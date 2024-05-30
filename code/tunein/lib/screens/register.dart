@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
-// import '../routes/routes.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  bool _obscureText = true;
+  bool _obscureTextConfirm = true;
+  bool _acceptTerms = false;
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -39,7 +47,7 @@ class RegisterScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 60),
+                SizedBox(height: 50),
                 Text(
                   'Join the Fastest Growing Listening Community',
                   style: GoogleFonts.poppins(
@@ -51,6 +59,134 @@ class RegisterScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 40),
+                Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Email or Username',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Enter your email or username',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Password',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextField(
+                              obscureText: _obscureText,
+                              decoration: InputDecoration(
+                                hintText: '*********',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Confirm Password',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextField(
+                              obscureText: _obscureTextConfirm,
+                              decoration: InputDecoration(
+                                hintText: '*********',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureTextConfirm ? Icons.visibility_off : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureTextConfirm = !_obscureTextConfirm;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                // Accept Terms and Conditions
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _acceptTerms,
+                      onChanged: (value) {
+                        setState(() {
+                          _acceptTerms = value!;
+                        });
+                      },
+                    ),
+                    Text('Accept Terms and Conditions'),
+                  ],
+                ),
+                SizedBox(height: 20),
                 // Center align the buttons
                 Center(
                   child: Column(
@@ -61,21 +197,18 @@ class RegisterScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF8B8FA8), // Login button color
+                            backgroundColor: Color(0xFF8B8FA8), // Register button color
                           ),
                           child: Text(
                             'REGISTER',
                             style: TextStyle(
                               fontSize: 16, // Set font size to 16
                               fontWeight: FontWeight.bold, // Set font weight to semibold
-                              color: Colors.white, // Set text color to black
+                              color: Colors.white, // Set text color to white
                             ),
                           ),
                         ),
                       ),
-
-                      
- 
                     ],
                   ),
                 ),
@@ -106,7 +239,7 @@ class RegisterScreen extends StatelessWidget {
                         ),
                         children: <TextSpan>[
                           TextSpan(
-                            text: 'Login Now',
+                            text: 'Login',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -124,4 +257,3 @@ class RegisterScreen extends StatelessWidget {
     );
   }
 }
-

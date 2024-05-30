@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Username',
+                              'Email or Username',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextField(
                               decoration: InputDecoration(
-                                hintText: 'Enter your username',
+                                hintText: 'Enter your email or username',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.grey),
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextField(
                               obscureText: _obscureText,
                               decoration: InputDecoration(
-                                hintText: 'Enter your password',
+                                hintText: '*********',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.grey),
