@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'register_streaming.dart';
-import '../routes/routes.dart';
+import 'login.dart';
+// import '../routes/routes.dart';
 
-class LoginStreamingScreen extends StatelessWidget {
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -39,9 +39,9 @@ class LoginStreamingScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 70),
+                SizedBox(height: 60),
                 Text(
-                  'Welcome Back to TuneIn',
+                  'Join the Fastest Growing Listening Community',
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                       fontSize: 32,
@@ -56,70 +56,26 @@ class LoginStreamingScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       SizedBox(
-                        width: mediaQuery.size.width * 0.75,
-                        height: 60,
+                        width: mediaQuery.size.width * 0.85,
+                        height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF8B8FA8), // Login button color
+                          ),
                           child: Text(
-                            'Spotify',
+                            'REGISTER',
                             style: TextStyle(
                               fontSize: 16, // Set font size to 16
                               fontWeight: FontWeight.bold, // Set font weight to semibold
-                              color: Colors.black, // Set text color to black
+                              color: Colors.white, // Set text color to black
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 30),
-                      SizedBox(
-                        width: mediaQuery.size.width * 0.75,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text(
-                            'YouTube Music',
-                            style: TextStyle(
-                              fontSize: 16, // Set font size to 16
-                              fontWeight: FontWeight.bold, // Set font weight to semibold
-                              color: Colors.black, // Set text color to black
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      SizedBox(
-                        width: mediaQuery.size.width * 0.75,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Apple Music',
-                            style: TextStyle(
-                              fontSize: 16, // Set font size to 16
-                              fontWeight: FontWeight.bold, // Set font weight to semibold
-                              color: Colors.black, // Set text color to black
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      SizedBox(
-                        width: mediaQuery.size.width * 0.75,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, Routes.loginOther); // Navigate to register_other.dart'
-                          },
-                          child: Text(
-                            'Other',
-                            style: TextStyle(
-                              fontSize: 16, // Set font size to 16
-                              fontWeight: FontWeight.bold, // Set font weight to semibold
-                              color: Colors.black, // Set text color to black
-                            ),
-                          ),
-                        ),
-                      ),
+
+                      
+ 
                     ],
                   ),
                 ),
@@ -134,7 +90,7 @@ class LoginStreamingScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RegisterStreamingScreen()),
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
                 child: Container(
@@ -143,14 +99,14 @@ class LoginStreamingScreen extends StatelessWidget {
                   child: Center(
                     child: RichText(
                       text: TextSpan(
-                        text: "Don’t have an account? ",
+                        text: "Already have an account? ",
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.black,
                         ),
                         children: <TextSpan>[
                           TextSpan(
-                            text: 'Register Now',
+                            text: 'Login Now',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -168,3 +124,4 @@ class LoginStreamingScreen extends StatelessWidget {
     );
   }
 }
+

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_streaming.dart';
+import '../routes/routes.dart'; // Import the Routes class
+// import 'register_other.dart'; // Import the register_other.dart screen
 
-class RegisterScreen extends StatelessWidget {
+class RegisterStreamingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -109,7 +110,9 @@ class RegisterScreen extends StatelessWidget {
                         width: mediaQuery.size.width * 0.75,
                         height: 60,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.registerOther); // Navigate to register_other.dart'
+                          },
                           child: Text(
                             'Other',
                             style: TextStyle(
@@ -131,10 +134,7 @@ class RegisterScreen extends StatelessWidget {
               right: 0,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
+                  Navigator.pushNamed(context, Routes.login); // Navigate to login.dart
                 },
                 child: Container(
                   padding: EdgeInsets.all(16),
