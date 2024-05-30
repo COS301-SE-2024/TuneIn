@@ -52,8 +52,8 @@ class WelcomePage extends StatelessWidget {
                   SizedBox(height: 30), // Smaller gap between "TuneIn" text and buttons
                   // Login button
                   SizedBox(
-                    width: mediaQuery.size.width * 0.75, // 3/4 of the screen width
-                    height: 50,
+                    width: mediaQuery.size.width * 0.85, // 3/4 of the screen width
+                    height: 60,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(context, Routes.login);
@@ -63,15 +63,18 @@ class WelcomePage extends StatelessWidget {
                       ),
                       child: Text(
                         'Login',
-                        style: TextStyle(color: Colors.white), // White text color for login button
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20), // Bigger gap between buttons
+                  SizedBox(height: 30), // Bigger gap between buttons
                   // Register button
                   SizedBox(
-                    width: mediaQuery.size.width * 0.75, // 3/4 of the screen width
-                    height: 50,
+                    width: mediaQuery.size.width * 0.85, // 3/4 of the screen width
+                    height: 60,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(context, Routes.register);
@@ -81,7 +84,10 @@ class WelcomePage extends StatelessWidget {
                       ),
                       child: Text(
                         'Register',
-                        style: TextStyle(color: Colors.black), // Black text color for register button
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
