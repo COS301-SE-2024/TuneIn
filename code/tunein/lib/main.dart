@@ -7,6 +7,7 @@ import 'screens/register_other.dart';
 import 'screens/login_other.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
+import 'screens/home.dart'; // Import HomePage
 
 void main() {
   runApp(MyApp());
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         Routes.loginOther: (context) => LoginOtherScreen(), // Register the loginOther route
         Routes.loginStreaming: (context) => LoginStreamingScreen(), // Register the loginStreaming route
         Routes.registerStreaming: (context) => RegisterStreamingScreen(), // Register the registerStreaming route
+        '/home': (context) => HomePage(), // Register the home route
       },
     );
   }
