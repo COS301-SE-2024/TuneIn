@@ -14,8 +14,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-
+   
     return Scaffold(
+      
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         child: Stack(
@@ -63,7 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        width:
+                            mediaQuery.size.width * 0.85, // Adjust input width
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -91,7 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 20),
                       Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        width:
+                            mediaQuery.size.width * 0.85, // Adjust input width
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -115,7 +118,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                                    _obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -170,13 +175,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF8B8FA8), // Login button color
+                            backgroundColor:
+                                Color(0xFF8B8FA8), // Login button color
                           ),
                           child: Text(
                             'LOGIN',
                             style: TextStyle(
                               fontSize: 16, // Set font size to 16
-                              fontWeight: FontWeight.bold, // Set font weight to semibold
+                              fontWeight: FontWeight
+                                  .bold, // Set font weight to semibold
                               color: Colors.white, // Set text color to black
                             ),
                           ),
