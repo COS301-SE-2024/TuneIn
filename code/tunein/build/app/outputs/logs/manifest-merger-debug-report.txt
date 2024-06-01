@@ -18,6 +18,7 @@ INJECTED from C:\Users\masia\Desktop\TuneIn\code\tunein\android\app\src\main\And
 INJECTED from C:\Users\masia\Desktop\TuneIn\code\tunein\android\app\src\main\AndroidManifest.xml:1:1-45:12
 MERGED from C:\Users\masia\Desktop\TuneIn\code\tunein\android\app\src\main\AndroidManifest.xml:1:1-45:12
 MERGED from [:path_provider_android] C:\Users\masia\Desktop\TuneIn\code\tunein\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:sqflite] C:\Users\masia\Desktop\TuneIn\code\tunein\build\sqflite\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\masia\.gradle\caches\transforms-3\2a215381204751055df81b6269e717b7\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\masia\.gradle\caches\transforms-3\f302e75fb7efd781bcf1a29281c188da\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.fragment:fragment:1.1.0] C:\Users\masia\.gradle\caches\transforms-3\2c78d49fbcc625202f50a9334fbc9153\transformed\fragment-1.1.0\AndroidManifest.xml:17:1-24:12
@@ -70,6 +71,8 @@ INJECTED from C:\Users\masia\Desktop\TuneIn\code\tunein\android\app\src\main\And
 INJECTED from C:\Users\masia\Desktop\TuneIn\code\tunein\android\app\src\main\AndroidManifest.xml
 MERGED from [:path_provider_android] C:\Users\masia\Desktop\TuneIn\code\tunein\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:path_provider_android] C:\Users\masia\Desktop\TuneIn\code\tunein\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:sqflite] C:\Users\masia\Desktop\TuneIn\code\tunein\build\sqflite\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:sqflite] C:\Users\masia\Desktop\TuneIn\code\tunein\build\sqflite\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\masia\.gradle\caches\transforms-3\2a215381204751055df81b6269e717b7\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:19:5-21:41
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\masia\.gradle\caches\transforms-3\2a215381204751055df81b6269e717b7\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:19:5-21:41
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\masia\.gradle\caches\transforms-3\f302e75fb7efd781bcf1a29281c188da\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:20:5-22:41
