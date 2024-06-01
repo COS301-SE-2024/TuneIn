@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import './models/roomCards.dart'; // Import RoomCard class from its file location
 import './widgets/roomCardsWidget.dart'; // Import RoomCardWidget widget from its file location
 import './models/dummyRoom.dart';
-import './dummyRoomPage.dart';
+import './dummyPages/dummyRoomPage.dart';
+import './dummyPages/dummyCreateRoomPage.dart'; // Import DummyCreateRoomPage
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -58,6 +59,15 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DummyCreateRoomPage()),
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

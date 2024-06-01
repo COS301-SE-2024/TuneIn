@@ -5,7 +5,8 @@ import '../models/roomCards.dart';
 class RoomCardWidget extends StatelessWidget {
   final RoomCard roomCard;
 
-  const RoomCardWidget({Key? key, required this.roomCard}) : super(key: key); // Default height
+  const RoomCardWidget({Key? key, required this.roomCard})
+      : super(key: key); // Default height
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,8 @@ class RoomCardWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        clipBehavior: Clip.antiAliasWithSaveLayer, // Ensures content is clipped to the border radius
+        clipBehavior: Clip
+            .antiAliasWithSaveLayer, // Ensures content is clipped to the border radius
         child: Stack(
           children: [
             // Background image
@@ -29,8 +31,12 @@ class RoomCardWidget extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: roomCard.backgroundImage,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator()), // Placeholder while loading
-                  errorWidget: (context, url, error) => Center(child: Icon(Icons.error)), // Error widget if image fails to load
+                  placeholder: (context, url) => Center(
+                      child:
+                          CircularProgressIndicator()), // Placeholder while loading
+                  errorWidget: (context, url, error) => Center(
+                      child: Icon(
+                          Icons.error)), // Error widget if image fails to load
                 ),
               ),
             ),
@@ -113,7 +119,8 @@ class RoomCardWidget extends StatelessWidget {
                         children: [
                           // User profile image with adjusted size
                           CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(roomCard.userProfile),
+                            backgroundImage: CachedNetworkImageProvider(
+                                roomCard.userProfile),
                             radius: 15, // Adjust the size as needed
                           ),
                           const SizedBox(width: 10),
