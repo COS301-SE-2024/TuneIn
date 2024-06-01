@@ -1,64 +1,77 @@
 import 'package:flutter/material.dart';
-import './models/roomCards.dart'; // Import RoomCard class from its file location
-import './widgets/roomCardsWidget.dart'; // Import RoomCardWidget widget from its file location
+import './models/roomCards.dart';
+import './widgets/roomCardsWidget.dart';
 import './models/dummyRoom.dart';
 import './dummyPages/dummyRoomPage.dart';
-import './dummyPages/dummyCreateRoomPage.dart'; // Import DummyCreateRoomPage
+import './dummyPages/dummyCreateRoomPage.dart';
+import './dummyPages/dummyProfilePage.dart';
+import './models/friends.dart';
+import './dummyPages/dummyFriendsPage.dart';
+import './widgets/friendCard.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // Remove the back button
-        title: Text(
-          'TuneIn', // Change the title to TuneIn
-          style: TextStyle(
-            fontWeight: FontWeight.bold, // Make it bold
-            fontSize: 26, // Change the font size
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            _buildRoomList(
-              context,
-              title: 'Recent Rooms',
-              rooms: _getRecentRooms(),
-            ),
-            const SizedBox(
-                height: 20), // Added some space between the carousel and button
-            _buildRoomList(
-              context,
-              title: 'Picks for You',
-              rooms: _getPicksForYou(),
-            ),
-            const SizedBox(
-                height: 20), // Added some space between the carousel and button
-            _buildSectionTitle('Friends'),
-            // Placeholder for friends section
-            SizedBox(
-              height: 100,
-              child: Center(
-                child: Text('Friends section content'),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            pinned: false, // Banner will disappear when scrolling up
+            title: Text(
+              'TuneIn', // Change the title to TuneIn
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // Make it bold
+                fontSize: 26, // Change the font size
               ),
             ),
-            const SizedBox(
-                height: 20), // Added some space between the carousel and button
-            ElevatedButton(
-              onPressed: () {
-                // Navigate back to the login page or another page if needed
-                Navigator.pop(context);
-              },
-              child: const Text('Go Back to Login'),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  _buildRoomList(
+                    context,
+                    title: 'Recent Rooms',
+                    rooms: _getRecentRooms(),
+                  ),
+                  const SizedBox(
+                      height:
+                          20), // Added some space between the carousel and button
+                  _buildRoomList(
+                    context,
+                    title: 'Picks for You',
+                    rooms: _getPicksForYou(),
+                  ),
+                  const SizedBox(
+                      height:
+                          20), // Added some space between the carousel and button
+                  _buildSectionTitle('Friends'),
+                  _buildFriendsGrid(context), // Add the friends grid
+                  const SizedBox(
+                      height:
+                          20), // Added some space between the carousel and button
+                  ElevatedButton(
+                    onPressed: () {
+                      // Navigate to a page showing all friends
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DummyFriendsPage(),
+                        ),
+                      );
+                    },
+                    child: Text('Show All Friends'),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -131,6 +144,64 @@ class HomePage extends StatelessWidget {
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
+  }
+
+  Widget _buildFriendsGrid(BuildContext context) {
+    List<Friend> friends = _getFriends().take(8).toList(); // Limit friends to 8
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // 2 columns
+        mainAxisSpacing: 10.0,
+        crossAxisSpacing: 10.0,
+        childAspectRatio: 2 / 1, // 2:1 aspect ratio
+      ),
+      itemCount: friends.length,
+      itemBuilder: (context, index) {
+        return FriendCard(friend: friends[index]);
+      },
+    );
+  }
+
+  List<Friend> _getFriends() {
+    return [
+      Friend(
+        name: 'Alice',
+        profilePicture:
+            'https://img.freepik.com/free-photo/beautiful-woman-face-close-up-young-girl-model-with-perfect-clean-skin-isolated-white-wall-studio-natural-makeup-beauty-treatment-spa-wellness_155003-14608.jpg',
+      ),
+      Friend(
+        name: 'Bob',
+        profilePicture:
+            'https://img.freepik.com/free-photo/smiling-young-man-wearing-sunglasses_171337-18683.jpg',
+      ),
+      Friend(
+        name: 'Charlie',
+        profilePicture: 'https://example.com/user_profiles/charlie.jpg',
+      ),
+      Friend(
+        name: 'David',
+        profilePicture: 'https://example.com/user_profiles/david.jpg',
+      ),
+      Friend(
+        name: 'Eve',
+        profilePicture: 'https://example.com/user_profiles/eve.jpg',
+      ),
+      Friend(
+        name: 'Frank',
+        profilePicture: 'https://example.com/user_profiles/frank.jpg',
+      ),
+      Friend(
+        name: 'Grace',
+        profilePicture: 'https://example.com/user_profiles/grace.jpg',
+      ),
+      Friend(
+        name: 'Grace',
+        profilePicture: 'https://example.com/user_profiles/grace.jpg',
+      ),
+    ];
   }
 
   List<RoomCard> _getRecentRooms() {
