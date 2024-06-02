@@ -10,18 +10,22 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            "Settings",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: const [
+                  Text(
+                    "Settings",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
             Text(
               "Profile",
               style: TextStyle(
@@ -145,13 +149,13 @@ class FavoriteRoomItem extends StatelessWidget {
           padding: EdgeInsets.only(left: 20.0),
           child: Row(
             children: [
-              roomCard(
+              RoomCard(
                 roomName: "Room Name",
                 songName: "song name",
                 artistName: "artist name",
                 username: "Username",
               ),
-              roomCard(
+              RoomCard(
                 roomName: "Room Name",
                 songName: "song name",
                 artistName: "artist name",
@@ -183,13 +187,13 @@ class RecentRooms extends StatelessWidget {
           padding: EdgeInsets.only(left: 20.0),
           child: Row(
             children: [
-              roomCard(
+              RoomCard(
                 roomName: "Room Name",
                 songName: "song name",
                 artistName: "artist name",
                 username: "Username",
               ),
-              roomCard(
+              RoomCard(
                 roomName: "Room Name",
                 songName: "song name",
                 artistName: "artist name",
@@ -203,14 +207,14 @@ class RecentRooms extends StatelessWidget {
   }
 }
 
-class roomCard extends StatelessWidget {
-  const roomCard({
-    Key? key,
+class RoomCard extends StatelessWidget {
+  const RoomCard({
+    super.key,
     required this.roomName,
     required this.songName,
     required this.artistName,
     required this.username,
-  }) : super(key: key);
+  });
 
   final String roomName;
   final String songName;
@@ -247,7 +251,45 @@ class roomCard extends StatelessWidget {
                 username,
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
               ),
+              SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TagBubble(text: "#tag"),
+                ],
+              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TagBubble extends StatelessWidget {
+  final String text;
+
+  const TagBubble({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 16,
+      margin: EdgeInsets.symmetric(horizontal: 5.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(232, 235, 242, 1),
+        borderRadius: BorderRadius.circular(
+            10), // Half of the height to create a stadium shape
+      ),
+      child: Center(
+        // Center the text vertically and horizontally
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+            fontSize: 11,
           ),
         ),
       ),
