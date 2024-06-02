@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -16,6 +17,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _termsController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final SupabaseClient client = Supabase.instance.client;
 
   @override
   Widget build(BuildContext context) {
@@ -65,147 +68,165 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: 40),
                 Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Username',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextFormField(
-                              controller: _emailController,
-                              decoration: InputDecoration(
-                                hintText: 'Enter your username',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
+                  
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Username',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ],
+                              TextFormField(
+                                controller: _usernameController,
+                                validator: (value) => value!.isEmpty ? 'Please enter a username' : null,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your username',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                          SizedBox(height: 20),
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Email',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _emailController,
+                                validator: (value) => // validate email using regex, if invalid throw error
+                                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)
+                                        ? null
+                                        : 'Please enter a valid email',
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your email',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         SizedBox(height: 20),
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextFormField(
-                              controller: _emailController,
-                              validator: (value) => //validate email using regex. if email is not valid, return error message
-                                  value!.isEmpty ? 'Please enter your email' : null,
-                              decoration: InputDecoration(
-                                hintText: 'Enter your email',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Password',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Password',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextField(
-                              obscureText: _obscureText,
-                              decoration: InputDecoration(
-                                hintText: '*********',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                              TextFormField(
+                                obscureText: _obscureText,
+                                controller: _passwordController,
+                                // validate password using regex to ensure it has at least 8 characters. if invalid throw error
+                                validator: (value) => value!.length < 8 ? 'Password must be at least 8 characters' : null,
+                                decoration: InputDecoration(
+                                  hintText: '*********',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscureText = !_obscureText;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Confirm Password',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextField(
-                              obscureText: _obscureTextConfirm,
-                              decoration: InputDecoration(
-                                hintText: '*********',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureTextConfirm ? Icons.visibility_off : Icons.visibility,
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscureTextConfirm = !_obscureTextConfirm;
-                                    });
-                                  },
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 20),
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Confirm Password',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextFormField(
+                                obscureText: _obscureTextConfirm,
+                                validator: (value) {
+                                  print("The thing");
+                                  print(value! + "  " + _passwordController.text);
+                                  if (value != _passwordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  hintText: '*********',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureTextConfirm ? Icons.visibility_off : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureTextConfirm = !_obscureTextConfirm;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -232,7 +253,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         width: mediaQuery.size.width * 0.85,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                           // validate form. if invalid show error message
+                           print("Button pressed");
+
+                           print(_formKey.currentState); 
+
+                           print("Printing email");
+                            if (_formKey.currentState!.validate()) {
+                              // if terms are not accepted, show error message
+                              print("Validated");
+                              if (!_acceptTerms) {
+                                print("Terms not accepted");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Please accept the terms and conditions'),
+                                  ),
+                                );
+                              } else {
+                                // if terms are accepted, register user
+                                print(client);
+                                print("Signing up");
+                                print(_emailController.text + " " + _passwordController.text + " " + _usernameController.text);
+                                final AuthResponse auth = await client.auth.signUp(email: _emailController.text, password: _passwordController.text); // if error occurs, show error message
+                                print("Signed up");
+                                if (auth.user == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Error signing up"),
+                                    ),
+                                  );
+                                } else {
+                                  // if registration is successful, show success message
+                                  print(auth);
+                                  // add new user to users table  
+                                  final response = await client.from('users').insert(
+                                    {
+                                      'user_id': auth.user!.id,
+                                      'username': _usernameController.text,
+                                    }
+                                  );
+                                  print(response);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('User registered successfully'),
+                                    ),
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                                  );
+                                }
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Please fill in all fields'),
+                                ),
+                              );
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF8B8FA8), // Register button color
                           ),
