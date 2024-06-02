@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.tunein.app-mergeDebugResources-9:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.example.tunein.app-mergeDebugResources-11:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
                     "source": "C:\\Users\\masia\\Desktop\\TuneIn\\code\\tunein\\android\\app\\src\\main\\res\\values-night\\styles.xml",
