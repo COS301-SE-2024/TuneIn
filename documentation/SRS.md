@@ -8,19 +8,61 @@ describe that the project is SRS for the development of a *** app + a descriptio
 ### 1.2 Scope
 Outline the scope of the software product. Include the major features and functionalities.
 
-### 1.3 Definitions, Acronyms, and Abbreviations
-(remove)
-
-### 1.4 References
-(remove)
-
-### 1.5 Overview
+### 1.3 Overview
 Provide an overview of the SRS document. Briefly describe the structure of the document.
 
 ## 2. User Stories / User Characteristics
 
 ### 2.1 User Groups
-Identify the different user groups that will use the product and their characteristics.
+
+(section description)
+
+
+
+#### Casual Listener
+
+**Characteristics:**
+
+- Users who either prefer passive music listening, similar to background radio.
+- They desire minimal interaction and a simple, intuitive user interface.
+
+
+
+#### Social Listener
+
+**Characteristics:**
+
+- Average user looking to enjoy music with friends or meet new people through shared listening experiences.
+
+
+
+#### Music Enthusiast
+
+**Characteristics:**
+
+- Passionate about music, deeply engaged in exploring different genres and artists.
+- Interested in creating and managing playlists, and connecting with other enthusiasts.
+- Users looking to find and connect with others who share similar music tastes.
+
+
+
+#### Verified Curator/Artist
+
+**Characteristics:**
+
+- Public figures, influencers, or organisations known for their music expertise.
+- Users follow them for their music choices and recommendations.
+- Musicians who create and perform music. They use the platform to connect with fans and promote their work.
+
+
+
+#### Social Listener
+
+**Characteristics:**
+
+- Average user who is looking to enjoy music with friends or meet new people through shared listening experiences.
+
+
 
 ### 2.2 Catering to User Groups
 Describe how the software will cater to the needs of each user group.
