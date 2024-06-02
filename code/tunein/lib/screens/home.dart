@@ -5,8 +5,6 @@ import './models/friends.dart';
 import './widgets/friendCard.dart';
 import './dummyPages/roomPage.dart';
 import './dummyPages/createRoomPage.dart';
-import './dummyPages/profilePage.dart';
-import './dummyPages/editRoomPage.dart';
 import './dummyPages/friendsPage.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,7 +15,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
+          const SliverAppBar(
             automaticallyImplyLeading: false,
             pinned: false,
             title: const Text(
