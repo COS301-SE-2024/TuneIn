@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/friends.dart';
-import '../dummyPages/dummyProfilePage.dart';
+import '../dummyPages/profilePage.dart';
 
 class FriendCard extends StatelessWidget {
   final Friend friend;
@@ -14,7 +14,7 @@ class FriendCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DummyProfilePage(friend: friend),
+            builder: (context) => ProfilePage(friend: friend),
           ),
         );
       },

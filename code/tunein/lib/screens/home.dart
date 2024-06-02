@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import './models/roomCards.dart';
+import './models/room.dart';
 import './widgets/roomCardsWidget.dart';
-import './models/dummyRoom.dart';
-import './dummyPages/dummyRoomPage.dart';
-import './dummyPages/dummyCreateRoomPage.dart';
-import './dummyPages/dummyProfilePage.dart';
 import './models/friends.dart';
-import './dummyPages/dummyFriendsPage.dart';
 import './widgets/friendCard.dart';
+import './dummyPages/roomPage.dart';
+import './dummyPages/createRoomPage.dart';
+import './dummyPages/profilePage.dart';
+import './dummyPages/editRoomPage.dart';
+import './dummyPages/friendsPage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,12 +19,12 @@ class HomePage extends StatelessWidget {
         slivers: <Widget>[
           SliverAppBar(
             automaticallyImplyLeading: false,
-            pinned: false, // Banner will disappear when scrolling up
-            title: Text(
-              'TuneIn', // Change the title to TuneIn
+            pinned: false,
+            title: const Text(
+              'TuneIn',
               style: TextStyle(
-                fontWeight: FontWeight.bold, // Make it bold
-                fontSize: 26, // Change the font size
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
               ),
             ),
           ),
@@ -34,39 +33,26 @@ class HomePage extends StatelessWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  _buildRoomList(
-                    context,
-                    title: 'Recent Rooms',
-                    rooms: _getRecentRooms(),
-                  ),
-                  const SizedBox(
-                      height:
-                          20), // Added some space between the carousel and button
-                  _buildRoomList(
-                    context,
-                    title: 'Picks for You',
-                    rooms: _getPicksForYou(),
-                  ),
-                  const SizedBox(
-                      height:
-                          20), // Added some space between the carousel and button
+                  _buildRoomList(context, 'Recent Rooms', _getRecentRooms()),
+                  const SizedBox(height: 20),
+                  _buildRoomList(context, 'Picks for You', _getPicksForYou()),
+                  const SizedBox(height: 20),
                   _buildSectionTitle('Friends'),
-                  _buildFriendsGrid(context), // Add the friends grid
-                  const SizedBox(
-                      height:
-                          20), // Added some space between the carousel and button
+                  _buildFriendsGrid(),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to a page showing all friends
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DummyFriendsPage(),
+                          builder: (context) => const FriendsPage(),
                         ),
                       );
                     },
-                    child: Text('Show All Friends'),
+                    child: const Text('Show All Friends'),
                   ),
+                  const SizedBox(height: 20),
+                  _buildRoomList(context, 'My Rooms', _getMyRooms()),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -77,56 +63,39 @@ class HomePage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DummyCreateRoomPage()),
+            MaterialPageRoute(builder: (context) => const CreateRoomPage()),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildRoomList(
-    BuildContext context, {
-    required String title,
-    required List<RoomCard> rooms,
-  }) {
+  Widget _buildRoomList(BuildContext context, String title, List<Room> rooms) {
+    final bool isMine = title == 'My Rooms';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildSectionTitle(title),
         SizedBox(
-          height: 230, // Set a fixed height for the carousel
+          height: 230,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemExtent:
-                MediaQuery.of(context).size.width * 0.85, // Adjust as needed
+            itemExtent: MediaQuery.of(context).size.width * 0.85,
             itemCount: rooms.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  // Create a DummyRoom object from RoomCard data
-                  DummyRoom dummyRoom = DummyRoom(
-                    name: rooms[index].name,
-                    songName: rooms[index].songName,
-                    artistName: rooms[index].artistName,
-                    description: rooms[index].description,
-                    username: rooms[index].username,
-                    userProfile: rooms[index].userProfile,
-                    backgroundImage: rooms[index].backgroundImage,
-                    tags: rooms[index].tags,
-                  );
-
-                  // Navigate to DummyRoomPage with the corresponding DummyRoom
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DummyRoomPage(dummyRoom: dummyRoom),
+                      builder: (context) => RoomPage(room: rooms[index]),
                     ),
                   );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: RoomCardWidget(roomCard: rooms[index]),
+                  child: RoomCardWidget(room: rooms[index], mine: isMine),
                 ),
               );
             },
@@ -141,28 +110,54 @@ class HomePage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _buildFriendsGrid(BuildContext context) {
-    List<Friend> friends = _getFriends().take(8).toList(); // Limit friends to 8
-
+  Widget _buildFriendsGrid() {
+    final friends = _getFriends().take(6).toList();
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // 2 columns
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
         mainAxisSpacing: 10.0,
         crossAxisSpacing: 10.0,
-        childAspectRatio: 2 / 1, // 2:1 aspect ratio
+        childAspectRatio: 2 / 1,
       ),
       itemCount: friends.length,
       itemBuilder: (context, index) {
         return FriendCard(friend: friends[index]);
       },
     );
+  }
+
+  List<Room> _getMyRooms() {
+    // Replace this with your actual list of rooms created by the user
+    return [
+      Room(
+        name: 'My Room 1',
+        songName: 'Song Name 1',
+        artistName: 'Artist Name 1',
+        description: 'Description 1',
+        username: 'username1',
+        userProfile: 'profile1.jpg',
+        backgroundImage: 'background1.jpg',
+        tags: ['tag1', 'tag2'],
+      ),
+      Room(
+        name: 'My Room 2',
+        songName: 'Song Name 2',
+        artistName: 'Artist Name 2',
+        description: 'Description 2',
+        username: 'username2',
+        userProfile: 'profile2.jpg',
+        backgroundImage: 'background2.jpg',
+        tags: ['tag3', 'tag4'],
+      ),
+      // Add more rooms here
+    ];
   }
 
   List<Friend> _getFriends() {
@@ -204,9 +199,9 @@ class HomePage extends StatelessWidget {
     ];
   }
 
-  List<RoomCard> _getRecentRooms() {
+  List<Room> _getRecentRooms() {
     return [
-      RoomCard(
+      Room(
         name: 'Chill Vibes',
         songName: 'Blinding Lights',
         artistName: 'The Weeknd',
@@ -218,7 +213,7 @@ class HomePage extends StatelessWidget {
             'https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         tags: ['chill', 'pop', '2020s'],
       ),
-      RoomCard(
+      Room(
         name: 'Party Hits',
         songName: 'Levitating',
         artistName: 'Dua Lipa',
@@ -230,7 +225,7 @@ class HomePage extends StatelessWidget {
             'https://images.pexels.com/photos/1449799/pexels-photo-1449799.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         tags: ['party', 'dance', '2020s'],
       ),
-      RoomCard(
+      Room(
         name: 'Relaxing Beats',
         songName: 'Shape of You',
         artistName: 'Ed Sheeran',
@@ -244,9 +239,9 @@ class HomePage extends StatelessWidget {
     ];
   }
 
-  List<RoomCard> _getPicksForYou() {
+  List<Room> _getPicksForYou() {
     return [
-      RoomCard(
+      Room(
         name: 'Relaxing Tunes',
         songName: 'Someone Like You',
         artistName: 'Adele',
@@ -258,7 +253,7 @@ class HomePage extends StatelessWidget {
             'https://images.pexels.com/photos/257360/pexels-photo-257360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         tags: ['relax', 'soul', '2010s'],
       ),
-      RoomCard(
+      Room(
         name: 'Groovy Hits',
         songName: 'Uptown Funk',
         artistName: 'Mark Ronson ft. Bruno Mars',
@@ -269,7 +264,7 @@ class HomePage extends StatelessWidget {
             'https://example.com/background_images/groovy_hits.jpg',
         tags: ['groove', 'funk', '2010s'],
       ),
-      RoomCard(
+      Room(
         name: 'Study Vibes',
         songName: 'Instrumental Study Playlist',
         artistName: 'Various Artists',
