@@ -105,28 +105,260 @@ class ProfileScreen extends StatelessWidget {
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ",
             ),
             SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 32),
-              child: Row(
-                children: const [
-                  Text(
-                    "Favorite Genres",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-            ),
+            Center(
+                child: GenreList(items: const [
+              "Pop",
+              "Hip-Hop",
+              "Jazz",
+              "Classical",
+              "Rock"
+            ])),
             SizedBox(
               height: 20,
             ),
-            Center(child: GenreList(items: const ["Pop", "Hip-Hop", "Jazz", "Classical", "Rock"])),
+            FavoriteSongsList(),
+            FavoriteRoomItem(),
+            SizedBox(height: 20),
+            RecentRooms(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class FavoriteRoomItem extends StatelessWidget {
+  const FavoriteRoomItem({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Title(
+          title: "Favorite Rooms",
+          more: true,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 20.0),
+          child: Row(
+            children: [
+              roomCard(
+                roomName: "Room Name",
+                songName: "song name",
+                artistName: "artist name",
+                username: "Username",
+              ),
+              roomCard(
+                roomName: "Room Name",
+                songName: "song name",
+                artistName: "artist name",
+                username: "Username",
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RecentRooms extends StatelessWidget {
+  const RecentRooms({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Title(
+          title: "Recently Visited",
+          more: true,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 20.0),
+          child: Row(
+            children: [
+              roomCard(
+                roomName: "Room Name",
+                songName: "song name",
+                artistName: "artist name",
+                username: "Username",
+              ),
+              roomCard(
+                roomName: "Room Name",
+                songName: "song name",
+                artistName: "artist name",
+                username: "Username",
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class roomCard extends StatelessWidget {
+  const roomCard({
+    Key? key,
+    required this.roomName,
+    required this.songName,
+    required this.artistName,
+    required this.username,
+  }) : super(key: key);
+
+  final String roomName;
+  final String songName;
+  final String artistName;
+  final String username;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 131,
+        width: 162,
+        decoration: BoxDecoration(
+          color: Color.fromRGBO(247, 250, 252, 1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Color.fromRGBO(209, 214, 232, 1)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(15, 16, 5, 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                roomName,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              Text(
+                '$songName by $artistName',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+              Text(
+                username,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FavoriteSongItem extends StatelessWidget {
+  const FavoriteSongItem({
+    Key? key,
+    required this.title,
+    required this.artist,
+    required this.duration,
+    required this.onMorePressed,
+  }) : super(key: key);
+
+  final String title;
+  final String artist;
+  final String duration;
+  final VoidCallback onMorePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 25),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              width: 57,
+              height: 57,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Color.fromRGBO(158, 171, 184, 1),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  artist,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // SizedBox(width: 5),
+          Text(
+            duration,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(width: 25), // Adjust the width as needed
+          IconButton(
+            onPressed: onMorePressed,
+            icon: Icon(Icons.more_horiz),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FavoriteSongsList extends StatelessWidget {
+  const FavoriteSongsList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Title(
+          title: "Favorite Songs",
+          more: true,
+        ),
+        SizedBox(height: 5),
+        FavoriteSongItem(
+          title: "Don't Smile At Me",
+          artist: "Billie Eilish",
+          duration: "5:33",
+          onMorePressed: () {
+            // Handle more button press
+          },
+        ),
+        FavoriteSongItem(
+          title: "Shape of You",
+          artist: "Ed Sheeran",
+          duration: "4:23",
+          onMorePressed: () {
+            // Handle more button press
+          },
+        ),
+      ],
     );
   }
 }
@@ -164,19 +396,72 @@ class GenreBubble extends StatelessWidget {
 class GenreList extends StatelessWidget {
   final List<String> items;
 
-  const GenreList({Key? key, required this.items}) : super(key: key);
+  const GenreList({super.key, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Title(title: "Favorite Genres", more: false),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
+          height: 32, // Set the height of the container
+          child: ListView.builder(
+            padding: EdgeInsets.only(left: 27),
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return GenreBubble(text: items[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class Title extends StatelessWidget {
+  final String title;
+  final bool more;
+
+  const Title({Key? key, required this.title, required this.more})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 32, // Set the height of the container
-      child: ListView.builder(
-        padding: EdgeInsets.only(left:27),
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return GenreBubble(text: items[index]);
-        },
+      padding: const EdgeInsets.only(
+          left: 32, right: 32), // Adjust padding as needed
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.start,
+          ),
+          if (more)
+            GestureDetector(
+              onTap: () {
+                // Add your onPressed logic here
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'More',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -195,23 +480,9 @@ class BioSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Title(title: "Bio", more: false),
         Padding(
-          padding: const EdgeInsets.only(left: 32),
-          child: Row(
-            children: const [
-              Text(
-                "Bio",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.start,
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 32),
+          padding: const EdgeInsets.only(left: 32, right: 32),
           child: Row(
             children: [
               Expanded(
@@ -242,20 +513,9 @@ class NowPlaying extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 32),
-          child: Row(
-            children: const [
-              Text(
-                "Now Playing",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.start,
-              ),
-            ],
-          ),
+        Title(
+          title: "Now Playing",
+          more: false,
         ),
         SizedBox(height: 5),
         Padding(
