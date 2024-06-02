@@ -7,8 +7,16 @@ import 'screens/register_other.dart';
 import 'screens/login_other.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
   runApp(MyApp());
 }
 

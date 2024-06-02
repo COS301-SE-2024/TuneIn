@@ -11,6 +11,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureText = true;
   bool _obscureTextConfirm = true;
   bool _acceptTerms = false;
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _termsController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +74,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Email or Username',
+                              'Username',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            TextField(
+                            TextFormField(
+                              controller: _emailController,
                               decoration: InputDecoration(
-                                hintText: 'Enter your email or username',
+                                hintText: 'Enter your username',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                        SizedBox(height: 20),
+                      Container(
+                        width: mediaQuery.size.width * 0.85, // Adjust input width
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Email',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextFormField(
+                              controller: _emailController,
+                              validator: (value) => //validate email using regex. if email is not valid, return error message
+                                  value!.isEmpty ? 'Please enter your email' : null,
+                              decoration: InputDecoration(
+                                hintText: 'Enter your email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.grey),
