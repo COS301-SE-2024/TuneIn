@@ -12,12 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
+  cached_network_image: ^3.2.0
+  supabase_flutter: ^2.5.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^3.0.0
+  mockito: ^5.0.0
 
 flutter:
   uses-material-design: true

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'register.dart';
+import 'home.dart'; // Import HomePage
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,27 +18,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         child: Stack(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 8), // Add top padding
+                  padding: const EdgeInsets.only(top: 8), // Add top padding
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back),
+                        icon: const Icon(Icons.arrow_back),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
-                      Spacer(), // Add space between back arrow and logo
+                      const Spacer(), // Add space between back arrow and logo
                       Text(
                         'Logo',
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
+                          textStyle: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -46,18 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 70),
+                const SizedBox(height: 70),
                 Text(
                   'Welcome Back to TuneIn',
                   style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,14 +68,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Email or Username',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            TextField(
+                            const TextField(
                               decoration: InputDecoration(
                                 hintText: 'Enter your email or username',
                                 hintStyle: TextStyle(color: Colors.grey),
@@ -89,13 +90,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Container(
                         width: mediaQuery.size.width * 0.85, // Adjust input width
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Password',
                               style: TextStyle(
                                 fontSize: 16,
@@ -106,16 +107,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: _obscureText,
                               decoration: InputDecoration(
                                 hintText: '*********',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                enabledBorder: const UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.grey),
                                 ),
-                                focusedBorder: UnderlineInputBorder(
+                                focusedBorder: const UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.black),
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                                    _obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -131,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
@@ -139,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       // Implement forgot password functionality here
                     },
-                    child: Text(
+                    child: const Text(
                       'Forgot Password?',
                       style: TextStyle(color: Colors.black),
                     ),
@@ -156,10 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                     ),
-                    Text('Remember Me'),
+                    const Text('Remember Me'),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Center align the buttons
                 Center(
                   child: Column(
@@ -168,11 +171,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: mediaQuery.size.width * 0.85,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/home'); // Navigate to home page
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF8B8FA8), // Login button color
+                            backgroundColor:
+                                const Color(0xFF8B8FA8), // Login button color
                           ),
-                          child: Text(
+                          child: const Text(
                             'LOGIN',
                             style: TextStyle(
                               fontSize: 16, // Set font size to 16
@@ -182,10 +188,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      // Small link to home page
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/home'); // Navigate to home page
+                        },
+                        child: const Text(
+                          'Go to Home Page',
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
               ],
             ),
             Positioned(
@@ -200,11 +217,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
                 child: Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   color: Colors.transparent,
                   child: Center(
                     child: RichText(
-                      text: TextSpan(
+                      text: const TextSpan(
                         text: "Don’t have an account? ",
                         style: TextStyle(
                           fontSize: 16,
