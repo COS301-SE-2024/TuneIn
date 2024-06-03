@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tunein/screens/home.dart';
+import 'package:tunein/screens/welcome.dart';
 import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,6 +13,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
   bool _rememberMe = false;
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final SupabaseClient client = Supabase.instance.client;
 
   @override
   Widget build(BuildContext context) {
@@ -59,76 +66,85 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 40),
                 Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email or Username',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter your email or username',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Email',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Container(
-                        width: mediaQuery.size.width * 0.85, // Adjust input width
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Password',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextField(
-                              obscureText: _obscureText,
-                              decoration: InputDecoration(
-                                hintText: '*********',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                              TextFormField(
+                                controller: _emailController,
+                                validator: (value) =>
+                                  value!.isEmpty ? 'Please enter your email' : null,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your email',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscureText = !_obscureText;
-                                    });
-                                  },
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 20),
+                        Container(
+                          width: mediaQuery.size.width * 0.85, // Adjust input width
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Password',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _passwordController,
+                                validator: (value) =>
+                                  value!.isEmpty ? 'Please enter your password' : null,
+                                obscureText: _obscureText,
+                                decoration: InputDecoration(
+                                  hintText: '*********',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -168,7 +184,49 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: mediaQuery.size.width * 0.85,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            print("Login button pressed");
+                            if (_formKey.currentState!.validate()) {
+                              print("Form is valid");
+                              // Implement login functionality here
+                              // sign in with password, if successful, navigate to home screen else show error message 
+                              try{
+                                print("Signing in");
+                                final response = await client.auth.signInWithPassword(
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                );
+                                if (response.user == null) {
+                                  print("Error: ${response}");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Error: ${response}"),
+                                    ),
+                                  );
+                                } else {
+                                  print("User logged in successfully");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("User logged in successfully"),
+                                    )
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => HomePage()),
+                                  );
+                                }
+                              } catch (error) {
+                                final AuthException e = error as AuthException;
+                                print("Error: $error");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Error: ${e.message}"),
+                                  ),
+                                );
+                              }
+
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF8B8FA8), // Login button color
                           ),
