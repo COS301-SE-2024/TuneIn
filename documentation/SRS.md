@@ -49,10 +49,6 @@ This SRS document is structured as follows:
 
 ### 2.1 User Groups
 
-(section description)
-
-
-
 #### Casual Listener
 
 **Characteristics:**
@@ -438,9 +434,7 @@ Our software will cater for above user group in the form of user stories as foll
 
 ##### FR7.2: Playlist Sharing
 - **FR7.2.1**: Users should be able to share playlists with other users.
-- **FR7.2.2
-
-**: Users should be able to export playlists to their personal music accounts on platforms like Spotify.
+- **FR7.2.2**: Users should be able to export playlists to their personal music accounts on platforms like Spotify.
 
 #### FR8: Integration with Music Services
 
@@ -561,9 +555,6 @@ Our software will cater for above user group in the form of user stories as foll
 ##### FR17.4: Responsiveness
 - **FR17.4.1**: The app should be optimized for fast loading times and smooth performance across all devices and network conditions.
 
-### 3.3 Subsystems
-Describe the various subsystems of the software and their interactions.
-
 ## 4. Use Case Diagram
 
 ![](../assets/UC_Profile_Management.jpeg)
@@ -581,8 +572,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 ## 6. Architectural Requirements
 
 ### 6.1 Architectural Requirements
-(intro)
-
 1. **Domain-Driven Architecture (DDA)**:
    - DDA emphasizes aligning the software design with the problem domain, focusing on understanding the domain's complexities and modeling them effectively within the system.
    - In TuneIn, DDA would involve identifying key domain entities such as users, rooms, music tracks, and interactions between them. These entities should be accurately represented in the software architecture.
@@ -613,8 +602,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
    - Architectural patterns like MVC (Model-View-Controller) and MVVM (Model-View-ViewModel) can help enforce separation of concerns and facilitate maintainable code architecture.
 
 ### 6.2 Quality Requirements
-(intro)
-
 #### Performance
 
 - **Specification:**
@@ -742,8 +729,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 
 ### 6.3 Architectural Patterns
-(intro)
-
 #### What we use in our Architecture
 
 1. **Domain-Driven Architecture (DDA)**:
@@ -766,8 +751,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 
 #### What we didn't use & why
-
-(intro for Considered Architectural Patterns and Reasons for Exclusion)
 
 ##### 1. Layered (N-Tier) Architecture
 
@@ -1085,8 +1068,6 @@ Restrictions: Ensure all software tools comply with licensing agreements and are
 
 
 ### 6.6 Technology Requirements
-(intro)
-
 ### Technology Requirements
 
 1. **Front-End**:
