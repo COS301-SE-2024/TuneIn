@@ -50,7 +50,9 @@ class HomePage extends StatelessWidget {
                         _buildRoomList(context, 'Picks for You', picksForYou),
                         const SizedBox(height: 20),
                         _buildSectionTitle('Friends'),
-                        _buildFriendsGrid(friends),
+                        friends.isEmpty
+                            ? const Text('No friends')
+                            : _buildFriendsGrid(friends),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
@@ -111,27 +113,29 @@ class HomePage extends StatelessWidget {
         _buildSectionTitle(title),
         SizedBox(
           height: 230,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemExtent: MediaQuery.of(context).size.width * 0.85,
-            itemCount: rooms.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RoomPage(room: rooms[index]),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: RoomCardWidget(room: rooms[index], mine: isMine),
+          child: rooms.isEmpty
+              ? const Text('No rooms')
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemExtent: MediaQuery.of(context).size.width * 0.85,
+                  itemCount: rooms.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RoomPage(room: rooms[index]),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: RoomCardWidget(room: rooms[index], mine: isMine),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );

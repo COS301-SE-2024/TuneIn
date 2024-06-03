@@ -3,7 +3,7 @@ import './models/room.dart';
 import './models/friends.dart';
 
 class SupabaseService {
-  String yourId = "a55c1ede-ea29-4065-bbe5-daee74b74188";
+  static String yourId = "ac34854d-8f9f-489d-aca3-d8a930b4b8b5";
   SupabaseService._(); // Private constructor to prevent instantiation
 
   static final SupabaseService _instance = SupabaseService._();
@@ -13,7 +13,6 @@ class SupabaseService {
   SupabaseClient get client => Supabase.instance.client;
 
   Future<List<Room>> _getRoomsFromResponse(dynamic response) async {
-    print('Response: $response'); // Print out the response
     final List<dynamic> data = response as List<dynamic>;
 
     List<Room> rooms = [];
@@ -49,10 +48,8 @@ class SupabaseService {
   }
 
   Future<List<Room>> getMyRooms() async {
-    final response = await client
-        .from('room')
-        .select()
-        .eq('room_creator', "a55c1ede-ea29-4065-bbe5-daee74b74188");
+    final response =
+        await client.from('room').select().eq('room_creator', yourId);
     return _getRoomsFromResponse(response);
   }
 
@@ -78,10 +75,13 @@ class SupabaseService {
   }
 
   Future<List<Friend>> getFriends() async {
-    final followeesResponse =
-        await client.from('follows').select('followee').eq('follower', yourId);
+    print('your getFriends Id: $yourId');
+    final followeesResponse = await client
+        .from('follows')
+        .select('followee')
+        .eq('follower', '$yourId');
     final List<dynamic> followees = followeesResponse;
-
+    print('followees: $followees');
     if (followees.isEmpty) {
       return [];
     }
