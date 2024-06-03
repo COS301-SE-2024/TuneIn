@@ -3,7 +3,7 @@ import './models/room.dart';
 import './models/friends.dart';
 
 class SupabaseService {
-  static String yourId = "ac34854d-8f9f-489d-aca3-d8a930b4b8b5";
+  static String yourId = "a55c1ede-ea29-4065-bbe5-daee74b74188";
   SupabaseService._(); // Private constructor to prevent instantiation
 
   static final SupabaseService _instance = SupabaseService._();
@@ -48,8 +48,10 @@ class SupabaseService {
   }
 
   Future<List<Room>> getMyRooms() async {
-    final response =
-        await client.from('room').select().eq('room_creator', yourId);
+    final response = await client
+        .from('room')
+        .select()
+        .eq('room_creator', "a55c1ede-ea29-4065-bbe5-daee74b74188");
     return _getRoomsFromResponse(response);
   }
 
