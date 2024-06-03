@@ -1,7 +1,9 @@
 # TuneIn
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
 
-(code coverage badges temporarily removed)
+<a href="https://codecov.io/gh/COS301-SE-2024/TuneIn">
+    <img alt="Coverage" src="https://codecov.io/gh/COS301-SE-2024/TuneIn/branch/main/graph/badge.svg?token=7T6WCYXEIO">
+</a>
 
 ## TuneIn - Apollo - Project Description
 
@@ -135,11 +137,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 
 ## :blue_book: Documentation
 
-(link to SRS document)
-
-(link to Design Specification)
-
-
+[](/../documentation/SRS.md)(link to SRS document)
 
 ## :gear: Technologies
 
