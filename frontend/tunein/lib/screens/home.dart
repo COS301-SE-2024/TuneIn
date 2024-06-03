@@ -5,6 +5,7 @@ import './widgets/roomCardsWidget.dart';
 import './widgets/friendCard.dart';
 import './dummyPages/roomPage.dart';
 import './dummyPages/createRoomPage.dart';
+import './create_room.dart';
 import './dummyPages/friendsPage.dart';
 import 'supabase_service.dart'; // Import SupabaseService
 
@@ -80,7 +81,7 @@ class HomePage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CreateRoomPage()),
+            MaterialPageRoute(builder: (context) => CreateRoomScreen()),
           );
         },
         child: const Icon(Icons.add),
