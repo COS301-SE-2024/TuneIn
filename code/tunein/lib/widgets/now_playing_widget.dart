@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'title_widget.dart';
 
 class NowPlaying extends StatelessWidget {
   final String title;

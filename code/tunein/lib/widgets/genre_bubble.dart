@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'title_widget.dart';
 
 class GenreBubble extends StatelessWidget {
   final String text;

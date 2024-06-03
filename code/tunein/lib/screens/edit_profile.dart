@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'supabase_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserProfile userProfile;
   final Function(UserProfile) onSave;
 
-  const EditProfileScreen({Key? key, required this.userProfile, required this.onSave}) : super(key: key);
+  const EditProfileScreen(
+      {Key? key, required this.userProfile, required this.onSave})
+      : super(key: key);
 
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
@@ -23,11 +27,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.userProfile.name);
-    _usernameController = TextEditingController(text: widget.userProfile.username);
+    _usernameController =
+        TextEditingController(text: widget.userProfile.username);
     _bioController = TextEditingController(text: widget.userProfile.bio);
-    _socialLinksController = TextEditingController(text: widget.userProfile.socialLinks.join(", "));
-    _genresController = TextEditingController(text: widget.userProfile.genres.join(", "));
-    _favoriteSongsController = TextEditingController(text: widget.userProfile.favoriteSongs.join(", "));
+    _socialLinksController =
+        TextEditingController(text: widget.userProfile.socialLinks.join(", "));
+    _genresController =
+        TextEditingController(text: widget.userProfile.genres.join(", "));
+    _favoriteSongsController = TextEditingController(
+        text: widget.userProfile.favoriteSongs.join(", "));
   }
 
   @override
@@ -77,128 +85,156 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 20),
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 125,
-                    height: 125,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color.fromRGBO(158, 171, 184, 1),
+      body: FutureBuilder<Map<String, dynamic>>(
+          future: _fetchData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              final String username = snapshot.data!['username'];
+              final String Bio = snapshot.data!['bio'];
+              final String profilePic = snapshot.data!['profile_picture'];
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 20),
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 125,
+                            height: 125,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                              image: NetworkImage(cleanProfilePic(profilePic)),
+                              fit: BoxFit.cover,
+                            ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-                    child: TextButton(
-                      onPressed: () {
-                        // Handle change photo action
+                    Positioned(
+                      child: TextButton(
+                        onPressed: () {
+                          // Handle change photo action
+                        },
+                        child: Text('Change Photo'),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      title: Text(
+                        'Name',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_nameController
+                              .text), // Replace with actual user name
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              _showEditDialog('Name', _nameController);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        'Username',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                              '@${username}'), // Replace with actual username
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              _showEditDialog('username', _usernameController);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        'Bio',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          _showEditDialog('bio', _bioController, maxLines: 3);
+                        },
+                      ),
+                    ),
+                    Divider(height: 20, thickness: 1),
+                    ListTile(
+                      title: Text(
+                        'Social',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ListTile(
+                      title: Text('Instagram'),
+                      subtitle: Text(_socialLinksController.text
+                          .split(', ')
+                          .firstWhere((link) => link.contains('instagram'),
+                              orElse: () =>
+                                  '')), // Replace with actual Instagram link
+                      onTap: () {
+                        _showEditDialog(
+                            'Instagram Link', _socialLinksController);
                       },
-                      child: Text('Change Photo'),
                     ),
-                  ),
-            SizedBox(height: 10),
-            ListTile(
-              title: Text(
-                'Name',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_nameController.text), // Replace with actual user name
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      _showEditDialog('Name', _nameController);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Username',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('@${_usernameController.text}'), // Replace with actual username
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      _showEditDialog('Username', _usernameController);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Bio',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  _showEditDialog('Bio', _bioController, maxLines: 3);
-                },
-              ),
-            ),
-            Divider(height: 20, thickness: 1),
-            ListTile(
-              title: Text(
-                'Social',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            ListTile(
-              title: Text('Instagram'),
-              subtitle: Text(_socialLinksController.text.split(', ').firstWhere((link) => link.contains('instagram'), orElse: () => '')), // Replace with actual Instagram link
-              onTap: () {
-                _showEditDialog('Instagram Link', _socialLinksController);
-              },
-            ),
-            ListTile(
-              title: Text('Twitter'),
-              subtitle: Text(_socialLinksController.text.split(', ').firstWhere((link) => link.contains('twitter'), orElse: () => '')), // Replace with actual Twitter link
-              onTap: () {
-                _showEditDialog('Twitter Link', _socialLinksController);
-              },
-            ),
-            Divider(height: 20, thickness: 1),
-            ListTile(
-              title: Text(
-                'Genres',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _genresController.text.split(', ').map((genre) {
-                  return Chip(
-                    label: Text(genre),
-                    onDeleted: () {
-                      setState(() {
-                        final genres = _genresController.text.split(', ').toList();
-                        genres.remove(genre);
-                        _genresController.text = genres.join(', ');
-                      });
-                    },
-                  );
-                }).toList()
-                  // ..add(
+                    ListTile(
+                      title: Text('Twitter'),
+                      subtitle: Text(_socialLinksController.text
+                          .split(', ')
+                          .firstWhere((link) => link.contains('twitter'),
+                              orElse: () =>
+                                  '')), // Replace with actual Twitter link
+                      onTap: () {
+                        _showEditDialog('Twitter Link', _socialLinksController);
+                      },
+                    ),
+                    Divider(height: 20, thickness: 1),
+                    ListTile(
+                      title: Text(
+                        'Genres',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              _genresController.text.split(', ').map((genre) {
+                            return Chip(
+                              label: Text(genre),
+                              onDeleted: () {
+                                setState(() {
+                                  final genres = _genresController.text
+                                      .split(', ')
+                                      .toList();
+                                  genres.remove(genre);
+                                  _genresController.text = genres.join(', ');
+                                });
+                              },
+                            );
+                          }).toList()
+                          // ..add(
 // Chip(
 //   label: Text('Add+'),
 //   onPressed: () {
@@ -206,40 +242,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 //   },
 // )
 
-                  // ),
-              ),
-            ),
-            Divider(height: 20, thickness: 1),
-            ListTile(
-              title: Text(
-                'Favorite Songs',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Column(
-              children: _favoriteSongsController.text.split(', ').map((song) {
-                return ListTile(
-                  title: Text(song),
-                );
-              }).toList()
-                ..add(
-ListTile(
-  title: Text('Add Song +'),
-  onTap: () {
-    _showEditDialog('Favorite Songs', _favoriteSongsController);
-  },
-)
-
+                          // ),
+                          ),
+                    ),
+                    Divider(height: 20, thickness: 1),
+                    ListTile(
+                      title: Text(
+                        'Favorite Songs',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Column(
+                      children:
+                          _favoriteSongsController.text.split(', ').map((song) {
+                        return ListTile(
+                          title: Text(song),
+                        );
+                      }).toList()
+                            ..add(ListTile(
+                              title: Text('Add Song +'),
+                              onTap: () {
+                                _showEditDialog(
+                                    'Favorite Songs', _favoriteSongsController);
+                              },
+                            )),
+                    ),
+                  ],
                 ),
-            ),
-          ],
-        ),
-      ),
+              );
+            }
+          }),
     );
   }
 
-  void _showEditDialog(String field, TextEditingController controller, {int maxLines = 1}) {
-    final TextEditingController _dialogController = TextEditingController(text: controller.text);
+  void _showEditDialog(String field, TextEditingController controller,
+      {int maxLines = 1}) {
+    final TextEditingController _dialogController =
+        TextEditingController(text: controller.text);
     showDialog(
       context: context,
       builder: (context) {
@@ -256,6 +295,8 @@ ListTile(
                   controller.text = _dialogController.text;
                 });
                 Navigator.of(context).pop();
+
+                changeData('ac34854d-8f9f-489d-aca3-d8a930b4b8b5', field, context);
               },
               child: Text('Save'),
             ),
@@ -266,8 +307,31 @@ ListTile(
   }
 }
 
+Future<Map<String, dynamic>> _fetchData() async {
+  // await Supabase.initialize(
+  //   url: "https://fhedmgsybptxgzjkaifd.supabase.co",
+  //   anonKey:
+  //       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoZWRtZ3N5YnB0eGd6amthaWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODUyMDMsImV4cCI6MjAzMjc2MTIwM30.N7Rj-vT-GTCcQ69Kq-kVGy7_iiTciUpbTaF3J2jKJVg",
+  // );
+  final results = SupabaseService.instance
+      .getProfileInfo("ac34854d-8f9f-489d-aca3-d8a930b4b8b5");
 
+  return results;
+}
 
+Future<void> changeData(userID, field, change) async {
+  // await Supabase.initialize(
+  //   url: "https://fhedmgsybptxgzjkaifd.supabase.co",
+  //   anonKey:
+  //       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoZWRtZ3N5YnB0eGd6amthaWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODUyMDMsImV4cCI6MjAzMjc2MTIwM30.N7Rj-vT-GTCcQ69Kq-kVGy7_iiTciUpbTaF3J2jKJVg",
+  // );
+  final results = SupabaseService.instance.changeProfileInfo(userID, field, change);
+
+}
+
+String cleanProfilePic(String pp) {
+  return pp.replaceAll("'", "").replaceAll(",", "").trim();
+}
 
 
 

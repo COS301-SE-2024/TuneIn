@@ -10,8 +10,15 @@ import 'screens/register.dart';
 import 'screens/profile.dart';
 import 'screens/edit_profile.dart';
 import 'models/user.dart'; // Import UserProfile model
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+
+void main() async {
+  // await Supabase.initialize(
+  //   url: dotenv.env['SUPABASE_URL']!,
+  //   anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  // );
   runApp(MyApp());
 }
 
