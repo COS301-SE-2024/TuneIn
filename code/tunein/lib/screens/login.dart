@@ -168,7 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: mediaQuery.size.width * 0.85,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          //button goes to profile page 
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/profile');
+                          },
+                          // onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF8B8FA8), // Login button color
                           ),

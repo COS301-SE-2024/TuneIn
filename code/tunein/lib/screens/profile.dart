@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import '../models/user.dart'; // Import UserProfile model
 import '../widgets/rooms_widget.dart';
 import '../widgets/now_playing_widget.dart';
 import '../widgets/favorite_song_widget.dart';
 import '../widgets/genre_widget.dart';
+import 'edit_profile.dart'; // Import EditProfileScreen
 
 class ProfileScreen extends StatelessWidget {
+  final UserProfile userProfile;
+
+  const ProfileScreen({Key? key, required this.userProfile}) : super(key: key);
+
+  void _navigateToEditProfile(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditProfileScreen(
+          userProfile: userProfile,
+          onSave: (updatedProfile) {
+            // Handle the updated profile
+            // For now, just print it to the console
+            print(updatedProfile.name);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> favoriteSongs = [
@@ -96,9 +117,9 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 10),
-            Text("Jess Bailey",
+            Text(userProfile.name,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-            Text("@jessbailey", style: TextStyle(fontWeight: FontWeight.w400)),
+            Text('@${userProfile.username}', style: TextStyle(fontWeight: FontWeight.w400)),
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -127,14 +148,18 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 30),
-            Text("instagram.com/jessbailey and 2 more links",
-                style: TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              userProfile.socialLinks.isNotEmpty
+                  ? '${userProfile.socialLinks.join(", ")}'
+                  : 'No social links available',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
             SizedBox(height: 20),
             SizedBox(
               width: 155,
               height: 37,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => _navigateToEditProfile(context),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(158, 171, 184, 1),
                     side: BorderSide.none,
@@ -148,9 +173,9 @@ class ProfileScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             NowPlaying(
-              title: "Don't Smile At Me",
-              artist: "Billie Eilish",
-              duration: "3:05",
+              title: favoriteSongs[0]["title"]!,
+              artist: favoriteSongs[0]["artist"]!,
+              duration: favoriteSongs[0]["duration"]!,
             ),
             SizedBox(height: 20),
             Padding(
@@ -168,7 +193,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ",
+                    userProfile.bio,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -182,13 +207,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Center(
-                child: GenreList(items: const [
-              "Pop",
-              "Hip-Hop",
-              "Jazz",
-              "Classical",
-              "Rock"
-            ])),
+                child: GenreList(items: userProfile.genres)),
             SizedBox(height: 20),
             FavoriteSongsList(songs: favoriteSongs),
             SizedBox(height: 20),

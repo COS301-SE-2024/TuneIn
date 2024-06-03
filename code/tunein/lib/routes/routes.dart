@@ -8,6 +8,7 @@ import '../screens/login.dart';
 import '../screens/register.dart';
 import '../screens/profile.dart';
 import '../screens/edit_profile.dart';
+import '../models/user.dart'; // Import UserProfile model
 
 class Routes {
   static const String welcome = '/welcomw';
@@ -37,9 +38,11 @@ class Routes {
       case registerStreaming:
         return MaterialPageRoute(builder: (_) => RegisterStreamingScreen());
       case profile: // Handle the new route
-        return MaterialPageRoute(builder: (_) => ProfileScreen());
+        return MaterialPageRoute(builder: (_) => ProfileScreen(userProfile: userProfile));
       case editProfile: // Handle the new route
-        return MaterialPageRoute(builder: (_) => EditProfileScreen());
+        return MaterialPageRoute(builder: (_) => EditProfileScreen(userProfile: userProfile, onSave: (UserProfile profile) {
+          // Handle onSave logic here
+        }));
       default:
         return MaterialPageRoute(builder: (_) => Scaffold(body: Center(child: Text('No route defined for ${settings.name}'))));
     }
