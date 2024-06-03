@@ -7,7 +7,8 @@ import 'screens/register_other.dart';
 import 'screens/login_other.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
-import 'screens/home.dart'; // Import HomePage
+import 'screens/home.dart';
+import 'screens/profile.dart'; // Import ProfilePage
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,8 +17,7 @@ void main() async {
 
   await Supabase.initialize(
     url: 'https://fhedmgsybptxgzjkaifd.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoZWRtZ3N5YnB0eGd6amthaWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODUyMDMsImV4cCI6MjAzMjc2MTIwM30.N7Rj-vT-GTCcQ69Kq-kVGy7_iiTciUpbTaF3J2jKJVg',
+    anonKey: 'your-anon-key',
   );
 
   runApp(MyApp());
@@ -46,8 +46,52 @@ class MyApp extends StatelessWidget {
             LoginStreamingScreen(), // Register the loginStreaming route
         Routes.registerStreaming: (context) =>
             RegisterStreamingScreen(), // Register the registerStreaming route
-        '/home': (context) => HomePage(), // Register the home route
+        '/home': (context) => MainPage(), // Use MainPage with navigation bar
       },
+    );
+  }
+}
+
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _selectedIndex = 0;
+
+  static const List<Widget> _pages = <Widget>[
+    HomePage(), // Your HomePage widget
+    ProfilePage(), // Your ProfilePage widget
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
