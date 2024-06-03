@@ -194,8 +194,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               TextFormField(
                                 obscureText: _obscureTextConfirm,
                                 validator: (value) {
-                                  print("The thing");
-                                  print(value! + "  " + _passwordController.text);
                                   if (value != _passwordController.text) {
                                     return 'Passwords do not match';
                                   }
@@ -254,17 +252,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () async {
-                           // validate form. if invalid show error message
-                           print("Button pressed");
-
-                           print(_formKey.currentState); 
-
-                           print("Printing email");
                             if (_formKey.currentState!.validate()) {
                               // if terms are not accepted, show error message
-                              print("Validated");
                               if (!_acceptTerms) {
-                                print("Terms not accepted");
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Please accept the terms and conditions'),
@@ -272,11 +262,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 );
                               } else {
                                 // if terms are accepted, register user
-                                print(client);
-                                print("Signing up");
-                                print(_emailController.text + " " + _passwordController.text + " " + _usernameController.text);
-                                final AuthResponse auth = await client.auth.signUp(email: _emailController.text, password: _passwordController.text); // if error occurs, show error message
-                                print("Signed up");
+                                AuthResponse auth = AuthResponse();
+                                try {
+                                  auth = await client.auth.signUp(email: _emailController.text, password: _passwordController.text);
+                                } catch (e) {
+                                  print('Error: $e');
+                                }
+
                                 if (auth.user == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -284,16 +276,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   );
                                 } else {
-                                  // if registration is successful, show success message
-                                  print(auth);
-                                  // add new user to users table  
-                                  final response = await client.from('users').insert(
+                                  await client.from('users').insert(
                                     {
                                       'user_id': auth.user!.id,
                                       'username': _usernameController.text,
                                     }
                                   );
-                                  print(response);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text('User registered successfully'),
