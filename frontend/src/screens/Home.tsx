@@ -1,11 +1,11 @@
-// screens/HomePage.tsx
+// src/screens/HomePage.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Home: React.FC = () => {
+const Home = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the TuneIn</Text>
+      <Text style={styles.title}>Welcome to the Home Page!</Text>
     </View>
   );
 };
