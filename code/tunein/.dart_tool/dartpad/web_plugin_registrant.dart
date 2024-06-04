@@ -3,6 +3,7 @@
 // Generated file. Do not edit.
 //
 
+<<<<<<< HEAD
 // @dart = 2.13
 // ignore_for_file: type=lint
 
@@ -18,3 +19,8 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   UrlLauncherPlugin.registerWith(registrar);
   registrar.registerMessageHandler();
 }
+=======
+// ignore_for_file: type=lint
+
+void registerPlugins() {}
+>>>>>>> feature/profile

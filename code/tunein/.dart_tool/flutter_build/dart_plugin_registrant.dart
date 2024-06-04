@@ -7,6 +7,7 @@
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
 import 'package:path_provider_android/path_provider_android.dart';
+<<<<<<< HEAD
 import 'package:shared_preferences_android/shared_preferences_android.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher_android/url_launcher_android.dart';
@@ -25,6 +26,12 @@ import 'package:url_launcher_macos/url_launcher_macos.dart';
 import 'package:path_provider_windows/path_provider_windows.dart';
 import 'package:shared_preferences_windows/shared_preferences_windows.dart';
 import 'package:url_launcher_windows/url_launcher_windows.dart';
+=======
+import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:path_provider_linux/path_provider_linux.dart';
+import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:path_provider_windows/path_provider_windows.dart';
+>>>>>>> feature/profile
 
 @pragma('vm:entry-point')
 class _PluginRegistrant {
@@ -41,6 +48,7 @@ class _PluginRegistrant {
         );
       }
 
+<<<<<<< HEAD
       try {
         SharedPreferencesAndroid.registerWith();
       } catch (err) {
@@ -68,6 +76,8 @@ class _PluginRegistrant {
         );
       }
 
+=======
+>>>>>>> feature/profile
     } else if (Platform.isIOS) {
       try {
         PathProviderFoundation.registerWith();
@@ -78,6 +88,7 @@ class _PluginRegistrant {
         );
       }
 
+<<<<<<< HEAD
       try {
         SharedPreferencesFoundation.registerWith();
       } catch (err) {
@@ -116,6 +127,10 @@ class _PluginRegistrant {
       }
 
       try {
+=======
+    } else if (Platform.isLinux) {
+      try {
+>>>>>>> feature/profile
         PathProviderLinux.registerWith();
       } catch (err) {
         print(
@@ -124,6 +139,7 @@ class _PluginRegistrant {
         );
       }
 
+<<<<<<< HEAD
       try {
         SharedPreferencesLinux.registerWith();
       } catch (err) {
@@ -142,6 +158,8 @@ class _PluginRegistrant {
         );
       }
 
+=======
+>>>>>>> feature/profile
     } else if (Platform.isMacOS) {
       try {
         PathProviderFoundation.registerWith();
@@ -152,6 +170,7 @@ class _PluginRegistrant {
         );
       }
 
+<<<<<<< HEAD
       try {
         SharedPreferencesFoundation.registerWith();
       } catch (err) {
@@ -179,6 +198,8 @@ class _PluginRegistrant {
         );
       }
 
+=======
+>>>>>>> feature/profile
     } else if (Platform.isWindows) {
       try {
         PathProviderWindows.registerWith();
@@ -189,6 +210,7 @@ class _PluginRegistrant {
         );
       }
 
+<<<<<<< HEAD
       try {
         SharedPreferencesWindows.registerWith();
       } catch (err) {
@@ -207,6 +229,8 @@ class _PluginRegistrant {
         );
       }
 
+=======
+>>>>>>> feature/profile
     }
   }
 }

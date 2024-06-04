@@ -2,6 +2,7 @@
   "configVersion": 2,
   "packages": [
     {
+<<<<<<< HEAD
       "name": "_fe_analyzer_shared",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/_fe_analyzer_shared-67.0.0",
       "packageUri": "lib/",
@@ -28,16 +29,25 @@
     {
       "name": "async",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
+=======
+      "name": "async",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "boolean_selector",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
+<<<<<<< HEAD
       "name": "build",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/build-2.4.1",
       "packageUri": "lib/",
@@ -76,16 +86,25 @@
     {
       "name": "characters",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.3.0",
+=======
+      "name": "characters",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.3.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "clock",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/clock-1.1.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/clock-1.1.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
+<<<<<<< HEAD
       "name": "code_builder",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/code_builder-4.10.0",
       "packageUri": "lib/",
@@ -100,16 +119,25 @@
     {
       "name": "convert",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/convert-3.1.1",
+=======
+      "name": "collection",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.18.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "crypto",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.3",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.3",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
+<<<<<<< HEAD
       "name": "dart_style",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/dart_style-2.3.6",
       "packageUri": "lib/",
@@ -118,16 +146,25 @@
     {
       "name": "fake_async",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/fake_async-1.3.1",
+=======
+      "name": "fake_async",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/fake_async-1.3.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "ffi",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.2",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
+<<<<<<< HEAD
       "name": "file",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.0",
       "packageUri": "lib/",
@@ -142,10 +179,15 @@
     {
       "name": "flutter",
       "rootUri": "file:///C:/flutter/packages/flutter",
+=======
+      "name": "flutter",
+      "rootUri": "file:///C:/Flutter/flutter/packages/flutter",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
+<<<<<<< HEAD
       "name": "flutter_cache_manager",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_cache_manager-3.3.2",
       "packageUri": "lib/",
@@ -154,16 +196,25 @@
     {
       "name": "flutter_lints",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-3.0.2",
+=======
+      "name": "flutter_lints",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-3.0.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
     {
       "name": "flutter_test",
+<<<<<<< HEAD
       "rootUri": "file:///C:/flutter/packages/flutter_test",
+=======
+      "rootUri": "file:///C:/Flutter/flutter/packages/flutter_test",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
+<<<<<<< HEAD
       "name": "flutter_web_plugins",
       "rootUri": "file:///C:/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
@@ -184,10 +235,15 @@
     {
       "name": "google_fonts",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/google_fonts-6.2.1",
+=======
+      "name": "google_fonts",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/google_fonts-6.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.14"
     },
     {
+<<<<<<< HEAD
       "name": "gotrue",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/gotrue-2.7.0",
       "packageUri": "lib/",
@@ -202,11 +258,16 @@
     {
       "name": "http",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.2.1",
+=======
+      "name": "http",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "http_parser",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
@@ -214,34 +275,54 @@
     {
       "name": "jwt_decode",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/jwt_decode-0.3.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "leak_tracker",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.4",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.4",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.3",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.3",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_testing",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "lints",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/lints-3.0.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/lints-3.0.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
+<<<<<<< HEAD
       "name": "logging",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/logging-1.2.0",
       "packageUri": "lib/",
@@ -250,17 +331,26 @@
     {
       "name": "matcher",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.16+1",
+=======
+      "name": "matcher",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.16+1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "material_color_utilities",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.8.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.8.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "meta",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
@@ -286,64 +376,104 @@
     {
       "name": "package_config",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/package_config-2.1.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "path",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "path_provider",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider-2.1.3",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider-2.1.3",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
     {
       "name": "path_provider_android",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.5",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.5",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "path_provider_foundation",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "path_provider_linux",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_linux-2.2.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_linux-2.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
       "name": "path_provider_platform_interface",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "path_provider_windows",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.2.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
       "name": "platform",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.4",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.4",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "plugin_platform_interface",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.8",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
+<<<<<<< HEAD
       "name": "postgrest",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/postgrest-2.1.2",
       "packageUri": "lib/",
@@ -418,10 +548,15 @@
     {
       "name": "sky_engine",
       "rootUri": "file:///C:/flutter/bin/cache/pkg/sky_engine",
+=======
+      "name": "sky_engine",
+      "rootUri": "file:///C:/Flutter/flutter/bin/cache/pkg/sky_engine",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
+<<<<<<< HEAD
       "name": "source_gen",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/source_gen-1.5.0",
       "packageUri": "lib/",
@@ -430,10 +565,15 @@
     {
       "name": "source_span",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0",
+=======
+      "name": "source_span",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
+<<<<<<< HEAD
       "name": "sprintf",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
       "packageUri": "lib/",
@@ -454,10 +594,15 @@
     {
       "name": "stack_trace",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.11.1",
+=======
+      "name": "stack_trace",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.11.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
+<<<<<<< HEAD
       "name": "storage_client",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/storage_client-2.0.2",
       "packageUri": "lib/",
@@ -466,16 +611,25 @@
     {
       "name": "stream_channel",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/stream_channel-2.1.2",
+=======
+      "name": "stream_channel",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/stream_channel-2.1.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
       "name": "string_scanner",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.2.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.2.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
+<<<<<<< HEAD
       "name": "supabase",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/supabase-2.2.0",
       "packageUri": "lib/",
@@ -496,22 +650,35 @@
     {
       "name": "term_glyph",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/term_glyph-1.2.1",
+=======
+      "name": "term_glyph",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/term_glyph-1.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "test_api",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "typed_data",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
+<<<<<<< HEAD
       "name": "url_launcher",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher-6.2.6",
       "packageUri": "lib/",
@@ -568,16 +735,25 @@
     {
       "name": "vector_math",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+=======
+      "name": "vector_math",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "2.14"
     },
     {
       "name": "vm_service",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-14.2.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-14.2.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
+<<<<<<< HEAD
       "name": "watcher",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.0",
       "packageUri": "lib/",
@@ -592,17 +768,26 @@
     {
       "name": "web_socket_channel",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-2.4.5",
+=======
+      "name": "web",
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/web-0.5.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "win32",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.5.1",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.5.1",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "xdg_directories",
+<<<<<<< HEAD
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.0.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
@@ -616,6 +801,9 @@
     {
       "name": "yet_another_json_isolate",
       "rootUri": "file:///C:/Users/masia/AppData/Local/Pub/Cache/hosted/pub.dev/yet_another_json_isolate-2.0.0",
+=======
+      "rootUri": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.0.4",
+>>>>>>> feature/profile
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -626,10 +814,19 @@
       "languageVersion": "3.4"
     }
   ],
+<<<<<<< HEAD
   "generated": "2024-06-03T09:17:09.331947Z",
   "generator": "pub",
   "generatorVersion": "3.4.1",
   "flutterRoot": "file:///C:/flutter",
   "flutterVersion": "3.22.1",
   "pubCache": "file:///C:/Users/masia/AppData/Local/Pub/Cache"
+=======
+  "generated": "2024-06-02T23:06:40.591493Z",
+  "generator": "pub",
+  "generatorVersion": "3.4.1",
+  "flutterRoot": "file:///C:/Flutter/flutter",
+  "flutterVersion": "3.22.1",
+  "pubCache": "file:///C:/Users/Nerin/AppData/Local/Pub/Cache"
+>>>>>>> feature/profile
 }
