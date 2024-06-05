@@ -1,23 +1,10 @@
-// App.tsx
-import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
-import Home from './src/screens/Home'; // Adjust the path as needed
+import { Stack } from 'expo-router';
 
-
-const App: React.FC = () => {
+export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <Home />
-      </ScrollView>
-    </SafeAreaView>
+    <Stack>
+      <Stack.Screen name="index" component={Home} />
+      <Stack.Screen name="room" component={RoomPage} />
+    </Stack>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
+}

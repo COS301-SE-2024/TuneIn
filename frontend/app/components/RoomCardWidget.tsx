@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, ImageBackground, StyleSheet, Image, Dimensions } from 'react-native';
-import { RoomCard } from './models/RoomCard';
+import { Room } from './models/Room';
 
 interface RoomCardWidgetProps {
-  roomCard: RoomCard;
+  roomCard: Room;
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
