@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
 
 import RoomCardWidget from '../components/RoomCardWidget';
 import { RoomCard } from '../components/models/RoomCard';
-import Carousel from '../components/AppCarousel';
+import AppCarousel from '../components/AppCarousel';
 
 interface HomeProps {
   // Define props if any
@@ -40,14 +40,9 @@ const Home: React.FC<HomeProps> = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <Text style={styles.title}>Welcome to the Home Page!</Text>
-      <View style={styles.carouselContainer}>
-        {sampleRoomCards.map((roomCard, index) => (
-          <RoomCardWidget key={index} roomCard={roomCard} />
-          
-        ))}
-        <Carousel/>
-      </View>
+      <AppCarousel data={sampleRoomCards} renderItem={renderItem}/>
     </View>
   );
 };
@@ -58,16 +53,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    paddingTop: StatusBar.currentHeight || 0, // Ensure that paddingTop respects the status bar height
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
-  },
-  carouselContainer: {
-    width: '100%',
-    alignItems: 'center',
   },
 });
 
