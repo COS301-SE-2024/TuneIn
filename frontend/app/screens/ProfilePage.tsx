@@ -17,7 +17,8 @@ const ProfileScreen: React.FC = () => {
         { roomName: "Room 5", songName: "Song 5", artistName: "Artist 5", username: "user5" },
     ];
     const dummyData = {
-        username: "John Doe",
+        name: "John Doe",
+        username: "john",
         bio: "Hello, I'm John!",
         profile_picture: require("../Assets/MockProfilePic.jpeg",),
         favoriteSongs: [{ title: "Song 1", artist: "Artist 1", duration: "3:45" }],
@@ -42,7 +43,7 @@ const ProfileScreen: React.FC = () => {
                         style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
                     />
                 </View>
-                <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center' }}>{dummyData.username}</Text>
+                <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center' }}>{dummyData.name}</Text>
                 <Text style={{ fontWeight: '400', textAlign: 'center' }}>@{dummyData.username}</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
                     <View style={{ alignItems: 'center' }}>

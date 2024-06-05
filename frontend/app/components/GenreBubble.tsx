@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
     },
     container: {
         marginRight: 12,
+        marginBottom: 10,
         paddingHorizontal: 14,
         paddingVertical: 8,
         backgroundColor: 'rgba(232, 235, 242, 1)',
