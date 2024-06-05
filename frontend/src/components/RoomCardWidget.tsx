@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ImageBackground, StyleSheet, Image } from 'react-native';
+import { View, Text, ImageBackground, StyleSheet, Image, Dimensions } from 'react-native';
 import { RoomCard } from './models/RoomCard';
 
 interface RoomCardWidgetProps {
@@ -7,8 +7,11 @@ interface RoomCardWidgetProps {
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
+  const screenWidth = Dimensions.get('window').width;
+  const cardWidth = screenWidth * 0.8; // 80% of screen width
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { width: cardWidth }]}>
       <ImageBackground
         source={{ uri: roomCard.backgroundImage }}
         style={styles.backgroundImage}
@@ -39,7 +42,7 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 15,
     overflow: 'hidden',
-    height: 230,
+    height: 210,
   },
   backgroundImage: {
     flex: 1,
