@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from 'expo-router';
 
-const AllFriends: React.FC = () => {
+const EditProfile: React.FC = () => {
   const navigation = useNavigation();
 
   const goBack = () => {
@@ -11,7 +12,7 @@ const AllFriends: React.FC = () => {
 
   return (
     <View className="flex-1 justify-center pt-4 px-4">
-      <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2">Welcome to the Friends Page</Text>
+      <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2">Welcome to the EditProfile Page</Text>
       <TouchableOpacity onPress={goBack}>
         <Text>Go Back</Text>
       </TouchableOpacity>
@@ -19,4 +20,4 @@ const AllFriends: React.FC = () => {
   );
 };
 
-export default AllFriends;
+export default EditProfile;
