@@ -1,5 +1,4 @@
-// Home.tsx
-import * as NavigationBar from 'expo-navigation-bar';
+// screens/Home.tsx
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Link, useRouter } from "expo-router";
@@ -8,9 +7,9 @@ import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
+import TopNavBar from "../components/TopNavBar";
 
 const Home: React.FC = () => {
-  const visibility = NavigationBar.useVisibility();
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string =
@@ -123,7 +122,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
+      <TopNavBar />
       <ScrollView>
         <View className="flex-1 justify-center pt-4">
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
