@@ -28,7 +28,9 @@
     "react-native-screens": "3.31.1",
     "react-native-snap-carousel": "^1.6.1",
     "twrnc": "^4.2.0",
-    "expo-navigation-bar": "~3.0.5"
+    "expo-navigation-bar": "~3.0.5",
+    "jest-expo": "~51.0.1",
+    "jest": "^29.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
