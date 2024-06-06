@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import GenreBubble from '../components/GenreBubble';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icons from 'react-native-vector-icons/FontAwesome'
+import { MaterialIcons } from '@expo/vector-icons';
 import { rgbaColor } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 
 const EditProfileScreen = () => {
@@ -26,7 +29,7 @@ const EditProfileScreen = () => {
 
     return (
         <View style={styles.container}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.profileHeader}>
                 <TouchableOpacity onPress={() => { }} style={styles.saveButton}>
                         <Text>Cancel</Text>
@@ -50,21 +53,21 @@ const EditProfileScreen = () => {
                 <View style={styles.listItem}>
                     <Text style={styles.listItemTitle}>Name</Text>
                     <TouchableOpacity onPress={() => showEditDialog('Name', setName)} style={styles.editButton}>
-                        <Text>John Doe</Text>
+                        <Text style={{marginLeft: 42,}}>John Doe</Text>
                     </TouchableOpacity>
                 </View>
                 {/* Username */}
                 <View style={styles.listItem}>
                     <Text style={styles.listItemTitle}>Username</Text>
                     <TouchableOpacity onPress={() => showEditDialog('Username', setUsername)} style={styles.editButton}>
-                        <Text>@john{username}</Text>
+                        <Text style={{marginLeft: 15,}}>@john{username}</Text>
                     </TouchableOpacity>
                 </View>
                 {/* Bio */}
                 <View style={styles.listItem}>
                     <Text style={styles.listItemTitle}>Bio</Text>
                     <TouchableOpacity onPress={() => showEditDialog('Bio', setBio, 3)} style={styles.editButton}>
-                        <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</Text>
+                        <Text style={{marginLeft: 60,}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</Text>
                     </TouchableOpacity>
                 </View>
                 {/* Social */}
@@ -107,13 +110,101 @@ const EditProfileScreen = () => {
                 <View style={styles.listItem}>
                     <Text style={styles.listItemTitle}>Favorite Songs</Text>
                 </View>
-                {/* Render favorite songs */}
+                 <View style={styles.container1}>
+                 <View style={styles.playingContainer}>
+      <View style={styles.albumArt}></View>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.songTitle}>Don't Smile At Me</Text>
+        <Text style={styles.artist}>Billie Eilish</Text>
+      </View>
+      <Text style={styles.duration}>5:33</Text>
+      <MaterialIcons name="more-horiz" size={24} color="black" style={styles.moreIcon} />
+    </View>
+     
+    </View>
+     <View style={styles.container1}>
+                 <View style={styles.playingContainer}>
+      <View style={styles.albumArt}></View>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.songTitle}>Don't Smile At Me</Text>
+        <Text style={styles.artist}>Billie Eilish</Text>
+      </View>
+      <Text style={styles.duration}>5:33</Text>
+      <MaterialIcons name="more-horiz" size={24} color="black" style={styles.moreIcon} />
+    </View></View>
+<View style={{flexDirection: 'row',
+    alignItems: 'center', justifyContent: 'center'}}>
+  <View style={styles.container2}>
+            <Text style={styles.text}>Add Song  <Icons name="plus" size={14} color="black" /></Text>
+        </View>
+</View>
             </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+
+text: {
+        color: 'black',
+        fontWeight: '500',
+        fontSize: 14,
+    },
+    container2: {
+        marginRight: 12,
+        marginBottom: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        backgroundColor: 'rgba(232, 235, 242, 1)',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+//favourite songs
+  container1: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  playingContainer: {
+    width: 310,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 0,
+    marginTop: 10, // Adjusted marginTop for space
+    paddingVertical: 10, // Added paddingVertical for space
+  },
+  albumArt: {
+    width: 57,
+    height: 57,
+    borderRadius: 12,
+    backgroundColor: 'rgba(158, 171, 184, 1)',
+    marginRight: 16,
+  },
+  detailsContainer: {
+    paddingRight: 40,
+  },
+  songTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  artist: {
+    fontSize: 12,
+    fontWeight: '400',
+    marginTop: 5,
+  },
+  duration: {
+    marginLeft: 10,
+  },
+  moreIcon: {
+    marginLeft: 30,
+  },
+
+
+//stuff
     container: {
         flex: 1,
         padding: 20,
@@ -142,7 +233,6 @@ const styles = StyleSheet.create({
     },
     listItem: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 20,
     },
@@ -155,7 +245,7 @@ const styles = StyleSheet.create({
     },
     editButton: {
         padding: 5,
-        width: 200,
+        width: 250,
     },
     divider: {
         borderBottomWidth: 1,
