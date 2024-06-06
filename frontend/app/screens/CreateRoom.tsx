@@ -1,13 +1,19 @@
-// AllFriends.tsx
-import React from 'react';
+// CreateRoom.tsx (or AllFriends.tsx if that's the intended name)
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from 'expo-router';
+import MyToggleWidget from '../components/ToggleWidget'; // Adjust the import path as needed
 
 const CreateRoom: React.FC = () => {
   const navigation = useNavigation();
+  const [selectedOption, setSelectedOption] = useState(true);
 
   const goBack = () => {
     navigation.goBack();
+  };
+
+  const handleToggleChange = (isFirstOptionSelected: boolean) => {
+    setSelectedOption(isFirstOptionSelected);
   };
 
   return (
@@ -16,6 +22,14 @@ const CreateRoom: React.FC = () => {
       <TouchableOpacity onPress={goBack}>
         <Text>Go Back</Text>
       </TouchableOpacity>
+      <MyToggleWidget
+        firstOption="Option 1"
+        secondOption="Option 2"
+        onChanged={handleToggleChange}
+      />
+      <Text className="mt-4 text-lg text-gray-800">
+        Selected Option: {selectedOption ? "Option 1" : "Option 2"}
+      </Text>
     </View>
   );
 };
