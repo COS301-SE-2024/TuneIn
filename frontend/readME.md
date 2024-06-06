@@ -5,10 +5,11 @@
 This README provides detailed instructions for setting up and using NativeWind (a Tailwind CSS solution for React Native) and Expo Router in your React Native project. It also includes examples of why these libraries are used, their advantages, common commands, and links to their respective resources.
 
 ## Table of Contents
-
+- [Folder Structure](#folder-structure)
 - [Installation](#installation)
   - [NativeWind](#nativewind)
   - [Expo Router](#expo-router)
+
 - [Usage Examples](#usage-examples)
   - [NativeWind Usage](#nativewind-usage)
   - [Expo Router Usage](#expo-router-usage)
@@ -16,6 +17,54 @@ This README provides detailed instructions for setting up and using NativeWind (
 - [Common Commands](#common-commands)
 - [Editor Configuration](#editor-configuration)
 - [Resources](#resources)
+
+
+## Folder Structure
+
+Here's an overview of how the project folders are structured:
+
+```
+my-app/
+│
+├── app/
+│   ├── components/
+│   │   ├── AppCarousel.tsx
+│   │   ├── FriendsGrid.tsx
+│   │   ├── NavBar.tsx
+│   │   ├── RoomCardWidget.tsx
+│   │   ├── TopNavBar.tsx
+│   │   └── ... (other reusable components)
+│   │
+│   ├── models/
+│   │   ├── friend.ts
+│   │   ├── Room.ts
+│   │   └── ... (other TypeScript class definitions)
+│   │
+│   ├── screens/
+│   │   ├── AllFriends.tsx
+│   │   ├── CreateRoom.tsx
+│   │   ├── EditProfile.tsx
+│   │   ├── EditRoom.tsx
+│   │   ├── Home.tsx
+│   │   ├── ProfilePage.tsx
+│   │   ├── RoomPage.tsx
+│   │   ├── Search.tsx
+│   │   └── ... (other pages/screens)
+│   │
+│   └── index.tsx
+│   
+│
+├── my-app.d.ts
+├── babel.config.js
+├── tailwind.config.js
+└── package.json
+```
+
+- **app/components/**: Contains all reusable components.
+- **app/models/**: Contains TypeScript class definitions to streamline data handling.
+- **app/screens/**: Contains all the screens (pages) of the app.
+- **app/_layout.tsx**: The layout file for the app's routing structure.
+- **app/index.tsx**: The entry point for the app.
 
 ## Installation
 
@@ -43,16 +92,23 @@ NativeWind brings the power of Tailwind CSS to React Native. Follow these steps 
     ```js
     /** @type {import('tailwindcss').Config} */
     module.exports = {
+      purge: [
+        './App.{js,jsx,ts,tsx}',
+        './screens/**/*.{js,jsx,ts,tsx}',
+        './components/**/*.{js,jsx,ts,tsx}',
+        './app/**/*.{js,jsx,ts,tsx}'
+      ],
       content: [
         "./App.{js,jsx,ts,tsx}",
         "./screens/**/*.{js,jsx,ts,tsx}",
         "./components/**/*.{js,jsx,ts,tsx}",
+        "./app/**/*.{js,jsx,ts,tsx}",
       ],
       theme: {
         extend: {},
       },
       plugins: [],
-    };
+    }
     ```
 
 4. **Configure Babel for NativeWind:**
@@ -68,13 +124,6 @@ NativeWind brings the power of Tailwind CSS to React Native. Follow these steps 
       };
     };
     ```
-## Editor Configuration
-
-To prevent the editor from showing redline errors when using `className`, create a `my-app.d.ts` file with the following content:
-
-```typescript
-/// <reference types="nativewind/types" />
-```
 
 ### Expo Router
 
@@ -143,6 +192,7 @@ Expo Router provides a file-based routing solution for Expo projects.
       }
     }
     ```
+
 
 ## Usage Examples
 
@@ -273,18 +323,7 @@ For more programmatic navigation, use the `router.navigate` method.
 
 ### Tailwind Purge
 
-Tailwind CSS can purge unused styles to optimize the bundle size. Configure this in `tailwind.config.js`:
-
-```js
-module.exports = {
-  purge: [
-    './screens/**/*.{js,jsx,ts,tsx}',
-    './components/**/*.{js,jsx,ts,tsx}',
-    './App.{js,jsx,ts,tsx}'
-  ],
-  // other configurations
-};
-```
+Tailwind CSS can purge unused styles to optimize the bundle size. This is configured in `tailwind.config.js`.
 
 ### Expo Router Commands
 
@@ -300,6 +339,14 @@ module.exports = {
     npx expo build
     ```
 
+## Editor Configuration
+
+To prevent the editor from showing redline errors when using `className`, create a `my-app.d.ts` file with the following content:
+
+```typescript
+/// <reference types="nativewind/types" />
+```
+
 ## Resources
 
 ### NativeWind
@@ -311,5 +358,3 @@ module.exports = {
 ### Expo Router
 
 - [Expo Router Documentation](https://expo.github.io/router/docs/)
-
-This README provides a comprehensive guide to setting up and using NativeWind and Expo Router in your React Native project. With these tools, you can enhance your development workflow, improve productivity, and maintain consistent and efficient code.
