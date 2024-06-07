@@ -1,10 +1,20 @@
 import React from "react";
 import { View } from "react-native";
 import CommentWidget from "../components/CommentWidget";
+import SongRoomWidget from "../components/SongRoomWidget"; // Import the SongRoomWidget component
 
 const ChatRoom: React.FC = () => {
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      {/* Add the SongRoomWidget */}
+      <SongRoomWidget
+        songName="Song Name"
+        artist="Artist Name"
+        progress={0.5} // Example progress value
+        time1="0:00" // Example time values
+        time2="3:30"
+      />
+      {/* Add CommentWidgets */}
       <CommentWidget
         username="JohnDoe"
         message="This is a sample comment."
