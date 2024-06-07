@@ -1,4 +1,4 @@
-// CreateRoom.tsx (or AllFriends.tsx if that's the intended name)
+// AllFriends.tsx (or CreateRoom.tsx)
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from 'expo-router';

@@ -21,22 +21,40 @@ const MyToggleWidget: React.FC<MyToggleWidgetProps> = ({ firstOption, secondOpti
     return (
         <View
             className="rounded-xl bg-gray-200 p-1"
-            style={{ width: toggleWidth, height: 50 }}
+            style={{ width: toggleWidth, height: 50,
+                borderTopLeftRadius: 24,
+                borderBottomLeftRadius: 24,
+                borderRadius: 24,
+                borderTopRightRadius: 24,
+                borderBottomRightRadius: 24,
+            }}
         >
             <View className="flex-row">
                 <TouchableOpacity
-                    className={`flex-1 rounded-lg items-center justify-center p-2 ${isFirstOptionSelected ? 'bg-gray-700 shadow' : ''}`}
+                    className={`flex-1 items-center justify-center p-2`}
+                    style={{
+                        backgroundColor: isFirstOptionSelected ? '#8B8FA8' : 'transparent',
+                        borderTopLeftRadius: 24,
+                        borderBottomLeftRadius: 24,
+                        borderRadius: 24,
+                    }}
                     onPress={() => handleToggle(true)}
                 >
-                    <Text className={`text-lg font-normal ${isFirstOptionSelected ? 'text-white' : 'text-gray-600'}`}>
+                    <Text className={`text-lg font-medium ${isFirstOptionSelected ? 'text-white' : 'text-gray-600'}`}>
                         {firstOption}
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    className={`flex-1 rounded-lg items-center justify-center p-2 ${!isFirstOptionSelected ? 'bg-gray-700 shadow' : ''}`}
+                    className={`flex-1 items-center justify-center p-2`}
+                    style={{
+                        backgroundColor: !isFirstOptionSelected ? '#8B8FA8' : 'transparent',
+                        borderTopRightRadius: 24,
+                        borderBottomRightRadius: 24,
+                        borderRadius: 24,
+                    }}
                     onPress={() => handleToggle(false)}
                 >
-                    <Text className={`text-lg font-normal ${!isFirstOptionSelected ? 'text-white' : 'text-gray-600'}`}>
+                    <Text className={`text-lg font-medium ${!isFirstOptionSelected ? 'text-white' : 'text-gray-600'}`}>
                         {secondOption}
                     </Text>
                 </TouchableOpacity>
