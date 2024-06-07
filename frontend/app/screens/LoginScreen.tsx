@@ -6,9 +6,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 
@@ -19,33 +18,18 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState("");
 
   const router = useRouter();
-  const navigation = useNavigation();
 
-  const navigateToRegister = () => {
-    router.navigate("/screens/RegisterScreen");
+  const navigateToHome = () => {
+    router.navigate("/screens/Home");
   };
 
-  const handleLogin = () => {
-    // Check if email is verified
-    const isEmailVerified = false; // Change to true if email is verified
-
-    if (isEmailVerified) {
-      // Implement login functionality here
-      router.push("/Home");
-    } else {
-      // Show alert if email is not verified
-      Alert.alert(
-        "Email Verification Required",
-        "Please verify your email before you can continue.",
-        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-        { cancelable: false }
-      );
-    }
-  };
+    const navigateToRegister = () => {
+        router.navigate("/screens/RegisterScreen");
+    };
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <MaterialIcons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
       <View style={styles.logoContainer}>
@@ -100,7 +84,7 @@ const LoginScreen: React.FC = () => {
             containerStyle={styles.checkbox}
           />
         </View>
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <TouchableOpacity style={styles.loginButton} onPress={navigateToHome}>
           <Text style={styles.loginButtonText}>LOGIN</Text>
         </TouchableOpacity>
         <TouchableOpacity

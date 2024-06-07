@@ -1,35 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   ScrollView,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { CheckBox } from 'react-native-elements';
-import { StackNavigationProp } from '@react-navigation/stack';
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { CheckBox } from "react-native-elements";
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
   const [obscureTextConfirm, setObscureTextConfirm] = useState(true);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [emailOrUsername, setEmailOrUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  //onst navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Register'>>();
+  const router = useRouter();
 
-  const { width } = Dimensions.get('window');
+  const navigateToLogin = () => {
+    router.navigate("/screens/LoginScreen");
+  };
+
+  const handleRegister = () => {
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      Alert.alert(
+        "Password Mismatch",
+        "The passwords do not match. Please try again.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+
+    // Check if terms are accepted
+    if (!acceptTerms) {
+      Alert.alert(
+        "Terms and Conditions",
+        "You need to accept the terms and conditions to register.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+
+    // Check if email is verified
+    const isEmailVerified = false; // Change to true if email is verified
+
+    if (isEmailVerified) {
+      // Implement register functionality here
+      router.navigate("/screens/Login");
+    } else {
+      // Show alert if email is not verified
+      Alert.alert(
+        "Email Verification Required",
+        "Please verify your email before you can continue.",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+        { cancelable: false }
+      );
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>
-        Join the Fastest Growing Listening Community
-      </Text>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <MaterialIcons name="arrow-back" size={24} color="black" />
+      </TouchableOpacity>
+      <View style={styles.logoContainer}>
+        {/* <Text style={styles.logoText}>Logo</Text> */}
+      </View>
+      <Text style={styles.title}>Join the Fastest Growing Listening Community</Text>
       <View style={styles.form}>
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Email or Username</Text>
@@ -55,7 +100,7 @@ const RegisterScreen: React.FC = () => {
               onPress={() => setObscureText(!obscureText)}
             >
               <MaterialIcons
-                name={obscureText ? 'visibility-off' : 'visibility'}
+                name={obscureText ? "visibility-off" : "visibility"}
                 size={24}
                 color="gray"
               />
@@ -77,7 +122,7 @@ const RegisterScreen: React.FC = () => {
               onPress={() => setObscureTextConfirm(!obscureTextConfirm)}
             >
               <MaterialIcons
-                name={obscureTextConfirm ? 'visibility-off' : 'visibility'}
+                name={obscureTextConfirm ? "visibility-off" : "visibility"}
                 size={24}
                 color="gray"
               />
@@ -92,19 +137,11 @@ const RegisterScreen: React.FC = () => {
             containerStyle={styles.checkbox}
           />
         </View>
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={() => {
-            // Implement register functionality here
-          }}
-        >
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>REGISTER</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.loginRedirect}
-       // onPress={() => navigation.navigate('Login')}
-      >
+      <TouchableOpacity style={styles.loginRedirect} onPress={navigateToLogin}>
         <Text style={styles.loginRedirectText}>
           Already have an account? <Text style={styles.loginLink}>Login</Text>
         </Text>
@@ -118,79 +155,90 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 1,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
   title: {
     padding: 10,
     fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 40,
   },
   form: {
-    alignItems: 'center',
+    alignItems: "center",
+    width: "100%",
   },
   inputWrapper: {
-    width: '85%',
+    width: "85%",
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   input: {
     padding: 12,
     borderBottomWidth: 1,
-    borderColor: 'gray',
+    borderColor: "gray",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
   },
   icon: {
-    position: 'absolute',
+    position: "absolute",
     right: 10,
   },
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '85%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "85%",
     marginBottom: 20,
   },
   checkbox: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 0,
     padding: 0,
   },
   registerButton: {
-    width: '85%',
+    width: "85%",
     height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#8B8FA8',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#8B8FA8",
     borderRadius: 30,
     marginBottom: 20,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3.84,
   },
   registerButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   loginRedirect: {
     marginTop: 20,
   },
   loginRedirectText: {
     fontSize: 16,
-    color: 'black',
-    textAlign: 'center',
+    color: "black",
+    textAlign: "center",
   },
   loginLink: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
