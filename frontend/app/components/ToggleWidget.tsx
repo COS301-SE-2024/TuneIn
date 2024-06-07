@@ -9,7 +9,7 @@ interface MyToggleWidgetProps {
 
 const MyToggleWidget: React.FC<MyToggleWidgetProps> = ({ firstOption, secondOption, onChanged }) => {
     const screenWidth = Dimensions.get("window").width;
-    const toggleWidth = screenWidth * 0.9; // 90% of screen width
+    const toggleWidth = screenWidth * 0.85; // 90% of screen width
 
     const [isFirstOptionSelected, setIsFirstOptionSelected] = useState(true);
 

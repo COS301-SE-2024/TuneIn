@@ -1,37 +1,77 @@
-// AllFriends.tsx (or CreateRoom.tsx)
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions } from 'react-native';
+import { Link, useRouter } from 'expo-router'; // Import Link and useRouter from 'expo-router'
 import MyToggleWidget from '../components/ToggleWidget'; // Adjust the import path as needed
 
-const CreateRoom: React.FC = () => {
-  const navigation = useNavigation();
-  const [selectedOption, setSelectedOption] = useState(true);
+const CreateRoomScreen: React.FC = () => {
+  const router = useRouter(); // Use useRouter instead of useNavigation
+  const [isSwitched, setIsSwitched] = useState(false);
+  const [roomName, setRoomName] = useState('');
 
-  const goBack = () => {
-    navigation.goBack();
-  };
+  const screenWidth = Dimensions.get('window').width;
 
   const handleToggleChange = (isFirstOptionSelected: boolean) => {
-    setSelectedOption(isFirstOptionSelected);
+    console.log(isFirstOptionSelected ? 'Permanent selected' : 'Temporary selected');
+  };
+  
+
+  const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
+    console.log(isFirstOptionSelected ? 'Public selected' : 'Private selected');
   };
 
+  const navigateToRoomDetails = () => {
+    router.navigate("/screens/RoomDetails");
+  };
+
+
   return (
-    <View className="flex-1 justify-center pt-4 px-4">
-      <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2">Welcome to the CreateRoom Page</Text>
-      <TouchableOpacity onPress={goBack}>
-        <Text>Go Back</Text>
-      </TouchableOpacity>
-      <MyToggleWidget
-        firstOption="Option 1"
-        secondOption="Option 2"
-        onChanged={handleToggleChange}
-      />
-      <Text className="mt-4 text-lg text-gray-800">
-        Selected Option: {selectedOption ? "Option 1" : "Option 2"}
-      </Text>
+    <View style={{ flex: 1, backgroundColor: 'white', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 }}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>×</Text>
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Room Option</Text>
+        <View style={{ width: 20 }} />
+      </View>
+      <View style={{ paddingHorizontal: 10, paddingVertical: 20 }}>
+        <View style={{ marginBottom: 20 }}>
+          <MyToggleWidget
+            firstOption="Permanent"
+            secondOption="Temporary"
+            onChanged={handleToggleChange}
+          />
+        </View>
+        <View style={{ marginBottom: 20 }}>
+          <MyToggleWidget
+            firstOption="Public"
+            secondOption="Private"
+            onChanged={handleToggleChange2}
+          />
+        </View>
+        <View style={{ marginBottom: 20 }}>
+          <TextInput
+            style={{ borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 10, padding: 10 }}
+            placeholder="Add room name"
+            value={roomName}
+            onChangeText={setRoomName}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Schedule for later</Text>
+          <Switch
+            value={isSwitched}
+            onValueChange={setIsSwitched}
+          />
+        </View>
+        <TouchableOpacity
+          style={{ backgroundColor: '#8B8FA8', borderRadius: 30, height: 50, alignItems: 'center', justifyContent: 'center', elevation: 5 }}
+          onPress={navigateToRoomDetails} // Use navigateToRoomDetails function for onPress
+        >
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white' }}>Let's go</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
-export default CreateRoom;
+export default CreateRoomScreen;
