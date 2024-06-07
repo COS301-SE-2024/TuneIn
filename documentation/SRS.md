@@ -86,14 +86,6 @@ This SRS document is structured as follows:
 
 
 
-#### Social Listener
-
-**Characteristics:**
-
-- Average user who is looking to enjoy music with friends or meet new people through shared listening experiences.
-
-
-
 ### 2.2 Catering to User Groups (User Stories)
 Our software will cater for above user group in the form of user stories as follows.
 
