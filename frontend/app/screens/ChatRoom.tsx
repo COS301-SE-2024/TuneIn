@@ -1,25 +1,27 @@
-// AllFriends.tsx
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { useNavigation } from "expo-router";
+import { View } from "react-native";
+import CommentWidget from "../components/CommentWidget";
 
 const ChatRoom: React.FC = () => {
-	const navigation = useNavigation();
-
-	const goBack = () => {
-		navigation.goBack();
-	};
-
-	return (
-		<View className="flex-1 justify-center pt-4 px-4">
-			<Text className="text-2xl font-bold text-gray-800 mt-2 mb-2">
-				Welcome to the Chat Room
-			</Text>
-			<TouchableOpacity onPress={goBack}>
-				<Text>Go Back</Text>
-			</TouchableOpacity>
-		</View>
-	);
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <CommentWidget
+        username="JohnDoe"
+        message="This is a sample comment."
+        profilePictureUrl="https://example.com/profile_picture.jpg"
+      />
+      <CommentWidget
+        username="JaneSmith"
+        message="Another sample comment here."
+        profilePictureUrl="https://example.com/profile_picture.jpg"
+      />
+      <CommentWidget
+        username="AliceWonder"
+        message="Yet another comment for demonstration."
+        profilePictureUrl="https://example.com/profile_picture.jpg"
+      />
+    </View>
+  );
 };
 
 export default ChatRoom;
