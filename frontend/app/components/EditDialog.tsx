@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 
-const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '' }) => {
+const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', isBio = false }) => {
     const [text, setText] = useState(initialText);
 
     useEffect(() => {
@@ -19,7 +19,7 @@ const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onS
                 <View style={styles.dialogContainer}>
                     <Text style={styles.dialogTitle}>Edit</Text>
                     <TextInput
-                        style={styles.input}
+                        style={isBio ? styles.bioInput : styles.defaultInput}
                         multiline={true}
                         numberOfLines={3}
                         value={text}
@@ -61,7 +61,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    input: {
+    defaultInput: {
+        width: '75%',
+        height: 38,
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 10,
+        textAlignVertical: 'top',
+    },
+    bioInput: {
         width: '100%',
         height: 100,
         borderColor: 'gray',
