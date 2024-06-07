@@ -7,6 +7,7 @@ export interface Room {
     description: string;
     userProfile?: string;
     username?: string;
+    mine?:boolean;
     tags: string[];
   }
   

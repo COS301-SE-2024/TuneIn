@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 
 interface CarouselProps<T> {
   data: T[];
@@ -8,7 +8,7 @@ interface CarouselProps<T> {
 
 const AppCarousel = <T,>({ data, renderItem }: CarouselProps<T>) => {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center">
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -17,18 +17,10 @@ const AppCarousel = <T,>({ data, renderItem }: CarouselProps<T>) => {
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         contentContainerStyle={{ paddingHorizontal: 20 }}
-        ItemSeparatorComponent={() => <View style={{ width: 30 }} />} // Add space between items
+        ItemSeparatorComponent={() => <View className="w-7" />} // Add space between items
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default AppCarousel;
