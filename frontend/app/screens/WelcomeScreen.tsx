@@ -6,6 +6,14 @@ const WelcomeScreen: React.FC = () => {
   const router = useRouter();
   const { width, height } = Dimensions.get('window');
 
+  const navigateToLogin = () => {
+    router.navigate("/screens/LoginScreen");
+  };
+
+  const navigateToRegister = () => {
+    router.navigate("/screens/RegisterScreen");
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -18,13 +26,13 @@ const WelcomeScreen: React.FC = () => {
         <Text style={styles.titleText}>TuneIn</Text>
         <TouchableOpacity
           style={[styles.button, styles.loginButton]}
-          onPress={() => router.push('Login')}
+          onPress={navigateToLogin}
         >
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, styles.registerButton]}
-          onPress={() => router.push('Register')}
+          onPress={navigateToRegister}
         >
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
