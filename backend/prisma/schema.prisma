@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model bookmark {
+  user_id String @db.Uuid
+  room_id String @db.Uuid
+  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  room    room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model follows {
+  follower                      String?  @db.Uuid
+  followee                      String?  @db.Uuid
+  date_followed                 DateTime @default(now()) @db.Timestamptz(6)
+  users_follows_followeeTousers users?   @relation("follows_followeeTousers", fields: [followee], references: [user_id], onDelete: Cascade, map: "followee")
+  users_follows_followerTousers users?   @relation("follows_followerTousers", fields: [follower], references: [user_id], onDelete: Cascade, map: "follower")
+
+  @@index([followee], map: "fki_followee")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model friends {
+  is_pending                   Boolean   @default(true)
+  is_close_friend              Boolean   @default(false)
+  date_friended                DateTime? @db.Timestamptz(6)
+  date_requested               DateTime  @default(now()) @db.Timestamptz(6)
+  friend1                      String    @db.Uuid
+  friend2                      String    @db.Uuid
+  users_friends_friend1Tousers users     @relation("friends_friend1Tousers", fields: [friend1], references: [user_id], onDelete: Cascade, map: "friend1")
+  users_friends_friend2Tousers users     @relation("friends_friend2Tousers", fields: [friend2], references: [user_id], onDelete: Cascade, map: "friend2")
+
+  @@index([friend2], map: "fki_friend2")
+  @@ignore
+}
+
+model message {
+  message_id      String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contents        String
+  date_sent       DateTime         @default(now()) @db.Timestamptz(6)
+  sender          String           @db.Uuid
+  users           users            @relation(fields: [sender], references: [user_id], onDelete: Cascade, map: "sender")
+  private_message private_message?
+  room_message    room_message?
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model participate {
+  user_id     String   @db.Uuid
+  room_id     String   @db.Uuid
+  date_joined DateTime @default(now()) @db.Timestamptz(6)
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
+  room        room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+
+  @@index([room_id], map: "fki_room")
+  @@ignore
+}
+
+model private_message {
+  p_message_id String  @id @db.Uuid
+  recipient    String  @db.Uuid
+  message      message @relation(fields: [p_message_id], references: [message_id], onDelete: Cascade)
+  users        users   @relation(fields: [recipient], references: [user_id], onDelete: Cascade, map: "recipient")
+
+  @@index([recipient], map: "fki_recipient")
+}
+
+model private_room {
+  room_id        String          @id @db.Uuid
+  is_listed      Boolean         @default(true)
+  room           room            @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+  scheduled_room scheduled_room?
+}
+
+model public_room {
+  room_id String @id @db.Uuid
+  room    room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model room {
+  room_id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name           String
+  room_creator   String         @db.Uuid
+  playlist_photo String?
+  description    String?        @default("This room has no description")
+  date_created   DateTime       @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean        @default(false)
+  is_temporary   Boolean?       @default(false)
+  bookmark       bookmark[]     @ignore
+  participate    participate[]  @ignore
+  private_room   private_room?
+  public_room    public_room?
+  users          users          @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  room_message   room_message[]
+}
+
+model room_message {
+  message_id String  @id @db.Uuid
+  room_id    String  @db.Uuid
+  room       room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  message    message @relation(fields: [message_id], references: [message_id], onDelete: Cascade)
+}
+
+model scheduled_room {
+  room_id        String       @id @db.Uuid
+  scheduled_date DateTime     @db.Timestamptz(6)
+  private_room   private_room @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model users {
+  user_id                         String            @id(map: "user_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                        String
+  bio                             String?
+  profile_picture                 String?
+  activity                        Json?             @db.Json
+  preferences                     Json?             @db.Json
+  bookmark                        bookmark[]        @ignore
+  follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers") @ignore
+  follows_follows_followerTousers follows[]         @relation("follows_followerTousers") @ignore
+  friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers") @ignore
+  friends_friends_friend2Tousers  friends[]         @relation("friends_friend2Tousers") @ignore
+  message                         message[]
+  participate                     participate[]     @ignore
+  private_message                 private_message[]
+  room                            room[]
+}

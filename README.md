@@ -24,10 +24,8 @@ Key Features:
 
 TuneIn isn't just an app—it's a gateway to a world where music brings people closer together. Whether you're sharing a favourite track with friends or discovering new beats in a virtual room, TuneIn is here to amplify the joy of music and strengthen connections. Let's turn up the volume on togetherness with TuneIn!
 
-(demo link here)
-
 # 🧑‍💻Meet the team
-(team member images temporarily removed due to weird spacing)
+(team member images temporarily removed due to poor spacing)
 
 <table style="border-width: 1px; width: 100%; font-family: Arial, sans-serif; border-collapse: collapse;">
   <tr>
