@@ -8,23 +8,23 @@ import {
 	ScrollView,
 	StyleSheet,
 } from "react-native";
+import { useRouter } from 'expo-router';
 import EditGenreBubble from "../components/EditGenreBubble";
 import EditDialog from "../components/EditDialog";
-import SongDialog from "../components/SongDialog";
+import FavoriteSongs from "../components/FavoriteSong";
 import PhotoSelect from "../components/PhotoSelect";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import Icons from "react-native-vector-icons/FontAwesome";
 import { MaterialIcons } from "@expo/vector-icons";
-import { rgbaColor } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 
 const EditProfileScreen = () => {
+	const router = useRouter();
 	const [name, setName] = useState("John Doe");
 	const [username, setUsername] = useState("john");
 	const [bio, setBio] = useState(
 		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do",
 	);
-	const [instagramLink, setInstagramLink] = useState("");
-	const [twitterLink, setTwitterLink] = useState("");
+	const [instagramLink, setInstagramLink] = useState("instagram.com/john");
+	const [twitterLink, setTwitterLink] = useState("twitter.com/john");
 	const [genres, setGenres] = useState([
 		"Pop",
 		"Hip-Hop",
@@ -32,18 +32,41 @@ const EditProfileScreen = () => {
 		"Classical",
 		"Rock",
 	]);
+	const [favoriteSongsData, setFavoriteSongsData] = useState([
+		{
+			songTitle: "Don't Smile At Me",
+			artist: "Billie Eilish",
+			duration: "5:33",
+			albumArt: "https://example.com/path-to-album-art1.jpg",
+		},
+		{
+			songTitle: "Blinding Lights",
+			artist: "The Weekend",
+			duration: "3:20",
+			albumArt: "https://example.com/path-to-album-art2.jpg",
+		},
+		{
+			songTitle: "Shape of You",
+			artist: "Ed Sheeran",
+			duration: "4:24",
+			albumArt: "https://example.com/path-to-album-art3.jpg",
+		},
+		// Add more songs as needed
+	]);
 	const [favoriteSongs, setFavoriteSongs] = useState([]);
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
 	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
+	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 
 	const dialogs = {
 		name: setNameDialogVisible,
 		username: setUsernameDialogVisible,
 		bio: setBioDialogVisible,
 		photo: setPhotoDialogVisible,
+		link: setLinkDialogVisible,
 	};
 
 	const setters = {
@@ -76,6 +99,14 @@ const EditProfileScreen = () => {
 		setGenres(genres.filter((genre) => genre !== genreToRemove));
 	};
 
+	const removeSong = (index) => {
+    setFavoriteSongsData(prevSongs => {
+      const updatedSongs = [...prevSongs];
+      updatedSongs.splice(index, 1);
+      return updatedSongs;
+    });
+  };
+
 	// Function to handle saving profile
 	const saveProfile = () => {
 		// Logic to save profile data
@@ -92,7 +123,7 @@ const EditProfileScreen = () => {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
-					<TouchableOpacity onPress={() => navigation.navigate("ProfilePage")}>
+					<TouchableOpacity onPress={() => router.navigate("ProfilePage")}>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
@@ -147,7 +178,7 @@ const EditProfileScreen = () => {
 					</TouchableOpacity>
 					<EditDialog
 						initialText={username}
-            maxLines={1}
+						maxLines={1}
 						value="username"
 						visible={isUsernameDialogVisible}
 						onClose={() => setUsernameDialogVisible(false)}
@@ -166,7 +197,7 @@ const EditProfileScreen = () => {
 					<EditDialog
 						initialText={bio}
 						value="bio"
-            isBio={true}
+						isBio={true}
 						visible={isBioDialogVisible}
 						onClose={() => setBioDialogVisible(false)}
 						onSave={handleSave}
@@ -178,7 +209,6 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Social</Text>
 				</View>
 				<View style={styles.listItem}>
-					<Text style={styles.subTitle}>instagram.com/john</Text>
 					<TouchableOpacity
 						onPress={() => showEditDialog("Instagram Link", setInstagramLink)}
 						style={styles.editButton}
@@ -186,12 +216,28 @@ const EditProfileScreen = () => {
 						<Text>{instagramLink}</Text>
 					</TouchableOpacity>
 				</View>
-				{/* <View style={styles.listItem}>
-          <Text style={styles.subTitle}>Twitter</Text>
-          <TouchableOpacity onPress={() => showEditDialog('Twitter Link', setTwitterLink)} style={styles.editButton}>
-            <Text>{twitterLink}</Text>
-          </TouchableOpacity>
-        </View> */}
+				<View style={styles.listItem}>
+					<TouchableOpacity
+						onPress={() => showEditDialog("Twitter Link", setTwitterLink)}
+						style={styles.editButton}
+					>
+						<Text>{twitterLink}</Text>
+					</TouchableOpacity>
+				</View>
+				<View style={styles.listItem}>
+					<TouchableOpacity
+						onPress={() => showEditDialog("Twitter Link", setTwitterLink)}
+						style={styles.editButton}
+					>
+						<Text style={{ fontWeight: 600 }}>Add link</Text>
+					</TouchableOpacity>
+					<EditDialog
+						value="link"
+						visible={isLinkDialogVisible}
+						onClose={() => setLinkDialogVisible(false)}
+						onSave={handleSave}
+					/>
+				</View>
 				{/* Genres */}
 				<View style={styles.divider} />
 				<View style={styles.listItem}>
@@ -223,38 +269,19 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Favorite Songs</Text>
 				</View>
-				<View style={styles.container1}>
-					<View style={styles.playingContainer}>
-						<View style={styles.albumArt}></View>
-						<View style={styles.detailsContainer}>
-							<Text style={styles.songTitle}>Don't Smile At Me</Text>
-							<Text style={styles.artist}>Billie Eilish</Text>
-						</View>
-						<Text style={styles.duration}>5:33</Text>
-						<MaterialIcons
-							name="more-horiz"
-							size={24}
-							color="black"
-							style={styles.moreIcon}
+				<ScrollView>
+					{favoriteSongsData.map((song, index) => (
+						<FavoriteSongs
+							key={index}
+							songTitle={song.songTitle}
+							artist={song.artist}
+							duration={song.duration}
+							albumArt={song.albumArt}
+              toEdit={true}
+							onPress={() => removeSong(index)}              
 						/>
-					</View>
-				</View>
-				<View style={styles.container1}>
-					<View style={styles.playingContainer}>
-						<View style={styles.albumArt}></View>
-						<View style={styles.detailsContainer}>
-							<Text style={styles.songTitle}>Don't Smile At Me</Text>
-							<Text style={styles.artist}>Billie Eilish</Text>
-						</View>
-						<Text style={styles.duration}>5:33</Text>
-						<MaterialIcons
-							name="more-horiz"
-							size={24}
-							color="black"
-							style={styles.moreIcon}
-						/>
-					</View>
-				</View>
+					))}
+				</ScrollView>
 				<View
 					style={{
 						flexDirection: "row",
@@ -290,47 +317,10 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 
-	//favourite songs
-	container1: {
-		marginBottom: 20,
-	},
 	title: {
 		fontSize: 16,
 		fontWeight: "700",
 		paddingBottom: 10,
-	},
-	playingContainer: {
-		width: 310,
-		flexDirection: "row",
-		alignItems: "center",
-		paddingHorizontal: 0,
-		marginTop: 10, // Adjusted marginTop for space
-		paddingVertical: 10, // Added paddingVertical for space
-	},
-	albumArt: {
-		width: 57,
-		height: 57,
-		borderRadius: 12,
-		backgroundColor: "rgba(158, 171, 184, 1)",
-		marginRight: 16,
-	},
-	detailsContainer: {
-		paddingRight: 40,
-	},
-	songTitle: {
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	artist: {
-		fontSize: 12,
-		fontWeight: "400",
-		marginTop: 5,
-	},
-	duration: {
-		marginLeft: 10,
-	},
-	moreIcon: {
-		marginLeft: 30,
 	},
 
 	//stuff
@@ -359,7 +349,7 @@ const styles = StyleSheet.create({
 	listItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: 20,
+		marginTop: 10,
 	},
 	listItemTitle: {
 		fontWeight: "bold",
