@@ -9,7 +9,7 @@ import {
 	Button,
 	ScrollView,
 } from "react-native";
-import { useLocalSearchParams, useNavigation } from "expo-router"; // Import useNavigation hook
+import { useRouter } from 'expo-router';
 import NowPlaying from "../components/NowPlaying";
 import BioSection from "../components/BioSection";
 import GenreList from "../components/GenreList";
@@ -18,6 +18,7 @@ import FavoriteSongs from "../components/FavoriteSong";
 // import { Room } from '../components/models/Room';
 
 const ProfileScreen: React.FC = () => {
+	const router = useRouter();
 	const favoriteRooms = [
 		{
 			roomName: "Room 1",
@@ -134,15 +135,19 @@ const ProfileScreen: React.FC = () => {
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
 				</View>
-				<Text style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}>
-					instagram.com/john
-				</Text>
+				<TouchableOpacity>
+					<Text
+						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
+					>
+						instagram.com/john
+					</Text>
+				</TouchableOpacity>
 				<View
 					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
 				>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => navigation.navigate("EditProfilePage")}
+						onPress={() => router.navigate("EditProfilePage")}
 					>
 						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
@@ -165,7 +170,7 @@ const ProfileScreen: React.FC = () => {
 					<GenreList items={genres}></GenreList>
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
-                <Text style={styles.title}>Favorite Songs</Text>
+					<Text style={styles.title}>Favorite Songs</Text>
 					{favoriteSongsData.slice(0, 2).map((song, index) => (
 						<FavoriteSongs
 							key={index}

@@ -26,7 +26,7 @@ const FavoriteSongs = ({ songTitle, artist, duration, albumArt='', toEdit=false,
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    // marginBottom: 10,
   },
   title: {
     fontSize: 16,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 0,
     marginTop: 10, // Adjusted marginTop for space
-    paddingVertical: 10, // Added paddingVertical for space
+    paddingBottom: 10, // Added paddingVertical for space
   },
   albumArt: {
     width: 57,
