@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
+import UserPool from '../services/UserPool';
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -19,15 +20,24 @@ const RegisterScreen: React.FC = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailError, setEmailError] = useState(true);
 
   const router = useRouter();
 
   const navigateToLogin = () => {
+
     router.navigate("/screens/LoginScreen");
+  };
+
+  const validateEmail = (email: string) => {
+    // user regex to check if email is valid
+    const re: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
   const handleRegister = () => {
     // Check if passwords match
+    console.log(emailOrUsername, password, confirmPassword);
     if (password !== confirmPassword) {
       Alert.alert(
         "Password Mismatch",
@@ -81,7 +91,10 @@ const RegisterScreen: React.FC = () => {
           <TextInput
             style={styles.input}
             value={emailOrUsername}
-            onChangeText={setEmailOrUsername}
+            onChangeText={() => {
+              setEmailOrUsername(emailOrUsername);
+              setEmailError(!validateEmail(emailOrUsername));
+            }}
             placeholder="Enter your email or username"
           />
         </View>
