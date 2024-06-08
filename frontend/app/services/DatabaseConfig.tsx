@@ -1,6 +1,7 @@
 // connect to aws rds and write a postgresql query to insert the user into the database
 // import rds from 'rds';
-const { Pool } = require('pg');
+import pg from 'pg';
+const { Pool } = pg;
 
 const pool = new Pool({
   user: 'postgres',

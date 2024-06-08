@@ -12,7 +12,6 @@ import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from '../services/UserPool';
-import { CognitoUser, CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -91,23 +90,26 @@ const RegisterScreen: React.FC = () => {
         { cancelable: false }
       );
       return;
-    }; 
+    };
 
     // aws cognito signup with email or username and password
+    let username = emailOrUsername;
+    let attributes = [];
 
     // If the input is an email, use a non-email username and add the email as an attribute
-
-    const attributes = [
-      new CognitoUserAttribute({
-        Name: 'email',
-        Value: emailOrUsername
-      }),
-      new CognitoUserAttribute({
-        Name: 'preferred_username',
-        Value: username
-      })
-    ];
-  
+    if (validateEmail(emailOrUsername)) {
+      // username = generateUniqueUsername(); // replace this with your own function
+      attributes = [
+        {
+          Name: 'email',
+          Value: emailOrUsername
+        },
+        {
+          Name: 'preferred_username',
+          Value: username
+        }
+      ];
+    }
     console.log(username, password, attributes);
     UserPool.signUp(username, password, attributes, [], (err, data) => {
       if (err) {
