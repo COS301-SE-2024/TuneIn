@@ -22,6 +22,7 @@
     "expo-router": "^3.5.15",
     "expo-status-bar": "~1.12.1",
     "nativewind": "^2.0.11",
+    "pg": "^8.12.0",
     "postcss": "^8.4.38",
     "react": "^18.2.0",
     "react-dom": "18.2.0",

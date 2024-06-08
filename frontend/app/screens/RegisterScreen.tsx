@@ -12,33 +12,55 @@ import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from '../services/UserPool';
+import { CognitoUser, CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
   const [obscureTextConfirm, setObscureTextConfirm] = useState(true);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [username, setUsername] = useState(""); // [username, setUsername
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState(true);
 
   const router = useRouter();
 
+
   const navigateToLogin = () => {
 
     router.navigate("/screens/LoginScreen");
   };
 
+  const generateUniqueUsername = () => {
+    // generate a unique username
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
   const validateEmail = (email: string) => {
     // user regex to check if email is valid
-    const re: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // use email regex to check if email is valid
+    const re: RegExp = /\S+@\S+\.\S+/;
+    console.log(re.test(email), email);
     return re.test(email);
   };
 
   const handleRegister = () => {
     // Check if passwords match
     console.log(emailOrUsername, password, confirmPassword);
+    if (password.length < 8) {
+      console.error("Password too short");
+      Alert.alert(
+        "Password too short",
+        "Password should be at least 8 characters long.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
     if (password !== confirmPassword) {
+      // alert("Password Mismatch");
+      console.error("Password Mismatch");
       Alert.alert(
         "Password Mismatch",
         "The passwords do not match. Please try again.",
@@ -50,6 +72,7 @@ const RegisterScreen: React.FC = () => {
 
     // Check if terms are accepted
     if (!acceptTerms) {
+      console.error("Terms and Conditions not accepted");
       Alert.alert(
         "Terms and Conditions",
         "You need to accept the terms and conditions to register.",
@@ -59,10 +82,58 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
+    if(emailError){
+      console.error("Invalid Email");
+      Alert.alert(
+        "Invalid Email",
+        "Please enter a valid email address",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }; 
+
+    // aws cognito signup with email or username and password
+
+    // If the input is an email, use a non-email username and add the email as an attribute
+
+    const attributes = [
+      new CognitoUserAttribute({
+        Name: 'email',
+        Value: emailOrUsername
+      }),
+      new CognitoUserAttribute({
+        Name: 'preferred_username',
+        Value: username
+      })
+    ];
+  
+    console.log(username, password, attributes);
+    UserPool.signUp(username, password, attributes, [], (err, data) => {
+      if (err) {
+        console.error(err);
+        Alert.alert(
+          "Error",
+          err.message,
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+        return;
+      }
+      console.log(data);
+      Alert.alert(
+        "Success",
+        "Please check your email for a verification link.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+    });
+
     // Check if email is verified
     const isEmailVerified = false; // Change to true if email is verified
 
     if (isEmailVerified) {
+      console.log("Email Verified");
       // Implement register functionality here
       router.navigate("/screens/Login");
     } else {
@@ -86,16 +157,27 @@ const RegisterScreen: React.FC = () => {
       </View>
       <Text style={styles.title}>Join the Fastest Growing Listening Community</Text>
       <View style={styles.form}>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Email or Username</Text>
+      <View style={styles.inputWrapper}>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
             value={emailOrUsername}
-            onChangeText={() => {
-              setEmailOrUsername(emailOrUsername);
-              setEmailError(!validateEmail(emailOrUsername));
+            onChangeText={(text) => {
+              setUsername(text);
             }}
-            placeholder="Enter your email or username"
+            placeholder="Create a new username"
+          />
+        </View>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={emailOrUsername}
+            onChangeText={(text) => {
+              setEmailOrUsername(text);
+              setEmailError(!validateEmail(text));
+            }}
+            placeholder="Enter your email"
           />
         </View>
         <View style={styles.inputWrapper}>
