@@ -3,7 +3,6 @@ import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { User } from "aws-sdk/clients/budgets";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
@@ -75,7 +74,7 @@ export class UsersController {
   */
 	@Get()
 	@ApiTags("users")
-	getUserInfo() : UserDto {
+	getUserInfo(): UserDto {
 		return this.usersService.getUserInfo();
 	}
 
@@ -87,13 +86,13 @@ export class UsersController {
   */
 	@Patch()
 	@ApiTags("users")
-	updateUserProfile(@Body() updateUserDto: UpdateUserDto) : UserDto {
+	updateUserProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
 		return this.usersService.updateUserProfile(updateUserDto);
 	}
 
 	@Put()
 	@ApiTags("users")
-	updateProfile(@Body() updateUserDto: UpdateUserDto) : UserDto {
+	updateProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
 		return this.usersService.updateProfile(updateUserDto);
 	}
 
@@ -105,7 +104,7 @@ export class UsersController {
   */
 	@Get("rooms")
 	@ApiTags("users")
-	getUserRooms() : RoomDto[] {
+	getUserRooms(): RoomDto[] {
 		return this.usersService.getUserRooms();
 	}
 
@@ -117,7 +116,7 @@ export class UsersController {
   */
 	@Post("rooms")
 	@ApiTags("users")
-	createRoom(@Body() createRoomDto: CreateRoomDto) : RoomDto {
+	createRoom(@Body() createRoomDto: CreateRoomDto): RoomDto {
 		return this.usersService.createRoom(createRoomDto);
 	}
 
@@ -129,7 +128,7 @@ export class UsersController {
   */
 	@Get("rooms/recent")
 	@ApiTags("users")
-	getRecentRooms() : RoomDto[] {
+	getRecentRooms(): RoomDto[] {
 		return this.usersService.getRecentRooms();
 	}
 
@@ -141,7 +140,7 @@ export class UsersController {
   */
 	@Get("rooms/foryou")
 	@ApiTags("users")
-	getRecommendedRooms() : RoomDto[] {
+	getRecommendedRooms(): RoomDto[] {
 		return this.usersService.getRecommendedRooms();
 	}
 
@@ -153,7 +152,7 @@ export class UsersController {
   */
 	@Get("friends")
 	@ApiTags("users")
-	getUserFriends() : UserProfileDto[] {
+	getUserFriends(): UserProfileDto[] {
 		return this.usersService.getUserFriends();
 	}
 
@@ -165,7 +164,7 @@ export class UsersController {
   */
 	@Get("followers")
 	@ApiTags("users")
-	getFollowers() : UserProfileDto[] {
+	getFollowers(): UserProfileDto[] {
 		return this.usersService.getFollowers();
 	}
 
@@ -177,7 +176,7 @@ export class UsersController {
   */
 	@Get("following")
 	@ApiTags("users")
-	getFollowing() : UserProfileDto[] {
+	getFollowing(): UserProfileDto[] {
 		return this.usersService.getFollowing();
 	}
 }

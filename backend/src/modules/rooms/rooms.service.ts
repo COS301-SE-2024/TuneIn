@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
+import { UserProfileDto } from "../profile/dto/userprofile.dto";
 
 @Injectable()
 export class RoomsService {
@@ -40,7 +41,7 @@ export class RoomsService {
 		return false;
 	}
 
-	getRoomUsers(room_id: string): ProfileDto[] {
+	getRoomUsers(room_id: string): UserProfileDto[] {
 		// TODO: Implement logic to get room users
 		return [];
 	}

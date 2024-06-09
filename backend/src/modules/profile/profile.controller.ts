@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Body } from "@nestjs/common";
+import { Controller, Get, Post, Put, Patch, Body, Param } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
