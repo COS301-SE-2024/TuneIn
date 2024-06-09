@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from 'expo-router';
+import UserPool from '../services/UserPool';
 
 const EditProfile: React.FC = () => {
   const navigation = useNavigation();
