@@ -3,60 +3,10 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-
-//based on
-/*
-import { users } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
-
-export class CreateUserDto extends users {
-  @ApiProperty()
-  user_id: string;
-
-  @ApiProperty()
-  username: string;
-
-  @ApiProperty()
-  bio: string;
-
-  @ApiProperty()
-  profile_picture: string;
-
-  @ApiProperty()
-  activity: any;
-
-  @ApiProperty()
-  preferences: any;
-
-  @ApiProperty()
-  bookmark: any[];
-
-  @ApiProperty()
-  follows_follows_followeeTousers: any[];
-
-  @ApiProperty()
-  follows_follows_followerTousers: any[];
-
-  @ApiProperty()
-  friends_friends_friend1Tousers: any[];
-
-  @ApiProperty()
-  friends_friends_friend2Tousers: any[];
-
-  @ApiProperty()
-  message: any[];
-
-  @ApiProperty()
-  participate: any[];
-
-  @ApiProperty()
-  private_message: any[];
-
-  @ApiProperty()
-  room: any[];
-}
-
-*/
+import { UserDto } from "./dto/user.dto";
+import { CreateRoomDto } from "../rooms/dto/createroomdto";
+import { UserProfileDto } from "../profile/dto/userprofile.dto";
+import { RoomDto } from "../rooms/dto/room.dto";
 
 @Injectable()
 export class UsersService {
@@ -104,5 +54,55 @@ export class UsersService {
 		return this.prisma.users.delete({
 			where: { user_id: user_id },
 		});
+	}
+
+	getUserInfo(): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	updateUserProfile(updateUserDto: UpdateUserDto): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	updateProfile(updateUserDto: UpdateUserDto): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	getUserRooms(): RoomDto[] {
+		// implementation goes here
+		return [];
+	}
+
+	createRoom(createRoomDto: CreateRoomDto): RoomDto {
+		// implementation goes here
+		return new RoomDto();
+	}
+
+	getRecentRooms(): RoomDto[] {
+		// implementation goes here
+		return [];
+	}
+
+	getRecommendedRooms(): RoomDto[] {
+		// implementation goes here
+		return [];
+	}
+
+	getUserFriends(): UserProfileDto[] {
+		// implementation goes here
+		return [];
+	}
+
+	getFollowers(): UserProfileDto[] {
+		// implementation goes here
+		return [];
+	}
+
+	getFollowing(): UserProfileDto[] {
+		// implementation goes here
+		return [];
 	}
 }
