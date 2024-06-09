@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { Prisma } from "@prisma/client";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 //based on
 /*
@@ -60,48 +60,49 @@ export class CreateUserDto extends users {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user: Prisma.usersCreateInput = {
-      user_id: createUserDto.user_id,
-      username: createUserDto.username,
-      bio: createUserDto.bio,
-      profile_picture: createUserDto.profile_picture,
-      activity: createUserDto.activity,
-      preferences: createUserDto.preferences,
-    };
-    return this.prisma.users.create({ data: user });
-  }
+	create(createUserDto: CreateUserDto) {
+		const user: Prisma.usersCreateInput = {
+			user_id: createUserDto.user_id,
+			username: createUserDto.username,
+			bio: createUserDto.bio,
+			profile_picture: createUserDto.profile_picture,
+			activity: createUserDto.activity,
+			preferences: createUserDto.preferences,
+		};
+		return this.prisma.users.create({ data: user });
+	}
 
-  findAll() {
-    return this.prisma.users.findMany();
-  }
+	findAll() {
+		return this.prisma.users.findMany();
+	}
 
-  findOne(user_id: string) {
-    return this.prisma.users.findUnique({
-      where: { user_id: user_id },
-    });
-  }
+	findOne(user_id: string) {
+		return this.prisma.users.findUnique({
+			where: { user_id: user_id },
+		});
+	}
 
-  update(user_id: string, updateUserDto: UpdateUserDto) {
-    const user: Prisma.usersUpdateInput = {
-      user_id: updateUserDto.user_id,
-      username: updateUserDto.username,
-      bio: updateUserDto.bio,
-      profile_picture: updateUserDto.profile_picture,
-      activity: updateUserDto.activity,
-      preferences: updateUserDto.preferences,
-    };
-    return this.prisma.users.update({
-      where: { user_id: user_id },
-      data: user,
-    });
-  }
+	update(user_id: string, updateUserDto: UpdateUserDto) {
+    console.log(updateUserDto);
+		const user: Prisma.usersUpdateInput = {};
+		if (updateUserDto.username) user.username = updateUserDto.username;
+		if (updateUserDto.bio) user.bio = updateUserDto.bio;
+		if (updateUserDto.profile_picture)
+			user.profile_picture = updateUserDto.profile_picture;
+		if (updateUserDto.activity) user.activity = updateUserDto.activity;
+		if (updateUserDto.preferences) user.preferences = updateUserDto.preferences;
+    console.log(user);
+		return this.prisma.users.update({
+			where: { user_id: user_id },
+			data: user,
+		});
+	}
 
-  remove(user_id: string) {
-    return this.prisma.users.delete({
-      where: { user_id: user_id },
-    });
-  }
+	remove(user_id: string) {
+		return this.prisma.users.delete({
+			where: { user_id: user_id },
+		});
+	}
 }
