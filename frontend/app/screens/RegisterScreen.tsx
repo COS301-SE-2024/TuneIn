@@ -34,14 +34,11 @@ const RegisterScreen: React.FC = () => {
 
   const validateEmail = (email: string) => {
     const re: RegExp = /\S+@\S+\.\S+/;
-    console.log(re.test(email), email);
     return re.test(email);
   };
 
   const handleRegister = () => {
-    console.log(email, password, confirmPassword);
     if (password.length < 8) {
-      console.error("Password too short");
       Alert.alert(
         "Password too short",
         "Password should be at least 8 characters long.",
@@ -51,7 +48,6 @@ const RegisterScreen: React.FC = () => {
       return;
     }
     if (password !== confirmPassword) {
-      console.error("Password Mismatch");
       Alert.alert(
         "Password Mismatch",
         "The passwords do not match. Please try again.",
@@ -62,7 +58,6 @@ const RegisterScreen: React.FC = () => {
     }
 
     if (!acceptTerms) {
-      console.error("Terms and Conditions not accepted");
       Alert.alert(
         "Terms and Conditions",
         "You need to accept the terms and conditions to register.",
@@ -73,7 +68,6 @@ const RegisterScreen: React.FC = () => {
     }
 
     if (emailError) {
-      console.error("Invalid Email");
       Alert.alert(
         "Invalid Email",
         "Please enter a valid email address",
@@ -99,7 +93,6 @@ const RegisterScreen: React.FC = () => {
       ];
     }
 
-    console.log(username, password, attributes);
     UserPool.signUp(username, password, attributes, [], (err, data) => {
       if (err) {
         Alert.alert(

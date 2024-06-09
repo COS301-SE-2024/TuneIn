@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState} from "react";
+import { View, Text, TextInput, TouchableOpacity, ScrollView,Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { CognitoUser } from "amazon-cognito-identity-js";
@@ -13,16 +13,23 @@ const VerifyEmailScreen: React.FC = () => {
 
     const verifyCode = () => {
         const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-        console.log("Verifying email:", username);
         const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
         cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
             if (err) {
-                console.error(err);
-                // Handle error
+                Alert.alert(
+                    "Error",
+                    err.message,
+                    [{ text: "OK" }],
+                    { cancelable: false }
+                  );
                 return;
             }
-            console.log("Verification successful", result);
-            // Navigate to login screen or other appropriate action
+            Alert.alert(
+                "Success!",
+                "Verification successful",
+                [{ text: "OK" }],
+                { cancelable: false }
+              );
             navigateToLogin();
         });
     };
