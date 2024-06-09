@@ -8,7 +8,7 @@ import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) {}
 
-    //NOTE TO DEV:
+	//NOTE TO DEV:
 	/*
     add decorators to each of these paths like:
     @Post()

@@ -63,10 +63,7 @@ export class RoomsController {
     */
 	@Get(":room_id")
 	@ApiTags("rooms")
-	getRoomInfo(
-		@Param("room_id") room_id: string,
-		@Body() createRoomDto: CreateRoomDto,
-	): RoomDto {
+	getRoomInfo(@Param("room_id") room_id: string): RoomDto {
 		return this.roomsService.getRoomInfo(room_id);
 	}
 
