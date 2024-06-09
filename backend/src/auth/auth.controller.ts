@@ -1,31 +1,24 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import {
+	Controller,
+	Post,
+	Body,
+	HttpException,
+	HttpStatus,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
+import {
+	ApiBody,
+	ApiOperation,
+	ApiProperty,
+	ApiResponse,
+} from "@nestjs/swagger";
 
-/*
-{
-  "CodeDeliveryDetails": {
-    "AttributeName": "email",
-    "DeliveryMedium": "EMAIL",
-    "Destination": "t***@g***"
-  },
-  "UserConfirmed": false,
-  "UserSub": "311ce2e8-8041-70bd-0ab5-be97283ee182"
-}
-*/
-interface AWSCognitioAuthResponse {
-	CodeDeliveryDetails: {
-		AttributeName: string;
-		DeliveryMedium: string;
-		Destination: string;
-	};
-	UserConfirmed: boolean;
-	UserSub: string;
-}
-
-interface AuthBody {
+class AuthBody {
+	@ApiProperty()
 	username: string;
-	email: string;
-	AWSResponse: AWSCognitioAuthResponse;
+
+	@ApiProperty()
+	userCognitoSub: string;
 }
 
 @Controller("auth")
@@ -33,59 +26,95 @@ export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	@Post("login")
+	@ApiOperation({ summary: "Login in the API using Cognito" })
+	@ApiBody({ type: AuthBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: AuthBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
 	async login(@Body() authInfo: AuthBody) {
 		const users = await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);
 		if (!users) {
-			return { message: "Invalid credentials. No users on Cognito" };
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError01",
+				HttpStatus.UNAUTHORIZED,
+			);
 		}
+
 		if (!users.Users || users.Users.length === 0) {
-			return { message: "Invalid credentials. No users on Cognito" };
-		}
-
-		console.log(users.Users[0]);
-		console.log(users.Users[0].Attributes);
-
-		const a  = users.Users;
-		const b = a[0];
-		const c = b.Username;
-		const d = b.Attributes;
-		console.log("A",a);
-		console.log("B",b);
-		console.log("C",c);
-		console.log("D",d);
-		if (d && d !== undefined && d.length > 0){
-			const e = d.find(
-				(attribute) => attribute.Name === "email"
-			).Value;
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError02",
+				HttpStatus.UNAUTHORIZED,
+			);
 		}
 
 		//match the email address given with the email in the UserPool
-		const userMatch = null;
+		let userMatch = null;
+		let userEmail = "";
 		for (let i = 0; i < users.Users.length; i++) {
-			if (
-				users.Users[i].Attributes.find(
-					(attribute) => attribute.Name === "email"
-				).Value === authInfo.email
-			) {
-				userMatch = users.Users[i];
-				break;
+			if (!users.Users[i] || users.Users[i] === undefined) {
+				continue;
+			}
+			console.log("users.Users[i]", users.Users[i]);
+			const attrs = users.Users[i].Attributes;
+			console.log("attrs", attrs);
+			if (!attrs || attrs === undefined || attrs.length === 0) {
+				continue;
+			}
+
+			// if "email" is the Name of an attribute in users.Users[i].Attributes
+			if (attrs.find((attribute) => attribute.Name === "email")) {
+				const attr = attrs.find((attribute) => attribute.Name === "email");
+				if (!attr || attr === undefined) {
+					continue;
+				}
+				//if the userCognitoSub matches the UserSub in the UserPool
+				if (users.Users[i].Username === authInfo.userCognitoSub && attr.Value) {
+					userMatch = users.Users[i];
+					userEmail = attr.Value;
+					break;
+				}
 			}
 		}
-		
-		//const userCognitioID = user.Users[0].Attributes.find(
-		const userEmail = users.Users[0].Attributes.find(
-			(attribute) => attribute.Name === "email"
-		).Value;
+
+		if (userMatch === null || !userMatch) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError03",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		// add users to table
+		const successful: boolean = await this.authService.createUser(
+			authInfo.username,
+			userEmail,
+			authInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError04",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
 
 		const payload = {
-			sub: users.Users[0].Username,
-			username: users.Users[0].Attributes.find(
-				(attribute) => attribute.Name === "email"
-			).Value,
+			sub: authInfo.userCognitoSub,
+			username: authInfo.username,
+			email: userEmail,
 		};
-		}
-		return { message: "Login successful" };
+
+		//generate JWT token using payload
+		const token: string = await this.authService.generateJWT(payload);
+
+		//return the JWT as a string
+		return { token: token };
 	}
+
+	//TODO: Add a POST method to refresh an expired JWT token
+	//TODO: Add a POST method to logout a user
 }
