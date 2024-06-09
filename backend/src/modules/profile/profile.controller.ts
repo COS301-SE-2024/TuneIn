@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Put, Patch } from "@nestjs/common";
+import { Controller, Get, Post, Put, Patch, Body } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
+import { ProfileService } from "./profile.service";
 
 @Controller("profile")
 export class ProfileController {
+	constructor(private readonly profileService: ProfileService) {}
+
 	/*
     GET /profile
     gets profile info
@@ -12,8 +15,8 @@ export class ProfileController {
     */
 	@Get()
 	@ApiTags("profile")
-	getProfile() {
-        return this.profileService.getProfile();
+	getProfile(): UserProfileDto {
+		return this.profileService.getProfile();
 	}
 
 	/*
@@ -24,7 +27,7 @@ export class ProfileController {
     */
 	@Put()
 	@ApiTags("profile")
-	updateProfile() {
+	updateProfile(@Body() updateProfileDto: any): UserProfileDto {
 		return this.profileService.updateProfile();
 	}
 
@@ -36,7 +39,7 @@ export class ProfileController {
     */
 	@Patch()
 	@ApiTags("profile")
-	patchProfile() {
+	patchProfile(@Body() updateProfileDto: any): UserProfileDto {
 		return this.profileService.patchProfile();
 	}
 
@@ -48,7 +51,7 @@ export class ProfileController {
     */
 	@Get(":username")
 	@ApiTags("profile")
-	getProfileByUsername() {
+	getProfileByUsername(@Param("username") username: string): UserProfileDto {
 		return this.profileService.getProfileByUsername();
 	}
 
@@ -60,7 +63,7 @@ export class ProfileController {
     */
 	@Post(":username/follow")
 	@ApiTags("profile")
-	followUser() {
+	followUser(@Param("username") username: string): boolean {
 		return this.profileService.followUser();
 	}
 
@@ -72,7 +75,7 @@ export class ProfileController {
     */
 	@Post(":username/unfollow")
 	@ApiTags("profile")
-	unfollowUser() {
+	unfollowUser(@Param("username") username: string): boolean {
 		return this.profileService.unfollowUser();
 	}
 }
