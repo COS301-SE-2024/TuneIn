@@ -93,16 +93,12 @@ const RegisterScreen: React.FC = () => {
         new CognitoUserAttribute({
           Name: 'email',
           Value: email
-        },
-        {
-          Name: 'preferred_username',
-          Value: username
-        }
+        })
       ];
     }
 
     console.log(username, password, attributes);
-    UserPool.signUp(emailOrUsername, password, null, [], (err, data) => {
+    UserPool.signUp(email, password, null, [], (err, data) => {
       if (err) {
         console.error(err);
         Alert.alert(

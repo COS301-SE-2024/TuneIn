@@ -51,9 +51,6 @@ const LoginScreen: React.FC = () => {
 
   return (
     <ScrollView className="flex-1 p-4">
-      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
-        <MaterialIcons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
       <View className="items-center mb-10">
         {/* <Text style={styles.logoText}>Logo</Text> */}
       </View>
