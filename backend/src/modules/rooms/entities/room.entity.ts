@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { UserProfileDto } from "../../profile/dto/userprofile.dto";
-import { DateTime } from "luxon";
 import { SongInfoDto } from "./songinfo.dto";
 
 export class RoomDto {
@@ -28,11 +27,11 @@ export class RoomDto {
 	@ApiProperty()
 	is_scheduled: boolean;
 
-	@ApiProperty({ type: DateTime })
-	start_date: DateTime;
+	@ApiProperty({ type: Date })
+	start_date: Date;
 
-	@ApiProperty({ type: DateTime })
-	end_date: DateTime;
+	@ApiProperty({ type: Date })
+	end_date: Date;
 
 	@ApiProperty()
 	language: string;

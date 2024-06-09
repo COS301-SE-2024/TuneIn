@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { DateTime } from "luxon";
 
 export class SongInfoDto {
 	@ApiProperty()
@@ -11,6 +10,6 @@ export class SongInfoDto {
 	@ApiProperty()
 	cover: string;
 
-	@ApiProperty({ type: DateTime })
-	start_time: DateTime;
+	@ApiProperty({ type: Date })
+	start_time: Date;
 }
