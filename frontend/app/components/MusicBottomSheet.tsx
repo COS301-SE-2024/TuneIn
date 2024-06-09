@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
 	View,
 	Image,
@@ -16,6 +16,10 @@ const MusicBottomSheet = ({ isVisible, onClose}) => {
     const ytMusicImg = "../assets/ytMusic.png"
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 	const [visible, setVisible] = useState(isVisible); // State to manage visibility
+
+	useEffect(() => {
+        setVisible(isVisible); // Update visibility state when prop changes
+    }, [isVisible]);
 
 	const handleOnClose = () => {
 		setVisible(false); // Set visibility to false

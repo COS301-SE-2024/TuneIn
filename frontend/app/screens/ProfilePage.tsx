@@ -13,8 +13,8 @@ import BioSection from "../components/BioSection";
 import GenreList from "../components/GenreList";
 import RoomCard from "../components/RoomCard";
 import FavoriteSongs from "../components/FavoriteSong";
-// import LinkBottomSheet from "../components/LinkBottomSheet";
-// import MusicBottomSheet from "../components/MusicBottomSheet";
+import LinkBottomSheet from "../components/LinkBottomSheet";
+import MusicBottomSheet from "../components/MusicBottomSheet";
 // import { Room } from '../components/models/Room';
 
 const ProfileScreen: React.FC = () => {
@@ -137,23 +137,35 @@ const ProfileScreen: React.FC = () => {
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
 				</View>
-				<TouchableOpacity onPress={() => setLinkDialogVisible(true)}>
+				<TouchableOpacity
+					onPress={() => {
+						console.log("Link button pressed"); // Add this line
+						console.log("Vsibility: " + isLinkDialogVisible)
+						setLinkDialogVisible(true);
+					}}
+				>
 					<Text
 						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
 					>
 						instagram.com/john
 					</Text>
-				</TouchableOpacity>	
+				</TouchableOpacity>
+				<LinkBottomSheet
+					isVisible={isLinkDialogVisible}
+					onClose={() => {
+						setLinkDialogVisible(false);
+					}}
+				/>
 				<View
 					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
 				>
-					{/* <TouchableOpacity
+					<TouchableOpacity
 						style={styles.button}
 						onPress={() => router.navigate("screens/EditProfilePage")}
 					>
 						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
-				</View> */}
+				</View>
 				<View style={{ paddingHorizontal: 20 }}>
 					<NowPlaying
 						title={favoriteSongsData[0].songTitle}
@@ -183,10 +195,10 @@ const ProfileScreen: React.FC = () => {
 							onPress={() => setMusicDialogVisible(true)}
 						/>
 					))}
-					{/* <MusicBottomSheet
+					<MusicBottomSheet
 					isVisible={isMusicDialogVisible}
 					onClose={() => setMusicDialogVisible(false)}
-				/> */}
+				/>
 				</View>
 				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
 					<Text style={styles.title}>Favorite Rooms</Text>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -9,9 +9,13 @@ import {
 	Animated,
 } from "react-native";
 
-const BottomSheet = ({ isVisible, onClose }) => {
+const LinkBottomSheet = ({ isVisible, onClose }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 	const [visible, setVisible] = useState(isVisible); // State to manage visibility
+
+	useEffect(() => {
+        setVisible(isVisible); // Update visibility state when prop changes
+    }, [isVisible]);
 
 	const handleOnClose = () => {
 		setVisible(false); // Set visibility to false
@@ -128,4 +132,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default BottomSheet;
+export default LinkBottomSheet;

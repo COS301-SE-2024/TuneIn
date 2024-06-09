@@ -107,23 +107,13 @@ const EditProfileScreen = () => {
     });
   };
 
-	// Function to handle saving profile
-	const saveProfile = () => {
-		// Logic to save profile data
-	};
-
-	// Function to show edit dialog
-	const showEditDialog = (field, controller, maxLines = 1) => {
-		// Logic to show edit dialog
-	};
-
 	const mockImage = require("../assets/MockProfilePic.jpeg");
 
 	return (
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
-					<TouchableOpacity onPress={() => router.navigate("ProfilePage")}>
+					<TouchableOpacity onPress={() => router.navigate("screens/ProfilePage")}>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
