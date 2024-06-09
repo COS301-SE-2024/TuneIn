@@ -1,0 +1,35 @@
+name: Confirm Permissions
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  allow_push_pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check User
+        id: check_user
+        run: |
+          allowed_users=("AvinashSingh786" "lkekana")
+          current_user="${{ github.actor }}"
+          allowed=false
+          for user in "${allowed_users[@]}"; do
+            if [ "$user" == "$current_user" ]; then
+              allowed=true
+              break
+            fi
+          done
+          echo "::set-output name=allow::${allowed}"
+
+      - name: Allow Push/Pull
+        if: steps.check_user.outputs.allow == 'false'
+        run: |
+          echo "User is not allowed to push/pull to/from main or develop branch."
+          exit 1
