@@ -10,7 +10,9 @@ const ApiTest: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Starting API call'); // Debugging log
         const response = await api.appControllerGetHello(); // Adjust method call based on your API
+        console.log('API call response:', response); // Debugging log
         setData(response);
       } catch (error) {
         console.error('Error fetching data:', error);
