@@ -1,9 +1,8 @@
 # from Jaden
-/profile (for self)
-/profile/{username} (for other users)
+## /profile (for self) or /profile/{username} (for other users)
 
 GET
-Profile Page:
+Profile Page (UserProfileDto)
 -Name
 -Username
 -Profile Picture
@@ -18,6 +17,9 @@ Profile Page:
 -Recently Visited Rooms
 
 PUT or PATCH
+input: UserProfileDto
+output: response code
+
 Edit Profile Page:
 -Profile Picture
 -Name
@@ -28,7 +30,11 @@ Edit Profile Page:
 -Favorite Songs
 - Favourite Rooms
 
-GET /room/{id}
+
+## GET /room/{id}
+input: id
+output: RoomDto
+
 Room Info:
 -Room Name
 -Song Name
@@ -37,18 +43,10 @@ Room Info:
 -Tags
 
 # From Nerina
-# Home API Endpoints
 
-GET /user/rooms/recent
-## Recent Rooms API Endpoint
-
-### Description
-This endpoint returns a JSON array containing data for recent rooms personalized for the user.
-
-### Endpoint
-- **URL:** `/api/recent_rooms`
-- **Method:** `POST`
-
+## POST /user/rooms (create room)
+input: RoomDto
+output: full RoomDto (with id)
 ### Request Parameters
 - **Headers:**
   - `Authorization: Bearer <token>` (optional, if using token-based authentication)
@@ -77,8 +75,9 @@ This endpoint returns a JSON array containing data for recent rooms personalized
 ]
 ```
 
-## Edit room details
-PUT /rooms/{id}
+## Edit room details (PUT /rooms/{id})
+input: id & RoomDto
+output: response code
 - **Query Parameters:**
   - `user_id` (required, they will be the owner of the room)
   - `room_id` (string, required): ID of the room
@@ -90,8 +89,7 @@ PUT /rooms/{id}
   - `photo` (string, optional): URL of the photo for the room
 
 
-## Get Song Info
-/room/songs/current
+## Get Song Info (GET /room/{id}/songs/current)
 ### Description
 This endpoint fetches the current song details being played in the room.
 
@@ -103,16 +101,68 @@ This endpoint fetches the current song details being played in the room.
 [
   {
     "song": {
-    "picture": "https://example.com/song_picture.jpg",
-    "name": "Song Name",
-    "artist": "Song Artist",
-    "current_position": "00:02:15"
-  }
+	    "picture": "https://example.com/song_picture.jpg",
+	    "name": "Song Name",
+	    "artist": "Song Artist",
+	    "current_position": "00:02:15"
+	  }
   },
   ...
 ]
 ```
 
+# From Linda
+## Get Recent Rooms (GET /user/rooms/recent)
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+### Response
+```json
+[
+  {
+    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "name": "Chill Vibes",
+    "description": "A description of the room goes here.",
+    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
+    "username": "User123",
+    "tags": ["Tag1", "Tag2", "Tag3"]
+  },
+  ...
+]
+```
+
+## Get Rooms for You (GET /users/rooms/foryou)
+
+### Description
+This endpoint returns a JSON array containing recommended rooms personalized for the user.
+
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+Returns array of RoomDto
+
+## Get Friends (GET /user/friends)
+### Description
+This endpoint returns a JSON array containing friends data personalized for the user.
+
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+Returns array of ProfileDto
+
+## My Rooms API Endpoint (GET /user/rooms)
+
+### Request Parameters
+- **Headers:**
+  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
+  
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+Returns array of RoomDto
+
+
+# Potentially for later
 ## Chat Messages
 
 ### Description
@@ -146,7 +196,7 @@ This endpoint manages the chat messages within a room, including fetching existi
   },
   ...
 ]
-```-
+```
 
 
 
@@ -171,84 +221,5 @@ This endpoint manages the chat messages within a room, including fetching existi
 }
   ...
 ]
-```-
-
-
-
-## User Profile Picture API Endpoint
-
-### Description
-This endpoint fetches the profile picture of the current user and displays it next to the input(message) text .
-
-### Endpoint
-- **URL:** `/api/user_profile_picture`
-- **Method:** `GET`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-
-- **Query Parameters:**
-  - `user_id` (required, they will be the person sending messages)
-
-### Response
-```json
-{
-  "profilePicture": "https://example.com/current_user_profile.jpg"
-},
 ```
 
-# From Linda
-# Home API Endpoints
-
-## Get Recent Rooms
-
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-### Response
-```json
-[
-  {
-    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "name": "Chill Vibes",
-    "description": "A description of the room goes here.",
-    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "username": "User123",
-    "tags": ["Tag1", "Tag2", "Tag3"]
-  },
-  ...
-]
-```
-
-## Get Rooms for You 
-
-### Description
-This endpoint returns a JSON array containing recommended rooms personalized for the user.
-
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-Returns array of RoomDto
-
-## Get Friends
-/user/friends
-### Description
-This endpoint returns a JSON array containing friends data personalized for the user.
-
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-Returns array of ProfileDto
-
-## My Rooms API Endpoint
-/user/rooms
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-Returns array of RoomDto
