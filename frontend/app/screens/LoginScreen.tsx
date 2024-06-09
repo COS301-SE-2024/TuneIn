@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
@@ -23,41 +22,43 @@ const LoginScreen: React.FC = () => {
     router.navigate("/screens/Home");
   };
 
-    const navigateToRegister = () => {
-        router.navigate("/screens/RegisterScreen");
-    };
+  const navigateToRegister = () => {
+    router.navigate("/screens/RegisterScreen");
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+    <ScrollView className="flex-1 p-4">
+      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
         <MaterialIcons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-      <View style={styles.logoContainer}>
+      <View className="items-center mb-10">
         {/* <Text style={styles.logoText}>Logo</Text> */}
       </View>
-      <Text style={styles.title}>Welcome Back to TuneIn</Text>
-      <View style={styles.form}>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Email or Username</Text>
+      <Text className="p-4 text-2xl font-bold text-center mb-10">
+        Welcome Back to TuneIn
+      </Text>
+      <View className="items-center w-full">
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Email or Username</Text>
           <TextInput
-            style={styles.input}
+            className="p-3 border-b border-gray-400 w-full"
             value={emailOrUsername}
             onChangeText={setEmailOrUsername}
             placeholder="Enter your email or username"
           />
         </View>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.inputContainer}>
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Password</Text>
+          <View className="flex-row items-center w-full">
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              className="p-3 flex-1 border-b border-gray-400"
               value={password}
               onChangeText={setPassword}
               placeholder="*********"
               secureTextEntry={obscureText}
             />
             <TouchableOpacity
-              style={styles.icon}
+              className="absolute right-3"
               onPress={() => setObscureText(!obscureText)}
             >
               <MaterialIcons
@@ -69,138 +70,39 @@ const LoginScreen: React.FC = () => {
           </View>
         </View>
         <TouchableOpacity
-          style={styles.forgotPassword}
+          className="self-end mr-10"
           onPress={() => {
             // Implement forgot password functionality here
           }}
         >
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          <Text className="text-black">Forgot Password?</Text>
         </TouchableOpacity>
-        <View style={styles.checkboxContainer}>
+        <View className="w-11/12 mb-5">
           <CheckBox
+            className="bg-transparent border-0 p-0"
             title="Remember Me"
             checked={rememberMe}
             onPress={() => setRememberMe(!rememberMe)}
-            containerStyle={styles.checkbox}
           />
         </View>
-        <TouchableOpacity style={styles.loginButton} onPress={navigateToHome}>
-          <Text style={styles.loginButtonText}>LOGIN</Text>
+        <TouchableOpacity
+          className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
+          onPress={navigateToHome}
+        >
+          <Text className="text-white text-lg font-bold">LOGIN</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.registerRedirect}
+          className="mt-5"
           onPress={navigateToRegister}
         >
-          <Text style={styles.registerText}>
+          <Text className="text-lg text-black">
             Don’t have an account?{" "}
-            <Text style={styles.registerLink}>Register Now</Text>
+            <Text className="font-bold">Register Now</Text>
           </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  backButton: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    zIndex: 1,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  title: {
-    padding: 10,
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  form: {
-    alignItems: "center",
-    width: "100%",
-  },
-  inputWrapper: {
-    width: "85%",
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  input: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderColor: "gray",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
-  icon: {
-    position: "absolute",
-    right: 10,
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginRight: "7.5%",
-  },
-  forgotPasswordText: {
-    color: "black",
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "85%",
-    marginBottom: 20,
-  },
-  checkbox: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    padding: 0,
-  },
-  loginButton: {
-    width: "85%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#8B8FA8",
-    borderRadius: 30,
-    marginBottom: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-  },
-  loginButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  registerRedirect: {
-    marginTop: 20,
-  },
-  registerText: {
-    fontSize: 16,
-    color: "black",
-  },
-  registerLink: {
-    fontWeight: "bold",
-  },
-});
 
 export default LoginScreen;
