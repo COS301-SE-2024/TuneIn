@@ -63,15 +63,16 @@ export class AuthService {
 	}
 
 	// eslint-disable-next-line prettier/prettier
-  async listUsers(userSub: string): Promise<AWS.CognitoIdentityServiceProvider.ListUsersResponse> {
+  async listUsers(): Promise<AWS.CognitoIdentityServiceProvider.ListUsersResponse> {
 		const params = {
 			UserPoolId: this.userPoolId,
 		};
 
 		try {
-			const response = await this.cognitoIdentityServiceProvider
+			const responsePromise = await this.cognitoIdentityServiceProvider
 				.listUsers(params)
 				.promise();
+			const response = await responsePromise;
 			return response;
 		} catch (error) {
 			throw new UnauthorizedException("Error listing users");
