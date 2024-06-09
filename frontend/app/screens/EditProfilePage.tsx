@@ -117,7 +117,7 @@ const EditProfileScreen = () => {
 		// Logic to show edit dialog
 	};
 
-	const mockImage = require("../Assets/MockProfilePic.jpeg");
+	const mockImage = require("../assets/MockProfilePic.jpeg");
 
 	return (
 		<View style={styles.container}>

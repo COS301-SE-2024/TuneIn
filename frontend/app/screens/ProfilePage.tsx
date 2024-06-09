@@ -5,16 +5,16 @@ import {
 	Image,
 	StyleSheet,
 	TouchableOpacity,
-	ActivityIndicator,
-	Button,
 	ScrollView,
 } from "react-native";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 import NowPlaying from "../components/NowPlaying";
 import BioSection from "../components/BioSection";
 import GenreList from "../components/GenreList";
 import RoomCard from "../components/RoomCard";
 import FavoriteSongs from "../components/FavoriteSong";
+// import LinkBottomSheet from "../components/LinkBottomSheet";
+// import MusicBottomSheet from "../components/MusicBottomSheet";
 // import { Room } from '../components/models/Room';
 
 const ProfileScreen: React.FC = () => {
@@ -72,7 +72,7 @@ const ProfileScreen: React.FC = () => {
 		name: "John Doe",
 		username: "john",
 		bio: "Hello, I'm John!",
-		profile_picture: require("../Assets/MockProfilePic.jpeg"),
+		profile_picture: require("../assets/MockProfilePic.jpeg"),
 		favoriteSongs: [{ title: "Song 1", artist: "Artist 1", duration: "3:45" }],
 		favoriteRooms: [
 			{
@@ -92,6 +92,8 @@ const ProfileScreen: React.FC = () => {
 		],
 	};
 	const genres = ["Pop", "Hip-Hop", "Jazz", "Classical", "Rock"];
+	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
@@ -135,23 +137,23 @@ const ProfileScreen: React.FC = () => {
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
 				</View>
-				<TouchableOpacity>
+				<TouchableOpacity onPress={() => setLinkDialogVisible(true)}>
 					<Text
 						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
 					>
 						instagram.com/john
 					</Text>
-				</TouchableOpacity>
+				</TouchableOpacity>	
 				<View
 					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
 				>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						style={styles.button}
-						onPress={() => router.navigate("EditProfilePage")}
+						onPress={() => router.navigate("screens/EditProfilePage")}
 					>
 						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
-				</View>
+				</View> */}
 				<View style={{ paddingHorizontal: 20 }}>
 					<NowPlaying
 						title={favoriteSongsData[0].songTitle}
@@ -178,9 +180,13 @@ const ProfileScreen: React.FC = () => {
 							artist={song.artist}
 							duration={song.duration}
 							albumArt={song.albumArt}
-							onPress={() => {}}
+							onPress={() => setMusicDialogVisible(true)}
 						/>
 					))}
+					{/* <MusicBottomSheet
+					isVisible={isMusicDialogVisible}
+					onClose={() => setMusicDialogVisible(false)}
+				/> */}
 				</View>
 				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
 					<Text style={styles.title}>Favorite Rooms</Text>
