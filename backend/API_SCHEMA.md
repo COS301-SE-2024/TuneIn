@@ -1,4 +1,8 @@
 # from Jaden
+/profile (for self)
+/profile/{username} (for other users)
+
+GET
 Profile Page:
 -Name
 -Username
@@ -13,13 +17,7 @@ Profile Page:
 -Favorite Rooms
 -Recently Visited Rooms
 
-Room Info:
--Room Name
--Song Name
--Artist Name
--Username
--Tags
-
+PUT or PATCH
 Edit Profile Page:
 -Profile Picture
 -Name
@@ -28,10 +26,20 @@ Edit Profile Page:
 -Social Media Links
 -Favorite Genres
 -Favorite Songs
+- Favourite Rooms
+
+GET /room/{id}
+Room Info:
+-Room Name
+-Song Name
+-Artist Name
+-Username
+-Tags
 
 # From Nerina
 # Home API Endpoints
 
+GET /user/rooms/recent
 ## Recent Rooms API Endpoint
 
 ### Description
@@ -69,19 +77,8 @@ This endpoint returns a JSON array containing data for recent rooms personalized
 ]
 ```
 
-## Room Details API Endpoint
-
-### Description
-This endpoint allows the user to update the details of an existing room or create new room details.
-
-### Endpoint
-- **URL:** `/api/room_details`
-- **Method:** `PUT`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
+## Edit room details
+PUT /rooms/{id}
 - **Query Parameters:**
   - `user_id` (required, they will be the owner of the room)
   - `room_id` (string, required): ID of the room
@@ -93,36 +90,11 @@ This endpoint allows the user to update the details of an existing room or creat
   - `photo` (string, optional): URL of the photo for the room
 
 
-### Response
-```json
-[
-  {
-    "room": {
-    "id": "room_id",
-    "name": "Updated Room Name",
-    "description": "Updated description of the room",
-    "language": "Spanish",
-    "explicit": true,
-    "nsfw": true,
-    "photo": "https://example.com/updated_photo.jpg"
-  },
-  ...
-]
-```
-
-## Fetch Song Info API Endpoint
-
+## Get Song Info
+/room/songs/current
 ### Description
 This endpoint fetches the current song details being played in the room.
 
-### Endpoint
-- **URL:** `/api/room_song_info`
-- **Method:** `GET`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
 - **Query Parameters:**
   - `room_id` (string, required): ID of the room
 
@@ -141,7 +113,7 @@ This endpoint fetches the current song details being played in the room.
 ]
 ```
 
-## Chat Messages API Endpoint
+## Chat Messages
 
 ### Description
 This endpoint manages the chat messages within a room, including fetching existing messages and sending new messages.
@@ -229,19 +201,8 @@ This endpoint fetches the profile picture of the current user and displays it ne
 # From Linda
 # Home API Endpoints
 
-## Recent Rooms API Endpoint
+## Get Recent Rooms
 
-### Description
-This endpoint returns a JSON array containing data for recent rooms personalized for the user.
-
-### Endpoint
-- **URL:** `/api/recent_rooms`
-- **Method:** `GET`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
 - **Query Parameters:**
   - `user_id` (optional, if using user ID based identification)
 
@@ -260,76 +221,28 @@ This endpoint returns a JSON array containing data for recent rooms personalized
 ]
 ```
 
-## Picks for You API Endpoint
+## Get Rooms for You 
 
 ### Description
 This endpoint returns a JSON array containing recommended rooms personalized for the user.
 
-### Endpoint
-- **URL:** `/api/picks_for_you`
-- **Method:** `GET`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
 - **Query Parameters:**
   - `user_id` (optional, if using user ID based identification)
 
-### Response
-```json
-[
-  {
-    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "name": "Chill Vibes",
-    "description": "A description of the room goes here.",
-    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "username": "User123",
-    "tags": ["Tag1", "Tag2", "Tag3"]
-  },
-  ...
-]
-```
+Returns array of RoomDto
 
-## Friends API Endpoint
-
+## Get Friends
+/user/friends
 ### Description
 This endpoint returns a JSON array containing friends data personalized for the user.
 
-### Endpoint
-- **URL:** `/api/friends`
-- **Method:** `GET`
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
 - **Query Parameters:**
   - `user_id` (optional, if using user ID based identification)
 
-### Response
-```json
-[
-  {
-    "profilePicture": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "name": "Friend 1"
-  },
-  {
-    "profilePicture": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "name": "Friend 2"
-  },
-  ...
-]
-```
+Returns array of ProfileDto
 
 ## My Rooms API Endpoint
-
-### Description
-This endpoint returns a JSON array containing data for rooms created by the user.
-
-### Endpoint
-- **URL:** `/api/my_rooms`
-- **Method:** `GET`
+/user/rooms
 
 ### Request Parameters
 - **Headers:**
@@ -338,27 +251,4 @@ This endpoint returns a JSON array containing data for rooms created by the user
 - **Query Parameters:**
   - `user_id` (optional, if using user ID based identification)
 
-### Response
-```json
-[
-  {
-    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "name": "My Room 1",
-    "description": "A description of my room goes here.",
-    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "username": "User123",
-    "tags": ["Tag1", "Tag2", "Tag3"],
-    "mine": true
-  },
-  {
-    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "name": "My Room 2",
-    "description": "A description of my room goes here.",
-    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "username": "User123",
-    "tags": ["Tag1", "Tag2", "Tag3"],
-    "mine": true
-  },
-  ...
-]
-```
+Returns array of RoomDto
