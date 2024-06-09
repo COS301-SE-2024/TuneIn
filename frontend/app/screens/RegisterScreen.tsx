@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -19,34 +18,28 @@ const RegisterScreen: React.FC = () => {
   const [obscureTextConfirm, setObscureTextConfirm] = useState(true);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [username, setUsername] = useState(""); // [username, setUsername
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState(true);
 
   const router = useRouter();
 
-
   const navigateToLogin = () => {
-
     router.navigate("/screens/LoginScreen");
   };
 
   const generateUniqueUsername = () => {
-    // generate a unique username
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
 
   const validateEmail = (email: string) => {
-    // user regex to check if email is valid
-    // use email regex to check if email is valid
     const re: RegExp = /\S+@\S+\.\S+/;
     console.log(re.test(email), email);
     return re.test(email);
   };
 
   const handleRegister = () => {
-    // Check if passwords match
     console.log(emailOrUsername, password, confirmPassword);
     if (password.length < 8) {
       console.error("Password too short");
@@ -59,7 +52,6 @@ const RegisterScreen: React.FC = () => {
       return;
     }
     if (password !== confirmPassword) {
-      // alert("Password Mismatch");
       console.error("Password Mismatch");
       Alert.alert(
         "Password Mismatch",
@@ -70,7 +62,6 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    // Check if terms are accepted
     if (!acceptTerms) {
       console.error("Terms and Conditions not accepted");
       Alert.alert(
@@ -82,7 +73,7 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    if(emailError){
+    if (emailError) {
       console.error("Invalid Email");
       Alert.alert(
         "Invalid Email",
@@ -91,7 +82,7 @@ const RegisterScreen: React.FC = () => {
         { cancelable: false }
       );
       return;
-    };
+    }
 
     // aws cognito signup with email or username and password
     // let username = emailOrUsername;
@@ -124,15 +115,12 @@ const RegisterScreen: React.FC = () => {
       );
     });
 
-    // Check if email is verified
-    const isEmailVerified = false; // Change to true if email is verified
+    const isEmailVerified = false;
 
     if (isEmailVerified) {
       console.log("Email Verified");
-      // Implement register functionality here
       router.navigate("/screens/Login");
     } else {
-      // Show alert if email is not verified
       Alert.alert(
         "Email Verification Required",
         "Please verify your email before you can continue.",
@@ -143,30 +131,32 @@ const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+    <ScrollView className="flex-1 p-4">
+      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
         <MaterialIcons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-      <View style={styles.logoContainer}>
-        {/* <Text style={styles.logoText}>Logo</Text> */}
+      <View className="items-center mb-10">
+        {/* Add Logo Component Here */}
       </View>
-      <Text style={styles.title}>Join the Fastest Growing Listening Community</Text>
-      <View style={styles.form}>
-      <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Username</Text>
+      <Text className="p-4 text-2xl font-bold text-center mb-10">
+        Join the Fastest Growing Listening Community
+      </Text>
+      <View className="items-center w-full">
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Username</Text>
           <TextInput
-            style={styles.input}
-            value={username}
+            className="p-3 border-b border-gray-400 w-full"
+            value={emailOrUsername}
             onChangeText={(text) => {
               setUsername(text);
             }}
             placeholder="Create a new username"
           />
         </View>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Email</Text>
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Email</Text>
           <TextInput
-            style={styles.input}
+            className="p-3 border-b border-gray-400 w-full"
             value={emailOrUsername}
             onChangeText={(text) => {
               setEmailOrUsername(text);
@@ -175,18 +165,18 @@ const RegisterScreen: React.FC = () => {
             placeholder="Enter your email"
           />
         </View>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.inputContainer}>
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Password</Text>
+          <View className="flex-row items-center w-full">
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              className="p-3 flex-1 border-b border-gray-400"
               value={password}
               onChangeText={setPassword}
               placeholder="*********"
               secureTextEntry={obscureText}
             />
             <TouchableOpacity
-              style={styles.icon}
+              className="absolute right-3"
               onPress={() => setObscureText(!obscureText)}
             >
               <MaterialIcons
@@ -197,18 +187,18 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Confirm Password</Text>
-          <View style={styles.inputContainer}>
+        <View className="w-11/12 mb-5">
+          <Text className="text-lg font-bold mb-2">Confirm Password</Text>
+          <View className="flex-row items-center w-full">
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              className="p-3 flex-1 border-b border-gray-400"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="*********"
               secureTextEntry={obscureTextConfirm}
             />
             <TouchableOpacity
-              style={styles.icon}
+              className="absolute right-3"
               onPress={() => setObscureTextConfirm(!obscureTextConfirm)}
             >
               <MaterialIcons
@@ -219,117 +209,29 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.checkboxContainer}>
+        <View className="w-11/12 mb-5">
           <CheckBox
+            className="bg-transparent border-0 p-0"
             title="Accept Terms and Conditions"
             checked={acceptTerms}
             onPress={() => setAcceptTerms(!acceptTerms)}
-            containerStyle={styles.checkbox}
           />
         </View>
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>REGISTER</Text>
+        <TouchableOpacity
+          className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
+          onPress={handleRegister}
+        >
+          <Text className="text-white text-lg font-bold">REGISTER</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.loginRedirect} onPress={navigateToLogin}>
-        <Text style={styles.loginRedirectText}>
-          Already have an account? <Text style={styles.loginLink}>Login</Text>
+      <TouchableOpacity className="mt-5" onPress={navigateToLogin}>
+        <Text className="text-lg text-black text-center">
+          Already have an account? <Text className="font-bold">Login</Text>
         </Text>
       </TouchableOpacity>
+      <View className="mb-20" />
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  backButton: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    zIndex: 1,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  title: {
-    padding: 10,
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  form: {
-    alignItems: "center",
-    width: "100%",
-  },
-  inputWrapper: {
-    width: "85%",
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  input: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderColor: "gray",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
-  icon: {
-    position: "absolute",
-    right: 10,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "85%",
-    marginBottom: 20,
-  },
-  checkbox: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    padding: 0,
-  },
-  registerButton: {
-    width: "85%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#8B8FA8",
-    borderRadius: 30,
-    marginBottom: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-  },
-  registerButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  loginRedirect: {
-    marginTop: 20,
-  },
-  loginRedirectText: {
-    fontSize: 16,
-    color: "black",
-    textAlign: "center",
-  },
-  loginLink: {
-    fontWeight: "bold",
-  },
-});
 
 export default RegisterScreen;
