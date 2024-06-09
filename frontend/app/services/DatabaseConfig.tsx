@@ -1,18 +1,16 @@
-// import pg from 'pg';
+// // connect to aws rds and write a postgresql query to insert the user into the database
+// // import rds from 'rds';
+// const { Pool } = require('pg');
 
-
-// const connection = {
-//   host: 'tunein-db.che0om0o6j54.af-south-1.rds.amazonaws.com',
-//   port: 5432,
-//   database: 'tunein-db',
+// const pool = new Pool({
 //   user: 'postgres',
-//   password: 'P6ppdnhCmw4nG8kU2a1K'
-// };
-
-// const pool = new pg.Pool(connection);
-// console.log('Connected to the database', pool);
-// pool.query(`SELECT * FROM users`, (err, res) => {
-//   console.log(err, res);
-//   pool.end();
+//   host: 'tunein-db.che0om0o6j54.af-south-1.rds.amazonaws.com',
+//   database: 'tunein-db',
+//   password: 'P6ppdnhCmw4nG8kU2a1K',
+//   port: '5432',
 // });
+
+// // console.log('Connected to the database', pool);
 // export default pool;
+
+

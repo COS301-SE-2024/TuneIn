@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from '../services/UserPool';
+import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -89,7 +90,7 @@ const RegisterScreen: React.FC = () => {
 
     if (validateEmail(email)) {
       attributes = [
-        {
+        new CognitoUserAttribute({
           Name: 'email',
           Value: email
         },
@@ -101,7 +102,7 @@ const RegisterScreen: React.FC = () => {
     }
 
     console.log(username, password, attributes);
-    UserPool.signUp(username, password, attributes, [], (err, data) => {
+    UserPool.signUp(emailOrUsername, password, null, [], (err, data) => {
       if (err) {
         console.error(err);
         Alert.alert(
