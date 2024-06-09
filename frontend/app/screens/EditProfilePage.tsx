@@ -3,7 +3,6 @@ import {
 	View,
 	Text,
 	Image,
-	TextInput,
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
@@ -25,6 +24,10 @@ const EditProfileScreen = () => {
 	);
 	const [instagramLink, setInstagramLink] = useState("instagram.com/john");
 	const [twitterLink, setTwitterLink] = useState("twitter.com/john");
+	const [links, setLinks] = useState([
+		"instagram.com/john",
+		"twitter.com/john",
+	]);
 	const [genres, setGenres] = useState([
 		"Pop",
 		"Hip-Hop",
@@ -62,11 +65,8 @@ const EditProfileScreen = () => {
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 
 	const handleImageUpload = (uri) => {
-		console.log("Image Upload1");
 		setProfilePic(uri);
-		console.log("Image Upload2");
 		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
-		console.log("Image Upload3");
 	};
 
 	const dialogs = {
@@ -101,6 +101,11 @@ const EditProfileScreen = () => {
 		} else {
 			console.error(`No setter function found for value: ${value}`);
 		}
+	};
+
+	const handleLinkAddition = (link) => {
+		setLinks(prevLinks => [...prevLinks, link]);
+		setLinkDialogVisible(false);
 	};
 
 	const removeGenre = (genreToRemove) => {
@@ -209,34 +214,26 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Social</Text>
 				</View>
+				{links.map((link, index) => (
+					<View key={index} style={styles.listItem}>
+						<TouchableOpacity onPress={() => {}} style={styles.editButton}>
+							<Text>{link}</Text>
+						</TouchableOpacity>
+					</View>
+				))}
 				<View style={styles.listItem}>
 					<TouchableOpacity
-						onPress={() => showEditDialog("Instagram Link", setInstagramLink)}
-						style={styles.editButton}
-					>
-						<Text>{instagramLink}</Text>
-					</TouchableOpacity>
-				</View>
-				<View style={styles.listItem}>
-					<TouchableOpacity
-						onPress={() => showEditDialog("Twitter Link", setTwitterLink)}
-						style={styles.editButton}
-					>
-						<Text>{twitterLink}</Text>
-					</TouchableOpacity>
-				</View>
-				<View style={styles.listItem}>
-					<TouchableOpacity
-						onPress={() => showEditDialog("Twitter Link", setTwitterLink)}
+						onPress={() => setLinkDialogVisible(true)}
 						style={styles.editButton}
 					>
 						<Text style={{ fontWeight: 600 }}>Add link</Text>
 					</TouchableOpacity>
 					<EditDialog
 						value="link"
+						title="Add Link"
 						visible={isLinkDialogVisible}
 						onClose={() => setLinkDialogVisible(false)}
-						onSave={handleSave}
+						onSave={handleLinkAddition}
 					/>
 				</View>
 				{/* Genres */}

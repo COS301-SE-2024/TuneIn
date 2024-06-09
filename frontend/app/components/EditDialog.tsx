@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 
-const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', isBio = false }) => {
+const EditDialog = ({ title = 'Edit', initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', isBio = false }) => {
     const [text, setText] = useState(initialText);
 
     useEffect(() => {
@@ -17,7 +17,7 @@ const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onS
         >
             <View style={styles.modalContainer}>
                 <View style={styles.dialogContainer}>
-                    <Text style={styles.dialogTitle}>Edit</Text>
+                    <Text style={styles.dialogTitle}>{title}</Text>
                     <TextInput
                         style={isBio ? styles.bioInput : styles.defaultInput}
                         multiline={true}
@@ -30,7 +30,12 @@ const EditDialog = ({ initialText = '', visible = false, onClose = () => {}, onS
                             <Text>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => onSave(text, value)}
+                            onPress={title === "Add Link" 
+                            ? () => {
+                                onSave(text);
+                                setText('');
+                              } 
+                            : () => onSave(text, value)}
                             style={styles.dialogButton}
                         >
                             <Text>Save</Text>
