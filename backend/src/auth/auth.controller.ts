@@ -7,18 +7,33 @@ export class AuthController {
 
 	@Post("login")
 	async login(@Body() authInfo: any) {
-		const user = await this.authService.listUsers(authInfo.userSub);
-		console.log(user);
-		console.log(user.Users);
-		if (!user) {
+		const users = await this.authService.listUsers(authInfo.userSub);
+		console.log(users);
+		console.log(users.Users);
+		if (!users) {
 			return { message: "Invalid credentials" };
 		}
-		if (!user.Users || user.Users.length === 0) {
+		if (!users.Users || users.Users.length === 0) {
 			return { message: "Invalid credentials" };
 		}
-		console.log(user.Users[0]);
-		console.log(user.Users[0].Attributes);
-		// Handle login logic, like generating JWT
+
+		console.log(users.Users[0]);
+		console.log(users.Users[0].Attributes);
+
+		//match the email address given with the email in the UserPool
+		
+		//const userCognitioID = user.Users[0].Attributes.find(
+		const userEmail = users.Users[0].Attributes.find(
+			(attribute) => attribute.Name === "email"
+		).Value;
+
+		const payload = {
+			sub: users.Users[0].Username,
+			username: users.Users[0].Attributes.find(
+				(attribute) => attribute.Name === "email"
+			).Value,
+		};
+		}
 		return { message: "Login successful" };
 	}
 }
