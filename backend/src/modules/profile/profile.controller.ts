@@ -8,6 +8,29 @@ import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) {}
 
+    //NOTE TO DEV:
+	/*
+    add decorators to each of these paths like:
+    @Post()
+    @ApiOperation({ summary: 'Create user' })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ status: 201, description: 'The record has been successfully created.', type: User })
+    @ApiResponse({ status: 403, description: 'Forbidden.' })
+    createUser(@Body() createUserDto: CreateUserDto) {
+      //...
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Retrieve user' })
+    @ApiParam({ name: 'id', required: true })
+    @ApiResponse({ status: 200, description: 'The found record', type: User })
+    getUser(@Param('id') id: string) {
+      //...
+    }
+
+    such that the API documentation is more detailed and informative for the next dev.
+  */
+
 	/*
     GET /profile
     gets profile info
