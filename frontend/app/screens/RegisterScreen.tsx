@@ -146,7 +146,7 @@ const RegisterScreen: React.FC = () => {
           <Text className="text-lg font-bold mb-2">Username</Text>
           <TextInput
             className="p-3 border-b border-gray-400 w-full"
-            value={emailOrUsername}
+            value={username}
             onChangeText={(text) => {
               setUsername(text);
             }}

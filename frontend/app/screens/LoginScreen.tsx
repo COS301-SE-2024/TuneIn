@@ -9,6 +9,8 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
+import UserPool from "../services/UserPool";
+import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -19,7 +21,28 @@ const LoginScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToHome = () => {
-    router.navigate("/screens/Home");
+    console.log(emailOrUsername, password);
+    const userData = {
+      Username: emailOrUsername,
+      Pool: UserPool
+    };
+    
+    const cognitoUser = new CognitoUser(userData);
+    
+    const authenticationData = {
+      Username: emailOrUsername,
+      Password: password
+    };
+    const authenticationDetails = new AuthenticationDetails(authenticationData);
+    cognitoUser.authenticateUser(authenticationDetails, {
+      onSuccess: function (result) {
+        console.log('access token + ' + result.getAccessToken().getJwtToken());
+        router.navigate("/screens/Home");
+      },
+      onFailure: function(err) {
+        console.error(err);
+      }
+    });
   };
 
   const navigateToRegister = () => {
