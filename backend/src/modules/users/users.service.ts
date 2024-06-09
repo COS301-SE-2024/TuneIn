@@ -85,7 +85,7 @@ export class UsersService {
 	}
 
 	update(user_id: string, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto);
+		console.log(updateUserDto);
 		const user: Prisma.usersUpdateInput = {};
 		if (updateUserDto.username) user.username = updateUserDto.username;
 		if (updateUserDto.bio) user.bio = updateUserDto.bio;
@@ -93,7 +93,7 @@ export class UsersService {
 			user.profile_picture = updateUserDto.profile_picture;
 		if (updateUserDto.activity) user.activity = updateUserDto.activity;
 		if (updateUserDto.preferences) user.preferences = updateUserDto.preferences;
-    console.log(user);
+		console.log(user);
 		return this.prisma.users.update({
 			where: { user_id: user_id },
 			data: user,
