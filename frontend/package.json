@@ -25,6 +25,7 @@
     "expo-navigation-bar": "~3.0.5",
     "expo-router": "^3.5.15",
     "expo-status-bar": "~1.12.1",
+    "isomorphic-fetch": "^3.0.0",
     "jest": "^29.4.0",
     "jest-expo": "~51.0.1",
     "nativewind": "^2.0.11",
