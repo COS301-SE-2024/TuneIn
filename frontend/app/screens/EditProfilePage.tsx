@@ -8,7 +8,7 @@ import {
 	ScrollView,
 	StyleSheet,
 } from "react-native";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 import EditGenreBubble from "../components/EditGenreBubble";
 import EditDialog from "../components/EditDialog";
 import FavoriteSongs from "../components/FavoriteSong";
@@ -61,6 +61,14 @@ const EditProfileScreen = () => {
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 
+	const handleImageUpload = (uri) => {
+		console.log("Image Upload1");
+		setProfilePic(uri);
+		console.log("Image Upload2");
+		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
+		console.log("Image Upload3");
+	};
+
 	const dialogs = {
 		name: setNameDialogVisible,
 		username: setUsernameDialogVisible,
@@ -100,20 +108,24 @@ const EditProfileScreen = () => {
 	};
 
 	const removeSong = (index) => {
-    setFavoriteSongsData(prevSongs => {
-      const updatedSongs = [...prevSongs];
-      updatedSongs.splice(index, 1);
-      return updatedSongs;
-    });
-  };
+		setFavoriteSongsData((prevSongs) => {
+			const updatedSongs = [...prevSongs];
+			updatedSongs.splice(index, 1);
+			return updatedSongs;
+		});
+	};
 
-	const mockImage = require("../assets/MockProfilePic.jpeg");
+	const [profilePic, setProfilePic] = useState(
+		require("../assets/MockProfilePic.jpeg"),
+	);
 
 	return (
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
-					<TouchableOpacity onPress={() => router.navigate("screens/ProfilePage")}>
+					<TouchableOpacity
+						onPress={() => router.navigate("screens/ProfilePage")}
+					>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
@@ -124,7 +136,7 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={mockImage}
+						source={profilePic}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 					<TouchableOpacity
@@ -134,10 +146,9 @@ const EditProfileScreen = () => {
 						<Text>Change Photo</Text>
 					</TouchableOpacity>
 					<PhotoSelect
-						visible={isPhotoDialogVisible}
+						isVisible={isPhotoDialogVisible}
 						onClose={() => setPhotoDialogVisible(false)}
-						onSave={handleSave}
-						photoUri={mockImage} // Pass the URI of the photo you want to display
+						onImageUpload={handleImageUpload} // Pass the URI of the photo you want to display
 					/>
 				</View>
 				{/* Name */}
@@ -267,8 +278,8 @@ const EditProfileScreen = () => {
 							artist={song.artist}
 							duration={song.duration}
 							albumArt={song.albumArt}
-              toEdit={true}
-							onPress={() => removeSong(index)}              
+							toEdit={true}
+							onPress={() => removeSong(index)}
 						/>
 					))}
 				</ScrollView>

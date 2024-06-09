@@ -1,42 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, StyleSheet, Modal, TouchableOpacity, Button } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from "expo-image-picker"; // Import Expo's image picker library
 
-const PhotoSelect = ({ initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', photoUri }) => {
-    const [text, setText] = useState(initialText);
+const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
+	const [image, setImage] = useState(null);
+    const [visibility, setVisibility] = useState(isVisible)
 
     useEffect(() => {
-        setText(initialText);
-    }, [initialText]);
+        setVisibility(isVisible);
+    }, [isVisible]);
 
-    return (
+	const pickImage = async () => {
+		let result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ImagePicker.MediaTypeOptions.All,
+			allowsEditing: true,
+			aspect: [4, 3],
+			quality: 1,
+		});
+
+		if (!result.canceled) {
+			setImage(result["uri"]);
+			onImageUpload(result["uri"]);		}
+	};
+
+	return (
         <Modal
             transparent={true}
             animationType="slide"
-            visible={visible}
+            visible={visibility}
             onRequestClose={onClose}
         >
             <View style={styles.modalContainer}>
-                <View style={styles.dialogContainer}>
-                    <Text style={styles.dialogTitle}>Select Photo</Text>
-                    {photoUri && <Image source={{ uri: photoUri }} style={styles.photo} />}
-                    <TextInput
-                        style={[styles.input, photoUri && styles.inputWithPhoto]}
-                        multiline={true}
-                        numberOfLines={3}
-                        value={text}
-                        onChangeText={setText}
-                    />
-                    <View style={styles.dialogButtons}>
-                        <TouchableOpacity onPress={onClose} style={styles.dialogButton}>
-                            <Text>Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => onSave(text, value)}
-                            style={styles.dialogButton}
-                        >
-                            <Text>Save</Text>
-                        </TouchableOpacity>
-                    </View>
+                <View style={styles.modal}>
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Ionicons name="close" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.modalTitle}>Add Image</Text>
+                    {image && (
+                        <View style={styles.imageContainer}>
+                            <Image source={{ uri: image }} style={styles.image} />
+                        </View>
+                    )}
+                    <Button title="Choose from Library" onPress={pickImage} />
                 </View>
             </View>
         </Modal>
@@ -46,50 +52,39 @@ const PhotoSelect = ({ initialText = '', visible = false, onClose = () => {}, on
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
     },
-    dialogContainer: {
-        width: '80%',
+    modal: {
+        backgroundColor: "white",
         padding: 20,
-        backgroundColor: 'white',
         borderRadius: 10,
-        alignItems: 'center',
+        alignItems: "center",
     },
-    dialogTitle: {
+    modalTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginBottom: 10,
     },
-    input: {
-        width: '100%',
-        height: 100,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 10,
-        textAlignVertical: 'top',
+    imageContainer: {
+        
+        marginVertical: 10,
+        alignItems: "center",
     },
-    inputWithPhoto: {
-        marginTop: 10,
+    image: {
+        width: 200,
+        height: 200,
+        resizeMode: "contain",
     },
-    dialogButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    chooseButton: {
         marginTop: 20,
     },
-    dialogButton: {
-        marginHorizontal: 10,
-        padding: 10,
-    },
-    photo: {
-        width: '100%',
-        height: 200,
-        borderRadius: 10,
-        marginBottom: 10,
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
     },
 });
 
 export default PhotoSelect;
-
