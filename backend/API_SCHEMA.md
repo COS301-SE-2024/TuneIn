@@ -1,4 +1,75 @@
-# from Jaden
+# All endpoints list
+## User Profiles
+`/profile`
+GET: gets profile info
+PUT or PATCH: edits profile info
+
+`/profile/{username}`
+GET: gets profile info for given username
+
+`/profile/{username}/follow`
+POST: follows the user with the username given
+
+`/profile/{username}/unfollow`
+POST: unfollows the user with the username given
+
+(add stuff for friends later)
+
+## User (general for authenticated user)
+`/user`
+(same as `/profile`)
+
+`/user/rooms`
+related to a user's own rooms
+GET: get a user's rooms
+POST: create a new room
+
+`/user/rooms/recent`
+GET: get user's recent rooms
+
+`/user/rooms/foryou`
+GET: get user's recommended rooms
+
+`/user/friends`
+GET: get user's friends
+
+`/user/followers`
+GET: get list of followers
+
+`/users/following`
+GET: get list of people user is following
+
+## Rooms
+`/rooms`
+
+`/rooms/new`
+GET: returns newly created public rooms
+
+`/rooms/{room_id}`
+GET: returns info about a room
+PUT or PATCH: edits room info (only if it belongs to the user)
+DELETE: deletes the room (only if it belongs to the user)
+
+`/rooms/{room_id}/join`
+POST: adds current user as a participant to the room
+
+`/rooms/{room_id}/leave`
+POST: remove current user as a participant to the room
+
+`/rooms/{room_id}/users`
+GET: returns people currently (and previously in room)
+
+`/rooms/{room_id}/songs`
+GET: returns the queue
+DELETE: clears the queue (except for current song, if playing)
+POST: add a song to queue
+
+`/rooms/{room_id}/songs/current`
+GET: returns the current playing song
+DELETE: skips the current song
+
+
+# All endpoints (rough definition)
 ## /profile (for self) or /profile/{username} (for other users)
 
 GET
@@ -29,20 +100,6 @@ Edit Profile Page:
 -Favorite Genres
 -Favorite Songs
 - Favourite Rooms
-
-
-## GET /room/{id}
-input: id
-output: RoomDto
-
-Room Info:
--Room Name
--Song Name
--Artist Name
--Username
--Tags
-
-# From Nerina
 
 ## POST /user/rooms (create room)
 input: RoomDto
@@ -87,9 +144,19 @@ output: response code
   - `explicit` (boolean, optional): Indicates if the room contains explicit content
   - `nsfw` (boolean, optional): Indicates if the room is NSFW
   - `photo` (string, optional): URL of the photo for the room
+## GET /rooms/{id}
+input: id
+output: RoomDto
 
+Room Info:
+-Room Name
+-Song Name
+-Artist Name
+-Username
+-Tags
 
-## Get Song Info (GET /room/{id}/songs/current)
+## Get queue (GET /rooms/{id}/songs)
+## Get Song Info (GET /rooms/{id}/songs/current)
 ### Description
 This endpoint fetches the current song details being played in the room.
 
@@ -111,7 +178,25 @@ This endpoint fetches the current song details being played in the room.
 ]
 ```
 
-# From Linda
+## Get Friends (GET /user/friends)
+### Description
+This endpoint returns a JSON array containing friends data personalized for the user.
+
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+Returns array of ProfileDto
+
+## My Rooms API Endpoint (GET /user/rooms)
+
+### Request Parameters
+- **Headers:**
+  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
+  
+- **Query Parameters:**
+  - `user_id` (optional, if using user ID based identification)
+
+Returns array of RoomDto
 ## Get Recent Rooms (GET /user/rooms/recent)
 - **Query Parameters:**
   - `user_id` (optional, if using user ID based identification)
@@ -140,27 +225,6 @@ This endpoint returns a JSON array containing recommended rooms personalized for
   - `user_id` (optional, if using user ID based identification)
 
 Returns array of RoomDto
-
-## Get Friends (GET /user/friends)
-### Description
-This endpoint returns a JSON array containing friends data personalized for the user.
-
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-Returns array of ProfileDto
-
-## My Rooms API Endpoint (GET /user/rooms)
-
-### Request Parameters
-- **Headers:**
-  - `Authorization: Bearer <token>` (optional, if using token-based authentication)
-  
-- **Query Parameters:**
-  - `user_id` (optional, if using user ID based identification)
-
-Returns array of RoomDto
-
 
 # Potentially for later
 ## Chat Messages
@@ -222,4 +286,3 @@ This endpoint manages the chat messages within a room, including fetching existi
   ...
 ]
 ```
-
