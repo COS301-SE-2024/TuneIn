@@ -16,7 +16,7 @@ const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
   const [obscureTextConfirm, setObscureTextConfirm] = useState(true);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,6 +24,7 @@ const RegisterScreen: React.FC = () => {
 
   const router = useRouter();
 
+  
   const navigateToLogin = () => {
     router.navigate("/screens/LoginScreen");
   };
@@ -39,7 +40,7 @@ const RegisterScreen: React.FC = () => {
   };
 
   const handleRegister = () => {
-    console.log(emailOrUsername, password, confirmPassword);
+    console.log(email, password, confirmPassword);
     if (password.length < 8) {
       console.error("Password too short");
       Alert.alert(
@@ -83,14 +84,14 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    let username = emailOrUsername;
+    let username = email;
     let attributes = [];
 
-    if (validateEmail(emailOrUsername)) {
+    if (validateEmail(email)) {
       attributes = [
         {
           Name: 'email',
-          Value: emailOrUsername
+          Value: email
         },
         {
           Name: 'preferred_username',
@@ -112,12 +113,13 @@ const RegisterScreen: React.FC = () => {
         return;
       }
       console.log(data);
-      Alert.alert(
-        "Success",
-        "Please check your email for a verification link.",
-        [{ text: "OK" }],
-        { cancelable: false }
-      );
+      // Now let's navigate to VerifyCodeScreen and pass the email
+      // Change to
+      router.navigate({
+        pathname: "/screens/VerifyEmail",
+        params: { email: JSON.stringify(email) },
+      });
+
     });
 
     const isEmailVerified = false;
@@ -132,6 +134,7 @@ const RegisterScreen: React.FC = () => {
         [{ text: "OK", onPress: () => console.log("OK Pressed") }],
         { cancelable: false }
       );
+      router.navigate("/screens/VerifyEmail");
     }
   };
 
@@ -151,7 +154,7 @@ const RegisterScreen: React.FC = () => {
           <Text className="text-lg font-bold mb-2">Username</Text>
           <TextInput
             className="p-3 border-b border-gray-400 w-full"
-            value={emailOrUsername}
+            value={username}
             onChangeText={(text) => {
               setUsername(text);
             }}
@@ -162,9 +165,9 @@ const RegisterScreen: React.FC = () => {
           <Text className="text-lg font-bold mb-2">Email</Text>
           <TextInput
             className="p-3 border-b border-gray-400 w-full"
-            value={emailOrUsername}
+            value={email}
             onChangeText={(text) => {
-              setEmailOrUsername(text);
+              setEmail(text);
               setEmailError(!validateEmail(text));
             }}
             placeholder="Enter your email"
