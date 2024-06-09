@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ProfileDto } from "./profile.dto";
-import { RoomDto } from "./room.dto";
-import { SongInfoDto } from "./song-info.dto";
+import { UserProfileDto } from "../dto/userprofile.dto";
+import { RoomDto } from "../../rooms/dto/room.dto";
+import { SongInfoDto } from "../../rooms/dto/songinfo.dto";
 
 export class UserEntity {
 	@ApiProperty()
@@ -19,13 +19,13 @@ export class UserEntity {
 	@ApiProperty()
 	followers: {
 		count: number;
-		data: ProfileDto[];
+		data: UserProfileDto[];
 	};
 
 	@ApiProperty()
 	following: {
 		count: number;
-		data: ProfileDto[];
+		data: UserProfileDto[];
 	};
 
 	@ApiProperty()

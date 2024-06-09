@@ -1,9 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsBoolean, IsNumber, IsDateString } from "class-validator";
+import { UserProfileDto } from "../../profile/dto/userprofile.dto";
+import { SongInfoDto } from "./songinfo.dto";
 
 export class RoomDto {
-	@ApiProperty({ type: ProfileDto })
-	creator: ProfileDto;
+	@ApiProperty({ type: UserProfileDto })
+	creator: UserProfileDto;
 
 	@ApiProperty()
 	@IsString()

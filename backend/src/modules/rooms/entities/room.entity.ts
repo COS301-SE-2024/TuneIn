@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ProfileDto } from "./profile.dto";
+import { UserProfileDto } from "../../profile/dto/userprofile.dto";
 import { DateTime } from "luxon";
-import { SongInfoDto } from "./song-info.dto";
+import { SongInfoDto } from "./songinfo.dto";
 
 export class RoomDto {
-	@ApiProperty({ type: ProfileDto })
-	creator: ProfileDto;
+	@ApiProperty({ type: UserProfileDto })
+	creator: UserProfileDto;
 
 	@ApiProperty()
 	room_id: string;

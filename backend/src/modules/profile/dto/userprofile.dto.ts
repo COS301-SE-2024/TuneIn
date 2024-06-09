@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString, IsInt, ValidateNested } from "class-validator";
+import { IsString, IsInt, ValidateNested } from "class-validator";
 import { RoomDto } from "src/modules/rooms/dto/room.dto";
-import { SongInfoDto } from "src/modules/rooms/dto/song-info.dto";
+import { SongInfoDto } from "src/modules/rooms/dto/songinfo.dto";
 
 export class UserProfileDto {
 	@ApiProperty()
@@ -24,14 +24,14 @@ export class UserProfileDto {
 	@IsInt()
 	followers: {
 		count: number;
-		data: ProfileDto[];
+		data: UserProfileDto[];
 	};
 
 	@ApiProperty()
 	@IsInt()
 	following: {
 		count: number;
-		data: ProfileDto[];
+		data: UserProfileDto[];
 	};
 
 	@ApiProperty()
