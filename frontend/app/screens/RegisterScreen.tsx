@@ -24,7 +24,6 @@ const RegisterScreen: React.FC = () => {
 
   const router = useRouter();
 
-  
   const navigateToLogin = () => {
     router.navigate("/screens/LoginScreen");
   };
@@ -103,39 +102,21 @@ const RegisterScreen: React.FC = () => {
     console.log(username, password, attributes);
     UserPool.signUp(username, password, attributes, [], (err, data) => {
       if (err) {
-        console.error(err);
         Alert.alert(
           "Error",
           err.message,
           [{ text: "OK" }],
           { cancelable: false }
         );
+        router.navigate("/screens/RegisterScreen");
         return;
       }
-      console.log(data);
-      // Now let's navigate to VerifyCodeScreen and pass the email
-      // Change to
       router.navigate({
         pathname: "/screens/VerifyEmail",
-        params: { email: JSON.stringify(email) },
+        params: { email: email },
       });
-
     });
 
-    const isEmailVerified = false;
-
-    if (isEmailVerified) {
-      console.log("Email Verified");
-      router.navigate("/screens/Login");
-    } else {
-      Alert.alert(
-        "Email Verification Required",
-        "Please verify your email before you can continue.",
-        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-        { cancelable: false }
-      );
-      router.navigate("/screens/VerifyEmail");
-    }
   };
 
   return (
