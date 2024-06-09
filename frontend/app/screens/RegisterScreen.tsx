@@ -102,6 +102,14 @@ const RegisterScreen: React.FC = () => {
         router.navigate("/screens/RegisterScreen");
         return;
       }
+
+      Alert.alert(
+        "Verification code sent",
+        "Please check your Email for the verification code",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      
       router.navigate({
         pathname: "/screens/VerifyEmail",
         params: { email: email },
