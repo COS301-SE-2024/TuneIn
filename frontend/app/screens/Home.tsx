@@ -1,6 +1,5 @@
-// screens/Home.tsx
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import React, { useState, useRef, useCallback } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Link, useRouter } from "expo-router";
 import RoomCardWidget from "../components/RoomCardWidget";
 import { Room } from "../models/Room";
@@ -10,6 +9,9 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 
 const Home: React.FC = () => {
+  const [scrollY] = useState(new Animated.Value(0));
+  const scrollViewRef = useRef<ScrollView>(null);
+
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string =
@@ -121,10 +123,37 @@ const Home: React.FC = () => {
     router.navigate("/screens/CreateRoom");
   };
 
+  const handleScroll = useCallback(({ nativeEvent }) => {
+    const offsetY = nativeEvent.contentOffset.y;
+    scrollY.setValue(offsetY);
+  }, []);
+
+  const topNavBarTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, -100],
+    extrapolate: "clamp",
+  });
+
   return (
     <View className="flex-1">
-      <TopNavBar />
-      <ScrollView>
+      <Animated.View
+        style={{
+          transform: [{ translateY: topNavBarTranslateY }],
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        <TopNavBar />
+      </Animated.View>
+      <ScrollView
+        ref={scrollViewRef}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingTop: 40 }}
+      >
         <View className="flex-1 justify-center pt-4">
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
             Recent Rooms
