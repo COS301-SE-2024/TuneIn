@@ -127,55 +127,77 @@ response: SongInfoDto (updated with new song playing)
 
 # Data Transfer Objects (Dtos)
 
-Profile Page (UserProfileDto)
--Name
--Username
--Profile Picture
--No. of Followers
--No. of Following
--Social Media Links
--Bio
--Current song playing (probably only after we get music streaming sorted)
--Favorite Genres
--Favorite Songs
--Favorite Rooms
--Recently Visited Rooms
+## UserProfileDto (User Profile Info)
+A object representing User Profile information.
+```json
+{
+	profile_name : string,
+	user_id : string,
+	username : string,
+	profile_picture_url : string,
+	followers: {
+		count: int,
+		data: [ProfileDto]
+	},
+	following: {
+		count: int,
+		data: [ProfileDto]
+	},
+	links: {
+		count: int,
+		data: [string]
+	},
+	bio : string,
+	current_song: SongInfoDto,
+	fav_genres: {
+		count: int,
+		data: [string]
+	},
+	fav_songs: {
+		count: int,
+		data: [SongInfoDto]
+	},
+	fav_rooms: {
+		count: int,
+		data: [RoomDto]
+	},
+	recent_rooms: {
+		count: int,
+		data: [RoomDto]
+	}
+}
+```
 
-RoomDto
-  - `user_id` (required, they will be the owner of the room)
-  - `room_id` (string, required): ID of the room
-  - `name` (string, required): Name of the room
-  - `type` (string, required): Room type, either permanent or temporary
-  - `visibility` (string, required): Room visibility, either public or private
-  - `schedule` (boolean, optional): Indicates if the room is scheduled for later
-  - `user_id` (required, they will be the owner of the room)
-  - `room_id` (string, required): ID of the room
-  - `name` (string, optional): Name of the room
-  - `description` (string, optional): Description of the room
-  - `language` (string, optional): Language of the room
-  - `explicit` (boolean, optional): Indicates if the room contains explicit content
-  - `nsfw` (boolean, optional): Indicates if the room is NSFW
-  - `photo` (string, optional): URL of the photo for the room
-- Room Info:
--Room Name
--Song Name
--Artist Name
--Username
--Tags
-  {
-    "backgroundImage": "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "name": "Chill Vibes",
-    "description": "A description of the room goes here.",
-    "userProfile": "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    "username": "User123",
-    "tags": ["Tag1", "Tag2", "Tag3"]
-  },
+## RoomDto (Room Info)
+A object representing Room information.
+```json
+{
+	creator: ProfileDto,
+	room_id: string,
+	partipicant_count: number,
+	room_name: string,
+	description: string,
+	is_temporary: boolean,
+	is_private: boolean,
+	is_scheduled: boolean,
+	start_date: DateTime,
+	end_date: DateTime,
+	language: string,
+	has_explicit_content: boolean,
+	has_nsfw_content: boolean,
+	room_image: string,
+	current_song: SongInfoDto,
+	tags: [string]
+}
+```
 
-
-SongInfoDto
-"song": {
-	    "picture": "https://example.com/song_picture.jpg",
-	    "name": "Song Name",
-	    "artist": "Song Artist",
-	    "current_position": "00:02:15"
-	  }
+## SongInfoDto (Song Info)
+A object representing Song information.
+```json
+{
+	title: string,
+	artists: [string],
+	cover: string,
+	start_time: DateTime
+}
+```
