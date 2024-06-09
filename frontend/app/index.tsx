@@ -1,11 +1,6 @@
-import React from 'react';
-import { ApiProvider } from './../api/APIContext';
-import ApiTest from './api-test';
+import React from "react";
+import Home from "./screens/WelcomeScreen";
 
 export default function App() {
-  return (
-    <ApiProvider>
-      <ApiTest />
-    </ApiProvider>
-  );
+	return <Home />;
 }
