@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Patch, Body } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
+import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 
 @Controller("profile")
 export class ProfileController {
@@ -27,7 +28,9 @@ export class ProfileController {
     */
 	@Put()
 	@ApiTags("profile")
-	updateProfile(@Body() updateProfileDto: any): UserProfileDto {
+	updateProfile(
+		@Body() updateProfileDto: UpdateUserProfileDto,
+	): UserProfileDto {
 		return this.profileService.updateProfile();
 	}
 
@@ -39,7 +42,7 @@ export class ProfileController {
     */
 	@Patch()
 	@ApiTags("profile")
-	patchProfile(@Body() updateProfileDto: any): UserProfileDto {
+	patchProfile(@Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
 		return this.profileService.patchProfile();
 	}
 
