@@ -35,7 +35,12 @@ const EditProfile: React.FC = () => {
       <TouchableOpacity onPress={handleGoBack} className="mb-4">
         <Text className="text-blue-500 text-lg">&lt; Back</Text>
       </TouchableOpacity>
-      <Image source={{ uri: friendData.profilePicture }} style={{ width: 100, height: 100, borderRadius: 50 }} className="mb-2" />
+      <Image
+        testID="friend-profile-image"
+        source={{ uri: friendData.profilePicture }}
+        style={{ width: 100, height: 100, borderRadius: 50 }}
+        className="mb-2"
+      />
       <Text className="text-lg font-bold">{friendData.name}</Text>
       {/* Display other details of the friend */}
     </View>
