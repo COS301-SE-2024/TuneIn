@@ -37,7 +37,7 @@ export class RoomsService {
 
 		const rooms: PrismaTypes.room[] = [];
 		for (const room of allRooms) {
-			if (publicRooms.find((pr) => pr.room_id === room.room_id)) {
+			if (publicRooms.find((pr) => pr.roomID === room.roomID)) {
 				rooms.push(room);
 			}
 		}
@@ -56,12 +56,12 @@ export class RoomsService {
 		return result;
 	}
 
-	getRoomInfo(room_id: string): RoomDto {
+	getRoomInfo(roomID: string): RoomDto {
 		// TODO: Implement logic to get room info
 		// an an example to generate a RoomDto
 		/*
-		const room_id = "xxxx"
-		const room = await this.dtogen.generateRoomDto(room_id);
+		const roomID = "xxxx"
+		const room = await this.dtogen.generateRoomDto(roomID);
 		if (room) {
 			return room;
 		}
@@ -69,52 +69,52 @@ export class RoomsService {
 		return new RoomDto();
 	}
 
-	updateRoomInfo(room_id: string, updateRoomDto: UpdateRoomDto): RoomDto {
+	updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
 		// TODO: Implement logic to update room info
 		return new RoomDto();
 	}
 
-	updateRoom(room_id: string, updateRoomDto: UpdateRoomDto): RoomDto {
+	updateRoom(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
 		// TODO: Implement logic to update room
 		return new RoomDto();
 	}
 
-	deleteRoom(room_id: string): boolean {
+	deleteRoom(roomID: string): boolean {
 		// TODO: Implement logic to delete room
 		return false;
 	}
 
-	joinRoom(room_id: string): boolean {
+	joinRoom(roomID: string): boolean {
 		// TODO: Implement logic to join room
 		return false;
 	}
 
-	leaveRoom(room_id: string): boolean {
+	leaveRoom(roomID: string): boolean {
 		// TODO: Implement logic to leave room
 		return false;
 	}
 
-	getRoomUsers(room_id: string): UserProfileDto[] {
+	getRoomUsers(roomID: string): UserProfileDto[] {
 		// TODO: Implement logic to get room users
 		return [];
 	}
 
-	getRoomQueue(room_id: string): SongInfoDto[] {
+	getRoomQueue(roomID: string): SongInfoDto[] {
 		// TODO: Implement logic to get room queue
 		return [];
 	}
 
-	clearRoomQueue(room_id: string): boolean {
+	clearRoomQueue(roomID: string): boolean {
 		// TODO: Implement logic to clear room queue
 		return false;
 	}
 
-	addSongToQueue(room_id: string, songInfoDto: SongInfoDto): SongInfoDto[] {
+	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue
 		return [];
 	}
 
-	getCurrentSong(room_id: string): SongInfoDto {
+	getCurrentSong(roomID: string): SongInfoDto {
 		// TODO: Implement logic to get current playing song
 		return new SongInfoDto();
 	}

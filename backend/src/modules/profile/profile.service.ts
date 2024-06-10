@@ -16,8 +16,8 @@ export class ProfileService {
 	getProfile(): UserProfileDto {
 		// an an example to generate a UserProfileDto
 		/*
-		const user_id = "311ce2e8-8041-70bd-0ab5-be97283ee182"
-		const user = await this.dtogen.generateUserProfileDto(user_id);
+		const userID = "311ce2e8-8041-70bd-0ab5-be97283ee182"
+		const user = await this.dtogen.generateUserProfileDto(userID);
 		if (user) {
 			return user;
 		}

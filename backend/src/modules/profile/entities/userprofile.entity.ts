@@ -8,7 +8,7 @@ export class UserEntity {
 	profile_name: string;
 
 	@ApiProperty()
-	user_id: string;
+	userID: string;
 
 	@ApiProperty()
 	username: string;

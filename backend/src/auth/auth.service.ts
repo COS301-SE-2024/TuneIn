@@ -139,15 +139,15 @@ export class AuthService {
 	async createUser(
 		username: string,
 		email: string,
-		user_id: string,
+		userID: string,
 	): Promise<boolean> {
 		const user: Prisma.usersCreateInput = {
 			username: username,
 			email: email,
-			user_id: user_id,
+			userID: userID,
 		};
 		const existingUser = await this.prisma.users.findUnique({
-			where: { user_id: user_id },
+			where: { userID: userID },
 		});
 		if (existingUser) {
 			return true;
@@ -203,16 +203,16 @@ export class AuthService {
 		}
 
 		const decoded = jwt.verify(jwt_token, secretKey);
-		const user_id = decoded.sub;
-		if (!user_id) {
+		const userID = decoded.sub;
+		if (!userID) {
 			throw new Error("Invalid JWT token");
 		}
-		if (typeof user_id !== "string") {
+		if (typeof userID !== "string") {
 			throw new Error("Invalid JWT token");
 		}
 
 		const user = await this.prisma.users.findUnique({
-			where: { user_id: user_id },
+			where: { userID: userID },
 		});
 		return user;
 	}
