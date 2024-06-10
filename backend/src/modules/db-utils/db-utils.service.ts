@@ -156,4 +156,26 @@ export class DbUtilsService {
 		}
 		return true;
 	}
+
+	async isFollowing(
+		user_id: string,
+		accountFollowedId: string,
+	): Promise<boolean> {
+		const follow: Prisma.follows[] = await this.prisma.follows.findMany({
+			where: {
+				follower: user_id,
+				followee: accountFollowedId,
+			},
+		});
+		if (!follow || follow === null) {
+			return false;
+		}
+		if (follow.length === 0) {
+			return false;
+		}
+		if (follow.length > 1) {
+			throw new Error("More than one follow found.");
+		}
+		return true;
+	}
 }
