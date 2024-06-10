@@ -291,6 +291,13 @@ export class DtoGenService {
 			const r = rooms[i];
 			if (r && r !== null) {
 				const u = userProfiles.find((u) => u.user_id === r.room_creator);
+				if (!u || u === null) {
+					throw new Error(
+						"Weird error. Got users from Rooms table but user (" +
+							r.room_creator +
+							") not found in Users table",
+					);
+				}
 				const room: RoomDto = {
 					creator: u || new UserProfileDto(),
 					room_id: r.room_id,
