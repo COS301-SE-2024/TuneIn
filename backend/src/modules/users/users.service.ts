@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
+import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -77,14 +78,105 @@ export class UsersService {
 		return new UserDto();
 	}
 
-	getUserRooms(): RoomDto[] {
+	async getUserRooms(user_id: string): Promise<RoomDto[]> {
 		// implementation goes here
-		return [];
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: user_id },
+		});
+
+		if (!user) {
+			throw new Error("User does not exist");
+		}
+
+		const rooms = await this.prisma.room.findMany({
+			where: { host_id: user_id },
+		});
+
+		if (!rooms) {
+			return [];
+		}
+
+		const ids: string[] = rooms.map((room) => room.room_id);
+		const r = await this.dtogen.generateMultipleRoomDto(ids);
+		if (!r || r === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for user rooms (getUserRooms). Received null.",
+			);
+		}
+		return r;
 	}
 
 	createRoom(createRoomDto: CreateRoomDto): RoomDto {
 		// implementation goes here
-		return new RoomDto();
+		const newRoom: Prisma.roomCreateInput = {
+			name: createRoomDto.room_name || "Untitled Room",
+		};
+		if (createRoomDto.room_id) newRoom.room_id = createRoomDto.room_id;
+		if (createRoomDto.description)
+			newRoom.description = createRoomDto.description;
+		if (createRoomDto.is_temporary)
+			newRoom.is_temporary = createRoomDto.is_temporary;
+
+		/*
+		if (createRoomDto.language) newRoom.language = createRoomDto.language;
+		*/
+		if (createRoomDto.has_explicit_content)
+			newRoom.explicit = createRoomDto.has_explicit_content;
+		if (createRoomDto.has_nsfw_content)
+			newRoom.nsfw = createRoomDto.has_nsfw_content;
+		if (createRoomDto.room_image)
+			newRoom.playlist_photo = createRoomDto.room_image;
+
+		/*
+		if (createRoomDto.current_song)
+			newRoom.current_song = createRoomDto.current_song;
+		*/
+
+		// foreign key relation for 'room_creator' field
+		if (createRoomDto.creator) {
+			newRoom.users = {
+				connect: {
+					user_id: createRoomDto.creator.user_id,
+				},
+			};
+		}
+
+		//for is_private, we will need to add the room_id to the private_room tbale
+		if (createRoomDto.is_private) {
+			newRoom.private_room = {
+				connect: {
+					room_id: createRoomDto.room_id,
+				},
+			};
+		} else {
+			newRoom.public_room = {
+				connect: {
+					room_id: createRoomDto.room_id,
+				},
+			};
+		}
+
+		//TODO: implement scheduled room creation
+		/*
+		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
+		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;		
+		if (createRoomDto.is_scheduled) {
+			newRoom.
+				connect: {
+					room_id: createRoomDto.room_id,
+				},
+			};
+		}
+		*/
+
+		const room = this.prisma.room.create({
+			data: newRoom,
+		});
+		if (!room) {
+			throw new Error("Something went wrong while creating the room");
+		}
+
+		return this.dtogen.generateRoomDto(room.room_id);
 	}
 
 	getRecentRooms(): RoomDto[] {
