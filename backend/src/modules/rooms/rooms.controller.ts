@@ -46,12 +46,6 @@ export class RoomsController {
     such that the API documentation is more detailed and informative for the next dev.
   */
 
-	/*
-    GET /rooms/new
-    gets newly created public rooms
-    no input
-    response: an array of RoomDto
-    */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("new")

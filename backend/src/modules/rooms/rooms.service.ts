@@ -17,8 +17,8 @@ export class RoomsService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async getNewRooms(): Promise<RoomDto[]> {
-		const r = await this.prisma.room.findMany({
+	async getNewRooms(limit: number = -1): Promise<RoomDto[]> {
+		const r: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			orderBy: {
 				date_created: "desc",
 			},
@@ -26,7 +26,26 @@ export class RoomsService {
 		if (!r || r === null) {
 			return [];
 		}
-		const rooms: PrismaTypes.room[] = r;
+		const allRooms: PrismaTypes.room[] = r;
+
+		const pr: PrismaTypes.public_room[] | null =
+			await this.prisma.public_room.findMany();
+		if (!pr || pr === null) {
+			return [];
+		}
+		const publicRooms: PrismaTypes.public_room[] = pr;
+
+		const rooms: PrismaTypes.room[] = [];
+		for (const room of allRooms) {
+			if (publicRooms.find((pr) => pr.room_id === room.room_id)) {
+				rooms.push(room);
+			}
+		}
+
+		if (limit > 0) {
+			publicRooms.splice(limit);
+		}
+
 		const result: RoomDto[] = [];
 		for (const room of rooms) {
 			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
