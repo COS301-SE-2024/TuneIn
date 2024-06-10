@@ -4,7 +4,8 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
-import * as Prisma from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 
@@ -16,7 +17,28 @@ export class RoomsService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	getNewRooms(): RoomDto[] {
+	async getNewRooms(): Promise<RoomDto[]> {
+		const r = await this.prisma.room.findMany({
+			orderBy: {
+				date_created: "desc",
+			},
+		});
+		if (!r || r === null) {
+			return [];
+		}
+		const rooms: PrismaTypes.room[] = r;
+		const result: RoomDto[] = [];
+		for (const room of rooms) {
+			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+			if (roomDto) {
+				result.push(roomDto);
+			}
+		}
+		return result;
+	}
+
+	getRoomInfo(room_id: string): RoomDto {
+		// TODO: Implement logic to get room info
 		// an an example to generate a RoomDto
 		/*
 		const room_id = "xxxx"
@@ -25,12 +47,6 @@ export class RoomsService {
 			return room;
 		}
 		*/
-
-		return [];
-	}
-
-	getRoomInfo(room_id: string): RoomDto {
-		// TODO: Implement logic to get room info
 		return new RoomDto();
 	}
 
