@@ -106,10 +106,20 @@ export class UsersService {
 		return r;
 	}
 
-	createRoom(createRoomDto: CreateRoomDto): RoomDto {
-		// implementation goes here
+	async createRoom(createRoomDto: CreateRoomDto): Promise<RoomDto> {
+		if (!createRoomDto.creator) {
+			throw new Error("No creator provided for the room");
+		}
+
 		const newRoom: Prisma.roomCreateInput = {
 			name: createRoomDto.room_name || "Untitled Room",
+
+			//foreign key relation for 'room_creator'
+			users: {
+				connect: {
+					user_id: createRoomDto.creator.user_id,
+				},
+			},
 		};
 		if (createRoomDto.room_id) newRoom.room_id = createRoomDto.room_id;
 		if (createRoomDto.description)
@@ -131,15 +141,6 @@ export class UsersService {
 		if (createRoomDto.current_song)
 			newRoom.current_song = createRoomDto.current_song;
 		*/
-
-		// foreign key relation for 'room_creator' field
-		if (createRoomDto.creator) {
-			newRoom.users = {
-				connect: {
-					user_id: createRoomDto.creator.user_id,
-				},
-			};
-		}
 
 		//for is_private, we will need to add the room_id to the private_room tbale
 		if (createRoomDto.is_private) {
@@ -169,14 +170,20 @@ export class UsersService {
 		}
 		*/
 
-		const room = this.prisma.room.create({
+		const room = await this.prisma.room.create({
 			data: newRoom,
 		});
 		if (!room) {
 			throw new Error("Something went wrong while creating the room");
 		}
 
-		return this.dtogen.generateRoomDto(room.room_id);
+		const result = await this.dtogen.generateRoomDtoFromRoom(room);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for created room. Received null.",
+			);
+		}
+		return result;
 	}
 
 	getRecentRooms(): RoomDto[] {
