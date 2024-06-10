@@ -12,7 +12,13 @@ import {
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiParam,
+	ApiTags,
+} from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
@@ -58,29 +64,6 @@ export class UsersController {
 	remove(@Param("id") id: string) {
 		return this.usersService.remove(id);
 	}
-  */
-
-	//NOTE TO DEV:
-	/*
-    add decorators to each of these paths like:
-    @Post()
-    @ApiOperation({ summary: 'Create user' })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'The record has been successfully created.', type: User })
-    @ApiResponse({ status: 403, description: 'Forbidden.' })
-    createUser(@Body() createUserDto: CreateUserDto) {
-      //...
-    }
-
-    @Get(':id')
-    @ApiOperation({ summary: 'Retrieve user' })
-    @ApiParam({ name: 'id', required: true })
-    @ApiResponse({ status: 200, description: 'The found record', type: User })
-    getUser(@Param('id') id: string) {
-      //...
-    }
-
-    such that the API documentation is more detailed and informative for the next dev.
   */
 
 	/*
@@ -182,8 +165,7 @@ export class UsersController {
 			const creator = await this.dtogen.generateUserProfileDto(userID, false);
 			if (creator) {
 				createRoomDto.creator = creator;
-			}
-			else {
+			} else {
 				throw new HttpException(
 					"Failed to generate creator profile from user ID.",
 					500,
@@ -191,7 +173,7 @@ export class UsersController {
 			}
 		}
 
-		if (userID !== createRoomDto.creator.user_id) {
+		if (userID !== createRoomDto.creator.userID) {
 			throw new HttpException(
 				"User ID in JWT token does not match creator ID in request body.",
 				400,
@@ -200,78 +182,81 @@ export class UsersController {
 		return await this.usersService.createRoom(createRoomDto);
 	}
 
-	/*
-    GET /users/rooms/recent
-    get user's recent rooms
-    no input
-    response: an array of RoomDto
-  */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
 	@ApiTags("users")
-	getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
+	@ApiOperation({ summary: "Get a user's recent rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
 		const userID = req.user.sub;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
-
-		if (userID !== 
-		return this.usersService.getRecentRooms();
+		return await this.usersService.getRecentRooms(userID);
 	}
 
-	/*
-    GET /users/rooms/foryou
-    get user's recommended rooms
-    no input
-    response: an array of RoomDto
-  */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
 	@ApiTags("users")
-	getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
+	@ApiOperation({ summary: "Get a user's recommended rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's recommended rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
 		return this.usersService.getRecommendedRooms();
 	}
 
-	/*
-    GET /users/friends
-    get user's friends
-    no input
-    response: an array of ProfileDto
-  */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
+	@ApiOperation({ summary: "Get a user's friends" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's friends as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
 	getUserFriends(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getUserFriends();
 	}
 
-	/*
-    GET /users/followers
-    get list of followers
-    no input
-    response: an array of ProfileDto
-  */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
 	@ApiTags("users")
+	@ApiOperation({ summary: "Get a user's followers" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's followers as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
 	getFollowers(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getFollowers();
 	}
 
-	/*
-    GET /users/following
-    get list of people user is following
-    no input
-    response: an array of ProfileDto
-  */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("following")
 	@ApiTags("users")
+	@ApiOperation({ summary: "Get a user's following" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's following as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
 	getFollowing(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getFollowing();
 	}
