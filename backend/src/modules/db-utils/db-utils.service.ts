@@ -96,4 +96,44 @@ export class DbUtilsService {
 		}
 		return rooms;
 	}
+
+	async isRoomPublic(room_id: string): Promise<boolean> {
+		const room: Prisma.room | null = await this.prisma.room.findUnique({
+			where: { room_id: room_id },
+		});
+		if (!room || room === null) {
+			throw new Error("Room not found. Probably doesn't exist.");
+		}
+
+		const publicRoom: Prisma.public_room | null =
+			await this.prisma.public_room.findUnique({
+				where: { room_id: room_id },
+			});
+
+		if (!publicRoom || publicRoom === null) {
+			return false;
+		}
+
+		return true;
+	}
+
+	async isRoomPrivate(room_id: string): Promise<boolean> {
+		const room: Prisma.room | null = await this.prisma.room.findUnique({
+			where: { room_id: room_id },
+		});
+		if (!room || room === null) {
+			throw new Error("Room not found. Probably doesn't exist.");
+		}
+
+		const privateRoom: Prisma.private_room | null =
+			await this.prisma.private_room.findUnique({
+				where: { room_id: room_id },
+			});
+
+		if (!privateRoom || privateRoom === null) {
+			return false;
+		}
+
+		return true;
+	}
 }

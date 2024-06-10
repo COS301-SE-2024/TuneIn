@@ -4,7 +4,7 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+import * as Prisma from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 
