@@ -192,8 +192,6 @@ export class UsersService {
 	}
 
 	async getRecommendedRooms(): Promise<RoomDto[]> {
-		// implementation goes here
-
 		//TODO: implement recommendation algorithm
 		const r = await this.dbUtils.getRandomRooms(5);
 		if (!r || r === null) {
@@ -212,18 +210,55 @@ export class UsersService {
 		return recommends;
 	}
 
-	getUserFriends(): UserProfileDto[] {
-		// implementation goes here
-		return [];
+	async getUserFriends(user_id: string): Promise<UserProfileDto[]> {
+		const f = await this.prisma.friends.findMany({
+			where: { OR: [{ friend1: user_id }, { friend2: user_id }] },
+		});
+		if (!f) {
+			return [];
+		}
+		const friends: PrismaTypes.friends[] = f;
+		const ids: string[] = [];
+		for (const friend of friends) {
+			if (friend.friend1 === user_id) {
+				ids.push(friend.friend2);
+			} else {
+				ids.push(friend.friend1);
+			}
+		}
+		const r = await this.dtogen.generateMultipleUserProfileDto(ids);
+		return r;
 	}
 
-	getFollowers(): UserProfileDto[] {
-		// implementation goes here
-		return [];
+	async getFollowers(user_id: string): Promise<UserProfileDto[]> {
+		const f = await this.dbUtils.getUserFollowers(user_id);
+		if (!f) {
+			return [];
+		}
+		const followers: PrismaTypes.users[] = f;
+		const ids: string[] = followers.map((follower) => follower.user_id);
+		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserProfileDto for followers. Received null.",
+			);
+		}
+		return result;
 	}
 
-	getFollowing(): UserProfileDto[] {
-		// implementation goes here
-		return [];
+	async getFollowing(user_id: string): Promise<UserProfileDto[]> {
+		const following = await this.dbUtils.getUserFollowing(user_id);
+		if (!following) {
+			return [];
+		}
+		const followees: PrismaTypes.users[] = following;
+		const ids: string[] = followees.map((followee) => followee.user_id);
+		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserProfileDto for following. Received null.",
+			);
+		}
+		return result;
 	}
 }
