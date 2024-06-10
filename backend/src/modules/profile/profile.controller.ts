@@ -9,7 +9,7 @@ import {
 	UseGuards,
 	Request,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
@@ -63,11 +63,11 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("profile")
-	updateProfile(
+	async updateProfile(
 		@Request() req: any,
 		@Body() updateProfileDto: UpdateUserProfileDto,
-	): UserProfileDto {
-		return this.profileService.updateProfile();
+	): Promise<UserProfileDto> {
+		return await this.profileService.updateProfile();
 	}
 
 	/*
@@ -79,8 +79,11 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("profile")
-	patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
-		return this.profileService.patchProfile();
+	async patchProfile(
+		@Request() req: any,
+		@Body() updateProfileDto: UpdateUserProfileDto,
+	): Promise<UserProfileDto> {
+		return await this.profileService.patchProfile();
 	}
 
 	/*
@@ -92,33 +95,60 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":username")
 	@ApiTags("profile")
-	getProfileByUsername(@Request() req: any, @Param("username") username: string): UserProfileDto {
-		return this.profileService.getProfileByUsername();
+	async getProfileByUsername(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<UserProfileDto> {
+		return await this.profileService.getProfileByUsername();
 	}
 
-	/*
-    POST /profile/{username}/follow
-    follows the user with the username given
-    no input
-    response: code (2xx for success, 4xx for error)
-    */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/follow")
 	@ApiTags("profile")
-	followUser(@Request() req: any, @Param("username") username: string): boolean {
-		return this.profileService.followUser();
+	@ApiOperation({ summary: "Follow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully followed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error following the user.",
+		type: Boolean,
+	})
+	async followUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+		return await this.profileService.followUser(userID, username);
 	}
 
-	/*
-    POST /profile/{username}/unfollow
-    unfollows the user with the username given
-    no input
-    response: code (2xx for success, 4xx for error)
-    */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/unfollow")
 	@ApiTags("profile")
-	unfollowUser(@Request() req: any, @Param("username") username: string): boolean {
-		return this.profileService.unfollowUser();
+	@ApiOperation({ summary: "Unfollow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully unfollowed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error unfollowing the user.",
+		type: Boolean,
+	})
+	async unfollowUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+		return await this.profileService.unfollowUser(userID, username);
 	}
 }

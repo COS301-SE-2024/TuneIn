@@ -117,11 +117,11 @@ export class UsersService {
 			//foreign key relation for 'room_creator'
 			users: {
 				connect: {
-					userID: createRoomDto.creator.userID,
+					user_id: createRoomDto.creator.userID,
 				},
 			},
 		};
-		if (createRoomDto.roomID) newRoom.roomID = createRoomDto.roomID;
+		if (createRoomDto.roomID) newRoom.room_id = createRoomDto.roomID;
 		if (createRoomDto.description)
 			newRoom.description = createRoomDto.description;
 		if (createRoomDto.is_temporary)
@@ -146,13 +146,13 @@ export class UsersService {
 		if (createRoomDto.is_private) {
 			newRoom.private_room = {
 				connect: {
-					roomID: createRoomDto.roomID,
+					room_id: createRoomDto.roomID,
 				},
 			};
 		} else {
 			newRoom.public_room = {
 				connect: {
-					roomID: createRoomDto.roomID,
+					room_id: createRoomDto.roomID,
 				},
 			};
 		}

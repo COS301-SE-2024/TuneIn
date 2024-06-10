@@ -144,10 +144,10 @@ export class AuthService {
 		const user: Prisma.usersCreateInput = {
 			username: username,
 			email: email,
-			userID: userID,
+			user_id: userID,
 		};
 		const existingUser = await this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 		if (existingUser) {
 			return true;
@@ -212,7 +212,7 @@ export class AuthService {
 		}
 
 		const user = await this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 		return user;
 	}
