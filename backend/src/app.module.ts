@@ -7,10 +7,10 @@ import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
 import { ProfileModule } from "./modules/profile/profile.module";
-import { DtoGenService } from './modules/dto-gen/dto-gen.service';
-import { DtoGenModule } from './modules/dto-gen/dto-gen.module';
-import { DbUtilsService } from './modules/db-utils/db-utils.service';
-import { DbUtilsModule } from './modules/db-utils/db-utils.module';
+import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
+import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
+import { DbUtilsService } from "./modules/db-utils/db-utils.service";
+import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 
 @Module({
 	imports: [
