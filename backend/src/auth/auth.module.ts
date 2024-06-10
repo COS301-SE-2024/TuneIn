@@ -6,6 +6,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { LocalStrategy } from "./local.strategy";
 import { JwtStrategy } from "./jwt.strategy";
 import { ConfigModule } from "@nestjs/config";
+import { PrismaService } from "../../prisma/prisma.service";
+import { PrismaModule } from "../../prisma/prisma.module";
 
 @Module({
 	imports: [
@@ -15,8 +17,9 @@ import { ConfigModule } from "@nestjs/config";
 			signOptions: { expiresIn: "60m" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
+		PrismaModule,
 	],
-	providers: [AuthService, LocalStrategy, JwtStrategy],
+	providers: [AuthService, LocalStrategy, JwtStrategy, PrismaService],
 	controllers: [AuthController],
 })
 export class AuthModule {}
