@@ -8,6 +8,8 @@ import * as jwt from "jsonwebtoken";
 @Injectable()
 export class AuthService {
 	private cognitoIdentityServiceProvider: AWS.CognitoIdentityServiceProvider;
+	private accessKeyId: string;
+	private secretAccessKey: string;
 	private userPoolId: string;
 	private clientId: string;
 
@@ -15,18 +17,41 @@ export class AuthService {
 		private configService: ConfigService,
 		private prisma: PrismaService,
 	) {
+		// Set the AWS credentials
+		const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
+		if (!accessKeyId) {
+			throw new Error("Missing AWS_ACCESS_KEY_ID");
+		}
+		this.accessKeyId = accessKeyId;
+
+		const secretAccessKey = this.configService.get<string>(
+			"AWS_SECRET_ACCESS_KEY",
+		);
+		if (!secretAccessKey) {
+			throw new Error("Missing AWS_SECRET_ACCESS_KEY");
+		}
+		this.secretAccessKey = secretAccessKey;
+
+		const userPoolId = this.configService.get<string>(
+			"AWS_COGNITO_USER_POOL_ID",
+		);
+		if (!userPoolId) {
+			throw new Error("Missing AWS_COGNITO_USER_POOL_ID");
+		}
+		this.userPoolId = userPoolId;
+
+		const clientId = this.configService.get<string>("AWS_COGNITO_CLIENT_ID");
+		if (!clientId) {
+			throw new Error("Missing AWS_COGNITO_CLIENT_ID");
+		}
+		this.clientId = clientId;
+
 		this.cognitoIdentityServiceProvider =
 			new AWS.CognitoIdentityServiceProvider({
 				region: "af-south-1",
-				accessKeyId: this.configService.get<string>("AWS_ACCESS_KEY_ID"),
-				secretAccessKey: this.configService.get<string>(
-					"AWS_SECRET_ACCESS_KEY",
-				),
+				accessKeyId: this.accessKeyId,
+				secretAccessKey: this.secretAccessKey,
 			});
-		this.userPoolId =
-			this.configService.get<string>("AWS_COGNITO_USER_POOL_ID") || "";
-		this.clientId =
-			this.configService.get<string>("AWS_COGNITO_CLIENT_ID") || "";
 	}
 
 	async validateUser(username: string, password: string): Promise<any> {
@@ -121,7 +146,8 @@ export class AuthService {
 			user_id: user_id,
 		};
 		try {
-			this.prisma.users.create({ data: user });
+			const response = await this.prisma.users.create({ data: user });
+			console.log(response);
 		} catch (err) {
 			console.log(err);
 			return false;
