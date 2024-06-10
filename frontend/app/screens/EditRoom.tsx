@@ -15,6 +15,7 @@ const EditRoom: React.FC = () => {
     const [tags, setTags] = useState(room.tags.join(", ") || "");
 
     const handleSave = () => {
+        
         // Logic to save the edited room details
         // For now, we can simply log the updated details
         console.log({

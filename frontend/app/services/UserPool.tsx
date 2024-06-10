@@ -7,5 +7,6 @@ const poolData = {
   UserPoolId: process.env.REACT_APP_USER_POOL_ID,
   ClientId: process.env.REACT_APP_CLIENT_ID,
 };
+// console.log(EXPO_CLIENT_ID, EXPO_USER_POOL_ID);
 
 export default new CognitoUserPool(poolData);

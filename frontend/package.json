@@ -23,6 +23,7 @@
     "expo-navigation-bar": "~3.0.5",
     "expo-router": "^3.5.15",
     "expo-status-bar": "~1.12.1",
+    "isomorphic-fetch": "^3.0.0",
     "mysql": "^2.18.1",
     "nativewind": "^2.0.11",
     "pg": "^8.12.0",
@@ -42,7 +43,8 @@
     "react-native-web": "~0.19.10",
     "react-router-dom": "^6.23.1",
     "tailwind-react-native-classnames": "^1.5.1",
-    "twrnc": "^4.2.0"
+    "twrnc": "^4.2.0",
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
