@@ -215,6 +215,30 @@ export class DtoGenService {
 		return result;
 	}
 
+	async generateMultipleUserProfileDto(
+		user_ids: string[],
+	): Promise<UserProfileDto[]> {
+		const users: Prisma.users[] | null = await this.prisma.users.findMany({
+			where: { user_id: { in: user_ids } },
+		});
+
+		if (!users || users === null) {
+			return [];
+		}
+
+		const result: UserProfileDto[] = [];
+		for (let i = 0; i < users.length; i++) {
+			const u = users[i];
+			if (u && u !== null) {
+				const user = await this.generateUserProfileDto(u.user_id, false);
+				if (user && user !== null) {
+					result.push(user);
+				}
+			}
+		}
+		return result;
+	}
+
 	async generateRoomDto(room_id: string): Promise<RoomDto | null> {
 		const room: Prisma.room | null = await this.prisma.room.findUnique({
 			where: { room_id: room_id },
@@ -224,6 +248,10 @@ export class DtoGenService {
 			return null;
 		}
 
+		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
+			where: { room_id: room_id },
+		});
+
 		const result: RoomDto = {
 			creator: new UserProfileDto(),
 			room_id: room.room_id,
@@ -231,8 +259,62 @@ export class DtoGenService {
 			room_name: room.name,
 			description: room.description || "",
 			is_temporary: room.is_temporary || false,
-			is_private: false, //db must add column
-			is_scheduled: false, //db must add column
+			is_private: await this.dbUtils.isRoomPrivate(room_id),
+			is_scheduled: false,
+			start_date: new Date(),
+			end_date: new Date(),
+			language: room.room_language || "",
+			has_explicit_content: room.explicit || false,
+			has_nsfw_content: room.nsfw || false,
+			room_image: room.playlist_photo || "",
+			current_song: {
+				title: "",
+				artists: [],
+				cover: "",
+				start_time: new Date(),
+			},
+			tags: room.tags || [],
+		};
+
+		if (scheduledRoom && scheduledRoom !== null) {
+			result.is_scheduled = true;
+			/*
+			result.start_date = scheduledRoom.start_date;
+			result.end_date = scheduledRoom.end_date;
+			*/
+		}
+
+		const creator = await this.generateUserProfileDto(room.room_creator, false);
+		if (creator && creator !== null) {
+			result.creator = creator;
+		}
+
+		//participant count will be added later
+		//current song will be added later
+		//dates will be added later
+		//current songs will be added later
+
+		return result;
+	}
+
+	async generateRoomDtoFromRoom(room: Prisma.room): Promise<RoomDto | null> {
+		if (!room || room === null) {
+			return null;
+		}
+
+		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
+			where: { room_id: room.room_id },
+		});
+
+		const result: RoomDto = {
+			creator: new UserProfileDto(),
+			room_id: room.room_id,
+			participant_count: 0,
+			room_name: room.name,
+			description: room.description || "",
+			is_temporary: room.is_temporary || false,
+			is_private: await this.dbUtils.isRoomPrivate(room.room_id),
+			is_scheduled: false,
 			start_date: new Date(),
 			end_date: new Date(),
 			language: room.room_language || "",
@@ -251,6 +333,14 @@ export class DtoGenService {
 		const creator = await this.generateUserProfileDto(room.room_creator, false);
 		if (creator && creator !== null) {
 			result.creator = creator;
+		}
+
+		if (scheduledRoom && scheduledRoom !== null) {
+			result.is_scheduled = true;
+			/*
+			result.start_date = scheduledRoom.start_date;
+			result.end_date = scheduledRoom.end_date;
+			*/
 		}
 
 		//participant count will be added later
