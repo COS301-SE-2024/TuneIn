@@ -7,6 +7,7 @@ import {
 	Body,
 	Param,
 	UseGuards,
+	Request,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
@@ -49,7 +50,7 @@ export class ProfileController {
     */
 	@UseGuards(JwtAuthGuard)
 	@ApiTags("profile")
-	getProfile(): UserProfileDto {
+	getProfile(@Request() req: any): UserProfileDto {
 		return this.profileService.getProfile();
 	}
 
@@ -63,6 +64,7 @@ export class ProfileController {
 	@Put()
 	@ApiTags("profile")
 	updateProfile(
+		@Request() req: any,
 		@Body() updateProfileDto: UpdateUserProfileDto,
 	): UserProfileDto {
 		return this.profileService.updateProfile();
@@ -77,7 +79,7 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("profile")
-	patchProfile(@Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
+	patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
 		return this.profileService.patchProfile();
 	}
 
@@ -90,7 +92,7 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":username")
 	@ApiTags("profile")
-	getProfileByUsername(@Param("username") username: string): UserProfileDto {
+	getProfileByUsername(@Request() req: any, @Param("username") username: string): UserProfileDto {
 		return this.profileService.getProfileByUsername();
 	}
 
@@ -103,7 +105,7 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/follow")
 	@ApiTags("profile")
-	followUser(@Param("username") username: string): boolean {
+	followUser(@Request() req: any, @Param("username") username: string): boolean {
 		return this.profileService.followUser();
 	}
 
@@ -116,7 +118,7 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/unfollow")
 	@ApiTags("profile")
-	unfollowUser(@Param("username") username: string): boolean {
+	unfollowUser(@Request() req: any, @Param("username") username: string): boolean {
 		return this.profileService.unfollowUser();
 	}
 }

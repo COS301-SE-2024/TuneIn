@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
-import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+//import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -146,6 +146,12 @@ export class AuthService {
 			email: email,
 			user_id: user_id,
 		};
+		const existingUser = await this.prisma.users.findUnique({
+			where: { user_id: user_id },
+		});
+		if (existingUser) {
+			return true;
+		}
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);

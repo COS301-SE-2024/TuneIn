@@ -8,6 +8,7 @@ import {
 	Post,
 	Put,
 	UseGuards,
+	Request,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
@@ -54,7 +55,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get("new")
 	@ApiTags("rooms")
-	getNewRooms(): RoomDto[] {
+	getNewRooms(@Request() req: any): RoomDto[] {
 		return this.roomsService.getNewRooms();
 	}
 
@@ -67,7 +68,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id")
 	@ApiTags("rooms")
-	getRoomInfo(@Param("room_id") room_id: string): RoomDto {
+	getRoomInfo(@Request() req: any, @Param("room_id") room_id: string): RoomDto {
 		return this.roomsService.getRoomInfo(room_id);
 	}
 
@@ -81,6 +82,7 @@ export class RoomsController {
 	@Patch(":room_id")
 	@ApiTags("rooms")
 	updateRoomInfo(
+		@Request() req: any,
 		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): RoomDto {
@@ -91,6 +93,7 @@ export class RoomsController {
 	@Put(":room_id")
 	@ApiTags("rooms")
 	updateRoom(
+		@Request() req: any,
 		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): RoomDto {
@@ -106,7 +109,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":room_id")
 	@ApiTags("rooms")
-	deleteRoom(@Param("room_id") room_id: string): boolean {
+	deleteRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
 		return this.roomsService.deleteRoom(room_id);
 	}
 
@@ -119,7 +122,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/join")
 	@ApiTags("rooms")
-	joinRoom(@Param("room_id") room_id: string): boolean {
+	joinRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
 		return this.roomsService.joinRoom(room_id);
 	}
 
@@ -132,7 +135,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/leave")
 	@ApiTags("rooms")
-	leaveRoom(@Param("room_id") room_id: string): boolean {
+	leaveRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
 		return this.roomsService.leaveRoom(room_id);
 	}
 
@@ -145,7 +148,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/users")
 	@ApiTags("rooms")
-	getRoomUsers(@Param("room_id") room_id: string): UserProfileDto[] {
+	getRoomUsers(@Request() req: any, @Param("room_id") room_id: string): UserProfileDto[] {
 		return this.roomsService.getRoomUsers(room_id);
 	}
 
@@ -158,7 +161,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/songs")
 	@ApiTags("rooms")
-	getRoomQueue(@Param("room_id") room_id: string): SongInfoDto[] {
+	getRoomQueue(@Request() req: any, @Param("room_id") room_id: string): SongInfoDto[] {
 		return this.roomsService.getRoomQueue(room_id);
 	}
 
@@ -171,7 +174,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":room_id/songs")
 	@ApiTags("rooms")
-	clearRoomQueue(@Param("room_id") room_id: string): boolean {
+	clearRoomQueue(@Request() req: any, @Param("room_id") room_id: string): boolean {
 		return this.roomsService.clearRoomQueue(room_id);
 	}
 
@@ -185,6 +188,7 @@ export class RoomsController {
 	@Post(":room_id/songs")
 	@ApiTags("rooms")
 	addSongToQueue(
+		@Request() req: any,
 		@Param("room_id") room_id: string,
 		@Body() songInfoDto: SongInfoDto,
 	): SongInfoDto[] {
@@ -200,7 +204,7 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/songs/current")
 	@ApiTags("rooms")
-	getCurrentSong(@Param("room_id") room_id: string): SongInfoDto {
+	getCurrentSong(@Request() req: any, @Param("room_id") room_id: string): SongInfoDto {
 		return this.roomsService.getCurrentSong(room_id);
 	}
 }

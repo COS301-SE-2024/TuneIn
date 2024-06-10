@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsArray } from "class-validator";
+import { IsString, IsArray, IsDate } from "class-validator";
 
 export class SongInfoDto {
 	@ApiProperty()
@@ -15,6 +15,6 @@ export class SongInfoDto {
 	cover: string;
 
 	@ApiProperty()
-	@IsString()
-	start_time: string;
+	@IsDate()
+	start_time: Date;
 }

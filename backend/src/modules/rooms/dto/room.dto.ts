@@ -13,7 +13,7 @@ export class RoomDto {
 
 	@ApiProperty()
 	@IsNumber()
-	partipicant_count: number;
+	participant_count: number;
 
 	@ApiProperty()
 	@IsString()
