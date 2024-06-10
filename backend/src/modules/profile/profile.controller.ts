@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Put, Patch, Body, Param } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	Post,
+	Put,
+	Patch,
+	Body,
+	Param,
+	UseGuards,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
+import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 
 @Controller("profile")
 export class ProfileController {
@@ -37,7 +47,7 @@ export class ProfileController {
     no input
     response: return ProfileDto
     */
-	@Get()
+	@UseGuards(JwtAuthGuard)
 	@ApiTags("profile")
 	getProfile(): UserProfileDto {
 		return this.profileService.getProfile();
@@ -49,6 +59,7 @@ export class ProfileController {
     input: ProfileDto
     output: updated ProfileDto
     */
+	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("profile")
 	updateProfile(
@@ -63,6 +74,7 @@ export class ProfileController {
     input: ProfileDto
     output: updated ProfileDto
     */
+	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("profile")
 	patchProfile(@Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
@@ -75,6 +87,7 @@ export class ProfileController {
     no input
     response: ProfileDto
     */
+	@UseGuards(JwtAuthGuard)
 	@Get(":username")
 	@ApiTags("profile")
 	getProfileByUsername(@Param("username") username: string): UserProfileDto {
@@ -87,6 +100,7 @@ export class ProfileController {
     no input
     response: code (2xx for success, 4xx for error)
     */
+	@UseGuards(JwtAuthGuard)
 	@Post(":username/follow")
 	@ApiTags("profile")
 	followUser(@Param("username") username: string): boolean {
@@ -99,6 +113,7 @@ export class ProfileController {
     no input
     response: code (2xx for success, 4xx for error)
     */
+	@UseGuards(JwtAuthGuard)
 	@Post(":username/unfollow")
 	@ApiTags("profile")
 	unfollowUser(@Param("username") username: string): boolean {
