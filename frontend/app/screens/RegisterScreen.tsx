@@ -7,8 +7,8 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
 import UserPool from '../services/UserPool';
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
@@ -78,20 +78,14 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    let username = email;
-    let attributes = [];
+    const attributes = [
+      new CognitoUserAttribute({
+        Name: 'email',
+        Value: email
+      })
+    ];
 
-    if (validateEmail(email)) {
-      attributes = [
-        new CognitoUserAttribute({
-          Name: 'email',
-          Value: email
-        })
-      ];
-    }
-
-    console.log(username, password, attributes);
-    UserPool.signUp(email, password, null, [], (err, data) => {
+    UserPool.signUp(email, password, attributes, [], (err, data) => {
       if (err) {
         Alert.alert(
           "Error",
@@ -103,6 +97,11 @@ const RegisterScreen: React.FC = () => {
         return;
       }
 
+      
+
+      // Extract userSub from the response data
+      const userSub = data?.userSub;
+
       Alert.alert(
         "Verification code sent",
         "Please check your Email for the verification code",
@@ -110,14 +109,18 @@ const RegisterScreen: React.FC = () => {
         { cancelable: false }
       );
       
+      console.log("userSub:", userSub);
+
       router.navigate({
         pathname: "/screens/VerifyEmail",
-        params: { email: email },
+        params: { 
+          email: email,
+          userSub: userSub,
+        },
       });
     });
 
   };
-
   return (
     <ScrollView className="flex-1 p-4">
       <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>

@@ -9,7 +9,13 @@ import {
 	Put,
 	UseGuards,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import {
+	ApiTags,
+	ApiOperation,
+	ApiBody,
+	ApiParam,
+	ApiResponse,
+} from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/createroomdto";
@@ -18,68 +24,46 @@ import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 
+@ApiTags("rooms")
 @Controller("rooms")
 export class RoomsController {
 	constructor(private readonly roomsService: RoomsService) {}
 
-	//NOTE TO DEV:
-	/*
-    add decorators to each of these paths like:
-    @Post()
-    @ApiOperation({ summary: 'Create user' })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'The record has been successfully created.', type: User })
-    @ApiResponse({ status: 403, description: 'Forbidden.' })
-    createUser(@Body() createUserDto: CreateUserDto) {
-      //...
-    }
-
-    @Get(':id')
-    @ApiOperation({ summary: 'Retrieve user' })
-    @ApiParam({ name: 'id', required: true })
-    @ApiResponse({ status: 200, description: 'The found record', type: User })
-    getUser(@Param('id') id: string) {
-      //...
-    }
-
-    such that the API documentation is more detailed and informative for the next dev.
-  */
-
-	/*
-    GET /rooms/new
-    gets newly created public rooms
-    no input
-    response: an array of RoomDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get("new")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get newly created public rooms" })
+	@ApiResponse({
+		status: 200,
+		description: "An array of RoomDto",
+		type: [RoomDto],
+	})
 	getNewRooms(): RoomDto[] {
 		return this.roomsService.getNewRooms();
 	}
 
-	/*
-    GET /rooms/{room_id}
-    returns info about a room
-    no input
-    response: RoomDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get room info" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "The room info",
+		type: RoomDto,
+	})
 	getRoomInfo(@Param("room_id") room_id: string): RoomDto {
 		return this.roomsService.getRoomInfo(room_id);
 	}
 
-	/*
-    PUT/PATCH /rooms/{room_id}
-    edits room info (only if it belongs to the user)
-    input: partial RoomDto
-    response: updated RoomDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Patch(":room_id")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Update room info (partial update)" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiBody({ type: UpdateRoomDto })
+	@ApiResponse({
+		status: 200,
+		description: "The updated room info",
+		type: RoomDto,
+	})
 	updateRoomInfo(
 		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
@@ -89,7 +73,14 @@ export class RoomsController {
 
 	@UseGuards(JwtAuthGuard)
 	@Put(":room_id")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Update room info (full update)" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiBody({ type: UpdateRoomDto })
+	@ApiResponse({
+		status: 200,
+		description: "The updated room info",
+		type: RoomDto,
+	})
 	updateRoom(
 		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
@@ -97,93 +88,110 @@ export class RoomsController {
 		return this.roomsService.updateRoom(room_id, updateRoomDto);
 	}
 
-	/*
-    DELETE /rooms/{room_id}
-    deletes the room (only if it belongs to the user)
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@UseGuards(JwtAuthGuard)
 	@Delete(":room_id")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Delete a room" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "Room deleted successfully",
+	})
+	@ApiResponse({
+		status: 403,
+		description: "Forbidden.",
+	})
 	deleteRoom(@Param("room_id") room_id: string): boolean {
 		return this.roomsService.deleteRoom(room_id);
 	}
 
-	/*
-    POST /rooms/{room_id}/join
-    adds current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/join")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Join a room" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "Joined the room successfully",
+	})
+	@ApiResponse({
+		status: 403,
+		description: "Forbidden.",
+	})
 	joinRoom(@Param("room_id") room_id: string): boolean {
 		return this.roomsService.joinRoom(room_id);
 	}
 
-	/*
-    POST /rooms/{room_id}/leave
-    remove current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/leave")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Leave a room" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "Left the room successfully",
+	})
+	@ApiResponse({
+		status: 403,
+		description: "Forbidden.",
+	})
 	leaveRoom(@Param("room_id") room_id: string): boolean {
 		return this.roomsService.leaveRoom(room_id);
 	}
 
-	/*
-    GET /rooms/{room_id}/users
-    returns people currently (and previously in room)
-    no input
-    response: array of ProfileDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/users")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get users in a room" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "An array of user profiles",
+		type: [UserProfileDto],
+	})
 	getRoomUsers(@Param("room_id") room_id: string): UserProfileDto[] {
 		return this.roomsService.getRoomUsers(room_id);
 	}
 
-	/*
-    GET /rooms/{room_id}/songs
-    returns the queue
-    no input
-    response: array of SongInfoDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/songs")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get room song queue" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "An array of SongInfoDto",
+		type: [SongInfoDto],
+	})
 	getRoomQueue(@Param("room_id") room_id: string): SongInfoDto[] {
 		return this.roomsService.getRoomQueue(room_id);
 	}
 
-	/*
-    DELETE /rooms/{room_id}/songs
-    clears the queue (except for current song, if playing)
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@UseGuards(JwtAuthGuard)
 	@Delete(":room_id/songs")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Clear room song queue" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "Queue cleared successfully",
+	})
+	@ApiResponse({
+		status: 403,
+		description: "Forbidden.",
+	})
 	clearRoomQueue(@Param("room_id") room_id: string): boolean {
 		return this.roomsService.clearRoomQueue(room_id);
 	}
 
-	/*
-    POST /rooms/{room_id}/songs
-    add a song to queue
-    input: SongInfoDto
-    response: array of SongInfoDto (room queue)
-    */
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/songs")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Add a song to the room queue" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiBody({ type: SongInfoDto })
+	@ApiResponse({
+		status: 200,
+		description: "Song added to the queue",
+		type: [SongInfoDto],
+	})
+	@ApiResponse({
+		status: 403,
+		description: "Forbidden.",
+	})
 	addSongToQueue(
 		@Param("room_id") room_id: string,
 		@Body() songInfoDto: SongInfoDto,
@@ -191,15 +199,15 @@ export class RoomsController {
 		return this.roomsService.addSongToQueue(room_id, songInfoDto);
 	}
 
-	/*
-    GET /rooms/{room_id}/songs/current
-    returns the current playing song
-    no input
-    response: SongInfoDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/songs/current")
-	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get current playing song" })
+	@ApiParam({ name: "room_id", required: true })
+	@ApiResponse({
+		status: 200,
+		description: "The current song",
+		type: SongInfoDto,
+	})
 	getCurrentSong(@Param("room_id") room_id: string): SongInfoDto {
 		return this.roomsService.getCurrentSong(room_id);
 	}
