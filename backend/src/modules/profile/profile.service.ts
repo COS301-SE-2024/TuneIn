@@ -91,8 +91,20 @@ export class ProfileService {
 		}
 
 		try {
+			//find the follow relationship and delete it
+			const follow = await this.prisma.follows.findFirst({
+				where: {
+					follower: userId,
+					followee: accountUnfollowedId,
+				},
+			});
+			if (!follow) {
+				return true;
+			}
+
 			await this.prisma.follows.delete({
 				where: {
+					follows_id: follow.follows_id,
 					follower: userId,
 					followee: accountUnfollowedId,
 				},

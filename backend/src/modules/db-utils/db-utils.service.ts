@@ -29,7 +29,7 @@ export class DbUtilsService {
 		}
 
 		const users: Prisma.users[] = await this.prisma.users.findMany({
-			where: { userID: { in: ids } },
+			where: { user_id: { in: ids } },
 		});
 
 		for (let i = 0; i < users.length; i++) {
@@ -64,7 +64,7 @@ export class DbUtilsService {
 		}
 
 		const users: Prisma.users[] = await this.prisma.users.findMany({
-			where: { userID: { in: ids } },
+			where: { user_id: { in: ids } },
 		});
 
 		for (let i = 0; i < users.length; i++) {
@@ -99,7 +99,7 @@ export class DbUtilsService {
 
 	async isRoomPublic(roomID: string): Promise<boolean> {
 		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { roomID: roomID },
+			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
@@ -107,7 +107,7 @@ export class DbUtilsService {
 
 		const publicRoom: Prisma.public_room | null =
 			await this.prisma.public_room.findUnique({
-				where: { roomID: roomID },
+				where: { room_id: roomID },
 			});
 
 		if (!publicRoom || publicRoom === null) {
@@ -119,7 +119,7 @@ export class DbUtilsService {
 
 	async isRoomPrivate(roomID: string): Promise<boolean> {
 		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { roomID: roomID },
+			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
@@ -127,7 +127,7 @@ export class DbUtilsService {
 
 		const privateRoom: Prisma.private_room | null =
 			await this.prisma.private_room.findUnique({
-				where: { roomID: roomID },
+				where: { room_id: roomID },
 			});
 
 		if (!privateRoom || privateRoom === null) {
@@ -139,7 +139,7 @@ export class DbUtilsService {
 
 	async userExists(userID: string): Promise<boolean> {
 		const user: Prisma.users | null = await this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 		if (!user || user === null) {
 			return false;
@@ -149,7 +149,7 @@ export class DbUtilsService {
 
 	async roomExists(roomID: string): Promise<boolean> {
 		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { roomID: roomID },
+			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
 			return false;

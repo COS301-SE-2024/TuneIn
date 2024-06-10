@@ -21,7 +21,7 @@ export class UsersService {
 
 	create(createUserDto: CreateUserDto) {
 		const user: Prisma.usersCreateInput = {
-			userID: createUserDto.userID,
+			user_id: createUserDto.userID,
 			username: createUserDto.username,
 			bio: createUserDto.bio,
 			profile_picture: createUserDto.profile_picture,
@@ -37,7 +37,7 @@ export class UsersService {
 
 	findOne(userID: string) {
 		return this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 	}
 
@@ -52,14 +52,14 @@ export class UsersService {
 		if (updateUserDto.preferences) user.preferences = updateUserDto.preferences;
 		console.log(user);
 		return this.prisma.users.update({
-			where: { userID: userID },
+			where: { user_id: userID },
 			data: user,
 		});
 	}
 
 	remove(userID: string) {
 		return this.prisma.users.delete({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 	}
 
@@ -81,7 +81,7 @@ export class UsersService {
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
 		// implementation goes here
 		const user = await this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 
 		if (!user) {
@@ -89,14 +89,14 @@ export class UsersService {
 		}
 
 		const rooms = await this.prisma.room.findMany({
-			where: { host_id: userID },
+			where: { room_creator: userID },
 		});
 
 		if (!rooms) {
 			return [];
 		}
 
-		const ids: string[] = rooms.map((room) => room.roomID);
+		const ids: string[] = rooms.map((room) => room.room_id);
 		const r = await this.dtogen.generateMultipleRoomDto(ids);
 		if (!r || r === null) {
 			throw new Error(
@@ -200,7 +200,7 @@ export class UsersService {
 			);
 		}
 		const rooms: PrismaTypes.room[] = r;
-		const ids: string[] = rooms.map((room) => room.roomID);
+		const ids: string[] = rooms.map((room) => room.room_id);
 		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
 		if (!recommends || recommends === null) {
 			throw new Error(
@@ -236,7 +236,7 @@ export class UsersService {
 			return [];
 		}
 		const followers: PrismaTypes.users[] = f;
-		const ids: string[] = followers.map((follower) => follower.userID);
+		const ids: string[] = followers.map((follower) => follower.user_id);
 		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
 		if (!result) {
 			throw new Error(
@@ -252,7 +252,7 @@ export class UsersService {
 			return [];
 		}
 		const followees: PrismaTypes.users[] = following;
-		const ids: string[] = followees.map((followee) => followee.userID);
+		const ids: string[] = followees.map((followee) => followee.user_id);
 		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
 		if (!result) {
 			throw new Error(

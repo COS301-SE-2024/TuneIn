@@ -37,7 +37,7 @@ export class RoomsService {
 
 		const rooms: PrismaTypes.room[] = [];
 		for (const room of allRooms) {
-			if (publicRooms.find((pr) => pr.roomID === room.roomID)) {
+			if (publicRooms.find((pr) => pr.room_id === room.room_id)) {
 				rooms.push(room);
 			}
 		}

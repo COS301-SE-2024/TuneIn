@@ -96,7 +96,7 @@ export class DtoGenService {
 	): Promise<UserProfileDto | null> {
 		//check if userID exists
 		const user: Prisma.users | null = await this.prisma.users.findUnique({
-			where: { userID: userID },
+			where: { user_id: userID },
 		});
 
 		if (!user || user === null) {
@@ -146,7 +146,7 @@ export class DtoGenService {
 				await this.dbUtils.getRandomRooms(5);
 			if (favRooms && favRooms !== null) {
 				result.fav_rooms.count = favRooms.length;
-				const ids: string[] = favRooms.map((r) => r.roomID);
+				const ids: string[] = favRooms.map((r) => r.room_id);
 				const rooms = await this.generateMultipleRoomDto(ids);
 				if (rooms && rooms !== null) {
 					result.fav_rooms.data = rooms;
@@ -159,7 +159,7 @@ export class DtoGenService {
 				await this.dbUtils.getRandomRooms(5);
 			if (recentRooms && recentRooms !== null) {
 				result.recent_rooms.count = recentRooms.length;
-				const ids: string[] = recentRooms.map((r) => r.roomID);
+				const ids: string[] = recentRooms.map((r) => r.room_id);
 				const rooms = await this.generateMultipleRoomDto(ids);
 				if (rooms && rooms !== null) {
 					result.recent_rooms.data = rooms;
@@ -173,7 +173,7 @@ export class DtoGenService {
 	generateBriefUserProfileDto(user: Prisma.users): UserProfileDto {
 		const result: UserProfileDto = {
 			profile_name: user.full_name || "",
-			userID: user.userID,
+			userID: user.user_id,
 			username: user.username,
 			profile_picture_url: user.profile_picture || "",
 			followers: {
@@ -219,7 +219,7 @@ export class DtoGenService {
 		user_ids: string[],
 	): Promise<UserProfileDto[]> {
 		const users: Prisma.users[] | null = await this.prisma.users.findMany({
-			where: { userID: { in: user_ids } },
+			where: { user_id: { in: user_ids } },
 		});
 
 		if (!users || users === null) {
@@ -230,7 +230,7 @@ export class DtoGenService {
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user = await this.generateUserProfileDto(u.userID, false);
+				const user = await this.generateUserProfileDto(u.user_id, false);
 				if (user && user !== null) {
 					result.push(user);
 				}
@@ -241,7 +241,7 @@ export class DtoGenService {
 
 	async generateRoomDto(roomID: string): Promise<RoomDto | null> {
 		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { roomID: roomID },
+			where: { room_id: roomID },
 		});
 
 		if (!room || room === null) {
@@ -249,12 +249,12 @@ export class DtoGenService {
 		}
 
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
-			where: { roomID: roomID },
+			where: { room_id: roomID },
 		});
 
 		const result: RoomDto = {
 			creator: new UserProfileDto(),
-			roomID: room.roomID,
+			roomID: room.room_id,
 			participant_count: 0,
 			room_name: room.name,
 			description: room.description || "",
@@ -303,17 +303,17 @@ export class DtoGenService {
 		}
 
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
-			where: { roomID: room.roomID },
+			where: { room_id: room.room_id },
 		});
 
 		const result: RoomDto = {
 			creator: new UserProfileDto(),
-			roomID: room.roomID,
+			roomID: room.room_id,
 			participant_count: 0,
 			room_name: room.name,
 			description: room.description || "",
 			is_temporary: room.is_temporary || false,
-			is_private: await this.dbUtils.isRoomPrivate(room.roomID),
+			is_private: await this.dbUtils.isRoomPrivate(room.room_id),
 			is_scheduled: false,
 			start_date: new Date(),
 			end_date: new Date(),
@@ -353,7 +353,7 @@ export class DtoGenService {
 
 	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[] | null> {
 		const rooms: Prisma.room[] | null = await this.prisma.room.findMany({
-			where: { roomID: { in: room_ids } },
+			where: { room_id: { in: room_ids } },
 		});
 
 		if (!rooms || rooms === null) {
@@ -364,7 +364,7 @@ export class DtoGenService {
 		//remove duplicate user ids
 		const uniqueUserIds: string[] = [...new Set(userIds)];
 		const users: Prisma.users[] | null = await this.prisma.users.findMany({
-			where: { userID: { in: uniqueUserIds } },
+			where: { user_id: { in: uniqueUserIds } },
 		});
 
 		const userProfiles: UserProfileDto[] = [];
@@ -390,7 +390,7 @@ export class DtoGenService {
 				}
 				const room: RoomDto = {
 					creator: u || new UserProfileDto(),
-					roomID: r.roomID,
+					roomID: r.room_id,
 					participant_count: 0, //to fix soon
 					room_name: r.name,
 					description: r.description || "",

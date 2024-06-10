@@ -10,7 +10,6 @@ import {
 	HttpException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import {
 	ApiBearerAuth,
@@ -250,12 +249,12 @@ export class UsersController {
 		type: UserProfileDto,
 		isArray: true,
 	})
-	getFollowers(@Request() req: any): UserProfileDto[] {
+	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
 		const userID = req.user.sub;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
-		return this.usersService.getFollowers();
+		return await this.usersService.getFollowers(userID);
 	}
 
 	@ApiBearerAuth()
@@ -269,11 +268,11 @@ export class UsersController {
 		type: UserProfileDto,
 		isArray: true,
 	})
-	getFollowing(@Request() req: any): UserProfileDto[] {
+	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
 		const userID = req.user.sub;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
-		return this.usersService.getFollowing();
+		return await this.usersService.getFollowing(userID);
 	}
 }
