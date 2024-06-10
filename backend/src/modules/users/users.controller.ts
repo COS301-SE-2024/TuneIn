@@ -6,6 +6,7 @@ import {
 	Patch,
 	Put,
 	UseGuards,
+	Request,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -84,7 +85,22 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("users")
-	getUserInfo(): UserDto {
+	getUserInfo(@Request() req: any): UserDto {
+		//try to get sub, username & email back from JWT token
+		console.log("1");
+		console.log("2", req);
+		console.log("3", req.user);
+		//req.user
+		/*
+		{
+			userId: '311ce2e8-8041-70bd-0ab5-be97283ee182',
+			username: 'bigdaddy'
+		}
+		*/
+		console.log("4", req.user.sub);
+		console.log("5", req.user.username);
+		console.log("6", req.user.email);
+
 		return this.usersService.getUserInfo();
 	}
 
@@ -97,14 +113,20 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("users")
-	updateUserProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
+	updateUserProfile(
+		@Request() req: any,
+		@Body() updateUserDto: UpdateUserDto,
+	): UserDto {
 		return this.usersService.updateUserProfile(updateUserDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("users")
-	updateProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
+	updateProfile(
+		@Request() req: any,
+		@Body() updateUserDto: UpdateUserDto,
+	): UserDto {
 		return this.usersService.updateProfile(updateUserDto);
 	}
 
@@ -117,7 +139,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("users")
-	getUserRooms(): RoomDto[] {
+	getUserRooms(@Request() req: any): RoomDto[] {
 		return this.usersService.getUserRooms();
 	}
 
@@ -130,7 +152,10 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Post("rooms")
 	@ApiTags("users")
-	createRoom(@Body() createRoomDto: CreateRoomDto): RoomDto {
+	createRoom(
+		@Request() req: any,
+		@Body() createRoomDto: CreateRoomDto,
+	): RoomDto {
 		return this.usersService.createRoom(createRoomDto);
 	}
 
@@ -143,7 +168,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
 	@ApiTags("users")
-	getRecentRooms(): RoomDto[] {
+	getRecentRooms(@Request() req: any): RoomDto[] {
 		return this.usersService.getRecentRooms();
 	}
 
@@ -156,7 +181,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
 	@ApiTags("users")
-	getRecommendedRooms(): RoomDto[] {
+	getRecommendedRooms(@Request() req: any): RoomDto[] {
 		return this.usersService.getRecommendedRooms();
 	}
 
@@ -169,7 +194,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
-	getUserFriends(): UserProfileDto[] {
+	getUserFriends(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getUserFriends();
 	}
 
@@ -182,7 +207,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
 	@ApiTags("users")
-	getFollowers(): UserProfileDto[] {
+	getFollowers(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getFollowers();
 	}
 
@@ -195,7 +220,7 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("following")
 	@ApiTags("users")
-	getFollowing(): UserProfileDto[] {
+	getFollowing(@Request() req: any): UserProfileDto[] {
 		return this.usersService.getFollowing();
 	}
 }
