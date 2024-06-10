@@ -7,21 +7,28 @@ import {
 	Put,
 	UseGuards,
 	Request,
+	HttpException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { DbUtilsService } from "../db-utils/db-utils.service";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
 
 @ApiTags("users")
 @Controller("users")
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+	) {}
 
 	//basic CRUD operations on the users table
 	/*
@@ -82,6 +89,7 @@ export class UsersController {
     no input
     response: return UserDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("users")
@@ -110,6 +118,7 @@ export class UsersController {
     input: UserDto
     response: return updated UserDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("users")
@@ -120,6 +129,7 @@ export class UsersController {
 		return this.usersService.updateUserProfile(updateUserDto);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("users")
@@ -130,33 +140,64 @@ export class UsersController {
 		return this.usersService.updateProfile(updateUserDto);
 	}
 
-	/*
-    GET /users/rooms
-    get a user's rooms
-    no input
-    response: an array of RoomDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("users")
-	getUserRooms(@Request() req: any): RoomDto[] {
-		return this.usersService.getUserRooms();
+	@ApiOperation({ summary: "Get a user's rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+		return await this.usersService.getUserRooms(userID);
 	}
 
-	/*
-    POST /users/rooms
-    create a new room
-    input: partial RoomDto
-    response: final RoomDto for room (including new id)
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post("rooms")
 	@ApiTags("users")
-	createRoom(
+	@ApiOperation({ summary: "Create a new room" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The newly created room as a RoomDto.",
+		type: RoomDto,
+	})
+	async createRoom(
 		@Request() req: any,
 		@Body() createRoomDto: CreateRoomDto,
-	): RoomDto {
-		return this.usersService.createRoom(createRoomDto);
+	): Promise<RoomDto> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+
+		if (!createRoomDto.creator) {
+			const creator = await this.dtogen.generateUserProfileDto(userID, false);
+			if (creator) {
+				createRoomDto.creator = creator;
+			}
+			else {
+				throw new HttpException(
+					"Failed to generate creator profile from user ID.",
+					500,
+				);
+			}
+		}
+
+		if (userID !== createRoomDto.creator.user_id) {
+			throw new HttpException(
+				"User ID in JWT token does not match creator ID in request body.",
+				400,
+			);
+		}
+		return await this.usersService.createRoom(createRoomDto);
 	}
 
 	/*
@@ -165,10 +206,17 @@ export class UsersController {
     no input
     response: an array of RoomDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
 	@ApiTags("users")
-	getRecentRooms(@Request() req: any): RoomDto[] {
+	getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+
+		if (userID !== 
 		return this.usersService.getRecentRooms();
 	}
 
@@ -178,10 +226,11 @@ export class UsersController {
     no input
     response: an array of RoomDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
 	@ApiTags("users")
-	getRecommendedRooms(@Request() req: any): RoomDto[] {
+	getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
 		return this.usersService.getRecommendedRooms();
 	}
 
@@ -191,6 +240,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
@@ -204,6 +254,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
 	@ApiTags("users")
@@ -217,6 +268,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("following")
 	@ApiTags("users")
