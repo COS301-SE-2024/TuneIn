@@ -136,4 +136,24 @@ export class DbUtilsService {
 
 		return true;
 	}
+
+	async userExists(user_id: string): Promise<boolean> {
+		const user: Prisma.users | null = await this.prisma.users.findUnique({
+			where: { user_id: user_id },
+		});
+		if (!user || user === null) {
+			return false;
+		}
+		return true;
+	}
+
+	async roomExists(room_id: string): Promise<boolean> {
+		const room: Prisma.room | null = await this.prisma.room.findUnique({
+			where: { room_id: room_id },
+		});
+		if (!room || room === null) {
+			return false;
+		}
+		return true;
+	}
 }
