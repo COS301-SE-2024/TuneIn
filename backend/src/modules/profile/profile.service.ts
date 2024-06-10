@@ -37,11 +37,69 @@ export class ProfileService {
 		return new UserProfileDto();
 	}
 
-	followUser(): boolean {
-		return true;
+	async followUser(
+		userId: string,
+		accountFollowedId: string,
+	): Promise<boolean> {
+		if (userId === accountFollowedId) {
+			throw new Error("You cannot follow yourself");
+		}
+
+		if (!(await this.dbUtilsService.userExists(accountFollowedId))) {
+			throw new Error("User (" + accountFollowedId + ") does not exist");
+		}
+
+		if (!(await this.dbUtilsService.userExists(userId))) {
+			throw new Error("User (" + userId + ") does not exist");
+		}
+
+		if (await this.dbUtilsService.isFollowing(userId, accountFollowedId)) {
+			return true;
+		}
+
+		try {
+			await this.prisma.follows.create({
+				data: {
+					follower: userId,
+					followee: accountFollowedId,
+				},
+			});
+			return true;
+		} catch (e) {
+			throw new Error("Failed to follow user (" + accountFollowedId + ")");
+		}
 	}
 
-	unfollowUser(): boolean {
-		return true;
+	async unfollowUser(
+		userId: string,
+		accountUnfollowedId: string,
+	): Promise<boolean> {
+		if (userId === accountUnfollowedId) {
+			throw new Error("You cannot unfollow yourself");
+		}
+
+		if (!(await this.dbUtilsService.userExists(accountUnfollowedId))) {
+			throw new Error("User (" + accountUnfollowedId + ") does not exist");
+		}
+
+		if (!(await this.dbUtilsService.userExists(userId))) {
+			throw new Error("User (" + userId + ") does not exist");
+		}
+
+		if (!(await this.dbUtilsService.isFollowing(userId, accountUnfollowedId))) {
+			return true;
+		}
+
+		try {
+			await this.prisma.follows.delete({
+				where: {
+					follower: userId,
+					followee: accountUnfollowedId,
+				},
+			});
+			return true;
+		} catch (e) {
+			throw new Error("Failed to unfollow user (" + accountUnfollowedId + ")");
+		}
 	}
 }
