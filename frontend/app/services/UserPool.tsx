@@ -7,4 +7,5 @@ const poolData = {
 };
 console.log(EXPO_CLIENT_ID, EXPO_USER_POOL_ID);
 
+console.log("UserPool.tsx: poolData", poolData);
 export default new CognitoUserPool(poolData);
