@@ -213,7 +213,11 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
-		return this.usersService.getRecommendedRooms();
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+		return await this.usersService.getRecommendedRooms(userID);
 	}
 
 	@ApiBearerAuth()
@@ -227,8 +231,12 @@ export class UsersController {
 		type: UserProfileDto,
 		isArray: true,
 	})
-	getUserFriends(@Request() req: any): UserProfileDto[] {
-		return this.usersService.getUserFriends();
+	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
+		return await this.usersService.getUserFriends(userID);
 	}
 
 	@ApiBearerAuth()
@@ -243,6 +251,10 @@ export class UsersController {
 		isArray: true,
 	})
 	getFollowers(@Request() req: any): UserProfileDto[] {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
 		return this.usersService.getFollowers();
 	}
 
@@ -258,6 +270,10 @@ export class UsersController {
 		isArray: true,
 	})
 	getFollowing(@Request() req: any): UserProfileDto[] {
+		const userID = req.user.sub;
+		if (!userID || userID === "" || typeof userID !== "string") {
+			throw new Error("Invalid user ID in JWT token. Please log in again.");
+		}
 		return this.usersService.getFollowing();
 	}
 }

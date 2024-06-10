@@ -191,7 +191,7 @@ export class UsersService {
 		return [];
 	}
 
-	async getRecommendedRooms(): Promise<RoomDto[]> {
+	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
 		const r = await this.dbUtils.getRandomRooms(5);
 		if (!r || r === null) {
