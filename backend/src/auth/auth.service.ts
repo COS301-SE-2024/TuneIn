@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
+import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -181,5 +182,32 @@ export class AuthService {
 
 		const token = jwt.sign(payload, secretKey, { expiresIn });
 		return token;
+	}
+
+	async getUserInfo(jwt_token: string): Promise<any> {
+		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
+		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
+
+		if (!secretKey || secretKey === undefined || secretKey === "") {
+			throw new Error("Missing JWT secret key");
+		}
+
+		if (!expiresIn || expiresIn === undefined || expiresIn === "") {
+			throw new Error("Missing JWT expiration time");
+		}
+
+		const decoded = jwt.verify(jwt_token, secretKey);
+		const user_id = decoded.sub;
+		if (!user_id) {
+			throw new Error("Invalid JWT token");
+		}
+		if (typeof user_id !== "string") {
+			throw new Error("Invalid JWT token");
+		}
+
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: user_id },
+		});
+		return user;
 	}
 }

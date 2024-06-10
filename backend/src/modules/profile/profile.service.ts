@@ -1,8 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { UserProfileDto } from "./dto/userprofile.dto";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { Prisma } from "@prisma/client";
+
 
 @Injectable()
 export class ProfileService {
+	constructor(private readonly prisma: PrismaService) {}
+	
 	getProfile(): UserProfileDto {
 		return new UserProfileDto();
 	}

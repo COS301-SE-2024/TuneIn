@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Put } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Put,
+	UseGuards,
+} from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -7,6 +15,7 @@ import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
+import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 
 @ApiTags("users")
 @Controller("users")
@@ -72,6 +81,7 @@ export class UsersController {
     no input
     response: return UserDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("users")
 	getUserInfo(): UserDto {
@@ -84,12 +94,14 @@ export class UsersController {
     input: UserDto
     response: return updated UserDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("users")
 	updateUserProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
 		return this.usersService.updateUserProfile(updateUserDto);
 	}
 
+	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("users")
 	updateProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
@@ -102,6 +114,7 @@ export class UsersController {
     no input
     response: an array of RoomDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("users")
 	getUserRooms(): RoomDto[] {
@@ -114,6 +127,7 @@ export class UsersController {
     input: partial RoomDto
     response: final RoomDto for room (including new id)
   */
+	@UseGuards(JwtAuthGuard)
 	@Post("rooms")
 	@ApiTags("users")
 	createRoom(@Body() createRoomDto: CreateRoomDto): RoomDto {
@@ -126,6 +140,7 @@ export class UsersController {
     no input
     response: an array of RoomDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
 	@ApiTags("users")
 	getRecentRooms(): RoomDto[] {
@@ -138,6 +153,7 @@ export class UsersController {
     no input
     response: an array of RoomDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
 	@ApiTags("users")
 	getRecommendedRooms(): RoomDto[] {
@@ -150,6 +166,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
 	getUserFriends(): UserProfileDto[] {
@@ -162,6 +179,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("followers")
 	@ApiTags("users")
 	getFollowers(): UserProfileDto[] {
@@ -174,6 +192,7 @@ export class UsersController {
     no input
     response: an array of ProfileDto
   */
+	@UseGuards(JwtAuthGuard)
 	@Get("following")
 	@ApiTags("users")
 	getFollowing(): UserProfileDto[] {

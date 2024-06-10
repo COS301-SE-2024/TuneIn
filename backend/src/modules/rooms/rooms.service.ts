@@ -3,9 +3,13 @@ import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class RoomsService {
+	constructor(private readonly prisma: PrismaService) {}
+
 	getNewRooms(): RoomDto[] {
 		// TODO: Implement logic to get newly created public rooms
 		return [];
