@@ -191,9 +191,25 @@ export class UsersService {
 		return [];
 	}
 
-	getRecommendedRooms(): RoomDto[] {
+	async getRecommendedRooms(): Promise<RoomDto[]> {
 		// implementation goes here
-		return [];
+
+		//TODO: implement recommendation algorithm
+		const r = await this.dbUtils.getRandomRooms(5);
+		if (!r || r === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+			);
+		}
+		const rooms: PrismaTypes.room[] = r;
+		const ids: string[] = rooms.map((room) => room.room_id);
+		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
+		if (!recommends || recommends === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+			);
+		}
+		return recommends;
 	}
 
 	getUserFriends(): UserProfileDto[] {
