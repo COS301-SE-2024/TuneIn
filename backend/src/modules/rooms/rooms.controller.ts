@@ -10,7 +10,7 @@ import {
 	UseGuards,
 	Request,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/createroomdto";
@@ -52,11 +52,19 @@ export class RoomsController {
     no input
     response: an array of RoomDto
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("new")
+	@ApiOperation({ summary: "Get newly created public rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The new public rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
 	@ApiTags("rooms")
-	getNewRooms(@Request() req: any): RoomDto[] {
-		return this.roomsService.getNewRooms();
+	async getNewRooms(): Promise<RoomDto[]> {
+		return await this.roomsService.getNewRooms();
 	}
 
 	/*
