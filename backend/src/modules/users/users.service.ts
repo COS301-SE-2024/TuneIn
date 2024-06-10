@@ -7,10 +7,16 @@ import { UserDto } from "./dto/user.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { DbUtilsService } from "../db-utils/db-utils.service";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
 
 @Injectable()
 export class UsersService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+	) {}
 
 	create(createUserDto: CreateUserDto) {
 		const user: Prisma.usersCreateInput = {
