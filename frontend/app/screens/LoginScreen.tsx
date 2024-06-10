@@ -39,6 +39,7 @@ const LoginScreen: React.FC = () => {
         console.log('access token + ' + result.getAccessToken().getJwtToken());
 
         console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
+        
         //POST request to backend
         fetch("http://localhost:3000/auth/login", {
           method: "POST",
@@ -62,7 +63,6 @@ const LoginScreen: React.FC = () => {
         .catch((error) => {
           console.error("Error:", error);
         });
-
 
         router.navigate("/screens/Home");
       },
