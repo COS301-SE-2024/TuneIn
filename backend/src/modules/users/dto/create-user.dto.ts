@@ -4,7 +4,7 @@ import { IsString } from "class-validator";
 export class CreateUserDto {
 	@ApiProperty()
 	@IsString()
-	user_id: string;
+	userID: string;
 
 	@ApiProperty()
 	@IsString()

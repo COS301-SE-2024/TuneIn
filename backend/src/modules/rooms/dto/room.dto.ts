@@ -9,11 +9,11 @@ export class RoomDto {
 
 	@ApiProperty()
 	@IsString()
-	room_id: string;
+	roomID: string;
 
 	@ApiProperty()
 	@IsNumber()
-	partipicant_count: number;
+	participant_count: number;
 
 	@ApiProperty()
 	@IsString()

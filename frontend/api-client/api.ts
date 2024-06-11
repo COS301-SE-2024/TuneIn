@@ -80,99 +80,361 @@ export class RequiredError extends Error {
 /**
  * 
  * @export
- * @interface CreateUserDto
+ * @interface AuthBody
  */
-export interface CreateUserDto {
+export interface AuthBody {
     /**
      * 
      * @type {string}
-     * @memberof CreateUserDto
-     */
-    userId: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateUserDto
+     * @memberof AuthBody
      */
     username: string;
     /**
      * 
      * @type {string}
-     * @memberof CreateUserDto
+     * @memberof AuthBody
      */
-    bio: string;
+    userCognitoSub: string;
+}
+/**
+ * 
+ * @export
+ * @interface CreateRoomDto
+ */
+export interface CreateRoomDto {
+    /**
+     * 
+     * @type {UserProfileDto}
+     * @memberof CreateRoomDto
+     */
+    creator?: UserProfileDto;
     /**
      * 
      * @type {string}
-     * @memberof CreateUserDto
+     * @memberof CreateRoomDto
      */
-    profilePicture: string;
+    roomID?: string;
     /**
      * 
-     * @type {any}
-     * @memberof CreateUserDto
+     * @type {number}
+     * @memberof CreateRoomDto
      */
-    activity: any;
+    participantCount?: number;
     /**
      * 
-     * @type {any}
-     * @memberof CreateUserDto
+     * @type {string}
+     * @memberof CreateRoomDto
      */
-    preferences: any;
+    roomName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRoomDto
+     */
+    description?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateRoomDto
+     */
+    isTemporary?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateRoomDto
+     */
+    isPrivate?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateRoomDto
+     */
+    isScheduled?: boolean;
+    /**
+     * 
+     * @type {Date}
+     * @memberof CreateRoomDto
+     */
+    startDate?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof CreateRoomDto
+     */
+    endDate?: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRoomDto
+     */
+    language?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateRoomDto
+     */
+    hasExplicitContent?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateRoomDto
+     */
+    hasNsfwContent?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRoomDto
+     */
+    roomImage?: string;
+    /**
+     * 
+     * @type {SongInfoDto}
+     * @memberof CreateRoomDto
+     */
+    currentSong?: SongInfoDto;
     /**
      * 
      * @type {Array<string>}
-     * @memberof CreateUserDto
+     * @memberof CreateRoomDto
      */
-    bookmark: Array<string>;
+    tags?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface RoomDto
+ */
+export interface RoomDto {
+    /**
+     * 
+     * @type {UserProfileDto}
+     * @memberof RoomDto
+     */
+    creator: UserProfileDto;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    roomID: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoomDto
+     */
+    participantCount: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    roomName: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    description: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof RoomDto
+     */
+    isTemporary: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof RoomDto
+     */
+    isPrivate: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof RoomDto
+     */
+    isScheduled: boolean;
+    /**
+     * 
+     * @type {Date}
+     * @memberof RoomDto
+     */
+    startDate: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof RoomDto
+     */
+    endDate: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    language: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof RoomDto
+     */
+    hasExplicitContent: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof RoomDto
+     */
+    hasNsfwContent: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    roomImage: string;
+    /**
+     * 
+     * @type {SongInfoDto}
+     * @memberof RoomDto
+     */
+    currentSong: SongInfoDto;
     /**
      * 
      * @type {Array<string>}
-     * @memberof CreateUserDto
+     * @memberof RoomDto
      */
-    followsFollowsFolloweeTousers: Array<string>;
+    tags: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface SongInfoDto
+ */
+export interface SongInfoDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof SongInfoDto
+     */
+    title: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof CreateUserDto
+     * @memberof SongInfoDto
      */
-    followsFollowsFollowerTousers: Array<string>;
+    artists: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof SongInfoDto
+     */
+    cover: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SongInfoDto
+     */
+    startTime: Date;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateRoomDto
+ */
+export interface UpdateRoomDto {
+    /**
+     * 
+     * @type {UserProfileDto}
+     * @memberof UpdateRoomDto
+     */
+    creator?: UserProfileDto;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoomDto
+     */
+    roomID?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateRoomDto
+     */
+    participantCount?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoomDto
+     */
+    roomName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoomDto
+     */
+    description?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateRoomDto
+     */
+    isTemporary?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateRoomDto
+     */
+    isPrivate?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateRoomDto
+     */
+    isScheduled?: boolean;
+    /**
+     * 
+     * @type {Date}
+     * @memberof UpdateRoomDto
+     */
+    startDate?: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof UpdateRoomDto
+     */
+    endDate?: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoomDto
+     */
+    language?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateRoomDto
+     */
+    hasExplicitContent?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateRoomDto
+     */
+    hasNsfwContent?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateRoomDto
+     */
+    roomImage?: string;
+    /**
+     * 
+     * @type {SongInfoDto}
+     * @memberof UpdateRoomDto
+     */
+    currentSong?: SongInfoDto;
     /**
      * 
      * @type {Array<string>}
-     * @memberof CreateUserDto
+     * @memberof UpdateRoomDto
      */
-    friendsFriendsFriend1Tousers: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateUserDto
-     */
-    friendsFriendsFriend2Tousers: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateUserDto
-     */
-    message: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateUserDto
-     */
-    participate: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateUserDto
-     */
-    privateMessage: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateUserDto
-     */
-    room: Array<string>;
+    tags?: Array<string>;
 }
 /**
  * 
@@ -185,7 +447,7 @@ export interface UpdateUserDto {
      * @type {string}
      * @memberof UpdateUserDto
      */
-    userId?: string;
+    userID?: string;
     /**
      * 
      * @type {string}
@@ -272,6 +534,176 @@ export interface UpdateUserDto {
     room?: Array<string>;
 }
 /**
+ * 
+ * @export
+ * @interface UpdateUserProfileDto
+ */
+export interface UpdateUserProfileDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserProfileDto
+     */
+    profileName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserProfileDto
+     */
+    userID?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserProfileDto
+     */
+    username?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserProfileDto
+     */
+    profilePictureUrl?: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    followers?: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    following?: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    links?: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserProfileDto
+     */
+    bio?: string;
+    /**
+     * 
+     * @type {SongInfoDto}
+     * @memberof UpdateUserProfileDto
+     */
+    currentSong?: SongInfoDto;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    favGenres?: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    favSongs?: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    favRooms?: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UpdateUserProfileDto
+     */
+    recentRooms?: any;
+}
+/**
+ * 
+ * @export
+ * @interface UserProfileDto
+ */
+export interface UserProfileDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserProfileDto
+     */
+    profileName: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserProfileDto
+     */
+    userID: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserProfileDto
+     */
+    username: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserProfileDto
+     */
+    profilePictureUrl: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    followers: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    following: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    links: any;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserProfileDto
+     */
+    bio: string;
+    /**
+     * 
+     * @type {SongInfoDto}
+     * @memberof UserProfileDto
+     */
+    currentSong: SongInfoDto;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    favGenres: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    favSongs: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    favRooms: any;
+    /**
+     * 
+     * @type {any}
+     * @memberof UserProfileDto
+     */
+    recentRooms: any;
+}
+/**
  * DefaultApi - fetch parameter creator
  * @export
  */
@@ -301,20 +733,30 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Login in the API using Cognito
+         * @param {AuthBody} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        authControllerLogin(options: any = {}): FetchArgs {
+        authControllerLogin(body: AuthBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authControllerLogin.');
+            }
             const localVarPath = `/auth/login`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             localVarUrlObj.search = null;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AuthBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -349,15 +791,17 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Login in the API using Cognito
+         * @param {AuthBody} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        authControllerLogin(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authControllerLogin(options);
+        authControllerLogin(body: AuthBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AuthBody> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authControllerLogin(body, options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -383,11 +827,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, fetch?
         },
         /**
          * 
+         * @summary Login in the API using Cognito
+         * @param {AuthBody} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        authControllerLogin(options?: any) {
-            return DefaultApiFp(configuration).authControllerLogin(options)(fetch, basePath);
+        authControllerLogin(body: AuthBody, options?: any) {
+            return DefaultApiFp(configuration).authControllerLogin(body, options)(fetch, basePath);
         },
     };
 };
@@ -411,33 +857,420 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
+     * @summary Login in the API using Cognito
+     * @param {AuthBody} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public authControllerLogin(options?: any) {
-        return DefaultApiFp(this.configuration).authControllerLogin(options)(this.fetch, this.basePath);
+    public authControllerLogin(body: AuthBody, options?: any) {
+        return DefaultApiFp(this.configuration).authControllerLogin(body, options)(this.fetch, this.basePath);
     }
 
 }
 /**
- * UsersApi - fetch parameter creator
+ * ProfileApi - fetch parameter creator
  * @export
  */
-export const UsersApiFetchParamCreator = function (configuration?: Configuration) {
+export const ProfileApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * 
-         * @param {CreateUserDto} body 
+         * @summary Follow the given user
+         * @param {string} username 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerCreate(body: CreateUserDto, options: any = {}): FetchArgs {
+        profileControllerFollowUser(username: string, options: any = {}): FetchArgs {
+            // verify required parameter 'username' is not null or undefined
+            if (username === null || username === undefined) {
+                throw new RequiredError('username','Required parameter username was null or undefined when calling profileControllerFollowUser.');
+            }
+            const localVarPath = `/profile/{username}/follow`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerGetProfileByUsername(username: string, options: any = {}): FetchArgs {
+            // verify required parameter 'username' is not null or undefined
+            if (username === null || username === undefined) {
+                throw new RequiredError('username','Required parameter username was null or undefined when calling profileControllerGetProfileByUsername.');
+            }
+            const localVarPath = `/profile/{username}`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerPatchProfile(body: UpdateUserProfileDto, options: any = {}): FetchArgs {
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerCreate.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling profileControllerPatchProfile.');
             }
-            const localVarPath = `/users`;
+            const localVarPath = `/profile`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PATCH' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUserProfileDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Unfollow the given user
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUnfollowUser(username: string, options: any = {}): FetchArgs {
+            // verify required parameter 'username' is not null or undefined
+            if (username === null || username === undefined) {
+                throw new RequiredError('username','Required parameter username was null or undefined when calling profileControllerUnfollowUser.');
+            }
+            const localVarPath = `/profile/{username}/unfollow`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUpdateProfile(body: UpdateUserProfileDto, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling profileControllerUpdateProfile.');
+            }
+            const localVarPath = `/profile`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUserProfileDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ProfileApi - functional programming interface
+ * @export
+ */
+export const ProfileApiFp = function(configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Follow the given user
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerFollowUser(username: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<boolean> {
+            const localVarFetchArgs = ProfileApiFetchParamCreator(configuration).profileControllerFollowUser(username, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerGetProfileByUsername(username: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = ProfileApiFetchParamCreator(configuration).profileControllerGetProfileByUsername(username, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerPatchProfile(body: UpdateUserProfileDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = ProfileApiFetchParamCreator(configuration).profileControllerPatchProfile(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Unfollow the given user
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUnfollowUser(username: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<boolean> {
+            const localVarFetchArgs = ProfileApiFetchParamCreator(configuration).profileControllerUnfollowUser(username, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUpdateProfile(body: UpdateUserProfileDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = ProfileApiFetchParamCreator(configuration).profileControllerUpdateProfile(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+    }
+};
+
+/**
+ * ProfileApi - factory interface
+ * @export
+ */
+export const ProfileApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+    return {
+        /**
+         * 
+         * @summary Follow the given user
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerFollowUser(username: string, options?: any) {
+            return ProfileApiFp(configuration).profileControllerFollowUser(username, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerGetProfileByUsername(username: string, options?: any) {
+            return ProfileApiFp(configuration).profileControllerGetProfileByUsername(username, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerPatchProfile(body: UpdateUserProfileDto, options?: any) {
+            return ProfileApiFp(configuration).profileControllerPatchProfile(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Unfollow the given user
+         * @param {string} username 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUnfollowUser(username: string, options?: any) {
+            return ProfileApiFp(configuration).profileControllerUnfollowUser(username, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateUserProfileDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        profileControllerUpdateProfile(body: UpdateUserProfileDto, options?: any) {
+            return ProfileApiFp(configuration).profileControllerUpdateProfile(body, options)(fetch, basePath);
+        },
+    };
+};
+
+/**
+ * ProfileApi - object-oriented interface
+ * @export
+ * @class ProfileApi
+ * @extends {BaseAPI}
+ */
+export class ProfileApi extends BaseAPI {
+    /**
+     * 
+     * @summary Follow the given user
+     * @param {string} username 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProfileApi
+     */
+    public profileControllerFollowUser(username: string, options?: any) {
+        return ProfileApiFp(this.configuration).profileControllerFollowUser(username, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} username 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProfileApi
+     */
+    public profileControllerGetProfileByUsername(username: string, options?: any) {
+        return ProfileApiFp(this.configuration).profileControllerGetProfileByUsername(username, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateUserProfileDto} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProfileApi
+     */
+    public profileControllerPatchProfile(body: UpdateUserProfileDto, options?: any) {
+        return ProfileApiFp(this.configuration).profileControllerPatchProfile(body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Unfollow the given user
+     * @param {string} username 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProfileApi
+     */
+    public profileControllerUnfollowUser(username: string, options?: any) {
+        return ProfileApiFp(this.configuration).profileControllerUnfollowUser(username, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateUserProfileDto} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProfileApi
+     */
+    public profileControllerUpdateProfile(body: UpdateUserProfileDto, options?: any) {
+        return ProfileApiFp(this.configuration).profileControllerUpdateProfile(body, options)(this.fetch, this.basePath);
+    }
+
+}
+/**
+ * RoomsApi - fetch parameter creator
+ * @export
+ */
+export const RoomsApiFetchParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @param {SongInfoDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerAddSongToQueue(body: SongInfoDto, roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling roomsControllerAddSongToQueue.');
+            }
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerAddSongToQueue.');
+            }
+            const localVarPath = `/rooms/{roomID}/songs`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
@@ -449,7 +1282,7 @@ export const UsersApiFetchParamCreator = function (configuration?: Configuration
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             localVarUrlObj.search = null;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"CreateUserDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"SongInfoDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -459,67 +1292,17 @@ export const UsersApiFetchParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @param {string} roomID 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerFindAll(options: any = {}): FetchArgs {
-            const localVarPath = `/users`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            localVarUrlObj.search = null;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerFindOne(id: string, options: any = {}): FetchArgs {
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling usersControllerFindOne.');
+        roomsControllerClearRoomQueue(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerClearRoomQueue.');
             }
-            const localVarPath = `/users/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            localVarUrlObj.search = null;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerRemove(id: string, options: any = {}): FetchArgs {
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling usersControllerRemove.');
-            }
-            const localVarPath = `/users/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            const localVarPath = `/rooms/{roomID}/songs`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'DELETE' }, options);
             const localVarHeaderParameter = {} as any;
@@ -537,22 +1320,1379 @@ export const UsersApiFetchParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @param {UpdateUserDto} body 
-         * @param {string} id 
+         * @param {string} roomID 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerUpdate(body: UpdateUserDto, id: string, options: any = {}): FetchArgs {
+        roomsControllerDeleteRoom(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerDeleteRoom.');
+            }
+            const localVarPath = `/rooms/{roomID}`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'DELETE' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetCurrentSong(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerGetCurrentSong.');
+            }
+            const localVarPath = `/rooms/{roomID}/songs/current`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get newly created public rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetNewRooms(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling roomsControllerGetNewRooms.');
+            }
+            const localVarPath = `/rooms/new`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomInfo(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerGetRoomInfo.');
+            }
+            const localVarPath = `/rooms/{roomID}`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomQueue(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerGetRoomQueue.');
+            }
+            const localVarPath = `/rooms/{roomID}/songs`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomUsers(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerGetRoomUsers.');
+            }
+            const localVarPath = `/rooms/{roomID}/users`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerJoinRoom(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerJoinRoom.');
+            }
+            const localVarPath = `/rooms/{roomID}/join`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerLeaveRoom(roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerLeaveRoom.');
+            }
+            const localVarPath = `/rooms/{roomID}/leave`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoom(body: UpdateRoomDto, roomID: string, options: any = {}): FetchArgs {
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerUpdate.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling roomsControllerUpdateRoom.');
             }
-            // verify required parameter 'id' is not null or undefined
-            if (id === null || id === undefined) {
-                throw new RequiredError('id','Required parameter id was null or undefined when calling usersControllerUpdate.');
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerUpdateRoom.');
             }
-            const localVarPath = `/users/{id}`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            const localVarPath = `/rooms/{roomID}`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateRoomDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoomInfo(body: UpdateRoomDto, roomID: string, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling roomsControllerUpdateRoomInfo.');
+            }
+            // verify required parameter 'roomID' is not null or undefined
+            if (roomID === null || roomID === undefined) {
+                throw new RequiredError('roomID','Required parameter roomID was null or undefined when calling roomsControllerUpdateRoomInfo.');
+            }
+            const localVarPath = `/rooms/{roomID}`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PATCH' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateRoomDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RoomsApi - functional programming interface
+ * @export
+ */
+export const RoomsApiFp = function(configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @param {SongInfoDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerAddSongToQueue(body: SongInfoDto, roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerAddSongToQueue(body, roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerClearRoomQueue(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerClearRoomQueue(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerDeleteRoom(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerDeleteRoom(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetCurrentSong(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerGetCurrentSong(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get newly created public rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetNewRooms(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerGetNewRooms(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomInfo(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerGetRoomInfo(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomQueue(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerGetRoomQueue(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomUsers(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerGetRoomUsers(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerJoinRoom(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerJoinRoom(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerLeaveRoom(roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerLeaveRoom(roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoom(body: UpdateRoomDto, roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerUpdateRoom(body, roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoomInfo(body: UpdateRoomDto, roomID: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = RoomsApiFetchParamCreator(configuration).roomsControllerUpdateRoomInfo(body, roomID, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+    }
+};
+
+/**
+ * RoomsApi - factory interface
+ * @export
+ */
+export const RoomsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+    return {
+        /**
+         * 
+         * @param {SongInfoDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerAddSongToQueue(body: SongInfoDto, roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerAddSongToQueue(body, roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerClearRoomQueue(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerClearRoomQueue(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerDeleteRoom(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerDeleteRoom(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetCurrentSong(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerGetCurrentSong(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get newly created public rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetNewRooms(none: any, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerGetNewRooms(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomInfo(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerGetRoomInfo(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomQueue(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerGetRoomQueue(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomUsers(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerGetRoomUsers(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerJoinRoom(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerJoinRoom(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerLeaveRoom(roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerLeaveRoom(roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoom(body: UpdateRoomDto, roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerUpdateRoom(body, roomID, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateRoomDto} body 
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerUpdateRoomInfo(body: UpdateRoomDto, roomID: string, options?: any) {
+            return RoomsApiFp(configuration).roomsControllerUpdateRoomInfo(body, roomID, options)(fetch, basePath);
+        },
+    };
+};
+
+/**
+ * RoomsApi - object-oriented interface
+ * @export
+ * @class RoomsApi
+ * @extends {BaseAPI}
+ */
+export class RoomsApi extends BaseAPI {
+    /**
+     * 
+     * @param {SongInfoDto} body 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerAddSongToQueue(body: SongInfoDto, roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerAddSongToQueue(body, roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerClearRoomQueue(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerClearRoomQueue(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerDeleteRoom(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerDeleteRoom(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerGetCurrentSong(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerGetCurrentSong(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get newly created public rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerGetNewRooms(none: any, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerGetNewRooms(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerGetRoomInfo(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerGetRoomInfo(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerGetRoomQueue(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerGetRoomQueue(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerGetRoomUsers(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerGetRoomUsers(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerJoinRoom(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerJoinRoom(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerLeaveRoom(roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerLeaveRoom(roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateRoomDto} body 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerUpdateRoom(body: UpdateRoomDto, roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerUpdateRoom(body, roomID, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateRoomDto} body 
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public roomsControllerUpdateRoomInfo(body: UpdateRoomDto, roomID: string, options?: any) {
+        return RoomsApiFp(this.configuration).roomsControllerUpdateRoomInfo(body, roomID, options)(this.fetch, this.basePath);
+    }
+
+}
+/**
+ * UsersApi - fetch parameter creator
+ * @export
+ */
+export const UsersApiFetchParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerCreateRoom(body: CreateRoomDto, none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerCreateRoom.');
+            }
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerCreateRoom.');
+            }
+            const localVarPath = `/users/rooms`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"CreateRoomDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerCreateRoom_1(body: CreateRoomDto, none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerCreateRoom_1.');
+            }
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerCreateRoom_1.');
+            }
+            const localVarPath = `/users/rooms`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"CreateRoomDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetFollowers.');
+            }
+            const localVarPath = `/users/followers`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers_2(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetFollowers_2.');
+            }
+            const localVarPath = `/users/followers`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetFollowing.');
+            }
+            const localVarPath = `/users/following`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing_3(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetFollowing_3.');
+            }
+            const localVarPath = `/users/following`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetRecentRooms.');
+            }
+            const localVarPath = `/users/rooms/recent`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms_4(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetRecentRooms_4.');
+            }
+            const localVarPath = `/users/rooms/recent`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetRecommendedRooms.');
+            }
+            const localVarPath = `/users/rooms/foryou`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms_5(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetRecommendedRooms_5.');
+            }
+            const localVarPath = `/users/rooms/foryou`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetUserFriends.');
+            }
+            const localVarPath = `/users/friends`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends_6(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetUserFriends_6.');
+            }
+            const localVarPath = `/users/friends`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserInfo(options: any = {}): FetchArgs {
+            const localVarPath = `/users`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserInfo_7(options: any = {}): FetchArgs {
+            const localVarPath = `/users`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserRooms(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetUserRooms.');
+            }
+            const localVarPath = `/users/rooms`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserRooms_8(none: any, options: any = {}): FetchArgs {
+            // verify required parameter 'none' is not null or undefined
+            if (none === null || none === undefined) {
+                throw new RequiredError('none','Required parameter none was null or undefined when calling usersControllerGetUserRooms_8.');
+            }
+            const localVarPath = `/users/rooms`
+                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateProfile(body: UpdateUserDto, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerUpdateProfile.');
+            }
+            const localVarPath = `/users`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUserDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateProfile_9(body: UpdateUserDto, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerUpdateProfile_9.');
+            }
+            const localVarPath = `/users`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUserDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile(body: UpdateUserDto, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerUpdateUserProfile.');
+            }
+            const localVarPath = `/users`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PATCH' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUserDto" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile_10(body: UpdateUserDto, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling usersControllerUpdateUserProfile_10.');
+            }
+            const localVarPath = `/users`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'PATCH' }, options);
             const localVarHeaderParameter = {} as any;
@@ -583,12 +2723,241 @@ export const UsersApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @param {CreateUserDto} body 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerCreate(body: CreateUserDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerCreate(body, options);
+        usersControllerCreateRoom(body: CreateRoomDto, none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomDto> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerCreateRoom(body, none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerCreateRoom_1(body: CreateRoomDto, none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomDto> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerCreateRoom_1(body, none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetFollowers(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers_2(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetFollowers_2(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetFollowing(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing_3(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetFollowing_3(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetRecentRooms(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms_4(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetRecentRooms_4(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetRecommendedRooms(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms_5(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetRecommendedRooms_5(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserFriends(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends_6(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<UserProfileDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserFriends_6(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserInfo(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserInfo(options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -604,8 +2973,8 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerFindAll(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerFindAll(options);
+        usersControllerGetUserInfo_7(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserInfo_7(options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -618,16 +2987,17 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Get a user's rooms
+         * @param {any} none 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerFindOne(id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerFindOne(id, options);
+        usersControllerGetUserRooms(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserRooms(none, options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
-                        return response;
+                        return response.json();
                     } else {
                         throw response;
                     }
@@ -636,12 +3006,31 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Get a user's rooms
+         * @param {any} none 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerRemove(id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerRemove(id, options);
+        usersControllerGetUserRooms_8(none: any, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<RoomDto>> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerGetUserRooms_8(none, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateProfile(body: UpdateUserDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerUpdateProfile(body, options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -655,12 +3044,47 @@ export const UsersApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {UpdateUserDto} body 
-         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerUpdate(body: UpdateUserDto, id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerUpdate(body, id, options);
+        usersControllerUpdateProfile_9(body: UpdateUserDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerUpdateProfile_9(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile(body: UpdateUserDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerUpdateUserProfile(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile_10(body: UpdateUserDto, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = UsersApiFetchParamCreator(configuration).usersControllerUpdateUserProfile_10(body, options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -682,48 +3106,197 @@ export const UsersApiFactory = function (configuration?: Configuration, fetch?: 
     return {
         /**
          * 
-         * @param {CreateUserDto} body 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerCreate(body: CreateUserDto, options?: any) {
-            return UsersApiFp(configuration).usersControllerCreate(body, options)(fetch, basePath);
+        usersControllerCreateRoom(body: CreateRoomDto, none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerCreateRoom(body, none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Create a new room
+         * @param {CreateRoomDto} body 
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerCreateRoom_1(body: CreateRoomDto, none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerCreateRoom_1(body, none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetFollowers(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's followers
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowers_2(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetFollowers_2(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetFollowing(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's following
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetFollowing_3(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetFollowing_3(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetRecentRooms(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's recent rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecentRooms_4(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetRecentRooms_4(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetRecommendedRooms(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's recommended rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetRecommendedRooms_5(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetRecommendedRooms_5(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserFriends(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's friends
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserFriends_6(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserFriends_6(none, options)(fetch, basePath);
         },
         /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerFindAll(options?: any) {
-            return UsersApiFp(configuration).usersControllerFindAll(options)(fetch, basePath);
+        usersControllerGetUserInfo(options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserInfo(options)(fetch, basePath);
         },
         /**
          * 
-         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerFindOne(id: string, options?: any) {
-            return UsersApiFp(configuration).usersControllerFindOne(id, options)(fetch, basePath);
+        usersControllerGetUserInfo_7(options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserInfo_7(options)(fetch, basePath);
         },
         /**
          * 
-         * @param {string} id 
+         * @summary Get a user's rooms
+         * @param {any} none 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerRemove(id: string, options?: any) {
-            return UsersApiFp(configuration).usersControllerRemove(id, options)(fetch, basePath);
+        usersControllerGetUserRooms(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserRooms(none, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Get a user's rooms
+         * @param {any} none 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetUserRooms_8(none: any, options?: any) {
+            return UsersApiFp(configuration).usersControllerGetUserRooms_8(none, options)(fetch, basePath);
         },
         /**
          * 
          * @param {UpdateUserDto} body 
-         * @param {string} id 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerUpdate(body: UpdateUserDto, id: string, options?: any) {
-            return UsersApiFp(configuration).usersControllerUpdate(body, id, options)(fetch, basePath);
+        usersControllerUpdateProfile(body: UpdateUserDto, options?: any) {
+            return UsersApiFp(configuration).usersControllerUpdateProfile(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateProfile_9(body: UpdateUserDto, options?: any) {
+            return UsersApiFp(configuration).usersControllerUpdateProfile_9(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile(body: UpdateUserDto, options?: any) {
+            return UsersApiFp(configuration).usersControllerUpdateUserProfile(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {UpdateUserDto} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerUpdateUserProfile_10(body: UpdateUserDto, options?: any) {
+            return UsersApiFp(configuration).usersControllerUpdateUserProfile_10(body, options)(fetch, basePath);
         },
     };
 };
@@ -737,13 +3310,148 @@ export const UsersApiFactory = function (configuration?: Configuration, fetch?: 
 export class UsersApi extends BaseAPI {
     /**
      * 
-     * @param {CreateUserDto} body 
+     * @summary Create a new room
+     * @param {CreateRoomDto} body 
+     * @param {any} none 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerCreate(body: CreateUserDto, options?: any) {
-        return UsersApiFp(this.configuration).usersControllerCreate(body, options)(this.fetch, this.basePath);
+    public usersControllerCreateRoom(body: CreateRoomDto, none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerCreateRoom(body, none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Create a new room
+     * @param {CreateRoomDto} body 
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerCreateRoom_1(body: CreateRoomDto, none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerCreateRoom_1(body, none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's followers
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetFollowers(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetFollowers(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's followers
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetFollowers_2(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetFollowers_2(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's following
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetFollowing(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetFollowing(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's following
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetFollowing_3(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetFollowing_3(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's recent rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetRecentRooms(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetRecentRooms(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's recent rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetRecentRooms_4(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetRecentRooms_4(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's recommended rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetRecommendedRooms(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetRecommendedRooms(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's recommended rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetRecommendedRooms_5(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetRecommendedRooms_5(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's friends
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetUserFriends(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserFriends(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's friends
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetUserFriends_6(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserFriends_6(none, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -752,42 +3460,86 @@ export class UsersApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerFindAll(options?: any) {
-        return UsersApiFp(this.configuration).usersControllerFindAll(options)(this.fetch, this.basePath);
+    public usersControllerGetUserInfo(options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserInfo(options)(this.fetch, this.basePath);
     }
 
     /**
      * 
-     * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerFindOne(id: string, options?: any) {
-        return UsersApiFp(this.configuration).usersControllerFindOne(id, options)(this.fetch, this.basePath);
+    public usersControllerGetUserInfo_7(options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserInfo_7(options)(this.fetch, this.basePath);
     }
 
     /**
      * 
-     * @param {string} id 
+     * @summary Get a user's rooms
+     * @param {any} none 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerRemove(id: string, options?: any) {
-        return UsersApiFp(this.configuration).usersControllerRemove(id, options)(this.fetch, this.basePath);
+    public usersControllerGetUserRooms(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserRooms(none, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Get a user's rooms
+     * @param {any} none 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetUserRooms_8(none: any, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerGetUserRooms_8(none, options)(this.fetch, this.basePath);
     }
 
     /**
      * 
      * @param {UpdateUserDto} body 
-     * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerUpdate(body: UpdateUserDto, id: string, options?: any) {
-        return UsersApiFp(this.configuration).usersControllerUpdate(body, id, options)(this.fetch, this.basePath);
+    public usersControllerUpdateProfile(body: UpdateUserDto, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerUpdateProfile(body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateUserDto} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerUpdateProfile_9(body: UpdateUserDto, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerUpdateProfile_9(body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateUserDto} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerUpdateUserProfile(body: UpdateUserDto, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerUpdateUserProfile(body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @param {UpdateUserDto} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerUpdateUserProfile_10(body: UpdateUserDto, options?: any) {
+        return UsersApiFp(this.configuration).usersControllerUpdateUserProfile_10(body, options)(this.fetch, this.basePath);
     }
 
 }

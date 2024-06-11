@@ -6,21 +6,36 @@ import {
 	Patch,
 	Put,
 	UseGuards,
+	Request,
+	HttpException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiTags } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiParam,
+	ApiTags,
+} from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { DbUtilsService } from "../db-utils/db-utils.service";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { AuthService } from "src/auth/auth.service";
 
 @ApiTags("users")
 @Controller("users")
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+		private readonly auth: AuthService,
+	) {}
 
 	//basic CRUD operations on the users table
 	/*
@@ -52,39 +67,32 @@ export class UsersController {
 	}
   */
 
-	//NOTE TO DEV:
-	/*
-    add decorators to each of these paths like:
-    @Post()
-    @ApiOperation({ summary: 'Create user' })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'The record has been successfully created.', type: User })
-    @ApiResponse({ status: 403, description: 'Forbidden.' })
-    createUser(@Body() createUserDto: CreateUserDto) {
-      //...
-    }
-
-    @Get(':id')
-    @ApiOperation({ summary: 'Retrieve user' })
-    @ApiParam({ name: 'id', required: true })
-    @ApiResponse({ status: 200, description: 'The found record', type: User })
-    getUser(@Param('id') id: string) {
-      //...
-    }
-
-    such that the API documentation is more detailed and informative for the next dev.
-  */
-
 	/*
     GET /users
     gets user info
     no input
     response: return UserDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("users")
-	getUserInfo(): UserDto {
+	getUserInfo(@Request() req: any): UserDto {
+		//try to get sub, username & email back from JWT token
+		console.log("1");
+		console.log("2", req);
+		console.log("3", req.user);
+		//req.user
+		/*
+		{
+			userId: '311ce2e8-8041-70bd-0ab5-be97283ee182',
+			username: 'bigdaddy'
+		}
+		*/
+		console.log("4", req.user.sub);
+		console.log("5", req.user.username);
+		console.log("6", req.user.email);
+
 		return this.usersService.getUserInfo();
 	}
 
@@ -94,108 +102,139 @@ export class UsersController {
     input: UserDto
     response: return updated UserDto
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("users")
-	updateUserProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
+	updateUserProfile(
+		@Request() req: any,
+		@Body() updateUserDto: UpdateUserDto,
+	): UserDto {
 		return this.usersService.updateUserProfile(updateUserDto);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("users")
-	updateProfile(@Body() updateUserDto: UpdateUserDto): UserDto {
+	updateProfile(
+		@Request() req: any,
+		@Body() updateUserDto: UpdateUserDto,
+	): UserDto {
 		return this.usersService.updateProfile(updateUserDto);
 	}
 
-	/*
-    GET /users/rooms
-    get a user's rooms
-    no input
-    response: an array of RoomDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("users")
-	getUserRooms(): RoomDto[] {
-		return this.usersService.getUserRooms();
+	@ApiOperation({ summary: "Get a user's rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getUserRooms(userInfo.userId);
 	}
 
-	/*
-    POST /users/rooms
-    create a new room
-    input: partial RoomDto
-    response: final RoomDto for room (including new id)
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post("rooms")
 	@ApiTags("users")
-	createRoom(@Body() createRoomDto: CreateRoomDto): RoomDto {
-		return this.usersService.createRoom(createRoomDto);
+	@ApiOperation({ summary: "Create a new room" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The newly created room as a RoomDto.",
+		type: RoomDto,
+	})
+	async createRoom(
+		@Request() req: any,
+		@Body() createRoomDto: CreateRoomDto,
+	): Promise<RoomDto> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.createRoom(createRoomDto, userInfo.userId);
 	}
 
-	/*
-    GET /users/rooms/recent
-    get user's recent rooms
-    no input
-    response: an array of RoomDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
 	@ApiTags("users")
-	getRecentRooms(): RoomDto[] {
-		return this.usersService.getRecentRooms();
+	@ApiOperation({ summary: "Get a user's recent rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getRecentRooms(userInfo.userId);
 	}
 
-	/*
-    GET /users/rooms/foryou
-    get user's recommended rooms
-    no input
-    response: an array of RoomDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
 	@ApiTags("users")
-	getRecommendedRooms(): RoomDto[] {
-		return this.usersService.getRecommendedRooms();
+	@ApiOperation({ summary: "Get a user's recommended rooms" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's recommended rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedRooms(userInfo.userId);
 	}
 
-	/*
-    GET /users/friends
-    get user's friends
-    no input
-    response: an array of ProfileDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
-	getUserFriends(): UserProfileDto[] {
-		return this.usersService.getUserFriends();
+	@ApiOperation({ summary: "Get a user's friends" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's friends as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getUserFriends(userInfo.userId);
 	}
 
-	/*
-    GET /users/followers
-    get list of followers
-    no input
-    response: an array of ProfileDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
 	@ApiTags("users")
-	getFollowers(): UserProfileDto[] {
-		return this.usersService.getFollowers();
+	@ApiOperation({ summary: "Get a user's followers" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's followers as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowers(userInfo.userId);
 	}
 
-	/*
-    GET /users/following
-    get list of people user is following
-    no input
-    response: an array of ProfileDto
-  */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("following")
 	@ApiTags("users")
-	getFollowing(): UserProfileDto[] {
-		return this.usersService.getFollowing();
+	@ApiOperation({ summary: "Get a user's following" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's following as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.userId);
 	}
 }

@@ -11,21 +11,30 @@ import {
 	ApiOperation,
 	ApiProperty,
 	ApiResponse,
+	ApiTags,
 } from "@nestjs/swagger";
 
-class AuthBody {
+class RegisterBody {
 	@ApiProperty()
 	username: string;
 
 	@ApiProperty()
 	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
 }
 
 @Controller("auth")
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
+	/*
+	POST /auth/login
+	body: Cognito Access Token (string)
+  	*/
 	@Post("login")
+	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
 	@ApiBody({ type: AuthBody })
 	@ApiResponse({
@@ -113,6 +122,33 @@ export class AuthController {
 
 		//return the JWT as a string
 		return { token: token };
+	}
+
+	@Post("register")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiBody({ type: RegisterBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: RegisterBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async register(@Body() registerInfo: RegisterBody) {
+		const successful: boolean = await this.authService.createUser(
+			registerInfo.username,
+			registerInfo.email,
+			registerInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthRegisterError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
 	//TODO: Add a POST method to refresh an expired JWT token
