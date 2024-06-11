@@ -267,8 +267,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="40"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:40</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="44"
+                                    class="link-to-prism">src/modules/profile/profile.service.ts:44</a></div>
                         </td>
                     </tr>
 
@@ -459,8 +459,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:73</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="81"
+                                    class="link-to-prism">src/modules/profile/profile.service.ts:81</a></div>
                         </td>
                     </tr>
 
@@ -600,6 +600,10 @@ export class ProfileService {
 		return new UserProfileDto();
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async followUser(
 		userId: string,
 		accountFollowedId: string,
@@ -633,6 +637,10 @@ export class ProfileService {
 		}
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async unfollowUser(
 		userId: string,
 		accountUnfollowedId: string,

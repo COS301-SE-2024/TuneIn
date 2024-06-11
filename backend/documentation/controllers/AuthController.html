@@ -146,8 +146,19 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#login" >login</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#register" >register</a>
                             </li>
                         </ul>
                     </td>
@@ -177,6 +188,7 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>login</b></span>
                         <a href="#login"><span class="icon ion-ios-link"></span></a>
@@ -186,7 +198,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>login(authInfo: <a href="../classes/AuthBody.html" target="_self">AuthBody</a>)</code>
+                    <code>login(loginInfo: <a href="../classes/LoginBody.html" target="_self">LoginBody</a>)</code>
                 </td>
             </tr>
 
@@ -194,14 +206,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;login&#x27;)<br />@ApiOperation({summary: &#x27;Login in the API using Cognito&#x27;})<br />@ApiBody({type: AuthBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: AuthBody})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                    <code>@Post(&#x27;login&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Login in the API using Cognito&#x27;})<br />@ApiBody({type: LoginBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: String})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="37"
-                                    class="link-to-prism">src/auth/auth.controller.ts:37</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="36"
+                                    class="link-to-prism">src/auth/auth.controller.ts:36</a></div>
                         </td>
                     </tr>
 
@@ -222,9 +234,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>authInfo</td>
+                                                <td>loginInfo</td>
                                             <td>
-                                                            <code><a href="../classes/AuthBody.html" target="_self" >AuthBody</a></code>
+                                                            <code><a href="../classes/LoginBody.html" target="_self" >LoginBody</a></code>
                                             </td>
 
                                             <td>
@@ -247,6 +259,88 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="register"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>register</b></span>
+                        <a href="#register"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>register(registerInfo: <a href="../classes/RegisterBody.html" target="_self">RegisterBody</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;register&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Register a new user in the API using Cognito&#x27;})<br />@ApiBody({type: RegisterBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: RegisterBody})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="160"
+                                    class="link-to-prism">src/auth/auth.controller.ts:160</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>registerInfo</td>
+                                            <td>
+                                                            <code><a href="../classes/RegisterBody.html" target="_self" >RegisterBody</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>    </div>
 
 
@@ -258,36 +352,36 @@
 	HttpException,
 	HttpStatus,
 } from &quot;@nestjs/common&quot;;
-import { AuthService } from &quot;./auth.service&quot;;
 import {
-	ApiBody,
-	ApiOperation,
-	ApiProperty,
-	ApiResponse,
-} from &quot;@nestjs/swagger&quot;;
-
-class AuthBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-}
+	AuthService,
+	CognitoDecodedToken,
+	JWTPayload,
+	RegisterBody,
+	LoginBody,
+} from &quot;./auth.service&quot;;
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from &quot;@nestjs/swagger&quot;;
+import { UsersService } from &quot;src/modules/users/users.service&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
 
 @Controller(&quot;auth&quot;)
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
 	@Post(&quot;login&quot;)
+	@ApiTags(&quot;auth&quot;)
 	@ApiOperation({ summary: &quot;Login in the API using Cognito&quot; })
-	@ApiBody({ type: AuthBody })
+	@ApiBody({ type: LoginBody })
 	@ApiResponse({
 		status: 201,
 		description: &quot;The record has been successfully created.&quot;,
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
-	async login(@Body() authInfo: AuthBody) {
+	async login(@Body() loginInfo: LoginBody) {
+		/*
 		const users &#x3D; await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);
@@ -354,18 +448,77 @@ export class AuthController {
 				HttpStatus.UNAUTHORIZED,
 			);
 		}
+		*/
+		if (!loginInfo.token || loginInfo.token &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;Invalid request. Missing Cognito access token. AuthControllerLoginError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		const cognitoAccessToken: string &#x3D; loginInfo.token;
+		console.log(&quot;cognitoAccessToken&quot;, cognitoAccessToken);
+		const authInfo: CognitoDecodedToken &#x3D;
+			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
+		const userID: string &#x3D; authInfo.username;
+		console.log(&quot;authInfo&quot;, authInfo);
 
-		const payload &#x3D; {
-			sub: authInfo.userCognitoSub,
-			username: authInfo.username,
-			email: userEmail,
+		const user: PrismaTypes.users | null &#x3D;
+			await this.usersService.findOne(userID);
+		if (!user || user &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthControllerLoginError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		if (!user.email || user.email &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;User (&quot; +
+					user.username +
+					&quot;) does not have an email address. AuthControllerLoginError02&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		const payload: JWTPayload &#x3D; {
+			id: authInfo.username,
+			username: user.username,
+			email: user.email,
 		};
 
+		console.log(&quot;payload&quot;, payload);
 		//generate JWT token using payload
 		const token: string &#x3D; await this.authService.generateJWT(payload);
+		console.log(&quot;token&quot;, token);
 
 		//return the JWT as a string
 		return { token: token };
+	}
+
+	@Post(&quot;register&quot;)
+	@ApiTags(&quot;auth&quot;)
+	@ApiOperation({ summary: &quot;Register a new user in the API using Cognito&quot; })
+	@ApiBody({ type: RegisterBody })
+	@ApiResponse({
+		status: 201,
+		description: &quot;The record has been successfully created.&quot;,
+		type: RegisterBody,
+	})
+	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
+	async register(@Body() registerInfo: RegisterBody) {
+		const successful: boolean &#x3D; await this.authService.createUser(
+			registerInfo.username,
+			registerInfo.email,
+			registerInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthRegisterError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		throw new HttpException(&quot;Successfully created user.&quot;, HttpStatus.CREATED);
 	}
 
 	//TODO: Add a POST method to refresh an expired JWT token
