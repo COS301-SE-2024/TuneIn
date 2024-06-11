@@ -1,3 +1,4 @@
+// screens/Home.tsx
 import React, { useState, useRef, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Link, useRouter } from "expo-router";
@@ -7,10 +8,13 @@ import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
+import NavBar from "../components/NavBar";
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const scrollViewRef = useRef<ScrollView>(null);
+  const previousScrollY = useRef(0);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -124,13 +128,47 @@ const Home: React.FC = () => {
   };
 
   const handleScroll = useCallback(({ nativeEvent }) => {
-    const offsetY = nativeEvent.contentOffset.y;
-    scrollY.setValue(offsetY);
+    const currentOffset = nativeEvent.contentOffset.y;
+    const direction = currentOffset > previousScrollY.current ? "down" : "up";
+    previousScrollY.current = currentOffset;
+    scrollY.setValue(currentOffset);
+
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+
+    scrollTimeout.current = setTimeout(() => {
+      if (currentOffset <= 0 || direction === "up") {
+        Animated.timing(scrollY, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        Animated.timing(scrollY, {
+          toValue: 100,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, 50); // Reduced debounce timeout to make it more responsive
   }, []);
 
   const topNavBarTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [0, -100],
+    extrapolate: "clamp",
+  });
+
+  const navBarTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 100],
+    extrapolate: "clamp",
+  });
+
+  const buttonTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 70],
     extrapolate: "clamp",
   });
 
@@ -175,12 +213,34 @@ const Home: React.FC = () => {
           <AppCarousel data={Myrooms} renderItem={renderItem} />
         </View>
       </ScrollView>
-      <TouchableOpacity
-        className="absolute bottom-4 right-4 bg-blue-500 rounded-2xl w-14 h-14 flex items-center justify-center p-2"
-        onPress={navigateToCreateNew}
+      <Animated.View
+        style={{
+          transform: [{ translateY: buttonTranslateY }],
+          position: "absolute",
+          bottom: 9,
+          right: 5,
+          zIndex: 20,
+        }}
       >
-        <Text className="text-white text-3xl font-bold">+</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-blue-500 rounded-2xl right-4 bottom-20 w-14 h-14 flex items-center justify-center p-2"
+          onPress={navigateToCreateNew}
+        >
+          <Text className="text-white text-3xl font-bold">+</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View
+        style={{
+          transform: [{ translateY: navBarTranslateY }],
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        <NavBar />
+      </Animated.View>
     </View>
   );
 };
