@@ -148,8 +148,8 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/leave")
 	@ApiTags("rooms")
-	leaveRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
-		return this.roomsService.leaveRoom(room_id, req.user.user_id);
+	async leaveRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
+		return await this.roomsService.leaveRoom(room_id, req.user.userId);
 	}
 
 	/*
