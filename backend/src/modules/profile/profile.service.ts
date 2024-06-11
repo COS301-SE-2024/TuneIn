@@ -37,6 +37,10 @@ export class ProfileService {
 		return new UserProfileDto();
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async followUser(
 		userId: string,
 		accountFollowedId: string,
@@ -70,6 +74,10 @@ export class ProfileService {
 		}
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async unfollowUser(
 		userId: string,
 		accountUnfollowedId: string,

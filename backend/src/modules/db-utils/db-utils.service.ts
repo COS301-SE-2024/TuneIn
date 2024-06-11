@@ -6,11 +6,15 @@ import * as Prisma from "@prisma/client";
 export class DbUtilsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	//get user following
+	//get user following (people the user is following)
+	/*
+		follower: the person who does the following
+		followee (leader): the person being followed
+	*/
 	async getUserFollowing(userID: string): Promise<Prisma.users[] | null> {
 		const following: Prisma.follows[] | null =
 			await this.prisma.follows.findMany({
-				where: { followee: userID },
+				where: { follower: userID },
 			});
 
 		if (!following || following === null) {
@@ -22,8 +26,8 @@ export class DbUtilsService {
 		for (let i = 0; i < following.length; i++) {
 			const f = following[i];
 			if (f && f !== null) {
-				if (f.follower && f.follower !== null) {
-					ids.push(f.follower);
+				if (f.followee && f.followee !== null) {
+					ids.push(f.followee);
 				}
 			}
 		}
@@ -41,11 +45,15 @@ export class DbUtilsService {
 		return result;
 	}
 
-	//get user followers
+	//get user followers (people following the user)
+	/*
+		follower: the person who does the following
+		followee (leader): the person being followed
+	*/
 	async getUserFollowers(userID: string): Promise<Prisma.users[] | null> {
 		const followers: Prisma.follows[] | null =
 			await this.prisma.follows.findMany({
-				where: { follower: userID },
+				where: { followee: userID },
 			});
 
 		if (!followers || followers === null) {
@@ -57,8 +65,8 @@ export class DbUtilsService {
 		for (let i = 0; i < followers.length; i++) {
 			const f = followers[i];
 			if (f && f !== null) {
-				if (f.followee && f.followee !== null) {
-					ids.push(f.followee);
+				if (f.follower && f.follower !== null) {
+					ids.push(f.follower);
 				}
 			}
 		}
@@ -157,6 +165,10 @@ export class DbUtilsService {
 		return true;
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async isFollowing(
 		userID: string,
 		accountFollowedId: string,
