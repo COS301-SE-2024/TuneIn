@@ -46,6 +46,7 @@
     "react-native-screens": "3.31.1",
     "react-native-snap-carousel": "^1.6.1",
     "react-native-svg": "^15.3.0",
+    "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.10",
     "react-router-dom": "^6.23.1",
     "tailwind-react-native-classnames": "^1.5.1",

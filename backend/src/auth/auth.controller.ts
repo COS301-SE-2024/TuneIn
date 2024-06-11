@@ -5,39 +5,44 @@ import {
 	HttpException,
 	HttpStatus,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import {
+	AuthService,
+	CognitoDecodedToken,
+	JWTPayload,
+	RegisterBody,
+} from "./auth.service";
 import {
 	ApiBody,
 	ApiOperation,
-	ApiProperty,
 	ApiResponse,
+	ApiTags,
 } from "@nestjs/swagger";
-
-class AuthBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	name: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-}
+import { UsersService } from "src/modules/users/users.service";
+import * as PrismaTypes from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
+	/*
+	POST /auth/login
+	body: Cognito Access Token (string)
+  	*/
 	@Post("login")
+	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: AuthBody })
+	@ApiBody({ type: String })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async login(@Body() authInfo: AuthBody) {
+	async login(@Body() cognitoAccessToken: string) {
+		/*
 		const users = await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);
@@ -104,11 +109,32 @@ export class AuthController {
 				HttpStatus.UNAUTHORIZED,
 			);
 		}
+		*/
+		const authInfo: CognitoDecodedToken =
+			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
+		const userID: string = authInfo.username;
 
-		const payload = {
-			sub: authInfo.userCognitoSub,
-			username: authInfo.username,
-			email: userEmail,
+		const user: PrismaTypes.users | null =
+			await this.usersService.findOne(userID);
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. AuthControllerLoginError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		const payload: JWTPayload = {
+			id: authInfo.username,
+			username: user.username,
+			email: user.email,
 		};
 
 		//generate JWT token using payload
@@ -116,6 +142,33 @@ export class AuthController {
 
 		//return the JWT as a string
 		return { token: token };
+	}
+
+	@Post("register")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiBody({ type: RegisterBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: RegisterBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async register(@Body() registerInfo: RegisterBody) {
+		const successful: boolean = await this.authService.createUser(
+			registerInfo.username,
+			registerInfo.email,
+			registerInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthRegisterError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
 	//TODO: Add a POST method to refresh an expired JWT token

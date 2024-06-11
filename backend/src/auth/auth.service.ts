@@ -4,7 +4,41 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { ApiProperty } from "@nestjs/swagger";
 //import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+
+export type CognitoDecodedToken = {
+	sub: string;
+	iss: string;
+	client_id: string;
+	origin_jti: string;
+	event_id?: string;
+	token_use: string;
+	scope?: string;
+	auth_time: number;
+	exp: number;
+	iat: number;
+	jti: string;
+	username: string;
+};
+
+export type JWTPayload = {
+	id: string;
+	email: string;
+	username: string;
+};
+
+export class RegisterBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -111,43 +145,18 @@ export class AuthService {
 		}
 	}
 
-	//Sample code
-	/*
-	if (!userMatch) {
-			return { message: "Invalid credentials. No user match" };
-		}
-
-		// add users to table
-		const successful: boolean = await this.authService.createUser(
-			userMatch.Username,
-			userEmail,
-		);
-
-		if (!successful) {
-			return { message: "Invalid credentials. Could not create user" };
-		}
-
-		const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-
-		//generate JWT token using payload
-		const token: string = this.authService.generateJWT(payload);
-	*/
 	async createUser(
 		username: string,
 		email: string,
-		user_id: string,
+		userID: string,
 	): Promise<boolean> {
 		const user: Prisma.usersCreateInput = {
 			username: username,
 			email: email,
-			user_id: user_id,
+			user_id: userID,
 		};
 		const existingUser = await this.prisma.users.findUnique({
-			where: { user_id: user_id },
+			where: { user_id: userID },
 		});
 		if (existingUser) {
 			return true;
@@ -162,19 +171,7 @@ export class AuthService {
 		return true;
 	}
 
-	//input payload
-	/*
-	const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-	*/
-	async generateJWT(payload: {
-		sub: string;
-		username: string;
-		email: string;
-	}): Promise<string> {
+	async generateJWT(payload: JWTPayload): Promise<string> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
 
@@ -190,6 +187,7 @@ export class AuthService {
 		return token;
 	}
 
+	/*
 	async getUserInfo(jwt_token: string): Promise<any> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
@@ -203,17 +201,58 @@ export class AuthService {
 		}
 
 		const decoded = jwt.verify(jwt_token, secretKey);
-		const user_id = decoded.sub;
-		if (!user_id) {
+		const userID = decoded.sub;
+		if (!userID) {
 			throw new Error("Invalid JWT token");
 		}
-		if (typeof user_id !== "string") {
+		if (typeof userID !== "string") {
 			throw new Error("Invalid JWT token");
 		}
 
 		const user = await this.prisma.users.findUnique({
-			where: { user_id: user_id },
+			where: { user_id: userID },
 		});
 		return user;
+	}
+	*/
+
+	// this funciton will be passed a Request object from the NestJS controller eg:
+	/*
+	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
+	}
+	*/
+	getUserInfo(req: any): any {
+		const result = req.user;
+		console.log(result);
+		if (!result) {
+			throw new UnauthorizedException(
+				"No user found in JWT token. Please log in again",
+			);
+		}
+		if (!result.userId) {
+			throw new UnauthorizedException(
+				"No user ID found in JWT token. Please log in again",
+			);
+		}
+		return result;
+	}
+
+	async decodeAndVerifyCognitoJWT(
+		jwt_token: string,
+	): Promise<CognitoDecodedToken> {
+		const verifier = CognitoJwtVerifier.create({
+			userPoolId: this.userPoolId,
+			tokenUse: "access",
+			clientId: this.clientId,
+		});
+
+		try {
+			const payload = await verifier.verify(jwt_token);
+			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
+			return result;
+		} catch (error) {
+			throw new UnauthorizedException("Invalid JWT token");
+		}
 	}
 }
