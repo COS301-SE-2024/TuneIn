@@ -128,14 +128,15 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Post(":room_id/join")
 	@ApiTags("rooms")
-	joinRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
+	async joinRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
 		// get user_id from req
 
 		// check if the user is already in the room
 		// if yes, return 403
 		// if no, add the user to the room and return 200
-		const user_id = req.user.user_id;
-		return this.roomsService.joinRoom(room_id, user_id);
+		console.log(req.user.userId)
+		const user_id = req.user.userId;
+		return await this.roomsService.joinRoom(room_id, user_id);
 	}
 
 	/*

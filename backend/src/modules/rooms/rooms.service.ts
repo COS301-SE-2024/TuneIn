@@ -64,21 +64,38 @@ export class RoomsService {
 		}
 	  }
 
-	joinRoom(room_id: string, user_id: string): boolean {
-		// TODO: Implement logic to join room
-		// check if the user is already in the room
-		// const data = this.prisma.participate.findUnique({
-		// 	where: { room_id, user_id },
-		// });
-		// add user to the room
-		// if(data === null){
-		// 	return false;
-		// }
-		this.prisma.participate.create({
-			data: { room_id, user_id },
-		});
-		return true;
+	  async joinRoom(room_id: string, user_id: string): Promise<boolean> {
+		console.log("user", user_id, "joining room", room_id);
+		try {
+			// Check if the user is already in the room
+			const room = await this.prisma.participate.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id
+				}
+			})
+	
+			// If the user is already in the room, return false
+			if (room !== null) {
+				return false;
+			}
+	
+			// Add the user to the room
+			await this.prisma.participate.create({
+				data: {
+					room_id: room_id,
+					user_id: user_id
+				}
+			});
+	
+			return true;
+		} catch (error) {
+			console.error("Error joining room:");
+			return false;
+		}
 	}
+	
+	
 
 	leaveRoom(room_id: string, user_id: string): boolean {
 		// TODO: Implement logic to leave room
