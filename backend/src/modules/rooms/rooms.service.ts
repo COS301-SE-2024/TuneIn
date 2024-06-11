@@ -26,6 +26,7 @@ export class RoomsService {
 		}
 		*/
 
+
 		return [];
 	}
 
@@ -44,18 +45,44 @@ export class RoomsService {
 		return new RoomDto();
 	}
 
-	deleteRoom(room_id: string): boolean {
-		// TODO: Implement logic to delete room
-		return false;
-	}
+	deleteRoom(room_id: string, room_creator: string): boolean {
+		// Check if the room exists
+		// delete the room user is the owner
+		let isDeleted = false;
+		try {
+			this.prisma.room.delete({
+				where: { room_id, room_creator }
+			}).then(() => {
+				isDeleted = true;
+			}
+			);
+			return isDeleted;
+		} catch (error) {
+			return false;
+		}
+	  }
 
-	joinRoom(room_id: string): boolean {
+	joinRoom(room_id: string, user_id: string): boolean {
 		// TODO: Implement logic to join room
-		return false;
+		// check if the user is already in the room
+		// const data = this.prisma.participate.findUnique({
+		// 	where: { room_id, user_id },
+		// });
+		// add user to the room
+		// if(data === null){
+		// 	return false;
+		// }
+		this.prisma.participate.create({
+			data: { room_id, user_id },
+		});
+		return true;
 	}
 
-	leaveRoom(room_id: string): boolean {
+	leaveRoom(room_id: string, user_id: string): boolean {
 		// TODO: Implement logic to leave room
+		// this.prisma.participate.delete({
+		// 	where: { room_id, user_id },
+		// });
 		return false;
 	}
 

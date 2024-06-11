@@ -18,6 +18,7 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { Prisma } from "@prisma/client";
 
 @Controller("rooms")
 export class RoomsController {
@@ -110,7 +111,12 @@ export class RoomsController {
 	@Delete(":room_id")
 	@ApiTags("rooms")
 	deleteRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
-		return this.roomsService.deleteRoom(room_id);
+		// check using jwt token whether the user is the creator of the room
+		// if not, return 403
+		// if yes, delete the room and return 200
+		const user_id = req.user.userId;
+		console.log("Deleting room", room_id, "by user", user_id);
+		return this.roomsService.deleteRoom(room_id, user_id);
 	}
 
 	/*
@@ -123,7 +129,13 @@ export class RoomsController {
 	@Post(":room_id/join")
 	@ApiTags("rooms")
 	joinRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
-		return this.roomsService.joinRoom(room_id);
+		// get user_id from req
+
+		// check if the user is already in the room
+		// if yes, return 403
+		// if no, add the user to the room and return 200
+		const user_id = req.user.user_id;
+		return this.roomsService.joinRoom(room_id, user_id);
 	}
 
 	/*
@@ -136,7 +148,7 @@ export class RoomsController {
 	@Post(":room_id/leave")
 	@ApiTags("rooms")
 	leaveRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
-		return this.roomsService.leaveRoom(room_id);
+		return this.roomsService.leaveRoom(room_id, req.user.user_id);
 	}
 
 	/*
