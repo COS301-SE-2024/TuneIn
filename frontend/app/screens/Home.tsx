@@ -23,69 +23,10 @@ const Home: React.FC = () => {
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string =
     "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
-  const sampleRoomCards: Room[] = [
-    {
-      backgroundImage: BackgroundIMG,
-      name: "Chill Vibes",
-      songName: "Song Title",
-      artistName: "Artist Name",
-      description: "A description of the room goes here.",
-      userProfile: ProfileIMG,
-      username: "User123",
-      tags: ["Tag1", "Tag2", "Tag3"],
-    },
-    {
-      backgroundImage: BackgroundIMG,
-      name: "Chill Vibes",
-      songName: "Song Title",
-      artistName: "Artist Name",
-      description: "A description of the room goes here.",
-      userProfile: ProfileIMG,
-      username: "User123",
-      tags: ["Tag1", "Tag2", "Tag3"],
-    },
-    // Add your sample rooms here...
-  ];
 
-  const sampleFriends: Friend[] = [
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 1",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 2",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 3",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 4",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 5",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 6",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 7",
-    },
-    {
-      profilePicture: ProfileIMG,
-      name: "Friend 8",
-    },
-    // Add more sample friends...
-  ];
-
-  const getMyRooms = async (token) => {
+  const fetchRooms = async (token: string | null, type?: string) => {
     try {
-      const response = await axios.get(`${baseURL}/users/rooms`, {
+      const response = await axios.get(`${baseURL}/users/rooms${type ? type : ''}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,62 +52,53 @@ const Home: React.FC = () => {
     }
   };
 
-  
+
+
+  const formatRoomData = (rooms: any[], mine: boolean = false) => {
+    return rooms.map(room => ({
+      backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+      name: room.room_name,
+      songName: room.current_song ? (room.current_song.title || "No current song") : "No current song",
+      artistName: room.current_song ? (room.current_song.artists.join(", ") || "No artists") : "No artists",
+      description: room.description,
+      userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
+      username: room.creator ? room.creator.username : "Unknown",
+      tags: room.tags ? room.tags : [],
+      mine: mine,
+    }));
+  };
+
   const [myRooms, setMyRooms] = useState<Room[]>([]);
+  const [myPicks, setMyPicks] = useState<Room[]>([]);
+  const [myRecents, setMyRecents] = useState<Room[]>([]);
   const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getTokenAndRooms = async () => {
-      const storedToken = await AsyncStorage.getItem('token');
-      setToken(storedToken);
-      console.log("HomeToken", storedToken);
-
-      if (storedToken) {
-        const rooms = await getMyRooms(storedToken);
-        const formattedRooms = rooms.map(room => ({
-          backgroundImage: room.room_image,
-          name: room.room_name,
-          songName: room.current_song.title || "No current song",
-          artistName: room.current_song.artists.join(", ") || "No artists",
-          description: room.description,
-          userProfile: room.creator.profile_picture_url,
-          username: room.creator.username,
-          tags: room.tags,
-          mine: true,
-        }));
-        setMyRooms(formattedRooms);
-      }
-    };
-
-    getTokenAndRooms();
-  }, []);
 
   useEffect(() => {
     const getTokenAndData = async () => {
       const storedToken = await AsyncStorage.getItem('token');
       setToken(storedToken);
-      console.log("HomeToken", storedToken);
   
       if (storedToken) {
-        // Fetch rooms
-        const rooms = await getMyRooms(storedToken);
-        const formattedRooms = rooms.map(room => ({
-          backgroundImage: room.room_image,
-          name: room.room_name,
-          songName: room.current_song.title || "No current song",
-          artistName: room.current_song.artists.join(", ") || "No artists",
-          description: room.description,
-          userProfile: room.creator.profile_picture_url,
-          username: room.creator.username,
-          tags: room.tags,
-          mine: true,
-        }));
-        setMyRooms(formattedRooms);
+        // Fetch recent rooms
+        const recentRooms = await fetchRooms(storedToken, '/recent');
+        const formattedRecentRooms = formatRoomData(recentRooms);
+        
+        // Fetch picks for you
+        const picksForYouRooms = await fetchRooms(storedToken, '/foryou');
+        const formattedPicksForYouRooms = formatRoomData(picksForYouRooms);
+        
+        // Fetch My Rooms
+        const myRoomsData = await fetchRooms(storedToken);
+        const formattedMyRooms = formatRoomData(myRoomsData, true);
+
+        setMyRooms(formattedMyRooms);
+        setMyPicks(formattedPicksForYouRooms);
+        setMyRecents(formattedRecentRooms);
   
         // Fetch friends
         const fetchedFriends = await getFriends(storedToken);
         const formattedFriends = fetchedFriends.map(friend => ({
-          profilePicture: friend.profile_picture_url,
+          profilePicture: friend.profile_picture_url ? friend.profile_picture_url : ProfileIMG,
           name: friend.profile_name,
         }));
         setFriends(formattedFriends);
@@ -266,11 +198,11 @@ const Home: React.FC = () => {
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
             Recent Rooms
           </Text>
-          <AppCarousel data={sampleRoomCards} renderItem={renderItem} />
+          <AppCarousel data={myRecents} renderItem={renderItem} />
           <Text className="text-2xl font-bold text-gray-800 mt-7 mb-5 ml-8">
             Picks for you
           </Text>
-          <AppCarousel data={sampleRoomCards} renderItem={renderItem} />
+          <AppCarousel data={myPicks} renderItem={renderItem} />
           <TouchableOpacity className="mt-7" onPress={navigateToAllFriends}>
             <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
               Friends
