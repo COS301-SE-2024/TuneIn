@@ -161,8 +161,8 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":room_id/users")
 	@ApiTags("rooms")
-	getRoomUsers(@Request() req: any, @Param("room_id") room_id: string): UserProfileDto[] {
-		return this.roomsService.getRoomUsers(room_id);
+	async getRoomUsers(@Request() req: any, @Param("room_id") room_id: string): Promise<UserProfileDto[]> {
+		return await this.roomsService.getRoomUsers(room_id);
 	}
 
 	/*

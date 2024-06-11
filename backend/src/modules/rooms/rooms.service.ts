@@ -128,10 +128,26 @@ export class RoomsService {
 		}
 	}
 
-	getRoomUsers(room_id: string): UserProfileDto[] {
-		// TODO: Implement logic to get room users
-		return [];
+	async getNumFollowers(user_id: string, getFollowers: boolean): Promise<number> {
+		try {
+			const _where: object = getFollowers? {
+				follower: user_id
+			} : {
+				followee: user_id
+			};
+			const followers: number = await this.prisma.follows.count({
+				where: _where
+			});
+			return followers;
+		} catch(error) {
+			return 0;
+		}
 	}
+
+	async getRoomUsers(room_id: string): Promise<UserProfileDto[]> {
+        // Return empty array in case of error
+		return [];
+    }
 
 	getRoomQueue(room_id: string): SongInfoDto[] {
 		// TODO: Implement logic to get room queue
