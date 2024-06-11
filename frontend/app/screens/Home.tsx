@@ -13,6 +13,7 @@ import axios from 'axios';
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
+  const [friends, setFriends] = useState<Friend[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -96,6 +97,21 @@ const Home: React.FC = () => {
     }
   };
 
+  const getFriends = async (token) => {
+    try {
+      const response = await axios.get(`${baseURL}/users/friends`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      return [];
+    }
+  };
+
+  
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [token, setToken] = useState<string | null>(null);
 
@@ -123,6 +139,41 @@ const Home: React.FC = () => {
     };
 
     getTokenAndRooms();
+  }, []);
+
+  useEffect(() => {
+    const getTokenAndData = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+      console.log("HomeToken", storedToken);
+  
+      if (storedToken) {
+        // Fetch rooms
+        const rooms = await getMyRooms(storedToken);
+        const formattedRooms = rooms.map(room => ({
+          backgroundImage: room.room_image,
+          name: room.room_name,
+          songName: room.current_song.title || "No current song",
+          artistName: room.current_song.artists.join(", ") || "No artists",
+          description: room.description,
+          userProfile: room.creator.profile_picture_url,
+          username: room.creator.username,
+          tags: room.tags,
+          mine: true,
+        }));
+        setMyRooms(formattedRooms);
+  
+        // Fetch friends
+        const fetchedFriends = await getFriends(storedToken);
+        const formattedFriends = fetchedFriends.map(friend => ({
+          profilePicture: friend.profile_picture_url,
+          name: friend.profile_name,
+        }));
+        setFriends(formattedFriends);
+      }
+    };
+  
+    getTokenAndData();
   }, []);
 
   const renderItem = ({ item }: { item: Room }) => (
@@ -225,7 +276,7 @@ const Home: React.FC = () => {
               Friends
             </Text>
           </TouchableOpacity>
-          <FriendsGrid friends={sampleFriends} maxVisible={8} />
+          <FriendsGrid friends={friends} maxVisible={8} />
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
