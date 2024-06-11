@@ -5,29 +5,27 @@ import {
 	HttpException,
 	HttpStatus,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import {
+	AuthService,
+	CognitoDecodedToken,
+	JWTPayload,
+	RegisterBody,
+} from "./auth.service";
 import {
 	ApiBody,
 	ApiOperation,
-	ApiProperty,
 	ApiResponse,
 	ApiTags,
 } from "@nestjs/swagger";
-
-class RegisterBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-
-	@ApiProperty()
-	email: string;
-}
+import { UsersService } from "src/modules/users/users.service";
+import * as PrismaTypes from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
 	/*
 	POST /auth/login
@@ -36,14 +34,15 @@ export class AuthController {
 	@Post("login")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: AuthBody })
+	@ApiBody({ type: String })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async login(@Body() authInfo: AuthBody) {
+	async login(@Body() cognitoAccessToken: string) {
+		/*
 		const users = await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);
@@ -110,11 +109,32 @@ export class AuthController {
 				HttpStatus.UNAUTHORIZED,
 			);
 		}
+		*/
+		const authInfo: CognitoDecodedToken =
+			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
+		const userID: string = authInfo.username;
 
-		const payload = {
-			sub: authInfo.userCognitoSub,
-			username: authInfo.username,
-			email: userEmail,
+		const user: PrismaTypes.users | null =
+			await this.usersService.findOne(userID);
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. AuthControllerLoginError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		const payload: JWTPayload = {
+			id: authInfo.username,
+			username: user.username,
+			email: user.email,
 		};
 
 		//generate JWT token using payload

@@ -5,6 +5,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { ApiProperty } from "@nestjs/swagger";
 //import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
@@ -21,6 +22,23 @@ export type CognitoDecodedToken = {
 	jti: string;
 	username: string;
 };
+
+export type JWTPayload = {
+	id: string;
+	email: string;
+	username: string;
+};
+
+export class RegisterBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -127,31 +145,6 @@ export class AuthService {
 		}
 	}
 
-	//Sample code
-	/*
-	if (!userMatch) {
-			return { message: "Invalid credentials. No user match" };
-		}
-
-		// add users to table
-		const successful: boolean = await this.authService.createUser(
-			userMatch.Username,
-			userEmail,
-		);
-
-		if (!successful) {
-			return { message: "Invalid credentials. Could not create user" };
-		}
-
-		const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-
-		//generate JWT token using payload
-		const token: string = this.authService.generateJWT(payload);
-	*/
 	async createUser(
 		username: string,
 		email: string,
@@ -178,19 +171,7 @@ export class AuthService {
 		return true;
 	}
 
-	//input payload
-	/*
-	const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-	*/
-	async generateJWT(payload: {
-		sub: string;
-		username: string;
-		email: string;
-	}): Promise<string> {
+	async generateJWT(payload: JWTPayload): Promise<string> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
 
