@@ -5,45 +5,36 @@ import {
 	HttpException,
 	HttpStatus,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
 import {
-	ApiBody,
-	ApiOperation,
-	ApiProperty,
-	ApiResponse,
-	ApiTags,
-} from "@nestjs/swagger";
-
-class RegisterBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-
-	@ApiProperty()
-	email: string;
-}
+	AuthService,
+	CognitoDecodedToken,
+	JWTPayload,
+	RegisterBody,
+	LoginBody,
+} from "./auth.service";
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { UsersService } from "src/modules/users/users.service";
+import * as PrismaTypes from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
-	/*
-	POST /auth/login
-	body: Cognito Access Token (string)
-  	*/
 	@Post("login")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: AuthBody })
+	@ApiBody({ type: LoginBody })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async login(@Body() authInfo: AuthBody) {
+	async login(@Body() loginInfo: LoginBody) {
+		/*
 		const users = await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);
@@ -110,15 +101,47 @@ export class AuthController {
 				HttpStatus.UNAUTHORIZED,
 			);
 		}
+		*/
+		if (!loginInfo.token || loginInfo.token === null) {
+			throw new HttpException(
+				"Invalid request. Missing Cognito access token. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		const cognitoAccessToken: string = loginInfo.token;
+		console.log("cognitoAccessToken", cognitoAccessToken);
+		const authInfo: CognitoDecodedToken =
+			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
+		const userID: string = authInfo.username;
+		console.log("authInfo", authInfo);
 
-		const payload = {
-			sub: authInfo.userCognitoSub,
-			username: authInfo.username,
-			email: userEmail,
+		const user: PrismaTypes.users | null =
+			await this.usersService.findOne(userID);
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. AuthControllerLoginError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		const payload: JWTPayload = {
+			id: authInfo.username,
+			username: user.username,
+			email: user.email,
 		};
 
+		console.log("payload", payload);
 		//generate JWT token using payload
 		const token: string = await this.authService.generateJWT(payload);
+		console.log("token", token);
 
 		//return the JWT as a string
 		return { token: token };

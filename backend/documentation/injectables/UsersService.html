@@ -157,6 +157,7 @@
                                 <a href="#getFollowing" >getFollowing</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getRecentRooms" >getRecentRooms</a>
                             </li>
                             <li>
@@ -358,7 +359,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createRoom(createRoomDto: <a href="../classes/CreateRoomDto.html" target="_self">CreateRoomDto</a>)</code>
+                    <code>createRoom(createRoomDto: <a href="../classes/CreateRoomDto.html" target="_self">CreateRoomDto</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -390,6 +391,18 @@
                                                 <td>createRoomDto</td>
                                             <td>
                                                             <code><a href="../classes/CreateRoomDto.html" target="_self" >CreateRoomDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
 
                                             <td>
@@ -538,8 +551,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="233"
-                                    class="link-to-prism">src/modules/users/users.service.ts:233</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="305"
+                                    class="link-to-prism">src/modules/users/users.service.ts:305</a></div>
                         </td>
                     </tr>
 
@@ -607,8 +620,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="249"
-                                    class="link-to-prism">src/modules/users/users.service.ts:249</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="321"
+                                    class="link-to-prism">src/modules/users/users.service.ts:321</a></div>
                         </td>
                     </tr>
 
@@ -660,6 +673,7 @@
                 <td class="col-md-4">
                     <a name="getRecentRooms"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>getRecentRooms</b></span>
                         <a href="#getRecentRooms"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -667,15 +681,16 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>getRecentRooms(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRecentRooms(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="189"
-                                    class="link-to-prism">src/modules/users/users.service.ts:189</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="207"
+                                    class="link-to-prism">src/modules/users/users.service.ts:207</a></div>
                         </td>
                     </tr>
 
@@ -711,7 +726,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >RoomDto[]</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -743,8 +758,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="194"
-                                    class="link-to-prism">src/modules/users/users.service.ts:194</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="266"
+                                    class="link-to-prism">src/modules/users/users.service.ts:266</a></div>
                         </td>
                     </tr>
 
@@ -812,8 +827,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="213"
-                                    class="link-to-prism">src/modules/users/users.service.ts:213</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="285"
+                                    class="link-to-prism">src/modules/users/users.service.ts:285</a></div>
                         </td>
                     </tr>
 
@@ -1359,22 +1374,20 @@ export class UsersService {
 		return r;
 	}
 
-	async createRoom(createRoomDto: CreateRoomDto): Promise&lt;RoomDto&gt; {
-		if (!createRoomDto.creator) {
-			throw new Error(&quot;No creator provided for the room&quot;);
-		}
-
+	async createRoom(
+		createRoomDto: CreateRoomDto,
+		userID: string,
+	): Promise&lt;RoomDto&gt; {
 		const newRoom: Prisma.roomCreateInput &#x3D; {
 			name: createRoomDto.room_name || &quot;Untitled Room&quot;,
 
 			//foreign key relation for &#x27;room_creator&#x27;
 			users: {
 				connect: {
-					user_id: createRoomDto.creator.userID,
+					user_id: userID,
 				},
 			},
 		};
-		if (createRoomDto.roomID) newRoom.room_id &#x3D; createRoomDto.roomID;
 		if (createRoomDto.description)
 			newRoom.description &#x3D; createRoomDto.description;
 		if (createRoomDto.is_temporary)
@@ -1395,19 +1408,46 @@ export class UsersService {
 			newRoom.current_song &#x3D; createRoomDto.current_song;
 		*/
 
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.create({
+			data: newRoom,
+		});
+		if (!room) {
+			throw new Error(&quot;Something went wrong while creating the room&quot;);
+		}
+
 		//for is_private, we will need to add the roomID to the private_room tbale
 		if (createRoomDto.is_private) {
-			newRoom.private_room &#x3D; {
-				connect: {
-					room_id: createRoomDto.roomID,
+			const privRoom: Prisma.private_roomCreateInput &#x3D; {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
 				},
 			};
+			const privRoomResult &#x3D; await this.prisma.private_room.create({
+				data: privRoom,
+			});
+			if (!privRoomResult || privRoomResult &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while creating private room. Received null.&quot;,
+				);
+			}
 		} else {
-			newRoom.public_room &#x3D; {
-				connect: {
-					room_id: createRoomDto.roomID,
+			const pubRoom: Prisma.public_roomCreateInput &#x3D; {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
 				},
 			};
+			const pubRoomResult &#x3D; await this.prisma.public_room.create({
+				data: pubRoom,
+			});
+			if (!pubRoomResult || pubRoomResult &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while creating public room. Received null.&quot;,
+				);
+			}
 		}
 
 		//TODO: implement scheduled room creation
@@ -1423,13 +1463,6 @@ export class UsersService {
 		}
 		*/
 
-		const room &#x3D; await this.prisma.room.create({
-			data: newRoom,
-		});
-		if (!room) {
-			throw new Error(&quot;Something went wrong while creating the room&quot;);
-		}
-
 		const result &#x3D; await this.dtogen.generateRoomDtoFromRoom(room);
 		if (!result) {
 			throw new Error(
@@ -1439,9 +1472,63 @@ export class UsersService {
 		return result;
 	}
 
-	getRecentRooms(userID: string): RoomDto[] {
-		// implementation goes here
-		return [];
+	async getRecentRooms(userID: string): Promise&lt;RoomDto[]&gt; {
+		/*
+		activity field in users table is modelled as:
+		&quot;{&quot;recent_rooms&quot;: [&quot;0352e8b8-e987-4dc9-a379-dc68b541e24f&quot;, &quot;497d8138-13d2-49c9-808d-287b447448e8&quot;, &quot;376578dd-9ef6-41cb-a9f6-2ded47e22c84&quot;, &quot;62560ae5-9236-490c-8c75-c234678dc346&quot;]}&quot;
+		*/
+		// get the recent rooms from the user&#x27;s activity field
+		const u &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(&quot;User does not exist&quot;);
+		}
+
+		const user: PrismaTypes.users &#x3D; u;
+		const activity: Prisma.JsonValue &#x3D; user.activity;
+		console.log(user);
+		console.log(activity);
+		if (!activity || activity &#x3D;&#x3D;&#x3D; null) {
+			return [];
+		}
+
+		if (typeof activity !&#x3D;&#x3D; &quot;object&quot;) {
+			throw new Error(
+				&quot;An unknown error occurred while parsing the &#x27;activity&#x27; field in &#x27;users&#x27;. Expected object, received &quot; +
+					typeof activity,
+			);
+		}
+
+		//if (!&quot;recent_rooms&quot; in activity) {
+		if (!(&quot;recent_rooms&quot; in activity)) {
+			return [];
+		}
+
+		try {
+			const recentRooms: string[] &#x3D; activity[&quot;recent_rooms&quot;] as string[];
+			for (const roomID of recentRooms) {
+				if (typeof roomID !&#x3D;&#x3D; &quot;string&quot;) {
+					throw new Error(
+						&quot;An unknown error occurred while parsing the &#x27;recent_rooms&#x27; field in &#x27;activity&#x27;. Expected string[], received &quot; +
+							typeof roomID,
+					);
+				}
+			}
+			const r &#x3D; await this.dtogen.generateMultipleRoomDto(recentRooms);
+			if (!r || r &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while generating RoomDto for recent rooms. Received null.&quot;,
+				);
+			}
+			return r;
+		} catch (e) {
+			throw new Error(
+				&quot;An unknown error occurred while parsing the &#x27;recent_rooms&#x27; field in &#x27;activity&#x27;. Expected string[], received &quot; +
+					typeof activity[&quot;recent_rooms&quot;],
+			);
+		}
 	}
 
 	async getRecommendedRooms(userID: string): Promise&lt;RoomDto[]&gt; {

@@ -15,6 +15,22 @@ import { Configuration } from "./configuration"
 
 const config: Configuration = {}
 
+describe("AuthApi", () => {
+  let instance: api.AuthApi
+  beforeEach(function() {
+    instance = new api.AuthApi(config)
+  });
+
+  test("authControllerLogin", () => {
+    const body: api.LoginBody = undefined
+    return expect(instance.authControllerLogin(body, {})).resolves.toBe(null)
+  })
+  test("authControllerRegister", () => {
+    const body: api.RegisterBody = undefined
+    return expect(instance.authControllerRegister(body, {})).resolves.toBe(null)
+  })
+})
+
 describe("DefaultApi", () => {
   let instance: api.DefaultApi
   beforeEach(function() {
@@ -23,10 +39,6 @@ describe("DefaultApi", () => {
 
   test("appControllerGetHello", () => {
     return expect(instance.appControllerGetHello({})).resolves.toBe(null)
-  })
-  test("authControllerLogin", () => {
-    const body: api.AuthBody = undefined
-    return expect(instance.authControllerLogin(body, {})).resolves.toBe(null)
   })
 })
 

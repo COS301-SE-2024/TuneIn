@@ -24,71 +24,71 @@
 <title>cluster_DbUtilsModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="24.5,-70 24.5,-268 471.5,-268 471.5,-70 24.5,-70"/>
 </g>
+<g id="clust6" class="cluster">
+<title>cluster_DbUtilsModule_providers</title>
+<polygon fill="none" stroke="black" points="154.5,-78 154.5,-130 463.5,-130 463.5,-78 154.5,-78"/>
+</g>
 <g id="clust3" class="cluster">
 <title>cluster_DbUtilsModule_imports</title>
-<polygon fill="none" stroke="black" points="349.5,-78 349.5,-130 463.5,-130 463.5,-78 349.5,-78"/>
+<polygon fill="none" stroke="black" points="32.5,-78 32.5,-130 146.5,-130 146.5,-78 32.5,-78"/>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_DbUtilsModule_exports</title>
-<polygon fill="none" stroke="black" points="201.5,-208 201.5,-260 323.5,-260 323.5,-208 201.5,-208"/>
-</g>
-<g id="clust6" class="cluster">
-<title>cluster_DbUtilsModule_providers</title>
-<polygon fill="none" stroke="black" points="32.5,-78 32.5,-130 341.5,-130 341.5,-78 32.5,-78"/>
+<polygon fill="none" stroke="black" points="168.5,-208 168.5,-260 290.5,-260 290.5,-208 168.5,-208"/>
 </g>
 <!-- PrismaModule -->
 <g id="node1" class="node">
 <title>PrismaModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="455.93,-122 452.93,-126 431.93,-126 428.93,-122 357.07,-122 357.07,-86 455.93,-86 455.93,-122"/>
-<text text-anchor="middle" x="406.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="138.93,-122 135.93,-126 114.93,-126 111.93,-122 40.07,-122 40.07,-86 138.93,-86 138.93,-122"/>
+<text text-anchor="middle" x="89.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
 </g>
 <!-- DbUtilsModule -->
 <g id="node2" class="node">
 <title>DbUtilsModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="314.38,-187 311.38,-191 290.38,-191 287.38,-187 210.62,-187 210.62,-151 314.38,-151 314.38,-187"/>
-<text text-anchor="middle" x="262.5" y="-164.8" font-family="Times,serif" font-size="14.00">DbUtilsModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="281.38,-187 278.38,-191 257.38,-191 254.38,-187 177.62,-187 177.62,-151 281.38,-151 281.38,-187"/>
+<text text-anchor="middle" x="229.5" y="-164.8" font-family="Times,serif" font-size="14.00">DbUtilsModule</text>
 </g>
 <!-- PrismaModule&#45;&gt;DbUtilsModule -->
 <g id="edge1" class="edge">
 <title>PrismaModule&#45;&gt;DbUtilsModule</title>
-<path fill="none" stroke="black" d="M406.5,-122.11C406.5,-141.34 406.5,-169 406.5,-169 406.5,-169 324.49,-169 324.49,-169"/>
-<polygon fill="black" stroke="black" points="324.49,-165.5 314.49,-169 324.49,-172.5 324.49,-165.5"/>
+<path fill="none" stroke="black" d="M89.5,-122.11C89.5,-141.34 89.5,-169 89.5,-169 89.5,-169 167.37,-169 167.37,-169"/>
+<polygon fill="black" stroke="black" points="167.37,-172.5 177.37,-169 167.37,-165.5 167.37,-172.5"/>
 </g>
 <!-- DbUtilsService  -->
 <g id="node3" class="node">
 <title>DbUtilsService </title>
-<polygon fill="#fb8072" stroke="black" points="315.31,-252 209.69,-252 209.69,-216 315.31,-216 315.31,-252"/>
-<text text-anchor="middle" x="262.5" y="-229.8" font-family="Times,serif" font-size="14.00">DbUtilsService </text>
+<polygon fill="#fb8072" stroke="black" points="282.31,-252 176.69,-252 176.69,-216 282.31,-216 282.31,-252"/>
+<text text-anchor="middle" x="229.5" y="-229.8" font-family="Times,serif" font-size="14.00">DbUtilsService </text>
 </g>
 <!-- DbUtilsModule&#45;&gt;DbUtilsService  -->
 <g id="edge2" class="edge">
 <title>DbUtilsModule&#45;&gt;DbUtilsService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M262.5,-187.11C262.5,-187.11 262.5,-205.99 262.5,-205.99"/>
-<polygon fill="black" stroke="black" points="259,-205.99 262.5,-215.99 266,-205.99 259,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M229.5,-187.11C229.5,-187.11 229.5,-205.99 229.5,-205.99"/>
+<polygon fill="black" stroke="black" points="226,-205.99 229.5,-215.99 233,-205.99 226,-205.99"/>
 </g>
 <!-- DbUtilsService -->
 <g id="node4" class="node">
 <title>DbUtilsService</title>
-<ellipse fill="#fdb462" stroke="black" cx="262.5" cy="-104" rx="70.64" ry="18"/>
-<text text-anchor="middle" x="262.5" y="-99.8" font-family="Times,serif" font-size="14.00">DbUtilsService</text>
+<ellipse fill="#fdb462" stroke="black" cx="384.5" cy="-104" rx="70.64" ry="18"/>
+<text text-anchor="middle" x="384.5" y="-99.8" font-family="Times,serif" font-size="14.00">DbUtilsService</text>
 </g>
 <!-- DbUtilsService&#45;&gt;DbUtilsModule -->
 <g id="edge3" class="edge">
 <title>DbUtilsService&#45;&gt;DbUtilsModule</title>
-<path fill="none" stroke="black" d="M262.5,-122.11C262.5,-122.11 262.5,-140.99 262.5,-140.99"/>
-<polygon fill="black" stroke="black" points="259,-140.99 262.5,-150.99 266,-140.99 259,-140.99"/>
+<path fill="none" stroke="black" d="M384.5,-122.11C384.5,-141.34 384.5,-169 384.5,-169 384.5,-169 291.54,-169 291.54,-169"/>
+<polygon fill="black" stroke="black" points="291.54,-165.5 281.54,-169 291.54,-172.5 291.54,-165.5"/>
 </g>
 <!-- PrismaService -->
 <g id="node5" class="node">
 <title>PrismaService</title>
-<ellipse fill="#fdb462" stroke="black" cx="107.5" cy="-104" rx="66.63" ry="18"/>
-<text text-anchor="middle" x="107.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
+<ellipse fill="#fdb462" stroke="black" cx="229.5" cy="-104" rx="66.63" ry="18"/>
+<text text-anchor="middle" x="229.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
 </g>
 <!-- PrismaService&#45;&gt;DbUtilsModule -->
 <g id="edge4" class="edge">
 <title>PrismaService&#45;&gt;DbUtilsModule</title>
-<path fill="none" stroke="black" d="M107.5,-122.11C107.5,-141.34 107.5,-169 107.5,-169 107.5,-169 200.46,-169 200.46,-169"/>
-<polygon fill="black" stroke="black" points="200.46,-172.5 210.46,-169 200.46,-165.5 200.46,-172.5"/>
+<path fill="none" stroke="black" d="M229.5,-122.11C229.5,-122.11 229.5,-140.99 229.5,-140.99"/>
+<polygon fill="black" stroke="black" points="226,-140.99 229.5,-150.99 233,-140.99 226,-140.99"/>
 </g>
 </g>
 </svg>

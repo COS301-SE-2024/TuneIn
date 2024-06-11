@@ -80,124 +80,119 @@ export class RequiredError extends Error {
 /**
  * 
  * @export
- * @interface AuthBody
- */
-export interface AuthBody {
-    /**
-     * 
-     * @type {string}
-     * @memberof AuthBody
-     */
-    username: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AuthBody
-     */
-    userCognitoSub: string;
-}
-/**
- * 
- * @export
  * @interface CreateRoomDto
  */
 export interface CreateRoomDto {
     /**
      * 
-     * @type {UserProfileDto}
+     * @type {string}
      * @memberof CreateRoomDto
      */
-    creator?: UserProfileDto;
+    roomName: string;
     /**
      * 
      * @type {string}
      * @memberof CreateRoomDto
      */
-    roomID?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateRoomDto
-     */
-    participantCount?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateRoomDto
-     */
-    roomName?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateRoomDto
-     */
-    description?: string;
+    description: string;
     /**
      * 
      * @type {boolean}
      * @memberof CreateRoomDto
      */
-    isTemporary?: boolean;
+    isTemporary: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof CreateRoomDto
      */
-    isPrivate?: boolean;
+    isPrivate: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof CreateRoomDto
      */
-    isScheduled?: boolean;
+    isScheduled: boolean;
     /**
      * 
      * @type {Date}
      * @memberof CreateRoomDto
      */
-    startDate?: Date;
+    startDate: Date;
     /**
      * 
      * @type {Date}
      * @memberof CreateRoomDto
      */
-    endDate?: Date;
+    endDate: Date;
     /**
      * 
      * @type {string}
      * @memberof CreateRoomDto
      */
-    language?: string;
+    language: string;
     /**
      * 
      * @type {boolean}
      * @memberof CreateRoomDto
      */
-    hasExplicitContent?: boolean;
+    hasExplicitContent: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof CreateRoomDto
      */
-    hasNsfwContent?: boolean;
+    hasNsfwContent: boolean;
     /**
      * 
      * @type {string}
      * @memberof CreateRoomDto
      */
-    roomImage?: string;
-    /**
-     * 
-     * @type {SongInfoDto}
-     * @memberof CreateRoomDto
-     */
-    currentSong?: SongInfoDto;
+    roomImage: string;
     /**
      * 
      * @type {Array<string>}
      * @memberof CreateRoomDto
      */
-    tags?: Array<string>;
+    tags: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface LoginBody
+ */
+export interface LoginBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof LoginBody
+     */
+    token: string;
+}
+/**
+ * 
+ * @export
+ * @interface RegisterBody
+ */
+export interface RegisterBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterBody
+     */
+    username: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterBody
+     */
+    userCognitoSub: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterBody
+     */
+    email: string;
 }
 /**
  * 
@@ -704,6 +699,187 @@ export interface UserProfileDto {
     recentRooms: any;
 }
 /**
+ * AuthApi - fetch parameter creator
+ * @export
+ */
+export const AuthApiFetchParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Login in the API using Cognito
+         * @param {LoginBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerLogin(body: LoginBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authControllerLogin.');
+            }
+            const localVarPath = `/auth/login`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"LoginBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Register a new user in the API using Cognito
+         * @param {RegisterBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerRegister(body: RegisterBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authControllerRegister.');
+            }
+            const localVarPath = `/auth/register`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            localVarUrlObj.search = null;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"RegisterBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AuthApi - functional programming interface
+ * @export
+ */
+export const AuthApiFp = function(configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Login in the API using Cognito
+         * @param {LoginBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerLogin(body: LoginBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<string> {
+            const localVarFetchArgs = AuthApiFetchParamCreator(configuration).authControllerLogin(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary Register a new user in the API using Cognito
+         * @param {RegisterBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerRegister(body: RegisterBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RegisterBody> {
+            const localVarFetchArgs = AuthApiFetchParamCreator(configuration).authControllerRegister(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+    }
+};
+
+/**
+ * AuthApi - factory interface
+ * @export
+ */
+export const AuthApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+    return {
+        /**
+         * 
+         * @summary Login in the API using Cognito
+         * @param {LoginBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerLogin(body: LoginBody, options?: any) {
+            return AuthApiFp(configuration).authControllerLogin(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary Register a new user in the API using Cognito
+         * @param {RegisterBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerRegister(body: RegisterBody, options?: any) {
+            return AuthApiFp(configuration).authControllerRegister(body, options)(fetch, basePath);
+        },
+    };
+};
+
+/**
+ * AuthApi - object-oriented interface
+ * @export
+ * @class AuthApi
+ * @extends {BaseAPI}
+ */
+export class AuthApi extends BaseAPI {
+    /**
+     * 
+     * @summary Login in the API using Cognito
+     * @param {LoginBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthApi
+     */
+    public authControllerLogin(body: LoginBody, options?: any) {
+        return AuthApiFp(this.configuration).authControllerLogin(body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary Register a new user in the API using Cognito
+     * @param {RegisterBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthApi
+     */
+    public authControllerRegister(body: RegisterBody, options?: any) {
+        return AuthApiFp(this.configuration).authControllerRegister(body, options)(this.fetch, this.basePath);
+    }
+
+}
+/**
  * DefaultApi - fetch parameter creator
  * @export
  */
@@ -711,6 +887,7 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
+         * @summary Hello World!
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -731,38 +908,6 @@ export const DefaultApiFetchParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @summary Login in the API using Cognito
-         * @param {AuthBody} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerLogin(body: AuthBody, options: any = {}): FetchArgs {
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling authControllerLogin.');
-            }
-            const localVarPath = `/auth/login`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            localVarUrlObj.search = null;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"AuthBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
-            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -774,30 +919,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Hello World!
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        appControllerGetHello(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+        appControllerGetHello(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<string> {
             const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).appControllerGetHello(options);
-            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response;
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * 
-         * @summary Login in the API using Cognito
-         * @param {AuthBody} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerLogin(body: AuthBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AuthBody> {
-            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authControllerLogin(body, options);
             return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -819,21 +946,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, fetch?
     return {
         /**
          * 
+         * @summary Hello World!
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         appControllerGetHello(options?: any) {
             return DefaultApiFp(configuration).appControllerGetHello(options)(fetch, basePath);
-        },
-        /**
-         * 
-         * @summary Login in the API using Cognito
-         * @param {AuthBody} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerLogin(body: AuthBody, options?: any) {
-            return DefaultApiFp(configuration).authControllerLogin(body, options)(fetch, basePath);
         },
     };
 };
@@ -847,24 +965,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, fetch?
 export class DefaultApi extends BaseAPI {
     /**
      * 
+     * @summary Hello World!
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
     public appControllerGetHello(options?: any) {
         return DefaultApiFp(this.configuration).appControllerGetHello(options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary Login in the API using Cognito
-     * @param {AuthBody} body 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public authControllerLogin(body: AuthBody, options?: any) {
-        return DefaultApiFp(this.configuration).authControllerLogin(body, options)(this.fetch, this.basePath);
     }
 
 }

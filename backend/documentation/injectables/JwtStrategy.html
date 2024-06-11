@@ -289,7 +289,7 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Strategy, ExtractJwt } from &quot;passport-jwt&quot;;
 import { PassportStrategy } from &quot;@nestjs/passport&quot;;
 import { Injectable } from &quot;@nestjs/common&quot;;
-import { AuthService } from &quot;./auth.service&quot;;
+import { AuthService, JWTPayload } from &quot;./auth.service&quot;;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -307,7 +307,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: any) {
-		return { userId: payload.sub, username: payload.username };
+		const result: JWTPayload &#x3D; {
+			id: payload.id,
+			email: payload.email,
+			username: payload.username,
+		};
+		return result;
 	}
 }
 </code></pre>
