@@ -134,7 +134,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -155,7 +155,7 @@ export class UsersController {
 		@Request() req: any,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -193,7 +193,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -212,7 +212,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -231,7 +231,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -250,7 +250,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -269,7 +269,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}

@@ -120,7 +120,7 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
@@ -145,7 +145,7 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userID = req.user.sub;
+		const userID = req.user.userId;
 		if (!userID || userID === "" || typeof userID !== "string") {
 			throw new Error("Invalid user ID in JWT token. Please log in again.");
 		}
