@@ -54,7 +54,20 @@ export class ProfileService {
     return userProfile;
   }
 
-  getProfileByUsername(): UserProfileDto {
+  async getProfileByUsername(username: string): Promise<UserProfileDto> {
+    const userData = await this.prisma.users.findFirst({
+      where: { username: username },
+    });
+
+    if (!userData) {
+      throw new Error("User not found");
+    } else {
+      const user = await this.dtogen.generateUserProfileDto(userData.user_id);
+      if (user) {
+        return user;
+      }
+    }
+
     return new UserProfileDto();
   }
 

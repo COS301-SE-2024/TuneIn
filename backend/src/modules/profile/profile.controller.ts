@@ -90,8 +90,8 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":username")
 	@ApiTags("profile")
-	getProfileByUsername(@Request() req: any, @Param("username") username: string): UserProfileDto {
-		return this.profileService.getProfileByUsername();
+	async getProfileByUsername(@Request() req: any, @Param("username") username: string): Promise<UserProfileDto> {
+		return this.profileService.getProfileByUsername(username);
 	}
 
 	/*
