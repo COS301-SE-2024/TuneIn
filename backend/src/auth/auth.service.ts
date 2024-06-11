@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
-import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+//import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -139,13 +139,19 @@ export class AuthService {
 	async createUser(
 		username: string,
 		email: string,
-		user_id: string,
+		userID: string,
 	): Promise<boolean> {
 		const user: Prisma.usersCreateInput = {
 			username: username,
 			email: email,
-			user_id: user_id,
+			user_id: userID,
 		};
+		const existingUser = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		if (existingUser) {
+			return true;
+		}
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
@@ -184,6 +190,7 @@ export class AuthService {
 		return token;
 	}
 
+	/*
 	async getUserInfo(jwt_token: string): Promise<any> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
@@ -197,17 +204,36 @@ export class AuthService {
 		}
 
 		const decoded = jwt.verify(jwt_token, secretKey);
-		const user_id = decoded.sub;
-		if (!user_id) {
+		const userID = decoded.sub;
+		if (!userID) {
 			throw new Error("Invalid JWT token");
 		}
-		if (typeof user_id !== "string") {
+		if (typeof userID !== "string") {
 			throw new Error("Invalid JWT token");
 		}
 
 		const user = await this.prisma.users.findUnique({
-			where: { user_id: user_id },
+			where: { user_id: userID },
 		});
 		return user;
+	}
+	*/
+
+	// this funciton will be passed a Request object from the NestJS controller eg: 
+	/*
+	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
+	}
+	*/
+	getUserInfo(req: any): any {
+		const result = req.user;
+		console.log(result);
+		if (!result) {
+			throw new UnauthorizedException("No user found in JWT token. Please log in again");
+		}
+		if (!result.userId) {
+			throw new UnauthorizedException("No user ID found in JWT token. Please log in again");
+		}
+		return result;
 	}
 }

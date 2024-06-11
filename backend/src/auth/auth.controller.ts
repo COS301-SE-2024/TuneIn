@@ -8,52 +8,53 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import {
-    ApiBody,
-    ApiOperation,
-    ApiProperty,
-    ApiResponse,
-    ApiTags
+	ApiBody,
+	ApiOperation,
+	ApiProperty,
+	ApiResponse,
+	ApiTags,
 } from "@nestjs/swagger";
 
-class AuthBody {
-    @ApiProperty()
-    username: string;
+class RegisterBody {
+	@ApiProperty()
+	username: string;
 
-    @ApiProperty()
-    userCognitoSub: string;
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
 }
 
 @ApiTags('auth')
 @Controller("auth")
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+	constructor(private readonly authService: AuthService) {}
 
-    @Get("health")
-    @ApiOperation({ summary: "Check if the server is running" })
-    @ApiResponse({ status: 200, description: "Server is running" })
-    healthCheck() {
-        return { status: "Server is running" };
-    }
-
-    @Post("login")
-    @ApiOperation({ summary: "Login in the API using Cognito" })
-    @ApiBody({ type: AuthBody })
-    @ApiResponse({
-        status: 201,
-        description: "The record has been successfully created.",
-        type: AuthBody,
-    })
-    @ApiResponse({ status: 403, description: "Forbidden." })
-    async login(@Body() authInfo: AuthBody) {
-        const users = await this.authService.listUsers();
-        console.log(users);
-        console.log(users.Users);
-        if (!users) {
-            throw new HttpException(
-                "Invalid credentials. Could not create user. AuthError01",
-                HttpStatus.UNAUTHORIZED,
-            );
-        }
+	/*
+	POST /auth/login
+	body: Cognito Access Token (string)
+  	*/
+	@Post("login")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Login in the API using Cognito" })
+	@ApiBody({ type: AuthBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: AuthBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async login(@Body() authInfo: AuthBody) {
+		const users = await this.authService.listUsers();
+		console.log(users);
+		console.log(users.Users);
+		if (!users) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
 
         if (!users.Users || users.Users.length === 0) {
             throw new HttpException(
@@ -121,9 +122,36 @@ export class AuthController {
         // Generate JWT token using payload
         const token: string = await this.authService.generateJWT(payload);
 
-        // Return the JWT as a string
-        return { token: token };
-    }
+		//return the JWT as a string
+		return { token: token };
+	}
+
+	@Post("register")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiBody({ type: RegisterBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: RegisterBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async register(@Body() registerInfo: RegisterBody) {
+		const successful: boolean = await this.authService.createUser(
+			registerInfo.username,
+			registerInfo.email,
+			registerInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthRegisterError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
+	}
 
     // TODO: Add a POST method to refresh an expired JWT token
     // TODO: Add a POST method to logout a user
