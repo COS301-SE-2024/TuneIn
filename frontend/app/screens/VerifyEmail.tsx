@@ -7,13 +7,15 @@ import UserPool from '../services/UserPool';
 
 const VerifyEmailScreen: React.FC = () => {
     const router = useRouter();
-    const { email } = useLocalSearchParams(); // Accessing the email passed from RegisterScreen
+    const { email, username } = useLocalSearchParams(); // Accessing the email passed from RegisterScreen
 
     const [verificationCode, setVerificationCode] = useState("");
 
     const verifyCode = () => {
-        const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-        const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
+        console.log(email, verificationCode, username);
+        const _username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
+        const cognitoUser = new CognitoUser({ Username: _username, Pool: UserPool });
+        console.log(email, verificationCode, username, _username);
         cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
             if (err) {
                 Alert.alert(
@@ -30,6 +32,8 @@ const VerifyEmailScreen: React.FC = () => {
                 [{ text: "OK" }],
                 { cancelable: false }
               );
+              // add user to database here
+              
             navigateToLogin();
         });
     };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Link, useRouter } from "expo-router";
 import RoomCardWidget from "../components/RoomCardWidget";
@@ -7,10 +7,32 @@ import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
+import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
+
+
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const scrollViewRef = useRef<ScrollView>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user: AuthUser = await getCurrentUser(); // Updated method call
+        setAuthUser(user);
+        console.log(user);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+
+
+
 
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";

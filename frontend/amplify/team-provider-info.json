@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-tunein-dev-abeeb-authRole",
+      "UnauthRoleArn": "arn:aws:iam::211125427171:role/amplify-tunein-dev-abeeb-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::211125427171:role/amplify-tunein-dev-abeeb-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-tunein-dev-abeeb-deployment",
+      "UnauthRoleName": "amplify-tunein-dev-abeeb-unauthRole",
+      "StackName": "amplify-tunein-dev-abeeb",
+      "StackId": "arn:aws:cloudformation:us-east-1:211125427171:stack/amplify-tunein-dev-abeeb/17493b30-23b6-11ef-a650-0affc1ba0a99",
+      "AmplifyAppId": "d1ejl5noyrtcea"
+    }
+  }
+}

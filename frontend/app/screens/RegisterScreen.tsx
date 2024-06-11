@@ -78,19 +78,8 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    let username = email;
-    let attributes = [];
 
-    if (validateEmail(email)) {
-      attributes = [
-        new CognitoUserAttribute({
-          Name: 'email',
-          Value: email
-        })
-      ];
-    }
-
-    console.log(username, password, attributes);
+    console.log(username, password, email);
     UserPool.signUp(email, password, null, [], (err, data) => {
       if (err) {
         Alert.alert(
@@ -112,7 +101,10 @@ const RegisterScreen: React.FC = () => {
       
       router.navigate({
         pathname: "/screens/VerifyEmail",
-        params: { email: email },
+        params: { 
+          email: email,
+          username: username,
+        },
       });
     });
 

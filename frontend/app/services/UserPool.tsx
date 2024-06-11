@@ -6,4 +6,6 @@ const poolData = {
   ClientId: EXPO_CLIENT_ID,
 };
 
+console.log(EXPO_CLIENT_ID, EXPO_USER_POOL_ID);
+
 export default new CognitoUserPool(poolData);
