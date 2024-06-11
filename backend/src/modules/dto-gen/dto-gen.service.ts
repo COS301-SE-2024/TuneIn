@@ -105,6 +105,7 @@ export class DtoGenService {
 
 		//get user info
 		const result: UserProfileDto = this.generateBriefUserProfileDto(user);
+		result.links = await this.dbUtils.getLinks(user);
 
 		const following: Prisma.users[] | null =
 			await this.dbUtils.getUserFollowing(user_id);

@@ -9,6 +9,6 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 @Module({
 	controllers: [RoomsController],
 	providers: [RoomsService, PrismaService, DtoGenService, DbUtilsService],
-	imports: [PrismaModule, DtoGenService, DbUtilsService],
+	imports: [PrismaModule],
 })
 export class RoomsModule {}

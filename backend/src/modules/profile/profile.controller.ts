@@ -49,9 +49,10 @@ export class ProfileController {
     response: return ProfileDto
     */
 	@UseGuards(JwtAuthGuard)
+	@Get()
 	@ApiTags("profile")
-	getProfile(@Request() req: any): UserProfileDto {
-		return this.profileService.getProfile();
+	getProfile(@Request() req: any): Promise<UserProfileDto>  {
+		return this.profileService.getProfile(req.user.userId);
 	}
 
 	/*

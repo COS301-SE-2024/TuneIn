@@ -76,6 +76,32 @@ export class DbUtilsService {
 		return result;
 	}
 
+	async getLinks(user: Prisma.users): Promise<{ count: number; data: string[] }> {
+		if (!user.external_links) {
+			// console.log("external links is null");
+		  return { count: 0, data: [] };
+		}
+	  
+		try {
+		  // Parse the JSON string
+		  const links = JSON.parse(JSON.stringify(user.external_links));
+		  
+		  // Ensure the parsed object has the required properties
+		  if (links && typeof links === 'object' && 'count' in links && 'data' in links) {
+			return {
+			  count: links.count,
+			  data: links.data,
+			};
+		  } else {
+			throw new Error("Invalid links format");
+		  }
+		} catch (error) {
+		  console.error("Failed to parse external_links:", error);
+		  return { count: 0, data: [] };
+		}
+	  }
+	  
+
 	async getRandomRooms(count: number): Promise<Prisma.room[] | null> {
 		const rooms: Prisma.room[] | null = await this.prisma.room.findMany();
 
