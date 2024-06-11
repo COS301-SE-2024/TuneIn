@@ -244,8 +244,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="119"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:119</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="123"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:123</a></div>
                         </td>
                     </tr>
 
@@ -333,8 +333,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="53"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:53</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="57"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:57</a></div>
                         </td>
                     </tr>
 
@@ -412,8 +412,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="98"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:98</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="102"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:102</a></div>
                         </td>
                     </tr>
 
@@ -503,8 +503,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="82"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:82</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="86"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:86</a></div>
                         </td>
                     </tr>
 
@@ -599,8 +599,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="144"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:144</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="145"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:145</a></div>
                         </td>
                     </tr>
 
@@ -690,8 +690,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="66"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:66</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="70"
+                                    class="link-to-prism">src/modules/profile/profile.controller.ts:70</a></div>
                         </td>
                     </tr>
 
@@ -769,10 +769,14 @@ import { UserProfileDto } from &quot;./dto/userprofile.dto&quot;;
 import { ProfileService } from &quot;./profile.service&quot;;
 import { UpdateUserProfileDto } from &quot;./dto/updateuserprofile.dto&quot;;
 import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
+import { AuthService, JWTPayload } from &quot;src/auth/auth.service&quot;;
 
 @Controller(&quot;profile&quot;)
 export class ProfileController {
-	constructor(private readonly profileService: ProfileService) {}
+	constructor(
+		private readonly profileService: ProfileService,
+		private readonly auth: AuthService,
+	) {}
 
 	//NOTE TO DEV:
 	/*
@@ -875,11 +879,8 @@ export class ProfileController {
 		@Request() req: any,
 		@Param(&quot;username&quot;) username: string,
 	): Promise&lt;boolean&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.profileService.followUser(userID, username);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.profileService.followUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
@@ -900,11 +901,8 @@ export class ProfileController {
 		@Request() req: any,
 		@Param(&quot;username&quot;) username: string,
 	): Promise&lt;boolean&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.profileService.unfollowUser(userID, username);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.profileService.unfollowUser(userInfo.id, username);
 	}
 }
 </code></pre>

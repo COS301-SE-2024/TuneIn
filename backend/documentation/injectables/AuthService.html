@@ -172,10 +172,13 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#generateJWT" >generateJWT</a>
+                                <a href="#decodeAndVerifyCognitoJWT" >decodeAndVerifyCognitoJWT</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#generateJWT" >generateJWT</a>
+                            </li>
+                            <li>
                                 <a href="#getUserInfo" >getUserInfo</a>
                             </li>
                             <li>
@@ -209,7 +212,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/auth/auth.service.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="54" class="link-to-prism">src/auth/auth.service.ts:54</a></div>
                             </td>
                         </tr>
 
@@ -286,8 +289,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="139"
-                                    class="link-to-prism">src/auth/auth.service.ts:139</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/auth/auth.service.ts:153</a></div>
                         </td>
                     </tr>
 
@@ -361,95 +364,26 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="generateJWT"></a>
+                    <a name="decodeAndVerifyCognitoJWT"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
-                        <span ><b>generateJWT</b></span>
-                        <a href="#generateJWT"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>decodeAndVerifyCognitoJWT</b></span>
+                        <a href="#decodeAndVerifyCognitoJWT"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>generateJWT(payload: literal type)</code>
+                    <code>decodeAndVerifyCognitoJWT(jwt_token: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="173"
-                                    class="link-to-prism">src/auth/auth.service.ts:173</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>payload</td>
-                                            <td>
-                                                        <code>literal type</code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;string&gt;</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getUserInfo"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>getUserInfo</b></span>
-                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserInfo(jwt_token: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="193"
-                                    class="link-to-prism">src/auth/auth.service.ts:193</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="247"
+                                    class="link-to-prism">src/auth/auth.service.ts:247</a></div>
                         </td>
                     </tr>
 
@@ -485,7 +419,143 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;any&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#CognitoDecodedToken" target="_self" >Promise&lt;CognitoDecodedToken&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="generateJWT"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>generateJWT</b></span>
+                        <a href="#generateJWT"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>generateJWT(payload: <a href="../undefineds/JWTPayload.html" target="_self">JWTPayload</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="179"
+                                    class="link-to-prism">src/auth/auth.service.ts:179</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#JWTPayload" target="_self" >JWTPayload</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;string&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserInfo"></a>
+                    <span class="name">
+                        <span ><b>getUserInfo</b></span>
+                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getUserInfo(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="230"
+                                    class="link-to-prism">src/auth/auth.service.ts:230</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#JWTPayload" target="_self" >JWTPayload</a></code>
 
                         </div>
                             <div class="io-description">
@@ -517,8 +587,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="98"
-                                    class="link-to-prism">src/auth/auth.service.ts:98</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">src/auth/auth.service.ts:137</a></div>
                         </td>
                     </tr>
 
@@ -556,8 +626,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="58"
-                                    class="link-to-prism">src/auth/auth.service.ts:58</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">src/auth/auth.service.ts:97</a></div>
                         </td>
                     </tr>
 
@@ -641,7 +711,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/auth/auth.service.ts:12</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="51" class="link-to-prism">src/auth/auth.service.ts:51</a></div>
                         </td>
                     </tr>
 
@@ -668,7 +738,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/auth/auth.service.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="54" class="link-to-prism">src/auth/auth.service.ts:54</a></div>
                         </td>
                     </tr>
 
@@ -695,7 +765,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/auth/auth.service.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="50" class="link-to-prism">src/auth/auth.service.ts:50</a></div>
                         </td>
                     </tr>
 
@@ -722,7 +792,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/auth/auth.service.ts:13</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">src/auth/auth.service.ts:52</a></div>
                         </td>
                     </tr>
 
@@ -749,7 +819,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/auth/auth.service.ts:14</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="53" class="link-to-prism">src/auth/auth.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -768,7 +838,46 @@ import { ConfigService } from &quot;@nestjs/config&quot;;
 import { PrismaService } from &quot;../../prisma/prisma.service&quot;;
 import { Prisma } from &quot;@prisma/client&quot;;
 import * as jwt from &quot;jsonwebtoken&quot;;
+import { CognitoJwtVerifier } from &quot;aws-jwt-verify&quot;;
+import { ApiProperty } from &quot;@nestjs/swagger&quot;;
 //import { CreateUserDto } from &quot;src/modules/users/dto/create-user.dto&quot;;
+
+export type CognitoDecodedToken &#x3D; {
+	sub: string;
+	iss: string;
+	client_id: string;
+	origin_jti: string;
+	event_id?: string;
+	token_use: string;
+	scope?: string;
+	auth_time: number;
+	exp: number;
+	iat: number;
+	jti: string;
+	username: string;
+};
+
+export type JWTPayload &#x3D; {
+	id: string;
+	email: string;
+	username: string;
+};
+
+export class RegisterBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
+}
+
+export class LoginBody {
+	@ApiProperty()
+	token: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -875,31 +984,6 @@ export class AuthService {
 		}
 	}
 
-	//Sample code
-	/*
-	if (!userMatch) {
-			return { message: &quot;Invalid credentials. No user match&quot; };
-		}
-
-		// add users to table
-		const successful: boolean &#x3D; await this.authService.createUser(
-			userMatch.Username,
-			userEmail,
-		);
-
-		if (!successful) {
-			return { message: &quot;Invalid credentials. Could not create user&quot; };
-		}
-
-		const payload &#x3D; {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-
-		//generate JWT token using payload
-		const token: string &#x3D; this.authService.generateJWT(payload);
-	*/
 	async createUser(
 		username: string,
 		email: string,
@@ -926,19 +1010,7 @@ export class AuthService {
 		return true;
 	}
 
-	//input payload
-	/*
-	const payload &#x3D; {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-	*/
-	async generateJWT(payload: {
-		sub: string;
-		username: string;
-		email: string;
-	}): Promise&lt;string&gt; {
+	async generateJWT(payload: JWTPayload): Promise&lt;string&gt; {
 		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
 		const expiresIn &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_EXPIRATION_TIME&quot;);
 
@@ -954,6 +1026,7 @@ export class AuthService {
 		return token;
 	}
 
+	/*
 	async getUserInfo(jwt_token: string): Promise&lt;any&gt; {
 		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
 		const expiresIn &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_EXPIRATION_TIME&quot;);
@@ -979,6 +1052,48 @@ export class AuthService {
 			where: { user_id: userID },
 		});
 		return user;
+	}
+	*/
+
+	// this funciton will be passed a Request object from the NestJS controller eg:
+	/*
+	getRoomInfo(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
+	}
+	*/
+	getUserInfo(req: any): JWTPayload {
+		console.log(&quot;req&quot;, req);
+		const result &#x3D; req.user as JWTPayload;
+		console.log(result);
+		if (!result) {
+			throw new UnauthorizedException(
+				&quot;No user found in JWT token. Please log in again&quot;,
+			);
+		}
+		if (!result.id) {
+			throw new UnauthorizedException(
+				&quot;No user ID found in JWT token. Please log in again&quot;,
+			);
+		}
+		return result;
+	}
+
+	async decodeAndVerifyCognitoJWT(
+		jwt_token: string,
+	): Promise&lt;CognitoDecodedToken&gt; {
+		const verifier &#x3D; CognitoJwtVerifier.create({
+			userPoolId: this.userPoolId,
+			tokenUse: &quot;access&quot;,
+			clientId: this.clientId,
+		});
+
+		try {
+			const payload &#x3D; await verifier.verify(jwt_token);
+			const result: CognitoDecodedToken &#x3D; payload as CognitoDecodedToken;
+			return result;
+		} catch (error) {
+			throw new UnauthorizedException(&quot;Invalid JWT token&quot;);
+		}
 	}
 }
 </code></pre>

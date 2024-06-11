@@ -291,8 +291,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="154"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:154</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:153</a></div>
                         </td>
                     </tr>
 
@@ -386,8 +386,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="252"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:252</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="220"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:220</a></div>
                         </td>
                     </tr>
 
@@ -469,8 +469,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="271"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:271</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="236"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:236</a></div>
                         </td>
                     </tr>
 
@@ -552,8 +552,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="195"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:195</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="172"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:172</a></div>
                         </td>
                     </tr>
 
@@ -635,8 +635,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="214"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:214</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="188"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:188</a></div>
                         </td>
                     </tr>
 
@@ -718,8 +718,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="233"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:233</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="204"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:204</a></div>
                         </td>
                     </tr>
 
@@ -797,8 +797,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="80"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:80</a></div>
                         </td>
                     </tr>
 
@@ -880,8 +880,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="136"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:136</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="138"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:138</a></div>
                         </td>
                     </tr>
 
@@ -959,8 +959,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:118</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="120"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:120</a></div>
                         </td>
                     </tr>
 
@@ -1050,8 +1050,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="109"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:109</a></div>
                         </td>
                     </tr>
 
@@ -1140,6 +1140,7 @@ import { UserProfileDto } from &quot;../profile/dto/userprofile.dto&quot;;
 import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
 import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
 import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
+import { AuthService, JWTPayload } from &quot;src/auth/auth.service&quot;;
 
 @ApiTags(&quot;users&quot;)
 @Controller(&quot;users&quot;)
@@ -1148,6 +1149,7 @@ export class UsersController {
 		private readonly usersService: UsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private readonly auth: AuthService,
 	) {}
 
 	//basic CRUD operations on the users table
@@ -1249,11 +1251,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserRooms(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getUserRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1270,30 +1269,8 @@ export class UsersController {
 		@Request() req: any,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise&lt;RoomDto&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-
-		if (!createRoomDto.creator) {
-			const creator &#x3D; await this.dtogen.generateUserProfileDto(userID, false);
-			if (creator) {
-				createRoomDto.creator &#x3D; creator;
-			} else {
-				throw new HttpException(
-					&quot;Failed to generate creator profile from user ID.&quot;,
-					500,
-				);
-			}
-		}
-
-		if (userID !&#x3D;&#x3D; createRoomDto.creator.userID) {
-			throw new HttpException(
-				&quot;User ID in JWT token does not match creator ID in request body.&quot;,
-				400,
-			);
-		}
-		return await this.usersService.createRoom(createRoomDto);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.createRoom(createRoomDto, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1308,11 +1285,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecentRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecentRooms(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getRecentRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1327,11 +1301,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecommendedRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecommendedRooms(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1346,11 +1317,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserFriends(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserFriends(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getUserFriends(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1365,11 +1333,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowers(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowers(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getFollowers(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -1384,11 +1349,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowing(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowing(userID);
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.id);
 	}
 }
 </code></pre>

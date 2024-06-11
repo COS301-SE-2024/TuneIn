@@ -255,8 +255,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="79"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:79</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="87"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:87</a></div>
                         </td>
                     </tr>
 
@@ -324,8 +324,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="45"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:45</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -393,8 +393,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="10"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:10</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="14"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:14</a></div>
                         </td>
                     </tr>
 
@@ -462,8 +462,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="160"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:160</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="172"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:172</a></div>
                         </td>
                     </tr>
 
@@ -543,8 +543,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="120"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:120</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="128"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:128</a></div>
                         </td>
                     </tr>
 
@@ -612,8 +612,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="100"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:100</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="108"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:108</a></div>
                         </td>
                     </tr>
 
@@ -681,8 +681,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="150"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:150</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="158"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:158</a></div>
                         </td>
                     </tr>
 
@@ -750,8 +750,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="140"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:140</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="148"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:148</a></div>
                         </td>
                     </tr>
 
@@ -811,11 +811,15 @@ import * as Prisma from &quot;@prisma/client&quot;;
 export class DbUtilsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	//get user following
+	//get user following (people the user is following)
+	/*
+		follower: the person who does the following
+		followee (leader): the person being followed
+	*/
 	async getUserFollowing(userID: string): Promise&lt;Prisma.users[] | null&gt; {
 		const following: Prisma.follows[] | null &#x3D;
 			await this.prisma.follows.findMany({
-				where: { followee: userID },
+				where: { follower: userID },
 			});
 
 		if (!following || following &#x3D;&#x3D;&#x3D; null) {
@@ -827,8 +831,8 @@ export class DbUtilsService {
 		for (let i &#x3D; 0; i &lt; following.length; i++) {
 			const f &#x3D; following[i];
 			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
-				if (f.follower &amp;&amp; f.follower !&#x3D;&#x3D; null) {
-					ids.push(f.follower);
+				if (f.followee &amp;&amp; f.followee !&#x3D;&#x3D; null) {
+					ids.push(f.followee);
 				}
 			}
 		}
@@ -846,11 +850,15 @@ export class DbUtilsService {
 		return result;
 	}
 
-	//get user followers
+	//get user followers (people following the user)
+	/*
+		follower: the person who does the following
+		followee (leader): the person being followed
+	*/
 	async getUserFollowers(userID: string): Promise&lt;Prisma.users[] | null&gt; {
 		const followers: Prisma.follows[] | null &#x3D;
 			await this.prisma.follows.findMany({
-				where: { follower: userID },
+				where: { followee: userID },
 			});
 
 		if (!followers || followers &#x3D;&#x3D;&#x3D; null) {
@@ -862,8 +870,8 @@ export class DbUtilsService {
 		for (let i &#x3D; 0; i &lt; followers.length; i++) {
 			const f &#x3D; followers[i];
 			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
-				if (f.followee &amp;&amp; f.followee !&#x3D;&#x3D; null) {
-					ids.push(f.followee);
+				if (f.follower &amp;&amp; f.follower !&#x3D;&#x3D; null) {
+					ids.push(f.follower);
 				}
 			}
 		}
@@ -962,6 +970,10 @@ export class DbUtilsService {
 		return true;
 	}
 
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
 	async isFollowing(
 		userID: string,
 		accountFollowedId: string,
