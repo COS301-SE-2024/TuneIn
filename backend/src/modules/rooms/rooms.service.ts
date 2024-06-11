@@ -42,7 +42,9 @@ export class RoomsService {
 
 	updateRoom(room_id: string, updateRoomDto: UpdateRoomDto): RoomDto {
 		// TODO: Implement logic to update room
+		// Check if the room exists, and if the user is the owner, then update the room
 		return new RoomDto();
+	
 	}
 
 	async deleteRoom(room_id: string, room_creator: string): Promise<boolean> {
@@ -145,9 +147,32 @@ export class RoomsService {
 	}
 
 	async getRoomUsers(room_id: string): Promise<UserProfileDto[]> {
-        // Return empty array in case of error
-		return [];
-    }
+		try {
+			// write a query to get all the users in the room
+			const users = await this.prisma.participate.findMany({
+				where: {
+					room_id: room_id
+				},
+				include: {
+					users: true
+				}
+			});
+			// map all the users to the userprofiledto
+			console.log("Users in room", users);
+			const userProfiles: (UserProfileDto | null)[] = await Promise.all(users.map(async (user) => {
+				const userProfile = await this.dtogen.generateUserProfileDto(user.users.user_id);
+				return userProfile;
+			}));
+	
+			// filter out null values
+			const filteredUserProfiles: UserProfileDto[] = userProfiles.filter((userProfile) => userProfile !== null) as UserProfileDto[];
+			console.log("Filtered user profiles", filteredUserProfiles);
+			return filteredUserProfiles;
+		} catch (error) {
+			console.error("Error getting room users:", error);
+			return [];
+		}
+	}
 
 	getRoomQueue(room_id: string): SongInfoDto[] {
 		// TODO: Implement logic to get room queue
