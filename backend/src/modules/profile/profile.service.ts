@@ -24,11 +24,7 @@ export class ProfileService {
     return new UserProfileDto();
   }
 
-  updateProfile(): UserProfileDto {
-    return new UserProfileDto();
-  }
-
-  async patchProfile(
+  async updateProfile(
     userId: string,
     updateProfileDto: UpdateUserProfileDto,
   ): Promise<UserProfileDto> {

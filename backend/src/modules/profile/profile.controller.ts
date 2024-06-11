@@ -64,11 +64,8 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("profile")
-	updateProfile(
-		@Request() req: any,
-		@Body() updateProfileDto: UpdateUserProfileDto,
-	): UserProfileDto {
-		return this.profileService.updateProfile();
+	async putProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
+		return await this.profileService.updateProfile(req.user.userId, updateProfileDto);
 	}
 
 	/*
@@ -81,7 +78,7 @@ export class ProfileController {
 	@Patch()
 	@ApiTags("profile")
 	async patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
-		return await this.profileService.patchProfile(req.user.userId, updateProfileDto);
+		return await this.profileService.updateProfile(req.user.userId, updateProfileDto);
 	}
 
 	/*
