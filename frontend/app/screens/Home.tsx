@@ -8,6 +8,7 @@ import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -28,6 +29,8 @@ const Home: React.FC = () => {
     };
 
     fetchUser();
+
+    console.log("this is the token and stuffs", AsyncStorage);
   }, []);
 
 

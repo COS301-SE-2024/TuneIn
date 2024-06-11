@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -54,7 +55,7 @@ const LoginScreen: React.FC = () => {
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
-          localStorage.setItem("token", data.token);
+          AsyncStorage.setItem("token", data.token);
 
           if (data.status === "success") {
             router.navigate("/screens/Home");

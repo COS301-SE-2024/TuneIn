@@ -18,6 +18,9 @@ class AuthBody {
 	username: string;
 
 	@ApiProperty()
+	name: string;
+
+	@ApiProperty()
 	userCognitoSub: string;
 }
 
@@ -90,7 +93,7 @@ export class AuthController {
 
 		// add users to table
 		const successful: boolean = await this.authService.createUser(
-			authInfo.username,
+			authInfo.name,
 			userEmail,
 			authInfo.userCognitoSub,
 		);
