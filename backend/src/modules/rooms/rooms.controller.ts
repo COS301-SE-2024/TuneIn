@@ -18,10 +18,14 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { AuthService } from "src/auth/auth.service";
 
 @Controller("rooms")
 export class RoomsController {
-	constructor(private readonly roomsService: RoomsService) {}
+	constructor(
+		private readonly roomsService: RoomsService,
+		private readonly auth: AuthService,
+	) {}
 
 	//NOTE TO DEV:
 	/*

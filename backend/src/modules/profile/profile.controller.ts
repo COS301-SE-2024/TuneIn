@@ -14,10 +14,14 @@ import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { AuthService } from "src/auth/auth.service";
 
 @Controller("profile")
 export class ProfileController {
-	constructor(private readonly profileService: ProfileService) {}
+	constructor(
+		private readonly profileService: ProfileService,
+		private readonly auth: AuthService,
+	) {}
 
 	//NOTE TO DEV:
 	/*
@@ -120,11 +124,8 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.profileService.followUser(userID, username);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.profileService.followUser(userInfo.userId, username);
 	}
 
 	@ApiBearerAuth()
@@ -145,10 +146,7 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.profileService.unfollowUser(userID, username);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.profileService.unfollowUser(userInfo.userId, username);
 	}
 }

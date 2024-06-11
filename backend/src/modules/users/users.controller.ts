@@ -25,6 +25,7 @@ import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { AuthService } from "src/auth/auth.service";
 
 @ApiTags("users")
 @Controller("users")
@@ -33,6 +34,7 @@ export class UsersController {
 		private readonly usersService: UsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private readonly auth: AuthService,
 	) {}
 
 	//basic CRUD operations on the users table
@@ -134,11 +136,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getUserRooms(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getUserRooms(userInfo.userId);
 	}
 
 	@ApiBearerAuth()
@@ -155,13 +154,10 @@ export class UsersController {
 		@Request() req: any,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
+		const userInfo = this.auth.getUserInfo(req);
 
 		if (!createRoomDto.creator) {
-			const creator = await this.dtogen.generateUserProfileDto(userID, false);
+			const creator = await this.dtogen.generateUserProfileDto(userInfo.userId, false);
 			if (creator) {
 				createRoomDto.creator = creator;
 			} else {
@@ -172,7 +168,7 @@ export class UsersController {
 			}
 		}
 
-		if (userID !== createRoomDto.creator.userID) {
+		if (userInfo.userId !== createRoomDto.creator.userID) {
 			throw new HttpException(
 				"User ID in JWT token does not match creator ID in request body.",
 				400,
@@ -193,11 +189,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getRecentRooms(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getRecentRooms(userInfo.userId);
 	}
 
 	@ApiBearerAuth()
@@ -212,11 +205,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getRecommendedRooms(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedRooms(userInfo.userId);
 	}
 
 	@ApiBearerAuth()
@@ -231,11 +221,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getUserFriends(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getUserFriends(userInfo.userId);
 	}
 
 	@ApiBearerAuth()
@@ -250,11 +237,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getFollowers(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowers(userInfo.userId);
 	}
 
 	@ApiBearerAuth()
@@ -269,10 +253,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
-		const userID = req.user.userId;
-		if (!userID || userID === "" || typeof userID !== "string") {
-			throw new Error("Invalid user ID in JWT token. Please log in again.");
-		}
-		return await this.usersService.getFollowing(userID);
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.userId);
 	}
 }

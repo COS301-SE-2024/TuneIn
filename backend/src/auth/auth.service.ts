@@ -190,6 +190,7 @@ export class AuthService {
 		return token;
 	}
 
+	/*
 	async getUserInfo(jwt_token: string): Promise<any> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
@@ -215,5 +216,24 @@ export class AuthService {
 			where: { user_id: userID },
 		});
 		return user;
+	}
+	*/
+
+	// this funciton will be passed a Request object from the NestJS controller eg: 
+	/*
+	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
+	}
+	*/
+	getUserInfo(req: any): any {
+		const result = req.user;
+		console.log(result);
+		if (!result) {
+			throw new UnauthorizedException("No user found in JWT token. Please log in again");
+		}
+		if (!result.userId) {
+			throw new UnauthorizedException("No user ID found in JWT token. Please log in again");
+		}
+		return result;
 	}
 }
