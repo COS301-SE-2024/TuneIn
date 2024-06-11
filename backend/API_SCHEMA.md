@@ -132,7 +132,7 @@ A object representing User Profile information.
 ```json
 {
 	profile_name : string,
-	userID : string,
+	user_id : string,
 	username : string,
 	profile_picture_url : string,
 	followers: {

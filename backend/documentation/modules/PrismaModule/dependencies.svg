@@ -24,13 +24,13 @@
 <title>cluster_PrismaModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="165,-70 165,-268 331,-268 331,-70 165,-70"/>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_PrismaModule_exports</title>
-<polygon fill="none" stroke="black" points="190,-208 190,-260 306,-260 306,-208 190,-208"/>
-</g>
 <g id="clust6" class="cluster">
 <title>cluster_PrismaModule_providers</title>
 <polygon fill="none" stroke="black" points="173,-78 173,-130 323,-130 323,-78 173,-78"/>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_PrismaModule_exports</title>
+<polygon fill="none" stroke="black" points="190,-208 190,-260 306,-260 306,-208 190,-208"/>
 </g>
 <!-- PrismaService  -->
 <g id="node1" class="node">

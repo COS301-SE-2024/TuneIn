@@ -8,29 +8,18 @@ import { JwtStrategy } from "./jwt.strategy";
 import { ConfigModule } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { PrismaModule } from "../../prisma/prisma.module";
-import { UsersService } from "src/modules/users/users.service";
-import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
-import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 
 @Module({
 	imports: [
 		PassportModule,
 		JwtModule.register({
 			secret: process.env.JWT_SECRET || "your_jwt_secret",
-			signOptions: { expiresIn: "2h" },
+			signOptions: { expiresIn: "60m" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
 	],
-	providers: [
-		AuthService,
-		LocalStrategy,
-		JwtStrategy,
-		PrismaService,
-		DtoGenService,
-		DbUtilsService,
-		UsersService,
-	],
+	providers: [AuthService, LocalStrategy, JwtStrategy, PrismaService],
 	controllers: [AuthController],
 })
 export class AuthModule {}

@@ -9,19 +9,15 @@ import {
 	UseGuards,
 	Request,
 } from "@nestjs/common";
-import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiTags } from "@nestjs/swagger";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @Controller("profile")
 export class ProfileController {
-	constructor(
-		private readonly profileService: ProfileService,
-		private readonly auth: AuthService,
-	) {}
+	constructor(private readonly profileService: ProfileService) {}
 
 	//NOTE TO DEV:
 	/*
@@ -98,47 +94,29 @@ export class ProfileController {
 		return this.profileService.getProfileByUsername(username);
 	}
 
-	@ApiBearerAuth()
+	/*
+    POST /profile/{username}/follow
+    follows the user with the username given
+    no input
+    response: code (2xx for success, 4xx for error)
+    */
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/follow")
 	@ApiTags("profile")
-	@ApiOperation({ summary: "Follow the given user" })
-	@ApiParam({ name: "username" })
-	@ApiOkResponse({
-		description: "Successfully followed the user.",
-		type: Boolean,
-	})
-	@ApiBadRequestResponse({
-		description: "Error following the user.",
-		type: Boolean,
-	})
-	async followUser(
-		@Request() req: any,
-		@Param("username") username: string,
-	): Promise<boolean> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.profileService.followUser(userInfo.id, username);
+	followUser(@Request() req: any, @Param("username") username: string): boolean {
+		return this.profileService.followUser();
 	}
 
-	@ApiBearerAuth()
+	/*
+    POST /profile/{username}/unfollow
+    unfollows the user with the username given
+    no input
+    response: code (2xx for success, 4xx for error)
+    */
 	@UseGuards(JwtAuthGuard)
 	@Post(":username/unfollow")
 	@ApiTags("profile")
-	@ApiOperation({ summary: "Unfollow the given user" })
-	@ApiParam({ name: "username" })
-	@ApiOkResponse({
-		description: "Successfully unfollowed the user.",
-		type: Boolean,
-	})
-	@ApiBadRequestResponse({
-		description: "Error unfollowing the user.",
-		type: Boolean,
-	})
-	async unfollowUser(
-		@Request() req: any,
-		@Param("username") username: string,
-	): Promise<boolean> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.profileService.unfollowUser(userInfo.id, username);
+	unfollowUser(@Request() req: any, @Param("username") username: string): boolean {
+		return this.profileService.unfollowUser();
 	}
 }
