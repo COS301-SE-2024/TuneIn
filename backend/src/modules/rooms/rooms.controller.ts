@@ -110,13 +110,13 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":room_id")
 	@ApiTags("rooms")
-	deleteRoom(@Request() req: any, @Param("room_id") room_id: string): boolean {
+	async deleteRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
 		// check using jwt token whether the user is the creator of the room
 		// if not, return 403
 		// if yes, delete the room and return 200
 		const user_id = req.user.userId;
 		console.log("Deleting room", room_id, "by user", user_id);
-		return this.roomsService.deleteRoom(room_id, user_id);
+		return await this.roomsService.deleteRoom(room_id, user_id);
 	}
 
 	/*

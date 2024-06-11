@@ -45,17 +45,19 @@ export class RoomsService {
 		return new RoomDto();
 	}
 
-	deleteRoom(room_id: string, room_creator: string): boolean {
+	async deleteRoom(room_id: string, room_creator: string): Promise<boolean> {
 		// Check if the room exists
 		// delete the room user is the owner
-		let isDeleted = false;
+		var isDeleted = false;
 		try {
-			this.prisma.room.delete({
+			await this.prisma.room.delete({
 				where: { room_id, room_creator }
-			}).then(() => {
+			}).then((room) => {
+				// console.log("is deleting", room);
 				isDeleted = true;
 			}
 			);
+			// console.log(isDeleted);
 			return isDeleted;
 		} catch (error) {
 			return false;
