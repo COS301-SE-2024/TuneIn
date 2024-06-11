@@ -79,19 +79,16 @@
                    <compodoc-menu mode="normal"></compodoc-menu>
                </div>
                <!-- START CONTENT -->
-               <div class="content injectable">
+               <div class="content controller">
                    <div class="content-data">
 
 
 
 
 
-
-
-
 <ol class="breadcrumb">
-  <li class="breadcrumb-item">Injectables</li>
-  <li class="breadcrumb-item" >PrismaService</li>
+  <li class="breadcrumb-item">Controllers</li>
+  <li class="breadcrumb-item" >AuthController</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -115,17 +112,19 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>prisma/prisma.service.ts</code>
+            <code>src/auth/auth.controller.ts</code>
         </p>
 
-
-
             <p class="comment">
-                <h3>Extends</h3>
+                <h3>Prefix</h3>
             </p>
             <p class="comment">
-                        <code>PrismaClient</code>
+                <code>auth</code>
             </p>
+
+
+
+
 
 
             <section data-compodoc="block-index">
@@ -142,12 +141,13 @@
                     <td class="col-md-4">
                         <ul class="index-list">
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#onModuleDestroy" >onModuleDestroy</a>
-                            </li>
-                            <li>
-                                    <span class="modifier">Async</span>
-                                <a href="#onModuleInit" >onModuleInit</a>
+                                <a href="#login" >login</a>
                             </li>
                         </ul>
                     </td>
@@ -161,7 +161,6 @@
     </table>
 </section>
 
-
             <section data-compodoc="block-methods">
     
     <h3 id="methods">
@@ -171,26 +170,38 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="onModuleDestroy"></a>
+                    <a name="login"></a>
                     <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>onModuleDestroy</b></span>
-                        <a href="#onModuleDestroy"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>login</b></span>
+                        <a href="#login"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleDestroy()</code>
+                    <code>login(authInfo: <a href="../classes/AuthBody.html" target="_self">AuthBody</a>)</code>
                 </td>
             </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;login&#x27;)<br />@ApiOperation({summary: &#x27;Login in the API using Cognito&#x27;})<br />@ApiBody({type: AuthBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: AuthBody})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                </td>
+            </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="13"
-                                    class="link-to-prism">prisma/prisma.service.ts:13</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="37"
+                                    class="link-to-prism">src/auth/auth.controller.ts:37</a></div>
                         </td>
                     </tr>
 
@@ -198,79 +209,174 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>authInfo</td>
+                                            <td>
+                                                            <code><a href="../classes/AuthBody.html" target="_self" >AuthBody</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
     </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="onModuleInit"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>onModuleInit</b></span>
-                        <a href="#onModuleInit"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleInit()</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">prisma/prisma.service.ts:9</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    </div>
+</section>    </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, OnModuleInit, OnModuleDestroy } from &quot;@nestjs/common&quot;;
-import { PrismaClient } from &quot;@prisma/client&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	Controller,
+	Post,
+	Body,
+	HttpException,
+	HttpStatus,
+} from &quot;@nestjs/common&quot;;
+import { AuthService } from &quot;./auth.service&quot;;
+import {
+	ApiBody,
+	ApiOperation,
+	ApiProperty,
+	ApiResponse,
+} from &quot;@nestjs/swagger&quot;;
 
-@Injectable()
-export class PrismaService
-	extends PrismaClient
-	implements OnModuleInit, OnModuleDestroy
-{
-	async onModuleInit() {
-		await this.$connect();
+class AuthBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+}
+
+@Controller(&quot;auth&quot;)
+export class AuthController {
+	constructor(private readonly authService: AuthService) {}
+
+	@Post(&quot;login&quot;)
+	@ApiOperation({ summary: &quot;Login in the API using Cognito&quot; })
+	@ApiBody({ type: AuthBody })
+	@ApiResponse({
+		status: 201,
+		description: &quot;The record has been successfully created.&quot;,
+		type: AuthBody,
+	})
+	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
+	async login(@Body() authInfo: AuthBody) {
+		const users &#x3D; await this.authService.listUsers();
+		console.log(users);
+		console.log(users.Users);
+		if (!users) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		if (!users.Users || users.Users.length &#x3D;&#x3D;&#x3D; 0) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthError02&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		//match the email address given with the email in the UserPool
+		let userMatch &#x3D; null;
+		let userEmail &#x3D; &quot;&quot;;
+		for (let i &#x3D; 0; i &lt; users.Users.length; i++) {
+			if (!users.Users[i] || users.Users[i] &#x3D;&#x3D;&#x3D; undefined) {
+				continue;
+			}
+			console.log(&quot;users.Users[i]&quot;, users.Users[i]);
+			const attrs &#x3D; users.Users[i].Attributes;
+			console.log(&quot;attrs&quot;, attrs);
+			if (!attrs || attrs &#x3D;&#x3D;&#x3D; undefined || attrs.length &#x3D;&#x3D;&#x3D; 0) {
+				continue;
+			}
+
+			// if &quot;email&quot; is the Name of an attribute in users.Users[i].Attributes
+			if (attrs.find((attribute) &#x3D;&gt; attribute.Name &#x3D;&#x3D;&#x3D; &quot;email&quot;)) {
+				const attr &#x3D; attrs.find((attribute) &#x3D;&gt; attribute.Name &#x3D;&#x3D;&#x3D; &quot;email&quot;);
+				if (!attr || attr &#x3D;&#x3D;&#x3D; undefined) {
+					continue;
+				}
+				//if the userCognitoSub matches the UserSub in the UserPool
+				if (users.Users[i].Username &#x3D;&#x3D;&#x3D; authInfo.userCognitoSub &amp;&amp; attr.Value) {
+					userMatch &#x3D; users.Users[i];
+					userEmail &#x3D; attr.Value;
+					break;
+				}
+			}
+		}
+
+		if (userMatch &#x3D;&#x3D;&#x3D; null || !userMatch) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthError03&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		// add users to table
+		const successful: boolean &#x3D; await this.authService.createUser(
+			authInfo.username,
+			userEmail,
+			authInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. AuthError04&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		const payload &#x3D; {
+			sub: authInfo.userCognitoSub,
+			username: authInfo.username,
+			email: userEmail,
+		};
+
+		//generate JWT token using payload
+		const token: string &#x3D; await this.authService.generateJWT(payload);
+
+		//return the JWT as a string
+		return { token: token };
 	}
 
-	async onModuleDestroy() {
-		await this.$disconnect();
-	}
+	//TODO: Add a POST method to refresh an expired JWT token
+	//TODO: Add a POST method to logout a user
 }
 </code></pre>
     </div>
-
 </div>
+
+
+
 
 
 
@@ -309,8 +415,8 @@ export class PrismaService
 
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
-            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
-            var COMPODOC_CURRENT_PAGE_URL = 'PrismaService.html';
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'controller';
+            var COMPODOC_CURRENT_PAGE_URL = 'AuthController.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 

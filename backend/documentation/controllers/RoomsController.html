@@ -88,7 +88,7 @@
 
 <ol class="breadcrumb">
   <li class="breadcrumb-item">Controllers</li>
-  <li class="breadcrumb-item" >UsersController</li>
+  <li class="breadcrumb-item" >RoomsController</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -112,14 +112,14 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/modules/users/users.controller.ts</code>
+            <code>src/modules/rooms/rooms.controller.ts</code>
         </p>
 
             <p class="comment">
                 <h3>Prefix</h3>
             </p>
             <p class="comment">
-                <code>users</code>
+                <code>rooms</code>
             </p>
 
 
@@ -144,12 +144,25 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                <a href="#addSongToQueue" >addSongToQueue</a>
+                            </li>
+                            <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                <a href="#clearRoomQueue" >clearRoomQueue</a>
+                            </li>
+                            <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#createRoom" >createRoom</a>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#deleteRoom" >deleteRoom</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#getCurrentSong" >getCurrentSong</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -160,83 +173,49 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#getFollowers" >getFollowers</a>
+                                <a href="#getNewRooms" >getNewRooms</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getFollowing" >getFollowing</a>
+                                <a href="#getRoomInfo" >getRoomInfo</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getRecentRooms" >getRecentRooms</a>
+                                <a href="#getRoomQueue" >getRoomQueue</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getRecommendedRooms" >getRecommendedRooms</a>
+                                <a href="#getRoomUsers" >getRoomUsers</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getUserFriends" >getUserFriends</a>
+                                <a href="#joinRoom" >joinRoom</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#getUserInfo" >getUserInfo</a>
+                                <a href="#leaveRoom" >leaveRoom</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getUserRooms" >getUserRooms</a>
+                                <a href="#updateRoom" >updateRoom</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#updateProfile" >updateProfile</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#updateUserProfile" >updateUserProfile</a>
+                                <a href="#updateRoomInfo" >updateRoomInfo</a>
                             </li>
                         </ul>
                     </td>
@@ -259,25 +238,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="createRoom"></a>
+                    <a name="addSongToQueue"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>createRoom</b></span>
-                        <a href="#createRoom"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>addSongToQueue</b></span>
+                        <a href="#addSongToQueue"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, createRoomDto: <a href="../classes/CreateRoomDto.html" target="_self">CreateRoomDto</a>)</code>
+                    <code>addSongToQueue(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, songInfoDto: <a href="../classes/SongInfoDto.html" target="_self">SongInfoDto</a>)</code>
                 </td>
             </tr>
 
@@ -285,14 +259,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Post(&#x27;rooms&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Create a new room&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The newly created room as a RoomDto.&#x27;, type: RoomDto})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Post(&#x27;:roomID/songs&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="154"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:154</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="192"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:192</a></div>
                         </td>
                     </tr>
 
@@ -325,9 +299,21 @@
 
                                         </tr>
                                         <tr>
-                                                <td>createRoomDto</td>
+                                                <td>roomID</td>
                                             <td>
-                                                            <code><a href="../classes/CreateRoomDto.html" target="_self" >CreateRoomDto</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>songInfoDto</td>
+                                            <td>
+                                                            <code><a href="../classes/SongInfoDto.html" target="_self" >SongInfoDto</a></code>
                                             </td>
 
                                             <td>
@@ -340,7 +326,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/SongInfoDto.html" target="_self" >SongInfoDto[]</a></code>
 
                         </div>
                             <div class="io-description">
@@ -354,25 +340,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getFollowers"></a>
+                    <a name="clearRoomQueue"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getFollowers</b></span>
-                        <a href="#getFollowers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>clearRoomQueue</b></span>
+                        <a href="#clearRoomQueue"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFollowers(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>clearRoomQueue(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -380,14 +361,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;followers&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s followers&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s followers as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Delete(&#x27;:roomID/songs&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="252"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:252</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="179"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:179</a></div>
                         </td>
                     </tr>
 
@@ -419,11 +400,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                         </div>
                             <div class="io-description">
@@ -437,25 +430,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getFollowing"></a>
+                    <a name="deleteRoom"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getFollowing</b></span>
-                        <a href="#getFollowing"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>deleteRoom</b></span>
+                        <a href="#deleteRoom"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFollowing(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>deleteRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -463,14 +451,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;following&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s following&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s following as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Delete(&#x27;:roomID&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="271"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:271</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="114"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:114</a></div>
                         </td>
                     </tr>
 
@@ -502,11 +490,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                         </div>
                             <div class="io-description">
@@ -520,25 +520,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getRecentRooms"></a>
+                    <a name="getCurrentSong"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getRecentRooms</b></span>
-                        <a href="#getRecentRooms"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getCurrentSong</b></span>
+                        <a href="#getCurrentSong"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getRecentRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>getCurrentSong(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -546,14 +541,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/recent&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s recent rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s recent rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:roomID/songs/current&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="195"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:195</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="209"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:209</a></div>
                         </td>
                     </tr>
 
@@ -585,16 +580,81 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SongInfoDto.html" target="_self" >SongInfoDto</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getNewRooms"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>getNewRooms</b></span>
+                        <a href="#getNewRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getNewRooms()</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;new&#x27;)<br />@ApiOperation({summary: &#x27;Get newly created public rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The new public rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="60"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:60</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
 
                         </div>
-                            <div class="io-description">
-                                
-                            </div>
                 </td>
             </tr>
         </tbody>
@@ -603,25 +663,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getRecommendedRooms"></a>
+                    <a name="getRoomInfo"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getRecommendedRooms</b></span>
-                        <a href="#getRecommendedRooms"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getRoomInfo</b></span>
+                        <a href="#getRoomInfo"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getRecommendedRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>getRoomInfo(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -629,14 +684,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/foryou&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s recommended rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s recommended rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:roomID&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="214"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:214</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="73"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:73</a></div>
                         </td>
                     </tr>
 
@@ -668,11 +723,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >RoomDto</a></code>
 
                         </div>
                             <div class="io-description">
@@ -686,25 +753,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getUserFriends"></a>
+                    <a name="getRoomQueue"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getUserFriends</b></span>
-                        <a href="#getUserFriends"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getRoomQueue</b></span>
+                        <a href="#getRoomQueue"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserFriends(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>getRoomQueue(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -712,14 +774,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;friends&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s friends&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s friends as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:roomID/songs&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="233"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:233</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="166"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:166</a></div>
                         </td>
                     </tr>
 
@@ -751,11 +813,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/SongInfoDto.html" target="_self" >SongInfoDto[]</a></code>
 
                         </div>
                             <div class="io-description">
@@ -769,21 +843,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getUserInfo"></a>
+                    <a name="getRoomUsers"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>getUserInfo</b></span>
-                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getRoomUsers</b></span>
+                        <a href="#getRoomUsers"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserInfo(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>getRoomUsers(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -791,14 +864,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:roomID/users&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:153</a></div>
                         </td>
                     </tr>
 
@@ -830,11 +903,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto[]</a></code>
 
                         </div>
                             <div class="io-description">
@@ -848,25 +933,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getUserRooms"></a>
+                    <a name="joinRoom"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getUserRooms</b></span>
-                        <a href="#getUserRooms"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>joinRoom</b></span>
+                        <a href="#joinRoom"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>joinRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -874,14 +954,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Post(&#x27;:roomID/join&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="136"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:136</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="127"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:127</a></div>
                         </td>
                     </tr>
 
@@ -913,11 +993,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                         </div>
                             <div class="io-description">
@@ -931,21 +1023,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="updateProfile"></a>
+                    <a name="leaveRoom"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>updateProfile</b></span>
-                        <a href="#updateProfile"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>leaveRoom</b></span>
+                        <a href="#leaveRoom"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+                    <code>leaveRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -953,14 +1044,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Put()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Post(&#x27;:roomID/leave&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:118</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="140"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:140</a></div>
                         </td>
                     </tr>
 
@@ -993,9 +1084,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>updateUserDto</td>
+                                                <td>roomID</td>
                                             <td>
-                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1008,7 +1099,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1022,21 +1113,20 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="updateUserProfile"></a>
+                    <a name="updateRoom"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>updateUserProfile</b></span>
-                        <a href="#updateUserProfile"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>updateRoom</b></span>
+                        <a href="#updateRoom"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateUserProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+                    <code>updateRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateRoomDto: <a href="../classes/UpdateRoomDto.html" target="_self">UpdateRoomDto</a>)</code>
                 </td>
             </tr>
 
@@ -1044,14 +1134,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Patch()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Put(&#x27;:roomID&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:97</a></div>
                         </td>
                     </tr>
 
@@ -1084,9 +1174,21 @@
 
                                         </tr>
                                         <tr>
-                                                <td>updateUserDto</td>
+                                                <td>roomID</td>
                                             <td>
-                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>updateRoomDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateRoomDto.html" target="_self" >UpdateRoomDto</a></code>
                                             </td>
 
                                             <td>
@@ -1099,7 +1201,109 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >RoomDto</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updateRoomInfo"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>updateRoomInfo</b></span>
+                        <a href="#updateRoomInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateRoomInfo(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateRoomDto: <a href="../classes/UpdateRoomDto.html" target="_self">UpdateRoomDto</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@UseGuards(JwtAuthGuard)<br />@Patch(&#x27;:roomID&#x27;)<br />@ApiTags(&#x27;rooms&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="86"
+                                    class="link-to-prism">src/modules/rooms/rooms.controller.ts:86</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>updateRoomDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateRoomDto.html" target="_self" >UpdateRoomDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >RoomDto</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1114,281 +1318,215 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
-	Controller,
-	Get,
-	Post,
 	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
 	Patch,
+	Post,
 	Put,
 	UseGuards,
 	Request,
-	HttpException,
 } from &quot;@nestjs/common&quot;;
-import { UsersService } from &quot;./users.service&quot;;
-import { UpdateUserDto } from &quot;./dto/update-user.dto&quot;;
-import {
-	ApiBearerAuth,
-	ApiOkResponse,
-	ApiOperation,
-	ApiParam,
-	ApiTags,
-} from &quot;@nestjs/swagger&quot;;
-import { UserDto } from &quot;./dto/user.dto&quot;;
-import { RoomDto } from &quot;../rooms/dto/room.dto&quot;;
-import { CreateRoomDto } from &quot;../rooms/dto/createroomdto&quot;;
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from &quot;@nestjs/swagger&quot;;
+import { SongInfoDto } from &quot;./dto/songinfo.dto&quot;;
+import { RoomsService } from &quot;./rooms.service&quot;;
+import { CreateRoomDto } from &quot;./dto/createroomdto&quot;;
+import { UpdateRoomDto } from &quot;./dto/updateroomdto&quot;;
+import { RoomDto } from &quot;./dto/room.dto&quot;;
 import { UserProfileDto } from &quot;../profile/dto/userprofile.dto&quot;;
 import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
-import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
-import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
 
-@ApiTags(&quot;users&quot;)
-@Controller(&quot;users&quot;)
-export class UsersController {
-	constructor(
-		private readonly usersService: UsersService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
-	) {}
+@Controller(&quot;rooms&quot;)
+export class RoomsController {
+	constructor(private readonly roomsService: RoomsService) {}
 
-	//basic CRUD operations on the users table
+	//NOTE TO DEV:
 	/*
-	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.usersService.create(createUserDto);
-	}
+    add decorators to each of these paths like:
+    @Post()
+    @ApiOperation({ summary: &#x27;Create user&#x27; })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ status: 201, description: &#x27;The record has been successfully created.&#x27;, type: User })
+    @ApiResponse({ status: 403, description: &#x27;Forbidden.&#x27; })
+    createUser(@Body() createUserDto: CreateUserDto) {
+      //...
+    }
 
-	@Get()
-	findAll() {
-		return this.usersService.findAll();
-	}
+    @Get(&#x27;:id&#x27;)
+    @ApiOperation({ summary: &#x27;Retrieve user&#x27; })
+    @ApiParam({ name: &#x27;id&#x27;, required: true })
+    @ApiResponse({ status: 200, description: &#x27;The found record&#x27;, type: User })
+    getUser(@Param(&#x27;id&#x27;) id: string) {
+      //...
+    }
 
-	@Get(&quot;:id&quot;)
-	findOne(@Param(&quot;id&quot;) id: string) {
-		return this.usersService.findOne(id);
-	}
-
-	@Patch(&quot;:id&quot;)
-	update(@Param(&quot;id&quot;) id: string, @Body() updateUserDto: UpdateUserDto) {
-		const result &#x3D; this.usersService.update(id, updateUserDto);
-		console.log(result);
-		return result;
-	}
-
-	@Delete(&quot;:id&quot;)
-	remove(@Param(&quot;id&quot;) id: string) {
-		return this.usersService.remove(id);
-	}
+    such that the API documentation is more detailed and informative for the next dev.
   */
 
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;new&quot;)
+	@ApiOperation({ summary: &quot;Get newly created public rooms&quot; })
+	@ApiParam({ name: &quot;none&quot; })
+	@ApiOkResponse({
+		description: &quot;The new public rooms as an array of RoomDto.&quot;,
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiTags(&quot;rooms&quot;)
+	async getNewRooms(): Promise&lt;RoomDto[]&gt; {
+		return await this.roomsService.getNewRooms();
+	}
+
 	/*
-    GET /users
-    gets user info
+    GET /rooms/{roomID}
+    returns info about a room
     no input
-    response: return UserDto
-  */
-	@ApiBearerAuth()
+    response: RoomDto
+    */
 	@UseGuards(JwtAuthGuard)
-	@Get()
-	@ApiTags(&quot;users&quot;)
-	getUserInfo(@Request() req: any): UserDto {
-		//try to get sub, username &amp; email back from JWT token
-		console.log(&quot;1&quot;);
-		console.log(&quot;2&quot;, req);
-		console.log(&quot;3&quot;, req.user);
-		//req.user
-		/*
-		{
-			userId: &#x27;311ce2e8-8041-70bd-0ab5-be97283ee182&#x27;,
-			username: &#x27;bigdaddy&#x27;
-		}
-		*/
-		console.log(&quot;4&quot;, req.user.sub);
-		console.log(&quot;5&quot;, req.user.username);
-		console.log(&quot;6&quot;, req.user.email);
-
-		return this.usersService.getUserInfo();
+	@Get(&quot;:roomID&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	getRoomInfo(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
 	}
 
 	/*
-    PUT/PATCH /users
-    user profile info
-    input: UserDto
-    response: return updated UserDto
-  */
-	@ApiBearerAuth()
+    PUT/PATCH /rooms/{roomID}
+    edits room info (only if it belongs to the user)
+    input: partial RoomDto
+    response: updated RoomDto
+    */
 	@UseGuards(JwtAuthGuard)
-	@Patch()
-	@ApiTags(&quot;users&quot;)
-	updateUserProfile(
+	@Patch(&quot;:roomID&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	updateRoomInfo(
 		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateUserProfile(updateUserDto);
+		@Param(&quot;roomID&quot;) roomID: string,
+		@Body() updateRoomDto: UpdateRoomDto,
+	): RoomDto {
+		return this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
-	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Put()
-	@ApiTags(&quot;users&quot;)
-	updateProfile(
+	@Put(&quot;:roomID&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	updateRoom(
 		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateProfile(updateUserDto);
+		@Param(&quot;roomID&quot;) roomID: string,
+		@Body() updateRoomDto: UpdateRoomDto,
+	): RoomDto {
+		return this.roomsService.updateRoom(roomID, updateRoomDto);
 	}
 
-	@ApiBearerAuth()
+	/*
+    DELETE /rooms/{roomID}
+    deletes the room (only if it belongs to the user)
+    no input
+    response: (2xx for success, 4xx for error)
+    */
 	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getUserRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserRooms(userID);
+	@Delete(&quot;:roomID&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	deleteRoom(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): boolean {
+		return this.roomsService.deleteRoom(roomID);
 	}
 
-	@ApiBearerAuth()
+	/*
+    POST /rooms/{roomID}/join
+    adds current user as a participant to the room
+    no input
+    response: (2xx for success, 4xx for error)
+    */
 	@UseGuards(JwtAuthGuard)
-	@Post(&quot;rooms&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Create a new room&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The newly created room as a RoomDto.&quot;,
-		type: RoomDto,
-	})
-	async createRoom(
+	@Post(&quot;:roomID/join&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	joinRoom(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): boolean {
+		return this.roomsService.joinRoom(roomID);
+	}
+
+	/*
+    POST /rooms/{roomID}/leave
+    remove current user as a participant to the room
+    no input
+    response: (2xx for success, 4xx for error)
+    */
+	@UseGuards(JwtAuthGuard)
+	@Post(&quot;:roomID/leave&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	leaveRoom(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): boolean {
+		return this.roomsService.leaveRoom(roomID);
+	}
+
+	/*
+    GET /rooms/{roomID}/users
+    returns people currently (and previously in room)
+    no input
+    response: array of ProfileDto
+    */
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;:roomID/users&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	getRoomUsers(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): UserProfileDto[] {
+		return this.roomsService.getRoomUsers(roomID);
+	}
+
+	/*
+    GET /rooms/{roomID}/songs
+    returns the queue
+    no input
+    response: array of SongInfoDto
+    */
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;:roomID/songs&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	getRoomQueue(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): SongInfoDto[] {
+		return this.roomsService.getRoomQueue(roomID);
+	}
+
+	/*
+    DELETE /rooms/{roomID}/songs
+    clears the queue (except for current song, if playing)
+    no input
+    response: (2xx for success, 4xx for error)
+    */
+	@UseGuards(JwtAuthGuard)
+	@Delete(&quot;:roomID/songs&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	clearRoomQueue(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): boolean {
+		return this.roomsService.clearRoomQueue(roomID);
+	}
+
+	/*
+    POST /rooms/{roomID}/songs
+    add a song to queue
+    input: SongInfoDto
+    response: array of SongInfoDto (room queue)
+    */
+	@UseGuards(JwtAuthGuard)
+	@Post(&quot;:roomID/songs&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	addSongToQueue(
 		@Request() req: any,
-		@Body() createRoomDto: CreateRoomDto,
-	): Promise&lt;RoomDto&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-
-		if (!createRoomDto.creator) {
-			const creator &#x3D; await this.dtogen.generateUserProfileDto(userID, false);
-			if (creator) {
-				createRoomDto.creator &#x3D; creator;
-			} else {
-				throw new HttpException(
-					&quot;Failed to generate creator profile from user ID.&quot;,
-					500,
-				);
-			}
-		}
-
-		if (userID !&#x3D;&#x3D; createRoomDto.creator.userID) {
-			throw new HttpException(
-				&quot;User ID in JWT token does not match creator ID in request body.&quot;,
-				400,
-			);
-		}
-		return await this.usersService.createRoom(createRoomDto);
+		@Param(&quot;roomID&quot;) roomID: string,
+		@Body() songInfoDto: SongInfoDto,
+	): SongInfoDto[] {
+		return this.roomsService.addSongToQueue(roomID, songInfoDto);
 	}
 
-	@ApiBearerAuth()
+	/*
+    GET /rooms/{roomID}/songs/current
+    returns the current playing song
+    no input
+    response: SongInfoDto
+    */
 	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms/recent&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s recent rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s recent rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getRecentRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecentRooms(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms/foryou&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s recommended rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s recommended rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getRecommendedRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecommendedRooms(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;friends&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s friends&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s friends as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getUserFriends(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserFriends(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;followers&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s followers&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s followers as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getFollowers(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowers(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;following&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s following&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s following as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getFollowing(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowing(userID);
+	@Get(&quot;:roomID/songs/current&quot;)
+	@ApiTags(&quot;rooms&quot;)
+	getCurrentSong(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): SongInfoDto {
+		return this.roomsService.getCurrentSong(roomID);
 	}
 }
 </code></pre>
@@ -1436,7 +1574,7 @@ export class UsersController {
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
             var COMPODOC_CURRENT_PAGE_CONTEXT = 'controller';
-            var COMPODOC_CURRENT_PAGE_URL = 'UsersController.html';
+            var COMPODOC_CURRENT_PAGE_URL = 'RoomsController.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 

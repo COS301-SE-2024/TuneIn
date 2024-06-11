@@ -86,7 +86,7 @@
 
 <ol class="breadcrumb">
     <li class="breadcrumb-item">Modules</li>
-    <li class="breadcrumb-item" >PrismaModule</li>
+    <li class="breadcrumb-item" >DbUtilsModule</li>
 </ol>
 
 <div class="text-center module-graph-container">
@@ -114,46 +114,74 @@
 <polygon fill="#fb8072" stroke="transparent" points="406,-10 406,-30 426,-30 426,-10 406,-10"/>
 <text text-anchor="start" x="429.73" y="-15.4" font-family="Times-12" font-size="14.00"> &#160;Exports</text>
 <g id="clust1" class="cluster">
-<title>cluster_PrismaModule</title>
-<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="165,-70 165,-268 331,-268 331,-70 165,-70"/>
+<title>cluster_DbUtilsModule</title>
+<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="24.5,-70 24.5,-268 471.5,-268 471.5,-70 24.5,-70"/>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_DbUtilsModule_imports</title>
+<polygon fill="none" stroke="black" points="349.5,-78 349.5,-130 463.5,-130 463.5,-78 349.5,-78"/>
 </g>
 <g id="clust4" class="cluster">
-<title>cluster_PrismaModule_exports</title>
-<polygon fill="none" stroke="black" points="190,-208 190,-260 306,-260 306,-208 190,-208"/>
+<title>cluster_DbUtilsModule_exports</title>
+<polygon fill="none" stroke="black" points="201.5,-208 201.5,-260 323.5,-260 323.5,-208 201.5,-208"/>
 </g>
 <g id="clust6" class="cluster">
-<title>cluster_PrismaModule_providers</title>
-<polygon fill="none" stroke="black" points="173,-78 173,-130 323,-130 323,-78 173,-78"/>
-</g>
-<!-- PrismaService  -->
-<g id="node1" class="node">
-<title>PrismaService </title>
-<polygon fill="#fb8072" stroke="black" points="298.36,-252 197.64,-252 197.64,-216 298.36,-216 298.36,-252"/>
-<text text-anchor="middle" x="248" y="-229.8" font-family="Times,serif" font-size="14.00">PrismaService </text>
+<title>cluster_DbUtilsModule_providers</title>
+<polygon fill="none" stroke="black" points="32.5,-78 32.5,-130 341.5,-130 341.5,-78 32.5,-78"/>
 </g>
 <!-- PrismaModule -->
-<g id="node2" class="node">
+<g id="node1" class="node">
 <title>PrismaModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="297.43,-187 294.43,-191 273.43,-191 270.43,-187 198.57,-187 198.57,-151 297.43,-151 297.43,-187"/>
-<text text-anchor="middle" x="248" y="-164.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="455.93,-122 452.93,-126 431.93,-126 428.93,-122 357.07,-122 357.07,-86 455.93,-86 455.93,-122"/>
+<text text-anchor="middle" x="406.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
 </g>
-<!-- PrismaModule&#45;&gt;PrismaService  -->
+<!-- DbUtilsModule -->
+<g id="node2" class="node">
+<title>DbUtilsModule</title>
+<polygon fill="#8dd3c7" stroke="black" points="314.38,-187 311.38,-191 290.38,-191 287.38,-187 210.62,-187 210.62,-151 314.38,-151 314.38,-187"/>
+<text text-anchor="middle" x="262.5" y="-164.8" font-family="Times,serif" font-size="14.00">DbUtilsModule</text>
+</g>
+<!-- PrismaModule&#45;&gt;DbUtilsModule -->
 <g id="edge1" class="edge">
-<title>PrismaModule&#45;&gt;PrismaService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M248,-187.11C248,-187.11 248,-205.99 248,-205.99"/>
-<polygon fill="black" stroke="black" points="244.5,-205.99 248,-215.99 251.5,-205.99 244.5,-205.99"/>
+<title>PrismaModule&#45;&gt;DbUtilsModule</title>
+<path fill="none" stroke="black" d="M406.5,-122.11C406.5,-141.34 406.5,-169 406.5,-169 406.5,-169 324.49,-169 324.49,-169"/>
+<polygon fill="black" stroke="black" points="324.49,-165.5 314.49,-169 324.49,-172.5 324.49,-165.5"/>
+</g>
+<!-- DbUtilsService  -->
+<g id="node3" class="node">
+<title>DbUtilsService </title>
+<polygon fill="#fb8072" stroke="black" points="315.31,-252 209.69,-252 209.69,-216 315.31,-216 315.31,-252"/>
+<text text-anchor="middle" x="262.5" y="-229.8" font-family="Times,serif" font-size="14.00">DbUtilsService </text>
+</g>
+<!-- DbUtilsModule&#45;&gt;DbUtilsService  -->
+<g id="edge2" class="edge">
+<title>DbUtilsModule&#45;&gt;DbUtilsService </title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M262.5,-187.11C262.5,-187.11 262.5,-205.99 262.5,-205.99"/>
+<polygon fill="black" stroke="black" points="259,-205.99 262.5,-215.99 266,-205.99 259,-205.99"/>
+</g>
+<!-- DbUtilsService -->
+<g id="node4" class="node">
+<title>DbUtilsService</title>
+<ellipse fill="#fdb462" stroke="black" cx="262.5" cy="-104" rx="70.64" ry="18"/>
+<text text-anchor="middle" x="262.5" y="-99.8" font-family="Times,serif" font-size="14.00">DbUtilsService</text>
+</g>
+<!-- DbUtilsService&#45;&gt;DbUtilsModule -->
+<g id="edge3" class="edge">
+<title>DbUtilsService&#45;&gt;DbUtilsModule</title>
+<path fill="none" stroke="black" d="M262.5,-122.11C262.5,-122.11 262.5,-140.99 262.5,-140.99"/>
+<polygon fill="black" stroke="black" points="259,-140.99 262.5,-150.99 266,-140.99 259,-140.99"/>
 </g>
 <!-- PrismaService -->
-<g id="node3" class="node">
+<g id="node5" class="node">
 <title>PrismaService</title>
-<ellipse fill="#fdb462" stroke="black" cx="248" cy="-104" rx="66.63" ry="18"/>
-<text text-anchor="middle" x="248" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
+<ellipse fill="#fdb462" stroke="black" cx="107.5" cy="-104" rx="66.63" ry="18"/>
+<text text-anchor="middle" x="107.5" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
 </g>
-<!-- PrismaService&#45;&gt;PrismaModule -->
-<g id="edge2" class="edge">
-<title>PrismaService&#45;&gt;PrismaModule</title>
-<path fill="none" stroke="black" d="M248,-122.11C248,-122.11 248,-140.99 248,-140.99"/>
-<polygon fill="black" stroke="black" points="244.5,-140.99 248,-150.99 251.5,-140.99 244.5,-140.99"/>
+<!-- PrismaService&#45;&gt;DbUtilsModule -->
+<g id="edge4" class="edge">
+<title>PrismaService&#45;&gt;DbUtilsModule</title>
+<path fill="none" stroke="black" d="M107.5,-122.11C107.5,-141.34 107.5,-169 107.5,-169 107.5,-169 200.46,-169 200.46,-169"/>
+<polygon fill="black" stroke="black" points="200.46,-172.5 210.46,-169 200.46,-165.5 200.46,-172.5"/>
 </g>
 </g>
 </svg>
@@ -191,7 +219,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>prisma/prisma.module.ts</code>
+            <code>src/modules/db-utils/db-utils.module.ts</code>
         </p>
 
 
@@ -205,7 +233,20 @@
                             title="Official documentation about module providers"><span class="icon ion-ios-information-circle-outline"></a></h3>
                     <ul class="list-group">
                         <li class="list-group-item">
+                            <a href="../injectables/DbUtilsService.html">DbUtilsService</a>
+                        </li>
+                        <li class="list-group-item">
                             <a href="../injectables/PrismaService.html">PrismaService</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-3">
+                    <h3>Imports<a href="https://angular.io/api/core/NgModule#imports" target="_blank" rel="noopener noreferrer"
+                            title="Official documentation about module imports"><span
+                                class="icon ion-ios-information-circle-outline"></a></h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="../modules/PrismaModule.html">PrismaModule</a>
                         </li>
                     </ul>
                 </div>
@@ -215,7 +256,7 @@
                                 class="icon ion-ios-information-circle-outline"></a></h3>
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <a href="../injectables/PrismaService.html">PrismaService</a>
+                            <a href="../injectables/DbUtilsService.html">DbUtilsService</a>
                         </li>
                     </ul>
                 </div>
@@ -228,13 +269,16 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Module } from &quot;@nestjs/common&quot;;
-import { PrismaService } from &quot;./prisma.service&quot;;
+import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
+import { PrismaModule } from &quot;prisma/prisma.module&quot;;
+import { DbUtilsService } from &quot;./db-utils.service&quot;;
 
 @Module({
-	providers: [PrismaService],
-	exports: [PrismaService],
+	imports: [PrismaModule],
+	providers: [PrismaService, DbUtilsService],
+	exports: [DbUtilsService],
 })
-export class PrismaModule {}
+export class DbUtilsModule {}
 </code></pre>
     </div>
 </div>
@@ -281,7 +325,7 @@ export class PrismaModule {}
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
             var COMPODOC_CURRENT_PAGE_CONTEXT = 'module';
-            var COMPODOC_CURRENT_PAGE_URL = 'PrismaModule.html';
+            var COMPODOC_CURRENT_PAGE_URL = 'DbUtilsModule.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 
