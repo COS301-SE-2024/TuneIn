@@ -18,19 +18,23 @@ const Home: React.FC = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
+    let token: string = "";
     const fetchUser = async () => {
       try {
+        token = await AsyncStorage.getItem("token");
+        console.log("Token stuff", token);
         const user: AuthUser = await getCurrentUser(); // Updated method call
         setAuthUser(user);
-        console.log(user);
+        console.log("User stuff" ,user);
       } catch (error) {
-        console.error(error);
+        console.error("Oopsie error" ,error);
       }
     };
 
     fetchUser();
+    
 
-    console.log("this is the token and stuffs", AsyncStorage);
+    console.log("this is the token and stuffs", token);
   }, []);
 
 
