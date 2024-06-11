@@ -10,13 +10,9 @@ import {
 	CognitoDecodedToken,
 	JWTPayload,
 	RegisterBody,
+	LoginBody,
 } from "./auth.service";
-import {
-	ApiBody,
-	ApiOperation,
-	ApiResponse,
-	ApiTags,
-} from "@nestjs/swagger";
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "src/modules/users/users.service";
 import * as PrismaTypes from "@prisma/client";
 
@@ -27,21 +23,17 @@ export class AuthController {
 		private readonly usersService: UsersService,
 	) {}
 
-	/*
-	POST /auth/login
-	body: Cognito Access Token (string)
-  	*/
 	@Post("login")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: String })
+	@ApiBody({ type: LoginBody })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
 		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async login(@Body() cognitoAccessToken: string) {
+	async login(@Body() loginInfo: LoginBody) {
 		/*
 		const users = await this.authService.listUsers();
 		console.log(users);
@@ -110,9 +102,18 @@ export class AuthController {
 			);
 		}
 		*/
+		if (!loginInfo.token || loginInfo.token === null) {
+			throw new HttpException(
+				"Invalid request. Missing Cognito access token. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		const cognitoAccessToken: string = loginInfo.token;
+		console.log("cognitoAccessToken", cognitoAccessToken);
 		const authInfo: CognitoDecodedToken =
 			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
 		const userID: string = authInfo.username;
+		console.log("authInfo", authInfo);
 
 		const user: PrismaTypes.users | null =
 			await this.usersService.findOne(userID);
@@ -137,8 +138,10 @@ export class AuthController {
 			email: user.email,
 		};
 
+		console.log("payload", payload);
 		//generate JWT token using payload
 		const token: string = await this.authService.generateJWT(payload);
+		console.log("token", token);
 
 		//return the JWT as a string
 		return { token: token };

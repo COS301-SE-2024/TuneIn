@@ -40,6 +40,11 @@ export class RegisterBody {
 	email: string;
 }
 
+export class LoginBody {
+	@ApiProperty()
+	token: string;
+}
+
 @Injectable()
 export class AuthService {
 	private cognitoIdentityServiceProvider: AWS.CognitoIdentityServiceProvider;
@@ -222,15 +227,16 @@ export class AuthService {
 		return this.roomsService.getRoomInfo(roomID);
 	}
 	*/
-	getUserInfo(req: any): any {
-		const result = req.user;
+	getUserInfo(req: any): JWTPayload {
+		console.log("req", req);
+		const result = req.user as JWTPayload;
 		console.log(result);
 		if (!result) {
 			throw new UnauthorizedException(
 				"No user found in JWT token. Please log in again",
 			);
 		}
-		if (!result.userId) {
+		if (!result.id) {
 			throw new UnauthorizedException(
 				"No user ID found in JWT token. Please log in again",
 			);

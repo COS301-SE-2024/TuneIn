@@ -25,7 +25,7 @@ import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { AuthService } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @ApiTags("users")
 @Controller("users")
@@ -136,8 +136,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getUserRooms(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getUserRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -154,8 +154,8 @@ export class UsersController {
 		@Request() req: any,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.createRoom(createRoomDto, userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.createRoom(createRoomDto, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -170,8 +170,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRooms(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecentRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -186,8 +186,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getRecommendedRooms(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -202,8 +202,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getUserFriends(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getUserFriends(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -218,8 +218,8 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getFollowers(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowers(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -234,7 +234,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.usersService.getFollowing(userInfo.userId);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.id);
 	}
 }
