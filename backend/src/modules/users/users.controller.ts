@@ -155,26 +155,7 @@ export class UsersController {
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
 		const userInfo = this.auth.getUserInfo(req);
-
-		if (!createRoomDto.creator) {
-			const creator = await this.dtogen.generateUserProfileDto(userInfo.userId, false);
-			if (creator) {
-				createRoomDto.creator = creator;
-			} else {
-				throw new HttpException(
-					"Failed to generate creator profile from user ID.",
-					500,
-				);
-			}
-		}
-
-		if (userInfo.userId !== createRoomDto.creator.userID) {
-			throw new HttpException(
-				"User ID in JWT token does not match creator ID in request body.",
-				400,
-			);
-		}
-		return await this.usersService.createRoom(createRoomDto);
+		return await this.usersService.createRoom(createRoomDto, userInfo.userId);
 	}
 
 	@ApiBearerAuth()

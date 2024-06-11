@@ -106,22 +106,20 @@ export class UsersService {
 		return r;
 	}
 
-	async createRoom(createRoomDto: CreateRoomDto): Promise<RoomDto> {
-		if (!createRoomDto.creator) {
-			throw new Error("No creator provided for the room");
-		}
-
+	async createRoom(
+		createRoomDto: CreateRoomDto,
+		userID: string,
+	): Promise<RoomDto> {
 		const newRoom: Prisma.roomCreateInput = {
 			name: createRoomDto.room_name || "Untitled Room",
 
 			//foreign key relation for 'room_creator'
 			users: {
 				connect: {
-					user_id: createRoomDto.creator.userID,
+					user_id: userID,
 				},
 			},
 		};
-		if (createRoomDto.roomID) newRoom.room_id = createRoomDto.roomID;
 		if (createRoomDto.description)
 			newRoom.description = createRoomDto.description;
 		if (createRoomDto.is_temporary)
@@ -142,19 +140,46 @@ export class UsersService {
 			newRoom.current_song = createRoomDto.current_song;
 		*/
 
+		const room: PrismaTypes.room | null = await this.prisma.room.create({
+			data: newRoom,
+		});
+		if (!room) {
+			throw new Error("Something went wrong while creating the room");
+		}
+
 		//for is_private, we will need to add the roomID to the private_room tbale
 		if (createRoomDto.is_private) {
-			newRoom.private_room = {
-				connect: {
-					room_id: createRoomDto.roomID,
+			const privRoom: Prisma.private_roomCreateInput = {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
 				},
 			};
+			const privRoomResult = await this.prisma.private_room.create({
+				data: privRoom,
+			});
+			if (!privRoomResult || privRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating private room. Received null.",
+				);
+			}
 		} else {
-			newRoom.public_room = {
-				connect: {
-					room_id: createRoomDto.roomID,
+			const pubRoom: Prisma.public_roomCreateInput = {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
 				},
 			};
+			const pubRoomResult = await this.prisma.public_room.create({
+				data: pubRoom,
+			});
+			if (!pubRoomResult || pubRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating public room. Received null.",
+				);
+			}
 		}
 
 		//TODO: implement scheduled room creation
@@ -170,13 +195,6 @@ export class UsersService {
 		}
 		*/
 
-		const room = await this.prisma.room.create({
-			data: newRoom,
-		});
-		if (!room) {
-			throw new Error("Something went wrong while creating the room");
-		}
-
 		const result = await this.dtogen.generateRoomDtoFromRoom(room);
 		if (!result) {
 			throw new Error(
@@ -186,9 +204,63 @@ export class UsersService {
 		return result;
 	}
 
-	getRecentRooms(userID: string): RoomDto[] {
-		// implementation goes here
-		return [];
+	async getRecentRooms(userID: string): Promise<RoomDto[]> {
+		/*
+		activity field in users table is modelled as:
+		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
+		*/
+		// get the recent rooms from the user's activity field
+		const u = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u === null) {
+			throw new Error("User does not exist");
+		}
+
+		const user: PrismaTypes.users = u;
+		const activity: Prisma.JsonValue = user.activity;
+		console.log(user);
+		console.log(activity);
+		if (!activity || activity === null) {
+			return [];
+		}
+
+		if (typeof activity !== "object") {
+			throw new Error(
+				"An unknown error occurred while parsing the 'activity' field in 'users'. Expected object, received " +
+					typeof activity,
+			);
+		}
+
+		//if (!"recent_rooms" in activity) {
+		if (!("recent_rooms" in activity)) {
+			return [];
+		}
+
+		try {
+			const recentRooms: string[] = activity["recent_rooms"] as string[];
+			for (const roomID of recentRooms) {
+				if (typeof roomID !== "string") {
+					throw new Error(
+						"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+							typeof roomID,
+					);
+				}
+			}
+			const r = await this.dtogen.generateMultipleRoomDto(recentRooms);
+			if (!r || r === null) {
+				throw new Error(
+					"An unknown error occurred while generating RoomDto for recent rooms. Received null.",
+				);
+			}
+			return r;
+		} catch (e) {
+			throw new Error(
+				"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+					typeof activity["recent_rooms"],
+			);
+		}
 	}
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
