@@ -80,8 +80,8 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags("profile")
-	patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): UserProfileDto {
-		return this.profileService.patchProfile();
+	async patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
+		return await this.profileService.patchProfile(req.user.userId, updateProfileDto);
 	}
 
 	/*

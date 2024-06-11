@@ -4,42 +4,69 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
+import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 
 @Injectable()
 export class ProfileService {
-	constructor(
-		private readonly prisma: PrismaService,
-		private readonly dtogen: DtoGenService,
-		private readonly dbUtilsService: DbUtilsService,
-	) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dtogen: DtoGenService,
+    private readonly dbUtilsService: DbUtilsService,
+  ) {}
 
-	async getProfile(uid: string): Promise<UserProfileDto> {
-		const user_id = uid;;
-		const user = await this.dtogen.generateUserProfileDto(uid);
-		if (user) {
-			return user;
-		}
+  async getProfile(uid: string): Promise<UserProfileDto> {
+    const user_id = uid;
+    const user = await this.dtogen.generateUserProfileDto(uid);
+    if (user) {
+      return user;
+    }
 
-		return new UserProfileDto();
-	}
+    return new UserProfileDto();
+  }
 
-	updateProfile(): UserProfileDto {
-		return new UserProfileDto();
-	}
+  updateProfile(): UserProfileDto {
+    return new UserProfileDto();
+  }
 
-	patchProfile(): UserProfileDto {
-		return new UserProfileDto();
-	}
+  async patchProfile(
+    userId: string,
+    updateProfileDto: UpdateUserProfileDto,
+  ): Promise<UserProfileDto> {
+    const user = await this.prisma.users.findUnique({
+      where: { user_id: userId },
+    });
 
-	getProfileByUsername(): UserProfileDto {
-		return new UserProfileDto();
-	}
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-	followUser(): boolean {
-		return true;
-	}
+    const updateData = this.dbUtilsService.buildUpdateData(
+      user,
+      updateProfileDto,
+    );
 
-	unfollowUser(): boolean {
-		return true;
-	}
+    await this.prisma.users.update({
+      where: { user_id: userId },
+      data: updateData,
+    });
+
+    const userProfile = await this.dtogen.generateUserProfileDto(userId);
+    if (!userProfile) {
+      throw new Error("Failed to generate user profile");
+    }
+
+    return userProfile;
+  }
+
+  getProfileByUsername(): UserProfileDto {
+    return new UserProfileDto();
+  }
+
+  followUser(): boolean {
+    return true;
+  }
+
+  unfollowUser(): boolean {
+    return true;
+  }
 }

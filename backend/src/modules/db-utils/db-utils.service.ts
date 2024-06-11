@@ -3,6 +3,7 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { UpdateUserProfileDto } from "../profile/dto/updateuserprofile.dto";
 
 @Injectable()
 export class DbUtilsService {
@@ -88,14 +89,10 @@ export class DbUtilsService {
     try {
       // Parse the JSON string
       const links = JSON.parse(JSON.stringify(user.external_links));
-      console.log(links);
+      // console.log(links);
 
       // Ensure the parsed object has the required properties
-      if (
-        links &&
-        typeof links === "object" &&
-        "data" in links
-      ) {
+      if (links && typeof links === "object" && "data" in links) {
         return {
           count: links.data.length,
           data: links.data,
@@ -123,6 +120,7 @@ export class DbUtilsService {
     try {
       // Parse the JSON string
       const preferences = JSON.parse(JSON.stringify(user.preferences));
+      console.log(preferences);
 
       // Ensure the parsed object has the required properties
       if (
@@ -204,5 +202,71 @@ export class DbUtilsService {
       }
     }
     return rooms;
+  }
+
+  // Merge preferences if they exist in updateProfileDto
+  buildUpdateData(
+    user: Prisma.users,
+    updateProfileDto: UpdateUserProfileDto,
+  ): any {
+    const allowedFields = [
+      "username",
+      "bio",
+      "email",
+    ];
+
+    const updateData: any = {};
+    for (const field of allowedFields) {
+      if (updateProfileDto[field] !== undefined) {
+        updateData[field] = updateProfileDto[field];
+      }
+    }
+
+    if(updateProfileDto.profile_name){
+      updateData.full_name = updateProfileDto.profile_name;
+    }
+
+    
+
+    if(updateProfileDto.profile_picture_url){
+      updateData.profile_picture = updateProfileDto.profile_picture_url;
+    }
+
+    if(updateProfileDto.links){
+      // console.log(updateProfileDto.links.data);
+      updateData.external_links = {data: updateProfileDto.links.data};
+    }
+
+    // Merge the preferences if they exist in the updateProfileDto
+    if (updateProfileDto.fav_genres || updateProfileDto.fav_songs) {
+      const existingPreferences = user.preferences
+        ? JSON.parse(JSON.stringify(user.preferences))
+        : {};
+
+      
+
+      if (updateProfileDto.fav_genres) {
+        existingPreferences.fav_genres = {
+          count: updateProfileDto.fav_genres.data.length,
+          data: updateProfileDto.fav_genres.data,
+        };
+      }
+
+      if (updateProfileDto.fav_songs) {
+        console.log(updateProfileDto.fav_songs.data)
+        existingPreferences.fav_songs = {
+          count: updateProfileDto.fav_songs.data.length,
+          data: updateProfileDto.fav_songs.data,
+        };
+      }
+
+      updateData.preferences = existingPreferences;
+    }
+
+    if(updateProfileDto.recent_rooms){
+      updateData.activity = {recent_rooms: updateProfileDto.recent_rooms.data};
+    }
+
+    return updateData;
   }
 }
