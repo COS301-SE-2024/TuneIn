@@ -4,7 +4,23 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 //import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+
+export type CognitoDecodedToken = {
+	sub: string;
+	iss: string;
+	client_id: string;
+	origin_jti: string;
+	event_id?: string;
+	token_use: string;
+	scope?: string;
+	auth_time: number;
+	exp: number;
+	iat: number;
+	jti: string;
+	username: string;
+};
 
 @Injectable()
 export class AuthService {
@@ -219,7 +235,7 @@ export class AuthService {
 	}
 	*/
 
-	// this funciton will be passed a Request object from the NestJS controller eg: 
+	// this funciton will be passed a Request object from the NestJS controller eg:
 	/*
 	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
 		return this.roomsService.getRoomInfo(roomID);
@@ -229,11 +245,33 @@ export class AuthService {
 		const result = req.user;
 		console.log(result);
 		if (!result) {
-			throw new UnauthorizedException("No user found in JWT token. Please log in again");
+			throw new UnauthorizedException(
+				"No user found in JWT token. Please log in again",
+			);
 		}
 		if (!result.userId) {
-			throw new UnauthorizedException("No user ID found in JWT token. Please log in again");
+			throw new UnauthorizedException(
+				"No user ID found in JWT token. Please log in again",
+			);
 		}
 		return result;
+	}
+
+	async decodeAndVerifyCognitoJWT(
+		jwt_token: string,
+	): Promise<CognitoDecodedToken> {
+		const verifier = CognitoJwtVerifier.create({
+			userPoolId: this.userPoolId,
+			tokenUse: "access",
+			clientId: this.clientId,
+		});
+
+		try {
+			const payload = await verifier.verify(jwt_token);
+			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
+			return result;
+		} catch (error) {
+			throw new UnauthorizedException("Invalid JWT token");
+		}
 	}
 }
