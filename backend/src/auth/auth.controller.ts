@@ -11,6 +11,7 @@ import {
 	ApiOperation,
 	ApiProperty,
 	ApiResponse,
+	ApiTags,
 } from "@nestjs/swagger";
 
 class AuthBody {
@@ -24,8 +25,9 @@ class AuthBody {
 @Controller("auth")
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
-
+	
 	@Post("login")
+	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
 	@ApiBody({ type: AuthBody })
 	@ApiResponse({
