@@ -9,12 +9,14 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const baseURL = "http://192.168.56.1:3000";
 
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -80,46 +82,48 @@ const Home: React.FC = () => {
     // Add more sample friends...
   ];
 
-  const Myrooms: Room[] = [
-    {
-      backgroundImage: BackgroundIMG,
-      name: "Chill Vibes",
-      songName: "Song Title",
-      artistName: "Artist Name",
-      description: "A description of the room goes here.",
-      userProfile: ProfileIMG,
-      username: "User123",
-      tags: ["Tag1", "Tag2", "Tag3"],
-      mine: true, // Set mine to true for "My Rooms"
-    },
-    {
-      backgroundImage: BackgroundIMG,
-      name: "Party",
-      songName: "Song Title",
-      artistName: "Artist Name",
-      description: "A description of the room goes here.",
-      userProfile: ProfileIMG,
-      username: "User123",
-      tags: ["Tag1", "Tag2", "Tag3"],
-      mine: true, // Set mine to true for "My Rooms"
-    },
-    // Add your sample rooms here...
-  ];
+  const getMyRooms = async (token) => {
+    try {
+      const response = await axios.get(`${baseURL}/users/rooms`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      return [];
+    }
+  };
 
+  const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchToken = async () => {
-      const storedToken = await AsyncStorage.getItem('decodedPayload');
+    const getTokenAndRooms = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+      console.log("HomeToken", storedToken);
+
       if (storedToken) {
-        const parsedToken = JSON.parse(storedToken);
-        setToken(parsedToken);
+        const rooms = await getMyRooms(storedToken);
+        const formattedRooms = rooms.map(room => ({
+          backgroundImage: room.room_image,
+          name: room.room_name,
+          songName: room.current_song.title || "No current song",
+          artistName: room.current_song.artists.join(", ") || "No artists",
+          description: room.description,
+          userProfile: room.creator.profile_picture_url,
+          username: room.creator.username,
+          tags: room.tags,
+          mine: true,
+        }));
+        setMyRooms(formattedRooms);
       }
     };
-    fetchToken();
-  }, []);
 
-  console.log("HomeToken", token);
+    getTokenAndRooms();
+  }, []);
 
   const renderItem = ({ item }: { item: Room }) => (
     <Link
@@ -133,7 +137,6 @@ const Home: React.FC = () => {
   );
 
   const router = useRouter();
-
   const navigateToAllFriends = () => {
     router.navigate("/screens/AllFriends");
   };
@@ -142,9 +145,6 @@ const Home: React.FC = () => {
     router.navigate("/screens/CreateRoom");
   };
 
-  const navigateToAPI = () => {
-    router.navigate("/api-test");
-  };
 
   const handleScroll = useCallback(({ nativeEvent }) => {
     const currentOffset = nativeEvent.contentOffset.y;
@@ -226,15 +226,10 @@ const Home: React.FC = () => {
             </Text>
           </TouchableOpacity>
           <FriendsGrid friends={sampleFriends} maxVisible={8} />
-          <TouchableOpacity className="mt-7" onPress={navigateToAPI}>
-            <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
-              API test
-            </Text>
-          </TouchableOpacity>
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
-          <AppCarousel data={Myrooms} renderItem={renderItem} />
+          <AppCarousel data={myRooms} renderItem={renderItem} />
         </View>
       </ScrollView>
       <Animated.View
@@ -270,4 +265,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

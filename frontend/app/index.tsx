@@ -1,17 +1,6 @@
-// App.tsx
-import React from 'react';
-import ApiTest from './api-test';
-import { ApiProvider } from '../api/APIContext';
-import { DefaultApi } from '../api-client';
+import React from "react";
+import Home from "./screens/WelcomeScreen";
 
-const api = new DefaultApi();
-
-const App: React.FC = () => {
-  return (
-    <ApiProvider api={api}>
-      <ApiTest />
-    </ApiProvider>
-  );
-};
-
-export default App;
+export default function App() {
+	return <Home />;
+}
