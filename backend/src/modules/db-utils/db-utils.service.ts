@@ -120,7 +120,7 @@ export class DbUtilsService {
     try {
       // Parse the JSON string
       const preferences = JSON.parse(JSON.stringify(user.preferences));
-      console.log(preferences);
+      // console.log(preferences);
 
       // Ensure the parsed object has the required properties
       if (
@@ -246,18 +246,11 @@ export class DbUtilsService {
       
 
       if (updateProfileDto.fav_genres) {
-        existingPreferences.fav_genres = {
-          count: updateProfileDto.fav_genres.data.length,
-          data: updateProfileDto.fav_genres.data,
-        };
+        existingPreferences.fav_genres = updateProfileDto.fav_genres.data;
       }
 
       if (updateProfileDto.fav_songs) {
-        console.log(updateProfileDto.fav_songs.data)
-        existingPreferences.fav_songs = {
-          count: updateProfileDto.fav_songs.data.length,
-          data: updateProfileDto.fav_songs.data,
-        };
+        existingPreferences.fav_songs = updateProfileDto.fav_songs.data;
       }
 
       updateData.preferences = existingPreferences;
