@@ -6,15 +6,11 @@ import * as Prisma from "@prisma/client";
 export class DbUtilsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	//get user following (people the user is following)
-	/*
-		follower: the person who does the following
-		followee (leader): the person being followed
-	*/
-	async getUserFollowing(userID: string): Promise<Prisma.users[] | null> {
+	//get user following
+	async getUserFollowing(user_id: string): Promise<Prisma.users[] | null> {
 		const following: Prisma.follows[] | null =
 			await this.prisma.follows.findMany({
-				where: { follower: userID },
+				where: { followee: user_id },
 			});
 
 		if (!following || following === null) {
@@ -26,8 +22,8 @@ export class DbUtilsService {
 		for (let i = 0; i < following.length; i++) {
 			const f = following[i];
 			if (f && f !== null) {
-				if (f.followee && f.followee !== null) {
-					ids.push(f.followee);
+				if (f.follower && f.follower !== null) {
+					ids.push(f.follower);
 				}
 			}
 		}
@@ -45,15 +41,11 @@ export class DbUtilsService {
 		return result;
 	}
 
-	//get user followers (people following the user)
-	/*
-		follower: the person who does the following
-		followee (leader): the person being followed
-	*/
-	async getUserFollowers(userID: string): Promise<Prisma.users[] | null> {
+	//get user followers
+	async getUserFollowers(user_id: string): Promise<Prisma.users[] | null> {
 		const followers: Prisma.follows[] | null =
 			await this.prisma.follows.findMany({
-				where: { followee: userID },
+				where: { follower: user_id },
 			});
 
 		if (!followers || followers === null) {
@@ -65,8 +57,8 @@ export class DbUtilsService {
 		for (let i = 0; i < followers.length; i++) {
 			const f = followers[i];
 			if (f && f !== null) {
-				if (f.follower && f.follower !== null) {
-					ids.push(f.follower);
+				if (f.followee && f.followee !== null) {
+					ids.push(f.followee);
 				}
 			}
 		}
@@ -103,91 +95,5 @@ export class DbUtilsService {
 			}
 		}
 		return rooms;
-	}
-
-	async isRoomPublic(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { room_id: roomID },
-		});
-		if (!room || room === null) {
-			throw new Error("Room not found. Probably doesn't exist.");
-		}
-
-		const publicRoom: Prisma.public_room | null =
-			await this.prisma.public_room.findUnique({
-				where: { room_id: roomID },
-			});
-
-		if (!publicRoom || publicRoom === null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	async isRoomPrivate(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { room_id: roomID },
-		});
-		if (!room || room === null) {
-			throw new Error("Room not found. Probably doesn't exist.");
-		}
-
-		const privateRoom: Prisma.private_room | null =
-			await this.prisma.private_room.findUnique({
-				where: { room_id: roomID },
-			});
-
-		if (!privateRoom || privateRoom === null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	async userExists(userID: string): Promise<boolean> {
-		const user: Prisma.users | null = await this.prisma.users.findUnique({
-			where: { user_id: userID },
-		});
-		if (!user || user === null) {
-			return false;
-		}
-		return true;
-	}
-
-	async roomExists(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
-			where: { room_id: roomID },
-		});
-		if (!room || room === null) {
-			return false;
-		}
-		return true;
-	}
-
-	/*
-	follower: the person who does the following
-	followee (leader): the person being followed
-	*/
-	async isFollowing(
-		userID: string,
-		accountFollowedId: string,
-	): Promise<boolean> {
-		const follow: Prisma.follows[] = await this.prisma.follows.findMany({
-			where: {
-				follower: userID,
-				followee: accountFollowedId,
-			},
-		});
-		if (!follow || follow === null) {
-			return false;
-		}
-		if (follow.length === 0) {
-			return false;
-		}
-		if (follow.length > 1) {
-			throw new Error("More than one follow found.");
-		}
-		return true;
 	}
 }

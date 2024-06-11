@@ -10,7 +10,7 @@ import {
 	UseGuards,
 	Request,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiTags } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/createroomdto";
@@ -18,15 +18,11 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService } from "src/auth/auth.service";
 import { Prisma } from "@prisma/client";
 
 @Controller("rooms")
 export class RoomsController {
-	constructor(
-		private readonly roomsService: RoomsService,
-		private readonly auth: AuthService,
-	) {}
+	constructor(private readonly roomsService: RoomsService) {}
 
 	//NOTE TO DEV:
 	/*
@@ -51,70 +47,68 @@ export class RoomsController {
     such that the API documentation is more detailed and informative for the next dev.
   */
 
-	@ApiBearerAuth()
+	/*
+    GET /rooms/new
+    gets newly created public rooms
+    no input
+    response: an array of RoomDto
+    */
 	@UseGuards(JwtAuthGuard)
 	@Get("new")
-	@ApiOperation({ summary: "Get newly created public rooms" })
-	@ApiParam({ name: "none" })
-	@ApiOkResponse({
-		description: "The new public rooms as an array of RoomDto.",
-		type: RoomDto,
-		isArray: true,
-	})
 	@ApiTags("rooms")
-	async getNewRooms(): Promise<RoomDto[]> {
-		return await this.roomsService.getNewRooms();
+	getNewRooms(@Request() req: any): RoomDto[] {
+		return this.roomsService.getNewRooms();
 	}
 
 	/*
-    GET /rooms/{roomID}
+    GET /rooms/{room_id}
     returns info about a room
     no input
     response: RoomDto
     */
 	@UseGuards(JwtAuthGuard)
-	@Get(":roomID")
+	@Get(":room_id")
 	@ApiTags("rooms")
-	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
-		return this.roomsService.getRoomInfo(roomID);
+	getRoomInfo(@Request() req: any, @Param("room_id") room_id: string): RoomDto {
+		return this.roomsService.getRoomInfo(room_id);
 	}
 
 	/*
-    PUT/PATCH /rooms/{roomID}
+    PUT/PATCH /rooms/{room_id}
     edits room info (only if it belongs to the user)
     input: partial RoomDto
     response: updated RoomDto
     */
 	@UseGuards(JwtAuthGuard)
-	@Patch(":roomID")
+	@Patch(":room_id")
 	@ApiTags("rooms")
 	updateRoomInfo(
 		@Request() req: any,
-		@Param("roomID") roomID: string,
+		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): RoomDto {
-		return this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+		return this.roomsService.updateRoomInfo(room_id, updateRoomDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Put(":roomID")
+	@Put(":room_id")
 	@ApiTags("rooms")
 	updateRoom(
 		@Request() req: any,
-		@Param("roomID") roomID: string,
+		@Param("room_id") room_id: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): RoomDto {
-		return this.roomsService.updateRoom(roomID, updateRoomDto);
+		return this.roomsService.updateRoom(room_id, updateRoomDto);
 	}
 
 	/*
-    DELETE /rooms/{roomID}
+    DELETE /rooms/{room_id}
     deletes the room (only if it belongs to the user)
     no input
     response: (2xx for success, 4xx for error)
     */
 	@UseGuards(JwtAuthGuard)
-	@Delete(":roomID")
+	@Delete(":room_id")
 	@ApiTags("rooms")
 	async deleteRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
 		// check using jwt token whether the user is the creator of the room
@@ -126,13 +120,13 @@ export class RoomsController {
 	}
 
 	/*
-    POST /rooms/{roomID}/join
+    POST /rooms/{room_id}/join
     adds current user as a participant to the room
     no input
     response: (2xx for success, 4xx for error)
     */
 	@UseGuards(JwtAuthGuard)
-	@Post(":roomID/join")
+	@Post(":room_id/join")
 	@ApiTags("rooms")
 	async joinRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
 		// get user_id from req
@@ -146,84 +140,84 @@ export class RoomsController {
 	}
 
 	/*
-    POST /rooms/{roomID}/leave
+    POST /rooms/{room_id}/leave
     remove current user as a participant to the room
     no input
     response: (2xx for success, 4xx for error)
     */
 	@UseGuards(JwtAuthGuard)
-	@Post(":roomID/leave")
+	@Post(":room_id/leave")
 	@ApiTags("rooms")
 	async leaveRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
 		return await this.roomsService.leaveRoom(room_id, req.user.userId);
 	}
 
 	/*
-    GET /rooms/{roomID}/users
+    GET /rooms/{room_id}/users
     returns people currently (and previously in room)
     no input
     response: array of ProfileDto
     */
 	@UseGuards(JwtAuthGuard)
-	@Get(":roomID/users")
+	@Get(":room_id/users")
 	@ApiTags("rooms")
 	async getRoomUsers(@Request() req: any, @Param("room_id") room_id: string): Promise<UserProfileDto[]> {
 		return await this.roomsService.getRoomUsers(room_id);
 	}
 
 	/*
-    GET /rooms/{roomID}/songs
+    GET /rooms/{room_id}/songs
     returns the queue
     no input
     response: array of SongInfoDto
     */
 	@UseGuards(JwtAuthGuard)
-	@Get(":roomID/songs")
+	@Get(":room_id/songs")
 	@ApiTags("rooms")
-	getRoomQueue(@Request() req: any, @Param("roomID") roomID: string): SongInfoDto[] {
-		return this.roomsService.getRoomQueue(roomID);
+	getRoomQueue(@Request() req: any, @Param("room_id") room_id: string): SongInfoDto[] {
+		return this.roomsService.getRoomQueue(room_id);
 	}
 
 	/*
-    DELETE /rooms/{roomID}/songs
+    DELETE /rooms/{room_id}/songs
     clears the queue (except for current song, if playing)
     no input
     response: (2xx for success, 4xx for error)
     */
 	@UseGuards(JwtAuthGuard)
-	@Delete(":roomID/songs")
+	@Delete(":room_id/songs")
 	@ApiTags("rooms")
-	clearRoomQueue(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.clearRoomQueue(roomID);
+	clearRoomQueue(@Request() req: any, @Param("room_id") room_id: string): boolean {
+		return this.roomsService.clearRoomQueue(room_id);
 	}
 
 	/*
-    POST /rooms/{roomID}/songs
+    POST /rooms/{room_id}/songs
     add a song to queue
     input: SongInfoDto
     response: array of SongInfoDto (room queue)
     */
 	@UseGuards(JwtAuthGuard)
-	@Post(":roomID/songs")
+	@Post(":room_id/songs")
 	@ApiTags("rooms")
 	addSongToQueue(
 		@Request() req: any,
-		@Param("roomID") roomID: string,
+		@Param("room_id") room_id: string,
 		@Body() songInfoDto: SongInfoDto,
 	): SongInfoDto[] {
-		return this.roomsService.addSongToQueue(roomID, songInfoDto);
+		return this.roomsService.addSongToQueue(room_id, songInfoDto);
 	}
 
 	/*
-    GET /rooms/{roomID}/songs/current
+    GET /rooms/{room_id}/songs/current
     returns the current playing song
     no input
     response: SongInfoDto
     */
 	@UseGuards(JwtAuthGuard)
-	@Get(":roomID/songs/current")
+	@Get(":room_id/songs/current")
 	@ApiTags("rooms")
-	getCurrentSong(@Request() req: any, @Param("roomID") roomID: string): SongInfoDto {
-		return this.roomsService.getCurrentSong(roomID);
+	getCurrentSong(@Request() req: any, @Param("room_id") room_id: string): SongInfoDto {
+		return this.roomsService.getCurrentSong(room_id);
 	}
 }

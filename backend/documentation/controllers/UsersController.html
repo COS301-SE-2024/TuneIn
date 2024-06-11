@@ -142,101 +142,23 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#createRoom" >createRoom</a>
+                                <a href="#create" >create</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getFollowers" >getFollowers</a>
+                                <a href="#findAll" >findAll</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getFollowing" >getFollowing</a>
+                                <a href="#findOne" >findOne</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getRecentRooms" >getRecentRooms</a>
+                                <a href="#remove" >remove</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getRecommendedRooms" >getRecommendedRooms</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getUserFriends" >getUserFriends</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#getUserInfo" >getUserInfo</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getUserRooms" >getUserRooms</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#updateProfile" >updateProfile</a>
-                            </li>
-                            <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#updateUserProfile" >updateUserProfile</a>
+                                <a href="#update" >update</a>
                             </li>
                         </ul>
                     </td>
@@ -259,25 +181,18 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="createRoom"></a>
+                    <a name="create"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>createRoom</b></span>
-                        <a href="#createRoom"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>create</b></span>
+                        <a href="#create"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createRoom(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, createRoomDto: <a href="../classes/CreateRoomDto.html" target="_self">CreateRoomDto</a>)</code>
+                    <code>create(createUserDto: <a href="../classes/CreateUserDto.html" target="_self">CreateUserDto</a>)</code>
                 </td>
             </tr>
 
@@ -285,14 +200,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Post(&#x27;rooms&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Create a new room&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The newly created room as a RoomDto.&#x27;, type: RoomDto})<br /></code>
+                    <code>@Post()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="154"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:154</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="21"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:21</a></div>
                         </td>
                     </tr>
 
@@ -313,21 +228,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>req</td>
+                                                <td>createUserDto</td>
                                             <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>createRoomDto</td>
-                                            <td>
-                                                            <code><a href="../classes/CreateRoomDto.html" target="_self" >CreateRoomDto</a></code>
+                                                            <code><a href="../classes/CreateUserDto.html" target="_self" >CreateUserDto</a></code>
                                             </td>
 
                                             <td>
@@ -340,7 +243,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -354,25 +257,18 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getFollowers"></a>
+                    <a name="findAll"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getFollowers</b></span>
-                        <a href="#getFollowers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>findAll</b></span>
+                        <a href="#findAll"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFollowers(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>findAll()</code>
                 </td>
             </tr>
 
@@ -380,14 +276,60 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;followers&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s followers&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s followers as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
+                    <code>@Get()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="252"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:252</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="26"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:26</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findOne"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>findOne</b></span>
+                        <a href="#findOne"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;:id&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="31"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:31</a></div>
                         </td>
                     </tr>
 
@@ -408,9 +350,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>req</td>
+                                                <td>id</td>
                                             <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
 
                                             <td>
@@ -423,7 +365,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -437,25 +379,18 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getFollowing"></a>
+                    <a name="remove"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getFollowing</b></span>
-                        <a href="#getFollowing"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>remove</b></span>
+                        <a href="#remove"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFollowing(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -463,14 +398,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;following&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s following&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s following as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
+                    <code>@Delete(&#x27;:id&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="271"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:271</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -491,9 +426,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>req</td>
+                                                <td>id</td>
                                             <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
 
                                             <td>
@@ -506,7 +441,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -520,25 +455,18 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getRecentRooms"></a>
+                    <a name="update"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getRecentRooms</b></span>
-                        <a href="#getRecentRooms"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>update</b></span>
+                        <a href="#update"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getRecentRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
                 </td>
             </tr>
 
@@ -546,14 +474,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/recent&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s recent rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s recent rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
+                    <code>@Patch(&#x27;:id&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="195"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:195</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="36"
+                                    class="link-to-prism">src/modules/users/users.controller.ts:36</a></div>
                         </td>
                     </tr>
 
@@ -574,416 +502,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>req</td>
+                                                <td>id</td>
                                             <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getRecommendedRooms"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getRecommendedRooms</b></span>
-                        <a href="#getRecommendedRooms"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getRecommendedRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/foryou&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s recommended rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s recommended rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="214"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:214</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getUserFriends"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getUserFriends</b></span>
-                        <a href="#getUserFriends"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserFriends(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;friends&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s friends&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s friends as an array of UserProfileDto.&#x27;, type: UserProfileDto, isArray: true})<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="233"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:233</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getUserInfo"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>getUserInfo</b></span>
-                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserInfo(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:78</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getUserRooms"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getUserRooms</b></span>
-                        <a href="#getUserRooms"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserRooms(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms&#x27;)<br />@ApiTags(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Get a user&#x27;s rooms&#x27;})<br />@ApiParam({name: &#x27;none&#x27;})<br />@ApiOkResponse({description: &#x27;The user&#x27;s rooms as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="136"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:136</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="updateProfile"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>updateProfile</b></span>
-                        <a href="#updateProfile"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Put()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:118</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1008,98 +529,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="updateUserProfile"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>updateUserProfile</b></span>
-                        <a href="#updateUserProfile"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateUserProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiBearerAuth()<br />@UseGuards(JwtAuthGuard)<br />@Patch()<br />@ApiTags(&#x27;users&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:107</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>updateUserDto</td>
-                                            <td>
-                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1114,282 +544,48 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
-	Controller,
-	Get,
-	Post,
-	Body,
-	Patch,
-	Put,
-	UseGuards,
-	Request,
-	HttpException,
-} from &quot;@nestjs/common&quot;;
-import { UsersService } from &quot;./users.service&quot;;
-import { UpdateUserDto } from &quot;./dto/update-user.dto&quot;;
-import {
-	ApiBearerAuth,
-	ApiOkResponse,
-	ApiOperation,
-	ApiParam,
-	ApiTags,
-} from &quot;@nestjs/swagger&quot;;
-import { UserDto } from &quot;./dto/user.dto&quot;;
-import { RoomDto } from &quot;../rooms/dto/room.dto&quot;;
-import { CreateRoomDto } from &quot;../rooms/dto/createroomdto&quot;;
-import { UserProfileDto } from &quot;../profile/dto/userprofile.dto&quot;;
-import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
-import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
-import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from &#x27;@nestjs/common&#x27;;
+import { UsersService } from &#x27;./users.service&#x27;;
+import { CreateUserDto } from &#x27;./dto/create-user.dto&#x27;;
+import { UpdateUserDto } from &#x27;./dto/update-user.dto&#x27;;
+import { ApiTags } from &#x27;@nestjs/swagger&#x27;;
 
-@ApiTags(&quot;users&quot;)
-@Controller(&quot;users&quot;)
+@ApiTags(&#x27;users&#x27;)
+@Controller(&#x27;users&#x27;)
 export class UsersController {
-	constructor(
-		private readonly usersService: UsersService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
-	) {}
+  constructor(private readonly usersService: UsersService) {}
 
-	//basic CRUD operations on the users table
-	/*
-	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.usersService.create(createUserDto);
-	}
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
-	@Get()
-	findAll() {
-		return this.usersService.findAll();
-	}
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-	@Get(&quot;:id&quot;)
-	findOne(@Param(&quot;id&quot;) id: string) {
-		return this.usersService.findOne(id);
-	}
+  @Get(&#x27;:id&#x27;)
+  findOne(@Param(&#x27;id&#x27;) id: string) {
+    return this.usersService.findOne(id);
+  }
 
-	@Patch(&quot;:id&quot;)
-	update(@Param(&quot;id&quot;) id: string, @Body() updateUserDto: UpdateUserDto) {
-		const result &#x3D; this.usersService.update(id, updateUserDto);
-		console.log(result);
-		return result;
-	}
+  @Patch(&#x27;:id&#x27;)
+  update(@Param(&#x27;id&#x27;) id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
 
-	@Delete(&quot;:id&quot;)
-	remove(@Param(&quot;id&quot;) id: string) {
-		return this.usersService.remove(id);
-	}
-  */
-
-	/*
-    GET /users
-    gets user info
-    no input
-    response: return UserDto
-  */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get()
-	@ApiTags(&quot;users&quot;)
-	getUserInfo(@Request() req: any): UserDto {
-		//try to get sub, username &amp; email back from JWT token
-		console.log(&quot;1&quot;);
-		console.log(&quot;2&quot;, req);
-		console.log(&quot;3&quot;, req.user);
-		//req.user
-		/*
-		{
-			userId: &#x27;311ce2e8-8041-70bd-0ab5-be97283ee182&#x27;,
-			username: &#x27;bigdaddy&#x27;
-		}
-		*/
-		console.log(&quot;4&quot;, req.user.sub);
-		console.log(&quot;5&quot;, req.user.username);
-		console.log(&quot;6&quot;, req.user.email);
-
-		return this.usersService.getUserInfo();
-	}
-
-	/*
-    PUT/PATCH /users
-    user profile info
-    input: UserDto
-    response: return updated UserDto
-  */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Patch()
-	@ApiTags(&quot;users&quot;)
-	updateUserProfile(
-		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateUserProfile(updateUserDto);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Put()
-	@ApiTags(&quot;users&quot;)
-	updateProfile(
-		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateProfile(updateUserDto);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getUserRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserRooms(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Post(&quot;rooms&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Create a new room&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The newly created room as a RoomDto.&quot;,
-		type: RoomDto,
-	})
-	async createRoom(
-		@Request() req: any,
-		@Body() createRoomDto: CreateRoomDto,
-	): Promise&lt;RoomDto&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-
-		if (!createRoomDto.creator) {
-			const creator &#x3D; await this.dtogen.generateUserProfileDto(userID, false);
-			if (creator) {
-				createRoomDto.creator &#x3D; creator;
-			} else {
-				throw new HttpException(
-					&quot;Failed to generate creator profile from user ID.&quot;,
-					500,
-				);
-			}
-		}
-
-		if (userID !&#x3D;&#x3D; createRoomDto.creator.userID) {
-			throw new HttpException(
-				&quot;User ID in JWT token does not match creator ID in request body.&quot;,
-				400,
-			);
-		}
-		return await this.usersService.createRoom(createRoomDto);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms/recent&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s recent rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s recent rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getRecentRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecentRooms(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;rooms/foryou&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s recommended rooms&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s recommended rooms as an array of RoomDto.&quot;,
-		type: RoomDto,
-		isArray: true,
-	})
-	async getRecommendedRooms(@Request() req: any): Promise&lt;RoomDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getRecommendedRooms(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;friends&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s friends&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s friends as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getUserFriends(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getUserFriends(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;followers&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s followers&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s followers as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getFollowers(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowers(userID);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get(&quot;following&quot;)
-	@ApiTags(&quot;users&quot;)
-	@ApiOperation({ summary: &quot;Get a user&#x27;s following&quot; })
-	@ApiParam({ name: &quot;none&quot; })
-	@ApiOkResponse({
-		description: &quot;The user&#x27;s following as an array of UserProfileDto.&quot;,
-		type: UserProfileDto,
-		isArray: true,
-	})
-	async getFollowing(@Request() req: any): Promise&lt;UserProfileDto[]&gt; {
-		const userID &#x3D; req.user.sub;
-		if (!userID || userID &#x3D;&#x3D;&#x3D; &quot;&quot; || typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
-			throw new Error(&quot;Invalid user ID in JWT token. Please log in again.&quot;);
-		}
-		return await this.usersService.getFollowing(userID);
-	}
+  @Delete(&#x27;:id&#x27;)
+  remove(@Param(&#x27;id&#x27;) id: string) {
+    return this.usersService.remove(id);
+  }
 }
 </code></pre>
     </div>

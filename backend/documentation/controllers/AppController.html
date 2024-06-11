@@ -205,17 +205,17 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get } from &quot;@nestjs/common&quot;;
-import { AppService } from &quot;./app.service&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get } from &#x27;@nestjs/common&#x27;;
+import { AppService } from &#x27;./app.service&#x27;;
 
 @Controller()
 export class AppController {
-	constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) {}
 
-	@Get()
-	getHello(): string {
-		return this.appService.getHello();
-	}
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
 }
 </code></pre>
     </div>

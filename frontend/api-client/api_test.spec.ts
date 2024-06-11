@@ -25,8 +25,7 @@ describe("DefaultApi", () => {
     return expect(instance.appControllerGetHello({})).resolves.toBe(null)
   })
   test("authControllerLogin", () => {
-    const body: api.AuthBody = undefined
-    return expect(instance.authControllerLogin(body, {})).resolves.toBe(null)
+    return expect(instance.authControllerLogin({})).resolves.toBe(null)
   })
 })
 
@@ -39,6 +38,9 @@ describe("ProfileApi", () => {
   test("profileControllerFollowUser", () => {
     const username: string = "username_example"
     return expect(instance.profileControllerFollowUser(username, {})).resolves.toBe(null)
+  })
+  test("profileControllerGetProfile", () => {
+    return expect(instance.profileControllerGetProfile({})).resolves.toBe(null)
   })
   test("profileControllerGetProfileByUsername", () => {
     const username: string = "username_example"
@@ -66,54 +68,53 @@ describe("RoomsApi", () => {
 
   test("roomsControllerAddSongToQueue", () => {
     const body: api.SongInfoDto = undefined
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerAddSongToQueue(body, roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerAddSongToQueue(body, roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerClearRoomQueue", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerClearRoomQueue(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerClearRoomQueue(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerDeleteRoom", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerDeleteRoom(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerDeleteRoom(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerGetCurrentSong", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerGetCurrentSong(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerGetCurrentSong(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerGetNewRooms", () => {
-    const none: any = undefined
-    return expect(instance.roomsControllerGetNewRooms(none, {})).resolves.toBe(null)
+    return expect(instance.roomsControllerGetNewRooms({})).resolves.toBe(null)
   })
   test("roomsControllerGetRoomInfo", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerGetRoomInfo(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerGetRoomInfo(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerGetRoomQueue", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerGetRoomQueue(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerGetRoomQueue(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerGetRoomUsers", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerGetRoomUsers(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerGetRoomUsers(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerJoinRoom", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerJoinRoom(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerJoinRoom(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerLeaveRoom", () => {
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerLeaveRoom(roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerLeaveRoom(roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerUpdateRoom", () => {
     const body: api.UpdateRoomDto = undefined
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerUpdateRoom(body, roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerUpdateRoom(body, roomId, {})).resolves.toBe(null)
   })
   test("roomsControllerUpdateRoomInfo", () => {
     const body: api.UpdateRoomDto = undefined
-    const roomID: string = "roomID_example"
-    return expect(instance.roomsControllerUpdateRoomInfo(body, roomID, {})).resolves.toBe(null)
+    const roomId: string = "roomId_example"
+    return expect(instance.roomsControllerUpdateRoomInfo(body, roomId, {})).resolves.toBe(null)
   })
 })
 
@@ -125,53 +126,41 @@ describe("UsersApi", () => {
 
   test("usersControllerCreateRoom", () => {
     const body: api.CreateRoomDto = undefined
-    const none: any = undefined
-    return expect(instance.usersControllerCreateRoom(body, none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerCreateRoom(body, {})).resolves.toBe(null)
   })
   test("usersControllerCreateRoom_0", () => {
     const body: api.CreateRoomDto = undefined
-    const none: any = undefined
-    return expect(instance.usersControllerCreateRoom_0(body, none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerCreateRoom_0(body, {})).resolves.toBe(null)
   })
   test("usersControllerGetFollowers", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetFollowers(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetFollowers({})).resolves.toBe(null)
   })
   test("usersControllerGetFollowers_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetFollowers_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetFollowers_0({})).resolves.toBe(null)
   })
   test("usersControllerGetFollowing", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetFollowing(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetFollowing({})).resolves.toBe(null)
   })
   test("usersControllerGetFollowing_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetFollowing_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetFollowing_0({})).resolves.toBe(null)
   })
   test("usersControllerGetRecentRooms", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetRecentRooms(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetRecentRooms({})).resolves.toBe(null)
   })
   test("usersControllerGetRecentRooms_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetRecentRooms_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetRecentRooms_0({})).resolves.toBe(null)
   })
   test("usersControllerGetRecommendedRooms", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetRecommendedRooms(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetRecommendedRooms({})).resolves.toBe(null)
   })
   test("usersControllerGetRecommendedRooms_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetRecommendedRooms_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetRecommendedRooms_0({})).resolves.toBe(null)
   })
   test("usersControllerGetUserFriends", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetUserFriends(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetUserFriends({})).resolves.toBe(null)
   })
   test("usersControllerGetUserFriends_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetUserFriends_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetUserFriends_0({})).resolves.toBe(null)
   })
   test("usersControllerGetUserInfo", () => {
     return expect(instance.usersControllerGetUserInfo({})).resolves.toBe(null)
@@ -180,12 +169,10 @@ describe("UsersApi", () => {
     return expect(instance.usersControllerGetUserInfo_0({})).resolves.toBe(null)
   })
   test("usersControllerGetUserRooms", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetUserRooms(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetUserRooms({})).resolves.toBe(null)
   })
   test("usersControllerGetUserRooms_0", () => {
-    const none: any = undefined
-    return expect(instance.usersControllerGetUserRooms_0(none, {})).resolves.toBe(null)
+    return expect(instance.usersControllerGetUserRooms_0({})).resolves.toBe(null)
   })
   test("usersControllerUpdateProfile", () => {
     const body: api.UpdateUserDto = undefined

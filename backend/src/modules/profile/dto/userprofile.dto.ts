@@ -10,7 +10,7 @@ export class UserProfileDto {
 
 	@ApiProperty()
 	@IsString()
-	userID: string;
+	user_id: string;
 
 	@ApiProperty()
 	@IsString()
