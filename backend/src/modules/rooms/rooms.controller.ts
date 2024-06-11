@@ -10,7 +10,14 @@ import {
 	UseGuards,
 	Request,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiParam,
+	ApiResponse,
+	ApiTags,
+} from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/createroomdto";
@@ -18,7 +25,7 @@ import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @ApiTags("rooms")
 @Controller("rooms")
@@ -155,7 +162,10 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/users")
 	@ApiTags("rooms")
-	getRoomUsers(@Request() req: any, @Param("roomID") roomID: string): UserProfileDto[] {
+	getRoomUsers(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): UserProfileDto[] {
 		return this.roomsService.getRoomUsers(roomID);
 	}
 
@@ -168,7 +178,10 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
-	getRoomQueue(@Request() req: any, @Param("roomID") roomID: string): SongInfoDto[] {
+	getRoomQueue(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): SongInfoDto[] {
 		return this.roomsService.getRoomQueue(roomID);
 	}
 
@@ -181,7 +194,10 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":roomID/songs")
 	@ApiTags("rooms")
-	clearRoomQueue(@Request() req: any, @Param("roomID") roomID: string): boolean {
+	clearRoomQueue(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): boolean {
 		return this.roomsService.clearRoomQueue(roomID);
 	}
 
@@ -211,7 +227,10 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
-	getCurrentSong(@Request() req: any, @Param("roomID") roomID: string): SongInfoDto {
+	getCurrentSong(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): SongInfoDto {
 		return this.roomsService.getCurrentSong(roomID);
 	}
 }

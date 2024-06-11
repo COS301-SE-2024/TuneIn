@@ -6,57 +6,37 @@ import {
     HttpStatus,
     Get
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
 import {
-	ApiBody,
-	ApiOperation,
-	ApiProperty,
-	ApiResponse,
-	ApiTags,
-} from "@nestjs/swagger";
-
-class AuthBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-
-	@ApiProperty()
-	email: string;
-}
-
-class RegisterBody {
-	@ApiProperty()
-	username: string;
-
-	@ApiProperty()
-	userCognitoSub: string;
-
-	@ApiProperty()
-	email: string;
-}
+	AuthService,
+	CognitoDecodedToken,
+	JWTPayload,
+	RegisterBody,
+	LoginBody,
+} from "./auth.service";
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { UsersService } from "src/modules/users/users.service";
+import * as PrismaTypes from "@prisma/client";
 
 @ApiTags('auth')
 @Controller("auth")
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
-	/*
-	POST /auth/login
-	body: Cognito Access Token (string)
-  	*/
 	@Post("login")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: AuthBody })
+	@ApiBody({ type: LoginBody })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async login(@Body() authInfo: AuthBody) {
+	async login(@Body() loginInfo: LoginBody) {
+		/*
 		const users = await this.authService.listUsers();
 		console.log(users);
 		console.log(users.Users);

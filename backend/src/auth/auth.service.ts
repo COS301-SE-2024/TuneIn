@@ -4,7 +4,46 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { ApiProperty } from "@nestjs/swagger";
 //import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+
+export type CognitoDecodedToken = {
+	sub: string;
+	iss: string;
+	client_id: string;
+	origin_jti: string;
+	event_id?: string;
+	token_use: string;
+	scope?: string;
+	auth_time: number;
+	exp: number;
+	iat: number;
+	jti: string;
+	username: string;
+};
+
+export type JWTPayload = {
+	id: string;
+	email: string;
+	username: string;
+};
+
+export class RegisterBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
+}
+
+export class LoginBody {
+	@ApiProperty()
+	token: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -111,31 +150,6 @@ export class AuthService {
 		}
 	}
 
-	//Sample code
-	/*
-	if (!userMatch) {
-			return { message: "Invalid credentials. No user match" };
-		}
-
-		// add users to table
-		const successful: boolean = await this.authService.createUser(
-			userMatch.Username,
-			userEmail,
-		);
-
-		if (!successful) {
-			return { message: "Invalid credentials. Could not create user" };
-		}
-
-		const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-
-		//generate JWT token using payload
-		const token: string = this.authService.generateJWT(payload);
-	*/
 	async createUser(
 		username: string,
 		email: string,
@@ -162,19 +176,7 @@ export class AuthService {
 		return true;
 	}
 
-	//input payload
-	/*
-	const payload = {
-			sub: userMatch.Username,
-			username: authInfo.username,
-			email: userEmail,
-		};
-	*/
-	async generateJWT(payload: {
-		sub: string;
-		username: string;
-		email: string;
-	}): Promise<string> {
+	async generateJWT(payload: JWTPayload): Promise<string> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
 
@@ -219,21 +221,44 @@ export class AuthService {
 	}
 	*/
 
-	// this funciton will be passed a Request object from the NestJS controller eg: 
+	// this funciton will be passed a Request object from the NestJS controller eg:
 	/*
 	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
 		return this.roomsService.getRoomInfo(roomID);
 	}
 	*/
-	getUserInfo(req: any): any {
-		const result = req.user;
+	getUserInfo(req: any): JWTPayload {
+		console.log("req", req);
+		const result = req.user as JWTPayload;
 		console.log(result);
 		if (!result) {
-			throw new UnauthorizedException("No user found in JWT token. Please log in again");
+			throw new UnauthorizedException(
+				"No user found in JWT token. Please log in again",
+			);
 		}
-		if (!result.userId) {
-			throw new UnauthorizedException("No user ID found in JWT token. Please log in again");
+		if (!result.id) {
+			throw new UnauthorizedException(
+				"No user ID found in JWT token. Please log in again",
+			);
 		}
 		return result;
+	}
+
+	async decodeAndVerifyCognitoJWT(
+		jwt_token: string,
+	): Promise<CognitoDecodedToken> {
+		const verifier = CognitoJwtVerifier.create({
+			userPoolId: this.userPoolId,
+			tokenUse: "access",
+			clientId: this.clientId,
+		});
+
+		try {
+			const payload = await verifier.verify(jwt_token);
+			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
+			return result;
+		} catch (error) {
+			throw new UnauthorizedException("Invalid JWT token");
+		}
 	}
 }

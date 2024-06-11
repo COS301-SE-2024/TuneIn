@@ -14,7 +14,7 @@ import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @Controller("profile")
 export class ProfileController {
@@ -124,8 +124,8 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.profileService.followUser(userInfo.userId, username);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.profileService.followUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
@@ -146,7 +146,7 @@ export class ProfileController {
 		@Request() req: any,
 		@Param("username") username: string,
 	): Promise<boolean> {
-		const userInfo = this.auth.getUserInfo(req);
-		return await this.profileService.unfollowUser(userInfo.userId, username);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.profileService.unfollowUser(userInfo.id, username);
 	}
 }
