@@ -15,6 +15,17 @@ import {
 	ApiTags,
 } from "@nestjs/swagger";
 
+class AuthBody {
+	@ApiProperty()
+	username: string;
+
+	@ApiProperty()
+	userCognitoSub: string;
+
+	@ApiProperty()
+	email: string;
+}
+
 class RegisterBody {
 	@ApiProperty()
 	username: string;

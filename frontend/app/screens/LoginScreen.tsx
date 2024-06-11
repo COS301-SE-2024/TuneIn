@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -37,8 +38,14 @@ const LoginScreen: React.FC = () => {
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
         console.log('access token + ' + result.getAccessToken().getJwtToken());
+        
+        const setToken = async () => {
+          const decodedPayload = result.getAccessToken().decodePayload();
+          console.log('Decoded Payload:', decodedPayload);
+          await AsyncStorage.setItem('decodedPayload', JSON.stringify(decodedPayload));
+        };
 
-        console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
+        setToken();
         
         //POST request to backend
         fetch("http://localhost:3000/auth/login", {
@@ -56,6 +63,7 @@ const LoginScreen: React.FC = () => {
           console.log(data);
           localStorage.setItem("token", data.token);
 
+          
           if (data.status === "success") {
             router.navigate("/screens/Home");
           }

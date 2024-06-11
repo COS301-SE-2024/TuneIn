@@ -1,5 +1,4 @@
-// screens/Home.tsx
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Animated } from "react-native";
 import { Link, useRouter } from "expo-router";
 import RoomCardWidget from "../components/RoomCardWidget";
@@ -9,6 +8,7 @@ import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
@@ -106,6 +106,21 @@ const Home: React.FC = () => {
     // Add your sample rooms here...
   ];
 
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const storedToken = await AsyncStorage.getItem('decodedPayload');
+      if (storedToken) {
+        const parsedToken = JSON.parse(storedToken);
+        setToken(parsedToken);
+      }
+    };
+    fetchToken();
+  }, []);
+
+  console.log("HomeToken", token);
+
   const renderItem = ({ item }: { item: Room }) => (
     <Link
       href={{
@@ -125,6 +140,10 @@ const Home: React.FC = () => {
 
   const navigateToCreateNew = () => {
     router.navigate("/screens/CreateRoom");
+  };
+
+  const navigateToAPI = () => {
+    router.navigate("/api-test");
   };
 
   const handleScroll = useCallback(({ nativeEvent }) => {
@@ -207,6 +226,11 @@ const Home: React.FC = () => {
             </Text>
           </TouchableOpacity>
           <FriendsGrid friends={sampleFriends} maxVisible={8} />
+          <TouchableOpacity className="mt-7" onPress={navigateToAPI}>
+            <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
+              API test
+            </Text>
+          </TouchableOpacity>
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
@@ -246,3 +270,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+

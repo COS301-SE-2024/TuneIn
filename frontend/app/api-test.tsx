@@ -24,7 +24,7 @@ const ApiTest: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Text>Home Scren</Text>
       {data ? (
         <Text>Data: {JSON.stringify(data)}</Text>
       ) : (
