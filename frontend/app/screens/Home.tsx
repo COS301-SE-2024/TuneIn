@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Animated } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Animated, ActivityIndicator } from "react-native";
 import { Link, useRouter } from "expo-router";
 import RoomCardWidget from "../components/RoomCardWidget";
 import { Room } from "../models/Room";
@@ -14,6 +14,7 @@ import axios from 'axios';
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [loadingFriends, setLoadingFriends] = useState<boolean>(true);
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -52,8 +53,6 @@ const Home: React.FC = () => {
     }
   };
 
-
-
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
     return rooms.map(room => ({
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -71,6 +70,7 @@ const Home: React.FC = () => {
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [myPicks, setMyPicks] = useState<Room[]>([]);
   const [myRecents, setMyRecents] = useState<Room[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -80,6 +80,7 @@ const Home: React.FC = () => {
   
       if (storedToken) {
         // Fetch recent rooms
+        setLoadingRooms(true);
         const recentRooms = await fetchRooms(storedToken, '/recent');
         const formattedRecentRooms = formatRoomData(recentRooms);
         
@@ -96,12 +97,15 @@ const Home: React.FC = () => {
         setMyRecents(formattedRecentRooms);
   
         // Fetch friends
+        setLoadingFriends(true);
         const fetchedFriends = await getFriends(storedToken);
         const formattedFriends = fetchedFriends.map(friend => ({
           profilePicture: friend.profile_picture_url ? friend.profile_picture_url : ProfileIMG,
           name: friend.profile_name,
         }));
         setFriends(formattedFriends);
+        setLoadingFriends(false);
+        setLoadingRooms(false);
       }
     };
   
@@ -198,21 +202,21 @@ const Home: React.FC = () => {
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
             Recent Rooms
           </Text>
-          <AppCarousel data={myRecents} renderItem={renderItem} />
+          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRecents} renderItem={renderItem} />}
           <Text className="text-2xl font-bold text-gray-800 mt-7 mb-5 ml-8">
             Picks for you
           </Text>
-          <AppCarousel data={myPicks} renderItem={renderItem} />
+          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myPicks} renderItem={renderItem} />}
           <TouchableOpacity className="mt-7" onPress={navigateToAllFriends}>
             <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
               Friends
             </Text>
           </TouchableOpacity>
-          <FriendsGrid friends={friends} maxVisible={8} />
+          {loadingFriends ? <ActivityIndicator size="large" /> : <FriendsGrid friends={friends} maxVisible={8} />}
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
-          <AppCarousel data={myRooms} renderItem={renderItem} />
+          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRooms} renderItem={renderItem} />}
         </View>
       </ScrollView>
       <Animated.View
