@@ -56,6 +56,8 @@ export class AppController {
 		}),
 	)
 	async uploadFile(@UploadedFile() file: Express.Multer.File) {
+		console.log("File uploaded");
+		console.log(file);
 		const result = await this.s3Service.uploadFile(file);
 		return {
 			url: result.Location,

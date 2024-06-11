@@ -49,6 +49,8 @@ export class S3Service {
 	async uploadFile(
 		file: Express.Multer.File,
 	): Promise<S3.ManagedUpload.SendData> {
+		console.log("Uploading file to S3");
+		console.log(file);
 		const params = {
 			Bucket: this.bucketName,
 			Key: `${Date.now()}-${file.originalname}`,
@@ -56,7 +58,7 @@ export class S3Service {
 			ContentType: file.mimetype,
 		};
 
-		return this.s3.upload(params).promise();
+		return await this.s3.upload(params).promise();
 	}
 
 	async getFileUrl(key: string): Promise<string> {
