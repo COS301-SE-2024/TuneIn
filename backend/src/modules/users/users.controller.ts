@@ -7,7 +7,6 @@ import {
 	Put,
 	UseGuards,
 	Request,
-	HttpException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
