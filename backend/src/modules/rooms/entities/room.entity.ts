@@ -7,7 +7,7 @@ export class RoomEntity {
 	creator: UserProfileDto;
 
 	@ApiProperty()
-	room_id: string;
+	roomID: string;
 
 	@ApiProperty()
 	participant_count: number;
