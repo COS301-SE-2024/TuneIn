@@ -81,24 +81,31 @@ export class DbUtilsService {
   async getLinks(
     user: Prisma.users,
   ): Promise<{ count: number; data: string[] }> {
-    if (!user.external_links) {
+    const links = user.external_links;
+    if (!links) {
       return { count: 0, data: [] };
     }
 
     try {
       // Parse the JSON string
-      const links = JSON.parse(JSON.stringify(user.external_links));
+      let count: number;
 
       // Ensure the parsed object has the required properties
       if (
         links &&
-        typeof links === "object" &&
-        "count" in links &&
-        "data" in links
-      ) {
+        Array.isArray(links) &&
+        links.every(link => typeof link === "string")
+    ) {
+
+        if (links && Array.isArray(links)) {
+          count = links.length;
+        } else {
+          count = 0;
+        }
+
         return {
-          count: links.count,
-          data: links.data,
+          count: count,
+          data: Array.isArray(links)? links.map(String) : [],
         };
       } else {
         throw new Error("Invalid links format");
@@ -132,8 +139,14 @@ export class DbUtilsService {
         "fav_songs" in preferences
       ) {
         return {
-          fav_genres: preferences.fav_genres,
-          fav_songs: preferences.fav_songs,
+          fav_genres: {
+            count: preferences.fav_genres.length,
+            data: preferences.fav_genres,
+          },
+          fav_songs: {
+            count: preferences.fav_songs.length,
+            data: preferences.fav_songs,
+          },
         };
       } else {
         throw new Error("Invalid preferences format");
