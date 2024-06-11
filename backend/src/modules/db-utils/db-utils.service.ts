@@ -81,31 +81,24 @@ export class DbUtilsService {
   async getLinks(
     user: Prisma.users,
   ): Promise<{ count: number; data: string[] }> {
-    const links = user.external_links;
-    if (!links) {
+    if (!user.external_links) {
       return { count: 0, data: [] };
     }
 
     try {
       // Parse the JSON string
-      let count: number;
+      const links = JSON.parse(JSON.stringify(user.external_links));
+      console.log(links);
 
       // Ensure the parsed object has the required properties
       if (
         links &&
-        Array.isArray(links) &&
-        links.every(link => typeof link === "string")
-    ) {
-
-        if (links && Array.isArray(links)) {
-          count = links.length;
-        } else {
-          count = 0;
-        }
-
+        typeof links === "object" &&
+        "data" in links
+      ) {
         return {
-          count: count,
-          data: Array.isArray(links)? links.map(String) : [],
+          count: links.data.length,
+          data: links.data,
         };
       } else {
         throw new Error("Invalid links format");
@@ -171,7 +164,6 @@ export class DbUtilsService {
     }
 
     try {
-      console.log(JSON.stringify(user.activity));
       // Parse the JSON string
       const activity = JSON.parse(JSON.stringify(user.activity));
 
