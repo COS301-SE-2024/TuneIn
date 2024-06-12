@@ -11,8 +11,6 @@ import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
-import { S3Service } from "./s3/s3.service";
-import { S3Module } from "./s3/s3.module";
 
 @Module({
 	imports: [
@@ -24,9 +22,8 @@ import { S3Module } from "./s3/s3.module";
 		ProfileModule,
 		DtoGenModule,
 		DbUtilsModule,
-		S3Module,
 	],
 	controllers: [AppController],
-	providers: [AppService, DtoGenService, DbUtilsService, S3Service],
+	providers: [AppService, DtoGenService, DbUtilsService],
 })
 export class AppModule {}
