@@ -108,9 +108,10 @@ const ProfileScreen: React.FC = () => {
 					Authorization: `Bearer ${token}`,
 				},
 			});
+			console.log(response);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching rooms:", error);
+			console.error("Error fetching profile info:", error);
 			return [];
 		}
 	};

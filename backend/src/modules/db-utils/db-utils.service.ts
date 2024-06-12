@@ -256,9 +256,9 @@ export class DbUtilsService {
       updateData.preferences = existingPreferences;
     }
 
-    if(updateProfileDto.recent_rooms){
-      updateData.activity = {recent_rooms: updateProfileDto.recent_rooms.data};
-    }
+    // if(updateProfileDto.recent_rooms){
+    //   updateData.activity = {recent_rooms: updateProfileDto.recent_rooms.data};
+    // }
 
     return updateData;
   }
