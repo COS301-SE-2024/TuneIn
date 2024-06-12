@@ -6,6 +6,7 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	ScrollView,
+	ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import NowPlaying from "../components/NowPlaying";
@@ -15,9 +16,11 @@ import RoomCard from "../components/RoomCard";
 import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
-// import { Room } from '../components/models/Room';
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
+	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const favoriteRooms = [
 		{
@@ -94,6 +97,52 @@ const ProfileScreen: React.FC = () => {
 	const genres = ["Pop", "Hip-Hop", "Jazz", "Classical", "Rock"];
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
+	const [loading, setLoading] = useState<boolean>(true);
+
+	const [token, setToken] = useState<string | null>(null);
+
+	const fetchProfileInfo = async (token: string | null) => {
+		try {
+			const response = await axios.get(`${baseURL}/profile`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			return response.data;
+		} catch (error) {
+			console.error("Error fetching rooms:", error);
+			return [];
+		}
+	};
+
+	const [profileData, setProfileData] = useState<any>(null);
+
+	useEffect(() => {
+		const getTokenAndData = async () => {
+			try {
+				const storedToken = await AsyncStorage.getItem("token");
+				setToken(storedToken);
+
+				if (storedToken) {
+					const data = await fetchProfileInfo(storedToken);
+					setProfileData(data);
+					setLoading(false);
+				}
+			} catch (error) {
+				console.error("Failed to retrieve token:", error);
+			}
+		};
+
+		getTokenAndData();
+	}, []);
+
+	if (loading) {
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<ActivityIndicator size="large" color="#0000ff" />
+			</View>
+		);
+	}
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
@@ -111,15 +160,15 @@ const ProfileScreen: React.FC = () => {
 				</Text>
 				<View style={{ alignItems: "center", marginTop: 20 }}>
 					<Image
-						source={dummyData.profile_picture}
+						source={{ uri: profileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 				</View>
 				<Text style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}>
-					{dummyData.name}
+					{profileData.profile_name}
 				</Text>
 				<Text style={{ fontWeight: "400", textAlign: "center" }}>
-					@{dummyData.username}
+					@{profileData.username}
 				</Text>
 				<View
 					style={{
@@ -129,25 +178,25 @@ const ProfileScreen: React.FC = () => {
 					}}
 				>
 					<View style={{ alignItems: "center" }}>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>17</Text>
+						<Text style={{ fontSize: 20, fontWeight: "600" }}>{profileData.followers.count}</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
 					</View>
 					<View style={{ marginLeft: 60, alignItems: "center" }}>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>270</Text>
+						<Text style={{ fontSize: 20, fontWeight: "600" }}>{profileData.following.count}</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
 				</View>
 				<TouchableOpacity
 					onPress={() => {
 						console.log("Link button pressed"); // Add this line
-						console.log("Vsibility: " + isLinkDialogVisible)
+						console.log("Vsibility: " + isLinkDialogVisible);
 						setLinkDialogVisible(true);
 					}}
 				>
 					<Text
 						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
 					>
-						instagram.com/john
+						{profileData.links.count > 0 ? profileData.links.data[0].links : ''}
 					</Text>
 				</TouchableOpacity>
 				<LinkBottomSheet
@@ -175,30 +224,28 @@ const ProfileScreen: React.FC = () => {
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
 					<BioSection
-						content={
-							"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do"
-						}
+						content={profileData.bio}
 					/>
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
-					<GenreList items={genres}></GenreList>
+					<GenreList items={profileData.fav_genres.data}></GenreList>
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Favorite Songs</Text>
-					{favoriteSongsData.slice(0, 2).map((song, index) => (
+					{profileData.fav_songs.data.slice(0, 2).map((song, index) => (
 						<FavoriteSongs
 							key={index}
-							songTitle={song.songTitle}
-							artist={song.artist}
+							songTitle={song.title}
+							artist={song.artists}
 							duration={song.duration}
-							albumArt={song.albumArt}
+							albumArt={song.cover}
 							onPress={() => setMusicDialogVisible(true)}
 						/>
 					))}
 					<MusicBottomSheet
-					isVisible={isMusicDialogVisible}
-					onClose={() => setMusicDialogVisible(false)}
-				/>
+						isVisible={isMusicDialogVisible}
+						onClose={() => setMusicDialogVisible(false)}
+					/>
 				</View>
 				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
 					<Text style={styles.title}>Favorite Rooms</Text>
@@ -217,13 +264,13 @@ const ProfileScreen: React.FC = () => {
 				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Recently Visited</Text>
 					<View style={styles.roomCardsContainer}>
-						{recentRooms.slice(0, 2).map((room) => (
+						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
 							<RoomCard
 								key={room.roomName}
-								roomName={room.roomName}
-								songName={room.songName}
-								artistName={room.artistName}
-								username={room.username}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists[0]}
+								username={room.creator.username}
 							/>
 						))}
 					</View>
