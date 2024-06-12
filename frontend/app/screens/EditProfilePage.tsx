@@ -14,6 +14,7 @@ import FavoriteSongs from "../components/FavoriteSong";
 import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import { MaterialIcons } from "@expo/vector-icons";
+import { UpdateUserProfileDto  } from "../../api-client";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -65,6 +66,48 @@ const EditProfileScreen = () => {
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 
 	const handleImageUpload = (uri) => {
+		//upload image to server
+		const token = localStorage.getItem("token");
+		fetch("http://localhost:3000/upload", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				"Authorization": "Bearer " + token
+			},
+			body: JSON.stringify({
+				uri: uri,
+			}),
+			redirect: 'follow'
+		})
+		.then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        })
+		.catch(error => console.log('error', error));
+
+		//update user profile picture on server (with url of uploaded image)
+		const self: UpdateUserProfileDto = {
+			profilePictureUrl: uri,
+		}
+
+		fetch("http://localhost:3000/profile", {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				"Authorization": "Bearer " + token
+			},
+			body: JSON.stringify(self),
+			redirect: 'follow'
+		})
+		.then(response => response.json())
+		.then((data) => {
+			console.log("Updated User Profile: ", data);
+			console.log(data);
+		})
+		.catch(error => console.log('error', error));
+
 		setProfilePic(uri);
 		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
 	};

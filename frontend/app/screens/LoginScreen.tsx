@@ -44,26 +44,31 @@ const LoginScreen: React.FC = () => {
 
         setToken();
         
-        // POST request to backend using axios
-        axios.post("http://192.168.56.1:3000/auth/login", {
-            username: emailOrUsername,
-            userCognitoSub: result.getAccessToken().decodePayload().username,
-          }, {
-            headers: {
-              "Content-Type": "application/json",
-            }
-          })
-          .then((response) => {
-            const token = response.data.token; // Extract the token from the response
-            AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
-  
-            if (response.status === 201) {
-              router.navigate("/screens/Home");
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
+        //POST request to backend
+        fetch("http://localhost:3000/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            token: result.getAccessToken().getJwtToken(),
+          }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          localStorage.setItem("token", data.token);
+
+          if (data.status === "success") {
+            router.navigate("/screens/Home");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+
+        router.navigate("/screens/Home");
       },
       onFailure: function(err) {
         console.error(err);
