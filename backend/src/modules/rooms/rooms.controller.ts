@@ -27,7 +27,6 @@ import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "src/auth/auth.service";
 
-@ApiTags("rooms")
 @Controller("rooms")
 export class RoomsController {
 	constructor(

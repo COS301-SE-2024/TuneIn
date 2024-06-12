@@ -1,10 +1,9 @@
 import {
-    Controller,
-    Post,
-    Body,
-    HttpException,
-    HttpStatus,
-    Get
+	Controller,
+	Post,
+	Body,
+	HttpException,
+	HttpStatus,
 } from "@nestjs/common";
 import {
 	AuthService,
@@ -17,7 +16,6 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "src/modules/users/users.service";
 import * as PrismaTypes from "@prisma/client";
 
-@ApiTags('auth')
 @Controller("auth")
 export class AuthController {
 	constructor(
@@ -47,71 +45,103 @@ export class AuthController {
 			);
 		}
 
-        if (!users.Users || users.Users.length === 0) {
-            throw new HttpException(
-                "Invalid credentials. Could not create user. AuthError02",
-                HttpStatus.UNAUTHORIZED,
-            );
-        }
+		if (!users.Users || users.Users.length === 0) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
 
-        // Match the email address given with the email in the UserPool
-        let userMatch = null;
-        let userEmail = "";
-        for (let i = 0; i < users.Users.length; i++) {
-            if (!users.Users[i] || users.Users[i] === undefined) {
-                continue;
-            }
-            console.log("users.Users[i]", users.Users[i]);
-            const attrs = users.Users[i].Attributes;
-            console.log("attrs", attrs);
-            if (!attrs || attrs === undefined || attrs.length === 0) {
-                continue;
-            }
+		//match the email address given with the email in the UserPool
+		let userMatch = null;
+		let userEmail = "";
+		for (let i = 0; i < users.Users.length; i++) {
+			if (!users.Users[i] || users.Users[i] === undefined) {
+				continue;
+			}
+			console.log("users.Users[i]", users.Users[i]);
+			const attrs = users.Users[i].Attributes;
+			console.log("attrs", attrs);
+			if (!attrs || attrs === undefined || attrs.length === 0) {
+				continue;
+			}
 
-            // If "email" is the Name of an attribute in users.Users[i].Attributes
-            if (attrs.find((attribute) => attribute.Name === "email")) {
-                const attr = attrs.find((attribute) => attribute.Name === "email");
-                if (!attr || attr === undefined) {
-                    continue;
-                }
-                // If the userCognitoSub matches the UserSub in the UserPool
-                if (users.Users[i].Username === authInfo.userCognitoSub && attr.Value) {
-                    userMatch = users.Users[i];
-                    userEmail = attr.Value;
-                    break;
-                }
-            }
-        }
+			// if "email" is the Name of an attribute in users.Users[i].Attributes
+			if (attrs.find((attribute) => attribute.Name === "email")) {
+				const attr = attrs.find((attribute) => attribute.Name === "email");
+				if (!attr || attr === undefined) {
+					continue;
+				}
+				//if the userCognitoSub matches the UserSub in the UserPool
+				if (users.Users[i].Username === authInfo.userCognitoSub && attr.Value) {
+					userMatch = users.Users[i];
+					userEmail = attr.Value;
+					break;
+				}
+			}
+		}
 
-        if (userMatch === null || !userMatch) {
-            throw new HttpException(
-                "Invalid credentials. Could not create user. AuthError03",
-                HttpStatus.UNAUTHORIZED,
-            );
-        }
+		if (userMatch === null || !userMatch) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError03",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
 
-        // Add users to table
-        const successful: boolean = await this.authService.createUser(
-            authInfo.username,
-            userEmail,
-            authInfo.userCognitoSub,
-        );
+		// add users to table
+		const successful: boolean = await this.authService.createUser(
+			authInfo.username,
+			userEmail,
+			authInfo.userCognitoSub,
+		);
 
-        if (!successful) {
-            throw new HttpException(
-                "Invalid credentials. Could not create user. AuthError04",
-                HttpStatus.UNAUTHORIZED,
-            );
-        }
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthError04",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		*/
+		if (!loginInfo.token || loginInfo.token === null) {
+			throw new HttpException(
+				"Invalid request. Missing Cognito access token. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		const cognitoAccessToken: string = loginInfo.token;
+		console.log("cognitoAccessToken", cognitoAccessToken);
+		const authInfo: CognitoDecodedToken =
+			await this.authService.decodeAndVerifyCognitoJWT(cognitoAccessToken);
+		const userID: string = authInfo.username;
+		console.log("authInfo", authInfo);
 
-        const payload = {
-            sub: authInfo.userCognitoSub,
-            username: authInfo.username,
-            email: userEmail,
-        };
+		const user: PrismaTypes.users | null =
+			await this.usersService.findOne(userID);
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthControllerLoginError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. AuthControllerLoginError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
 
-        // Generate JWT token using payload
-        const token: string = await this.authService.generateJWT(payload);
+		const payload: JWTPayload = {
+			id: authInfo.username,
+			username: user.username,
+			email: user.email,
+		};
+
+		console.log("payload", payload);
+		//generate JWT token using payload
+		const token: string = await this.authService.generateJWT(payload);
+		console.log("token", token);
 
 		//return the JWT as a string
 		return { token: token };
@@ -144,6 +174,6 @@ export class AuthController {
 		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
-    // TODO: Add a POST method to refresh an expired JWT token
-    // TODO: Add a POST method to logout a user
+	//TODO: Add a POST method to refresh an expired JWT token
+	//TODO: Add a POST method to logout a user
 }
