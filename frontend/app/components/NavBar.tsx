@@ -19,15 +19,15 @@ const NavBar: React.FC = () => {
     };
 
     return (
-        <View className="flex-row justify-around bg-gray-800 p-4">
+        <View className="flex-row justify-around bg-gray-100 p-4">
             <TouchableOpacity onPress={navigateToHome}>
-                <Text className="text-white text-lg">Home</Text>
+                <Text className="text-black text-lg">Home</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={navigateToSearch}>
-                <Text className="text-white text-lg">Search</Text>
+                <Text className="text-black text-lg">Search</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={navigateToProfile}>
-                <Text className="text-white text-lg">Profile</Text>
+                <Text className="text-black text-lg">Profile</Text>
             </TouchableOpacity>
         </View>
     );

@@ -11,6 +11,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -21,7 +23,6 @@ const LoginScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToHome = () => {
-    console.log(emailOrUsername, password);
     const userData = {
       Username: emailOrUsername,
       Pool: UserPool
@@ -36,35 +37,33 @@ const LoginScreen: React.FC = () => {
     const authenticationDetails = new AuthenticationDetails(authenticationData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-        console.log('access token + ' + result.getAccessToken().getJwtToken());
+        const setToken = async () => {
+          const decodedPayload = result.getAccessToken().decodePayload();
+          await AsyncStorage.setItem('decodedPayload', result.getAccessToken().getJwtToken());
+        };
 
-        console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
+        setToken();
         
-        //POST request to backend
-        fetch("http://localhost:3000/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        // POST request to backend using axios
+        axios.post("http://192.168.56.1:3000/auth/login", {
             username: emailOrUsername,
             userCognitoSub: result.getAccessToken().decodePayload().username,
-          }),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          localStorage.setItem("token", data.token);
-
-          if (data.status === "success") {
-            router.navigate("/screens/Home");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-
-        router.navigate("/screens/Home");
+          }, {
+            headers: {
+              "Content-Type": "application/json",
+            }
+          })
+          .then((response) => {
+            const token = response.data.token; // Extract the token from the response
+            AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
+  
+            if (response.status === 201) {
+              router.navigate("/screens/Home");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       },
       onFailure: function(err) {
         console.error(err);

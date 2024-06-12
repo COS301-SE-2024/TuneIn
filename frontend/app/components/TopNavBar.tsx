@@ -22,7 +22,7 @@ const TopNavBar: React.FC = () => {
   const profileImage = profileData.profilePicture; // Use profile data image
 
   return (
-    <View className="flex-row h-14 items-center justify-between">
+    <View className="flex-row bg-gray-50 h-14 items-center justify-between">
       <View className="w-10"></View>
       <Text className="text-black text-2xl font-bold">{appName}</Text>
       <TouchableOpacity onPress={navigateToProfile}>

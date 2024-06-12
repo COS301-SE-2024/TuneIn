@@ -8,7 +8,7 @@ import UserPool from '../services/UserPool';
 const VerifyEmailScreen: React.FC = () => {
     const router = useRouter();
     const { email } = useLocalSearchParams(); // Accessing the email passed from RegisterScreen
-
+    const { userSub } = useLocalSearchParams();
     const [verificationCode, setVerificationCode] = useState("");
 
     const verifyCode = () => {
@@ -33,6 +33,9 @@ const VerifyEmailScreen: React.FC = () => {
             navigateToLogin();
         });
     };
+
+    console.log("email : ",email);
+    console.log("userSub: ",userSub);
 
     const navigateToLogin = () => {
         router.navigate("/screens/LoginScreen");

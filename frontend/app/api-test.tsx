@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useApi } from '../api/APIContext';
-import { DefaultApi } from '../api-client';
+import axios from 'axios';
 
 const ApiTest: React.FC = () => {
-  const api = useApi();
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Starting API call'); // Debugging log
-        const response = await api.appControllerGetHello(); // Adjust method call based on your API
-        console.log('API call response:', response); // Debugging log
-        setData(response);
+        console.log('Starting API call');
+        const response = await axios.get('http://192.168.56.1:3000'); // Replace the URL with your API endpoint
+        console.log('API call response:', response.data);
+        setData(response.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error.message);
       }
     };
 
     fetchData();
-  }, [api]);
+  }, []);
 
   return (
     <View style={styles.container}>
