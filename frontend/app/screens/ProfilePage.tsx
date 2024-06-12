@@ -266,10 +266,10 @@ const ProfileScreen: React.FC = () => {
 					<View style={styles.roomCardsContainer}>
 						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
 							<RoomCard
-								key={room.roomName}
+								key={room.room_id}
 								roomName={room.room_name}
 								songName={room.current_song.title}
-								artistName={room.current_song.artists[0]}
+								artistName={room.current_song.artists}
 								username={room.creator.username}
 							/>
 						))}

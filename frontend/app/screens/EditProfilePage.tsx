@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import EditGenreBubble from "../components/EditGenreBubble";
@@ -13,6 +14,8 @@ import EditDialog from "../components/EditDialog";
 import FavoriteSongs from "../components/FavoriteSong";
 import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const EditProfileScreen = () => {
@@ -124,6 +127,55 @@ const EditProfileScreen = () => {
 		require("../assets/MockProfilePic.jpeg"),
 	);
 
+	const baseURL = "http://localhost:3000";
+
+	const [loading, setLoading] = useState<boolean>(true);
+
+	const [token, setToken] = useState<string | null>(null);
+
+	const fetchProfileInfo = async (token: string | null) => {
+		try {
+			const response = await axios.get(`${baseURL}/profile`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			return response.data;
+		} catch (error) {
+			console.error("Error fetching rooms:", error);
+			return [];
+		}
+	};
+
+	const [profileData, setProfileData] = useState<any>(null);
+
+	useEffect(() => {
+		const getTokenAndData = async () => {
+			try {
+				const storedToken = await AsyncStorage.getItem("token");
+				setToken(storedToken);
+
+				if (storedToken) {
+					const data = await fetchProfileInfo(storedToken);
+					setProfileData(data);
+					setLoading(false);
+				}
+			} catch (error) {
+				console.error("Failed to retrieve token:", error);
+			}
+		};
+
+		getTokenAndData();
+	}, []);
+
+	if (loading) {
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<ActivityIndicator size="large" color="#0000ff" />
+			</View>
+		);
+	}
+
 	return (
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
@@ -141,7 +193,7 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={profilePic}
+						source={profileData.profile_picture_url}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 					<TouchableOpacity
@@ -163,10 +215,10 @@ const EditProfileScreen = () => {
 						onPress={() => setNameDialogVisible(true)}
 						style={styles.editButton}
 					>
-						<Text style={{ marginLeft: 42 }}>{name}</Text>
+						<Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text>
 					</TouchableOpacity>
 					<EditDialog
-						initialText={name}
+						initialText={profileData.profile_name}
 						value="name"
 						visible={isNameDialogVisible}
 						onClose={() => setNameDialogVisible(false)}
@@ -180,10 +232,10 @@ const EditProfileScreen = () => {
 						onPress={() => setUsernameDialogVisible(true)}
 						style={styles.editButton}
 					>
-						<Text style={{ marginLeft: 15 }}>@{username}</Text>
+						<Text style={{ marginLeft: 15 }}>@{profileData.username}</Text>
 					</TouchableOpacity>
 					<EditDialog
-						initialText={username}
+						initialText={profileData.username}
 						maxLines={1}
 						value="username"
 						visible={isUsernameDialogVisible}
@@ -198,10 +250,10 @@ const EditProfileScreen = () => {
 						onPress={() => setBioDialogVisible(true)}
 						style={styles.editButton}
 					>
-						<Text style={{ marginLeft: 60 }}>{bio}</Text>
+						<Text style={{ marginLeft: 60 }}>{profileData.bio}</Text>
 					</TouchableOpacity>
 					<EditDialog
-						initialText={bio}
+						initialText={profileData.bio}
 						value="bio"
 						isBio={true}
 						visible={isBioDialogVisible}
@@ -214,10 +266,10 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Social</Text>
 				</View>
-				{links.map((link, index) => (
+				{profileData.links.data.map((link, index) => (
 					<View key={index} style={styles.listItem}>
 						<TouchableOpacity onPress={() => {}} style={styles.editButton}>
-							<Text>{link}</Text>
+							<Text>{link.links}</Text>
 						</TouchableOpacity>
 					</View>
 				))}
@@ -242,7 +294,7 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Genres</Text>
 				</View>
 				<View style={styles.chipsContainer}>
-					{genres.map((genre, index) => (
+					{profileData.fav_genres.data.map((genre, index) => (
 						<EditGenreBubble
 							key={index}
 							text={genre}
@@ -268,13 +320,13 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Favorite Songs</Text>
 				</View>
 				<ScrollView>
-					{favoriteSongsData.map((song, index) => (
+					{profileData.fav_songs.data.map((song, index) => (
 						<FavoriteSongs
 							key={index}
-							songTitle={song.songTitle}
-							artist={song.artist}
+							songTitle={song.title}
+							artist={song.artists}
 							duration={song.duration}
-							albumArt={song.albumArt}
+							albumArt={song.cover}
 							toEdit={true}
 							onPress={() => removeSong(index)}
 						/>
