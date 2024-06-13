@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import MessageItem from '../components/MessageItem';
+import { Message } from '../models/message';
 
-const messages = [
+const messages: Message[] = [
   { id: '1', text: 'Hey there!', sender: 'John Doe', me: false },
   { id: '2', text: 'Hi! How are you?', sender: 'Me', me: true },
   // Add more dummy messages
@@ -11,10 +13,10 @@ const messages = [
 
 const ChatScreen = () => {
   const [message, setMessage] = useState('');
-  const { name } = useLocalSearchParams(); // Remove avatar from useLocalSearchParams
+  const { name } = useLocalSearchParams();
   const router = useRouter();
 
-  const avatarUrl = 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg'; // Direct URL for avatar
+  const avatarUrl = 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg';
 
   const handleSend = () => {
     if (message.trim()) {
@@ -29,28 +31,13 @@ const ChatScreen = () => {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <Image source={{ uri: avatarUrl }} style={styles.avatar} /> 
+        <Image source={{ uri: avatarUrl }} style={styles.avatar} />
         <Text style={styles.headerTitle}>{name}</Text>
       </View>
       <FlatList
         data={messages}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={[
-            styles.messageContainer,
-            item.me ? styles.messageContainerMe : styles.messageContainerOther
-          ]}>
-            {!item.me && (
-              <Image source={{ uri: avatarUrl }} style={styles.messageAvatar} /> 
-            )}
-            <View style={[
-              styles.messageBubble,
-              item.me ? styles.messageBubbleMe : styles.messageBubbleOther
-            ]}>
-              <Text style={styles.messageText}>{item.text}</Text>
-            </View>
-          </View>
-        )}
+        renderItem={({ item }) => <MessageItem message={item} avatarUrl={avatarUrl} />}
         contentContainerStyle={styles.messagesContainer}
       />
       <View style={styles.inputContainer}>
