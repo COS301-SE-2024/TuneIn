@@ -7,6 +7,8 @@ import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
+import { Ionicons } from '@expo/vector-icons'; 
+import { Entypo } from '@expo/vector-icons';
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
@@ -123,6 +125,10 @@ const Home: React.FC = () => {
     router.navigate("/screens/CreateRoom");
   };
 
+  const navigateToChatList = () => {
+    router.navigate("/screens/ChatListScreen");
+  };
+
   const handleScroll = useCallback(({ nativeEvent }) => {
     const offsetY = nativeEvent.contentOffset.y;
     scrollY.setValue(offsetY);
@@ -180,6 +186,13 @@ const Home: React.FC = () => {
         onPress={navigateToCreateNew}
       >
         <Text className="text-white text-3xl font-bold">+</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 15, left: 20, zIndex: 10 }}
+        onPress={navigateToChatList}
+      >
+        <Entypo name="direction" size={24} color="black" />
+        {/* <Entypo name="message" size={24} color="black" /> */}
       </TouchableOpacity>
     </View>
   );
