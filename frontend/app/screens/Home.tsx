@@ -14,7 +14,8 @@ import axios from 'axios';
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [loadingFriends, setLoadingFriends] = useState<boolean>(true);
+  const [loadingFriends, setLoadingFriends] = useState(true);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -77,8 +78,11 @@ const Home: React.FC = () => {
     const getTokenAndData = async () => {
       const storedToken = await AsyncStorage.getItem('token');
       setToken(storedToken);
-  
+
       if (storedToken) {
+        setLoadingRooms(true);
+        setLoadingFriends(true);
+        
         // Fetch recent rooms
         setLoadingRooms(true);
         const recentRooms = await fetchRooms(storedToken, '/recent');
@@ -95,7 +99,8 @@ const Home: React.FC = () => {
         setMyRooms(formattedMyRooms);
         setMyPicks(formattedPicksForYouRooms);
         setMyRecents(formattedRecentRooms);
-  
+        setLoadingRooms(false);
+
         // Fetch friends
         setLoadingFriends(true);
         const fetchedFriends = await getFriends(storedToken);
@@ -106,9 +111,10 @@ const Home: React.FC = () => {
         setFriends(formattedFriends);
         setLoadingFriends(false);
         setLoadingRooms(false);
+        setLoadingFriends(false);
       }
     };
-  
+
     getTokenAndData();
   }, []);
 
@@ -131,7 +137,6 @@ const Home: React.FC = () => {
   const navigateToCreateNew = () => {
     router.navigate("/screens/CreateRoom");
   };
-
 
   const handleScroll = useCallback(({ nativeEvent }) => {
     const currentOffset = nativeEvent.contentOffset.y;
@@ -202,21 +207,37 @@ const Home: React.FC = () => {
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
             Recent Rooms
           </Text>
-          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRecents} renderItem={renderItem} />}
+          {loadingRooms ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRecents} renderItem={renderItem} />}
+          )}
           <Text className="text-2xl font-bold text-gray-800 mt-7 mb-5 ml-8">
             Picks for you
           </Text>
-          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myPicks} renderItem={renderItem} />}
+          {loadingRooms ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myPicks} renderItem={renderItem} />}
+          )}
           <TouchableOpacity className="mt-7" onPress={navigateToAllFriends}>
             <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
               Friends
             </Text>
           </TouchableOpacity>
-          {loadingFriends ? <ActivityIndicator size="large" /> : <FriendsGrid friends={friends} maxVisible={8} />}
+          {loadingFriends ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            {loadingFriends ? <ActivityIndicator size="large" /> : <FriendsGrid friends={friends} maxVisible={8} />}
+          )}
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
-          {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRooms} renderItem={renderItem} />}
+          {loadingRooms ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRooms} renderItem={renderItem} />}
+          )}
         </View>
       </ScrollView>
       <Animated.View
