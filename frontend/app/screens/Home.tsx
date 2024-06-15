@@ -7,42 +7,18 @@ import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
-import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
+import NavBar from "../components/NavBar";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Entypo } from '@expo/vector-icons';
+import axios from 'axios';
 
 const Home: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [loadingFriends, setLoadingFriends] = useState(true);
-  const [loadingRooms, setLoadingRooms] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-
-  useEffect(() => {
-    let token: string = "";
-    const fetchUser = async () => {
-      try {
-        token = await AsyncStorage.getItem("token");
-        console.log("Token stuff", token);
-        const user: AuthUser = await getCurrentUser(); // Updated method call
-        setAuthUser(user);
-        console.log("User stuff" ,user);
-      } catch (error) {
-        console.error("Oopsie error" ,error);
-      }
-    };
-
-    fetchUser();
-    
-
-    console.log("this is the token and stuffs", token);
-  }, []);
-
-
-
-
+  const previousScrollY = useRef(0);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const baseURL = "http://192.168.56.1:3000";
 
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -77,6 +53,8 @@ const Home: React.FC = () => {
     }
   };
 
+
+
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
     return rooms.map(room => ({
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -94,20 +72,15 @@ const Home: React.FC = () => {
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [myPicks, setMyPicks] = useState<Room[]>([]);
   const [myRecents, setMyRecents] = useState<Room[]>([]);
-  const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const getTokenAndData = async () => {
       const storedToken = await AsyncStorage.getItem('token');
       setToken(storedToken);
-
+  
       if (storedToken) {
-        setLoadingRooms(true);
-        setLoadingFriends(true);
-        
         // Fetch recent rooms
-        setLoadingRooms(true);
         const recentRooms = await fetchRooms(storedToken, '/recent');
         const formattedRecentRooms = formatRoomData(recentRooms);
         
@@ -122,22 +95,17 @@ const Home: React.FC = () => {
         setMyRooms(formattedMyRooms);
         setMyPicks(formattedPicksForYouRooms);
         setMyRecents(formattedRecentRooms);
-        setLoadingRooms(false);
-
+  
         // Fetch friends
-        setLoadingFriends(true);
         const fetchedFriends = await getFriends(storedToken);
         const formattedFriends = fetchedFriends.map(friend => ({
           profilePicture: friend.profile_picture_url ? friend.profile_picture_url : ProfileIMG,
           name: friend.profile_name,
         }));
         setFriends(formattedFriends);
-        setLoadingFriends(false);
-        setLoadingRooms(false);
-        setLoadingFriends(false);
       }
     };
-
+  
     getTokenAndData();
   }, []);
 
@@ -153,7 +121,6 @@ const Home: React.FC = () => {
   );
 
   const router = useRouter();
-
   const navigateToAllFriends = () => {
     router.navigate("/screens/AllFriends");
   };
@@ -162,14 +129,52 @@ const Home: React.FC = () => {
     router.navigate("/screens/CreateRoom");
   };
 
+  const navigateToChatList = () => {
+    router.navigate("/screens/ChatListScreen");
+  }
+
   const handleScroll = useCallback(({ nativeEvent }) => {
-    const offsetY = nativeEvent.contentOffset.y;
-    scrollY.setValue(offsetY);
+    const currentOffset = nativeEvent.contentOffset.y;
+    const direction = currentOffset > previousScrollY.current ? "down" : "up";
+    previousScrollY.current = currentOffset;
+    scrollY.setValue(currentOffset);
+
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+
+    scrollTimeout.current = setTimeout(() => {
+      if (currentOffset <= 0 || direction === "up") {
+        Animated.timing(scrollY, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        Animated.timing(scrollY, {
+          toValue: 100,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, 50); // Reduced debounce timeout to make it more responsive
   }, []);
 
   const topNavBarTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [0, -100],
+    extrapolate: "clamp",
+  });
+
+  const navBarTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 100],
+    extrapolate: "clamp",
+  });
+
+  const buttonTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 70],
     extrapolate: "clamp",
   });
 
@@ -185,6 +190,13 @@ const Home: React.FC = () => {
           zIndex: 10,
         }}
       >
+              <TouchableOpacity
+        style={{ position: 'absolute', top: 15, left: 20, zIndex: 10 }}
+        onPress={navigateToChatList}
+      >
+        <Entypo name="direction" size={24} color="black" />
+        {/* <Entypo name="message" size={24} color="black" /> */}
+      </TouchableOpacity>
         <TopNavBar />
       </Animated.View>
       <ScrollView
@@ -197,45 +209,52 @@ const Home: React.FC = () => {
           <Text className="text-2xl font-bold text-gray-800 mt-2 mb-5 ml-8">
             Recent Rooms
           </Text>
-          {loadingRooms ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRecents} renderItem={renderItem} />}
-          )}
+          <AppCarousel data={myRecents} renderItem={renderItem} />
           <Text className="text-2xl font-bold text-gray-800 mt-7 mb-5 ml-8">
             Picks for you
           </Text>
-          {loadingRooms ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myPicks} renderItem={renderItem} />}
-          )}
+          <AppCarousel data={myPicks} renderItem={renderItem} />
           <TouchableOpacity className="mt-7" onPress={navigateToAllFriends}>
             <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2 ml-8">
               Friends
             </Text>
           </TouchableOpacity>
-          {loadingFriends ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            {loadingFriends ? <ActivityIndicator size="large" /> : <FriendsGrid friends={friends} maxVisible={8} />}
-          )}
+          <FriendsGrid friends={friends} maxVisible={8} />
           <Text className="text-2xl font-bold text-gray-800 mb-5 ml-8">
             My Rooms
           </Text>
-          {loadingRooms ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            {loadingRooms ? <ActivityIndicator size="large" /> : <AppCarousel data={myRooms} renderItem={renderItem} />}
-          )}
+          <AppCarousel data={myRooms} renderItem={renderItem} />
         </View>
       </ScrollView>
-      <TouchableOpacity
-        className="absolute bottom-4 right-4 bg-blue-500 rounded-2xl w-14 h-14 flex items-center justify-center p-2"
-        onPress={navigateToCreateNew}
+      <Animated.View
+        style={{
+          transform: [{ translateY: buttonTranslateY }],
+          position: "absolute",
+          bottom: 9,
+          right: 5,
+          zIndex: 20,
+        }}
       >
-        <Text className="text-white text-3xl font-bold">+</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-blue-500 rounded-2xl right-4 bottom-20 w-14 h-14 flex items-center justify-center p-2"
+          onPress={navigateToCreateNew}
+        >
+          <Text className="text-white text-3xl font-bold">+</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View
+        style={{
+          transform: [{ translateY: navBarTranslateY }],
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+
+        <NavBar />
+      </Animated.View>
     </View>
   );
 };
