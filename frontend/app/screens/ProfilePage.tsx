@@ -113,21 +113,34 @@ const ProfileScreen: React.FC = () => {
 	}, []);
 
 	const renderLinks = () => {
-        if (profileData.links.count > 0) {
-            const firstLink = profileData.links.data[0].links;
-            const remainingCount = profileData.links.count - 1;
+		if (profileData.links.count > 1) {
+			const firstLink = profileData.links.data[0].links;
+			const remainingCount = profileData.links.count - 1;
 
-            return (
-                <View>
-                        <Text style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}>
-                            {firstLink} and {remainingCount} more link{remainingCount > 1 ? 's' : ''}
-                        </Text>
-                </View>
-            );
-        } else {
-            return null; // No links to display
-        }
-    };
+			return (
+				<View>
+					<Text
+						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
+					>
+						{firstLink} and {remainingCount} more link
+						{remainingCount > 1 ? "s" : ""}
+					</Text>
+				</View>
+			);
+		} else if (profileData.links.count == 1) {
+			return (
+				<View>
+					<Text
+						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
+					>
+						{profileData.links.data[0].links}
+					</Text>
+				</View>
+			);
+		} else {
+			return null; // No links to display
+		}
+	};
 
 	if (loading) {
 		return (
@@ -140,13 +153,13 @@ const ProfileScreen: React.FC = () => {
 	const profileInfo = {
 		profile_picture_url: profileData.profile_picture_url,
 		profile_name: profileData.profile_name,
-        username: profileData.username,
-        bio: profileData.bio,
+		username: profileData.username,
+		bio: profileData.bio,
 		links: profileData.links,
 		fav_genres: profileData.fav_genres,
-        fav_songs: profileData.fav_songs,
-	}
-	
+		fav_songs: profileData.fav_songs,
+	};
+
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
 			<View style={{ padding: 15 }}>
@@ -181,11 +194,15 @@ const ProfileScreen: React.FC = () => {
 					}}
 				>
 					<View style={{ alignItems: "center" }}>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>{profileData.followers.count}</Text>
+						<Text style={{ fontSize: 20, fontWeight: "600" }}>
+							{profileData.followers.count}
+						</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
 					</View>
 					<View style={{ marginLeft: 60, alignItems: "center" }}>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>{profileData.following.count}</Text>
+						<Text style={{ fontSize: 20, fontWeight: "600" }}>
+							{profileData.following.count}
+						</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
 				</View>
@@ -208,10 +225,12 @@ const ProfileScreen: React.FC = () => {
 				>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => router.push({
-							pathname: "screens/EditProfilePage",
-							params: { profile: JSON.stringify(profileInfo) }
-						  })}
+						onPress={() =>
+							router.push({
+								pathname: "screens/EditProfilePage",
+								params: { profile: JSON.stringify(profileInfo) },
+							})
+						}
 					>
 						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
@@ -224,9 +243,7 @@ const ProfileScreen: React.FC = () => {
 					/>
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
-					<BioSection
-						content={profileData.bio}
-					/>
+					<BioSection content={profileData.bio} />
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
 					<GenreList items={profileData.fav_genres.data}></GenreList>

@@ -16,7 +16,7 @@ import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -28,7 +28,6 @@ const EditProfileScreen = () => {
 	const profileInfo = JSON.parse(profile as string);
 
 	const [profileData, setProfileData] = useState(profileInfo);
-
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
@@ -184,19 +183,26 @@ const EditProfileScreen = () => {
 			},
 		}));
 		setChanged(true);
-		// setChangedFields((prevChangedFields) => ({
-		// 	...prevChangedFields,links: profileData.links
-		// }))
-		// setChangedFields((prevChangedFields) => ({
-		// 	...prevChangedFields,
-		// 	links: {
-		// 		count: prevChangedFields.links.count + 1, // Increment the count
-		// 		data: [...prevChangedFields.links.data, link], // Add the new link to data array
-		// 	},
-		// }));
 
 		setLinkDialogVisible(false);
 	};
+
+	const handleLinkDeletion = (linkToDelete) => {
+		if (profileData.links && Array.isArray(profileData.links.data)) {
+		  setProfileData((prevProfileData) => ({
+			...prevProfileData,
+			links: {
+			  ...prevProfileData.links,
+			  data: prevProfileData.links.data.filter(
+				(item) => item.links !== linkToDelete
+			  ),
+			},
+		  }));
+		  console.log(profileData.links);
+		  setChanged(true);
+		}
+	  };
+	  
 
 	const removeGenre = (genreToRemove) => {
 		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
@@ -232,7 +238,7 @@ const EditProfileScreen = () => {
 	};
 
 	const renderAddLink = () => {
-		if(profileData.links.count < 3){
+		if (profileData.links.count < 3) {
 			return (
 				<View style={styles.listItem}>
 					<TouchableOpacity
@@ -251,7 +257,7 @@ const EditProfileScreen = () => {
 				</View>
 			);
 		}
-	}
+	};
 
 	const [profilePic, setProfilePic] = useState(
 		require("../assets/MockProfilePic.jpeg"),
@@ -361,6 +367,14 @@ const EditProfileScreen = () => {
 							<TouchableOpacity onPress={() => {}} style={styles.editButton}>
 								<Text>{link.links}</Text>
 							</TouchableOpacity>
+							<TouchableOpacity onPress={() => handleLinkDeletion(link.links)}>
+								<Ionicons
+									name="close"
+									size={16}
+									color="black"
+									style={styles.icon}
+								/>
+							</TouchableOpacity>
 						</View>
 					))}
 				{renderAddLink()}
@@ -431,6 +445,9 @@ const styles = StyleSheet.create({
 		color: "black",
 		fontWeight: "500",
 		fontSize: 14,
+	},
+	icon: {
+		marginLeft: 60,
 	},
 	container2: {
 		marginRight: 12,
