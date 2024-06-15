@@ -8,7 +8,7 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../components/EditGenreBubble";
 import EditDialog from "../components/EditDialog";
 import FavoriteSongs from "../components/FavoriteSong";
@@ -20,46 +20,15 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
-	const [name, setName] = useState("John Doe");
-	const [username, setUsername] = useState("john");
-	const [bio, setBio] = useState(
-		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do",
-	);
-	const [instagramLink, setInstagramLink] = useState("instagram.com/john");
-	const [twitterLink, setTwitterLink] = useState("twitter.com/john");
-	const [links, setLinks] = useState([
-		"instagram.com/john",
-		"twitter.com/john",
-	]);
-	const [genres, setGenres] = useState([
-		"Pop",
-		"Hip-Hop",
-		"Jazz",
-		"Classical",
-		"Rock",
-	]);
-	const [favoriteSongsData, setFavoriteSongsData] = useState([
-		{
-			songTitle: "Don't Smile At Me",
-			artist: "Billie Eilish",
-			duration: "5:33",
-			albumArt: "https://example.com/path-to-album-art1.jpg",
-		},
-		{
-			songTitle: "Blinding Lights",
-			artist: "The Weekend",
-			duration: "3:20",
-			albumArt: "https://example.com/path-to-album-art2.jpg",
-		},
-		{
-			songTitle: "Shape of You",
-			artist: "Ed Sheeran",
-			duration: "4:24",
-			albumArt: "https://example.com/path-to-album-art3.jpg",
-		},
-		// Add more songs as needed
-	]);
-	const [favoriteSongs, setFavoriteSongs] = useState([]);
+	const params = useLocalSearchParams(); // Correct way to access query parameters
+	console.log("Profile :", params);
+	const profile = Array.isArray(params.profile)
+		? params.profile[0]
+		: params.profile;
+	const profileInfo = JSON.parse(profile as string);
+
+	const [profileData, setProfileData] = useState(profileInfo);
+
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
@@ -72,33 +41,28 @@ const EditProfileScreen = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 
 	const [token, setToken] = useState<string | null>(null);
+	useEffect(() => {
+		const getTokenAndData = async () => {
+			try {
+				const storedToken = await AsyncStorage.getItem("token");
+				setToken(storedToken);
+			} catch (error) {
+				console.error("Failed to retrieve token:", error);
+			}
+		};
 
-	const fetchProfileInfo = async (token: string | null) => {
-		try {
-			const response = await axios.get(`${baseURL}/profile`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
-			return [];
-		}
-	};
+		getTokenAndData();
+	}, []);
 
 	const updateProfile = async (changed) => {
-		if(changed){
+		console.log("Changed: " + JSON.stringify(changedFields));
+		if (changed) {
 			try {
-				const response = await axios.patch(
-					`${baseURL}/profile`,
-						profileData,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					}
-				);
+				const response = await axios.patch(`${baseURL}/profile`, profileData, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
 
 				console.log(response.data);
 				return response.data;
@@ -107,32 +71,7 @@ const EditProfileScreen = () => {
 				return [];
 			}
 		}
-	}
-
-	const [profileData, setProfileData] = useState<any>(null);
-	const [updatedProfileData, setUpdatedProfileData] = useState(
-		JSON.parse(JSON.stringify(profileData)),
-	);
-
-	useEffect(() => {
-		const getTokenAndData = async () => {
-			try {
-				const storedToken = await AsyncStorage.getItem("token");
-				setToken(storedToken);
-
-				if (storedToken) {
-					const data = await fetchProfileInfo(storedToken);
-					setProfileData(data);
-					setUpdatedProfileData(data);
-					setLoading(false);
-				}
-			} catch (error) {
-				console.error("Failed to retrieve token:", error);
-			}
-		};
-
-		getTokenAndData();
-	}, []);
+	};
 
 	const handleImageUpload = (uri) => {
 		setProfilePic(uri);
@@ -147,7 +86,7 @@ const EditProfileScreen = () => {
 		link: setLinkDialogVisible,
 	};
 
-	// const [changedFields, setChangedFields] = useState({});
+	const [changedFields, setChangedFields] = useState({});
 	const [changed, setChanged] = useState(false);
 
 	const handleSave = (text, value) => {
@@ -162,73 +101,81 @@ const EditProfileScreen = () => {
 		if (value === "name") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				profile_name: text, // Assuming text contains the new name
+				profile_name: text,
 			}));
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	profile_name: text,
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				profile_name: text,
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "username") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				username: text, // Assuming text contains the new username
+				username: text,
 			}));
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	username: text,
-			// }));
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	username: text,
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				username: text,
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
+			setChanged(true);
 		} else if (value === "bio") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				bio: text, // Assuming text contains the new bio
+				bio: text,
 			}));
 			setChanged(true);
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	bio: text,
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				bio: text,
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "instagramLink") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				links: { data: text }, // Assuming text contains the new Instagram link
+				links: { data: text },
 			}));
 			setChanged(true);
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	links: { data: text },
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				links: { data: text },
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "genres") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				fav_genres: text, // Assuming text contains the new genres
+				fav_genres: text,
 			}));
 			setChanged(true);
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	fav_genres: text,
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				fav_genres: text,
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "favoriteSongs") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
-				fav_songs: text, // Assuming text contains the new favorite songs
+				fav_songs: text,
 			}));
 			setChanged(true);
-			// setChangedFields((prevChangedFields) => ({
-			// 	...prevChangedFields,
-			// 	fav_songs: text,
-			// }));
+
+			setChangedFields((prevChangedFields) => ({
+				...prevChangedFields,
+				fav_songs: text,
+			}));
+			console.log("Changed: " + JSON.stringify(changedFields));
 		}
 	};
 
 	const handleLinkAddition = (link) => {
-		setLinks((prevLinks) => [...prevLinks, link]);
+		// setLinks((prevLinks) => [...prevLinks, link]);
 
-		// Update the profileData state immutably
 		setProfileData((prevProfileData) => ({
 			...prevProfileData,
 			links: {
@@ -238,10 +185,13 @@ const EditProfileScreen = () => {
 		}));
 		setChanged(true);
 		// setChangedFields((prevChangedFields) => ({
+		// 	...prevChangedFields,links: profileData.links
+		// }))
+		// setChangedFields((prevChangedFields) => ({
 		// 	...prevChangedFields,
 		// 	links: {
-		// 		...prevChangedFields.links,
-		// 		data: [...prevChangedFields.links.data, { links: link }],
+		// 		count: prevChangedFields.links.count + 1, // Increment the count
+		// 		data: [...prevChangedFields.links.data, link], // Add the new link to data array
 		// 	},
 		// }));
 
@@ -254,13 +204,15 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				fav_genres: {
 					...prevProfileData.fav_genres,
-					data: prevProfileData.fav_genres.data.filter((genre) => genre !== genreToRemove)
-				}
+					data: prevProfileData.fav_genres.data.filter(
+						(genre) => genre !== genreToRemove,
+					),
+				},
 			}));
 			setChanged(true);
 		}
 	};
-	
+
 	const removeSong = (index) => {
 		setProfileData((prevProfileData) => {
 			const updatedSongs = [...prevProfileData.fav_songs.data];
@@ -269,29 +221,19 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				fav_songs: {
 					...prevProfileData.fav_songs,
-					data: updatedSongs
-				}
+					data: updatedSongs,
+				},
 			};
 		});
 		setChanged(true);
-		// setChangedFields((prevChangedFields) => ({
-		// 	...prevChangedFields,
-			
-		// }));
+		setChangedFields((prevChangedFields) => ({
+			...prevChangedFields,
+		}));
 	};
-	
 
 	const [profilePic, setProfilePic] = useState(
 		require("../assets/MockProfilePic.jpeg"),
 	);
-
-	if (loading) {
-		return (
-			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-				<ActivityIndicator size="large" color="#0000ff" />
-			</View>
-		);
-	}
 
 	return (
 		<View style={styles.container}>
@@ -303,7 +245,13 @@ const EditProfileScreen = () => {
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
-					<TouchableOpacity onPress={() => {updateProfile(changed); router.navigate("screens/ProfilePage")}} style={styles.saveButton}>
+					<TouchableOpacity
+						onPress={() => {
+							updateProfile(changed);
+							router.navigate("screens/ProfilePage");
+						}}
+						style={styles.saveButton}
+					>
 						<Text style={styles.saveButtonText}>Save</Text>
 					</TouchableOpacity>
 				</View>

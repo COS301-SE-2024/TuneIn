@@ -69,32 +69,7 @@ const ProfileScreen: React.FC = () => {
 			duration: "4:24",
 			albumArt: "https://example.com/path-to-album-art3.jpg",
 		},
-		// Add more songs as needed
 	]);
-	const dummyData = {
-		name: "John Doe",
-		username: "john",
-		bio: "Hello, I'm John!",
-		profile_picture: require("../assets/MockProfilePic.jpeg"),
-		favoriteSongs: [{ title: "Song 1", artist: "Artist 1", duration: "3:45" }],
-		favoriteRooms: [
-			{
-				roomName: "Room 1",
-				songName: "Song 1",
-				artistName: "Artist 1",
-				username: "user1",
-			},
-		],
-		recentRooms: [
-			{
-				roomName: "Room 2",
-				songName: "Song 2",
-				artistName: "Artist 2",
-				username: "user2",
-			},
-		],
-	};
-	const genres = ["Pop", "Hip-Hop", "Jazz", "Classical", "Rock"];
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -145,6 +120,16 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
+	const profileInfo = {
+		profile_picture_url: profileData.profile_picture_url,
+		profile_name: profileData.profile_name,
+        username: profileData.username,
+        bio: profileData.bio,
+		links: profileData.links,
+		fav_genres: profileData.fav_genres,
+        fav_songs: profileData.fav_songs,
+	}
+	
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
 			<View style={{ padding: 15 }}>
@@ -211,7 +196,10 @@ const ProfileScreen: React.FC = () => {
 				>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => router.navigate("screens/EditProfilePage")}
+						onPress={() => router.push({
+							pathname: "screens/EditProfilePage",
+							params: { profile: JSON.stringify(profileInfo) }
+						  })}
 					>
 						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
