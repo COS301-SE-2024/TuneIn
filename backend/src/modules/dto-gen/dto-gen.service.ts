@@ -93,14 +93,20 @@ export class DtoGenService {
 	async generateUserProfileDto(
 		userID: string,
 		fully_qualify: boolean = true,
-	): Promise<UserProfileDto | null> {
+	): Promise<UserProfileDto> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new Error("User with id " + userID + " does not exist");
+		}
+
 		//check if userID exists
 		const user: Prisma.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
 
 		if (!user || user === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserProfileDto():ERROR01",
+			);
 		}
 
 		//get user info
@@ -223,17 +229,20 @@ export class DtoGenService {
 		});
 
 		if (!users || users === null) {
-			return [];
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserProfileDto():ERROR01",
+			);
 		}
 
 		const result: UserProfileDto[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user = await this.generateUserProfileDto(u.user_id, false);
-				if (user && user !== null) {
-					result.push(user);
-				}
+				const user: UserProfileDto = await this.generateUserProfileDto(
+					u.user_id,
+					false,
+				);
+				result.push(user);
 			}
 		}
 		return result;
