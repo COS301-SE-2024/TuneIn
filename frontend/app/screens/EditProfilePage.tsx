@@ -231,6 +231,28 @@ const EditProfileScreen = () => {
 		}));
 	};
 
+	const renderAddLink = () => {
+		if(profileData.links.count < 3){
+			return (
+				<View style={styles.listItem}>
+					<TouchableOpacity
+						onPress={() => setLinkDialogVisible(true)}
+						style={styles.editButton}
+					>
+						<Text style={{ fontWeight: 600 }}>Add link</Text>
+					</TouchableOpacity>
+					<EditDialog
+						value="link"
+						title="Add Link"
+						visible={isLinkDialogVisible}
+						onClose={() => setLinkDialogVisible(false)}
+						onSave={handleLinkAddition}
+					/>
+				</View>
+			);
+		}
+	}
+
 	const [profilePic, setProfilePic] = useState(
 		require("../assets/MockProfilePic.jpeg"),
 	);
@@ -341,21 +363,7 @@ const EditProfileScreen = () => {
 							</TouchableOpacity>
 						</View>
 					))}
-				<View style={styles.listItem}>
-					<TouchableOpacity
-						onPress={() => setLinkDialogVisible(true)}
-						style={styles.editButton}
-					>
-						<Text style={{ fontWeight: 600 }}>Add link</Text>
-					</TouchableOpacity>
-					<EditDialog
-						value="link"
-						title="Add Link"
-						visible={isLinkDialogVisible}
-						onClose={() => setLinkDialogVisible(false)}
-						onSave={handleLinkAddition}
-					/>
-				</View>
+				{renderAddLink()}
 				{/* Genres */}
 				<View style={styles.divider} />
 				<View style={styles.listItem}>
@@ -438,7 +446,6 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 16,
 		fontWeight: "700",
-		paddingBottom: 10,
 	},
 
 	//stuff
@@ -477,7 +484,7 @@ const styles = StyleSheet.create({
 		color: "grey",
 	},
 	editButton: {
-		padding: 5,
+		paddingVertical: 5,
 		width: 250,
 	},
 	divider: {

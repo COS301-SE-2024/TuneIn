@@ -112,6 +112,23 @@ const ProfileScreen: React.FC = () => {
 		getTokenAndData();
 	}, []);
 
+	const renderLinks = () => {
+        if (profileData.links.count > 0) {
+            const firstLink = profileData.links.data[0].links;
+            const remainingCount = profileData.links.count - 1;
+
+            return (
+                <View>
+                        <Text style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}>
+                            {firstLink} and {remainingCount} more link{remainingCount > 1 ? 's' : ''}
+                        </Text>
+                </View>
+            );
+        } else {
+            return null; // No links to display
+        }
+    };
+
 	if (loading) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -174,22 +191,17 @@ const ProfileScreen: React.FC = () => {
 				</View>
 				<TouchableOpacity
 					onPress={() => {
-						console.log("Link button pressed"); // Add this line
-						console.log("Vsibility: " + isLinkDialogVisible);
 						setLinkDialogVisible(true);
 					}}
 				>
-					<Text
-						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
-					>
-						{profileData.links.count > 0 ? profileData.links.data[0].links : ''}
-					</Text>
+					{renderLinks()}
 				</TouchableOpacity>
 				<LinkBottomSheet
 					isVisible={isLinkDialogVisible}
 					onClose={() => {
 						setLinkDialogVisible(false);
 					}}
+					links={profileData.links.data}
 				/>
 				<View
 					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
