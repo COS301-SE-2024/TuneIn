@@ -1,96 +1,50 @@
 import React from "react";
-import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import {
+	View,
+	Text,
+	ImageBackground,
+	TouchableOpacity,
+	Dimensions,
+} from "react-native";
 import { useRouter } from "expo-router";
 
 const WelcomeScreen: React.FC = () => {
-  const router = useRouter();
-  const { width, height } = Dimensions.get('window');
+	const router = useRouter();
+	const { width, height } = Dimensions.get("window");
 
-  const navigateToLogin = () => {
-    router.navigate("/screens/LoginScreen");
-  };
+	const navigateToLogin = () => {
+		router.navigate("/screens/LoginScreen");
+	};
 
-  const navigateToRegister = () => {
-    router.navigate("/screens/RegisterScreen");
-  };
+	const navigateToRegister = () => {
+		router.navigate("/screens/RegisterScreen");
+	};
 
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../../assets/text.jpg')}
-        style={{ width, height: height * 0.5 }}
-        resizeMode="cover"
-      />
-      <View style={styles.contentContainer}>
-        <Text style={styles.logoText}>Logo</Text>
-        <Text style={styles.titleText}>TuneIn</Text>
-        <TouchableOpacity
-          style={[styles.button, styles.loginButton]}
-          onPress={navigateToLogin}
-        >
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.registerButton]}
-          onPress={navigateToRegister}
-        >
-          <Text style={styles.registerButtonText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+	return (
+		<View className="flex-1 justify-center">
+			<ImageBackground
+				source={require("../../assets/text.jpg")}
+				style={{ width, height: height * 0.5 }}
+				resizeMode="cover"
+			/>
+			<View className="flex-1 justify-center items-center p-4">
+				<Text className="text-lg font-bold mb-5">Logo</Text>
+				<Text className="text-2xl font-bold mb-8">TuneIn</Text>
+				<TouchableOpacity
+					className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
+					onPress={navigateToLogin}
+				>
+					<Text className="text-lg font-bold text-white">Login</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					className="w-11/12 h-12 justify-center items-center bg-white-700 border border-black rounded-full mb-5 shadow-lg"
+					onPress={navigateToRegister}
+				>
+					<Text className="text-lg font-bold text-black">Register</Text>
+				</TouchableOpacity>
+			</View>
+		</View>
+	);
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  logoText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  button: {
-    width: '85%',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 30,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    marginBottom: 30,
-  },
-  loginButton: {
-    backgroundColor: '#8B8FA8',
-  },
-  registerButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  registerButtonText: {
-    fontSize: 16,
-    color: '#000000',
-  },
-});
 
 export default WelcomeScreen;

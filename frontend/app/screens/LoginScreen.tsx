@@ -5,12 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
+import axios from 'axios';
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -40,8 +43,13 @@ const LoginScreen: React.FC = () => {
 
         console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
         
+        // Store token in AsyncStorage if remember me is checked
+        if (rememberMe) {
+          AsyncStorage.setItem("cognitoToken", result.getAccessToken().getJwtToken());
+        }
+
         //POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://192.168.56.1:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -50,27 +58,25 @@ const LoginScreen: React.FC = () => {
           body: JSON.stringify({
             token: result.getAccessToken().getJwtToken(),
           }),
-        })
-        .then((response) => response.json())
+        }).then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          localStorage.setItem("token", data.token);
+         
+          const token = data.token; // Extract the token from the response
+          AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
 
-          if (data.status === "success") {
+         
             router.navigate("/screens/Home");
-          }
+          
         })
         .catch((error) => {
           console.error("Error:", error);
         });
-
-        router.navigate("/screens/Home");
-      },
-      onFailure: function(err) {
-        console.error(err);
-      }
-    });
-  };
+    },
+    onFailure: function(err) {
+      console.error(err);
+    }
+  });
+};
 
   const navigateToRegister = () => {
     router.navigate("/screens/RegisterScreen");
