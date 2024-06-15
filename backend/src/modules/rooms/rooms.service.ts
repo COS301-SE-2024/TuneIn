@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
@@ -117,5 +117,76 @@ export class RoomsService {
 	getCurrentSong(roomID: string): SongInfoDto {
 		// TODO: Implement logic to get current playing song
 		return new SongInfoDto();
+	}
+
+	async roomExists(roomID: string): Promise<boolean> {
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		if (!room || room === null) {
+			return false;
+		}
+		return true;
+	}
+
+	async getChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
+		if (!(await this.roomExists(roomID))) {
+			throw new HttpException(
+				"Room with id '" + roomID + "' does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+
+		const roomMessages: PrismaTypes.room_message[] | null =
+			await this.prisma.room_message.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
+
+		if (!roomMessages || roomMessages === null) {
+			throw new Error(
+				"Failed to get chat history (query returned null) for room with id '" +
+					roomID +
+					"'",
+			);
+		}
+
+		if (roomMessages.length === 0) {
+			return [];
+		}
+
+		const ids: string[] = [];
+		for (const message of roomMessages) {
+			ids.push(message.message_id);
+		}
+
+		const messages: PrismaTypes.message[] | null =
+			await this.prisma.message.findMany({
+				where: {
+					message_id: {
+						in: ids,
+					},
+				},
+			});
+
+		if (!messages || messages === null) {
+			throw new Error(
+				"Failed to get chat history (query returned null) for room with id '" +
+					roomID +
+					"'",
+			);
+		}
+
+		if (messages.length === 0) {
+			throw new Error(
+				"Failed to get chat history (no messages found) matching IDs for room with id '" +
+					roomID +
+					"'. DB may be corrupted.",
+			);
+		}
+		return messages;
 	}
 }
