@@ -9,6 +9,7 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Entypo } from '@expo/vector-icons';
 import axios from 'axios';
 
 const Home: React.FC = () => {
@@ -128,6 +129,9 @@ const Home: React.FC = () => {
     router.navigate("/screens/CreateRoom");
   };
 
+  const navigateToChatList = () => {
+    router.navigate("/screens/ChatListScreen");
+  }
 
   const handleScroll = useCallback(({ nativeEvent }) => {
     const currentOffset = nativeEvent.contentOffset.y;
@@ -186,6 +190,13 @@ const Home: React.FC = () => {
           zIndex: 10,
         }}
       >
+              <TouchableOpacity
+        style={{ position: 'absolute', top: 15, left: 20, zIndex: 10 }}
+        onPress={navigateToChatList}
+      >
+        <Entypo name="direction" size={24} color="black" />
+        {/* <Entypo name="message" size={24} color="black" /> */}
+      </TouchableOpacity>
         <TopNavBar />
       </Animated.View>
       <ScrollView
@@ -241,6 +252,7 @@ const Home: React.FC = () => {
           zIndex: 10,
         }}
       >
+
         <NavBar />
       </Animated.View>
     </View>
