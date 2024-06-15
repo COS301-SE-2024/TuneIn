@@ -12,12 +12,16 @@ export class LiveChatEventDto {
 	event: string;
 
 	@ApiProperty()
-	body: LiveChatMessageDto;
-
-	@ApiProperty()
-	sender: UserProfileDto;
+	sender: UserProfileDto | null;
 
 	@ApiProperty()
 	@IsDateString()
 	date_created?: Date;
+
+	@ApiProperty()
+	body?: LiveChatMessageDto;
+
+	@ApiProperty()
+	@IsString()
+	errorMessage?: string;
 }

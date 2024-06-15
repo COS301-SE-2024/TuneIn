@@ -41,57 +41,144 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.CONNECTION)
-	async handleJoinRoom(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleJoinRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.DISCONNECT)
-	async handleLeaveRoom(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleLeaveRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
-	async handleLiveMessage(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleLiveMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
-	async handleGetLiveChatHistory(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleGetLiveChatHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
-	async handleDirectMessage(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleDirectMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
-	async handleGetDirectMessageHistory(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleGetDirectMessageHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.TYPING)
-	async handleTyping(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
-	async handleStopTyping(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleStopTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.ERROR)
-	async handleError(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleError(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
-	async handleJoinRoom(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleJoinRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)
-	async handleLeaveRoom(client: Socket, payload: any): Promise<void> {
-		//this.server.emit();
+	async handleLeaveRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			this.handleThrownError(client, error);
+		}
+	}
+
+	async handleThrownError(client: Socket, error: Error): Promise<void> {
+		const errorResponse: LiveChatEventDto = {
+			event: SOCKET_EVENTS.ERROR,
+			sender: null,
+			date_created: new Date(),
+			errorMessage: error.message,
+		};
+		this.server.emit(SOCKET_EVENTS.ERROR, errorResponse);
 	}
 }
