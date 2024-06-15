@@ -45,10 +45,10 @@ const LoginScreen: React.FC = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
           },
           body: JSON.stringify({
-            username: emailOrUsername,
-            userCognitoSub: result.getAccessToken().decodePayload().username,
+            token: result.getAccessToken().getJwtToken(),
           }),
         })
         .then((response) => response.json())

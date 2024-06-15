@@ -24,6 +24,7 @@
     "amazon-cognito-identity-js": "^6.3.12",
     "aws-amplify": "^6.3.6",
     "expo": "~51.0.9",
+    "expo-image-picker": "^15.0.5",
     "expo-navigation-bar": "~3.0.5",
     "expo-router": "^3.5.15",
     "expo-status-bar": "~1.12.1",
