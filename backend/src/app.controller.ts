@@ -28,6 +28,9 @@ export class AppController {
 		return this.appService.getHello();
 	}
 
+	/*
+	curl -v -X POST http://localhost:3000/upload -F "file=@/Users/lesedikekana/Downloads/f.jpg"
+	*/
 	@Post("upload")
 	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
 	@UseInterceptors(
