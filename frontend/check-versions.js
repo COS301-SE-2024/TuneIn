@@ -8,7 +8,7 @@ const versionRequirements = [
 
 versionRequirements.forEach(({ name, currentVersion, requiredVersion }) => {
   if (!currentVersion.includes(requiredVersion)) {
-    console.error(`Required ${name} version: ${requiredVersion}, but found: ${currentVersion}.`);
+    console.error('Required ${name} version: ${requiredVersion}, but found: ${currentVersion}. Use `nvm use stable` to switch to the correct node version.');    
     process.exit(1);
   }
 });
