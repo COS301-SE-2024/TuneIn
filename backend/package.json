@@ -22,7 +22,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "gen-api-client": "java -jar ./../tools/swagger-codegen-cli.jar generate -i http://localhost:3000/api-yaml -l typescript-fetch -o ./../frontend/api-client --additional-properties supportsES6=true",
     "gen-docs": "compodoc -p tsconfig.json",
-    "serve-docs": "compodoc -p tsconfig.json -s"
+    "serve-docs": "compodoc -p tsconfig.json -s",
+    "prisma-read": "prisma introspect",
+    "prisma-gen": "prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.592.0",
