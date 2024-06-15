@@ -1,12 +1,15 @@
 import {
+	ConnectedSocket,
+	MessageBody,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
 } from "@nestjs/websockets";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { SOCKET_EVENTS } from "src/config/constants";
+import { LiveChatEventDto } from "./dto/livechatevent.dto";
 
 @WebSocketGateway({
 	namespace: "/chat",
@@ -19,74 +22,76 @@ import { SOCKET_EVENTS } from "src/config/constants";
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() server: Server;
 
-	handleConnection(client: any, ...args: any[]) {
+	async handleConnection(client: Socket, ...args: any[]) {
 		console.log("Client connected");
 	}
 
-	handleDisconnect(client: any) {
+	async handleDisconnect(client: Socket) {
 		console.log("Client disconnected");
 	}
 
 	@SubscribeMessage("message")
-	handleMessage(client: any, payload: any): void {
+	async handleMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: any,
+	): Promise<void> {
 		console.log(payload);
 		//Hello World
 		this.server.emit("message", { response: "Hello World" });
 	}
 
-  @SubscribeMessage(SOCKET_EVENTS.CONNECTION)
-  handleJoinRoom(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.CONNECTION)
+	async handleJoinRoom(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.DISCONNECT)
-  handleLeaveRoom(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.DISCONNECT)
+	async handleLeaveRoom(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
-  handleLiveMessage(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
+	async handleLiveMessage(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
-  handleGetLiveChatHistory(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
+	async handleGetLiveChatHistory(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
-  handleDirectMessage(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
+	async handleDirectMessage(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
-  handleGetDirectMessageHistory(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
+	async handleGetDirectMessageHistory(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.TYPING)
-  handleTyping(client: any, payload: any): void {
-    //this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.TYPING)
+	async handleTyping(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
-  handleStopTyping(client: any, payload: any): void {
-	//this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
+	async handleStopTyping(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.ERROR)
-  handleError(client: any, payload: any): void {
-	//this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.ERROR)
+	async handleError(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
-  handleJoinRoom(client: any, payload: any): void {
-	//this.server.emit();
-  }
+	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
+	async handleJoinRoom(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 
-  @SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)
-  handleLeaveRoom(client: any, payload: any): void {
-	//this.server.emit();
-  }
-
+	@SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)
+	async handleLeaveRoom(client: Socket, payload: any): Promise<void> {
+		//this.server.emit();
+	}
 }
