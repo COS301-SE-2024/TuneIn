@@ -8,6 +8,7 @@ import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
 
 @Injectable()
 export class RoomsService {
@@ -131,7 +132,7 @@ export class RoomsService {
 		return true;
 	}
 
-	async getChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
+	async getLiveChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
 		if (!(await this.roomExists(roomID))) {
 			throw new HttpException(
 				"Room with id '" + roomID + "' does not exist",
@@ -188,5 +189,76 @@ export class RoomsService {
 			);
 		}
 		return messages;
+	}
+
+	async createMessage(message: Prisma.messageCreateInput): Promise<string> {
+		const newMessage: PrismaTypes.message | null =
+			await this.prisma.message.create({
+				data: message,
+			});
+
+		if (!newMessage || newMessage === null) {
+			throw new Error(
+				"Failed to create message with id '" +
+					message.message_id +
+					"'. Unknown database error",
+			);
+		}
+
+		return newMessage.message_id;
+	}
+
+	async createLiveChatMessage(message: LiveChatMessageDto): Promise<string> {
+		if (!(await this.roomExists(message.roomID))) {
+			throw new Error("Room with id '" + message.roomID + "' does not exist");
+		}
+
+		const sender: PrismaTypes.users | null = await this.prisma.users.findUnique(
+			{
+				where: {
+					user_id: message.sender.userID,
+				},
+			},
+		);
+
+		if (!sender || sender === null) {
+			throw new Error(
+				"Failed to get user with id '" +
+					message.sender.userID +
+					"' and name '" +
+					message.sender.username +
+					"'",
+			);
+		}
+
+		const newMessage: Prisma.messageCreateInput = {
+			contents: message.body,
+			date_sent: message.date_created,
+			users: {
+				connect: {
+					user_id: message.sender.userID,
+				},
+			},
+		};
+
+		const messageID: string = await this.createMessage(newMessage);
+
+		const roomMessage: PrismaTypes.room_message | null =
+			await this.prisma.room_message.create({
+				data: {
+					room_id: message.roomID,
+					message_id: messageID,
+				},
+			});
+
+		if (!roomMessage || roomMessage === null) {
+			throw new Error(
+				"Failed to create room message for room with id '" +
+					message.roomID +
+					"'. Unknown database error",
+			);
+		}
+
+		return messageID;
 	}
 }
