@@ -115,6 +115,25 @@ export class DtoGenService {
       data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
     };
 
+    const favRooms = await this.prisma.bookmark.findMany({
+      where: { user_id: user_id },
+    });
+
+    const roomDtoArray: RoomDto[] = [];
+
+    // Iterate through each room_id and generate RoomDto
+    for (const room of favRooms) {
+      const roomDto = await this.generateRoomDto(room.room_id);
+      if (roomDto) {
+        roomDtoArray.push(roomDto);
+      }
+    }
+
+    result.fav_rooms = {
+      count: roomDtoArray.length,
+      data: roomDtoArray,
+    };
+
     const following: Prisma.users[] | null =
       await this.dbUtils.getUserFollowing(user_id);
     if (following && following !== null) {

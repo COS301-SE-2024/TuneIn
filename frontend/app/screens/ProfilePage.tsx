@@ -268,13 +268,13 @@ const ProfileScreen: React.FC = () => {
 				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
 					<Text style={styles.title}>Favorite Rooms</Text>
 					<View style={styles.roomCardsContainer}>
-						{favoriteRooms.slice(0, 2).map((room) => (
+						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
 							<RoomCard
-								key={room.roomName}
-								roomName={room.roomName}
-								songName={room.songName}
-								artistName={room.artistName}
-								username={room.username}
+								key={room.room_id}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists}
+								username={room.creator.username}
 							/>
 						))}
 					</View>
