@@ -10,9 +10,10 @@ import {
 import { Server, Socket } from "socket.io";
 import { SOCKET_EVENTS } from "src/config/constants";
 import { LiveChatEventDto } from "./dto/livechatevent.dto";
+import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
 
 @WebSocketGateway({
-	namespace: "/chat",
+	namespace: "/live-chat",
 	transports: ["websocket"],
 	cors: {
 		origin: "http://localhost:3000",
@@ -20,14 +21,17 @@ import { LiveChatEventDto } from "./dto/livechatevent.dto";
 	},
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+	constructor(private readonly connectedUsers: ConnectedUsersService) {}
+
 	@WebSocketServer() server: Server;
 
 	async handleConnection(client: Socket, ...args: any[]) {
-		console.log("Client connected");
+		console.log("Client connected with ID: " + client.id);
 	}
 
 	async handleDisconnect(client: Socket) {
-		console.log("Client disconnected");
+		console.log("Client (id: " + client.id + ") disconnected");
+		this.connectedUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
@@ -154,7 +158,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() payload: any,
 	): Promise<void> {
 		try {
-			//this.server.emit();
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}
