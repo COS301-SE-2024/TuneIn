@@ -10,8 +10,8 @@ const NavBar: React.FC = () => {
         router.navigate("/");
     };
 
-    const navigateToSearch = () => {
-        router.navigate("/screens/Search");
+    const navigateToSpotifyAuth = () => {
+        router.navigate("/screens/SpotifyAuth");
     };
 
     const navigateToProfile = () => {
@@ -23,8 +23,8 @@ const NavBar: React.FC = () => {
             <TouchableOpacity onPress={navigateToHome}>
                 <Text className="text-white text-lg">Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateToSearch}>
-                <Text className="text-white text-lg">Search</Text>
+            <TouchableOpacity onPress={navigateToSpotifyAuth}>
+                <Text className="text-white text-lg">SpotifyAuth</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={navigateToProfile}>
                 <Text className="text-white text-lg">Profile</Text>
