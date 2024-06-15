@@ -9,13 +9,7 @@ import { AuthService } from "src/auth/auth.service";
 
 @Module({
 	controllers: [RoomsController],
-	providers: [
-		RoomsService,
-		PrismaService,
-		DtoGenService,
-		DbUtilsService,
-		AuthService,
-	],
+	providers: [RoomsService, PrismaService, DtoGenService, DbUtilsService, AuthService],
 	imports: [PrismaModule],
 })
 export class RoomsModule {}
