@@ -139,16 +139,53 @@
                                 <a href="#create" >create</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#createRoom" >createRoom</a>
+                            </li>
+                            <li>
                                 <a href="#findAll" >findAll</a>
                             </li>
                             <li>
                                 <a href="#findOne" >findOne</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getFollowers" >getFollowers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getFollowing" >getFollowing</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRecentRooms" >getRecentRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRecommendedRooms" >getRecommendedRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUserFriends" >getUserFriends</a>
+                            </li>
+                            <li>
+                                <a href="#getUserInfo" >getUserInfo</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUserRooms" >getUserRooms</a>
+                            </li>
+                            <li>
                                 <a href="#remove" >remove</a>
                             </li>
                             <li>
                                 <a href="#update" >update</a>
+                            </li>
+                            <li>
+                                <a href="#updateProfile" >updateProfile</a>
+                            </li>
+                            <li>
+                                <a href="#updateUserProfile" >updateUserProfile</a>
                             </li>
                         </ul>
                     </td>
@@ -168,12 +205,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>)</code>
+<code>constructor(prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>, dbUtils: <a href="../injectables/DbUtilsService.html" target="_self">DbUtilsService</a>, dtogen: <a href="../injectables/DtoGenService.html" target="_self">DtoGenService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="62" class="link-to-prism">src/modules/users/users.service.ts:62</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/modules/users/users.service.ts:15</a></div>
                             </td>
                         </tr>
 
@@ -195,6 +232,30 @@
                                                   
                                                         <td>
                                                                         <code><a href="../injectables/PrismaService.html" target="_self" >PrismaService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dbUtils</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DbUtilsService.html" target="_self" >DbUtilsService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dtogen</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DtoGenService.html" target="_self" >DtoGenService</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -236,8 +297,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="65"
-                                    class="link-to-prism">src/modules/users/users.service.ts:65</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="22"
+                                    class="link-to-prism">src/modules/users/users.service.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -287,6 +348,87 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="createRoom"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createRoom</b></span>
+                        <a href="#createRoom"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createRoom(createRoomDto: <a href="../classes/CreateRoomDto.html" target="_self">CreateRoomDto</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="109"
+                                    class="link-to-prism">src/modules/users/users.service.ts:109</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>createRoomDto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateRoomDto.html" target="_self" >CreateRoomDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="findAll"></a>
                     <span class="name">
                         <span ><b>findAll</b></span>
@@ -303,8 +445,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="77"
-                                    class="link-to-prism">src/modules/users/users.service.ts:77</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">src/modules/users/users.service.ts:34</a></div>
                         </td>
                     </tr>
 
@@ -333,15 +475,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>findOne(user_id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+<code>findOne(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="81"
-                                    class="link-to-prism">src/modules/users/users.service.ts:81</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="38"
+                                    class="link-to-prism">src/modules/users/users.service.ts:38</a></div>
                         </td>
                     </tr>
 
@@ -362,7 +504,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>user_id</td>
+                                                <td>userID</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -391,24 +533,26 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="remove"></a>
+                    <a name="getFollowers"></a>
                     <span class="name">
-                        <span ><b>remove</b></span>
-                        <a href="#remove"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier">Async</span>
+                        <span ><b>getFollowers</b></span>
+                        <a href="#getFollowers"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>remove(user_id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getFollowers(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="102"
-                                    class="link-to-prism">src/modules/users/users.service.ts:102</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="305"
+                                    class="link-to-prism">src/modules/users/users.service.ts:305</a></div>
                         </td>
                     </tr>
 
@@ -429,7 +573,456 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>user_id</td>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getFollowing"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getFollowing</b></span>
+                        <a href="#getFollowing"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getFollowing(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="321"
+                                    class="link-to-prism">src/modules/users/users.service.ts:321</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRecentRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRecentRooms</b></span>
+                        <a href="#getRecentRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRecentRooms(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="207"
+                                    class="link-to-prism">src/modules/users/users.service.ts:207</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRecommendedRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRecommendedRooms</b></span>
+                        <a href="#getRecommendedRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRecommendedRooms(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="266"
+                                    class="link-to-prism">src/modules/users/users.service.ts:266</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserFriends"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserFriends</b></span>
+                        <a href="#getUserFriends"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserFriends(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="285"
+                                    class="link-to-prism">src/modules/users/users.service.ts:285</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserInfo"></a>
+                    <span class="name">
+                        <span ><b>getUserInfo</b></span>
+                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getUserInfo()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="66"
+                                    class="link-to-prism">src/modules/users/users.service.ts:66</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserRooms</b></span>
+                        <a href="#getUserRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserRooms(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="81"
+                                    class="link-to-prism">src/modules/users/users.service.ts:81</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="remove"></a>
+                    <span class="name">
+                        <span ><b>remove</b></span>
+                        <a href="#remove"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>remove(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="60"
+                                    class="link-to-prism">src/modules/users/users.service.ts:60</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -467,15 +1060,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>update(user_id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+<code>update(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="87"
-                                    class="link-to-prism">src/modules/users/users.service.ts:87</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="44"
+                                    class="link-to-prism">src/modules/users/users.service.ts:44</a></div>
                         </td>
                     </tr>
 
@@ -496,7 +1089,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>user_id</td>
+                                                <td>userID</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -533,118 +1126,481 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updateProfile"></a>
+                    <span class="name">
+                        <span ><b>updateProfile</b></span>
+                        <a href="#updateProfile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>updateProfile(updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="76"
+                                    class="link-to-prism">src/modules/users/users.service.ts:76</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>updateUserDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updateUserProfile"></a>
+                    <span class="name">
+                        <span ><b>updateUserProfile</b></span>
+                        <a href="#updateUserProfile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>updateUserProfile(updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="71"
+                                    class="link-to-prism">src/modules/users/users.service.ts:71</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>updateUserDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >UserDto</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>
 
     </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
-import { PrismaService } from &#x27;../../../prisma/prisma.service&#x27;;
-import { Prisma } from &#x27;@prisma/client&#x27;;
-import { CreateUserDto } from &#x27;./dto/create-user.dto&#x27;;
-import { UpdateUserDto } from &#x27;./dto/update-user.dto&#x27;;
-
-//based on
-/*
-import { users } from &#x27;@prisma/client&#x27;;
-import { ApiProperty } from &#x27;@nestjs/swagger&#x27;;
-
-export class CreateUserDto extends users {
-  @ApiProperty()
-  user_id: string;
-
-  @ApiProperty()
-  username: string;
-
-  @ApiProperty()
-  bio: string;
-
-  @ApiProperty()
-  profile_picture: string;
-
-  @ApiProperty()
-  activity: any;
-
-  @ApiProperty()
-  preferences: any;
-
-  @ApiProperty()
-  bookmark: any[];
-
-  @ApiProperty()
-  follows_follows_followeeTousers: any[];
-
-  @ApiProperty()
-  follows_follows_followerTousers: any[];
-
-  @ApiProperty()
-  friends_friends_friend1Tousers: any[];
-
-  @ApiProperty()
-  friends_friends_friend2Tousers: any[];
-
-  @ApiProperty()
-  message: any[];
-
-  @ApiProperty()
-  participate: any[];
-
-  @ApiProperty()
-  private_message: any[];
-
-  @ApiProperty()
-  room: any[];
-}
-
-*/
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
+import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { Prisma } from &quot;@prisma/client&quot;;
+import { CreateUserDto } from &quot;./dto/create-user.dto&quot;;
+import { UpdateUserDto } from &quot;./dto/update-user.dto&quot;;
+import { UserDto } from &quot;./dto/user.dto&quot;;
+import { CreateRoomDto } from &quot;../rooms/dto/createroomdto&quot;;
+import { UserProfileDto } from &quot;../profile/dto/userprofile.dto&quot;;
+import { RoomDto } from &quot;../rooms/dto/room.dto&quot;;
+import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
+import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+	) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user: Prisma.usersCreateInput &#x3D; {
-      user_id: createUserDto.user_id,
-      username: createUserDto.username,
-      bio: createUserDto.bio,
-      profile_picture: createUserDto.profile_picture,
-      activity: createUserDto.activity,
-      preferences: createUserDto.preferences,
-    };
-    return this.prisma.users.create({ data: user });
-  }
+	create(createUserDto: CreateUserDto) {
+		const user: Prisma.usersCreateInput &#x3D; {
+			user_id: createUserDto.userID,
+			username: createUserDto.username,
+			bio: createUserDto.bio,
+			profile_picture: createUserDto.profile_picture,
+			activity: createUserDto.activity,
+			preferences: createUserDto.preferences,
+		};
+		return this.prisma.users.create({ data: user });
+	}
 
-  findAll() {
-    return this.prisma.users.findMany();
-  }
+	findAll() {
+		return this.prisma.users.findMany();
+	}
 
-  findOne(user_id: string) {
-    return this.prisma.users.findUnique({
-      where: { user_id: user_id },
-    });
-  }
+	findOne(userID: string) {
+		return this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+	}
 
-  update(user_id: string, updateUserDto: UpdateUserDto) {
-    const user: Prisma.usersUpdateInput &#x3D; {
-      user_id: updateUserDto.user_id,
-      username: updateUserDto.username,
-      bio: updateUserDto.bio,
-      profile_picture: updateUserDto.profile_picture,
-      activity: updateUserDto.activity,
-      preferences: updateUserDto.preferences,
-    };
-    return this.prisma.users.update({
-      where: { user_id: user_id },
-      data: user,
-    });
-  }
+	update(userID: string, updateUserDto: UpdateUserDto) {
+		console.log(updateUserDto);
+		const user: Prisma.usersUpdateInput &#x3D; {};
+		if (updateUserDto.username) user.username &#x3D; updateUserDto.username;
+		if (updateUserDto.bio) user.bio &#x3D; updateUserDto.bio;
+		if (updateUserDto.profile_picture)
+			user.profile_picture &#x3D; updateUserDto.profile_picture;
+		if (updateUserDto.activity) user.activity &#x3D; updateUserDto.activity;
+		if (updateUserDto.preferences) user.preferences &#x3D; updateUserDto.preferences;
+		console.log(user);
+		return this.prisma.users.update({
+			where: { user_id: userID },
+			data: user,
+		});
+	}
 
-  remove(user_id: string) {
-    return this.prisma.users.delete({
-      where: { user_id: user_id },
-    });
-  }
+	remove(userID: string) {
+		return this.prisma.users.delete({
+			where: { user_id: userID },
+		});
+	}
+
+	getUserInfo(): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	updateUserProfile(updateUserDto: UpdateUserDto): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	updateProfile(updateUserDto: UpdateUserDto): UserDto {
+		// implementation goes here
+		return new UserDto();
+	}
+
+	async getUserRooms(userID: string): Promise&lt;RoomDto[]&gt; {
+		// implementation goes here
+		const user &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user) {
+			throw new Error(&quot;User does not exist&quot;);
+		}
+
+		const rooms &#x3D; await this.prisma.room.findMany({
+			where: { room_creator: userID },
+		});
+
+		if (!rooms) {
+			return [];
+		}
+
+		const ids: string[] &#x3D; rooms.map((room) &#x3D;&gt; room.room_id);
+		const r &#x3D; await this.dtogen.generateMultipleRoomDto(ids);
+		if (!r || r &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(
+				&quot;An unknown error occurred while generating RoomDto for user rooms (getUserRooms). Received null.&quot;,
+			);
+		}
+		return r;
+	}
+
+	async createRoom(
+		createRoomDto: CreateRoomDto,
+		userID: string,
+	): Promise&lt;RoomDto&gt; {
+		const newRoom: Prisma.roomCreateInput &#x3D; {
+			name: createRoomDto.room_name || &quot;Untitled Room&quot;,
+
+			//foreign key relation for &#x27;room_creator&#x27;
+			users: {
+				connect: {
+					user_id: userID,
+				},
+			},
+		};
+		if (createRoomDto.description)
+			newRoom.description &#x3D; createRoomDto.description;
+		if (createRoomDto.is_temporary)
+			newRoom.is_temporary &#x3D; createRoomDto.is_temporary;
+
+		/*
+		if (createRoomDto.language) newRoom.language &#x3D; createRoomDto.language;
+		*/
+		if (createRoomDto.has_explicit_content)
+			newRoom.explicit &#x3D; createRoomDto.has_explicit_content;
+		if (createRoomDto.has_nsfw_content)
+			newRoom.nsfw &#x3D; createRoomDto.has_nsfw_content;
+		if (createRoomDto.room_image)
+			newRoom.playlist_photo &#x3D; createRoomDto.room_image;
+
+		/*
+		if (createRoomDto.current_song)
+			newRoom.current_song &#x3D; createRoomDto.current_song;
+		*/
+
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.create({
+			data: newRoom,
+		});
+		if (!room) {
+			throw new Error(&quot;Something went wrong while creating the room&quot;);
+		}
+
+		//for is_private, we will need to add the roomID to the private_room tbale
+		if (createRoomDto.is_private) {
+			const privRoom: Prisma.private_roomCreateInput &#x3D; {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
+				},
+			};
+			const privRoomResult &#x3D; await this.prisma.private_room.create({
+				data: privRoom,
+			});
+			if (!privRoomResult || privRoomResult &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while creating private room. Received null.&quot;,
+				);
+			}
+		} else {
+			const pubRoom: Prisma.public_roomCreateInput &#x3D; {
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
+				},
+			};
+			const pubRoomResult &#x3D; await this.prisma.public_room.create({
+				data: pubRoom,
+			});
+			if (!pubRoomResult || pubRoomResult &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while creating public room. Received null.&quot;,
+				);
+			}
+		}
+
+		//TODO: implement scheduled room creation
+		/*
+		if (createRoomDto.start_date) newRoom.start_date &#x3D; createRoomDto.start_date;
+		if (createRoomDto.end_date) newRoom.end_date &#x3D; createRoomDto.end_date;		
+		if (createRoomDto.is_scheduled) {
+			newRoom.
+				connect: {
+					roomID: createRoomDto.roomID,
+				},
+			};
+		}
+		*/
+
+		const result &#x3D; await this.dtogen.generateRoomDtoFromRoom(room);
+		if (!result) {
+			throw new Error(
+				&quot;An unknown error occurred while generating RoomDto for created room. Received null.&quot;,
+			);
+		}
+		return result;
+	}
+
+	async getRecentRooms(userID: string): Promise&lt;RoomDto[]&gt; {
+		/*
+		activity field in users table is modelled as:
+		&quot;{&quot;recent_rooms&quot;: [&quot;0352e8b8-e987-4dc9-a379-dc68b541e24f&quot;, &quot;497d8138-13d2-49c9-808d-287b447448e8&quot;, &quot;376578dd-9ef6-41cb-a9f6-2ded47e22c84&quot;, &quot;62560ae5-9236-490c-8c75-c234678dc346&quot;]}&quot;
+		*/
+		// get the recent rooms from the user&#x27;s activity field
+		const u &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(&quot;User does not exist&quot;);
+		}
+
+		const user: PrismaTypes.users &#x3D; u;
+		const activity: Prisma.JsonValue &#x3D; user.activity;
+		console.log(user);
+		console.log(activity);
+		if (!activity || activity &#x3D;&#x3D;&#x3D; null) {
+			return [];
+		}
+
+		if (typeof activity !&#x3D;&#x3D; &quot;object&quot;) {
+			throw new Error(
+				&quot;An unknown error occurred while parsing the &#x27;activity&#x27; field in &#x27;users&#x27;. Expected object, received &quot; +
+					typeof activity,
+			);
+		}
+
+		//if (!&quot;recent_rooms&quot; in activity) {
+		if (!(&quot;recent_rooms&quot; in activity)) {
+			return [];
+		}
+
+		try {
+			const recentRooms: string[] &#x3D; activity[&quot;recent_rooms&quot;] as string[];
+			for (const roomID of recentRooms) {
+				if (typeof roomID !&#x3D;&#x3D; &quot;string&quot;) {
+					throw new Error(
+						&quot;An unknown error occurred while parsing the &#x27;recent_rooms&#x27; field in &#x27;activity&#x27;. Expected string[], received &quot; +
+							typeof roomID,
+					);
+				}
+			}
+			const r &#x3D; await this.dtogen.generateMultipleRoomDto(recentRooms);
+			if (!r || r &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(
+					&quot;An unknown error occurred while generating RoomDto for recent rooms. Received null.&quot;,
+				);
+			}
+			return r;
+		} catch (e) {
+			throw new Error(
+				&quot;An unknown error occurred while parsing the &#x27;recent_rooms&#x27; field in &#x27;activity&#x27;. Expected string[], received &quot; +
+					typeof activity[&quot;recent_rooms&quot;],
+			);
+		}
+	}
+
+	async getRecommendedRooms(userID: string): Promise&lt;RoomDto[]&gt; {
+		//TODO: implement recommendation algorithm
+		const r &#x3D; await this.dbUtils.getRandomRooms(5);
+		if (!r || r &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(
+				&quot;An unknown error occurred while generating RoomDto for recommended rooms. Received null.&quot;,
+			);
+		}
+		const rooms: PrismaTypes.room[] &#x3D; r;
+		const ids: string[] &#x3D; rooms.map((room) &#x3D;&gt; room.room_id);
+		const recommends &#x3D; await this.dtogen.generateMultipleRoomDto(ids);
+		if (!recommends || recommends &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(
+				&quot;An unknown error occurred while generating RoomDto for recommended rooms. Received null.&quot;,
+			);
+		}
+		return recommends;
+	}
+
+	async getUserFriends(userID: string): Promise&lt;UserProfileDto[]&gt; {
+		const f &#x3D; await this.prisma.friends.findMany({
+			where: { OR: [{ friend1: userID }, { friend2: userID }] },
+		});
+		if (!f) {
+			return [];
+		}
+		const friends: PrismaTypes.friends[] &#x3D; f;
+		const ids: string[] &#x3D; [];
+		for (const friend of friends) {
+			if (friend.friend1 &#x3D;&#x3D;&#x3D; userID) {
+				ids.push(friend.friend2);
+			} else {
+				ids.push(friend.friend1);
+			}
+		}
+		const r &#x3D; await this.dtogen.generateMultipleUserProfileDto(ids);
+		return r;
+	}
+
+	async getFollowers(userID: string): Promise&lt;UserProfileDto[]&gt; {
+		const f &#x3D; await this.dbUtils.getUserFollowers(userID);
+		if (!f) {
+			return [];
+		}
+		const followers: PrismaTypes.users[] &#x3D; f;
+		const ids: string[] &#x3D; followers.map((follower) &#x3D;&gt; follower.user_id);
+		const result &#x3D; await this.dtogen.generateMultipleUserProfileDto(ids);
+		if (!result) {
+			throw new Error(
+				&quot;An unknown error occurred while generating UserProfileDto for followers. Received null.&quot;,
+			);
+		}
+		return result;
+	}
+
+	async getFollowing(userID: string): Promise&lt;UserProfileDto[]&gt; {
+		const following &#x3D; await this.dbUtils.getUserFollowing(userID);
+		if (!following) {
+			return [];
+		}
+		const followees: PrismaTypes.users[] &#x3D; following;
+		const ids: string[] &#x3D; followees.map((followee) &#x3D;&gt; followee.user_id);
+		const result &#x3D; await this.dtogen.generateMultipleUserProfileDto(ids);
+		if (!result) {
+			throw new Error(
+				&quot;An unknown error occurred while generating UserProfileDto for following. Received null.&quot;,
+			);
+		}
+		return result;
+	}
 }
 </code></pre>
     </div>

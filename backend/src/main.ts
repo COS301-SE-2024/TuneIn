@@ -3,6 +3,8 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 
+declare const module: any;
+
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
@@ -20,6 +22,11 @@ async function bootstrap() {
 	SwaggerModule.setup("api", app, document);
 
 	app.enableCors();
+
+	if (module.hot) {
+		module.hot.accept();
+		module.hot.dispose(() => app.close());
+	}
 
 	await app.listen(3000);
 }
