@@ -1,8 +1,9 @@
 import React from "react";
 import Home from "./screens/WelcomeScreen";
+import SpotifyAuth from "./screens/SpotifyAuth";
 
 export default function App() {
-	return <Home />;
+	return <SpotifyAuth />;
 }
 
 // import React, { useEffect } from "react";

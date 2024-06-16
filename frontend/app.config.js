@@ -6,4 +6,8 @@ export default ({ config }) => ({
     userPoolId: process.env.REACT_APP_USER_POOL_ID,
     clientId: process.env.REACT_APP_CLIENT_ID,
   },
+  
+  "android": {
+    "package": "com.TuneIn"
+  }
 });
