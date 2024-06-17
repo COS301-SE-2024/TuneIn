@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const Home: React.FC = () => {
+  
   const [scrollY] = useState(new Animated.Value(0));
   const [friends, setFriends] = useState<Friend[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -39,6 +40,8 @@ const Home: React.FC = () => {
   };
 
   const getFriends = async (token) => {
+    const accessToken = await AsyncStorage.getItem("token");
+    console.log(accessToken);
     try {
       const response = await axios.get(`${baseURL}/users/friends`, {
         headers: {
