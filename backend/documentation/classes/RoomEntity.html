@@ -95,7 +95,7 @@
 
 <ol class="breadcrumb">
   <li class="breadcrumb-item">Classes</li>
-  <li class="breadcrumb-item" >CreateUserDto</li>
+  <li class="breadcrumb-item" >RoomEntity</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -119,7 +119,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/modules/users/dto/create-user.dto.ts</code>
+            <code>src/modules/rooms/entities/room.entity.ts</code>
         </p>
 
 
@@ -141,67 +141,67 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#activity" >activity</a>
+                                <a href="#creator" >creator</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#bio" >bio</a>
+                                <a href="#current_song" >current_song</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#bookmark" >bookmark</a>
+                                <a href="#description" >description</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#follows_follows_followeeTousers" >follows_follows_followeeTousers</a>
+                                <a href="#end_date" >end_date</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#follows_follows_followerTousers" >follows_follows_followerTousers</a>
+                                <a href="#has_explicit_content" >has_explicit_content</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#friends_friends_friend1Tousers" >friends_friends_friend1Tousers</a>
+                                <a href="#has_nsfw_content" >has_nsfw_content</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#friends_friends_friend2Tousers" >friends_friends_friend2Tousers</a>
+                                <a href="#is_private" >is_private</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#message" >message</a>
+                                <a href="#is_scheduled" >is_scheduled</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#participate" >participate</a>
+                                <a href="#is_temporary" >is_temporary</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#preferences" >preferences</a>
+                                <a href="#language" >language</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#private_message" >private_message</a>
+                                <a href="#participant_count" >participant_count</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#profile_picture" >profile_picture</a>
+                                <a href="#room_image" >room_image</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                <a href="#room" >room</a>
+                                <a href="#room_name" >room_name</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#userID" >userID</a>
+                                <a href="#roomID" >roomID</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                <a href="#start_date" >start_date</a>
+                            </li>
+                            <li>
                                     <span class="modifier"></span>
-                                <a href="#username" >username</a>
+                                <a href="#tags" >tags</a>
                             </li>
                         </ul>
                     </td>
@@ -226,17 +226,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="activity"></a>
+                    <a name="creator"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>activity</b></span>
-                        <a href="#activity"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>creator</b></span>
+                        <a href="#creator"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                        <i>Type : </i>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
 
                     </td>
                 </tr>
@@ -245,13 +245,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />
+                            @ApiProperty({type: UserProfileDto})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:22</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:7</a></div>
                         </td>
                     </tr>
 
@@ -262,12 +262,47 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="bio"></a>
+                    <a name="current_song"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                        <span ><b>current_song</b></span>
+                        <a href="#current_song"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="../classes/SongInfoDto.html" target="_self" >SongInfoDto</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: SongInfoDto})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="49" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:49</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="description"></a>
+                    <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>bio</b></span>
-                        <a href="#bio"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>description</b></span>
+                        <a href="#description"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -282,13 +317,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />@IsString()<br />
+                            @ApiProperty()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:19</a></div>
                         </td>
                     </tr>
 
@@ -299,17 +334,53 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="bookmark"></a>
+                    <a name="end_date"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>bookmark</b></span>
-                        <a href="#bookmark"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>end_date</b></span>
+                        <a href="#end_date"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" target="_blank" >Date</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: Date})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="34" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:34</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="has_explicit_content"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>has_explicit_content</b></span>
+                        <a href="#has_explicit_content"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                     </td>
                 </tr>
@@ -324,7 +395,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="28" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:28</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="40" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:40</a></div>
                         </td>
                     </tr>
 
@@ -335,17 +406,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="follows_follows_followeeTousers"></a>
+                    <a name="has_nsfw_content"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>follows_follows_followeeTousers</b></span>
-                        <a href="#follows_follows_followeeTousers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>has_nsfw_content</b></span>
+                        <a href="#has_nsfw_content"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                     </td>
                 </tr>
@@ -360,7 +431,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="31" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:31</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="43" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:43</a></div>
                         </td>
                     </tr>
 
@@ -371,17 +442,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="follows_follows_followerTousers"></a>
+                    <a name="is_private"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>follows_follows_followerTousers</b></span>
-                        <a href="#follows_follows_followerTousers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>is_private</b></span>
+                        <a href="#is_private"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                     </td>
                 </tr>
@@ -396,7 +467,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="34" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:34</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:25</a></div>
                         </td>
                     </tr>
 
@@ -407,17 +478,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="friends_friends_friend1Tousers"></a>
+                    <a name="is_scheduled"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>friends_friends_friend1Tousers</b></span>
-                        <a href="#friends_friends_friend1Tousers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>is_scheduled</b></span>
+                        <a href="#is_scheduled"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                     </td>
                 </tr>
@@ -432,7 +503,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="37" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:37</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="28" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:28</a></div>
                         </td>
                     </tr>
 
@@ -443,17 +514,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="friends_friends_friend2Tousers"></a>
+                    <a name="is_temporary"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>friends_friends_friend2Tousers</b></span>
-                        <a href="#friends_friends_friend2Tousers"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>is_temporary</b></span>
+                        <a href="#is_temporary"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
 
                     </td>
                 </tr>
@@ -468,7 +539,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="40" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:40</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -479,156 +550,11 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="message"></a>
+                    <a name="language"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>message</b></span>
-                        <a href="#message"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
-
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <b>Decorators : </b>
-                        <br />
-                        <code>
-                            @ApiProperty()<br />
-                        </code>
-                    </td>
-                </tr>
-                    <tr>
-                        <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="43" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:43</a></div>
-                        </td>
-                    </tr>
-
-
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="participate"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                        <span ><b>participate</b></span>
-                        <a href="#participate"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
-
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <b>Decorators : </b>
-                        <br />
-                        <code>
-                            @ApiProperty()<br />
-                        </code>
-                    </td>
-                </tr>
-                    <tr>
-                        <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="46" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:46</a></div>
-                        </td>
-                    </tr>
-
-
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="preferences"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                        <span ><b>preferences</b></span>
-                        <a href="#preferences"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <i>Type : </i>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <b>Decorators : </b>
-                        <br />
-                        <code>
-                            @ApiProperty()<br />
-                        </code>
-                    </td>
-                </tr>
-                    <tr>
-                        <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:25</a></div>
-                        </td>
-                    </tr>
-
-
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="private_message"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                        <span ><b>private_message</b></span>
-                        <a href="#private_message"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
-
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <b>Decorators : </b>
-                        <br />
-                        <code>
-                            @ApiProperty()<br />
-                        </code>
-                    </td>
-                </tr>
-                    <tr>
-                        <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="49" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:49</a></div>
-                        </td>
-                    </tr>
-
-
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="profile_picture"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>profile_picture</b></span>
-                        <a href="#profile_picture"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>language</b></span>
+                        <a href="#language"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -643,13 +569,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />@IsString()<br />
+                            @ApiProperty()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="37" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:37</a></div>
                         </td>
                     </tr>
 
@@ -660,17 +586,17 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="room"></a>
+                    <a name="participant_count"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                        <span ><b>room</b></span>
-                        <a href="#room"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>participant_count</b></span>
+                        <a href="#participant_count"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>any[]</code>
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
 
                     </td>
                 </tr>
@@ -685,7 +611,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:52</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:13</a></div>
                         </td>
                     </tr>
 
@@ -696,12 +622,11 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="userID"></a>
+                    <a name="room_image"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>userID</b></span>
-                        <a href="#userID"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>room_image</b></span>
+                        <a href="#room_image"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -716,13 +641,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />@IsString()<br />
+                            @ApiProperty()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:7</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="46" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:46</a></div>
                         </td>
                     </tr>
 
@@ -733,12 +658,11 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="username"></a>
+                    <a name="room_name"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>username</b></span>
-                        <a href="#username"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>room_name</b></span>
+                        <a href="#room_name"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -753,13 +677,121 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />@IsString()<br />
+                            @ApiProperty()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/modules/users/dto/create-user.dto.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:16</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="roomID"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>roomID</b></span>
+                        <a href="#roomID"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:10</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="start_date"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>start_date</b></span>
+                        <a href="#start_date"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" target="_blank" >Date</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: Date})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="31" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:31</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="tags"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>tags</b></span>
+                        <a href="#tags"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>string[]</code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: undefined})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">src/modules/rooms/entities/room.entity.ts:52</a></div>
                         </td>
                     </tr>
 
@@ -779,57 +811,57 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ApiProperty } from &quot;@nestjs/swagger&quot;;
-import { IsString } from &quot;class-validator&quot;;
+import { UserProfileDto } from &quot;../../profile/dto/userprofile.dto&quot;;
+import { SongInfoDto } from &quot;../dto/songinfo.dto&quot;;
 
-export class CreateUserDto {
-	@ApiProperty()
-	@IsString()
-	userID: string;
-
-	@ApiProperty()
-	@IsString()
-	username: string;
+export class RoomEntity {
+	@ApiProperty({ type: UserProfileDto })
+	creator: UserProfileDto;
 
 	@ApiProperty()
-	@IsString()
-	bio: string;
+	roomID: string;
 
 	@ApiProperty()
-	@IsString()
-	profile_picture: string;
+	participant_count: number;
 
 	@ApiProperty()
-	activity: any;
+	room_name: string;
 
 	@ApiProperty()
-	preferences: any;
+	description: string;
 
 	@ApiProperty()
-	bookmark: any[];
+	is_temporary: boolean;
 
 	@ApiProperty()
-	follows_follows_followeeTousers: any[];
+	is_private: boolean;
 
 	@ApiProperty()
-	follows_follows_followerTousers: any[];
+	is_scheduled: boolean;
+
+	@ApiProperty({ type: Date })
+	start_date: Date;
+
+	@ApiProperty({ type: Date })
+	end_date: Date;
 
 	@ApiProperty()
-	friends_friends_friend1Tousers: any[];
+	language: string;
 
 	@ApiProperty()
-	friends_friends_friend2Tousers: any[];
+	has_explicit_content: boolean;
 
 	@ApiProperty()
-	message: any[];
+	has_nsfw_content: boolean;
 
 	@ApiProperty()
-	participate: any[];
+	room_image: string;
 
-	@ApiProperty()
-	private_message: any[];
+	@ApiProperty({ type: SongInfoDto })
+	current_song: SongInfoDto;
 
-	@ApiProperty()
-	room: any[];
+	@ApiProperty({ type: [String] })
+	tags: string[];
 }
 </code></pre>
     </div>
@@ -869,7 +901,7 @@ export class CreateUserDto {
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
             var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
-            var COMPODOC_CURRENT_PAGE_URL = 'CreateUserDto.html';
+            var COMPODOC_CURRENT_PAGE_URL = 'RoomEntity.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 

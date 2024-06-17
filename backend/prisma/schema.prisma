@@ -1,7 +1,7 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "windows"]
+  provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -50,7 +50,7 @@ model message {
   room_message    room_message?
 }
 
-model Participate {
+model participate {
   user_id        String   @db.Uuid
   room_id        String   @db.Uuid
   date_joined    DateTime @default(now()) @db.Timestamptz(6)
@@ -58,37 +58,8 @@ model Participate {
   users          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
   room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 
-  @@unique([room_id, user_id], map: "unique_participation") // Define the composite unique key
+  @@index([room_id], map: "fki_room")
 }
-
-model Room {
-  room_id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name           String
-  room_creator   String         @db.Uuid
-  playlist_photo String?
-  description    String?        @default("This room has no description")
-  date_created   DateTime       @default(now()) @db.Timestamptz(6)
-  nsfw           Boolean        @default(false)
-  is_temporary   Boolean?       @default(false)
-  room_language  String?        @default("English")
-  explicit       Boolean?       @default(false)
-  tags           String[]
-  bookmark       Bookmark[]
-  participate    Participate[]
-  private_room   PrivateRoom?
-  public_room    PublicRoom?
-  users          users          @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
-  room_message   RoomMessage[]
-}
-
-model Users {
-  user_id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name           String
-  participate    Participate[]
-  room           Room[]
-}
-
-
 
 model private_message {
   p_message_id String  @id @db.Uuid
@@ -111,6 +82,26 @@ model public_room {
   room    room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
 }
 
+model room {
+  room_id        String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name           String
+  room_creator   String         @db.Uuid
+  playlist_photo String?
+  description    String?        @default("This room has no description")
+  date_created   DateTime       @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean        @default(false)
+  is_temporary   Boolean?       @default(false)
+  room_language  String?        @default("English")
+  explicit       Boolean?       @default(false)
+  tags           String[]
+  bookmark       bookmark[]
+  participate    participate[]
+  private_room   private_room?
+  public_room    public_room?
+  users          users          @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  room_message   room_message[]
+}
+
 model room_message {
   message_id String  @id @db.Uuid
   room_id    String  @db.Uuid
@@ -122,4 +113,25 @@ model scheduled_room {
   room_id        String       @id @db.Uuid
   scheduled_date DateTime     @db.Timestamptz(6)
   private_room   private_room @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model users {
+  user_id                         String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                        String
+  bio                             String?
+  profile_picture                 String?
+  activity                        Json?             @db.Json
+  preferences                     Json?             @db.Json
+  full_name                       String?
+  external_links                  Json?             @db.Json
+  email                           String?
+  bookmark                        bookmark[]
+  follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
+  follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
+  friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
+  friends_friends_friend2Tousers  friends[]         @relation("friends_friend2Tousers")
+  message                         message[]
+  participate                     participate[]
+  private_message                 private_message[]
+  room                            room[]
 }

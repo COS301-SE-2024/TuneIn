@@ -18,15 +18,19 @@ import * as PrismaTypes from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly usersService: UsersService,
+	) {}
 
 	@Post("login")
+	@ApiTags("auth")
 	@ApiOperation({ summary: "Login in the API using Cognito" })
 	@ApiBody({ type: LoginBody })
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: AuthBody,
+		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
 	async login(@Body() loginInfo: LoginBody) {
@@ -86,7 +90,7 @@ export class AuthController {
 
 		// add users to table
 		const successful: boolean = await this.authService.createUser(
-			authInfo.name,
+			authInfo.username,
 			userEmail,
 			authInfo.userCognitoSub,
 		);
@@ -141,6 +145,33 @@ export class AuthController {
 
 		//return the JWT as a string
 		return { token: token };
+	}
+
+	@Post("register")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiBody({ type: RegisterBody })
+	@ApiResponse({
+		status: 201,
+		description: "The record has been successfully created.",
+		type: RegisterBody,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async register(@Body() registerInfo: RegisterBody) {
+		const successful: boolean = await this.authService.createUser(
+			registerInfo.username,
+			registerInfo.email,
+			registerInfo.userCognitoSub,
+		);
+
+		if (!successful) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. AuthRegisterError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
 	//TODO: Add a POST method to refresh an expired JWT token

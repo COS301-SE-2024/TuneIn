@@ -9,7 +9,7 @@ export class RoomDto {
 
 	@ApiProperty()
 	@IsString()
-	room_id: string;
+	roomID: string;
 
 	@ApiProperty()
 	@IsNumber()

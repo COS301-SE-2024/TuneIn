@@ -79,7 +79,7 @@
                    <compodoc-menu mode="normal"></compodoc-menu>
                </div>
                <!-- START CONTENT -->
-               <div class="content injectable">
+               <div class="content class">
                    <div class="content-data">
 
 
@@ -89,9 +89,13 @@
 
 
 
+
+
+
+
 <ol class="breadcrumb">
-  <li class="breadcrumb-item">Injectables</li>
-  <li class="breadcrumb-item" >PrismaService</li>
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >SongInfoEntity</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -115,39 +119,41 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>prisma/prisma.service.ts</code>
+            <code>src/modules/rooms/entities/songinfo.entity.ts</code>
         </p>
 
 
 
-            <p class="comment">
-                <h3>Extends</h3>
-            </p>
-            <p class="comment">
-                        <code>PrismaClient</code>
-            </p>
+
 
 
             <section data-compodoc="block-index">
     <h3 id="index">Index</h3>
     <table class="table table-sm table-bordered index-table">
         <tbody>
-
                 <tr>
                     <td class="col-md-4">
-                        <h6><b>Methods</b></h6>
+                        <h6><b>Properties</b></h6>
                     </td>
                 </tr>
                 <tr>
                     <td class="col-md-4">
                         <ul class="index-list">
                             <li>
-                                    <span class="modifier">Async</span>
-                                <a href="#onModuleDestroy" >onModuleDestroy</a>
+                                    <span class="modifier"></span>
+                                <a href="#artists" >artists</a>
                             </li>
                             <li>
-                                    <span class="modifier">Async</span>
-                                <a href="#onModuleInit" >onModuleInit</a>
+                                    <span class="modifier"></span>
+                                <a href="#cover" >cover</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                <a href="#start_time" >start_time</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                <a href="#title" >title</a>
                             </li>
                         </ul>
                     </td>
@@ -157,124 +163,191 @@
 
 
 
+
         </tbody>
     </table>
 </section>
 
 
-            <section data-compodoc="block-methods">
+            <section data-compodoc="block-properties">
     
-    <h3 id="methods">
-        Methods
+    <h3 id="inputs">
+        Properties
     </h3>
     <table class="table table-sm table-bordered">
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="onModuleDestroy"></a>
+                    <a name="artists"></a>
                     <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>onModuleDestroy</b></span>
-                        <a href="#onModuleDestroy"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier"></span>
+                        <span ><b>artists</b></span>
+                        <a href="#artists"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleDestroy()</code>
-                </td>
-            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>string[]</code>
 
-
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: undefined})<br />
+                        </code>
+                    </td>
+                </tr>
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="13"
-                                    class="link-to-prism">prisma/prisma.service.ts:13</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="8" class="link-to-prism">src/modules/rooms/entities/songinfo.entity.ts:8</a></div>
                         </td>
                     </tr>
 
 
-            <tr>
-                <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
-                </td>
-            </tr>
         </tbody>
     </table>
     <table class="table table-sm table-bordered">
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="onModuleInit"></a>
+                    <a name="cover"></a>
                     <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>onModuleInit</b></span>
-                        <a href="#onModuleInit"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier"></span>
+                        <span ><b>cover</b></span>
+                        <a href="#cover"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleInit()</code>
-                </td>
-            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
 
-
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />
+                        </code>
+                    </td>
+                </tr>
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">prisma/prisma.service.ts:9</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/modules/rooms/entities/songinfo.entity.ts:11</a></div>
                         </td>
                     </tr>
 
 
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
             <tr>
                 <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
+                    <a name="start_time"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>start_time</b></span>
+                        <a href="#start_time"><span class="icon ion-ios-link"></span></a>
+                    </span>
                 </td>
             </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" target="_blank" >Date</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({type: Date})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/modules/rooms/entities/songinfo.entity.ts:14</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="title"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>title</b></span>
+                        <a href="#title"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="5" class="link-to-prism">src/modules/rooms/entities/songinfo.entity.ts:5</a></div>
+                        </td>
+                    </tr>
+
+
         </tbody>
     </table>
 </section>
+
+
+
+
+
+
 
     </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, OnModuleInit, OnModuleDestroy } from &quot;@nestjs/common&quot;;
-import { PrismaClient } from &quot;@prisma/client&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ApiProperty } from &quot;@nestjs/swagger&quot;;
 
-@Injectable()
-export class PrismaService
-	extends PrismaClient
-	implements OnModuleInit, OnModuleDestroy
-{
-	async onModuleInit() {
-		await this.$connect();
-	}
+export class SongInfoEntity {
+	@ApiProperty()
+	title: string;
 
-	async onModuleDestroy() {
-		await this.$disconnect();
-	}
+	@ApiProperty({ type: [String] })
+	artists: string[];
+
+	@ApiProperty()
+	cover: string;
+
+	@ApiProperty({ type: Date })
+	start_time: Date;
 }
 </code></pre>
     </div>
-
 </div>
-
-
-
-
 
 
 
@@ -309,8 +382,8 @@ export class PrismaService
 
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
-            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
-            var COMPODOC_CURRENT_PAGE_URL = 'PrismaService.html';
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'SongInfoEntity.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 

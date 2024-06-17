@@ -79,7 +79,7 @@
                    <compodoc-menu mode="normal"></compodoc-menu>
                </div>
                <!-- START CONTENT -->
-               <div class="content injectable">
+               <div class="content class">
                    <div class="content-data">
 
 
@@ -89,9 +89,13 @@
 
 
 
+
+
+
+
 <ol class="breadcrumb">
-  <li class="breadcrumb-item">Injectables</li>
-  <li class="breadcrumb-item" >PrismaService</li>
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >UpdateRoomDto</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -115,7 +119,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>prisma/prisma.service.ts</code>
+            <code>src/modules/rooms/dto/updateroomdto.ts</code>
         </p>
 
 
@@ -124,157 +128,31 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PrismaClient</code>
+                            <code><a href="../classes/RoomDto.html" target="_self" >PartialType(RoomDto)</a></code>
             </p>
 
 
-            <section data-compodoc="block-index">
-    <h3 id="index">Index</h3>
-    <table class="table table-sm table-bordered index-table">
-        <tbody>
-
-                <tr>
-                    <td class="col-md-4">
-                        <h6><b>Methods</b></h6>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-                        <ul class="index-list">
-                            <li>
-                                    <span class="modifier">Async</span>
-                                <a href="#onModuleDestroy" >onModuleDestroy</a>
-                            </li>
-                            <li>
-                                    <span class="modifier">Async</span>
-                                <a href="#onModuleInit" >onModuleInit</a>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
 
 
 
 
 
-        </tbody>
-    </table>
-</section>
 
 
-            <section data-compodoc="block-methods">
-    
-    <h3 id="methods">
-        Methods
-    </h3>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="onModuleDestroy"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>onModuleDestroy</b></span>
-                        <a href="#onModuleDestroy"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleDestroy()</code>
-                </td>
-            </tr>
 
 
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="13"
-                                    class="link-to-prism">prisma/prisma.service.ts:13</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="onModuleInit"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>onModuleInit</b></span>
-                        <a href="#onModuleInit"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>onModuleInit()</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">prisma/prisma.service.ts:9</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</section>
 
     </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, OnModuleInit, OnModuleDestroy } from &quot;@nestjs/common&quot;;
-import { PrismaClient } from &quot;@prisma/client&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { PartialType } from &quot;@nestjs/swagger&quot;;
+import { RoomDto } from &quot;./room.dto&quot;;
 
-@Injectable()
-export class PrismaService
-	extends PrismaClient
-	implements OnModuleInit, OnModuleDestroy
-{
-	async onModuleInit() {
-		await this.$connect();
-	}
-
-	async onModuleDestroy() {
-		await this.$disconnect();
-	}
-}
+export class UpdateRoomDto extends PartialType(RoomDto) {}
 </code></pre>
     </div>
-
 </div>
-
-
-
-
 
 
 
@@ -309,8 +187,8 @@ export class PrismaService
 
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
-            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
-            var COMPODOC_CURRENT_PAGE_URL = 'PrismaService.html';
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'UpdateRoomDto.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 
