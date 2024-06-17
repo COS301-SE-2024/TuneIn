@@ -1,7 +1,7 @@
 // `config/constants.ts`
 export const SOCKET_EVENTS = {
 	//shared
-	CONNECTION: "connection",
+	CONNECT: "connect",
 	DISCONNECT: "disconnect",
 	JOIN_ROOM: "joinRoom",
 	LEAVE_ROOM: "leaveRoom",
