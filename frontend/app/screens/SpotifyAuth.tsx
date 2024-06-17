@@ -59,6 +59,10 @@ const LoginScreen = () => {
     router.navigate("/screens/SpotifyTesting");
   };
 
+  const navigateToSpotifyTesting = () => {
+    router.navigate("/screens/SpotifyTesting");
+  };
+
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
       <SafeAreaView>
@@ -96,6 +100,23 @@ const LoginScreen = () => {
           }}
         >
           <Text>Sign In with Spotify</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={navigateToSpotifyTesting}
+          style={{
+            backgroundColor: "#1DB954",
+            padding: 10,
+            marginLeft: "auto",
+            marginRight: "auto",
+            width: 300,
+            borderRadius: 25,
+            alignItems: "center",
+            justifyContent: "center",
+            marginVertical: 10
+          }}
+        >
+          <Text>Go to Spotify Testing</Text>
         </Pressable>
       </SafeAreaView>
     </LinearGradient>
