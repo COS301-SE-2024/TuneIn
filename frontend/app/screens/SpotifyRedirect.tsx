@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from 'expo-linking';
 
 const SpotifyRedirect = () => {
-  const router = useRouter();
   const [tokenDetails, setTokenDetails] = useState(null);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const extractToken = async () => {
@@ -25,17 +25,18 @@ const SpotifyRedirect = () => {
             console.log('Token Type:', tokenType);
             console.log('Expires In:', expiresIn);
 
+            // Store token details in local storage
+            await AsyncStorage.setItem('accessToken', accessToken);
+            await AsyncStorage.setItem('tokenType', tokenType);
+            await AsyncStorage.setItem('expiresIn', expiresIn);
+
             setTokenDetails({
               accessToken,
               tokenType,
               expiresIn,
             });
 
-            // Optionally navigate to another screen and pass the token
-            router.push({
-              pathname: '/screens/Home',
-              params: { accessToken },
-            });
+            setSuccess(true);
           } else {
             setError('Access token not found');
             console.error('Access token not found');
@@ -51,26 +52,69 @@ const SpotifyRedirect = () => {
     };
 
     extractToken();
-  }, [router]);
+  }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ScrollView contentContainerStyle={styles.container}>
       {tokenDetails ? (
-        <View>
-          <Text>Access Token: {tokenDetails.accessToken}</Text>
-          <Text>Token Type: {tokenDetails.tokenType}</Text>
-          <Text>Expires In: {tokenDetails.expiresIn}</Text>
+        <View style={styles.tokenContainer}>
+          <Text style={styles.label}>Access Token:</Text>
+          <Text style={styles.token}>{tokenDetails.accessToken}</Text>
+          <Text style={styles.label}>Token Type:</Text>
+          <Text style={styles.token}>{tokenDetails.tokenType}</Text>
+          <Text style={styles.label}>Expires In:</Text>
+          <Text style={styles.token}>{tokenDetails.expiresIn}</Text>
+          {success && <Text style={styles.success}>Token stored successfully in local storage!</Text>}
         </View>
       ) : error ? (
-        <Text>Error: {error}</Text>
+        <Text style={styles.error}>Error: {error}</Text>
       ) : (
-        <View>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text>Authenticating...</Text>
+          <Text style={styles.loadingText}>Authenticating...</Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tokenContainer: {
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  token: {
+    fontSize: 14,
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  success: {
+    marginTop: 20,
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  error: {
+    fontSize: 16,
+    color: 'red',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  loadingText: {
+    marginTop: 10,
+  },
+});
 
 export default SpotifyRedirect;

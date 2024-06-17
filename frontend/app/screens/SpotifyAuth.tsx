@@ -1,11 +1,15 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Pressable, SafeAreaView } from "react-native";
+import { View, Text, Pressable, SafeAreaView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Entypo, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
+import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { VITE_SPOTIFY_CLIENT_ID, VITE_REDIRECT_TARGET } from '@env';
 
+const clientId = VITE_SPOTIFY_CLIENT_ID;
+const redirectTarget = VITE_REDIRECT_TARGET;
 
 const LoginScreen = () => {
   const router = useRouter();
@@ -14,28 +18,24 @@ const LoginScreen = () => {
     const checkTokenValidity = async () => {
       const accessToken = await AsyncStorage.getItem("Spotify token");
       const expirationDate = await AsyncStorage.getItem("expirationDate");
-      console.log("access token", accessToken);
-      console.log("expiration date", expirationDate);
 
       if (accessToken && expirationDate) {
         const currentTime = Date.now();
         if (currentTime < parseInt(expirationDate)) {
-          // here the token is still valid
+          // Token is still valid
           router.navigate("/screens/Home");
         } else {
-          // token would be expired so we need to remove it from the async storage
+          // Token is expired
           await AsyncStorage.removeItem("Spotify token");
           await AsyncStorage.removeItem("expirationDate");
         }
       }
-    }
+    };
 
     checkTokenValidity();
-  }, [])
+  }, []);
 
-  async function authenticate() {
-    const clientId = "4902747b9d7c4f4195b991f29f8a680a";
-    const redirectUri = "http://localhost:8081/screens/SpotifyRedirect";
+  const authenticate = async () => {
     const scopes = [
       "user-read-email",
       "user-library-read",
@@ -45,21 +45,19 @@ const LoginScreen = () => {
       "playlist-read-collaborative",
       "playlist-modify-public" // or "playlist-modify-private"
     ].join(" ");
-  
-    const authUrl =
-      `https://accounts.spotify.com/authorize`+
+
+    const authUrl = `https://accounts.spotify.com/authorize`+
       `?client_id=${clientId}`
       +`&response_type=token`
-      +`&redirect_uri=${encodeURIComponent(redirectUri)}`
+      +`&redirect_uri=${encodeURIComponent(redirectTarget)}`
       +`&show_dialog=true`+
       `&scope=${scopes}`;
   
     // Open Spotify authorization page in a web browser
-    console.log("authUrl: " + authUrl);
     Linking.openURL(authUrl);
-  }
-  
-  
+
+    router.navigate("/screens/SpotifyTesting");
+  };
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
@@ -80,9 +78,8 @@ const LoginScreen = () => {
             marginTop: 40,
           }}
         >
-          Millions of Songs Free on spotify!
+          Millions of Songs Free on Spotify!
         </Text>
-
         <View style={{ height: 80 }} />
         <Pressable
           onPress={authenticate}
@@ -99,67 +96,6 @@ const LoginScreen = () => {
           }}
         >
           <Text>Sign In with Spotify</Text>
-        </Pressable>
-
-        <Pressable
-          style={{
-            backgroundColor: "#131624",
-            padding: 10,
-            marginLeft: "auto",
-            marginRight: "auto",
-            width: 300,
-            borderRadius: 25,
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            marginVertical: 10,
-            borderColor: "#C0C0C0",
-            borderWidth: 0.8
-          }}
-        >
-          <MaterialIcons name="phone-android" size={24} color="white" />
-          <Text style={{ fontWeight: "500", color: "white", textAlign: "center", flex: 1 }}>Continue with phone number</Text>
-        </Pressable>
-
-        <Pressable
-          style={{
-            backgroundColor: "#131624",
-            padding: 10,
-            marginLeft: "auto",
-            marginRight: "auto",
-            width: 300,
-            borderRadius: 25,
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            marginVertical: 10,
-            borderColor: "#C0C0C0",
-            borderWidth: 0.8
-          }}
-        >
-          <AntDesign name="google" size={24} color="red" />
-          <Text style={{ fontWeight: "500", color: "white", textAlign: "center", flex: 1 }}>Continue with Google</Text>
-        </Pressable>
-
-        <Pressable
-          style={{
-            backgroundColor: "#131624",
-            padding: 10,
-            marginLeft: "auto",
-            marginRight: "auto",
-            width: 300,
-            borderRadius: 25,
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-
-            marginVertical: 10,
-            borderColor: "#C0C0C0",
-            borderWidth: 0.8
-          }}
-        >
-          <Entypo name="facebook" size={24} color="blue" />
-          <Text style={{ fontWeight: "500", color: "white", textAlign: "center", flex: 1 }}>Sign In with Facebook</Text>
         </Pressable>
       </SafeAreaView>
     </LinearGradient>
