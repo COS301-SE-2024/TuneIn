@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "scheme": "your-app-scheme",
   "scripts": {
+    "prestart": "node check-versions.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -77,5 +78,9 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
     ]
+  },
+  "engines": {
+    "node": "18.18.2",
+    "npm": "9.8.1"
   }
 }
