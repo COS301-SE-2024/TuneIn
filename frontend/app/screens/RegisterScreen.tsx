@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from '../services/UserPool';
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
+import { Ionicons } from '@expo/vector-icons';
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -26,7 +27,7 @@ const RegisterScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToLogin = () => {
-    router.navigate("/screens/LoginScreen");
+    router.navigate("/screens/LoginStreaming");
   };
 
   const generateUniqueUsername = () => {
@@ -121,12 +122,12 @@ const RegisterScreen: React.FC = () => {
   return (
     <ScrollView className="flex-1 p-4">
       <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
-        <MaterialIcons name="arrow-back" size={24} color="black" />
+      <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
       <View className="items-center mb-10">
         {/* Add Logo Component Here */}
       </View>
-      <Text className="p-4 text-2xl font-bold text-center mb-10">
+      <Text className="p-4 text-3xl font-bold text-center mb-10">
         Join the Fastest Growing Listening Community
       </Text>
       <View className="items-center w-full">
@@ -206,7 +207,7 @@ const RegisterScreen: React.FC = () => {
           />
         </View>
         <TouchableOpacity
-          className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
+          className="w-11/12 h-12 justify-center items-center bg-blue-700 rounded-full mb-5 shadow-lg"
           onPress={handleRegister}
         >
           <Text className="text-white text-lg font-bold">REGISTER</Text>
@@ -221,5 +222,6 @@ const RegisterScreen: React.FC = () => {
     </ScrollView>
   );
 };
+
 
 export default RegisterScreen;
