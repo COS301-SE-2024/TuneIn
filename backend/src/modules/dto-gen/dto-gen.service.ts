@@ -201,7 +201,7 @@ export class DtoGenService {
 	generateBriefUserProfileDto(user: Prisma.users): UserProfileDto {
 		const result: UserProfileDto = {
 			profile_name: user.full_name || "",
-			user_id: user.user_id,
+			userID: user.user_id,
 			username: user.username,
 			profile_picture_url: user.profile_picture || "",
 			followers: {
@@ -408,7 +408,7 @@ export class DtoGenService {
 		for (let i = 0; i < rooms.length; i++) {
 			const r = rooms[i];
 			if (r && r !== null) {
-				const u = userProfiles.find((u) => u.user_id === r.room_creator);
+				const u = userProfiles.find((u) => u.userID === r.room_creator);
 				if (!u || u === null) {
 					throw new Error(
 						"Weird error. Got users from Rooms table but user (" +

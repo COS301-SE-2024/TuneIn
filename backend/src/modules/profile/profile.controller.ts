@@ -56,7 +56,7 @@ export class ProfileController {
 	@Get()
 	@ApiTags("profile")
 	getProfile(@Request() req: any): Promise<UserProfileDto>  {
-		return this.profileService.getProfile(req.user.userId);
+		return this.profileService.getProfile(req.user.id);
 	}
 
 	/*
