@@ -11,7 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from '@expo/vector-icons';
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -55,7 +55,7 @@ const LoginScreen: React.FC = () => {
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
-          AsyncStorage.setItem("token", data.token);
+          localStorage.setItem("token", data.token);
 
           if (data.status === "success") {
             router.navigate("/screens/Home");
@@ -74,15 +74,22 @@ const LoginScreen: React.FC = () => {
   };
 
   const navigateToRegister = () => {
-    router.navigate("/screens/RegisterScreen");
+    router.navigate("/screens/RegisterStreaming");
+  };
+
+  const navigateToForgot = () => {
+    router.navigate("/screens/ForgotPassword");
   };
 
   return (
     <ScrollView className="flex-1 p-4">
+      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
+      <Ionicons name="chevron-back" size={24} color="black" />
+      </TouchableOpacity>
       <View className="items-center mb-10">
         {/* <Text style={styles.logoText}>Logo</Text> */}
       </View>
-      <Text className="p-4 text-2xl font-bold text-center mb-10">
+      <Text className="p-4 text-4xl font-bold text-center mb-10">
         Welcome Back to TuneIn
       </Text>
       <View className="items-center w-full">
@@ -119,9 +126,7 @@ const LoginScreen: React.FC = () => {
         </View>
         <TouchableOpacity
           className="self-end mr-10"
-          onPress={() => {
-            // Implement forgot password functionality here
-          }}
+          onPress= {navigateToForgot}
         >
           <Text className="text-black">Forgot Password?</Text>
         </TouchableOpacity>
@@ -152,5 +157,6 @@ const LoginScreen: React.FC = () => {
     </ScrollView>
   );
 };
+
 
 export default LoginScreen;

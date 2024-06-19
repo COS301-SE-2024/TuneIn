@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions } from 'react-native';
-import { Link, useRouter } from 'expo-router'; // Import Link and useRouter from 'expo-router'
-import MyToggleWidget from '../components/ToggleWidget'; // Adjust the import path as needed
+import { useRouter } from 'expo-router'; 
+import MyToggleWidget from '../components/ToggleWidget'; 
 
 const CreateRoomScreen: React.FC = () => {
-  const router = useRouter(); // Use useRouter instead of useNavigation
+  const router = useRouter(); 
   const [isSwitched, setIsSwitched] = useState(false);
   const [roomName, setRoomName] = useState('');
 

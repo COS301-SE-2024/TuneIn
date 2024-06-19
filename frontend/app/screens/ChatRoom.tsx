@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform } from 'react-native'; // Replace Dimensions with ScrollView
-import { useRouter } from 'expo-router'; // Import useRouter from 'expo-router'
+import { useRouter } from 'expo-router'; 
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
 
