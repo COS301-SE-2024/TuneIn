@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser } from "amazon-cognito-identity-js";
-import UserPool from '../services/UserPool';
 import { Ionicons } from '@expo/vector-icons';
 
 const VerifyEmailScreen: React.FC = () => {
@@ -19,30 +17,21 @@ const VerifyEmailScreen: React.FC = () => {
 
     const verifyCode = () => {
         const code = verificationCode.join("");
-        const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-        const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
-        cognitoUser.confirmRegistration(code, true, (err, result) => {
-            if (err) {
-                Alert.alert(
-                    "Error",
-                    err.message,
-                    [{ text: "OK" }],
-                    { cancelable: false }
-                );
-                return;
-            }
-            Alert.alert(
-                "Success!",
-                "Verification successful",
-                [{ text: "OK" }],
-                { cancelable: false }
-            );
-            navigateToLogin();
-        });
+
+        // Placeholder logic for verifying the code
+        if (code === "123456") {
+            navigateToNewPassword();
+        } else {
+            navigateToIncorrectCode();
+        }
     };
 
-    const navigateToLogin = () => {
-        router.navigate("/screens/LoginScreen");
+    const navigateToIncorrectCode = () => {
+        router.navigate("/screens/IncorrectCode");
+    };
+
+    const navigateToNewPassword = () => {
+        router.navigate("/screens/NewPassword");
     };
 
     return (
@@ -74,18 +63,15 @@ const VerifyEmailScreen: React.FC = () => {
                         ))}
                     </View>
                     <TouchableOpacity style={styles.verifyButton} onPress={verifyCode}>
-                    <Text style={styles.verifyButtonText}>VERIFY</Text>
-                </TouchableOpacity>
+                        <Text style={styles.verifyButtonText}>VERIFY</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.registerContainer}>
+                        <Text style={styles.registerText}>
+                            Didn’t receive code? <Text style={styles.registerBoldText}>Resend</Text>
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
-            <View style={styles.bottomContainer}>
-                
-                <TouchableOpacity style={styles.registerContainer} onPress={navigateToLogin}>
-                    <Text style={styles.registerText}>
-                        Remember Password? <Text style={styles.registerBoldText}>Login</Text>
-                    </Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 };
@@ -100,7 +86,7 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        marginBottom: 50,
+        marginBottom: 100,
     },
     title: {
         fontSize: 32,
