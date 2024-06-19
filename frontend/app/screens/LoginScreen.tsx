@@ -77,6 +77,10 @@ const LoginScreen: React.FC = () => {
     router.navigate("/screens/RegisterStreaming");
   };
 
+  const navigateToForgot = () => {
+    router.navigate("/screens/ForgotPassword");
+  };
+
   return (
     <ScrollView className="flex-1 p-4">
       <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
@@ -122,9 +126,7 @@ const LoginScreen: React.FC = () => {
         </View>
         <TouchableOpacity
           className="self-end mr-10"
-          onPress={() => {
-            // Implement forgot password functionality here
-          }}
+          onPress= {navigateToForgot}
         >
           <Text className="text-black">Forgot Password?</Text>
         </TouchableOpacity>
