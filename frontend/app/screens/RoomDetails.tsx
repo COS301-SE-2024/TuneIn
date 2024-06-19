@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions } from 'react-native';
-import { Link, useRouter } from 'expo-router'; // Import Link and useRouter from 'expo-router'
+import { useRouter } from 'expo-router';
 
 const RoomDetaills: React.FC = () => {
-  const router = useRouter(); // Use useRouter instead of useNavigation
+  const router = useRouter();
   const [isNsfw, setIsNsfw] = useState(false);
   const [isExplicit, setIsExplicit] = useState(false);
   const [name, setName] = useState('');
