@@ -18,4 +18,14 @@ export const SOCKET_EVENTS = {
 	STOP_TYPING: "stopTyping",
 
 	//sync after getting chat history???
+
+	//for server responses
+	CONNECTED: "connected",
+	DISONNECTED: "disconnected",
+	ROOM_JOINED: "roomJoined",
+	ROOM_LEFT: "roomLeft",
+	MESSAGE_SENT: "messageSent",
+	MESSAGE_RECEIVED: "messageReceived",
+	USER_JOINED_ROOM: "userJoinedRoom",
+	USER_LEFT_ROOM: "userLeftRoom",
 };
