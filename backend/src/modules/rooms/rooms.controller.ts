@@ -11,6 +11,7 @@ import {
 	Request,
 } from "@nestjs/common";
 import {
+	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiOkResponse,
 	ApiOperation,
@@ -120,15 +121,25 @@ export class RoomsController {
     response: (2xx for success, 4xx for error)
     */
 	@UseGuards(JwtAuthGuard)
-	@Delete(":room_id")
+	@Delete(":roomID")
 	@ApiTags("rooms")
-	async deleteRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
+	@ApiOkResponse({
+		description: "Room deleted successfully.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "User is not the creator of the room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	@ApiBearerAuth()
+	@ApiOperation({ summary: "Delete a room" })
+	async deleteRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
 		// check using jwt token whether the user is the creator of the room
 		// if not, return 403
 		// if yes, delete the room and return 200
-		const user_id = req.user.userId;
-		console.log("Deleting room", room_id, "by user", user_id);
-		return await this.roomsService.deleteRoom(room_id, user_id);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
 	/*
@@ -137,19 +148,23 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+   	// @ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":room_id/join")
+	@Post(":roomID/join")
 	@ApiTags("rooms")
-	async joinRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
-		// get user_id from req
-
-		// check if the user is already in the room
-		// if yes, return 403
-		// if no, add the user to the room and return 200
-
-		console.log(req.user.id)
-		const user_id = req.user.id;
-		return await this.roomsService.joinRoom(room_id, user_id);
+	@ApiOkResponse({
+		description: "User joined room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Join a room"})
+	@ApiBadRequestResponse({ 
+		description: "User already in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async joinRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.joinRoom(roomID, userID.id)
 	}
 
 	/*
@@ -158,11 +173,23 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":room_id/leave")
+	@Post(":roomID/leave")
 	@ApiTags("rooms")
-	async leaveRoom(@Request() req: any, @Param("room_id") room_id: string): Promise<boolean> {
-		return await this.roomsService.leaveRoom(room_id, req.user.id);
+	@ApiOkResponse({
+		description: "User left room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Leave a room" })
+	@ApiBadRequestResponse({
+		description: "User not in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async leaveRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
 	/*
@@ -171,11 +198,19 @@ export class RoomsController {
     no input
     response: array of ProfileDto
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":room_id/users")
+	@Get(":roomID/users")
 	@ApiTags("rooms")
-	async getRoomUsers(@Request() req: any, @Param("room_id") room_id: string): Promise<UserProfileDto[]> {
-		return await this.roomsService.getRoomUsers(room_id);
+	@ApiOkResponse({
+		description: "The users in the room as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	@ApiOperation({ summary: "Get users in a room" })
+	@ApiParam({ name: "roomID", required: true })
+	async getRoomUsers(@Request() req: any, @Param("roomID") roomID: string): Promise<UserProfileDto[]> {
+		return await this.roomsService.getRoomUsers(roomID);
 	}
 
 	/*
