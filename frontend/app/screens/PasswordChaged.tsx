@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser } from "amazon-cognito-identity-js";
-import UserPool from '../services/UserPool';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 
 const PasswordChangedScreen: React.FC = () => {
     const router = useRouter();

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 
 const VerifyEmailScreen: React.FC = () => {
     const router = useRouter();
-    const { email } = useLocalSearchParams(); // Accessing the email passed from RegisterScreen
-
+   
     const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""]);
 
     const handleCodeChange = (value: string, index: number) => {

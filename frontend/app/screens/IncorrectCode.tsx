@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser } from "amazon-cognito-identity-js";
-import UserPool from '../services/UserPool';
+import React from "react";
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
+import { useRouter} from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 
 const IncorrectCodeScreen: React.FC = () => {

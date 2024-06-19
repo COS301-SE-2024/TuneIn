@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const ForgotPasswordScreen: React.FC = () => {
   const router = useRouter();
-  const { width } = Dimensions.get('window');
 
   const navigateToOTP = () => {
     router.push('screens/OTP');
