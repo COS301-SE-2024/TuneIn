@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "scheme": "your-app-scheme",
   "scripts": {
+    "prestart": "node check-versions.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -14,6 +15,8 @@
   "dependencies": {
     "@aws-amplify/react-native": "^1.1.1",
     "@aws-amplify/ui-react-native": "^2.2.2",
+    "@expo-google-fonts/plus-jakarta-sans": "^0.2.3",
+    "@expo-google-fonts/poppins": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.1.1",
@@ -27,6 +30,7 @@
     "aws-amplify": "^6.3.6",
     "axios": "^1.7.2",
     "expo": "~51.0.9",
+    "expo-font": "^12.0.7",
     "expo-image-picker": "^15.0.5",
     "expo-navigation-bar": "~3.0.5",
     "expo-router": "^3.5.15",
@@ -79,5 +83,9 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
     ]
+  },
+  "engines": {
+    "node": "18.18.2",
+    "npm": "9.8.1"
   }
 }

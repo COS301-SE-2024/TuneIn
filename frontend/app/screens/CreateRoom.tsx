@@ -6,7 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 
 const CreateRoomScreen: React.FC = () => {
-  const router = useRouter(); // Use useRouter instead of useNavigation
+  const router = useRouter(); 
   const [isSwitched, setIsSwitched] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [date, setDate] = useState(new Date());
