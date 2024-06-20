@@ -1,17 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons'; // Import FontAwesome5 for Spotify-like icons
-import { MaterialIcons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
 import io from 'socket.io-client';
-import { Configuration, LiveChatMessageDto, RoomDto, UserProfileDto, UsersApi } from '../../api-client';
+import { LiveChatMessageDto, RoomDto, UserProfileDto } from '../../api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { ChatEventDto } from '../models/ChatEventDto';
-import { useRoute } from '@react-navigation/native';
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -20,21 +17,15 @@ type Message = {
   me?: boolean;
 };
 
-// Define an interface for the route parameters
-interface ChatRoomRouteParams {
-  room: string; // Assuming RoomDto is already defined elsewhere
-}
-
 interface ChatRoomScreenProps {
-  room: RoomDto;
+  roomObj: string;
 }
 
-const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
-  const route = useRoute();
+const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   const router = useRouter();
   const [isChatExpanded, setChatExpanded] = useState(false);
 
-  //const room: RoomDto = roomObj as 
+  const room: RoomDto = JSON.parse(roomObj) as RoomDto;
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfileDto | null>(null);
   const [message, setMessage] = useState('');
@@ -63,6 +54,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
                 Authorization: `Bearer ${token}`,
               },
             });
+            console.log('User\'s own info:', response.data);
             return response.data as UserProfileDto;
           } catch (error) {
             console.error('Error fetching user\'s own info:', error);
@@ -224,6 +216,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
 
   //automatically join the room on component mount
   useEffect(() => {
+    console.log("Joining room...");
+    console.log(user);
     joinRoom();
   }, []);
 
