@@ -186,6 +186,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			get chat history
 			emit to socket: LIVE_MESSAGE, { message: chatHistory }
 			*/
+
+			//auth
+
+			payload = await this.validateInputEvent(payload);
+			const user = payload.sender;
+			let userID: string;
+			if (typeof user === "string") {
+				userID = user;
+			} else if (!user) {
+				throw new Error("No userID provided");
+			} else {
+				userID = user.userID;
+			}
+
+			if (!payload.body) {
+				throw new Error("No body provided");
+			}
+			const roomID: string = payload.body.roomID;
+			if (!roomID) {
+				throw new Error("No roomID provided");
+			}
+			if (!this.dbUtils.roomExists(roomID)) {
+				throw new Error("Room does not exist");
+			}
+
+			const messages: LiveChatMessageDto[] =
+				await this.dtogen.generateMultipleLiveChatMessageDto(
+					await this.roomService.getLiveChatHistory(roomID),
+				);
+			this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}

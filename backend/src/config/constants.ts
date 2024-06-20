@@ -28,4 +28,5 @@ export const SOCKET_EVENTS = {
 	MESSAGE_RECEIVED: "messageReceived",
 	USER_JOINED_ROOM: "userJoinedRoom",
 	USER_LEFT_ROOM: "userLeftRoom",
+	CHAT_HISTORY: "chatHistory",
 };
