@@ -239,7 +239,7 @@ export class RoomsService {
 		if (!sender || sender === null) {
 			throw new Error(
 				"Failed to get user with id '" +
-					message.sender.userID +
+					u +
 					"' and name '" +
 					message.sender.username +
 					"'",
@@ -250,7 +250,7 @@ export class RoomsService {
 			contents: message.messageBody,
 			users: {
 				connect: {
-					user_id: message.sender.userID,
+					user_id: sender.user_id,
 				},
 			},
 		};

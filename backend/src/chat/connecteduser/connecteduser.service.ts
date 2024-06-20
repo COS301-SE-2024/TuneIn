@@ -17,7 +17,11 @@ export class ConnectedUsersService {
 
 	private connectedUsers = new Map<string, liveChatUser>();
 
-	async addConnectedUser(socketId: string, userId: string, roomID?: string) {
+	async addConnectedUser(
+		socketId: string,
+		userId: string,
+		roomID?: string,
+	): Promise<void> {
 		if (this.connectedUsers.has(socketId)) {
 			return;
 		}
@@ -35,6 +39,9 @@ export class ConnectedUsersService {
 		} else {
 			this.connectedUsers.set(socketId, { user });
 		}
+
+		console.log("Added connected user: " + user);
+		console.log("Connected users: " + this.connectedUsers);
 	}
 
 	removeConnectedUser(socketId: string) {
