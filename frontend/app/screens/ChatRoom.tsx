@@ -8,11 +8,8 @@ import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
 import io from 'socket.io-client';
 import { Configuration, LiveChatMessageDto, RoomDto, UserProfileDto, UsersApi } from '../../api-client';
-import { Configuration, LiveChatMessageDto, RoomDto, UserProfileDto, UsersApi } from '../../api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { ChatEventDto } from '../models/ChatEventDto';
-import { useRoute } from '@react-navigation/native';
 import { ChatEventDto } from '../models/ChatEventDto';
 import { useRoute } from '@react-navigation/native';
 
@@ -81,48 +78,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
     };
     getTokenAndSelf();
 
-  const [user, setUser] = useState<UserProfileDto | null>(null);
-  const [message, setMessage] = useState('');
-  /*
-  const [messages, setMessages] = useState<Message[]>([
-    { username: 'JohnDoe', message: 'This is a sample comment.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
-    { username: 'JaneSmith', message: 'Another sample comment here.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
-    { username: 'Me', message: 'This is my own message.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true },
-  ]);
-  */
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
-  const [isRoomCreator, setIsRoomCreator] = useState(true); // Replace with actual logic to determine if the user is the creator
-  const socket = useRef(null);
-  
-  //init & connect to socket
-  useEffect(() => {
-    const getTokenAndSelf = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('token');
-        setToken(storedToken);
-        const whoami = async (token: string | null, type?: string) => {
-          try {
-            const response = await axios.get(`${BASE_URL}/users`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            return response.data as UserProfileDto;
-          } catch (error) {
-            console.error('Error fetching user\'s own info:', error);
-            //user is not authenticated
-          }
-        };
-        setUser(await whoami(token));
-      }
-      catch (error) {
-        console.error('Error fetching token:', error);
-        //user is not authenticated
-      }
-    };
-    getTokenAndSelf();
-
     socket.current = io(BASE_URL + "/live-chat", {
       transports: ["websocket"],
     });
@@ -133,21 +88,13 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
         userID: user.userID,
       }
       socket.current.emit("connectUser", input);
-      const input: ChatEventDto = {
-        userID: user.userID,
-      }
-      socket.current.emit("connectUser", input);
     });
 
-    socket.current.on("connected", (response: ChatEventDto) => {
-      //an event that should be in response to the connectUser event
     socket.current.on("connected", (response: ChatEventDto) => {
       //an event that should be in response to the connectUser event
       console.log("User connected:", response);
     });
 
-    socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-      //if someone joins (could be self)
     socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
       //if someone joins (could be self)
       console.log("User joined room:", response);
@@ -162,22 +109,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
       };
       socket.current.emit("getChatHistory", input);
     });
-      const input: ChatEventDto = {
-        userID: user.userID,
-        body: {
-          messageBody: "",
-          sender: user,
-          roomID: room.roomID,
-          dateCreated: new Date(),
-        },
-      };
-      socket.current.emit("getChatHistory", input);
-    });
 
-    socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-      //an event that should be in response to the getChatHistory event
-      const chatHistory = history.map((msg) => ({ message: msg, me: msg.sender.userID === user.userID }));
-      setMessages(chatHistory);
     socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
       //an event that should be in response to the getChatHistory event
       const chatHistory = history.map((msg) => ({ message: msg, me: msg.sender.userID === user.userID }));
@@ -192,25 +124,11 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
         setMessage('');
       }
       setMessages(prevMessages => [...prevMessages, { message, me: message.sender.userID === user.userID }]);
-    socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-      const message = newMessage.body;
-      const me: boolean = message.sender.userID === user.userID;
-      if (me){
-        //clear message only after it has been sent & confirmed as received
-        setMessage('');
-      }
-      setMessages(prevMessages => [...prevMessages, { message, me: message.sender.userID === user.userID }]);
     });
 
-    socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-      //an event that should be in response to the leaveRoom event (could be self or other people)
     socket.current.on("userLeftRoom", (response: ChatEventDto) => {
       //an event that should be in response to the leaveRoom event (could be self or other people)
       console.log("User left room:", response);
-    });
-
-    socket.current.on("error", (response: ChatEventDto) => {
-      console.error("Error:", response.errorMessage);
     });
 
     socket.current.on("error", (response: ChatEventDto) => {
@@ -234,16 +152,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
         messageBody: message,
         sender: user,
         roomID: room.roomID,
-        roomID: room.roomID,
         dateCreated: new Date(),
       };
-      const input: ChatEventDto = {
-        userID: user.userID,
-        body: newMessage,
-      };
-      socket.current.emit("sendMessage", input);
-      // do not add the message to the state here, wait for the server to send it back
-      //setMessages([...messages, { message: newMessage, me: true }]);
       const input: ChatEventDto = {
         userID: user.userID,
         body: newMessage,
@@ -255,30 +165,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
   };
 
   const joinRoom = () => {
-    const input: ChatEventDto = {
-      userID: user.userID,
-      body: {
-        messageBody: "",
-        sender: user,
-        roomID: room.roomID,
-        dateCreated: new Date(),
-      },
-    };
-    socket.current.emit("joinRoom", input);
-  };
-
-  const leaveRoom = () => {
-    const input: ChatEventDto = {
-      userID: user.userID,
-      body: {
-        messageBody: "",
-        sender: user,
-        roomID: room.roomID,
-        dateCreated: new Date(),
-      },
-    };
-    socket.current.emit("leaveRoom", input);
-  }
     const input: ChatEventDto = {
       userID: user.userID,
       body: {
