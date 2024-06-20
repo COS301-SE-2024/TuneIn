@@ -14,9 +14,7 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:3000';
 
 type Message = {
-  username: string;
-  message: string;
-  profilePictureUrl: string;
+  message: LiveChatMessageDto;
   me?: boolean;
 };
 
@@ -102,7 +100,7 @@ const ChatRoomScreen: React.FC = () => {
         roomID: "yourRoomID",
         dateCreated: new Date(),
       };
-      setMessages([...messages, newMessage]);
+      setMessages([...messages, { message: newMessage, me: true }]);
       setMessage(''); // Clear input after sending message
     }
   };
@@ -208,12 +206,12 @@ const ChatRoomScreen: React.FC = () => {
                 <View style={{ marginBottom: 10 }}>
                   <View style={{ borderBottomWidth: 1, borderBottomColor: '#D1D5DB', paddingBottom: 10 }}></View>
                   <View style={{ marginTop: 10 }}>
-                    {messages.map((msg, index) => (
+                    {messages.map((msg,index) => (
                       <CommentWidget
                         key={index}
-                        username={msg.username}
-                        message={msg.message}
-                        profilePictureUrl={msg.profilePictureUrl}
+                        username={msg.message.sender.username}
+                        message={msg.message.messageBody}
+                        profilePictureUrl={msg.message.sender.profilePictureUrl}
                         me={msg.me}
                       />
                     ))}
