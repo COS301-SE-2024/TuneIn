@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Foundation } from '@expo/vector-icons'; // Import Foundation icons from Expo
+import { Foundation } from '@expo/vector-icons';
 
 const Voting = ({ voteCount, setVoteCount, index, swapSongs }) => {
   const [upvoted, setUpvoted] = useState(false);
@@ -8,7 +8,7 @@ const Voting = ({ voteCount, setVoteCount, index, swapSongs }) => {
 
   const handleUpvote = () => {
     if (!upvoted) {
-      setVoteCount(voteCount + 1);
+      setVoteCount((prevCount) => prevCount + 1, index);
       setUpvoted(true);
       setDownvoted(false);
       swapSongs(index, 'up');
@@ -17,7 +17,7 @@ const Voting = ({ voteCount, setVoteCount, index, swapSongs }) => {
 
   const handleDownvote = () => {
     if (!downvoted) {
-      setVoteCount(voteCount - 1);
+      setVoteCount((prevCount) => prevCount - 1, index);
       setUpvoted(false);
       setDownvoted(true);
       swapSongs(index, 'down');

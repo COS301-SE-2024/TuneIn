@@ -7,6 +7,10 @@ import SongList from '../components/SongList'; // Import the SongList component
 const Playlist = () => {
   const router = useRouter();
 
+  const navigateToAddSong = () => {
+    router.push('screens/AddSongPage');
+  };
+
   // Sample data for songs
   const [songs, setSongs] = useState([
     {
@@ -46,6 +50,12 @@ const Playlist = () => {
     },
     // Add more songs here
   ]);
+
+  const setVoteCount = (newCount, index) => {
+    const updatedSongs = [...songs];
+    updatedSongs[index].voteCount = newCount;
+    setSongs(updatedSongs);
+  };
 
   // Function to swap songs based on vote count
   const swapSongs = (index, direction) => {
@@ -90,12 +100,13 @@ const Playlist = () => {
             showVoting={song.showVoting}
             index={index} // Pass index for swapping
             swapSongs={swapSongs} // Pass swapSongs function
+            // setVoteCount={setVoteCount} // Pass setVoteCount function
           />
         ))}
       </View>
       <View style={styles.addButtonContainer}>
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>Add Song</Text>
+        <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+          <Text style={styles.addButtonText}>Add Song</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -129,16 +140,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  saveButton: {
+  addButton: {
     backgroundColor: '#08BDBD',
     borderRadius: 24,
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 20,
-    width :'95%',
+    width: '95%',
     marginBottom: 15,
   },
-  saveButtonText: {
+  addButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
