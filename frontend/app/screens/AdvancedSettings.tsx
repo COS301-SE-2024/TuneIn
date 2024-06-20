@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
-import { useRouter } from 'expo-router'; // Import useRouter from 'expo-router'
+import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Import the icon
 
 const AdvancedSettings = () => {
-  const router = useRouter(); // Initialize router instance
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState(null);
   const [toggle1, setToggle1] = useState(true);
   const [toggle2, setToggle2] = useState(true);
@@ -20,8 +21,11 @@ const AdvancedSettings = () => {
   const toggleSwitch4 = () => setToggle4(previousState => !previousState);
 
   const goToEditScreen = () => {
-    // Navigate to edit screen
-    router.navigate("/screens/EditRoomInfo");
+    router.navigate("/screens/EditRoom");
+  };
+
+  const goToChat = () => {
+    router.navigate("/screens/ChatRoom");
   };
 
   return (
@@ -63,10 +67,8 @@ const AdvancedSettings = () => {
 
       <View style={styles.toggleContainer}>
         <View style={styles.toggleItem}>
-          <View style={styles.toggleHeaderContainer}>
-            <Text style={styles.toggleHeader}>Searchability
-            {'\n'}
-            </Text>
+          <Text style={styles.toggleHeader}>Searchability</Text>
+          <View style={styles.toggleSwitchContainer}>
             <Switch
               value={toggle1}
               onValueChange={toggleSwitch1}
@@ -75,8 +77,8 @@ const AdvancedSettings = () => {
           <Text style={styles.toggleDescription}>Make this room searchable</Text>
         </View>
         <View style={styles.toggleItem}>
-          <View style={styles.toggleHeaderContainer}>
-            <Text style={styles.toggleHeader}>Listeners can add</Text>
+          <Text style={styles.toggleHeader}>Listeners can add</Text>
+          <View style={styles.toggleSwitchContainer}>
             <Switch
               value={toggle2}
               onValueChange={toggleSwitch2}
@@ -85,8 +87,8 @@ const AdvancedSettings = () => {
           <Text style={styles.toggleDescription}>Allow everyone to add tracks</Text>
         </View>
         <View style={styles.toggleItem}>
-          <View style={styles.toggleHeaderContainer}>
-            <Text style={styles.toggleHeader}>Enable chat in room</Text>
+          <Text style={styles.toggleHeader}>Enable chat in room</Text>
+          <View style={styles.toggleSwitchContainer}>
             <Switch
               value={toggle3}
               onValueChange={toggleSwitch3}
@@ -95,8 +97,8 @@ const AdvancedSettings = () => {
           <Text style={styles.toggleDescription}>Listeners can use chat functionality</Text>
         </View>
         <View style={styles.toggleItem}>
-          <View style={styles.toggleHeaderContainer}>
-            <Text style={styles.toggleHeader}>Can vote</Text>
+          <Text style={styles.toggleHeader}>Can vote</Text>
+          <View style={styles.toggleSwitchContainer}>
             <Switch
               value={toggle4}
               onValueChange={toggleSwitch4}
@@ -108,9 +110,13 @@ const AdvancedSettings = () => {
 
       <TouchableOpacity style={styles.editButton} onPress={goToEditScreen}>
         <Text style={styles.editButtonText}>Edit Room Details</Text>
+        <Icon name="edit" size={20} color="black" />
       </TouchableOpacity>
 
-      {/* Button to save changes can be added here if needed */}
+      <TouchableOpacity style={styles.saveButton} onPress={goToChat}>
+        <Text style={styles.saveButtonText}>Save Changes</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
@@ -118,14 +124,14 @@ const AdvancedSettings = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingTop: 20,
   },
   closeButton: {
@@ -135,6 +141,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
   },
   sectionHeader: {
     fontSize: 18,
@@ -161,34 +169,43 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   toggleItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 20,
-  },
-  toggleHeaderContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   toggleHeader: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 10,
+  },
+  toggleSwitchContainer: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   toggleDescription: {
-    flex: 1,
     fontSize: 14,
     color: 'grey',
-    marginLeft: 10,
+    marginTop: 5,
   },
   editButton: {
-    marginTop: 30,
-    backgroundColor: 'blue',
-    padding: 10,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 5,
+    justifyContent: 'center',
+    marginBottom: 0,
+    marginTop: 20,
   },
   editButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+    marginRight: 5,
+  },
+  saveButton: {
+    backgroundColor: '#08BDBD',
+    borderRadius: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 32,
+  },
+  saveButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
