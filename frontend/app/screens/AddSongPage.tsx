@@ -34,6 +34,10 @@ const AddSongPage = () => {
     setSongs(songs.filter(song => song.id !== id));
   };
 
+  const navigateToPlaylist = () => {
+    router.navigate("/screens/Playlist");
+  };
+
   const addSong = () => {
     // Add functionality to add a new song
     // For demonstration, a new song is added to the list with a hardcoded value
@@ -71,8 +75,8 @@ const AddSongPage = () => {
         )}
       />
       <View style={styles.addButtonContainer}>
-        <TouchableOpacity style={styles.saveButton} onPress={addSong}>
-          <Text style={styles.saveButtonText}>Add Song ({songs.length})</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={navigateToPlaylist}>
+          <Text style={styles.saveButtonText}>Add To Playlist ({songs.length})</Text>
         </TouchableOpacity>
       </View>
     </View>

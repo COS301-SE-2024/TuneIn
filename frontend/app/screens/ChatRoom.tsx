@@ -24,7 +24,7 @@ const ChatRoomScreen: React.FC = () => {
     { username: 'Me', message: 'This is my own message.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true },
   ]);
   const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
-  const [isRoomCreator, setIsRoomCreator] = useState(false); // false will lead to RoomInfo, true will lead to AdvancedSettings
+  const [isRoomCreator, setIsRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
 
   // Get screen height to calculate the expanded height
   const screenHeight = Dimensions.get('window').height;
