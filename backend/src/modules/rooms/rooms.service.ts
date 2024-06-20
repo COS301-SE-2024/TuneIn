@@ -191,6 +191,14 @@ export class RoomsService {
 		return messages;
 	}
 
+	async getLiveChatHistoryDto(roomID: string): Promise<LiveChatMessageDto[]> {
+		const messages: PrismaTypes.message[] =
+			await this.getLiveChatHistory(roomID);
+		const result: LiveChatMessageDto[] =
+			await this.dtogen.generateMultipleLiveChatMessageDto(messages);
+		return result;
+	}
+
 	async createMessage(message: Prisma.messageCreateInput): Promise<string> {
 		const newMessage: PrismaTypes.message | null =
 			await this.prisma.message.create({
@@ -216,7 +224,7 @@ export class RoomsService {
 			throw new Error("Room with id '" + message.roomID + "' does not exist");
 		}
 
-		const u: string = message.sender.userID;
+		let u: string = message.sender.userID;
 		if (userID) {
 			u = userID;
 		}

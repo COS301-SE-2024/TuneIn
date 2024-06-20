@@ -212,9 +212,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 
 			const messages: LiveChatMessageDto[] =
-				await this.dtogen.generateMultipleLiveChatMessageDto(
-					await this.roomService.getLiveChatHistory(roomID),
-				);
+				await this.roomService.getLiveChatHistoryDto(roomID);
 			this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
 		} catch (error) {
 			this.handleThrownError(client, error);

@@ -26,6 +26,7 @@ import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "src/auth/auth.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
 
 @Controller("rooms")
 export class RoomsController {
@@ -231,5 +232,23 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): SongInfoDto {
 		return this.roomsService.getCurrentSong(roomID);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(":roomID/chat/history")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get room's chat history" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "The chat history as an array of LiveChatMessageDto.",
+		type: LiveChatMessageDto,
+		isArray: true,
+	})
+	async getLiveChatHistory(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<LiveChatMessageDto[]> {
+		return await this.roomsService.getLiveChatHistoryDto(roomID);
 	}
 }
