@@ -1,36 +1,29 @@
-import React from "react";
-import Home from "./screens/WelcomeScreen";
-import SpotifyAuth from "./screens/SpotifyAuth";
 
-export default function App() {
-	return <SpotifyAuth />;
-}
+import React, { useEffect } from "react";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoginScreen from "./screens/LoginScreen";
 
-// import React, { useEffect } from "react";
-// import { useRouter } from "expo-router";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-// import LoginScreen from "./screens/LoginScreen";
+const App: React.FC = () => {
+  const router = useRouter();
 
-// const App: React.FC = () => {
-//   const router = useRouter();
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem("cognitoToken");
+      if (token) {
+        // Validate token (if needed)
+        router.push("/screens/Home");
+      } else {
+        router.push("/screens/WelcomeScreen");
+      }
+    };
 
-//   useEffect(() => {
-//     const checkToken = async () => {
-//       const token = await AsyncStorage.getItem("cognitoToken");
-//       if (token) {
-//         // Validate token (if needed)
-//         router.push("/screens/Home");
-//       } else {
-//         router.push("/screens/WelcomeScreen");
-//       }
-//     };
+    checkToken();
+  }, []);
 
-//     checkToken();
-//   }, []);
+  return (
+    <LoginScreen />
+  );
+};
 
-//   return (
-//     <LoginScreen />
-//   );
-// };
-
-// export default App;
+export default App;

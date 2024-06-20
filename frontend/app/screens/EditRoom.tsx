@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { Room } from "../models/Room";
 
 const EditRoom: React.FC = () => {
     const router = useRouter();
+    const navigation = useNavigation(); // Get navigation object
     const { room: roomParam } = useLocalSearchParams();
     const room: Room = roomParam ? JSON.parse(roomParam as string) : {};
 
@@ -29,56 +30,133 @@ const EditRoom: React.FC = () => {
         router.back();
     };
 
+    const handleEditPlaylists = () => {
+        // Navigate to EditPlaylists screen and pass room ID and playlists field
+        router.navigate({
+            pathname: "/screens/EditPlaylists",
+            params: {
+                roomId: room.id,
+                playlists: room.playlist,
+            },
+        });
+    };
+
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-white">
-            <View className="p-5 flex-1">
-                <Text className="text-3xl font-bold text-gray-800 mb-3">Edit Room</Text>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+            <View style={styles.container}>
+                <Text style={styles.heading}>Edit Room</Text>
                 
-                <Text className="text-gray-800 mb-1">Room Name:</Text>
+                <Text style={styles.label}>Room Name:</Text>
                 <TextInput
-                    className="bg-gray-200 p-3 rounded mb-3"
+                    style={styles.input}
                     value={name}
                     onChangeText={setName}
                 />
 
-                <Text className="text-gray-800 mb-1">Song Name:</Text>
+                <Text style={styles.label}>Song Name:</Text>
                 <TextInput
-                    className="bg-gray-200 p-3 rounded mb-3"
+                    style={styles.input}
                     value={songName}
                     onChangeText={setSongName}
                 />
 
-                <Text className="text-gray-800 mb-1">Artist Name:</Text>
+                <Text style={styles.label}>Artist Name:</Text>
                 <TextInput
-                    className="bg-gray-200 p-3 rounded mb-3"
+                    style={styles.input}
                     value={artistName}
                     onChangeText={setArtistName}
                 />
 
-                <Text className="text-gray-800 mb-1">Description:</Text>
+                <Text style={styles.label}>Description:</Text>
                 <TextInput
-                    className="bg-gray-200 p-3 rounded mb-3"
+                    style={[styles.input, styles.multilineInput]}
                     value={description}
                     onChangeText={setDescription}
                     multiline
                 />
 
-                <Text className="text-gray-800 mb-1">Tags (comma separated):</Text>
+                <Text style={styles.label}>Tags (comma separated):</Text>
                 <TextInput
-                    className="bg-gray-200 p-3 rounded mb-5"
+                    style={styles.input}
                     value={tags}
                     onChangeText={setTags}
                 />
 
                 <TouchableOpacity
-                    className="bg-blue-500 rounded-full py-3 px-6"
+                    style={styles.saveButton}
                     onPress={handleSave}
                 >
-                    <Text className="text-white text-center text-lg font-bold">Save</Text>
+                    <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+
+                {/* Edit Playlist Button */}
+                <TouchableOpacity
+                    style={styles.editPlaylistButton}
+                    onPress={handleEditPlaylists}
+                >
+                    <Text style={styles.editPlaylistButtonText}>Edit Playlist</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
     );
 };
+
+const styles = StyleSheet.create({
+    scrollView: {
+        flexGrow: 1,
+        backgroundColor: "#ffffff",
+    },
+    container: {
+        padding: 20,
+        flex: 1,
+    },
+    heading: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#333333",
+        marginBottom: 20,
+    },
+    label: {
+        color: "#333333",
+        marginBottom: 5,
+    },
+    input: {
+        backgroundColor: "#eeeeee",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10,
+        fontSize: 16,
+    },
+    multilineInput: {
+        minHeight: 100,
+        textAlignVertical: "top", // For Android
+    },
+    saveButton: {
+        backgroundColor: "#1E90FF",
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginTop: 20,
+    },
+    saveButtonText: {
+        color: "#ffffff",
+        fontSize: 18,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    editPlaylistButton: {
+        backgroundColor: "#4CAF50",
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginTop: 10,
+    },
+    editPlaylistButtonText: {
+        color: "#ffffff",
+        fontSize: 18,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+});
 
 export default EditRoom;
