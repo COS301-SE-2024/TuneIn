@@ -82,8 +82,8 @@ const ChatRoomScreen: React.FC = () => {
       {!isChatExpanded && (
         <View style={{ paddingHorizontal: 10, paddingBottom: 40, flex: 1 }}>
           <SongRoomWidget
-            songName="Your Song Name"
-            artist="Your Artist"
+            songName="Eternal Sunshine"
+            artist="Ariana Grande"
             albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
             progress={0.5}
             time1="1:30"
