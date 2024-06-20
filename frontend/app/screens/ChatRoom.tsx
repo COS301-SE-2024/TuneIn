@@ -38,7 +38,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   */
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
-  const [isRoomCreator, setIsRoomCreator] = useState(true); // Replace with actual logic to determine if the user is the creator
+  const [isRoomCreator, setIsRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
   const socket = useRef(null);
   
   //init & connect to socket
@@ -210,8 +210,8 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
     setChatExpanded(!isChatExpanded);
   };
 
-  const navigateToRoomInfo = () => {
-    router.navigate("/screens/RoomInfo");
+  const navigateToRoomOptions = () => {
+    router.navigate("/screens/RoomOptions");
   };
 
   //automatically join the room on component mount
@@ -227,15 +227,15 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>×</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={isRoomCreator ? navigateToAdvancedSettings : navigateToRoomInfo}>
+        <TouchableOpacity onPress={isRoomCreator ? navigateToAdvancedSettings : navigateToRoomOptions}>
           <FontAwesome5 name="ellipsis-h" size={15} color="black" />
         </TouchableOpacity>
       </View>
       {!isChatExpanded && (
         <View style={{ paddingHorizontal: 10, paddingBottom: 40, flex: 1 }}>
           <SongRoomWidget
-            songName="Your Song Name"
-            artist="Your Artist"
+            songName="Eternal Sunshine"
+            artist="Ariana Grande"
             albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
             progress={0.5}
             time1="1:30"

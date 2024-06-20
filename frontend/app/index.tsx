@@ -1,5 +1,5 @@
 import React from "react";
-import WelcomeScreen from "./screens/WelcomeScreen";
+import Home from "./screens/EditRoom";
 
 export default function App() {
 	return <WelcomeScreen />;
