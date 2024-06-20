@@ -208,15 +208,22 @@ export class RoomsService {
 		return newMessage.message_id;
 	}
 
-	async createLiveChatMessage(message: LiveChatMessageDto): Promise<string> {
+	async createLiveChatMessage(
+		message: LiveChatMessageDto,
+		userID?: string,
+	): Promise<string> {
 		if (!(await this.roomExists(message.roomID))) {
 			throw new Error("Room with id '" + message.roomID + "' does not exist");
 		}
 
+		const u: string = message.sender.userID;
+		if (userID) {
+			u = userID;
+		}
 		const sender: PrismaTypes.users | null = await this.prisma.users.findUnique(
 			{
 				where: {
-					user_id: message.sender.userID,
+					user_id: u,
 				},
 			},
 		);
@@ -232,8 +239,7 @@ export class RoomsService {
 		}
 
 		const newMessage: Prisma.messageCreateInput = {
-			contents: message.body,
-			date_sent: message.date_created,
+			contents: message.messageBody,
 			users: {
 				connect: {
 					user_id: message.sender.userID,

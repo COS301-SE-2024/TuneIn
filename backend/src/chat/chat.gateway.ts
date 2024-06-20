@@ -13,6 +13,8 @@ import { ChatEventDto } from "./dto/chatevent.dto";
 import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
+import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
+import { RoomsService } from "src/modules/rooms/rooms.service";
 
 @WebSocketGateway({
 	namespace: "/live-chat",
@@ -27,6 +29,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly connectedUsers: ConnectedUsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private readonly roomService: RoomsService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -122,6 +125,45 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			create message
 			emit to room: LIVE_MESSAGE, { message: payload.message }
 			*/
+
+			//auth
+
+			payload = await this.validateInputEvent(payload);
+			const user = payload.sender;
+			let userID: string;
+			if (typeof user === "string") {
+				userID = user;
+			} else if (!user) {
+				throw new Error("No userID provided");
+			} else {
+				userID = user.userID;
+			}
+
+			if (!payload.body) {
+				throw new Error("No body provided");
+			}
+			const roomID: string = payload.body.roomID;
+			if (!roomID) {
+				throw new Error("No roomID provided");
+			}
+			if (!this.dbUtils.roomExists(roomID)) {
+				throw new Error("Room does not exist");
+			}
+
+			const message: LiveChatMessageDto = payload.body;
+			const messageID: string = await this.roomService.createLiveChatMessage(
+				message,
+				userID,
+			);
+			const finalMessage: LiveChatMessageDto =
+				await this.dtogen.generateLiveChatMessageDto(messageID);
+			const response: ChatEventDto = {
+				event: SOCKET_EVENTS.LIVE_MESSAGE,
+				sender: finalMessage.sender,
+				date_created: new Date(),
+				body: finalMessage,
+			};
+			this.server.to(roomID).emit(SOCKET_EVENTS.LIVE_MESSAGE, response);
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}

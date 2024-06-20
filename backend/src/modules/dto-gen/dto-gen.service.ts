@@ -5,6 +5,7 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
 
 /*
 ## UserProfileDto (User Profile Info)
@@ -428,5 +429,49 @@ export class DtoGenService {
 
 	async generateUserDto(): Promise<UserDto | null> {
 		return new UserDto();
+	}
+
+	async generateLiveChatMessageDto(
+		messageID: string,
+	): Promise<LiveChatMessageDto> {
+		const roomMessage: Prisma.room_message | null =
+			await this.prisma.room_message.findUnique({
+				where: { message_id: messageID },
+			});
+
+		if (!roomMessage || roomMessage === null) {
+			throw new Error(
+				"Message with id " +
+					messageID +
+					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR01",
+			);
+		}
+
+		const message: Prisma.message | null = await this.prisma.message.findUnique(
+			{
+				where: { message_id: messageID },
+			},
+		);
+
+		if (!message || message === null) {
+			throw new Error(
+				"Message with id " +
+					messageID +
+					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR02",
+			);
+		}
+
+		const sender: UserProfileDto = await this.generateUserProfileDto(
+			message.sender,
+		);
+
+		const result: LiveChatMessageDto = {
+			messageBody: message.contents,
+			sender: sender,
+			roomID: roomMessage.room_id,
+			dateCreated: message.date_sent,
+		};
+
+		return result;
 	}
 }
