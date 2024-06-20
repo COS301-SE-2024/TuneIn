@@ -10,7 +10,6 @@ const CreateRoomScreen: React.FC = () => {
   const [isSwitched, setIsSwitched] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [newRoom, setNewRoom] = useState({
-    room_name: '',
     is_permanent: true,
     is_private: false,
   });
@@ -31,15 +30,31 @@ const CreateRoomScreen: React.FC = () => {
 
   const navigateToRoomDetails = () => {
     console.log('Navigating to RoomDetails screen');
-    if (roomName === '') {
-      Alert.alert(
-        "Invalid Room Name",
-        "Please enter a room name.",
+    if (isSwitched) {
+      const currentDate = moment(date).format('MM/DD/YYYY');
+      const currentTime = moment(time).format('HH:mm');
+      console.log('Date before:', date)
+      const newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
+      
+      if (newDate < new Date()) {
+        Alert.alert(
+          "Invalid Date",
+          "Please select a future date and time.",
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+        return;
+      }
+      Alert.alert
+      (
+        "Scheduled Room",
+        `Room will be scheduled for ${currentDate} at ${currentTime}.`,
         [{ text: "OK" }],
         { cancelable: false }
       );
-      return;
+      newRoom['start_date'] = newDate;
     }
+    newRoom['is_scheduled'] = isSwitched;
     const room = JSON.stringify(newRoom);
     router.navigate({
       pathname: '/screens/RoomDetails',
@@ -51,12 +66,15 @@ const CreateRoomScreen: React.FC = () => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === 'ios');
     setDate(currentDate);
+    console.log('Selected date:', selectedDate, currentDate, moment(currentDate).format('MM/DD/YYYY'))
+    currentDate.setHours(time.getHours());
   };
 
   const handleTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
     setShowTimePicker(Platform.OS === 'ios');
     setTime(currentTime);
+    console.log('Selected time:', selectedTime, currentTime, moment(currentTime).format('HH:mm'))
   };
 
   return (
@@ -88,14 +106,14 @@ const CreateRoomScreen: React.FC = () => {
                 onChanged={handleToggleChange2}
               />
             </View>
-            <View style={{ marginBottom: 20 }}>
+            {/* <View style={{ marginBottom: 20 }}>
               <TextInput
                 style={{ borderWidth: 1, borderColor: '#70c6d8', borderRadius: 10, padding: 10, backgroundColor: '#F9FAFB' }}
                 placeholder="Add room name"
                 value={roomName}
                 onChangeText={setRoomName}
               />
-            </View>
+            </View> */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Schedule for later</Text>
               <Switch
