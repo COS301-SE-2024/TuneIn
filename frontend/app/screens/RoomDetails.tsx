@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button } from 'react-native';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 
 const RoomDetails: React.FC = () => {
   const router = useRouter();
   const { room } = useLocalSearchParams();
   const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
-  console.log('room', newRoom);
+  // console.log('room', newRoom);
   const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
     name: '',
     description: '',
@@ -24,8 +26,60 @@ const RoomDetails: React.FC = () => {
 
   const screenWidth = Dimensions.get('window').width;
 
-  const navigateToChatRoom = () => {
-    router.navigate("/screens/ChatRoom");
+  const navigateToChatRoom = async () => {
+    newRoom['has_nsfw_content'] = roomDetails.isNsfw;
+    if(roomDetails.language !== '') {
+      newRoom['language'] = roomDetails.language;
+    }
+    else {
+      newRoom['language'] = 'English';
+    }
+    if(roomDetails.genre !== '')
+      newRoom['genre'] = roomDetails.genre;
+    else{
+      // delete genre field from newRoom
+      delete newRoom['genre'];
+    }
+    if(roomDetails.description !== '')
+      newRoom['description'] = roomDetails.description;
+    else{
+      // delete description field from newRoom
+      delete newRoom['description'];
+    }
+    newRoom['has_explicit_content'] = roomDetails.isExplicit;
+    newRoom['room_name'] = roomDetails.name;
+    console.log('New room:', newRoom, newRoom['room_name']);
+    console.log('Navigating to ChatRoom screen');
+    const token = await AsyncStorage.getItem('token');
+    console.log('Token:', token);
+    if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
+      // alert user to enter room name
+      Alert.alert(
+        "Room Name Required",
+        "Please enter a room name.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+    fetch("http://10.32.253.158:3000/users/rooms", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` || ""
+      },
+      body: JSON.stringify(newRoom),
+    }).then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      router.navigate({
+        pathname: '/screens/ChatRoom',
+        params: {room: JSON.stringify(data.room)}
+      });
+    }).catch((error) => {
+      console.error("Error:", error);
+    });
+    // router.navigate("/screens/ChatRoom");
   };
 
   const pickImage = async () => {
@@ -56,7 +110,7 @@ const RoomDetails: React.FC = () => {
           <View style={{ width: 20 }} />
         </View>
         <View style={{ paddingHorizontal: 10, paddingVertical: 20 }}>
-          {_buildInputField('Room Name', roomDetails.name, (value) => handleInputChange('name', value))}
+          {_buildInputField('Room Name (required)', roomDetails.name, (value) => handleInputChange('name', value))}
           {_buildInputField('Description', roomDetails.description, (value) => handleInputChange('description', value), 4)}
           {_buildInputField('Genre', roomDetails.genre, (value) => handleInputChange('genre', value))}
           {_buildInputField('Language', roomDetails.language, (value) => handleInputChange('language', value))}
