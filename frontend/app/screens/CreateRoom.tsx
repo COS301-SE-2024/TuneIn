@@ -106,14 +106,6 @@ const CreateRoomScreen: React.FC = () => {
                 onChanged={handleToggleChange2}
               />
             </View>
-            {/* <View style={{ marginBottom: 20 }}>
-              <TextInput
-                style={{ borderWidth: 1, borderColor: '#70c6d8', borderRadius: 10, padding: 10, backgroundColor: '#F9FAFB' }}
-                placeholder="Add room name"
-                value={roomName}
-                onChangeText={setRoomName}
-              />
-            </View> */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Schedule for later</Text>
               <Switch

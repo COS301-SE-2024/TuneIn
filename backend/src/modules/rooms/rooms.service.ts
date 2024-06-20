@@ -118,4 +118,8 @@ export class RoomsService {
 		// TODO: Implement logic to get current playing song
 		return new SongInfoDto();
 	}
+
+	async bookmarkRoom(roomID: string, userID: string): Promise<void> {}
+
+	async unbookmarkRoom(roomID: string, userID: string): Promise<void> {}
 }

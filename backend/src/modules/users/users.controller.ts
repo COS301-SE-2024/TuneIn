@@ -7,7 +7,6 @@ import {
 	Put,
 	UseGuards,
 	Request,
-	HttpException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -236,5 +235,21 @@ export class UsersController {
 	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowing(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post("bookmarks")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getBookmarks(userInfo.id);
 	}
 }

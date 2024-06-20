@@ -333,4 +333,8 @@ export class UsersService {
 		}
 		return result;
 	}
+
+	async getBookmarks(userID: string): Promise<RoomDto[]> {
+		return [];
+	}
 }
