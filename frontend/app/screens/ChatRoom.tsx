@@ -7,9 +7,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
 import io from 'socket.io-client';
-import { Configuration, LiveChatMessageDto, UserProfileDto, UsersApi } from '../../api-client';
+import { Configuration, LiveChatMessageDto, RoomDto, UserProfileDto, UsersApi } from '../../api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { ChatEventDto } from '../models/ChatEventDto';
+import { useRoute } from '@react-navigation/native';
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -18,67 +20,119 @@ type Message = {
   me?: boolean;
 };
 
-const ChatRoomScreen: React.FC = () => {
+// Define an interface for the route parameters
+interface ChatRoomRouteParams {
+  room: string; // Assuming RoomDto is already defined elsewhere
+}
+
+interface ChatRoomScreenProps {
+  room: RoomDto;
+}
+
+const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ room }) => {
+  const route = useRoute();
   const router = useRouter();
   const [isChatExpanded, setChatExpanded] = useState(false);
 
-  const storedToken = await AsyncStorage.getItem('token');
+  //const room: RoomDto = roomObj as 
   const [token, setToken] = useState<string | null>(null);
-  setToken(storedToken);
-  const whoami = async (token: string | null, type?: string) => {
-    try {
-      const response = await axios.get(`${BASE_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data as UserProfileDto;
-    } catch (error) {
-      console.error('Error fetching user\'s own info:', error);
-      //user is not authenticated
-    }
-  };
-  const user: UserProfileDto = await whoami(token);
-
+  const [user, setUser] = useState<UserProfileDto | null>(null);
   const [message, setMessage] = useState('');
+  /*
   const [messages, setMessages] = useState<Message[]>([
     { username: 'JohnDoe', message: 'This is a sample comment.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
     { username: 'JaneSmith', message: 'Another sample comment here.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
     { username: 'Me', message: 'This is my own message.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true },
   ]);
+  */
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
   const [isRoomCreator, setIsRoomCreator] = useState(true); // Replace with actual logic to determine if the user is the creator
   const socket = useRef(null);
   
   //init & connect to socket
   useEffect(() => {
+    const getTokenAndSelf = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        setToken(storedToken);
+        const whoami = async (token: string | null, type?: string) => {
+          try {
+            const response = await axios.get(`${BASE_URL}/users`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            return response.data as UserProfileDto;
+          } catch (error) {
+            console.error('Error fetching user\'s own info:', error);
+            //user is not authenticated
+          }
+        };
+        setUser(await whoami(token));
+      }
+      catch (error) {
+        console.error('Error fetching token:', error);
+        //user is not authenticated
+      }
+    };
+    getTokenAndSelf();
+
     socket.current = io(BASE_URL + "/live-chat", {
       transports: ["websocket"],
     });
 
     socket.current.on("connect", () => {
       console.log("Connected to the server!");
-      socket.current.emit("connectUser", { sender: "username" });
+      const input: ChatEventDto = {
+        userID: user.userID,
+      }
+      socket.current.emit("connectUser", input);
     });
 
-    socket.current.on("connected", (response) => {
+    socket.current.on("connected", (response: ChatEventDto) => {
+      //an event that should be in response to the connectUser event
       console.log("User connected:", response);
     });
 
-    socket.current.on("userJoinedRoom", (response) => {
+    socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+      //if someone joins (could be self)
       console.log("User joined room:", response);
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: {
+          messageBody: "",
+          sender: user,
+          roomID: room.roomID,
+          dateCreated: new Date(),
+        },
+      };
+      socket.current.emit("getChatHistory", input);
     });
 
-    socket.current.on("chatHistory", (history) => {
-      setMessages(history);
+    socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+      //an event that should be in response to the getChatHistory event
+      const chatHistory = history.map((msg) => ({ message: msg, me: msg.sender.userID === user.userID }));
+      setMessages(chatHistory);
     });
 
-    socket.current.on("liveMessage", (newMessage) => {
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+    socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+      const message = newMessage.body;
+      const me: boolean = message.sender.userID === user.userID;
+      if (me){
+        //clear message only after it has been sent & confirmed as received
+        setMessage('');
+      }
+      setMessages(prevMessages => [...prevMessages, { message, me: message.sender.userID === user.userID }]);
     });
 
-    socket.current.on("userLeftRoom", (response) => {
+    socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+      //an event that should be in response to the leaveRoom event (could be self or other people)
       console.log("User left room:", response);
+    });
+
+    socket.current.on("error", (response: ChatEventDto) => {
+      console.error("Error:", response.errorMessage);
     });
 
     return () => {
@@ -97,17 +151,44 @@ const ChatRoomScreen: React.FC = () => {
       const newMessage: LiveChatMessageDto = {
         messageBody: message,
         sender: user,
-        roomID: "yourRoomID",
+        roomID: room.roomID,
         dateCreated: new Date(),
       };
-      setMessages([...messages, { message: newMessage, me: true }]);
-      setMessage(''); // Clear input after sending message
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: newMessage,
+      };
+      socket.current.emit("sendMessage", input);
+      // do not add the message to the state here, wait for the server to send it back
+      //setMessages([...messages, { message: newMessage, me: true }]);
     }
   };
 
   const joinRoom = () => {
-    socket.current.emit("joinRoom", { roomID: "yourRoomID" });
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: room.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("joinRoom", input);
   };
+
+  const leaveRoom = () => {
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: room.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("leaveRoom", input);
+  }
 
   const navigateToAdvancedSettings = () => {
     router.navigate("/screens/AdvancedSettings");

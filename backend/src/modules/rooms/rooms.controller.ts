@@ -30,12 +30,14 @@ import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "src/auth/auth.service";
 import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
 
 @Controller("rooms")
 export class RoomsController {
 	constructor(
 		private readonly roomsService: RoomsService,
 		private readonly auth: AuthService,
+		private readonly dtogen: DtoGenService,
 	) {}
 
 	//NOTE TO DEV:
