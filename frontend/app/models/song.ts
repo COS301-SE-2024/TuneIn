@@ -5,4 +5,5 @@ export interface SongRoomWidgetProps {
     progress: number;
     time1: string;
     time2: string;
+    
 }
