@@ -272,7 +272,10 @@ export class RoomsService {
 					"'. Unknown database error",
 			);
 		}
-
 		return messageID;
 	}
+
+	async bookmarkRoom(roomID: string, userID: string): Promise<void> {}
+
+	async unbookmarkRoom(roomID: string, userID: string): Promise<void> {}
 }

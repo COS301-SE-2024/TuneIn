@@ -236,4 +236,20 @@ export class UsersController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowing(userInfo.id);
 	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post("bookmarks")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getBookmarks(userInfo.id);
+	}
 }

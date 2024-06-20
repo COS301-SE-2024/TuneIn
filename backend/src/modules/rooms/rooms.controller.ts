@@ -11,12 +11,15 @@ import {
 	Request,
 } from "@nestjs/common";
 import {
+	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiNotFoundResponse,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
 	ApiResponse,
 	ApiTags,
+	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
@@ -250,5 +253,52 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<LiveChatMessageDto[]> {
 		return await this.roomsService.getLiveChatHistoryDto(roomID);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":roomID/bookmark")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Bookmark a room" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "Room bookmarked successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async bookmarkRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.bookmarkRoom(roomID, userInfo.id);
+	}
+
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":roomID/unbookmark")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Unbookmark a room" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "Room unbookmarked successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async unbookmarkRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.unbookmarkRoom(roomID, userInfo.id);
 	}
 }

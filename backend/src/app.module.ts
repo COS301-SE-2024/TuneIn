@@ -14,6 +14,8 @@ import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 import { ChatGateway } from "./chat/chat.gateway";
 import { ConnectedUsersService } from "./chat/connecteduser/connecteduser.service";
 import { ChatModule } from "./chat/chat.module";
+import { S3Service } from "./s3/s3.service";
+import { S3Module } from "./s3/s3.module";
 
 @Module({
 	imports: [
@@ -26,14 +28,16 @@ import { ChatModule } from "./chat/chat.module";
 		DtoGenModule,
 		DbUtilsModule,
 		ChatModule,
+		S3Module,
 	],
-	controllers: [AppController],
 	providers: [
 		AppService,
 		DtoGenService,
 		DbUtilsService,
+		S3Service,
 		ChatGateway,
 		ConnectedUsersService,
 	],
+	controllers: [AppController],
 })
 export class AppModule {}
