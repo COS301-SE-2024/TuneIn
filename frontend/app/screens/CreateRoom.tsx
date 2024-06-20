@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { useRouter } from 'expo-router'; 
 import MyToggleWidget from '../components/ToggleWidget'; 
 
@@ -7,20 +7,41 @@ const CreateRoomScreen: React.FC = () => {
   const router = useRouter(); 
   const [isSwitched, setIsSwitched] = useState(false);
   const [roomName, setRoomName] = useState('');
+  const [newRoom, setNewRoom] = useState({
+    room_name: '',
+    is_permanent: true,
+    is_private: false,
+  });
 
   const screenWidth = Dimensions.get('window').width;
 
   const handleToggleChange = (isFirstOptionSelected: boolean) => {
-    console.log(isFirstOptionSelected ? 'Permanent selected' : 'Temporary selected');
+    newRoom['is_permanent'] = isFirstOptionSelected;
+    console.log(isFirstOptionSelected ? 'Permanent selected' : 'Temporary selected', newRoom);
   };
   
 
   const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
-    console.log(isFirstOptionSelected ? 'Public selected' : 'Private selected');
+    newRoom['is_private'] = !isFirstOptionSelected;
+    console.log(isFirstOptionSelected ? 'Public selected' : 'Private selected', newRoom);
   };
 
   const navigateToRoomDetails = () => {
-    router.navigate("/screens/RoomDetails");
+    console.log('Navigating to RoomDetails screen');
+    if (roomName === '') {
+      Alert.alert(
+        "Invalid Room Name",
+        "Please enter a room name.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+    const room = JSON.stringify(newRoom);
+    router.navigate({
+      pathname: '/screens/RoomDetails',
+      params: {room: room},
+    });
   };
 
 
@@ -53,7 +74,11 @@ const CreateRoomScreen: React.FC = () => {
             style={{ borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 10, padding: 10 }}
             placeholder="Add room name"
             value={roomName}
-            onChangeText={setRoomName}
+            onChangeText={(text) => {
+              newRoom['room_name'] = text;
+              setRoomName(text);
+              console.log('Room name:', text, newRoom)
+            }}
           />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>

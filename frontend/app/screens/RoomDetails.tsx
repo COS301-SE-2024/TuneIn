@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 const RoomDetaills: React.FC = () => {
+
   const router = useRouter();
+  const { room } = useLocalSearchParams();
+  const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
+  console.log('room', newRoom);
   const [isNsfw, setIsNsfw] = useState(false);
   const [isExplicit, setIsExplicit] = useState(false);
   const [name, setName] = useState('');
