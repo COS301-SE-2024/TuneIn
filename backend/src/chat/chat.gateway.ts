@@ -417,7 +417,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			throw new Error("Invalid JSON received");
 		}
 		if (!p.userID) {
-			throw new Error("No sender provided");
+			throw new Error("No userID provided");
 		}
 
 		const result: ChatEventDto = {

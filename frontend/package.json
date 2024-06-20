@@ -57,6 +57,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.10",
     "react-router-dom": "^6.23.1",
+    "socket.io-client": "^4.7.5",
     "tailwind-react-native-classnames": "^1.5.1",
     "twrnc": "^4.2.0",
     "url": "^0.11.3"

@@ -18,7 +18,7 @@ const Home: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const baseURL = "http://192.168.56.1:3000";
+  const baseURL = "http://localhost:3000";
 
   const BackgroundIMG: string =
     "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";

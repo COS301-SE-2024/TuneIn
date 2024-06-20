@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons'; // Import FontAwesome5 for Spotify-like icons
@@ -6,6 +6,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
+import io from 'socket.io-client';
+import { Configuration, LiveChatMessageDto, UserProfileDto, UsersApi } from '../../api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:3000';
 
 type Message = {
   username: string;
@@ -17,6 +23,25 @@ type Message = {
 const ChatRoomScreen: React.FC = () => {
   const router = useRouter();
   const [isChatExpanded, setChatExpanded] = useState(false);
+
+  const storedToken = await AsyncStorage.getItem('token');
+  const [token, setToken] = useState<string | null>(null);
+  setToken(storedToken);
+  const whoami = async (token: string | null, type?: string) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data as UserProfileDto;
+    } catch (error) {
+      console.error('Error fetching user\'s own info:', error);
+      //user is not authenticated
+    }
+  };
+  const user: UserProfileDto = await whoami(token);
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { username: 'JohnDoe', message: 'This is a sample comment.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
@@ -25,12 +50,66 @@ const ChatRoomScreen: React.FC = () => {
   ]);
   const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
   const [isRoomCreator, setIsRoomCreator] = useState(true); // Replace with actual logic to determine if the user is the creator
+  const socket = useRef(null);
+  
+  //init & connect to socket
+  useEffect(() => {
+    socket.current = io(BASE_URL + "/live-chat", {
+      transports: ["websocket"],
+    });
+
+    socket.current.on("connect", () => {
+      console.log("Connected to the server!");
+      socket.current.emit("connectUser", { sender: "username" });
+    });
+
+    socket.current.on("connected", (response) => {
+      console.log("User connected:", response);
+    });
+
+    socket.current.on("userJoinedRoom", (response) => {
+      console.log("User joined room:", response);
+    });
+
+    socket.current.on("chatHistory", (history) => {
+      setMessages(history);
+    });
+
+    socket.current.on("liveMessage", (newMessage) => {
+      setMessages(prevMessages => [...prevMessages, newMessage]);
+    });
+
+    socket.current.on("userLeftRoom", (response) => {
+      console.log("User left room:", response);
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
+  }, []);
 
   // Get screen height to calculate the expanded height
   const screenHeight = Dimensions.get('window').height;
   const collapsedHeight = 60;
   const expandedHeight = screenHeight - 80; // Adjust as needed for your layout
   const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
+
+  const sendMessage = () => {
+    if (message.trim()) {
+      const newMessage: LiveChatMessageDto = {
+        messageBody: message,
+        sender: user,
+        roomID: "yourRoomID",
+        dateCreated: new Date(),
+      };
+      setMessages([...messages, newMessage]);
+      setMessage(''); // Clear input after sending message
+    }
+  };
+
+  const joinRoom = () => {
+    socket.current.emit("joinRoom", { roomID: "yourRoomID" });
+  };
 
   const navigateToAdvancedSettings = () => {
     router.navigate("/screens/AdvancedSettings");
@@ -44,12 +123,7 @@ const ChatRoomScreen: React.FC = () => {
     router.navigate("/screens/Lyrics");
   };
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, { username: 'Me', message, profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true }]);
-      setMessage(''); // Clear input after sending message
-    }
-  };
+  
 
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -68,6 +142,11 @@ const ChatRoomScreen: React.FC = () => {
   const navigateToRoomInfo = () => {
     router.navigate("/screens/RoomInfo");
   };
+
+  //automatically join the room on component mount
+  useEffect(() => {
+    joinRoom();
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white', paddingHorizontal: 20, paddingTop: 20 }}>

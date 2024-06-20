@@ -2,8 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const testMessage = {
-	event: "connect",
-	sender: process.env.SOCKET_SENDER,
+	userID: process.env.SOCKET_SENDER,
 	body: {
 		messageBody: "The first message sent using our app's sockets",
 		sender: process.env.SOCKET_SENDER,
