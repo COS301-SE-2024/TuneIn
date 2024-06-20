@@ -32,5 +32,6 @@ import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 		UsersService,
 	],
 	controllers: [AuthController],
+	exports: [AuthService],
 })
 export class AuthModule {}

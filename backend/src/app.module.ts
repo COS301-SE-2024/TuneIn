@@ -11,8 +11,9 @@ import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
-import { ChatGateway } from './chat/chat.gateway';
-import { ConnecteduserService } from './chat/connecteduser/connecteduser.service';
+import { ChatGateway } from "./chat/chat.gateway";
+import { ConnectedUsersService } from "./chat/connecteduser/connecteduser.service";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
 	imports: [
@@ -24,8 +25,15 @@ import { ConnecteduserService } from './chat/connecteduser/connecteduser.service
 		ProfileModule,
 		DtoGenModule,
 		DbUtilsModule,
+		ChatModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, DtoGenService, DbUtilsService, ChatGateway, ConnecteduserService],
+	providers: [
+		AppService,
+		DtoGenService,
+		DbUtilsService,
+		ChatGateway,
+		ConnectedUsersService,
+	],
 })
 export class AppModule {}

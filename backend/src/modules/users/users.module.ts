@@ -10,6 +10,13 @@ import { AuthService } from "src/auth/auth.service";
 @Module({
 	imports: [PrismaModule],
 	controllers: [UsersController],
-	providers: [UsersService, PrismaService, DtoGenService, DbUtilsService, AuthService],
+	providers: [
+		UsersService,
+		PrismaService,
+		DtoGenService,
+		DbUtilsService,
+		AuthService,
+	],
+	exports: [UsersService],
 })
 export class UsersModule {}
