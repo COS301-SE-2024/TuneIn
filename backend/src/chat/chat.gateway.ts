@@ -76,20 +76,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			//auth
 			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (payload.sender === null) {
-				throw new Error("Sender cannot be null for frontend events.");
+			if (!payload.userID) {
+				throw new Error("No userID provided");
 			}
-			const user = payload.sender;
-			let userID: string;
-			if (typeof user === "string") {
-				userID = user;
-			} else {
-				userID = user.userID;
-			}
-			await this.connectedUsers.addConnectedUser(client.id, userID);
+			await this.connectedUsers.addConnectedUser(client.id, payload.userID);
 			const response: ChatEventDto = {
-				event: SOCKET_EVENTS.CONNECTED,
-				sender: null,
+				userID: null,
 				date_created: new Date(),
 			};
 			this.server.emit(SOCKET_EVENTS.CONNECTED, response);
@@ -137,14 +129,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//auth
 
 			const payload: ChatEventDto = await this.validateInputEvent(p);
-			const user = payload.sender;
-			let userID: string;
-			if (typeof user === "string") {
-				userID = user;
-			} else if (!user) {
+			if (!payload.userID) {
 				throw new Error("No userID provided");
-			} else {
-				userID = user.userID;
 			}
 
 			if (!payload.body) {
@@ -161,13 +147,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const message: LiveChatMessageDto = payload.body;
 			const messageID: string = await this.roomService.createLiveChatMessage(
 				message,
-				userID,
+				payload.userID,
 			);
 			const finalMessage: LiveChatMessageDto =
 				await this.dtogen.generateLiveChatMessageDto(messageID);
 			const response: ChatEventDto = {
-				event: SOCKET_EVENTS.LIVE_MESSAGE,
-				sender: finalMessage.sender,
+				userID: finalMessage.sender.userID,
 				date_created: new Date(),
 				body: finalMessage,
 			};
@@ -201,14 +186,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//auth
 
 			const payload: ChatEventDto = await this.validateInputEvent(p);
-			const user = payload.sender;
-			let userID: string;
-			if (typeof user === "string") {
-				userID = user;
-			} else if (!user) {
+			if (!payload.userID) {
 				throw new Error("No userID provided");
-			} else {
-				userID = user.userID;
 			}
 
 			if (!payload.body) {
@@ -344,14 +323,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//auth
 
 			const payload: ChatEventDto = await this.validateInputEvent(p);
-			const user = payload.sender;
-			let userID: string;
-			if (typeof user === "string") {
-				userID = user;
-			} else if (!user) {
+			if (!payload.userID) {
 				throw new Error("No userID provided");
-			} else {
-				userID = user.userID;
 			}
 
 			if (!payload.body) {
@@ -368,8 +341,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			await this.connectedUsers.setRoomId(client.id, roomID);
 			client.join(roomID);
 			const response: ChatEventDto = {
-				event: SOCKET_EVENTS.USER_JOINED_ROOM,
-				sender: null,
+				userID: null,
 				date_created: new Date(),
 			};
 			this.server.to(roomID).emit(SOCKET_EVENTS.USER_JOINED_ROOM, response);
@@ -403,14 +375,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//auth
 
 			const payload: ChatEventDto = await this.validateInputEvent(p);
-			const user = payload.sender;
-			let userID: string;
-			if (typeof user === "string") {
-				userID = user;
-			} else if (!user) {
+			if (!payload.userID) {
 				throw new Error("No userID provided");
-			} else {
-				userID = user.userID;
 			}
 
 			const roomID = this.connectedUsers.getRoomId(client.id);
@@ -422,8 +388,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 
 			const response: ChatEventDto = {
-				event: SOCKET_EVENTS.USER_LEFT_ROOM,
-				sender: null,
+				userID: null,
 				date_created: new Date(),
 			};
 			this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
@@ -451,22 +416,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.error(e);
 			throw new Error("Invalid JSON received");
 		}
-		if (!p.sender) {
+		if (!p.userID) {
 			throw new Error("No sender provided");
 		}
 
-		if (!p.event) {
-			throw new Error("No event provided");
-		}
 		const result: ChatEventDto = {
-			event: p.event,
-			sender: null,
+			userID: p.userID,
 		};
-		if (p.sender === null) {
-			throw new Error("Sender cannot be null for frontend events.");
-		} else {
-			result.sender = p.sender;
-		}
 		if (p.date_created) {
 			result.date_created = p.date_created;
 		}
@@ -481,8 +437,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async handleThrownError(client: Socket, error: Error): Promise<void> {
 		const errorResponse: ChatEventDto = {
-			event: SOCKET_EVENTS.ERROR,
-			sender: null,
+			userID: null,
 			date_created: new Date(),
 			errorMessage: error.message,
 		};
