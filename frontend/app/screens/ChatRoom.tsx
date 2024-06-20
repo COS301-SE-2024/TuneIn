@@ -65,8 +65,8 @@ const ChatRoomScreen: React.FC = () => {
     setChatExpanded(!isChatExpanded);
   };
 
-  const navigateToRoomInfo = () => {
-    router.navigate("/screens/RoomInfo");
+  const navigateToRoomOptions = () => {
+    router.navigate("/screens/RoomOptions");
   };
 
   return (
@@ -75,7 +75,7 @@ const ChatRoomScreen: React.FC = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>×</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={isRoomCreator ? navigateToAdvancedSettings : navigateToRoomInfo}>
+        <TouchableOpacity onPress={isRoomCreator ? navigateToAdvancedSettings : navigateToRoomOptions}>
           <FontAwesome5 name="ellipsis-h" size={15} color="black" />
         </TouchableOpacity>
       </View>
