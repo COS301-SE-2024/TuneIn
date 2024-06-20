@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Entypo } from "@expo/vector-icons";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { SpotifyApi } from '@spotify/web-api-ts-sdk'; // Adjust this import based on your setup
 import { VITE_SPOTIFY_CLIENT_ID, VITE_REDIRECT_TARGET } from '@env';
 
 const clientId = VITE_SPOTIFY_CLIENT_ID;
@@ -17,23 +17,56 @@ const LoginScreen = () => {
   useEffect(() => {
     const checkTokenValidity = async () => {
       const accessToken = await AsyncStorage.getItem("Spotify token");
+      const refreshToken = await AsyncStorage.getItem("Spotify refresh token");
       const expirationDate = await AsyncStorage.getItem("expirationDate");
 
-      if (accessToken && expirationDate) {
+      if (accessToken && refreshToken && expirationDate) {
         const currentTime = Date.now();
         if (currentTime < parseInt(expirationDate)) {
           // Token is still valid
           router.navigate("/screens/Home");
         } else {
-          // Token is expired
-          await AsyncStorage.removeItem("Spotify token");
-          await AsyncStorage.removeItem("expirationDate");
+          // Token is expired, but refresh token is available
+          await refreshAccessToken(refreshToken);
         }
       }
     };
 
     checkTokenValidity();
   }, []);
+
+  const refreshAccessToken = async (refreshToken) => {
+    try {
+      const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: clientId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to refresh access token: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const newAccessToken = data.access_token;
+      const newExpiration = Date.now() + (data.expires_in * 1000); // Convert seconds to milliseconds
+
+      // Store new access token and possibly new refresh token
+      await AsyncStorage.setItem('accessToken', newAccessToken);
+      await AsyncStorage.setItem('expirationDate', newExpiration.toString());
+
+      router.navigate("/screens/Home");
+    } catch (error) {
+      console.error('Error refreshing access token:', error);
+      // Handle error (e.g., redirect to login screen)
+    }
+  };
 
   const authenticate = async () => {
     const scopes = [
@@ -43,12 +76,15 @@ const LoginScreen = () => {
       "user-top-read",
       "playlist-read-private",
       "playlist-read-collaborative",
-      "playlist-modify-public" // or "playlist-modify-private"
+      "playlist-modify-public", // or "playlist-modify-private"
+      "user-modify-playback-state",
+      "user-read-playback-state",
+      "user-read-currently-playing"
     ].join(" ");
-
+    
     const authUrl = `https://accounts.spotify.com/authorize`+
       `?client_id=${clientId}`
-      +`&response_type=token`
+      +`&response_type=code` // Change response_type to 'code'
       +`&redirect_uri=${encodeURIComponent(redirectTarget)}`
       +`&show_dialog=true`+
       `&scope=${scopes}`;

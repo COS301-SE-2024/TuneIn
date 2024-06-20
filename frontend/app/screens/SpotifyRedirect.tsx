@@ -2,11 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from 'expo-linking';
+import { useRouter } from "expo-router";
+import { VITE_SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET, VITE_REDIRECT_TARGET } from '@env';
+
+const clientId = VITE_SPOTIFY_CLIENT_ID;
+const clientSecret = VITE_SPOTIFY_CLIENT_SECRET;
+const redirectTarget = VITE_REDIRECT_TARGET;
 
 const SpotifyRedirect = () => {
   const [tokenDetails, setTokenDetails] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const extractToken = async () => {
@@ -14,32 +21,12 @@ const SpotifyRedirect = () => {
         const url = await Linking.getInitialURL();
         if (url) {
           console.log('Redirect URL:', url);
-          const hash = url.split('#')[1];
-          const params = new URLSearchParams(hash);
-          const accessToken = params.get('access_token');
-          const tokenType = params.get('token_type');
-          const expiresIn = params.get('expires_in');
-
-          if (accessToken) {
-            console.log('Access Token:', accessToken);
-            console.log('Token Type:', tokenType);
-            console.log('Expires In:', expiresIn);
-
-            // Store token details in local storage
-            await AsyncStorage.setItem('accessToken', accessToken);
-            await AsyncStorage.setItem('tokenType', tokenType);
-            await AsyncStorage.setItem('expiresIn', expiresIn);
-
-            setTokenDetails({
-              accessToken,
-              tokenType,
-              expiresIn,
-            });
-
-            setSuccess(true);
+          const code = getCodeFromUrl(url);
+          if (code) {
+            await exchangeCodeForToken(code);
           } else {
-            setError('Access token not found');
-            console.error('Access token not found');
+            setError('Authorization code not found');
+            console.error('Authorization code not found');
           }
         } else {
           setError('URL not found');
@@ -54,17 +41,69 @@ const SpotifyRedirect = () => {
     extractToken();
   }, []);
 
+  const getCodeFromUrl = (url) => {
+    const query = url.split('?')[1];
+    if (!query) return null;
+    const params = new URLSearchParams(query);
+    return params.get('code');
+  };
+
+  const exchangeCodeForToken = async (code) => {
+    try {
+      const credentials = `${clientId}:${clientSecret}`;
+      const base64Credentials = btoa(credentials); // Encode credentials for Basic Auth
+  
+      const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${base64Credentials}`, // Use encoded credentials
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: redirectTarget,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to exchange code for tokens: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      const accessToken = data.access_token;
+      const refreshToken = data.refresh_token;
+      const expiresIn = data.expires_in;
+  
+      await AsyncStorage.setItem('accessToken', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+      await AsyncStorage.setItem('expiresIn', expiresIn.toString());
+  
+      setTokenDetails({
+        accessToken,
+        refreshToken,
+        expiresIn,
+      });
+  
+      setSuccess(true);
+    } catch (error) {
+      setError(`Failed to exchange code for tokens: ${error.message}`);
+      console.error('Failed to exchange code for tokens:', error);
+    }
+  };
+  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {tokenDetails ? (
         <View style={styles.tokenContainer}>
           <Text style={styles.label}>Access Token:</Text>
           <Text style={styles.token}>{tokenDetails.accessToken}</Text>
-          <Text style={styles.label}>Token Type:</Text>
-          <Text style={styles.token}>{tokenDetails.tokenType}</Text>
+          <Text style={styles.label}>Refresh Token:</Text>
+          <Text style={styles.token}>{tokenDetails.refreshToken}</Text>
           <Text style={styles.label}>Expires In:</Text>
           <Text style={styles.token}>{tokenDetails.expiresIn}</Text>
-          {success && <Text style={styles.success}>Token stored successfully in local storage!</Text>}
+          {success && <Text style={styles.success}>Tokens stored successfully in local storage!</Text>}
         </View>
       ) : error ? (
         <Text style={styles.error}>Error: {error}</Text>
