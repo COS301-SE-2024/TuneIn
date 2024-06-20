@@ -21,7 +21,7 @@ const AdvancedSettings = () => {
   const toggleSwitch4 = () => setToggle4(previousState => !previousState);
 
   const goToEditScreen = () => {
-    router.navigate("/screens/EditRoomInfo");
+    router.navigate("/screens/EditRoom");
   };
 
   const goToChat = () => {
