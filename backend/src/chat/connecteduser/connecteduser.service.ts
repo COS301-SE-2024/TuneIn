@@ -5,7 +5,7 @@ import { UserProfileDto } from "src/modules/profile/dto/userprofile.dto";
 
 interface liveChatUser {
 	user: UserProfileDto;
-	roomID: string;
+	roomID?: string;
 }
 
 @Injectable()
@@ -17,7 +17,7 @@ export class ConnectedUsersService {
 
 	private connectedUsers = new Map<string, liveChatUser>();
 
-	async addConnectedUser(socketId: string, userId: string, roomID: string) {
+	async addConnectedUser(socketId: string, userId: string, roomID?: string) {
 		if (this.connectedUsers.has(socketId)) {
 			return;
 		}
@@ -27,10 +27,14 @@ export class ConnectedUsersService {
 		const user: UserProfileDto =
 			await this.dtogen.generateUserProfileDto(userId);
 
-		if (!(await this.dbUtils.roomExists(roomID))) {
-			throw new Error("Room with ID " + roomID + " does not exist");
+		if (roomID && roomID !== undefined) {
+			if (!(await this.dbUtils.roomExists(roomID))) {
+				throw new Error("Room with ID " + roomID + " does not exist");
+			}
+			this.connectedUsers.set(socketId, { user, roomID });
+		} else {
+			this.connectedUsers.set(socketId, { user });
 		}
-		this.connectedUsers.set(socketId, { user, roomID });
 	}
 
 	removeConnectedUser(socketId: string) {
@@ -60,10 +64,35 @@ export class ConnectedUsersService {
 		return user.userID;
 	}
 
+	async setRoomId(socketId: string, roomID: string) {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
+			throw new Error("Connected user does not exist");
+		}
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new Error("Room with ID " + roomID + " does not exist");
+		}
+		u.roomID = roomID;
+	}
+
+	async leaveRoom(socketId: string) {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
+			throw new Error("Connected user does not exist");
+		}
+		if (!u.roomID || u.roomID === undefined) {
+			throw new Error("Connected user does not have a roomID");
+		}
+		u.roomID = undefined;
+	}
+
 	getRoomId(socketId: string): string | null {
 		const u = this.connectedUsers.get(socketId);
 		if (!u || u === undefined) {
 			return null;
+		}
+		if (!u.roomID || u.roomID === undefined) {
+			throw new Error("Connected user does not have a roomID");
 		}
 		return u.roomID;
 	}

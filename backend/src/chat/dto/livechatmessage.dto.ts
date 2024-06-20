@@ -6,7 +6,7 @@ import { UserProfileDto } from "src/modules/profile/dto/userprofile.dto";
 export class LiveChatMessageDto {
 	@ApiProperty()
 	@IsString()
-	body: string;
+	messageBody: string;
 
 	@ApiProperty()
 	sender: UserProfileDto;
@@ -17,5 +17,5 @@ export class LiveChatMessageDto {
 
 	@ApiProperty()
 	@IsDateString()
-	date_created?: Date;
+	dateCreated?: Date;
 }

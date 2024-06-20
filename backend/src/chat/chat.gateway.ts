@@ -66,10 +66,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			add user to connected users
 			emit to socket: CONNECTION, { userId: user.id }
 			*/
-			
+
 			//auth
-			let user: UserProfileDto;
-			if 
+			payload = await this.validateInputEvent(payload);
+			if (payload.sender === null) {
+				throw new Error("Sender cannot be null for frontend events.");
+			}
+			const user = payload.sender;
+			let userID: string;
+			if (typeof user === "string") {
+				userID = user;
+			} else {
+				userID = user.userID;
+			}
+			this.connectedUsers.addConnectedUser(client.id, userID);
+			const response: ChatEventDto = {
+				event: SOCKET_EVENTS.CONNECTED,
+				sender: null,
+				date_created: new Date(),
+			};
+			this.server.emit(SOCKET_EVENTS.CONNECTED, response);
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}
@@ -231,6 +247,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			add user to socket room
 			emit to room: USER_JOINED, { userId: user.id }
 			*/
+
+			//auth
+
+			payload = await this.validateInputEvent(payload);
+			const user = payload.sender;
+			let userID: string;
+			if (typeof user === "string") {
+				userID = user;
+			} else if (!user) {
+				throw new Error("No userID provided");
+			} else {
+				userID = user.userID;
+			}
+
+			if (!payload.body) {
+				throw new Error("No body provided");
+			}
+			const roomID: string = payload.body.roomID;
+			if (!roomID) {
+				throw new Error("No roomID provided");
+			}
+			if (!this.dbUtils.roomExists(roomID)) {
+				throw new Error("Room does not exist");
+			}
+
+			this.connectedUsers.setRoomId(client.id, roomID);
+			client.join(roomID);
+			const response: ChatEventDto = {
+				event: SOCKET_EVENTS.USER_JOINED_ROOM,
+				sender: null,
+				date_created: new Date(),
+			};
+			this.server.to(roomID).emit(SOCKET_EVENTS.USER_JOINED_ROOM, response);
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}
@@ -243,7 +292,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	): Promise<void> {
 		try {
 			//this.server.emit();
-
 			/*
 			validate auth
 
@@ -255,9 +303,74 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			remove user from socket room
 			emit to room: USER_LEFT, { userId: user.id }
 			*/
+
+			//auth
+
+			payload = await this.validateInputEvent(payload);
+			const user = payload.sender;
+			let userID: string;
+			if (typeof user === "string") {
+				userID = user;
+			} else if (!user) {
+				throw new Error("No userID provided");
+			} else {
+				userID = user.userID;
+			}
+
+			const roomID = this.connectedUsers.getRoomId(client.id);
+			if (!roomID) {
+				throw new Error("User is not in a room");
+			}
+			if (!this.dbUtils.roomExists(roomID)) {
+				throw new Error("Room does not exist");
+			}
+
+			this.connectedUsers.leaveRoom(client.id);
+			client.leave(roomID);
+			const response: ChatEventDto = {
+				event: SOCKET_EVENTS.USER_LEFT_ROOM,
+				sender: null,
+				date_created: new Date(),
+			};
+			this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
 		} catch (error) {
 			this.handleThrownError(client, error);
 		}
+	}
+
+	async validateInputEvent(payload: ChatEventDto): Promise<ChatEventDto> {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		if (!payload.sender) {
+			throw new Error("No sender provided");
+		}
+
+		if (!payload.event) {
+			throw new Error("No event provided");
+		}
+		const result: ChatEventDto = {
+			event: payload.event,
+			sender: null,
+		};
+		if (payload.sender === null) {
+			throw new Error("Sender cannot be null for frontend events.");
+		} else {
+			result.sender = payload.sender;
+		}
+		if (payload.date_created) {
+			result.date_created = payload.date_created;
+		}
+		if (payload.body) {
+			result.body = payload.body;
+		}
+		if (payload.errorMessage) {
+			throw new Error("errorMessage is not a valid field for input events.");
+		}
+		return result;
 	}
 
 	async handleThrownError(client: Socket, error: Error): Promise<void> {
