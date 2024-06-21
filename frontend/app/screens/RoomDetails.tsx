@@ -4,14 +4,36 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import AWS from 'aws-sdk';
+import Constants from 'expo-constants';
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
+const AWS_S3_REGION = process.env.AWS_S3_REGION;
+const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
 
 
 const RoomDetails: React.FC = () => {
+  
+  const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace('+', '+')
+
+  // console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_NEST_BUCKET_NAME, AWS_S3_REGION, AWS_S3_ENDPOINT)
   const router = useRouter();
   const { room } = useLocalSearchParams();
   const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
   // console.log('room', newRoom);
+  AWS.config.update({ 
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    region: AWS_S3_REGION,
+  });
+  AWS.config.logger = console
+
+// Create an S3 instance
+  const s3 = new AWS.S3({
+    apiVersion: '2006-03-01',
+    signatureVersion: 'v4'
+  });
   const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
     name: '',
     description: '',
@@ -43,15 +65,11 @@ const RoomDetails: React.FC = () => {
     if(roomDetails.description !== '')
       newRoom['description'] = roomDetails.description;
     else{
-      // delete description field from newRoom
-      delete newRoom['description'];
+      newRoom['description'] = 'This room has no description.';
     }
     newRoom['has_explicit_content'] = roomDetails.isExplicit;
     newRoom['room_name'] = roomDetails.name;
-    console.log('New room:', newRoom, newRoom['room_name']);
-    console.log('Navigating to ChatRoom screen');
-    const token = await AsyncStorage.getItem('token');
-    console.log('Token:', token);
+    var imageURL = '[LINK_HERE]';
     if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
       // alert user to enter room name
       Alert.alert(
@@ -62,6 +80,37 @@ const RoomDetails: React.FC = () => {
       );
       return;
     }
+    if(image !== null){
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const params = {
+        Bucket: AWS_NEST_BUCKET_NAME, // replace with your bucket name
+        Key: `${(new Date()).toISOString()}-${roomDetails.name.replace(' ', '-').toLowerCase()}.jpeg`, // replace with the destination key
+        Body: blob,
+        ContentType: blob.type
+      };
+      const data = await s3.upload(params)
+      .promise()
+      console.log('Successfully uploaded image', data.Location);
+      imageURL = data.Location;
+      setImage(data.Location);
+      console.log('image url', image, imageURL, data.Location);
+      // s3.upload(params, function(err, data) {
+      //   if (err) {
+      //     console.log('Error:', err);
+      //   } else {
+      //     console.log('Successfully uploaded image', data.Location);
+      //     setImage(data.Location);
+      //     imageURL = data.Location;
+      //   }
+      // });
+    }
+    newRoom['image_url'] = imageURL;
+    console.log('image url', image);
+    console.log('New room:', newRoom, newRoom['room_name'], imageURL);
+    console.log('Navigating to ChatRoom screen');
+    const token = await AsyncStorage.getItem('token');
+    // console.log('Token:', token);
     fetch("http://10.32.253.158:3000/users/rooms", {
       method: "POST",
       headers: {
@@ -71,7 +120,7 @@ const RoomDetails: React.FC = () => {
       body: JSON.stringify(newRoom),
     }).then((response) => response.json())
     .then((data) => {
-      console.log(data);
+      // console.log(data);
       router.navigate({
         pathname: '/screens/ChatRoom',
         params: {room: JSON.stringify(data.room)}

@@ -78,6 +78,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const getTokenAndData = async () => {
       const storedToken = await AsyncStorage.getItem('token');
+      console.log('Stored token:', storedToken)
       setToken(storedToken);
   
       if (storedToken) {
