@@ -8,17 +8,20 @@ interface Track {
   artists: { name: string }[];
   album: { images: { url: string }[] }; // Album art images
   explicit: boolean; // Explicit tag
+  preview_url: string;
 }
 
 interface SongCardProps {
   track: Track;
   onPlay: () => void;
+  onPause: () => void;
+  isPlaying: boolean;
   onAdd: () => void;
   onRemove: () => void;
   isAdded: boolean;
 }
 
-const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onAdd, onRemove, isAdded }) => {
+const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onPause, isPlaying, onAdd, onRemove, isAdded }) => {
   return (
     <View style={styles.card}>
       <Image source={{ uri: track.album.images[0].url }} style={styles.albumArt} />
@@ -28,7 +31,7 @@ const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onAdd, onRemove, isA
         {track.explicit && <Text style={styles.explicit}>Explicit</Text>}
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Play" onPress={onPlay} />
+        <Button title={isPlaying ? "Pause" : "Play"} onPress={isPlaying ? onPause : onPlay} />
         <Button
           title={isAdded ? '-' : '+'}
           onPress={isAdded ? onRemove : onAdd}

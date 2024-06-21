@@ -9,15 +9,30 @@ export const useSpotifyAuth = () => {
   const [accessToken, setAccessToken] = useState<string>('');
   const [refreshToken, setRefreshToken] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [expirationTime, setExpirationTime] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (expirationTime) {
+      const interval = setInterval(() => {
+        const currentTime = Date.now();
+        if (currentTime >= expirationTime - 60000) { // Refresh token 1 minute before expiration
+          refreshAccessToken();
+        }
+      }, 10000); // Check every 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [expirationTime]);
+
   const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token');
       const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
+      const storedExpirationTime = await AsyncStorage.getItem('expiration_time');
+
       if (token) {
         setAccessToken(token);
         await refreshAccessTokenIfNeeded(token);
@@ -25,16 +40,22 @@ export const useSpotifyAuth = () => {
       if (storedRefreshToken) {
         setRefreshToken(storedRefreshToken);
       }
+      if (storedExpirationTime) {
+        setExpirationTime(parseInt(storedExpirationTime, 10));
+      }
     } catch (err) {
       setError('An error occurred while fetching data');
       console.error('An error occurred while fetching data', err);
     }
   };
 
-  const handleTokenChange = async (token: string) => {
+  const handleTokenChange = async (token: string, expiresIn: number = 3600) => {
     try {
       setAccessToken(token);
       await AsyncStorage.setItem('access_token', token);
+      const expirationTime = Date.now() + expiresIn * 1000; // Current time + expiresIn (1 hour)
+      setExpirationTime(expirationTime);
+      await AsyncStorage.setItem('expiration_time', expirationTime.toString());
     } catch (err) {
       setError('An error occurred while saving token');
       console.error('An error occurred while saving token', err);
@@ -56,14 +77,13 @@ export const useSpotifyAuth = () => {
       const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
       if (!storedRefreshToken) throw new Error('No refresh token found');
       const response = await axios.post('http://192.168.56.1:4000/refresh_token', {
-        refresh_token: refreshToken,
+        refresh_token: storedRefreshToken,
       });
 
       if (!response) throw new Error('Failed to refresh token');
 
       const data = await response.data;
-      await AsyncStorage.setItem('access_token', data.access_token);
-      setAccessToken(data.access_token);
+      await handleTokenChange(data.access_token, data.expires_in);
     } catch (err) {
       setError('An error occurred while refreshing token');
       console.error('An error occurred while refreshing token', err);
@@ -71,11 +91,27 @@ export const useSpotifyAuth = () => {
   };
 
   const refreshAccessTokenIfNeeded = async (token: string) => {
-    // Placeholder function to check if token is expired
-    const isTokenExpired = false; // Replace with actual expiration check logic
-
-    if (isTokenExpired) {
+    const currentTime = Date.now();
+    if (expirationTime && currentTime >= expirationTime - 60000) { // If token is about to expire in 1 minute
       await getRefreshToken();
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
+      if (!storedRefreshToken) throw new Error('No refresh token found');
+      const response = await axios.post('http://192.168.56.1:4000/refresh_token', {
+        refresh_token: storedRefreshToken,
+      });
+
+      if (!response) throw new Error('Failed to refresh token');
+
+      const data = await response.data;
+      await handleTokenChange(data.access_token, data.expires_in);
+    } catch (err) {
+      setError('An error occurred while refreshing token');
+      console.error('An error occurred while refreshing token', err);
     }
   };
 

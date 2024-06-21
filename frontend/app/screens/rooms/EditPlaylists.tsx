@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, TextInput, Button, ScrollView, StyleSheet, Alert, Text, Image } from 'react-native';
 import SongCard from '../../components/Spotify/SongCard';
 import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
-import { useLocalSearchParams } from 'expo-router'; // Assuming useLocalSearchParams is correctly implemented
+import { useLocalSearchParams } from 'expo-router';
+import { Audio } from 'expo-av'; // Import Audio from expo-av
 
 interface Track {
   id: string;
@@ -32,6 +33,8 @@ const EditPlaylist: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
+  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const addToPlaylist = (track: Track) => {
     const simplifiedTrack: SimplifiedTrack = {
@@ -56,9 +59,21 @@ const EditPlaylist: React.FC = () => {
     // Add any logic to save the playlist to the backend if necessary
   };
 
-  const playPreview = (previewUrl: string) => {
-    const audio = new Audio(previewUrl);
-    audio.play();
+  const playPreview = async (track: SimplifiedTrack) => {
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+    }
+    const { sound } = await Audio.Sound.createAsync({ uri: track.preview_url });
+    soundRef.current = sound;
+    setPlayingTrackId(track.id);
+    await sound.playAsync();
+  };
+
+  const pausePreview = async () => {
+    if (soundRef.current) {
+      await soundRef.current.pauseAsync();
+      setPlayingTrackId(null);
+    }
   };
 
   return (
@@ -74,8 +89,9 @@ const EditPlaylist: React.FC = () => {
       {/* Selected Playlist Section */}
       <ScrollView style={styles.selectedContainer}>
         <Text style={styles.selectedTitle}>Selected Tracks</Text>
-        {playlist.map(track => (
+        {playlist.map((track, index) => (
           <View key={track.id} style={styles.selectedItem}>
+            <Text style={styles.trackNumber}>{index + 1}</Text>
             <Image source={{ uri: track.albumArtUrl }} style={styles.albumArt} />
             <View style={styles.trackInfo}>
               <Text style={styles.trackName}>{track.name}</Text>
@@ -83,6 +99,10 @@ const EditPlaylist: React.FC = () => {
               {track.explicit && <Text style={styles.explicitTag}>Explicit</Text>}
             </View>
             <Button title="Remove" onPress={() => removeFromPlaylist(track.id)} />
+            <Button
+              title={playingTrackId === track.id ? "Pause" : "Play"}
+              onPress={playingTrackId === track.id ? pausePreview : () => playPreview(track)}
+            />
           </View>
         ))}
       </ScrollView>
@@ -93,7 +113,9 @@ const EditPlaylist: React.FC = () => {
           <SongCard
             key={track.id}
             track={track}
-            onPlay={() => playPreview(track.preview_url)}
+            onPlay={() => playPreview(track)}
+            onPause={pausePreview}
+            isPlaying={playingTrackId === track.id}
             onAdd={() => addToPlaylist(track)}
             onRemove={() => removeFromPlaylist(track.id)}
             isAdded={playlist.some(selectedTrack => selectedTrack.id === track.id)}
@@ -138,6 +160,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 5,
+  },
+  trackNumber: {
+    fontSize: 18,
+    marginRight: 10,
   },
   albumArt: {
     width: 50,

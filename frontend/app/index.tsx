@@ -10,12 +10,12 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem("cognitoToken");
-      if (token) {
-        // Validate token (if needed)
-        router.push("/screens/Home");
-      } else {
+    //   if (token) {
+    //     // Validate token (if needed)
+    //     router.push("/screens/Home");
+    //   } else {
         router.push("/screens/WelcomeScreen");
-      }
+    //   }
     };
 
     checkToken();
