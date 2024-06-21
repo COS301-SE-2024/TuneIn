@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
@@ -332,5 +332,24 @@ export class UsersService {
 			);
 		}
 		return result;
+	}
+
+	async getBookmarks(userID: string): Promise<RoomDto[]> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const bookmarks: PrismaTypes.bookmark[] =
+			await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+
+		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
+		return rooms;
 	}
 }

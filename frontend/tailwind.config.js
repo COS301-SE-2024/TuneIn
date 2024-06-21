@@ -15,5 +15,18 @@ module.exports = {
   theme: {
     extend: {},
   },
+  theme: {
+    extend: {
+      colors: {
+        primary: '#E1306C',
+        secondary: '#262626',
+        background: '#FFFFFF',
+        chatBackground: '#F8F8F8',
+        chatBubble: '#ECECEC',
+        chatBubbleMe: '#08bdbd',
+      },
+    },
+  },
+  variants: {},
   plugins: [],
 }

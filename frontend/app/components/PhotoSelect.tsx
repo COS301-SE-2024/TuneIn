@@ -23,7 +23,7 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
 		let result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.All,
 			allowsEditing: true,
-			aspect: [1, 1],
+			aspect: [4, 3],
 			quality: 1,
 		});
 
