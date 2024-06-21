@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { View, TextInput, Button, ScrollView, StyleSheet, Alert, Text, Image } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Text, Image } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import DraggableFlatList from 'react-native-draggable-flatlist';
 import SongCard from '../../components/Spotify/SongCard';
 import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
 import { useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av'; // Import Audio from expo-av
+import { Audio } from 'expo-av';
 
 interface Track {
   id: string;
@@ -12,8 +14,8 @@ interface Track {
   artists: { name: string }[];
   album: { images: { url: string }[] };
   explicit: boolean;
-  preview_url: string; // URL for previewing the song
-  uri: string; // URI used to play the song
+  preview_url: string;
+  uri: string;
 }
 
 interface SimplifiedTrack {
@@ -27,7 +29,7 @@ interface SimplifiedTrack {
 }
 
 const EditPlaylist: React.FC = () => {
-  const { roomId, playlists: initialPlaylist } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+  const { roomId, playlists: initialPlaylist } = useLocalSearchParams();
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch(accessToken);
 
@@ -76,6 +78,18 @@ const EditPlaylist: React.FC = () => {
     }
   };
 
+  const renderItem = ({ item, drag }: any) => (
+    <SongCard
+      track={item}
+      onPlay={() => playPreview(item)}
+      onPause={pausePreview}
+      isPlaying={playingTrackId === item.id}
+      onAdd={() => addToPlaylist(item)}
+      onRemove={() => removeFromPlaylist(item.id)}
+      onDrag={drag} // Pass the drag function to the SongCard
+    />
+  );
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -86,28 +100,14 @@ const EditPlaylist: React.FC = () => {
       />
       <Button title="Search" onPress={() => handleSearch(searchQuery)} />
 
-      {/* Selected Playlist Section */}
-      <ScrollView style={styles.selectedContainer}>
-        <Text style={styles.selectedTitle}>Selected Tracks</Text>
-        {playlist.map((track, index) => (
-          <View key={track.id} style={styles.selectedItem}>
-            <Text style={styles.trackNumber}>{index + 1}</Text>
-            <Image source={{ uri: track.albumArtUrl }} style={styles.albumArt} />
-            <View style={styles.trackInfo}>
-              <Text style={styles.trackName}>{track.name}</Text>
-              <Text style={styles.artistName}>{track.artistNames}</Text>
-              {track.explicit && <Text style={styles.explicitTag}>Explicit</Text>}
-            </View>
-            <Button title="Remove" onPress={() => removeFromPlaylist(track.id)} />
-            <Button
-              title={playingTrackId === track.id ? "Pause" : "Play"}
-              onPress={playingTrackId === track.id ? pausePreview : () => playPreview(track)}
-            />
-          </View>
-        ))}
-      </ScrollView>
+      <Text style={styles.selectedTitle}>Selected Tracks</Text>
+      <DraggableFlatList
+        data={playlist}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        onDragEnd={({ data }) => setPlaylist(data)}
+      />
 
-      {/* Search Results Section */}
       <ScrollView style={styles.resultsContainer}>
         {searchResults.map(track => (
           <SongCard
@@ -118,7 +118,6 @@ const EditPlaylist: React.FC = () => {
             isPlaying={playingTrackId === track.id}
             onAdd={() => addToPlaylist(track)}
             onRemove={() => removeFromPlaylist(track.id)}
-            isAdded={playlist.some(selectedTrack => selectedTrack.id === track.id)}
           />
         ))}
       </ScrollView>
@@ -143,48 +142,10 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
-  selectedContainer: {
-    maxHeight: 200,
-    marginBottom: 10,
-  },
   selectedTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-  },
-  selectedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  trackNumber: {
-    fontSize: 18,
-    marginRight: 10,
-  },
-  albumArt: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  trackInfo: {
-    flex: 1,
-  },
-  trackName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  artistName: {
-    fontSize: 14,
-    color: '#666',
-  },
-  explicitTag: {
-    fontSize: 12,
-    color: 'red',
-    marginTop: 5,
   },
   resultsContainer: {
     flex: 1,

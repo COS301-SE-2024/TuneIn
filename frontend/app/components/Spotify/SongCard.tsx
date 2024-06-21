@@ -1,14 +1,15 @@
 // components/SongCard.tsx
 import React from 'react';
 import { View, Text, Button, StyleSheet, Image } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Feather } from '@expo/vector-icons'; // Import Feather icon from expo/vector-icons
 
 interface Track {
   id: string;
   name: string;
   artists: { name: string }[];
-  album: { images: { url: string }[] }; // Album art images
+  album: { images: { url: string }[] };
   explicit: boolean; // Explicit tag
-  preview_url: string;
 }
 
 interface SongCardProps {
@@ -18,12 +19,23 @@ interface SongCardProps {
   isPlaying: boolean;
   onAdd: () => void;
   onRemove: () => void;
-  isAdded: boolean;
+  onDrag: () => void; // New prop for drag functionality
 }
 
-const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onPause, isPlaying, onAdd, onRemove, isAdded }) => {
+const SongCard: React.FC<SongCardProps> = ({
+  track,
+  onPlay,
+  onPause,
+  isPlaying,
+  onAdd,
+  onRemove,
+  onDrag,
+}) => {
   return (
     <View style={styles.card}>
+      <TouchableOpacity onPress={onDrag} style={styles.grip}>
+        <Feather name="menu" size={24} color="black" />
+      </TouchableOpacity>
       <Image source={{ uri: track.album.images[0].url }} style={styles.albumArt} />
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{track.name}</Text>
@@ -32,11 +44,7 @@ const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onPause, isPlaying, 
       </View>
       <View style={styles.buttonContainer}>
         <Button title={isPlaying ? "Pause" : "Play"} onPress={isPlaying ? onPause : onPlay} />
-        <Button
-          title={isAdded ? '-' : '+'}
-          onPress={isAdded ? onRemove : onAdd}
-          color={isAdded ? 'red' : 'green'}
-        />
+        <Button title="-" onPress={onRemove} color="red" />
       </View>
     </View>
   );
@@ -52,6 +60,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: '#ddd',
     borderWidth: 1,
+  },
+  grip: {
+    paddingRight: 10,
   },
   albumArt: {
     width: 50,
