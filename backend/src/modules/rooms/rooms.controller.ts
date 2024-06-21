@@ -116,7 +116,7 @@ export class RoomsController {
 		return this.roomsService.updateRoom(roomID, updateRoomDto);
 	}
 
-	/*
+		/*
     DELETE /rooms/{roomID}
     deletes the room (only if it belongs to the user)
     no input
@@ -125,8 +125,23 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":roomID")
 	@ApiTags("rooms")
-	deleteRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.deleteRoom(roomID);
+	@ApiOkResponse({
+		description: "Room deleted successfully.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "User is not the creator of the room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	@ApiBearerAuth()
+	@ApiOperation({ summary: "Delete a room" })
+	async deleteRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+		// check using jwt token whether the user is the creator of the room
+		// if not, return 403
+		// if yes, delete the room and return 200
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
 	/*
@@ -135,11 +150,23 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+   	// @ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/join")
 	@ApiTags("rooms")
-	joinRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.joinRoom(roomID);
+	@ApiOkResponse({
+		description: "User joined room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Join a room"})
+	@ApiBadRequestResponse({ 
+		description: "User already in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async joinRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.joinRoom(roomID, userID.id)
 	}
 
 	/*
@@ -148,11 +175,23 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/leave")
 	@ApiTags("rooms")
-	leaveRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.leaveRoom(roomID);
+	@ApiOkResponse({
+		description: "User left room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Leave a room" })
+	@ApiBadRequestResponse({
+		description: "User not in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async leaveRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
 	/*
@@ -161,46 +200,19 @@ export class RoomsController {
     no input
     response: array of ProfileDto
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/users")
 	@ApiTags("rooms")
-	getRoomUsers(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): UserProfileDto[] {
-		return this.roomsService.getRoomUsers(roomID);
-	}
-
-	/*
-    GET /rooms/{roomID}/songs
-    returns the queue
-    no input
-    response: array of SongInfoDto
-    */
-	@UseGuards(JwtAuthGuard)
-	@Get(":roomID/songs")
-	@ApiTags("rooms")
-	getRoomQueue(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): SongInfoDto[] {
-		return this.roomsService.getRoomQueue(roomID);
-	}
-
-	/*
-    DELETE /rooms/{roomID}/songs
-    clears the queue (except for current song, if playing)
-    no input
-    response: (2xx for success, 4xx for error)
-    */
-	@UseGuards(JwtAuthGuard)
-	@Delete(":roomID/songs")
-	@ApiTags("rooms")
-	clearRoomQueue(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): boolean {
-		return this.roomsService.clearRoomQueue(roomID);
+	@ApiOkResponse({
+		description: "The users in the room as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	@ApiOperation({ summary: "Get users in a room" })
+	@ApiParam({ name: "roomID", required: true })
+	async getRoomUsers(@Request() req: any, @Param("roomID") roomID: string): Promise<UserProfileDto[]> {
+		return await this.roomsService.getRoomUsers(roomID);
 	}
 
 	/*
