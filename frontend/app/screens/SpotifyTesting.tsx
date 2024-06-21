@@ -19,13 +19,13 @@ const SpotifyTestingPage: React.FC = () => {
     getRefreshToken,
   } = useSpotifyAuth();
 
-  const { searchResults, handleSearch, error: searchError } = useSpotifySearch(accessToken);
+  const { searchResults, handleSearch, error: searchError } = useSpotifySearch();
 
   const {
     handlePlayback,
     selectedTrackUri,
     error: playbackError,
-  } = useSpotifyPlayback(accessToken);
+  } = useSpotifyPlayback();
 
   return (
     <View style={styles.container}>

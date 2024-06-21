@@ -1,11 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { useSpotifyDevices } from './useSpotifyDevices'; // Import the custom devices hook
+import { useSpotifyDevices } from './useSpotifyDevices';
+import { useSpotifyAuth } from './useSpotifyAuth';
 
-export const useSpotifyPlayback = (accessToken: string) => {
+export const useSpotifyPlayback = () => {
+  const { getToken } = useSpotifyAuth();
+  const [accessToken, setAccessToken] = useState<string>('');
   const [selectedTrackUri, setSelectedTrackUri] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const { getDeviceId } = useSpotifyDevices(accessToken); // Use the custom devices hook
+  const { getDeviceId } = useSpotifyDevices(accessToken);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await getToken();
+        setAccessToken(token);
+      } catch (err) {
+        setError('An error occurred while fetching the token');
+        console.error('An error occurred while fetching the token', err);
+      }
+    };
+
+    fetchToken();
+  }, [getToken]);
 
   const handlePlayback = async (action: string, uri: string | null = null, offset: number | null = null) => {
     try {
@@ -14,7 +31,8 @@ export const useSpotifyPlayback = (accessToken: string) => {
       }
       const activeDevice = await getDeviceId();
       if (!activeDevice) {
-        throw new Error('No active device found');
+        Alert.alert("Please connect a device to Spotify");
+        return;
       }
 
       let url = '';
@@ -25,8 +43,8 @@ export const useSpotifyPlayback = (accessToken: string) => {
         case 'play':
           if (uri) {
             body = {
-              "uris": [uri], // Place the uri inside an array
-              "position_ms": offset || 0 // Adjust milliseconds as needed
+              uris: [uri],
+              position_ms: offset || 0,
             };
           }
           url = `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice}`;
@@ -60,7 +78,7 @@ export const useSpotifyPlayback = (accessToken: string) => {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: body ? JSON.stringify(body) : undefined, // Only include body if it's not null
+        body: body ? JSON.stringify(body) : undefined,
       });
 
       if (!response.ok) {
@@ -68,9 +86,9 @@ export const useSpotifyPlayback = (accessToken: string) => {
       }
 
       if (action === 'play') {
-        setSelectedTrackUri(uri || ''); // Store the selected track URI
+        setSelectedTrackUri(uri || '');
       } else if (action === 'pause') {
-        setSelectedTrackUri(''); // Clear the selected track URI to stop playback
+        setSelectedTrackUri('');
       }
     } catch (err) {
       setError('An error occurred while controlling playback');

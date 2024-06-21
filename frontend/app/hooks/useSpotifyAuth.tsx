@@ -1,3 +1,4 @@
+// useSpotifyAuth.ts
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -122,5 +123,20 @@ export const useSpotifyAuth = () => {
     handleTokenChange,
     handleRefreshTokenChange,
     getRefreshToken,
+    getToken, // Export the getToken function
   };
 };
+
+export const getToken = async (): Promise<string> => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (token) {
+        return token;
+      } else {
+        throw new Error('No access token found');
+      }
+    } catch (err) {
+      console.error('An error occurred while getting the token', err);
+      throw err;
+    }
+  };

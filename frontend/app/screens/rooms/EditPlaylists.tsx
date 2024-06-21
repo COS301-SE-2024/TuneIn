@@ -1,12 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Text, Image } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import DraggableFlatList from 'react-native-draggable-flatlist';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, ScrollView, StyleSheet, Alert, Text, Image } from 'react-native';
 import SongCard from '../../components/Spotify/SongCard';
 import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
-import { useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
+import { useLocalSearchParams } from 'expo-router'; // Assuming useLocalSearchParams is correctly implemented
 
 interface Track {
   id: string;
@@ -14,8 +11,8 @@ interface Track {
   artists: { name: string }[];
   album: { images: { url: string }[] };
   explicit: boolean;
-  preview_url: string;
-  uri: string;
+  preview_url: string; // URL for previewing the song
+  uri: string; // URI used to play the song
 }
 
 interface SimplifiedTrack {
@@ -29,14 +26,12 @@ interface SimplifiedTrack {
 }
 
 const EditPlaylist: React.FC = () => {
-  const { roomId, playlists: initialPlaylist } = useLocalSearchParams();
+  const { roomId, playlists: initialPlaylist } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch(accessToken);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
-  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
 
   const addToPlaylist = (track: Track) => {
     const simplifiedTrack: SimplifiedTrack = {
@@ -61,34 +56,10 @@ const EditPlaylist: React.FC = () => {
     // Add any logic to save the playlist to the backend if necessary
   };
 
-  const playPreview = async (track: SimplifiedTrack) => {
-    if (soundRef.current) {
-      await soundRef.current.unloadAsync();
-    }
-    const { sound } = await Audio.Sound.createAsync({ uri: track.preview_url });
-    soundRef.current = sound;
-    setPlayingTrackId(track.id);
-    await sound.playAsync();
+  const playPreview = (previewUrl: string) => {
+    const audio = new Audio(previewUrl);
+    audio.play();
   };
-
-  const pausePreview = async () => {
-    if (soundRef.current) {
-      await soundRef.current.pauseAsync();
-      setPlayingTrackId(null);
-    }
-  };
-
-  const renderItem = ({ item, drag }: any) => (
-    <SongCard
-      track={item}
-      onPlay={() => playPreview(item)}
-      onPause={pausePreview}
-      isPlaying={playingTrackId === item.id}
-      onAdd={() => addToPlaylist(item)}
-      onRemove={() => removeFromPlaylist(item.id)}
-      onDrag={drag} // Pass the drag function to the SongCard
-    />
-  );
 
   return (
     <View style={styles.container}>
@@ -100,24 +71,32 @@ const EditPlaylist: React.FC = () => {
       />
       <Button title="Search" onPress={() => handleSearch(searchQuery)} />
 
-      <Text style={styles.selectedTitle}>Selected Tracks</Text>
-      <DraggableFlatList
-        data={playlist}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        onDragEnd={({ data }) => setPlaylist(data)}
-      />
+      {/* Selected Playlist Section */}
+      <ScrollView style={styles.selectedContainer}>
+        <Text style={styles.selectedTitle}>Selected Tracks</Text>
+        {playlist.map(track => (
+          <View key={track.id} style={styles.selectedItem}>
+            <Image source={{ uri: track.albumArtUrl }} style={styles.albumArt} />
+            <View style={styles.trackInfo}>
+              <Text style={styles.trackName}>{track.name}</Text>
+              <Text style={styles.artistName}>{track.artistNames}</Text>
+              {track.explicit && <Text style={styles.explicitTag}>Explicit</Text>}
+            </View>
+            <Button title="Remove" onPress={() => removeFromPlaylist(track.id)} />
+          </View>
+        ))}
+      </ScrollView>
 
+      {/* Search Results Section */}
       <ScrollView style={styles.resultsContainer}>
         {searchResults.map(track => (
           <SongCard
             key={track.id}
             track={track}
-            onPlay={() => playPreview(track)}
-            onPause={pausePreview}
-            isPlaying={playingTrackId === track.id}
+            onPlay={() => playPreview(track.preview_url)}
             onAdd={() => addToPlaylist(track)}
             onRemove={() => removeFromPlaylist(track.id)}
+            isAdded={playlist.some(selectedTrack => selectedTrack.id === track.id)}
           />
         ))}
       </ScrollView>
@@ -142,10 +121,44 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  selectedContainer: {
+    maxHeight: 200,
+    marginBottom: 10,
+  },
   selectedTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+  },
+  selectedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  albumArt: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  trackInfo: {
+    flex: 1,
+  },
+  trackName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  artistName: {
+    fontSize: 14,
+    color: '#666',
+  },
+  explicitTag: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 5,
   },
   resultsContainer: {
     flex: 1,

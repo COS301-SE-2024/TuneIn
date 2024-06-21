@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { getToken } from './useSpotifyAuth'; // Import the named export
 
-export const useSpotifySearch = (accessToken: string) => {
+export const useSpotifySearch = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (query: string) => {
     try {
+      const accessToken = await getToken(); // Get a valid access token
+
       if (!accessToken) {
         throw new Error('Access token not found');
       }

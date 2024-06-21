@@ -1,15 +1,12 @@
-// components/SongCard.tsx
 import React from 'react';
 import { View, Text, Button, StyleSheet, Image } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Feather } from '@expo/vector-icons'; // Import Feather icon from expo/vector-icons
 
 interface Track {
   id: string;
   name: string;
   artists: { name: string }[];
   album: { images: { url: string }[] };
-  explicit: boolean; // Explicit tag
+  explicit: boolean;
 }
 
 interface SongCardProps {
@@ -19,23 +16,12 @@ interface SongCardProps {
   isPlaying: boolean;
   onAdd: () => void;
   onRemove: () => void;
-  onDrag: () => void; // New prop for drag functionality
+  isAdded: boolean;
 }
 
-const SongCard: React.FC<SongCardProps> = ({
-  track,
-  onPlay,
-  onPause,
-  isPlaying,
-  onAdd,
-  onRemove,
-  onDrag,
-}) => {
+const SongCard: React.FC<SongCardProps> = ({ track, onPlay, onPause, isPlaying, onAdd, onRemove, isAdded }) => {
   return (
     <View style={styles.card}>
-      <TouchableOpacity onPress={onDrag} style={styles.grip}>
-        <Feather name="menu" size={24} color="black" />
-      </TouchableOpacity>
       <Image source={{ uri: track.album.images[0].url }} style={styles.albumArt} />
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{track.name}</Text>
@@ -44,7 +30,11 @@ const SongCard: React.FC<SongCardProps> = ({
       </View>
       <View style={styles.buttonContainer}>
         <Button title={isPlaying ? "Pause" : "Play"} onPress={isPlaying ? onPause : onPlay} />
-        <Button title="-" onPress={onRemove} color="red" />
+        <Button
+          title={isAdded ? '-' : '+'}
+          onPress={isAdded ? onRemove : onAdd}
+          color={isAdded ? 'red' : 'green'}
+        />
       </View>
     </View>
   );
@@ -61,9 +51,6 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderWidth: 1,
   },
-  grip: {
-    paddingRight: 10,
-  },
   albumArt: {
     width: 50,
     height: 50,
@@ -78,13 +65,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   artist: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
   },
   explicit: {
-    fontSize: 14,
+    fontSize: 12,
     color: 'red',
-    marginTop: 4,
   },
   buttonContainer: {
     flexDirection: 'row',
