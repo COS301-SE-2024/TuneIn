@@ -5,7 +5,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AWS from 'aws-sdk';
-import Constants from 'expo-constants';
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
@@ -20,6 +19,7 @@ const RoomDetails: React.FC = () => {
   // console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_NEST_BUCKET_NAME, AWS_S3_REGION, AWS_S3_ENDPOINT)
   const router = useRouter();
   const { room } = useLocalSearchParams();
+  console.log('room', room)
   const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
   // console.log('room', newRoom);
   AWS.config.update({ 
@@ -69,7 +69,7 @@ const RoomDetails: React.FC = () => {
     }
     newRoom['has_explicit_content'] = roomDetails.isExplicit;
     newRoom['room_name'] = roomDetails.name;
-    var imageURL = '[LINK_HERE]';
+    var imageURL = '';
     if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
       // alert user to enter room name
       Alert.alert(
@@ -120,10 +120,12 @@ const RoomDetails: React.FC = () => {
       body: JSON.stringify(newRoom),
     }).then((response) => response.json())
     .then((data) => {
-      // console.log(data);
+      console.log(data);
+      const moreData = JSON.stringify(data)
+      console.log('More data:', moreData, data['roomID'])
       router.navigate({
         pathname: '/screens/ChatRoom',
-        params: {room: JSON.stringify(data.room)}
+        params: data
       });
     }).catch((error) => {
       console.error("Error:", error);

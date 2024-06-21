@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons'; // Import FontAwesome5 for Spotify-like icons
 import { MaterialIcons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
+import RoomDetails from './RoomDetails';
 
 type Message = {
   username: string;
@@ -16,6 +17,12 @@ type Message = {
 
 const ChatRoomScreen: React.FC = () => {
   const router = useRouter();
+  const _roomDetails = useLocalSearchParams();
+  console.log('stringify the thing' ,JSON.stringify(_roomDetails))
+  console.log('local params', useLocalSearchParams())
+  console.log('_roomDetails', _roomDetails)
+  // const roomDetails = Array.isArray(_roomDetails) ? JSON.parse(_roomDetails[0]) : JSON.parse(_roomDetails);
+  // console.log('roomDetails', roomDetails)
   const [isChatExpanded, setChatExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
