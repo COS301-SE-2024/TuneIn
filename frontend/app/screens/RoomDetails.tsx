@@ -105,7 +105,7 @@ const RoomDetails: React.FC = () => {
       //   }
       // });
     }
-    newRoom['image_url'] = imageURL;
+    newRoom['room_image'] = imageURL;
     console.log('image url', image);
     console.log('New room:', newRoom, newRoom['room_name'], imageURL);
     console.log('Navigating to ChatRoom screen');
