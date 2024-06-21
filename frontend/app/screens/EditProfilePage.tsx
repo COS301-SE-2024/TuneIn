@@ -8,6 +8,8 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 } from "react-native";
+import fs from "fs";
+import FormData from "form-data";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../components/EditGenreBubble";
 import EditDialog from "../components/EditDialog";
@@ -73,10 +75,37 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const handleImageUpload = (uri) => {
-		setProfilePic(uri);
-		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
+	const handleImageUpload = async (uri: string): Promise<string> => {
+		const form = new FormData();
+		form.append("file", fs.createReadStream(uri));
+	
+		const headers = {
+			...form.getHeaders(),
+			Authorization: `Bearer ${token}`,
+		};
+	
+		try {
+			const response = await axios.post("http://localhost:3000/upload", form, { headers });
+			console.log("File uploaded successfully", response.data);
+			return response.data.url; // Assuming response.data has the URL
+		} catch (error) {
+			console.error("Error uploading file", error);
+			throw error;
+		}
 	};
+
+	const updateImage = async (uri) => {
+		try {
+			const image = await handleImageUpload(uri); // Wait for image upload to complete
+			setProfileData((prevProfileData) => ({
+				...prevProfileData,
+				profile_picture_url: image,
+			}));
+		} catch (error) {
+			console.error("Error updating image:", error);
+		}
+	}
+	
 
 	const dialogs = {
 		name: setNameDialogVisible,
@@ -134,18 +163,18 @@ const EditProfileScreen = () => {
 				bio: text,
 			}));
 			console.log("Changed: " + JSON.stringify(changedFields));
-		} else if (value === "instagramLink") {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				links: { data: text },
-			}));
-			setChanged(true);
+			// } else if (value === "instagramLink") {
+			// 	setProfileData((prevProfileData) => ({
+			// 		...prevProfileData,
+			// 		links: { data: text },
+			// 	}));
+			// 	setChanged(true);
 
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				links: { data: text },
-			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// 	setChangedFields((prevChangedFields) => ({
+			// 		...prevChangedFields,
+			// 		links: { data: text },
+			// 	}));
+			// 	console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "genres") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -211,7 +240,7 @@ const EditProfileScreen = () => {
 		setCurrentLinkIndex(index);
 		setCurrentLinkEditText(text);
 		setLinkEditDialogVisible(true);
-	  };
+	};
 
 	const handleLinkEdit = (index, newLink) => {
 		if (profileData.links && Array.isArray(profileData.links.data)) {
@@ -324,7 +353,7 @@ const EditProfileScreen = () => {
 					<PhotoSelect
 						isVisible={isPhotoDialogVisible}
 						onClose={() => setPhotoDialogVisible(false)}
-						onImageUpload={handleImageUpload} // Pass the URI of the photo you want to display
+						onImageUpload={updateImage} // Pass the URI of the photo you want to display
 					/>
 				</View>
 				{/* Name */}
