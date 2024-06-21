@@ -47,7 +47,8 @@ const styles = StyleSheet.create({
   bubble: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderRadius: 25,
+    borderRadius: 25,    
+    elevation: 2,
     maxWidth: '75%',
   },
   bubbleMe: {
@@ -55,7 +56,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   bubbleOther: {
-    backgroundColor: '#ECECEC',
+    backgroundColor: '#FFFFFF',    
+    borderColor: '#ECECEC',
     alignSelf: 'flex-start',
   },
   text: {

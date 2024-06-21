@@ -1,25 +1,16 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { SongRoomWidgetProps } from '../models/song';
 
-interface SongRoomWidgetProps {
-    songName: string;
-    artist: string;
-    progress: number;
-    time1: string;
-    time2: string;
-}
-
-const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({ songName, artist, progress, time1, time2 }) => {
+const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({ songName, artist, albumCoverUrl, progress, time1, time2 }) => {
     return (
         <View style={styles.container}>
             <View style={styles.imageContainer}>
                 <Image
-                    source={require('../../assets/blank.png')}
+                    source={{ uri: albumCoverUrl }}
                     style={styles.image}
                 />
-                {/* Placeholder gray square */}
-                <View style={styles.placeholder}></View>
             </View>
             <View style={styles.textContainer}>
                 <Text style={styles.songName}>{songName}</Text>
@@ -56,18 +47,13 @@ const styles = StyleSheet.create({
     imageContainer: {
         borderRadius: 12,
         overflow: 'hidden',
-        marginBottom: 16,
+        marginBottom: 40,
+        marginTop: 8,
     },
     image: {
         width: 200,
         height: 200,
         borderRadius: 12,
-    },
-    placeholder: {
-        width: 200,
-        height: 200,
-        backgroundColor: '#8B8FA8', // Placeholder color
-        position: 'absolute',
     },
     textContainer: {
         alignItems: 'center',
@@ -82,20 +68,23 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'grey',
         marginBottom: 8,
+        marginTop: 8,
     },
     slider: {
-        width: '80%',
+        width: '100%',
         marginBottom: 8,
+        marginTop: 8,
     },
     timeContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: '80%',
+        width: '90%',
     },
     time: {
         fontSize: 12,
         color: '#878787',
         fontWeight: 'bold',
+        marginBottom: 20,
     },
 });
 
