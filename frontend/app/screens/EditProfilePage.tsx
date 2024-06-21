@@ -19,9 +19,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 
 const EditProfileScreen = () => {
+	const AUTH_TOKEN = process.env.AUTH_TOKEN;
 	const router = useRouter();
 	const params = useLocalSearchParams(); // Correct way to access query parameters
-	console.log("Profile :", params);
+	// console.log("Profile :", params);
 	const profile = Array.isArray(params.profile)
 		? params.profile[0]
 		: params.profile;
@@ -33,7 +34,8 @@ const EditProfileScreen = () => {
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
 	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
-	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
+	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
 	const baseURL = "http://localhost:3000";
 
@@ -54,12 +56,12 @@ const EditProfileScreen = () => {
 	}, []);
 
 	const updateProfile = async (changed) => {
-		console.log("Changed: " + JSON.stringify(changedFields));
+		console.log("Changed: " + JSON.stringify(profileData));
 		if (changed) {
 			try {
 				const response = await axios.patch(`${baseURL}/profile`, profileData, {
 					headers: {
-						Authorization: `Bearer ${token}`,
+						Authorization: `Bearer ${AUTH_TOKEN}`,
 					},
 				});
 
@@ -82,7 +84,7 @@ const EditProfileScreen = () => {
 		username: setUsernameDialogVisible,
 		bio: setBioDialogVisible,
 		photo: setPhotoDialogVisible,
-		link: setLinkDialogVisible,
+		link: setLinkAddDialogVisible,
 	};
 
 	const [changedFields, setChangedFields] = useState({});
@@ -184,25 +186,50 @@ const EditProfileScreen = () => {
 		}));
 		setChanged(true);
 
-		setLinkDialogVisible(false);
+		setLinkAddDialogVisible(false);
 	};
 
 	const handleLinkDeletion = (linkToDelete) => {
 		if (profileData.links && Array.isArray(profileData.links.data)) {
-		  setProfileData((prevProfileData) => ({
-			...prevProfileData,
-			links: {
-			  ...prevProfileData.links,
-			  data: prevProfileData.links.data.filter(
-				(item) => item.links !== linkToDelete
-			  ),
-			},
-		  }));
-		  console.log(profileData.links);
-		  setChanged(true);
+			setProfileData((prevProfileData) => ({
+				...prevProfileData,
+				links: {
+					...prevProfileData.links,
+					data: prevProfileData.links.data.filter(
+						(item) => item.links !== linkToDelete,
+					),
+				},
+			}));
+			console.log(profileData.links);
+			setChanged(true);
 		}
+	};
+
+	const [currentLinkIndex, setCurrentLinkIndex] = useState(null);
+	const [currentLinkEditText, setCurrentLinkEditText] = useState("");
+
+	const openEditDialog = (index, text) => {
+		setCurrentLinkIndex(index);
+		setCurrentLinkEditText(text);
+		setLinkEditDialogVisible(true);
 	  };
-	  
+
+	const handleLinkEdit = (index, newLink) => {
+		if (profileData.links && Array.isArray(profileData.links.data)) {
+			setProfileData((prevProfileData) => ({
+				...prevProfileData,
+				links: {
+					...prevProfileData.links,
+					data: prevProfileData.links.data.map((item, i) =>
+						i === index ? { ...item, links: newLink } : item,
+					),
+				},
+			}));
+			console.log(profileData.links);
+			setLinkEditDialogVisible(false);
+			setChanged(true);
+		}
+	};
 
 	const removeGenre = (genreToRemove) => {
 		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
@@ -242,7 +269,7 @@ const EditProfileScreen = () => {
 			return (
 				<View style={styles.listItem}>
 					<TouchableOpacity
-						onPress={() => setLinkDialogVisible(true)}
+						onPress={() => setLinkAddDialogVisible(true)}
 						style={styles.editButton}
 					>
 						<Text style={{ fontWeight: 600 }}>Add link</Text>
@@ -250,8 +277,8 @@ const EditProfileScreen = () => {
 					<EditDialog
 						value="link"
 						title="Add Link"
-						visible={isLinkDialogVisible}
-						onClose={() => setLinkDialogVisible(false)}
+						visible={isLinkAddDialogVisible}
+						onClose={() => setLinkAddDialogVisible(false)}
 						onSave={handleLinkAddition}
 					/>
 				</View>
@@ -364,7 +391,10 @@ const EditProfileScreen = () => {
 					profileData.links.data &&
 					profileData.links.data.map((link, index) => (
 						<View key={index} style={styles.listItem}>
-							<TouchableOpacity onPress={() => {}} style={styles.editButton}>
+							<TouchableOpacity
+								onPress={() => openEditDialog(index, link.links)}
+								style={styles.editButton}
+							>
 								<Text>{link.links}</Text>
 							</TouchableOpacity>
 							<TouchableOpacity onPress={() => handleLinkDeletion(link.links)}>
@@ -375,6 +405,14 @@ const EditProfileScreen = () => {
 									style={styles.icon}
 								/>
 							</TouchableOpacity>
+							<EditDialog
+								initialText={currentLinkEditText}
+								index={currentLinkIndex}
+								maxLines={1}
+								visible={isLinkEditDialogVisible}
+								onClose={() => setLinkEditDialogVisible(false)}
+								onSave={handleLinkEdit}
+							/>
 						</View>
 					))}
 				{renderAddLink()}

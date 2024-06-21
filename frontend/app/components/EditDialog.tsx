@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 
-const EditDialog = ({ title = 'Edit', initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', isBio = false }) => {
+const EditDialog = ({ title = 'Edit', initialText = '', visible = false, onClose = () => {}, onSave = () => {}, value = '', isBio = false, index = -1 }) => {
     const [text, setText] = useState(initialText);
 
     useEffect(() => {
@@ -35,7 +35,12 @@ const EditDialog = ({ title = 'Edit', initialText = '', visible = false, onClose
                                 onSave(text);
                                 setText('');
                               } 
-                            : () => onSave(text, value)}
+                            : () => {
+                                if(index === -1){
+                                onSave(text, value);
+                            } else{
+                                onSave(index, text);
+                            }}}
                             style={styles.dialogButton}
                         >
                             <Text>Save</Text>

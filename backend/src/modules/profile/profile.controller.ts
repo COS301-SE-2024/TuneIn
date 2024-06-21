@@ -69,7 +69,7 @@ export class ProfileController {
 	@Put()
 	@ApiTags("profile")
 	async putProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
-		return await this.profileService.updateProfile(req.user.userId, updateProfileDto);
+		return await this.profileService.updateProfile(req.user.id, updateProfileDto);
 	}
 
 	/*
@@ -82,7 +82,7 @@ export class ProfileController {
 	@Patch()
 	@ApiTags("profile")
 	async patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
-		return await this.profileService.updateProfile(req.user.userId, updateProfileDto);
+		return await this.profileService.updateProfile(req.user.id, updateProfileDto);
 	}
 
 	/*
