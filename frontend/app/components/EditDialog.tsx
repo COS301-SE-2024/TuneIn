@@ -20,8 +20,8 @@ const EditDialog = ({ title = 'Edit', initialText = '', visible = false, onClose
                     <Text style={styles.dialogTitle}>{title}</Text>
                     <TextInput
                         style={isBio ? styles.bioInput : styles.defaultInput}
-                        multiline={true}
-                        numberOfLines={3}
+                        multiline={isBio ? true : false}
+                        // numberOfLines={3}
                         value={text}
                         onChangeText={setText}
                     />
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         textAlignVertical: 'top',
+        overflow: 'hidden'
     },
     bioInput: {
         width: '100%',
