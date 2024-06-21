@@ -33,9 +33,10 @@ const EditRoom: React.FC = () => {
     const handleEditPlaylists = () => {
         // Navigate to EditPlaylists screen and pass room ID and playlists field
         router.navigate({
-            pathname: "/screens/EditPlaylists",
+            pathname: "/screens/rooms/EditPlaylists",
             params: {
                 roomId: room.id,
+                name:room.name,
                 playlists: room.playlist,
             },
         });
