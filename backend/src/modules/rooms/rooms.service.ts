@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
@@ -119,7 +119,35 @@ export class RoomsService {
 		return new SongInfoDto();
 	}
 
-	async bookmarkRoom(roomID: string, userID: string): Promise<void> {}
+	async bookmarkRoom(roomID: string, userID: string): Promise<void> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const b: Prisma.bookmarkCreateInput = {
+			users: {
+				connect: {
+					user_id: userID,
+				},
+			},
+			room: {
+				connect: {
+					room_id: roomID,
+				},
+			},
+		};
+		const newBookmark: PrismaTypes.bookmark | null =
+			await this.prisma.bookmark.create({
+				data: b,
+			});
+		if (!newBookmark || newBookmark === null) {
+			throw new Error("Failed to bookmark room. Databse returned null after insert.");
+		}
+	}
 
 	async unbookmarkRoom(roomID: string, userID: string): Promise<void> {}
 }
