@@ -17,12 +17,7 @@ type Message = {
 
 const ChatRoomScreen: React.FC = () => {
   const router = useRouter();
-  const _roomDetails = useLocalSearchParams();
-  console.log('stringify the thing' ,JSON.stringify(_roomDetails))
-  console.log('local params', useLocalSearchParams())
-  console.log('_roomDetails', _roomDetails)
-  // const roomDetails = Array.isArray(_roomDetails) ? JSON.parse(_roomDetails[0]) : JSON.parse(_roomDetails);
-  // console.log('roomDetails', roomDetails)
+  const _roomDetails = useLocalSearchParams(); // room details from previous screen
   const [isChatExpanded, setChatExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
