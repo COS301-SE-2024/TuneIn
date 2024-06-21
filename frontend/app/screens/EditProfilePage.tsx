@@ -19,7 +19,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 
 const EditProfileScreen = () => {
-	const AUTH_TOKEN = process.env.AUTH_TOKEN;
 	const router = useRouter();
 	const params = useLocalSearchParams(); // Correct way to access query parameters
 	// console.log("Profile :", params);
@@ -61,7 +60,7 @@ const EditProfileScreen = () => {
 			try {
 				const response = await axios.patch(`${baseURL}/profile`, profileData, {
 					headers: {
-						Authorization: `Bearer ${AUTH_TOKEN}`,
+						Authorization: `Bearer ${token}`,
 					},
 				});
 

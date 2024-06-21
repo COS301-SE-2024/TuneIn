@@ -21,7 +21,6 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
-	// const AUTH_TOKEN = process.env.AUTH_TOKEN;
 	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -55,7 +54,7 @@ const ProfileScreen: React.FC = () => {
 	const fetchProfileInfo = async (token: string | null) => {
 		try {
 			const response = await axios.get(
-				`${baseURL}/profile/theoriginalles@gmail.com`,
+				`${baseURL}/profile/${username}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -158,7 +157,7 @@ const ProfileScreen: React.FC = () => {
 		if(following){
 			const response = await axios.post(
 				`${baseURL}/profile/${profileData.userID}/unfollow`,
-				{}, // Empty object if no data is needed in the body
+				{}, 
 				{
 				  headers: {
 					Authorization: `Bearer ${token}`,
@@ -169,6 +168,7 @@ const ProfileScreen: React.FC = () => {
 
 			if(response){
 				setFollowing(false);
+				profileData.followers.count--;
 			}
 			else{
 				console.error("Issue unfollowing user");
@@ -177,7 +177,7 @@ const ProfileScreen: React.FC = () => {
 		else{
 			const response = await axios.post(
 				`${baseURL}/profile/${profileData.userID}/follow`,
-				{}, // Empty object if no data is needed in the body
+				{}, 
 				{
 				  headers: {
 					Authorization: `Bearer ${token}`,
@@ -188,6 +188,7 @@ const ProfileScreen: React.FC = () => {
 
 			if(response){
 				setFollowing(true);
+				profileData.followers.count++;
 			}
 			else{
 				console.error("Issue unfollowing user");
@@ -311,7 +312,7 @@ const ProfileScreen: React.FC = () => {
 						))}
 					</View>
 				</View>
-				{/* <View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Recently Visited</Text>
 					<View style={styles.roomCardsContainer}>
 						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
@@ -324,7 +325,7 @@ const ProfileScreen: React.FC = () => {
 							/>
 						))}
 					</View>
-				</View> */}
+				</View>
 			</View>
 		</ScrollView>
 	);

@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -22,34 +23,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const ProfileScreen: React.FC = () => {
 	const baseURL = "http://localhost:3000";
 	const router = useRouter();
-	const favoriteRooms = [
-		{
-			roomName: "Room 1",
-			songName: "Song 1",
-			artistName: "Artist 1",
-			username: "user1",
-		},
-		{
-			roomName: "Room 2",
-			songName: "Song 2",
-			artistName: "Artist 2",
-			username: "user2",
-		},
-	];
-	const recentRooms = [
-		{
-			roomName: "Room 4",
-			songName: "Song 4",
-			artistName: "Artist 4",
-			username: "user4",
-		},
-		{
-			roomName: "Room 5",
-			songName: "Song 5",
-			artistName: "Artist 5",
-			username: "user5",
-		},
-	];
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{
 			songTitle: "Don't Smile At Me",

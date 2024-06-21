@@ -43,27 +43,23 @@ const LoginScreen: React.FC = () => {
         
         //POST request to backend
         fetch("http://localhost:3000/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: emailOrUsername,
-            userCognitoSub: result.getAccessToken().decodePayload().username,
-          }),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          localStorage.setItem("token", data.token);
-
-          if (data.status === "success") {
-            router.navigate("/screens/Home");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			body: JSON.stringify({
+				token: result.getAccessToken().getJwtToken(),
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log(data);
+				localStorage.setItem("token", data.token);
+			})
+			.catch((error) => {
+				console.error("Error:", error);
+			});
 
         router.navigate("/screens/Home");
       },
