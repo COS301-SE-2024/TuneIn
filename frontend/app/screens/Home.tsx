@@ -31,6 +31,7 @@ const Home: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
+      
     } catch (error) {
       console.error('Error fetching rooms:', error);
       return [];
@@ -51,6 +52,7 @@ const Home: React.FC = () => {
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
     return rooms.map(room => ({
+      id:room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
       songName: room.current_song ? (room.current_song.title) : null,

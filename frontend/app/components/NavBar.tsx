@@ -1,4 +1,3 @@
-// NavBar.tsx
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
@@ -10,8 +9,8 @@ const NavBar: React.FC = () => {
         router.navigate("/");
     };
 
-    const navigateToSpotifyAuth = () => {
-        router.navigate("/screens/SpotifyAuth");
+    const navigateToSitemap = () => {
+        router.navigate("/screens/Sitemap");
     };
 
     const navigateToProfile = () => {
@@ -23,8 +22,8 @@ const NavBar: React.FC = () => {
             <TouchableOpacity onPress={navigateToHome}>
                 <Text style={styles.text}>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateToSpotifyAuth}>
-                <Text style={styles.text}>SpotifyAuth</Text>
+            <TouchableOpacity onPress={navigateToSitemap}>
+                <Text style={styles.text}>Sitemap</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={navigateToProfile}>
                 <Text style={styles.text}>Profile</Text>

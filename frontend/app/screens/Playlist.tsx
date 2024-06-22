@@ -1,83 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import SongList from '../components/SongList'; // Import the SongList component
 
+interface Track {
+  id: string;
+  songName: string;
+  artist: string;
+  albumCoverUrl: string;
+  voteCount: number;
+  showVoting: boolean;
+}
+
 const Playlist = () => {
   const router = useRouter();
+  const { queue, currentTrackIndex } = useLocalSearchParams();
+
+  // Initialize songs state with an empty array
+  const [songs, setSongs] = useState<Track[]>([]);
+
+  useEffect(() => {
+    // Ensure queue is properly initialized
+    if (queue && queue.length > 0) {
+      // Set songs state with the queue received from useLocalSearchParams
+      setSongs(queue);
+    } else {
+      // Handle case when queue is empty or undefined (optional)
+      console.warn('Queue is empty or undefined.');
+    }
+  }, [queue]); // Update songs state when queue changes
 
   const navigateToAddSong = () => {
     router.push('screens/AddSongPage');
-  };
-
-  // Sample data for songs
-  const [songs, setSongs] = useState([
-    {
-      songName: 'Eternal Sunshine',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: true, // Show voting for this song
-    },
-    {
-      songName: 'bye',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: true, // Do not show voting for this song
-    },
-    {
-      songName: 'supernatural',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    {
-      songName: 'yes, and?',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    {
-      songName: 'true story',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    // Add more songs here
-  ]);
-
-  const setVoteCount = (newCount, index) => {
-    const updatedSongs = [...songs];
-    updatedSongs[index].voteCount = newCount;
-    setSongs(updatedSongs);
-  };
-
-  // Function to swap songs based on vote count
-  const swapSongs = (index, direction) => {
-    const newSongs = [...songs];
-    const currentSong = newSongs[index];
-    let swapIndex = index;
-
-    if (direction === 'up') {
-      while (swapIndex > 0 && currentSong.voteCount > newSongs[swapIndex - 1].voteCount) {
-        swapIndex--;
-      }
-    } else if (direction === 'down') {
-      while (swapIndex < newSongs.length - 1 && currentSong.voteCount < newSongs[swapIndex + 1].voteCount) {
-        swapIndex++;
-      }
-    }
-
-    if (swapIndex !== index) {
-      newSongs.splice(index, 1);
-      newSongs.splice(swapIndex, 0, currentSong);
-      setSongs(newSongs);
-    }
   };
 
   return (
@@ -89,7 +44,8 @@ const Playlist = () => {
         <Text style={styles.pageName}>Songs</Text>
       </View>
       <View style={styles.songListContainer}>
-        {songs.map((song, index) => (
+        {/* Check if songs is defined before mapping */}
+        {songs && songs.map((song, index) => (
           <SongList
             key={index}
             songNumber={index + 1} // Pass the song number
@@ -99,8 +55,7 @@ const Playlist = () => {
             voteCount={song.voteCount} // Pass vote count to SongList
             showVoting={song.showVoting}
             index={index} // Pass index for swapping
-            swapSongs={swapSongs} // Pass swapSongs function
-            // setVoteCount={setVoteCount} // Pass setVoteCount function
+            highlighted={index === currentTrackIndex} // Highlight the current playing song
           />
         ))}
       </View>

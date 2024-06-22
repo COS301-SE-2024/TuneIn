@@ -18,7 +18,6 @@ interface RoomCardWidgetProps {
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
   const screenWidth = Dimensions.get("window").width;
   const cardWidth = screenWidth * 0.8; // 80% of screen width
-
   const router = useRouter();
 
   const navigateToEditRoom = () => {
