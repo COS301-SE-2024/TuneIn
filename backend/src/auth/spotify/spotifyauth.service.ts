@@ -7,6 +7,10 @@ import { SpotifyUser } from "src/spotify/models/user";
 import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "prisma/prisma.service";
+import { JWTPayload } from "../auth.service";
+import * as jwt from "jsonwebtoken";
+import { IsObject, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -15,6 +19,16 @@ export type SpotifyTokenResponse = {
 	expires_in: number;
 	refresh_token: string;
 };
+
+export class SpotifyCallbackResponse {
+	@ApiProperty()
+	@IsString()
+	token: string;
+
+	@ApiProperty()
+	@IsObject()
+	spotifyTokens: SpotifyTokenResponse;
+}
 
 @Injectable()
 export class SpotifyAuthService {
@@ -99,7 +113,37 @@ export class SpotifyAuthService {
 		return response.data as SpotifyTokenResponse;
 	}
 
-	async createUser(spotifyUser: SpotifyUser): Promise<string> {
+	async generateJWT(user: PrismaTypes.users): Promise<string> {
+		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
+		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
+
+		if (!secretKey || secretKey === undefined || secretKey === "") {
+			throw new Error("Missing JWT secret key");
+		}
+
+		if (!expiresIn || expiresIn === undefined || expiresIn === "") {
+			throw new Error("Missing JWT expiration time");
+		}
+
+		if (!user || user === null) {
+			throw new Error("Cannot generate JWT for null user");
+		}
+
+		if (!user.email || user.email === null) {
+			throw new Error("Cannot generate JWT for user without email");
+		}
+
+		const payload: JWTPayload = {
+			username: user.username,
+			id: user.user_id,
+			email: user.email,
+		};
+
+		const token = jwt.sign(payload, secretKey, { expiresIn });
+		return token;
+	}
+
+	async createUser(userID: string): Promise<PrismaTypes.users> {
 		//find largest profile picture
 		let largest = 0;
 		for (let i = 0; i < spotifyUser.images.length; i++) {
@@ -125,12 +169,12 @@ export class SpotifyAuthService {
 			throw new Error("Failed to find user");
 		}
 		if (existingUser && existingUser.length > 0) {
-			return existingUser[0].user_id;
+			return existingUser[0];
 		}
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
-			return response.user_id;
+			return response;
 		} catch (err) {
 			console.log(err);
 			throw new Error("Failed to create user");

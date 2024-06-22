@@ -1,13 +1,20 @@
 import { Controller, Get, Query, Request } from "@nestjs/common";
 import {
 	SpotifyAuthService,
+	SpotifyCallbackResponse,
 	SpotifyTokenResponse,
 } from "./spotifyauth.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import * as PrismaTypes from "@prisma/client";
+import { SpotifyUser } from "src/spotify/models/user";
+import { SpotifyService } from "src/spotify/spotify.service";
 
 @Controller("auth/spotify")
 export class SpotifyAuthController {
-	constructor(private readonly spotifyAuth: SpotifyAuthService) {}
+	constructor(
+		private readonly spotifyAuth: SpotifyAuthService,
+		private readonly spotify: SpotifyService,
+	) {}
 
 	@Get("callback")
 	@ApiTags("auth")
@@ -26,6 +33,16 @@ export class SpotifyAuthController {
 		const tokens: SpotifyTokenResponse =
 			await this.spotifyAuth.exchangeCodeForToken(code);
 		console.log(tokens);
+		const spotifyUser: SpotifyUser = await this.spotify.getSelf(tokens);
+		const user: PrismaTypes.users =
+			await this.spotifyAuth.createUser(spotifyUser);
+		const jwt: string = await this.spotifyAuth.generateJWT(user);
+
+		const response: SpotifyCallbackResponse = {
+			token: jwt,
+			spotifyTokens: tokens,
+		};
+		return response;
 	}
 
 	@Get("refresh")

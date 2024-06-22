@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
@@ -39,5 +40,11 @@ export class SpotifyService {
 		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
 			"base64",
 		);
+	}
+
+	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const user = await api.currentUser.profile();
+		return user;
 	}
 }
