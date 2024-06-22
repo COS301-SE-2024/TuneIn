@@ -1,6 +1,6 @@
 // NavBar.tsx
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 const NavBar: React.FC = () => {
@@ -10,8 +10,8 @@ const NavBar: React.FC = () => {
         router.navigate("/");
     };
 
-    const navigateToSearch = () => {
-        router.navigate("/screens/Search");
+    const navigateToSpotifyAuth = () => {
+        router.navigate("/screens/SpotifyAuth");
     };
 
     const navigateToProfile = () => {
@@ -19,18 +19,31 @@ const NavBar: React.FC = () => {
     };
 
     return (
-        <View className="flex-row justify-around bg-gray-800 p-4">
+        <View style={styles.container}>
             <TouchableOpacity onPress={navigateToHome}>
-                <Text className="text-white text-lg">Home</Text>
+                <Text style={styles.text}>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateToSearch}>
-                <Text className="text-white text-lg">Search</Text>
+            <TouchableOpacity onPress={navigateToSpotifyAuth}>
+                <Text style={styles.text}>SpotifyAuth</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={navigateToProfile}>
-                <Text className="text-white text-lg">Profile</Text>
+                <Text style={styles.text}>Profile</Text>
             </TouchableOpacity>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        backgroundColor: "#333",
+        padding: 16,
+    },
+    text: {
+        color: "white",
+        fontSize: 18,
+    },
+});
 
 export default NavBar;

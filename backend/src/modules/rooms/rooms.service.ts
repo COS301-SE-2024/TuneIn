@@ -275,7 +275,90 @@ export class RoomsService {
 		return messageID;
 	}
 
-	async bookmarkRoom(roomID: string, userID: string): Promise<void> {}
+	async bookmarkRoom(roomID: string, userID: string): Promise<void> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
 
-	async unbookmarkRoom(roomID: string, userID: string): Promise<void> {}
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const existingBookmark: PrismaTypes.bookmark | null =
+			await this.prisma.bookmark.findFirst({
+				where: {
+					room_id: roomID,
+					user_id: userID,
+				},
+			});
+
+		if (existingBookmark) {
+			throw new HttpException(
+				"User has already bookmarked this room",
+				HttpStatus.CONFLICT,
+			);
+		}
+
+		const b: Prisma.bookmarkCreateInput = {
+			users: {
+				connect: {
+					user_id: userID,
+				},
+			},
+			room: {
+				connect: {
+					room_id: roomID,
+				},
+			},
+		};
+		const newBookmark: PrismaTypes.bookmark | null =
+			await this.prisma.bookmark.create({
+				data: b,
+			});
+		if (!newBookmark || newBookmark === null) {
+			throw new Error(
+				"Failed to bookmark room. Database returned null after insert.",
+			);
+		}
+	}
+
+	async unbookmarkRoom(roomID: string, userID: string): Promise<void> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const existingBookmark: PrismaTypes.bookmark | null =
+			await this.prisma.bookmark.findFirst({
+				where: {
+					room_id: roomID,
+					user_id: userID,
+				},
+			});
+		if (!existingBookmark) {
+			throw new HttpException(
+				"User has not bookmarked this room",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+
+		const b: Prisma.bookmarkDeleteManyArgs = {
+			where: {
+				room_id: roomID,
+				user_id: userID,
+			},
+		};
+		const delBookmark: Prisma.BatchPayload =
+			await this.prisma.bookmark.deleteMany(b);
+		console.log(delBookmark);
+
+		if (!delBookmark || delBookmark === null) {
+			throw new Error(
+				"Failed to unbookmark room. Database returned null after delete.",
+			);
+		}
+	}
 }
