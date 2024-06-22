@@ -2,6 +2,7 @@
   "expo": {
     "name": "TuneIn",
     "slug": "TuneIn",
+    "owner": "Apollo",
     "scheme": "TuneIn",
     "version": "1.0.0",
     "orientation": "portrait",

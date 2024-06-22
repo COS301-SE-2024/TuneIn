@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from 'expo-router';
 
 const AllFriends: React.FC = () => {
@@ -10,13 +10,33 @@ const AllFriends: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 justify-center pt-4 px-4">
-      <Text className="text-2xl font-bold text-gray-800 mt-2 mb-2">Welcome to the Friends Page</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome to the Friends Page</Text>
       <TouchableOpacity onPress={goBack}>
-        <Text>Go Back</Text>
+        <Text style={styles.goBackText}>Go Back</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingTop: 16,
+    paddingHorizontal: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4A4A4A',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  goBackText: {
+    fontSize: 16,
+    color: '#1E90FF',
+  },
+});
 
 export default AllFriends;
