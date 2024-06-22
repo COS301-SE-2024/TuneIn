@@ -27,10 +27,10 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
             quality: 1,
           });
 
-        console.log(JSON.stringify(result));
+        // console.log(JSON.stringify(result));
 
 		if (!result.canceled) {
-			onImageUpload(result["uri"]);
+			onImageUpload(result.assets[0].uri);
 		}
 	};
 

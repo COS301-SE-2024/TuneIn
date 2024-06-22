@@ -75,19 +75,27 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const handleImageUpload = async (uri: string): Promise<string> => {
+	const handleImageUpload = async (uri) => {
 		const form = new FormData();
-		form.append("file", fs.createReadStream(uri));
-	
-		const headers = {
-			...form.getHeaders(),
-			Authorization: `Bearer ${token}`,
-		};
-	
+		console.log(uri);
+		
 		try {
-			const response = await axios.post("http://localhost:3000/upload", form, { headers });
-			console.log("File uploaded successfully", response.data);
-			return response.data.url; // Assuming response.data has the URL
+			// Fetch the file from the URI
+			const response = await fetch(uri);
+			const blob = await response.blob();
+			const fileName = uri.split('/').pop(); // Extract filename from URI
+	
+			// Append the file to the FormData
+			form.append("file", new File([blob], fileName, { type: blob.type }));
+	
+			const headers = {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'multipart/form-data',
+			};
+	
+			const uploadResponse = await axios.post("http://localhost:3000/upload", form, { headers });
+			console.log("File uploaded successfully", uploadResponse.data);
+			return uploadResponse.data.url; // Assuming response.data has the URL
 		} catch (error) {
 			console.error("Error uploading file", error);
 			throw error;
