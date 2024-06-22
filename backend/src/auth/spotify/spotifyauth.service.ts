@@ -3,6 +3,10 @@ import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
+import { SpotifyUser } from "src/spotify/models/user";
+import { Prisma } from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
+import { PrismaService } from "prisma/prisma.service";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -22,6 +26,7 @@ export class SpotifyAuthService {
 	constructor(
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
+		private readonly prisma: PrismaService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -92,5 +97,43 @@ export class SpotifyAuthService {
 		}
 
 		return response.data as SpotifyTokenResponse;
+	}
+
+	async createUser(spotifyUser: SpotifyUser): Promise<string> {
+		//find largest profile picture
+		let largest = 0;
+		for (let i = 0; i < spotifyUser.images.length; i++) {
+			if (spotifyUser.images[i].height > largest) {
+				largest = i;
+			}
+		}
+
+		const user: Prisma.usersCreateInput = {
+			username: spotifyUser.id,
+			profile_picture: spotifyUser.images[largest].url,
+			full_name: spotifyUser.display_name,
+			external_links: {
+				spotify: spotifyUser.external_urls.spotify,
+			},
+			email: spotifyUser.email,
+		};
+		const existingUser: PrismaTypes.users[] | null =
+			await this.prisma.users.findMany({
+				where: { username: spotifyUser.id },
+			});
+		if (!existingUser || existingUser === null) {
+			throw new Error("Failed to find user");
+		}
+		if (existingUser && existingUser.length > 0) {
+			return existingUser[0].user_id;
+		}
+		try {
+			const response = await this.prisma.users.create({ data: user });
+			console.log(response);
+			return response.user_id;
+		} catch (err) {
+			console.log(err);
+			throw new Error("Failed to create user");
+		}
 	}
 }
