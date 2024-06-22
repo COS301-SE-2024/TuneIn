@@ -28,7 +28,8 @@ const fetchRoomDetails = async (roomId: string) => {
 
 const EditRoom: React.FC = () => {
   const router = useRouter();
-  const { room } = useLocalSearchParams();
+  const room = useLocalSearchParams();
+  console.log('Room after search params:', room)
   const _room = Array.isArray(room) ? room[0] : room;
   console.log('Room:', _room);
   console.log('local params', useLocalSearchParams())

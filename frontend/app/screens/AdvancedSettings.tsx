@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Import the icon
 
 const AdvancedSettings = () => {
   const router = useRouter();
+  const _roomDetails = useLocalSearchParams(); // room details from previous screen
   const [selectedOption, setSelectedOption] = useState(null);
   const [toggle1, setToggle1] = useState(true);
   const [toggle2, setToggle2] = useState(true);
@@ -21,7 +22,7 @@ const AdvancedSettings = () => {
   const toggleSwitch4 = () => setToggle4(previousState => !previousState);
 
   const goToEditScreen = () => {
-    router.navigate("/screens/EditRoom");
+    router.navigate({pathname:"/screens/EditRoom", params: _roomDetails});
   };
 
   const goToChat = () => {

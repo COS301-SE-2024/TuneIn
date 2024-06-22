@@ -18,6 +18,7 @@ type Message = {
 const ChatRoomScreen: React.FC = () => {
   const router = useRouter();
   const _roomDetails = useLocalSearchParams(); // room details from previous screen
+  console.log(_roomDetails);
   const [isChatExpanded, setChatExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -35,7 +36,10 @@ const ChatRoomScreen: React.FC = () => {
   const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
   const navigateToAdvancedSettings = () => {
-    router.navigate("/screens/AdvancedSettings");
+    router.navigate({
+      pathname:"/screens/AdvancedSettings",
+      params: _roomDetails
+    });
   };
 
   const navigateToPlaylist = () => {
