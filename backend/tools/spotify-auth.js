@@ -51,7 +51,6 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
     let details;
 
     //exchange code for access token
-    /*
     await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         headers: {
@@ -78,5 +77,4 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
 	let sdk = SpotifyApi.SpotifyApi.withAccessToken(clientId, details);
     let user = await sdk.currentUser.profile();
     console.log(user);
-    */
 });
