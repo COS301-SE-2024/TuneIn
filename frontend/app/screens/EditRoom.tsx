@@ -140,7 +140,15 @@ const EditRoom: React.FC = () => {
           'Authorization': 'Bearer ' + token
         }});
       console.log(data);
-      navigateToChatRoom();
+      Alert.alert(
+        "Changes Saved",
+        "Your changes have been saved successfully.",
+        [{ text: "OK"}],
+        { cancelable: false }
+      );
+      router.navigate({
+        pathname: '/screens/Home'
+      })
     } catch (error) {
       console.error('Error:', error);
     }
