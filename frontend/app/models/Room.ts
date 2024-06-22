@@ -11,5 +11,10 @@ export interface Room {
     mine?:boolean;
     tags: string[];
     playlist?:string[];
+    genre?: string,
+    language?: string,
+    roomSize?: Number,
+    isExplicit?: boolean,
+    isNsfw?: boolean,
   }
   

@@ -56,8 +56,7 @@ const LoginScreen: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: emailOrUsername,
-            userCognitoSub: result.getAccessToken().decodePayload().username,
+            token: result.getAccessToken().getJwtToken(),
           }),
         }).then((response) => response.json())
         .then((data) => {

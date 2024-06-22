@@ -4,7 +4,9 @@ import SongCard from '../../components/Spotify/SongCard';
 import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
 import { useLocalSearchParams } from 'expo-router'; // Assuming useLocalSearchParams is correctly implemented
+import { useRouter } from "expo-router";
 
+   
 interface Track {
   id: string;
   name: string;
@@ -26,12 +28,55 @@ interface SimplifiedTrack {
 }
 
 const EditPlaylist: React.FC = () => {
+
+  const router = useRouter();
   const { roomId, playlists: initialPlaylist } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
   const { accessToken } = useSpotifyAuth();
-  const { searchResults, handleSearch } = useSpotifySearch(accessToken);
+  const { searchResults, handleSearch } = useSpotifySearch();
+
+  const parseInitialPlaylist = (data: string | string[]): SimplifiedTrack[] => {
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.every(item => typeof item === 'object')) {
+          return parsed as SimplifiedTrack[];
+        } else {
+          console.error('Parsed data is not an array of objects');
+          return [];
+        }
+      } catch (error) {
+        console.error('Failed to parse initial playlist:', error);
+        return [];
+      }
+    } else if (Array.isArray(data)) {
+      return data.map(item => {
+        if (typeof item === 'string') {
+          // Assuming item is a JSON string that represents a SimplifiedTrack object
+          try {
+            const parsedItem = JSON.parse(item);
+            if (typeof parsedItem === 'object') {
+              return parsedItem as SimplifiedTrack;
+            } else {
+              console.error('Parsed item is not an object');
+              return {} as SimplifiedTrack;
+            }
+          } catch (error) {
+            console.error('Failed to parse playlist item:', error);
+            return {} as SimplifiedTrack;
+          }
+        } else if (typeof item === 'object') {
+          return item as SimplifiedTrack;
+        } else {
+          console.error('Item is not a string or object');
+          return {} as SimplifiedTrack;
+        }
+      });
+    }
+    return [];
+  };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
+  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() => parseInitialPlaylist(initialPlaylist));
 
   const addToPlaylist = (track: Track) => {
     const simplifiedTrack: SimplifiedTrack = {
@@ -50,10 +95,25 @@ const EditPlaylist: React.FC = () => {
     setPlaylist(prevPlaylist => prevPlaylist.filter(track => track.id !== trackId));
   };
 
-  const savePlaylist = () => {
+  const savePlaylist = async () => {
     console.log('Playlist saved:', playlist);
     Alert.alert('Playlist Saved', 'Playlist saved successfully.');
-    // Add any logic to save the playlist to the backend if necessary
+    // Add logic to save the playlist to the backend if necessary
+    try {
+      // Replace with your backend API URL
+      const response = await fetch('http://192.168.56.1:4000/room/' + roomId + '/playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ roomId, playlist }),
+      });
+      const data = await response.json();
+      console.log('Playlist saved to backend:', data);
+    } catch (error) {
+      console.error('Error saving playlist:', error);
+    }
+  router.navigate('/screens/Home');
   };
 
   const playPreview = (previewUrl: string) => {
@@ -79,7 +139,7 @@ const EditPlaylist: React.FC = () => {
             <Image source={{ uri: track.albumArtUrl }} style={styles.albumArt} />
             <View style={styles.trackInfo}>
               <Text style={styles.trackName}>{track.name}</Text>
-              <Text style={styles.artistName}>{track.artistNames}</Text>
+              <Text style={styles.artistNames}>{track.artistNames}</Text>
               {track.explicit && <Text style={styles.explicitTag}>Explicit</Text>}
             </View>
             <Button title="Remove" onPress={() => removeFromPlaylist(track.id)} />
@@ -151,7 +211,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  artistName: {
+  artistNames: {
     fontSize: 14,
     color: '#666',
   },
