@@ -48,33 +48,86 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
 	const code = url.searchParams.get("code");
 	console.log(`Code extracted: ${code}`);
 
-    let details;
+	let details;
 
-    //exchange code for access token
-    await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-            "content-type": "application/x-www-form-urlencoded",
-            Authorization:
-                "Basic " +
-                Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-        },
-        body: new URLSearchParams({
-            grant_type: "authorization_code",
-            code: code,
-            redirect_uri: redirectTarget,
-        }),
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            details = data;
-            console.log(details);
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
+	//exchange code for access token
+	await fetch("https://accounts.spotify.com/api/token", {
+		method: "POST",
+		headers: {
+			"content-type": "application/x-www-form-urlencoded",
+			Authorization:
+				"Basic " +
+				Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+		},
+		body: new URLSearchParams({
+			grant_type: "authorization_code",
+			code: code,
+			redirect_uri: redirectTarget,
+		}),
+	})
+		.then((response) => response.json())
+		.then((data) => {
+			details = data;
+			console.log(details);
+		})
+		.catch((error) => {
+			console.error("Error:", error);
+		});
 
 	let sdk = SpotifyApi.SpotifyApi.withAccessToken(clientId, details);
-    let user = await sdk.currentUser.profile();
-    console.log(user);
+	let user = await sdk.currentUser.profile();
+	console.log(user);
+
+	let total = Number.MAX_SAFE_INTEGER;
+	let retrieved = 0;
+	let userPlaylists = [];
+	while (retrieved < total) {
+		let playlists = await sdk.currentUser.playlists.playlists(50, retrieved);
+		if (total === Number.MAX_SAFE_INTEGER) {
+			total = playlists.total;
+		}
+		playlists.items.forEach((playlist) => {
+			console.log(playlist.name);
+		});
+		userPlaylists.push(...playlists.items);
+		retrieved += playlists.items.length;
+	}
+
+	console.log("=========================================");
+	let tracks = await sdk.currentUser.tracks.savedTracks(50);
+	console.log(tracks.total + " tracks saved");
+	for (let i = 0; i < 50; i++) {
+		console.log(
+			tracks.items[i].track.artists[0].name +
+				" - " +
+				tracks.items[i].track.name,
+		);
+	}
+
+	console.log("=========================================");
+	let playlist = userPlaylists[0];
+	/*
+    total = playlist.tracks.total;
+    retrieved = 0;
+    let playlistTracks = [];
+    while (retrieved < total) {
+        let tracks = await sdk.playlists.getPlaylistItems
+        tracks.items.forEach((track) => {
+            console.log(track.track.artists[0].name + " - " + track.track.name);
+        });
+        playlistTracks.push(...tracks.items);
+        retrieved += tracks.items.length;
+    }
+        */
+	let playlistItself = await sdk.playlists.getPlaylist(playlist.id);
+	console.log(playlistItself.name);
+	console.log(playlistItself.tracks.total + " tracks");
+	userPlaylists[0] = playlistItself;
+	for (let i = 0; i < playlistItself.tracks.items.length; i++) {
+		console.log(
+			playlistItself.tracks.items[i].track.artists[0].name +
+				" - " +
+				playlistItself.tracks.items[i].track.name,
+		);
+	}
 });
