@@ -51,7 +51,9 @@ const Home: React.FC = () => {
   };
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
+    // console.log('formatting rooms', rooms)
     return rooms.map(room => ({
+      roomID: room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
       songName: room.current_song ? (room.current_song.title) : null,
@@ -59,8 +61,11 @@ const Home: React.FC = () => {
       description: room.description,
       userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
       username: room.creator ? room.creator.username : "Unknown",
+      roomSize: "50",
       tags: room.tags ? room.tags : [],
       mine: mine,
+      isNsfw: room.has_nsfw_content,
+      isExplicit: room.has_explicit_content,
     }));
   };
 

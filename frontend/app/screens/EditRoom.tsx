@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, StyleSheet, Alert } from 'react-native';
 import {useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Room } from '../models/Room';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import uploadImage from '../services/ImageUpload';
 
 const BASE_URL = 'http://10.32.253.158:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
@@ -12,7 +13,7 @@ const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching
   const token = await AsyncStorage.getItem('token');
   try {
-    const data = await axios.get(`${BASE_URL}/rooms/${roomId}`, {
+    const data = await axios.get(`${BASE_URL}rooms/${roomId}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
@@ -32,8 +33,9 @@ const EditRoom: React.FC = () => {
   console.log('Room:', _room);
   console.log('local params', useLocalSearchParams())
   const roomData = JSON.parse(_room);
+  const [changedImage, setChangedImage] = useState<boolean>(false);
   const [roomDetails, setRoomDetails] = useState<Room>({
-    id: "roomData",
+    roomID: "roomData",
     name: "roomData",
     description: "roomData",
     backgroundImage: '',
@@ -72,7 +74,10 @@ const EditRoom: React.FC = () => {
   const screenWidth = Dimensions.get('window').width;
 
   const navigateToChatRoom = () => {
-    router.navigate("/screens/ChatRoom");
+    router.navigate({
+      pathname:"/screens/ChatRoom",
+      params: { room: JSON.stringify(roomDetails) }
+    });
   };
 
   const navigateToEditPlaylist = () => {
@@ -88,6 +93,7 @@ const EditRoom: React.FC = () => {
     });
 
     if (!result.canceled) {
+      setChangedImage(true);
       setImage(result.assets[0].uri);
     }
   };
@@ -100,10 +106,45 @@ const EditRoom: React.FC = () => {
     }
   };
 
-  const saveChanges = () => {
+  const saveChanges = async () => {
     // Add logic to save changes
     console.log('Changes saved', { ...roomDetails, backgroundImage: image });
-    navigateToChatRoom();
+    const newRoom = {};
+    newRoom['description'] = roomDetails.description;
+    newRoom['has_explicit_content'] = roomDetails.isExplicit;
+    newRoom['room_language'] = roomDetails.language;
+    newRoom['has_nsfw_content'] = roomDetails.isNsfw;
+    newRoom['room_name'] = roomDetails.name;
+    var imageURL = '';
+    if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
+      // alert user to enter room name
+      Alert.alert(
+        "Room Name Required",
+        "Please enter a room name.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+    if(changedImage){
+      imageURL = await uploadImage(image, roomDetails.name)
+      console.log('Image URL:', imageURL);
+      newRoom['room_image'] = imageURL;
+    }
+    const token = await AsyncStorage.getItem('token');
+    console.log('Token:', token);
+    try {
+      const data = await axios.patch(`${BASE_URL}rooms/${roomDetails.roomID}`, newRoom, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }});
+      console.log(data);
+      navigateToChatRoom();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    
   };
 
 
