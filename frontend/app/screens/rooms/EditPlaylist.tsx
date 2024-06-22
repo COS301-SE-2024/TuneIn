@@ -101,7 +101,7 @@ const EditPlaylist: React.FC = () => {
     // Add logic to save the playlist to the backend if necessary
     try {
       // Replace with your backend API URL
-      const response = await fetch('http://192.168.56.1:4000/room/' + roomId + '/playlist', {
+      const response = await fetch('http://localhost:4000/room/' + roomId + '/playlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

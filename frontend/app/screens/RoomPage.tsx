@@ -24,7 +24,7 @@ const RoomPage = () => {
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
-        const response = await fetch(`http://192.168.56.1:4000/room/${roomData.id}/playlist`);
+        const response = await fetch(`http://localhost:4000/room/${roomData.id}/playlist`);
         const data = await response.json();
         setPlaylist(data.playlist);
       } catch (error) {
