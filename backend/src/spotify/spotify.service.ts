@@ -72,6 +72,38 @@ export class SpotifyService {
 			userPlaylists.push(...playlists.items);
 			retrieved += playlists.items.length;
 		}
-		return userPlaylists;
+
+		//dedupe
+		const seen = new Set();
+		const userPlaylistsDeduped = userPlaylists.filter((el) => {
+			const duplicate = seen.has(el.id);
+			seen.add(el.id);
+			return !duplicate;
+		});
+		return userPlaylistsDeduped;
+	}
+
+	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		let total = Number.MAX_SAFE_INTEGER;
+		let retrieved = 0;
+		const likedSongs: Spotify.SavedTrack[] = [];
+		while (retrieved < total) {
+			const tracks = await api.currentUser.tracks.savedTracks(50, retrieved);
+			if (total === Number.MAX_SAFE_INTEGER) {
+				total = tracks.total;
+			}
+			likedSongs.push(...tracks.items);
+			retrieved += tracks.items.length;
+		}
+
+		//dedupe
+		const seen = new Set();
+		const likedSongsDeduped = likedSongs.filter((el) => {
+			const duplicate = seen.has(el.track.id);
+			seen.add(el.track.id);
+			return !duplicate;
+		});
+		return likedSongsDeduped;
 	}
 }
