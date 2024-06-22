@@ -1,96 +1,112 @@
 import React from "react";
-import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import {
+	View,
+	Text,
+	ImageBackground,
+	TouchableOpacity,
+	Dimensions,
+	StyleSheet,
+} from "react-native";
 import { useRouter } from "expo-router";
 
 const WelcomeScreen: React.FC = () => {
-  const router = useRouter();
-  const { width, height } = Dimensions.get('window');
+	const router = useRouter();
+	const { width, height } = Dimensions.get("window");
 
-  const navigateToLogin = () => {
-    router.navigate("/screens/LoginStreaming");
-  };
+	const navigateToLogin = () => {
+		router.navigate("/screens/LoginScreen");
+	};
 
-  const navigateToRegister = () => {
-    router.navigate("/screens/RegisterStreaming");
-  };
+	const navigateToRegister = () => {
+		router.navigate("/screens/RegisterScreen");
+	};
 
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../../assets/text.jpg')}
-        style={{ width, height: height * 0.5 }}
-        resizeMode="cover"
-      />
-      <View style={styles.contentContainer}>
-        <Text style={styles.logoText}>Logo</Text>
-        <Text style={styles.titleText}>TuneIn</Text>
-        <TouchableOpacity
-          style={[styles.button, styles.loginButton]}
-          onPress={navigateToLogin}
-        >
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.registerButton]}
-          onPress={navigateToRegister}
-        >
-          <Text style={styles.registerButtonText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+	return (
+		<View style={styles.container}>
+			<ImageBackground
+				source={require("../../assets/text.jpg")}
+				style={[styles.imageBackground, { width, height: height * 0.5 }]}
+				resizeMode="cover"
+			/>
+			<View style={styles.innerContainer}>
+				<Text style={styles.logoText}>Logo</Text>
+				<Text style={styles.titleText}>TuneIn</Text>
+				<TouchableOpacity style={styles.loginButton} onPress={navigateToLogin}>
+					<Text style={styles.loginButtonText}>Login</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={styles.registerButton} onPress={navigateToRegister}>
+					<Text style={styles.registerButtonText}>Register</Text>
+				</TouchableOpacity>
+			</View>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  logoText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  button: {
-    width: '85%',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 30,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    marginBottom: 30,
-  },
-  loginButton: {
-    backgroundColor: '#8B8FA8',
-  },
-  registerButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  registerButtonText: {
-    fontSize: 16,
-    color: '#000000',
-  },
+	container: {
+		flex: 1,
+		justifyContent: "center",
+	},
+	imageBackground: {
+		width: "100%",
+		height: "50%",
+	},
+	innerContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		padding: 16,
+	},
+	logoText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 20,
+	},
+	titleText: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 32,
+	},
+	loginButton: {
+		width: "92%",
+		height: 48,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#4C51BF",
+		borderRadius: 24,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	loginButtonText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#FFF",
+	},
+	registerButton: {
+		width: "92%",
+		height: 48,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#FFF",
+		borderColor: "#000",
+		borderWidth: 1,
+		borderRadius: 24,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	registerButtonText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#000",
+	},
 });
 
 export default WelcomeScreen;

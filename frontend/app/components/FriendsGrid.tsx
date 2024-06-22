@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Assume you have a Friend model
 
@@ -10,21 +10,22 @@ interface FriendsGridProps {
 
 const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
   return (
-    <View className="mb-5 flex items-center justify-center">
-      <View className="flex flex-row flex-wrap px-4 pl-8">
+    <View style={styles.container}>
+      <View style={styles.gridContainer}>
         {friends.slice(0, maxVisible).map((friend, index) => (
           <Link
             key={index}
             href={`/screens/ProfilePage?friend=${JSON.stringify(friend)}`}
+            style={styles.link}
           >
-            <View className="w-1/3 p-3">
-              <View className="flex items-center border-2 border-blue-500 rounded-full p-1">
+            <View style={styles.friendContainer}>
+              <View style={styles.imageBorder}>
                 <Image
                   source={{ uri: friend.profilePicture }}
-                  className="w-12 h-12 rounded-full"
+                  style={styles.profileImage}
                 />
               </View>
-              <Text className="mt-2 text-center">{friend.name}</Text>
+              <Text style={styles.friendName}>{friend.name}</Text>
             </View>
           </Link>
         ))}
@@ -32,5 +33,43 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingLeft: 32,
+  },
+  link: {
+    width: '33.33%', // Use percentage for flexible layout
+    padding: 8,
+  },
+  friendContainer: {
+    alignItems: 'center',
+    padding: 4,
+  },
+  imageBorder: {
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#0000FF', // Use hex color for blue
+    borderRadius: 50,
+    padding: 4,
+  },
+  profileImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  friendName: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});
 
 export default FriendsGrid;
