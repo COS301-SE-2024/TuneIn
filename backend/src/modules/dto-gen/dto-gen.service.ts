@@ -112,6 +112,34 @@ export class DtoGenService {
 
 		//get user info
 		const result: UserProfileDto = this.generateBriefUserProfileDto(user);
+		result.links = await this.dbUtils.getLinks(user);
+    const preferences = await this.dbUtils.getPreferences(user);
+    result.fav_genres = preferences.fav_genres;
+    result.fav_songs = preferences.fav_songs;
+    const recent_rooms = await this.dbUtils.getActivity(user);
+    result.recent_rooms = {
+      count: recent_rooms.count,
+      data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
+    };
+
+    const favRooms = await this.prisma.bookmark.findMany({
+      where: { user_id: userID },
+    });
+
+    const roomDtoArray: RoomDto[] = [];
+
+    // Iterate through each room_id and generate RoomDto
+    for (const room of favRooms) {
+      const roomDto = await this.generateRoomDto(room.room_id);
+      if (roomDto) {
+        roomDtoArray.push(roomDto);
+      }
+    }
+
+    result.fav_rooms = {
+      count: roomDtoArray.length,
+      data: roomDtoArray,
+    };
 
 		const following: Prisma.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
@@ -148,31 +176,31 @@ export class DtoGenService {
 		//exclude fav genres
 		//exclude fav songs
 
-		if (fully_qualify) {
-			const favRooms: Prisma.room[] | null =
-				await this.dbUtils.getRandomRooms(5);
-			if (favRooms && favRooms !== null) {
-				result.fav_rooms.count = favRooms.length;
-				const ids: string[] = favRooms.map((r) => r.room_id);
-				const rooms = await this.generateMultipleRoomDto(ids);
-				if (rooms && rooms !== null) {
-					result.fav_rooms.data = rooms;
-				}
-			}
-		}
+		// if (fully_qualify) {
+		// 	const favRooms: Prisma.room[] | null =
+		// 		await this.dbUtils.getRandomRooms(5);
+		// 	if (favRooms && favRooms !== null) {
+		// 		result.fav_rooms.count = favRooms.length;
+		// 		const ids: string[] = favRooms.map((r) => r.room_id);
+		// 		const rooms = await this.generateMultipleRoomDto(ids);
+		// 		if (rooms && rooms !== null) {
+		// 			result.fav_rooms.data = rooms;
+		// 		}
+		// 	}
+		// }
 
-		if (fully_qualify) {
-			const recentRooms: Prisma.room[] | null =
-				await this.dbUtils.getRandomRooms(5);
-			if (recentRooms && recentRooms !== null) {
-				result.recent_rooms.count = recentRooms.length;
-				const ids: string[] = recentRooms.map((r) => r.room_id);
-				const rooms = await this.generateMultipleRoomDto(ids);
-				if (rooms && rooms !== null) {
-					result.recent_rooms.data = rooms;
-				}
-			}
-		}
+		// if (fully_qualify) {
+		// 	const recentRooms: Prisma.room[] | null =
+		// 		await this.dbUtils.getRandomRooms(5);
+		// 	if (recentRooms && recentRooms !== null) {
+		// 		result.recent_rooms.count = recentRooms.length;
+		// 		const ids: string[] = recentRooms.map((r) => r.room_id);
+		// 		const rooms = await this.generateMultipleRoomDto(ids);
+		// 		if (rooms && rooms !== null) {
+		// 			result.recent_rooms.data = rooms;
+		// 		}
+		// 	}
+		// }
 
 		return result;
 	}
