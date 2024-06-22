@@ -1,16 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { SpotifyUser } from "src/spotify/models/user";
 import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
-import { PrismaService } from "prisma/prisma.service";
+import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
+import { SpotifyService } from "src/spotify/spotify.service";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -18,6 +21,11 @@ export type SpotifyTokenResponse = {
 	scope: string;
 	expires_in: number;
 	refresh_token: string;
+};
+
+export type SpotifyTokenPair = {
+	tokens: SpotifyTokenResponse;
+	epoch_expiry: number;
 };
 
 export class SpotifyCallbackResponse {
@@ -41,6 +49,8 @@ export class SpotifyAuthService {
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly spotify: SpotifyService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -143,13 +153,33 @@ export class SpotifyAuthService {
 		return token;
 	}
 
-	async createUser(userID: string): Promise<PrismaTypes.users> {
+	async createUser(tk: SpotifyTokenPair): Promise<PrismaTypes.users> {
+		//get user
+		if (tk.epoch_expiry < Date.now()) {
+			throw new Error("Token has expired");
+		}
+
+		const spotifyUser: Spotify.UserProfile = await this.spotify.getSelf(
+			tk.tokens,
+		);
+
 		//find largest profile picture
 		let largest = 0;
 		for (let i = 0; i < spotifyUser.images.length; i++) {
 			if (spotifyUser.images[i].height > largest) {
 				largest = i;
 			}
+		}
+
+		const existingUser: PrismaTypes.users[] | null =
+			await this.prisma.users.findMany({
+				where: { username: spotifyUser.id },
+			});
+		if (!existingUser || existingUser === null) {
+			throw new Error("Failed to find user");
+		}
+		if (existingUser && existingUser.length > 0) {
+			return existingUser[0];
 		}
 
 		const user: Prisma.usersCreateInput = {
@@ -161,16 +191,7 @@ export class SpotifyAuthService {
 			},
 			email: spotifyUser.email,
 		};
-		const existingUser: PrismaTypes.users[] | null =
-			await this.prisma.users.findMany({
-				where: { username: spotifyUser.id },
-			});
-		if (!existingUser || existingUser === null) {
-			throw new Error("Failed to find user");
-		}
-		if (existingUser && existingUser.length > 0) {
-			return existingUser[0];
-		}
+
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);

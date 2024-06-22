@@ -2,6 +2,7 @@ import { Controller, Get, Query, Request } from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
+	SpotifyTokenPair,
 	SpotifyTokenResponse,
 } from "./spotifyauth.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -32,10 +33,12 @@ export class SpotifyAuthController {
 		//expecting "/auth/callback?code={code}&state={state}"
 		const tokens: SpotifyTokenResponse =
 			await this.spotifyAuth.exchangeCodeForToken(code);
+		const tp: SpotifyTokenPair = {
+			tokens: tokens,
+			epoch_expiry: new Date().getTime() + (tokens.expires_in - 300) * 1000,
+		};
 		console.log(tokens);
-		const spotifyUser: SpotifyUser = await this.spotify.getSelf(tokens);
-		const user: PrismaTypes.users =
-			await this.spotifyAuth.createUser(spotifyUser);
+		const user: PrismaTypes.users = await this.spotifyAuth.createUser(tp);
 		const jwt: string = await this.spotifyAuth.generateJWT(user);
 
 		const response: SpotifyCallbackResponse = {

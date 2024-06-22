@@ -13,8 +13,9 @@ import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 import { S3Service } from "./s3/s3.service";
 import { S3Module } from "./s3/s3.module";
-import { SpotifyService } from './spotify/spotify.service';
-import { SpotifyModule } from './spotify/spotify.module';
+import { SpotifyService } from "./spotify/spotify.service";
+import { SpotifyModule } from "./spotify/spotify.module";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
 	imports: [
@@ -28,8 +29,15 @@ import { SpotifyModule } from './spotify/spotify.module';
 		DbUtilsModule,
 		S3Module,
 		SpotifyModule,
+		HttpModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, DtoGenService, DbUtilsService, S3Service, SpotifyService],
+	providers: [
+		AppService,
+		DtoGenService,
+		DbUtilsService,
+		S3Service,
+		SpotifyService,
+	],
 })
 export class AppModule {}
