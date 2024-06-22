@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SpotifyAuthController } from './spotify.controller';
+import { SpotifyAuthController } from './spotifyauth.controller';
 
 describe('SpotifyAuthController', () => {
   let controller: SpotifyAuthController;
