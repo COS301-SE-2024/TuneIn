@@ -5,6 +5,7 @@ import {
 	ImageBackground,
 	TouchableOpacity,
 	Dimensions,
+	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -21,30 +22,91 @@ const WelcomeScreen: React.FC = () => {
 	};
 
 	return (
-		<View className="flex-1 justify-center">
+		<View style={styles.container}>
 			<ImageBackground
 				source={require("../../assets/text.jpg")}
-				style={{ width, height: height * 0.5 }}
+				style={[styles.imageBackground, { width, height: height * 0.5 }]}
 				resizeMode="cover"
 			/>
-			<View className="flex-1 justify-center items-center p-4">
-				<Text className="text-lg font-bold mb-5">Logo</Text>
-				<Text className="text-2xl font-bold mb-8">TuneIn</Text>
-				<TouchableOpacity
-					className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
-					onPress={navigateToLogin}
-				>
-					<Text className="text-lg font-bold text-white">Login</Text>
+			<View style={styles.innerContainer}>
+				<Text style={styles.logoText}>Logo</Text>
+				<Text style={styles.titleText}>TuneIn</Text>
+				<TouchableOpacity style={styles.loginButton} onPress={navigateToLogin}>
+					<Text style={styles.loginButtonText}>Login</Text>
 				</TouchableOpacity>
-				<TouchableOpacity
-					className="w-11/12 h-12 justify-center items-center bg-white-700 border border-black rounded-full mb-5 shadow-lg"
-					onPress={navigateToRegister}
-				>
-					<Text className="text-lg font-bold text-black">Register</Text>
+				<TouchableOpacity style={styles.registerButton} onPress={navigateToRegister}>
+					<Text style={styles.registerButtonText}>Register</Text>
 				</TouchableOpacity>
 			</View>
 		</View>
 	);
 };
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		justifyContent: "center",
+	},
+	imageBackground: {
+		width: "100%",
+		height: "50%",
+	},
+	innerContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		padding: 16,
+	},
+	logoText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 20,
+	},
+	titleText: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 32,
+	},
+	loginButton: {
+		width: "92%",
+		height: 48,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#4C51BF",
+		borderRadius: 24,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	loginButtonText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#FFF",
+	},
+	registerButton: {
+		width: "92%",
+		height: 48,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#FFF",
+		borderColor: "#000",
+		borderWidth: 1,
+		borderRadius: 24,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	registerButtonText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#000",
+	},
+});
 
 export default WelcomeScreen;

@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
-import UserPool from '../services/UserPool';
+import UserPool from "../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const RegisterScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -27,11 +28,14 @@ const RegisterScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToLogin = () => {
-    router.navigate("/screens/LoginStreaming");
+    router.navigate("/screens/LoginScreen");
   };
 
   const generateUniqueUsername = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
   };
 
   const validateEmail = (email: string) => {
@@ -85,21 +89,16 @@ const RegisterScreen: React.FC = () => {
     if (validateEmail(email)) {
       attributes = [
         new CognitoUserAttribute({
-          Name: 'email',
-          Value: email
-        })
+          Name: "email",
+          Value: email,
+        }),
       ];
     }
 
     console.log(username, password, attributes);
     UserPool.signUp(email, password, null, [], (err, data) => {
       if (err) {
-        Alert.alert(
-          "Error",
-          err.message,
-          [{ text: "OK" }],
-          { cancelable: false }
-        );
+        Alert.alert("Error", err.message, [{ text: "OK" }], { cancelable: false });
         router.navigate("/screens/RegisterScreen");
         return;
       }
@@ -110,31 +109,28 @@ const RegisterScreen: React.FC = () => {
         [{ text: "OK" }],
         { cancelable: false }
       );
-      
+
       router.navigate({
         pathname: "/screens/VerifyEmail",
         params: { email: email },
       });
     });
-
   };
 
   return (
-    <ScrollView className="flex-1 p-4">
-      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
-      <Ionicons name="chevron-back" size={24} color="black" />
+    <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
-      <View className="items-center mb-10">
-        {/* Add Logo Component Here */}
-      </View>
-      <Text className="p-4 text-3xl font-bold text-center mb-10">
+      <View style={styles.logoContainer}>{/* Add Logo Component Here */}</View>
+      <Text style={styles.headerText}>
         Join the Fastest Growing Listening Community
       </Text>
-      <View className="items-center w-full">
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Username</Text>
+      <View style={styles.formContainer}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Username</Text>
           <TextInput
-            className="p-3 border-b border-gray-400 w-full"
+            style={styles.input}
             value={username}
             onChangeText={(text) => {
               setUsername(text);
@@ -142,10 +138,10 @@ const RegisterScreen: React.FC = () => {
             placeholder="Create a new username"
           />
         </View>
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Email</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
           <TextInput
-            className="p-3 border-b border-gray-400 w-full"
+            style={styles.input}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -154,18 +150,18 @@ const RegisterScreen: React.FC = () => {
             placeholder="Enter your email"
           />
         </View>
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Password</Text>
-          <View className="flex-row items-center w-full">
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
             <TextInput
-              className="p-3 flex-1 border-b border-gray-400"
+              style={styles.passwordInput}
               value={password}
               onChangeText={setPassword}
               placeholder="*********"
               secureTextEntry={obscureText}
             />
             <TouchableOpacity
-              className="absolute right-3"
+              style={styles.visibilityToggle}
               onPress={() => setObscureText(!obscureText)}
             >
               <MaterialIcons
@@ -176,18 +172,18 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Confirm Password</Text>
-          <View className="flex-row items-center w-full">
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Confirm Password</Text>
+          <View style={styles.passwordContainer}>
             <TextInput
-              className="p-3 flex-1 border-b border-gray-400"
+              style={styles.passwordInput}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="*********"
               secureTextEntry={obscureTextConfirm}
             />
             <TouchableOpacity
-              className="absolute right-3"
+              style={styles.visibilityToggle}
               onPress={() => setObscureTextConfirm(!obscureTextConfirm)}
             >
               <MaterialIcons
@@ -198,30 +194,121 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View className="w-11/12 mb-5">
+        <View style={styles.inputGroup}>
           <CheckBox
-            className="bg-transparent border-0 p-0"
+            containerStyle={styles.checkboxContainer}
             title="Accept Terms and Conditions"
             checked={acceptTerms}
             onPress={() => setAcceptTerms(!acceptTerms)}
           />
         </View>
-        <TouchableOpacity
-          className="w-11/12 h-12 justify-center items-center bg-blue-700 rounded-full mb-5 shadow-lg"
-          onPress={handleRegister}
-        >
-          <Text className="text-white text-lg font-bold">REGISTER</Text>
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+          <Text style={styles.registerButtonText}>REGISTER</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity className="mt-5" onPress={navigateToLogin}>
-        <Text className="text-lg text-black text-center">
-          Already have an account? <Text className="font-bold">Login</Text>
+      <TouchableOpacity style={styles.loginLink} onPress={navigateToLogin}>
+        <Text style={styles.loginLinkText}>
+          Already have an account? <Text style={styles.loginLinkBold}>Login</Text>
         </Text>
       </TouchableOpacity>
-      <View className="mb-20" />
+      <View style={styles.bottomSpacer} />
     </ScrollView>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  headerText: {
+    padding: 16,
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 40,
+  },
+  formContainer: {
+    alignItems: "center",
+    width: "100%",
+  },
+  inputGroup: {
+    width: "92%",
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  input: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+    width: "100%",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+  },
+  visibilityToggle: {
+    position: "absolute",
+    right: 12,
+  },
+  checkboxContainer: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    padding: 0,
+  },
+  registerButton: {
+    width: "92%",
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#4C51BF",
+    borderRadius: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  registerButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  loginLink: {
+    marginTop: 20,
+  },
+  loginLinkText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  loginLinkBold: {
+    fontWeight: "bold",
+  },
+  bottomSpacer: {
+    marginBottom: 40,
+  },
+});
 
 export default RegisterScreen;

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -13,8 +14,8 @@ import { CheckBox } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -28,28 +29,36 @@ const LoginScreen: React.FC = () => {
     console.log(emailOrUsername, password);
     const userData = {
       Username: emailOrUsername,
-      Pool: UserPool
+      Pool: UserPool,
     };
-    
+
     const cognitoUser = new CognitoUser(userData);
-    
+
     const authenticationData = {
       Username: emailOrUsername,
-      Password: password
+      Password: password,
     };
     const authenticationDetails = new AuthenticationDetails(authenticationData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-        console.log('access token + ' + result.getAccessToken().getJwtToken());
+        console.log(
+          "access token + " + result.getAccessToken().getJwtToken()
+        );
 
-        console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
-        
+        console.log(
+          "result.getAccessToken().decodePayload()",
+          result.getAccessToken().decodePayload()
+        );
+
         // Store token in AsyncStorage if remember me is checked
         if (rememberMe) {
-          AsyncStorage.setItem("cognitoToken", result.getAccessToken().getJwtToken());
+          AsyncStorage.setItem(
+            "cognitoToken",
+            result.getAccessToken().getJwtToken()
+          );
         }
 
-        //POST request to backend
+        // POST request to backend
         fetch("http://192.168.56.1:3000/auth/login", {
           method: "POST",
           headers: {
@@ -58,28 +67,25 @@ const LoginScreen: React.FC = () => {
           body: JSON.stringify({
             token: result.getAccessToken().getJwtToken(),
           }),
-        }).then((response) => response.json())
-        .then((data) => {
-         
-          const token = data.token; // Extract the token from the response
-          AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
-
-         
-            router.navigate("/screens/Home");
-          
         })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-    },
-    onFailure: function(err) {
-      console.error(err);
-    }
-  });
-};
+          .then((response) => response.json())
+          .then((data) => {
+            const token = data.token; // Extract the token from the response
+            AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
+            router.navigate("/screens/Home");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      },
+      onFailure: function (err) {
+        console.error(err);
+      },
+    });
+  };
 
   const navigateToRegister = () => {
-    router.navigate("/screens/RegisterStreaming");
+    router.navigate("/screens/RegisterScreen");
   };
 
   const navigateToForgot = () => {
@@ -87,38 +93,34 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView className="flex-1 p-4">
-      <TouchableOpacity className="absolute top-4 left-4 z-10" onPress={() => router.back()}>
-      <Ionicons name="chevron-back" size={24} color="black" />
+    <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
-      <View className="items-center mb-10">
-        {/* <Text style={styles.logoText}>Logo</Text> */}
-      </View>
-      <Text className="p-4 text-4xl font-bold text-center mb-10">
-        Welcome Back to TuneIn
-      </Text>
-      <View className="items-center w-full">
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Email or Username</Text>
+      <View style={styles.logoContainer}>{/* <Text style={styles.logoText}>Logo</Text> */}</View>
+      <Text style={styles.headerText}>Welcome Back to TuneIn</Text>
+      <View style={styles.formContainer}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email or Username</Text>
           <TextInput
-            className="p-3 border-b border-gray-400 w-full"
+            style={styles.input}
             value={emailOrUsername}
             onChangeText={setEmailOrUsername}
             placeholder="Enter your email or username"
           />
         </View>
-        <View className="w-11/12 mb-5">
-          <Text className="text-lg font-bold mb-2">Password</Text>
-          <View className="flex-row items-center w-full">
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
             <TextInput
-              className="p-3 flex-1 border-b border-gray-400"
+              style={styles.passwordInput}
               value={password}
               onChangeText={setPassword}
               placeholder="*********"
               secureTextEntry={obscureText}
             />
             <TouchableOpacity
-              className="absolute right-3"
+              style={styles.visibilityToggle}
               onPress={() => setObscureText(!obscureText)}
             >
               <MaterialIcons
@@ -129,33 +131,24 @@ const LoginScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity
-          className="self-end mr-10"
-          onPress= {navigateToForgot}
-        >
-          <Text className="text-black">Forgot Password?</Text>
+        <TouchableOpacity style={styles.forgotPasswordButton} onPress={navigateToForgot}>
+          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-        <View className="w-11/12 mb-5">
+        <View style={styles.inputGroup}>
           <CheckBox
-            className="bg-transparent border-0 p-0"
+            containerStyle={styles.checkboxContainer}
             title="Remember Me"
             checked={rememberMe}
             onPress={() => setRememberMe(!rememberMe)}
           />
         </View>
-        <TouchableOpacity
-          className="w-11/12 h-12 justify-center items-center bg-indigo-700 rounded-full mb-5 shadow-lg"
-          onPress={navigateToHome}
-        >
-          <Text className="text-white text-lg font-bold">LOGIN</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={navigateToHome}>
+          <Text style={styles.loginButtonText}>LOGIN</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          className="mt-5"
-          onPress={navigateToRegister}
-        >
-          <Text className="text-lg text-black">
+        <TouchableOpacity style={styles.registerLink} onPress={navigateToRegister}>
+          <Text style={styles.registerLinkText}>
             Don’t have an account?{" "}
-            <Text className="font-bold">Register Now</Text>
+            <Text style={styles.registerLinkBold}>Register Now</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -163,5 +156,103 @@ const LoginScreen: React.FC = () => {
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  headerText: {
+    padding: 16,
+    fontSize: 32,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 40,
+  },
+  formContainer: {
+    alignItems: "center",
+    width: "100%",
+  },
+  inputGroup: {
+    width: "92%",
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  input: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+    width: "100%",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+  },
+  visibilityToggle: {
+    position: "absolute",
+    right: 12,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginRight: 16,
+  },
+  forgotPasswordText: {
+    color: "black",
+  },
+  checkboxContainer: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    padding: 0,
+  },
+  loginButton: {
+    width: "92%",
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#4C51BF",
+    borderRadius: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  loginButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  registerLink: {
+    marginTop: 20,
+  },
+  registerLinkText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  registerLinkBold: {
+    fontWeight: "bold",
+  },
+});
 
 export default LoginScreen;

@@ -20,7 +20,7 @@ export const useSpotifyAuth = () => {
     if (expirationTime) {
       const interval = setInterval(() => {
         const currentTime = Date.now();
-        if (currentTime >= expirationTime - 60000) { // Refresh token 1 minute before expiration
+        if (currentTime >= expirationTime - 180000) { // Refresh token 1 minute before expiration
           refreshAccessToken();
         }
       }, 10000); // Check every 10 seconds

@@ -10,26 +10,46 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser } from "amazon-cognito-identity-js";
-import UserPool from "../services/UserPool";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const VerifyEmailScreen: React.FC = () => {
+const VerifySpotify: React.FC = () => {
   const router = useRouter();
   const { email } = useLocalSearchParams(); // Accessing the email passed from RegisterScreen
 
   const [verificationCode, setVerificationCode] = useState("");
 
-  const verifyCode = () => {
+  const verifyCode = async () => {
     const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-    const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
-    cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
-      if (err) {
-        Alert.alert("Error", err.message, [{ text: "OK" }], { cancelable: false });
-        return;
+
+    try {
+      const response = await fetch("YOUR_API_URL", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          verificationCode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to verify: ${response.status}`);
       }
+
+      const data = await response.json();
+      const { requestToken, refreshToken, expiresIn } = data;
+      const expirationDate = Date.now() + expiresIn;
+
+      await AsyncStorage.setItem("Spotify requestToken", requestToken);
+      await AsyncStorage.setItem("Spotify refreshToken", refreshToken);
+      await AsyncStorage.setItem("Spotify expirationDate", expirationDate.toString());
+
       Alert.alert("Success!", "Verification successful", [{ text: "OK" }], { cancelable: false });
       navigateToLogin();
-    });
+    } catch (err) {
+      Alert.alert("Error", err.message, [{ text: "OK" }], { cancelable: false });
+    }
   };
 
   const navigateToLogin = () => {
@@ -123,4 +143,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VerifyEmailScreen;
+export default VerifySpotify;
