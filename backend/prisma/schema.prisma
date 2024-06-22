@@ -7,6 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model authentication {
+  user_id String @id @db.Uuid
+  token   String
+  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model blocked {
+  blocker                      String   @db.Uuid
+  blockee                      String   @db.Uuid
+  date_blocked                 DateTime @default(now()) @db.Timestamptz(6)
+  users_blocked_blockeeTousers users    @relation("blocked_blockeeTousers", fields: [blockee], references: [user_id], onDelete: Cascade, map: "blockee")
+  users_blocked_blockerTousers users    @relation("blocked_blockerTousers", fields: [blocker], references: [user_id], onDelete: Cascade, map: "blocker")
+
+  @@index([blockee], map: "fki_blockee")
+  @@index([blocker], map: "fki_blocker")
+  @@ignore
+}
+
 model bookmark {
   user_id     String @db.Uuid
   room_id     String @db.Uuid
@@ -62,6 +81,14 @@ model participate {
   @@index([room_id], map: "fki_room")
 }
 
+model playlist {
+  playlist_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  name        String
+  playlist    String[]
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
 model private_message {
   p_message_id String  @id @db.Uuid
   recipient    String  @db.Uuid
@@ -80,6 +107,18 @@ model private_room {
 model public_room {
   room_id String @id @db.Uuid
   room    room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model queue {
+  room_id         String  @db.Uuid
+  song_id         String  @db.Uuid
+  is_done_playing Boolean @default(false)
+  queue_id        String  @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room            room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  song            song    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
+  vote            vote[]
+
+  @@index([song_id], map: "fki_song_id")
 }
 
 model room {
@@ -114,9 +153,19 @@ model room_message {
 model scheduled_room {
   room_id        String   @id @db.Uuid
   scheduled_date DateTime @db.Timestamptz(6)
-  private_room   room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
+  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
 
   @@index([room_id], map: "fki_scheduled_room ")
+}
+
+model song {
+  song_id    String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name       String
+  artist     String
+  genre      String?
+  lyrics_url String?
+  duration   Int?    @default(0)
+  queue      queue[]
 }
 
 model users {
@@ -142,55 +191,6 @@ model users {
   playlist                        playlist[]
   private_message                 private_message[]
   room                            room[]
-}
-
-model authentication {
-  user_id String @id @db.Uuid
-  token   String
-  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model blocked {
-  blocker                      String   @db.Uuid
-  blockee                      String   @db.Uuid
-  date_blocked                 DateTime @default(now()) @db.Timestamptz(6)
-  users_blocked_blockeeTousers users    @relation("blocked_blockeeTousers", fields: [blockee], references: [user_id], onDelete: Cascade, map: "blockee")
-  users_blocked_blockerTousers users    @relation("blocked_blockerTousers", fields: [blocker], references: [user_id], onDelete: Cascade, map: "blocker")
-
-  @@index([blockee], map: "fki_blockee")
-  @@index([blocker], map: "fki_blocker")
-  @@ignore
-}
-
-model playlist {
-  playlist_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String   @db.Uuid
-  name        String
-  playlist    String[]
-  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-}
-
-model queue {
-  room_id         String  @db.Uuid
-  song_id         String  @db.Uuid
-  is_done_playing Boolean @default(false)
-  queue_id        String  @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  room            room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-  song            song    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
-  vote            vote[]
-
-  @@index([song_id], map: "fki_song_id")
-}
-
-model song {
-  song_id    String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name       String
-  artist     String
-  genre      String?
-  lyrics_url String?
-  duration   Int?    @default(0)
-  queue      queue[]
 }
 
 model vote {

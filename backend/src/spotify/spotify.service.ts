@@ -47,4 +47,10 @@ export class SpotifyService {
 		const user = await api.currentUser.profile();
 		return user;
 	}
+
+	async getPlaylists(token: SpotifyTokenResponse): Promise<Spotify.Playlist[]> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const playlists: Spotify.SimplifiedPlaylist[] = await api.currentUser.playlists.playlists();
+		return playlists;
+	}
 }
