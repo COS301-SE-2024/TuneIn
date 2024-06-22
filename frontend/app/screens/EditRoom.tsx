@@ -8,17 +8,17 @@ import axios from 'axios';
 
 const BASE_URL = 'http://10.32.253.158:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
-const fetchRoomDetails = async (roomId: string): Promise<Room> => {
+const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching
   const token = await AsyncStorage.getItem('token');
   try {
-    const data = axios.get(`${BASE_URL}/rooms/${roomId}`, {
+    const data = await axios.get(`${BASE_URL}/rooms/${roomId}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
       }});
     console.log(data);
-    return data
+    return data;
   } catch (error) {
     console.error('Error:', error);
     return null
@@ -28,11 +28,14 @@ const fetchRoomDetails = async (roomId: string): Promise<Room> => {
 const EditRoom: React.FC = () => {
   const router = useRouter();
   const { room } = useLocalSearchParams();
-  const roomData = JSON.parse(room);
+  const _room = Array.isArray(room) ? room[0] : room;
+  console.log('Room:', _room);
+  console.log('local params', useLocalSearchParams())
+  const roomData = JSON.parse(_room);
   const [roomDetails, setRoomDetails] = useState<Room>({
-    id: roomData,
-    name: roomData,
-    description: roomData,
+    id: "roomData",
+    name: "roomData",
+    description: "roomData",
     backgroundImage: '',
     tags: [],
     roomSize: 50,
@@ -46,9 +49,9 @@ const EditRoom: React.FC = () => {
 
   useEffect(() => {
     const loadRoomDetails = async () => {
-      const _details = await fetchRoomDetails(roomID);
+      const _details = await fetchRoomDetails(roomId);
       console.log('Room details:', _details);
-      const details = { // Return default values
+      const __details = { // Return default values
         name: 'Sample Room',
         description: 'This is a sample room description.',
         genre: 'Music',
@@ -59,8 +62,8 @@ const EditRoom: React.FC = () => {
         image: 'https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-1170x780.jpg' // Replace with actual image URL
       };
       const details = await fetchRoomDetails("demo");
-      setRoomDetails(details);
-      setImage(details.backgroundImage);
+      setRoomDetails(roomData);
+      setImage(roomData.backgroundImage);
     };
 
     loadRoomDetails();
