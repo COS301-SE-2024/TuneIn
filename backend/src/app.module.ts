@@ -13,6 +13,8 @@ import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 import { S3Service } from "./s3/s3.service";
 import { S3Module } from "./s3/s3.module";
+import { SpotifyService } from './spotify/spotify.service';
+import { SpotifyModule } from './spotify/spotify.module';
 
 @Module({
 	imports: [
@@ -25,8 +27,9 @@ import { S3Module } from "./s3/s3.module";
 		DtoGenModule,
 		DbUtilsModule,
 		S3Module,
+		SpotifyModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, DtoGenService, DbUtilsService, S3Service],
+	providers: [AppService, DtoGenService, DbUtilsService, S3Service, SpotifyService],
 })
 export class AppModule {}
