@@ -150,12 +150,12 @@ const RoomPage = () => {
   };
 
   const navigateToPlaylist = () => {
-    console.log("Queue: ",queue);
-    console.log("currentTrackIndex: ",currentTrackIndex);
+    console.log("room id: ", roomData.id);
     router.navigate({
       pathname: "/screens/Playlist",
-      params: { queue: queue,
-        currentTrackIndex: currentTrackIndex
+      params: { queue: JSON.stringify(queue),
+        currentTrackIndex: currentTrackIndex,
+        Room_id: roomData.id,
        },
     });
   };
