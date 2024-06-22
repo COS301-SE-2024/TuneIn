@@ -11,6 +11,8 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 
 @Injectable()
 export class RoomsService {
+	DUMBroomQueues: Map<string, string[]> = new Map<string, string[]>();
+
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly dtogen: DtoGenService,
@@ -104,6 +106,11 @@ export class RoomsService {
 		return [];
 	}
 
+	getRoomQueueDUMBVERSION(roomID: string): string[] {
+		// TODO: Implement logic to get room queue
+		return this.DUMBroomQueues.get(roomID) || [];
+	}
+
 	clearRoomQueue(roomID: string): boolean {
 		// TODO: Implement logic to clear room queue
 		return false;
@@ -112,6 +119,13 @@ export class RoomsService {
 	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue
 		return [];
+	}
+
+	addSongToQueueDUMBVERSION(roomID: string, songID: string): string[] {
+		const queue = this.DUMBroomQueues.get(roomID) || [];
+		queue.push(songID);
+		this.DUMBroomQueues.set(roomID, queue);
+		return queue;
 	}
 
 	getCurrentSong(roomID: string): SongInfoDto {

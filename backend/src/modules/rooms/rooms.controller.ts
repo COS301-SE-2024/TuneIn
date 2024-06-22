@@ -177,14 +177,28 @@ export class RoomsController {
     no input
     response: array of SongInfoDto
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
-	getRoomQueue(
+	@ApiOperation({ summary: "Get the queue of a room" })
+	@ApiOkResponse({
+		description: "The queue of the room as an array of SongInfoDto.",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async getRoomQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
-	): SongInfoDto[] {
-		return this.roomsService.getRoomQueue(roomID);
+	//): SongInfoDto[] {
+	): Promise<string[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		//return this.roomsService.getRoomQueue(roomID);
+		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
 	}
 
 	/*
@@ -209,15 +223,29 @@ export class RoomsController {
     input: SongInfoDto
     response: array of SongInfoDto (room queue)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/songs")
 	@ApiTags("rooms")
+	@ApiOperation({ summary: "Add a song to the queue of a room" })
+	@ApiOkResponse({
+		description: "The queue of the room as an array of SongInfoDto.",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
 	addSongToQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
-		@Body() songInfoDto: SongInfoDto,
-	): SongInfoDto[] {
-		return this.roomsService.addSongToQueue(roomID, songInfoDto);
+		//@Body() songInfoDto: SongInfoDto,
+		@Body() songInfoDto: string,
+	//): SongInfoDto[] {
+	): string[] {
+		//return this.roomsService.addSongToQueue(roomID, songInfoDto);
+		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
 	}
 
 	/*

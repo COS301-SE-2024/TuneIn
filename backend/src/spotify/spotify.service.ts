@@ -4,6 +4,7 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
+import * as PrismaTypes from "@prisma/client";
 import {
 	SpotifyTokenPair,
 	SpotifyTokenResponse,
@@ -54,6 +55,10 @@ export class SpotifyService {
 	async getUserPlaylists(
 		tk: SpotifyTokenPair,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
+
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		let total = Number.MAX_SAFE_INTEGER;
 		let retrieved = 0;
@@ -84,6 +89,10 @@ export class SpotifyService {
 	}
 
 	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
+
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		let total = Number.MAX_SAFE_INTEGER;
 		let retrieved = 0;
@@ -106,4 +115,29 @@ export class SpotifyService {
 		});
 		return likedSongsDeduped;
 	}
+
+	/*
+	async importUserLibrary(tk: SpotifyTokenPair): Promise<void> {
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
+
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		const playlists: Spotify.SimplifiedPlaylist[] = await this.getUserPlaylists(
+			tk,
+		);
+		const likedSongs: Spotify.SavedTrack[] = await this.getAllLikedSongs(tk);
+
+		for (const playlist of playlists) {
+			const fullPlaylist: Spotify.Playlist = await api.playlists.getPlaylist(playlist.id);
+			const dbSongs: PrismaTypes.song[] = [];
+			for (const track of fullPlaylist.tracks.items) {
+				const song: PrismaTypes.song = {
+					name: track.track.name,
+					duration: track.track.duration_ms,
+				};
+			}
+		}
+	}
+		*/
 }
