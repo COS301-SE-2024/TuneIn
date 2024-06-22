@@ -4,7 +4,10 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
-import { SpotifyTokenResponse } from "../auth/spotify/spotifyauth.service";
+import {
+	SpotifyTokenPair,
+	SpotifyTokenResponse,
+} from "../auth/spotify/spotifyauth.service";
 
 @Injectable()
 export class SpotifyService {
@@ -48,9 +51,27 @@ export class SpotifyService {
 		return user;
 	}
 
-	async getPlaylists(token: SpotifyTokenResponse): Promise<Spotify.Playlist[]> {
-		const api = SpotifyApi.withAccessToken(this.clientId, token);
-		const playlists: Spotify.SimplifiedPlaylist[] = await api.currentUser.playlists.playlists();
-		return playlists;
+	async getUserPlaylists(
+		tk: SpotifyTokenPair,
+	): Promise<Spotify.SimplifiedPlaylist[]> {
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		let total = Number.MAX_SAFE_INTEGER;
+		let retrieved = 0;
+		const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
+		while (retrieved < total) {
+			const playlists = await api.currentUser.playlists.playlists(
+				50,
+				retrieved,
+			);
+			if (total === Number.MAX_SAFE_INTEGER) {
+				total = playlists.total;
+			}
+			playlists.items.forEach((playlist) => {
+				console.log(playlist.name);
+			});
+			userPlaylists.push(...playlists.items);
+			retrieved += playlists.items.length;
+		}
+		return userPlaylists;
 	}
 }
