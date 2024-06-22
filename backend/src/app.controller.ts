@@ -9,7 +9,7 @@ import { AppService } from "./app.service";
 import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { S3Service } from "./s3/s3.service";
-import { memoryStorage } from "multer";
+import { diskStorage } from "multer";
 
 @Controller()
 export class AppController {
@@ -35,7 +35,15 @@ export class AppController {
 	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
 	@UseInterceptors(
 		FileInterceptor("file", {
-			storage: memoryStorage(),
+			storage: diskStorage({
+				destination: "./uploads",
+				filename: (req, file, callback) => {
+					const uniqueSuffix =
+						Date.now() + "-" + Math.round(Math.random() * 1e9);
+					const filename = `${uniqueSuffix}-${file.originalname}`;
+					callback(null, filename);
+				},
+			}),
 			/*
 			limits: { fileSize: 5 * 1024 * 1024 },
 			fileFilter: (req, file, callback) => {
