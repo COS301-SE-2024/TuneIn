@@ -145,6 +145,49 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
+	const renderFavRooms = () => {
+		if (profileData.fav_rooms.count > 0) {
+			return (
+				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+					<Text style={styles.title}>Favorite Rooms</Text>
+					<View style={styles.roomCardsContainer}>
+						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
+							<RoomCard
+								key={room.roomId}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists}
+								username={room.creator.username}
+							/>
+						))}
+					</View>
+				</View>
+			);
+		}
+	};
+
+	const renderRecentRooms = () => {
+		if (profileData.recent_rooms.count > 0) {
+			console.log('profileData:', profileData.recent_rooms.data.slice(0, 2));
+			return (
+				<View style={{ paddingHorizontal: 20 }}>
+					<Text style={styles.title}>Recently Visited</Text>
+					<View style={styles.roomCardsContainer}>
+						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
+							<RoomCard
+								key={room.roomId}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists}
+								username={room.creator.username}
+							/>
+						))}
+					</View>
+				</View>
+			);
+		}
+	};
+
 	if (loading) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -298,34 +341,8 @@ const ProfileScreen: React.FC = () => {
 						onClose={() => setMusicDialogVisible(false)}
 					/>
 				</View>
-				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-					<Text style={styles.title}>Favorite Rooms</Text>
-					<View style={styles.roomCardsContainer}>
-						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.room_id}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-							/>
-						))}
-					</View>
-				</View>
-				<View style={{ paddingHorizontal: 20 }}>
-					<Text style={styles.title}>Recently Visited</Text>
-					<View style={styles.roomCardsContainer}>
-						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.room_id}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-							/>
-						))}
-					</View>
-				</View>
+				{renderFavRooms()}
+				{renderRecentRooms()}
 			</View>
 		</ScrollView>
 	);
