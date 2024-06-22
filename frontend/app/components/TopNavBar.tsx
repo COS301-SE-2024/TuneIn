@@ -1,5 +1,6 @@
+// TopNavBar.tsx
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Friend } from "../models/friend";
 
@@ -22,17 +23,44 @@ const TopNavBar: React.FC = () => {
   const profileImage = profileData.profilePicture; // Use profile data image
 
   return (
-    <View className="flex-row h-14 items-center justify-between">
-      <View className="w-10"></View>
-      <Text className="text-black text-2xl font-bold">{appName}</Text>
+    <View style={styles.container}>
+      <View style={styles.emptyView}></View>
+      <Text style={styles.appName}>{appName}</Text>
       <TouchableOpacity onPress={navigateToProfile}>
         <Image 
           source={{ uri: profileImage }}
-          className="w-10 h-10 rounded-full mr-5"
+          style={styles.profileImage}
         />
       </TouchableOpacity>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    height: 56,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    backgroundColor: "#FFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+  },
+  emptyView: {
+    width: 40, // Adjust as needed
+  },
+  appName: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 16,
+  },
+});
 
 export default TopNavBar;

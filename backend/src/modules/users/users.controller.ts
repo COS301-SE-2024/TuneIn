@@ -239,7 +239,7 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post("bookmarks")
+	@Get("bookmarks")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
 	@ApiParam({ name: "none" })
