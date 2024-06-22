@@ -13,17 +13,16 @@ model authentication {
   users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model blocked {
   blocker                      String   @db.Uuid
   blockee                      String   @db.Uuid
   date_blocked                 DateTime @default(now()) @db.Timestamptz(6)
+  blocked_id                   String   @id(map: "blocked_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   users_blocked_blockeeTousers users    @relation("blocked_blockeeTousers", fields: [blockee], references: [user_id], onDelete: Cascade, map: "blockee")
   users_blocked_blockerTousers users    @relation("blocked_blockerTousers", fields: [blocker], references: [user_id], onDelete: Cascade, map: "blocker")
 
   @@index([blockee], map: "fki_blockee")
   @@index([blocker], map: "fki_blocker")
-  @@ignore
 }
 
 model bookmark {
@@ -179,8 +178,8 @@ model users {
   external_links                  Json?             @db.Json
   email                           String?
   authentication                  authentication?
-  blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers") @ignore
-  blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers") @ignore
+  blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
+  blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
