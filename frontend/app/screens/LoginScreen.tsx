@@ -61,7 +61,7 @@ const LoginScreen: React.FC = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				console.log(data);
-				localStorage.setItem("token", data.token);
+				AsyncStorage.setItem("token", data.token);
 			})
 			.catch((error) => {
 				console.error("Error:", error);
