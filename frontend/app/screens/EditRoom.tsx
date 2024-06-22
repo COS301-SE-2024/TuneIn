@@ -1,26 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { Room } from '../models/Room';
 
+const BASE_URL = 'http://10.32.253.158:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
-const fetchRoomDetails = async (roomId) => {
+
+// make the function return value the relavant type
+
+const fetchRoomDetails = async (roomId: string | null) => {
   // Replace with real data fetching
-  return {
-    name: 'Sample Room',
-    description: 'This is a sample room description.',
-    genre: 'Music',
-    language: 'English',
-    roomSize: '50',
-    isExplicit: false,
-    isNsfw: false,
-    image: 'https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-1170x780.jpg' // Replace with actual image URL
-  };
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const data = axios.get(`${BASE_URL}/rooms/${roomId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }});
+    console.log(data);
+    return data
+  } catch (error) {
+    console.error('Error:', error);
+    return null
+  }
 };
 
 const EditRoom: React.FC = () => {
   const router = useRouter();
+  const _roomID = useLocalSearchParams();
+  console.log('Room ID:', _roomID)
+  var roomID = '';
+  // check if null or undefined. if neither then convert into string from string[]. else, make empty string
+  if (_roomID === null || _roomID === undefined) {
+    roomID = '3e1ab6e7-afdb-4781-9208-babd32923336';
+  }
+  const room = Array.isArray(_roomID.room) ? _roomID.room[0] : _roomID.room;
+  console.log('Room:', room);
+  // const roomID = _roomID ? _roomID.toString() : '';
+  const roomStuffs = JSON.parse(room);
+  console.log('Room Stuffs:', roomStuffs.roomID);
   const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
     name: '',
     description: '',
@@ -32,10 +54,23 @@ const EditRoom: React.FC = () => {
   });
 
   const [image, setImage] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string>(''); // Add room ID here
+  const [token, setToken] = useState<string>('');
 
   useEffect(() => {
     const loadRoomDetails = async () => {
-      const details = await fetchRoomDetails(/* roomId */);
+      const _details = await fetchRoomDetails(roomID);
+      console.log('Room details:', _details);
+      const details = { // Return default values
+        name: 'Sample Room',
+        description: 'This is a sample room description.',
+        genre: 'Music',
+        language: 'English',
+        roomSize: '50',
+        isExplicit: false,
+        isNsfw: false,
+        image: 'https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-1170x780.jpg' // Replace with actual image URL
+      };
       setRoomDetails(details);
       setImage(details.image);
     };

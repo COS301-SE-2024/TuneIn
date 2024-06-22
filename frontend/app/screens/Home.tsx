@@ -124,15 +124,23 @@ const Home: React.FC = () => {
 
   const router = useRouter();
   const navigateToAllFriends = () => {
+    console.log("Navigating to all friends")
     router.navigate("/screens/AllFriends");
   };
 
   const navigateToCreateNew = () => {
+    console.log("Navigating to create new room")
     router.navigate("/screens/CreateRoom");
   };
 
   const navigateToChatList = () => {
+    console.log("Navigating to chat list")
     router.navigate("/screens/ChatListScreen");
+  }
+
+  const navigateToEditRoom = () => {
+    console.log("Navigating to edit room")
+    router.navigate("/screens/EditRoom");
   }
 
   const handleScroll = useCallback(({ nativeEvent }) => {
