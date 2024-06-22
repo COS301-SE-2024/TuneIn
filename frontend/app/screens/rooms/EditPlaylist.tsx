@@ -30,7 +30,8 @@ interface SimplifiedTrack {
 const EditPlaylist: React.FC = () => {
 
   const router = useRouter();
-  const { roomId, playlists: initialPlaylist } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+  const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch();
 
@@ -76,7 +77,7 @@ const EditPlaylist: React.FC = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() => parseInitialPlaylist(initialPlaylist));
+  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() => parseInitialPlaylist(queue));
 
   const addToPlaylist = (track: Track) => {
     const simplifiedTrack: SimplifiedTrack = {
@@ -101,12 +102,12 @@ const EditPlaylist: React.FC = () => {
     // Add logic to save the playlist to the backend if necessary
     try {
       // Replace with your backend API URL
-      const response = await fetch('http://192.168.56.1:4000/room/' + roomId + '/playlist', {
+      const response = await fetch('http://192.168.56.1:4000/room/' + Room_id + '/playlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ roomId, playlist }),
+        body: JSON.stringify({ Room_id, playlist }),
       });
       const data = await response.json();
       console.log('Playlist saved to backend:', data);

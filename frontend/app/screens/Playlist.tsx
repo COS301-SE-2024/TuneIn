@@ -24,8 +24,6 @@ const Playlist = () => {
     if (typeof queue === 'string') {
       // Assuming queue is a JSON string, parse it into an array of Track objects
       const parsedQueue = JSON.parse(queue) as Track[];
-    
-      console.log("roomID: ",Room_id);
       setPlaylist(parsedQueue);
     } else if (Array.isArray(queue)) {
       // If queue is already an array (for testing purposes or other scenarios)
@@ -38,7 +36,14 @@ const Playlist = () => {
   }, [currentTrackIndex]);
 
   const navigateToAddSong = () => {
-    router.push('screens/AddSongPage');
+
+    router.navigate({
+      pathname: "/screens/rooms/EditPlaylist",
+      params: { queue: queue,
+        currentTrackIndex: currentTrackIndex,
+        Room_id: Room_id,
+       },
+    });
   };
 
   return (
