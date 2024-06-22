@@ -49,7 +49,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
         setToken(storedToken);
         const whoami = async (token: string | null, type?: string) => {
           try {
-            const response = await axios.get(`${BASE_URL}/users`, {
+            const response = await axios.get(`${BASE_URL}/profile`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
