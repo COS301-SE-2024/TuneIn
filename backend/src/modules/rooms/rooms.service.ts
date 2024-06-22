@@ -66,22 +66,62 @@ export class RoomsService {
 			return room;
 		}
 		*/
-		const room = await this.prisma.room.findFirst({
-			where: {
-				room_id: roomID
+		try{
+			const room = await this.prisma.room.findFirst({
+				where: {
+					room_id: roomID
+				}
+			});
+			if (!room) {
+				return new RoomDto();
 			}
-		});
-		if (!room) {
+			// filter out null values
+			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+			return roomDto? roomDto : new RoomDto();
+		} catch (error) {
+			console.error("Error getting room info:", error);
 			return new RoomDto();
 		}
-		// filter out null values
-		const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-		return roomDto? roomDto : new RoomDto();
+		// const room = await this.prisma.room.findFirst({
+		// 	where: {
+		// 		room_id: roomID
+		// 	}
+		// });
+		// if (!room) {
+		// 	return new RoomDto();
+		// }
+		// // filter out null values
+		// const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+		// return roomDto? roomDto : new RoomDto();
 	}
 
-	updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
+	async updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): Promise<RoomDto> {
 		// TODO: Implement logic to update room info
-		return new RoomDto();
+		const data = {
+			name: updateRoomDto.room_name!,
+			description: updateRoomDto.description!,
+			playlist_photo: updateRoomDto.room_image!,
+			explicit: updateRoomDto.has_explicit_content!,
+			nsfw: updateRoomDto.has_explicit_content!,
+			room_language: updateRoomDto.language!
+		}
+
+		Object.keys(data).forEach(key => data[key as keyof typeof data] === undefined && delete data[key as keyof typeof data]);
+
+		console.log("Updating room", roomID, "with data", data)
+		try{
+			const room = await this.prisma.room.update({
+				where: {
+					room_id: roomID
+				},
+				data: data
+			});
+			const updatedRoom = room? await this.dtogen.generateRoomDtoFromRoom(room): new RoomDto();
+			return updatedRoom? updatedRoom : new RoomDto();
+		} catch (error) {
+			console.error("Error updating room info:", error);
+			return new RoomDto();
+		}
 	}
 
 	updateRoom(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
@@ -118,12 +158,10 @@ export class RoomsService {
 					user_id: user_id
 				}
 			})
-	
-			// If the user is already in the room, return false
+
 			if (room !== null) {
 				return false;
 			}
-	
 			// Add the user to the room
 			await this.prisma.participate.create({
 				data: {

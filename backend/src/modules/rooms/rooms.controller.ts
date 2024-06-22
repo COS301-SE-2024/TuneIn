@@ -109,12 +109,23 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Patch(":roomID")
 	@ApiTags("rooms")
-	updateRoomInfo(
+	@ApiOkResponse({
+		description: "Room info updated successfully.",
+		type: RoomDto,
+	})
+	@ApiBadRequestResponse({
+		description: "User is not the creator of the room.",
+		type: RoomDto,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	// provide summary
+	@ApiOperation({ summary: "Update room info" })
+	async updateRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
-	): RoomDto {
-		return this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+	): Promise<RoomDto> {
+		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
