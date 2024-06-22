@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import fetch from "node-fetch";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
+import { HttpService } from "@nestjs/axios";
+import { firstValueFrom } from "rxjs";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -18,7 +19,10 @@ export class SpotifyAuthService {
 	private redirectUri;
 	private authHeader;
 
-	constructor(private configService: ConfigService) {
+	constructor(
+		private readonly configService: ConfigService,
+		private readonly httpService: HttpService,
+	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
 			throw new Error("Missing SPOTIFY_CLIENT_ID");
@@ -45,6 +49,7 @@ export class SpotifyAuthService {
 	}
 
 	async exchangeCodeForToken(code: string): Promise<SpotifyTokenResponse> {
+		/*
 		const details = await fetch("https://accounts.spotify.com/api/token", {
 			method: "POST",
 			headers: {
@@ -64,5 +69,28 @@ export class SpotifyAuthService {
 			});
 
 		return details as SpotifyTokenResponse;
+        */
+		const response = await firstValueFrom(
+			this.httpService.post(
+				"https://accounts.spotify.com/api/token",
+				{
+					grant_type: "authorization_code",
+					code: code,
+					redirect_uri: this.redirectUri,
+				},
+				{
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+						Authorization: `Basic ${this.authHeader}`,
+					},
+				},
+			),
+		);
+
+		if (!response || !response.data) {
+			throw new Error("Failed to exchange code for token");
+		}
+
+		return response.data as SpotifyTokenResponse;
 	}
 }

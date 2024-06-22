@@ -11,9 +11,10 @@ import { PrismaModule } from "../../prisma/prisma.module";
 import { UsersService } from "src/modules/users/users.service";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
-import { SpotifyAuthService } from './spotify/spotify.service';
-import { SpotifyAuthController } from './spotify/spotify.controller';
-import { SpotifyAuthModule } from './spotify/spotify.module';
+import { SpotifyAuthService } from "./spotify/spotify.service";
+import { SpotifyAuthController } from "./spotify/spotify.controller";
+import { SpotifyAuthModule } from "./spotify/spotify.module";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
 	imports: [
@@ -23,7 +24,9 @@ import { SpotifyAuthModule } from './spotify/spotify.module';
 			signOptions: { expiresIn: "2h" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
-		PrismaModule, SpotifyAuthModule,
+		PrismaModule,
+		SpotifyAuthModule,
+		HttpModule,
 	],
 	providers: [
 		AuthService,
