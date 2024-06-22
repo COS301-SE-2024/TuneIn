@@ -14,7 +14,7 @@ const TopNavBar: React.FC = () => {
 
   const navigateToProfile = () => {
     router.navigate({
-      pathname: "/screens/EditProfile",
+      pathname: "/screens/ProfilePage",
       params: { friend: JSON.stringify(profileData) },
     });
   };

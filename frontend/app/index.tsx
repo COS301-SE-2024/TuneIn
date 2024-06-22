@@ -12,12 +12,12 @@ const App: React.FC = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem("cognitoToken");
-        if (token) {
-          // Validate token if necessary
-          router.push("/screens/Home");
-        } else {
+        // if (token) {
+        //   // Validate token if necessary
+        //   router.push("/screens/Home");
+        // } else {
           router.push("/screens/WelcomeScreen");
-        }
+        // }
       } catch (error) {
         console.error("Error checking token:", error);
         router.push("/screens/WelcomeScreen");
