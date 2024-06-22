@@ -1,50 +1,68 @@
-import { Injectable } from '@nestjs/common';
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { Injectable } from "@nestjs/common";
+import fetch from "node-fetch";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { ConfigService } from "@nestjs/config";
 
 export type SpotifyTokenResponse = {
-    access_token: string;
-    token_type: string;
-    scope: string;
-    expires_in: number;
-    refresh_token: string;
+	access_token: string;
+	token_type: string;
+	scope: string;
+	expires_in: number;
+	refresh_token: string;
 };
 
 @Injectable()
 export class SpotifyAuthService {
+	private clientId;
+	private clientSecret;
+	private redirectUri;
+	private authHeader;
 
-    //exchange code for token
-    /* example
+	constructor(private configService: ConfigService) {
+		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
+		if (!clientId) {
+			throw new Error("Missing SPOTIFY_CLIENT_ID");
+		}
+		this.clientId = clientId;
 
-    app.get('/callback', function(req, res) {
+		const clientSecret = this.configService.get<string>(
+			"SPOTIFY_CLIENT_SECRET",
+		);
+		if (!clientSecret) {
+			throw new Error("Missing SPOTIFY_CLIENT_SECRET");
+		}
+		this.clientSecret = clientSecret;
 
-  var code = req.query.code || null;
-  var state = req.query.state || null;
+		const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
+		if (!redirectUri) {
+			throw new Error("Missing SPOTIFY_REDIRECT_URI");
+		}
+		this.redirectUri = redirectUri;
 
-  if (state === null) {
-    res.redirect('/#' +
-      querystring.stringify({
-        error: 'state_mismatch'
-      }));
-  } else {
-    var authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      form: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
-      },
-      json: true
-    };
-  }
-});
-    */
-    async exchangeCodeForToken(code: string) : Promise<SpotifyTokenResponse> {
-        const spotifyApi = new SpotifyApi();
-        const response = SpotifyApi.withUserAuthorization()
-        return response.body;
-    }
+		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
+			"base64",
+		);
+	}
+
+	async exchangeCodeForToken(code: string): Promise<SpotifyTokenResponse> {
+		const details = await fetch("https://accounts.spotify.com/api/token", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Authorization: "Basic " + this.authHeader,
+			},
+			body: new URLSearchParams({
+				grant_type: "authorization_code",
+				code: code,
+				redirect_uri: this.redirectUri,
+			}),
+		})
+			.then((response) => response.json())
+			.catch((error) => {
+				console.error("Error:", error);
+				throw new Error("Failed to exchange code for token");
+			});
+
+		return details as SpotifyTokenResponse;
+	}
 }

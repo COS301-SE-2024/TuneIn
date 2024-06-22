@@ -13,6 +13,7 @@ import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 import { SpotifyAuthService } from './spotify/spotify.service';
 import { SpotifyAuthController } from './spotify/spotify.controller';
+import { SpotifyAuthModule } from './spotify/spotify.module';
 
 @Module({
 	imports: [
@@ -22,7 +23,7 @@ import { SpotifyAuthController } from './spotify/spotify.controller';
 			signOptions: { expiresIn: "2h" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
-		PrismaModule,
+		PrismaModule, SpotifyAuthModule,
 	],
 	providers: [
 		AuthService,

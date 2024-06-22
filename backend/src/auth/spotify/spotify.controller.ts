@@ -1,5 +1,5 @@
-import { Controller, Get, Query } from "@nestjs/common";
-import { SpotifyAuthService } from "./spotify.service";
+import { Controller, Get, Query, Request } from "@nestjs/common";
+import { SpotifyAuthService, SpotifyTokenResponse } from "./spotify.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
 @Controller("spotify")
@@ -15,12 +15,14 @@ export class SpotifyAuthController {
 		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	handleSpotifyAuthCallback(
-        @Req() req: Request,
-        @Query("code") code: string,
-    ) {
+	async handleSpotifyAuthCallback(
+		@Request() req: Request,
+		@Query("code") code: string,
+	) {
 		//expecting "/auth/callback?code={code}&state={state}"
-        await this.spotifyAuth.exchangeCodeForToken(code);
+		const tokens: SpotifyTokenResponse =
+			await this.spotifyAuth.exchangeCodeForToken(code);
+		console.log(tokens);
 	}
 
 	@Get("refresh")
