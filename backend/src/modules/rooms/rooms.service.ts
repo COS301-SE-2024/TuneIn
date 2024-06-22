@@ -56,7 +56,7 @@ export class RoomsService {
 		return result;
 	}
 
-	getRoomInfo(roomID: string): RoomDto {
+	async getRoomInfo(roomID: string): Promise<RoomDto> {
 		// TODO: Implement logic to get room info
 		// an an example to generate a RoomDto
 		/*
@@ -66,7 +66,17 @@ export class RoomsService {
 			return room;
 		}
 		*/
-		return new RoomDto();
+		const room = await this.prisma.room.findFirst({
+			where: {
+				room_id: roomID
+			}
+		});
+		if (!room) {
+			return new RoomDto();
+		}
+		// filter out null values
+		const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+		return roomDto? roomDto : new RoomDto();
 	}
 
 	updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {

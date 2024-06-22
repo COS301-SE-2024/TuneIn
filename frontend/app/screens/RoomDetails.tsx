@@ -12,6 +12,7 @@ const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
 const AWS_S3_REGION = process.env.AWS_S3_REGION;
 const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
+const BASE_URL = "http://10.32.253.158:3000/";
 
 
 const RoomDetails: React.FC = () => {
@@ -83,26 +84,13 @@ const RoomDetails: React.FC = () => {
       return;
     }
     if(image !== null){
-      // const response = await fetch(image);
-      // const blob = await response.blob();
-      // const params = {
-      //   Bucket: AWS_NEST_BUCKET_NAME, // replace with your bucket name
-      //   Key: `${(new Date()).toISOString()}-${roomDetails.name.replace(' ', '-').toLowerCase()}.jpeg`, // replace with the destination key
-      //   Body: blob,
-      //   ContentType: blob.type
-      // };
-      // const data = await s3.upload(params)
-      // .promise()
-      // console.log('Successfully uploaded image', data.Location);
-      // imageURL = data.Location;
-      // setImage(data.Location);
       imageURL = await uploadImage(image, roomDetails.name)
-      console.log('Image URL:', imageURL);
+      // console.log('Image URL:', imageURL);
     }
     newRoom['room_image'] = imageURL;
     const token = await AsyncStorage.getItem('token');
     // console.log('Token:', token);
-    fetch("http://10.32.253.158:3000/users/rooms", {
+    fetch(`${BASE_URL}users/rooms`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

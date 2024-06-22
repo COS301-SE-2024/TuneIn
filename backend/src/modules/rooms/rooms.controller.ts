@@ -84,8 +84,20 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID")
 	@ApiTags("rooms")
-	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
-		return this.roomsService.getRoomInfo(roomID);
+	@ApiOkResponse({
+		description: "The room info as a RoomDto.",
+		type: RoomDto,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	@ApiBadRequestResponse({
+		description: "Room not found.",
+		type: RoomDto,
+	})
+	// generate summary
+	@ApiOperation({ summary: "Get room info" })
+	async getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): Promise<RoomDto> {
+		console.log("getting room with ID", roomID);
+		return await this.roomsService.getRoomInfo(roomID);
 	}
 
 	/*
