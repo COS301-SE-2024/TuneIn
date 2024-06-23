@@ -110,9 +110,9 @@ const RoomPage = () => {
 		};
 	}, [isPlaying, handlePlayback]);
 
-	const handleGoBack = () => {
-		// router.goBack();
-	};
+	// const handleGoBack = () => {
+	// 	// router.goBack();
+	// };
 
   const handleJoinLeave = () => {
     // Simulate toggling join/leave
@@ -194,7 +194,6 @@ const RoomPage = () => {
 	};
 
 	const navigateToPlaylist = () => {
-		console.log("RP mine: ",roomData.mine);
 		router.navigate({
 			pathname: "/screens/Playlist",
 			params: {
@@ -208,9 +207,9 @@ const RoomPage = () => {
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+			{/* <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
 				<Text style={styles.backButtonText}>← Back</Text>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 
 			<Image
 				source={{ uri: roomData.backgroundImage }}
@@ -303,8 +302,10 @@ const RoomPage = () => {
 				<View></View>
 			)}
 			<TouchableOpacity style={styles.queueButton} onPress={navigateToPlaylist}>
-				<Text style={styles.queueButtonText}>Queue</Text>
-			</TouchableOpacity>
+  
+    <MaterialIcons name="queue-music" size={55} color="Black" /><Text style={styles.queueButtonText}> Queue
+  </Text>
+</TouchableOpacity>
       </View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -437,13 +438,13 @@ const styles = StyleSheet.create({
 	},
 	backgroundImage: {
 		width: "100%",
-		height: "74%",
+		height: "67%",
 		resizeMode: "cover",
 	},
 	gradientOverlay: {
 		position: "absolute",
 		width: "100%",
-		height: "75%",
+		height: "68%",
 	},
 	contentContainer: {
 		position: "absolute",
@@ -474,6 +475,7 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 18,
 		fontWeight: "bold",
+		color: "white"
 	},
 	roomDetails: {
 		alignItems: "center",
