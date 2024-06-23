@@ -16,10 +16,26 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Room } from "../models/Room";
 import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
+import io from 'socket.io-client';
+import { LiveChatMessageDto, RoomDto, UserProfileDto } from '../../api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { ChatEventDto } from '../models/ChatEventDto';
+import RoomDetails from './RoomDetails';
+
+const BASE_URL = "http://localhost:3000";
+
+type Message = {
+	message: LiveChatMessageDto;
+	me?: boolean;
+  };
+  
+interface ChatRoomScreenProps {
+roomObj: string;
+}
 
 const getQueue = () => {
 	return [
@@ -51,9 +67,14 @@ const getQueue = () => {
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
-	const roomData = JSON.parse(room);
+	const roomData: Room = JSON.parse(room);
+	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
+
+	const [token, setToken] = useState<string | null>(null);
+	const [user, setUser] = useState<UserProfileDto | null>(null);
+  
 
   const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState([]);
@@ -62,6 +83,7 @@ const RoomPage = () => {
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
+	/*
 	const [messages, setMessages] = useState([
 		{
 			username: "JohnDoe",
@@ -83,6 +105,157 @@ const RoomPage = () => {
 			me: true,
 		},
 	]);
+	*/
+	const [messages, setMessages] = useState<Message[]>([]);
+
+
+	const socket = useRef(null);
+  
+  //init & connect to socket
+  useEffect(() => {
+    const getTokenAndSelf = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        setToken(storedToken);
+        const whoami = async (token: string | null, type?: string) => {
+          try {
+            const response = await axios.get(`${BASE_URL}/profile`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log('User\'s own info:', response.data);
+            return response.data as UserProfileDto;
+          } catch (error) {
+            console.error('Error fetching user\'s own info:', error);
+            //user is not authenticated
+          }
+        };
+        setUser(await whoami(token));
+      }
+      catch (error) {
+        console.error('Error fetching token:', error);
+        //user is not authenticated
+      }
+
+	  try {
+		const roomDto: RoomDto = await axios.get(`${BASE_URL}/room/${roomData.roomID}`, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		}) as RoomDto;
+		setRoomObj(roomDto);
+        } catch (error) {
+            console.error('Error fetching room:', error);
+        }
+    };
+    getTokenAndSelf();
+
+    socket.current = io(BASE_URL + "/live-chat", {
+      transports: ["websocket"],
+    });
+
+    socket.current.on("connect", () => {
+      console.log("Connected to the server!");
+      const input: ChatEventDto = {
+        userID: user.userID,
+      }
+      socket.current.emit("connectUser", input);
+    });
+
+    socket.current.on("connected", (response: ChatEventDto) => {
+      //an event that should be in response to the connectUser event
+      console.log("User connected:", response);
+    });
+
+    socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+      //if someone joins (could be self)
+      console.log("User joined room:", response);
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: {
+          messageBody: "",
+          sender: user,
+          roomID: roomData.roomID,
+          dateCreated: new Date(),
+        },
+      };
+      socket.current.emit("getChatHistory", input);
+    });
+
+    socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+      //an event that should be in response to the getChatHistory event
+      const chatHistory = history.map((msg) => ({ message: msg, me: msg.sender.userID === user.userID }));
+      setMessages(chatHistory);
+    });
+
+    socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+      const message = newMessage.body;
+      const me: boolean = message.sender.userID === user.userID;
+      if (me){
+        //clear message only after it has been sent & confirmed as received
+        setMessage('');
+      }
+      setMessages(prevMessages => [...prevMessages, { message, me: message.sender.userID === user.userID }]);
+    });
+
+    socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+      //an event that should be in response to the leaveRoom event (could be self or other people)
+      console.log("User left room:", response);
+    });
+
+    socket.current.on("error", (response: ChatEventDto) => {
+      console.error("Error:", response.errorMessage);
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (message.trim()) {
+      const newMessage: LiveChatMessageDto = {
+        messageBody: message,
+        sender: user,
+        roomID: roomData.roomID,
+        dateCreated: new Date(),
+      };
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: newMessage,
+      };
+      socket.current.emit("sendMessage", input);
+      // do not add the message to the state here, wait for the server to send it back
+      //setMessages([...messages, { message: newMessage, me: true }]);
+    }
+  };
+
+  const joinRoom = () => {
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: roomObj.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("joinRoom", input);
+  };
+
+  const leaveRoom = () => {
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: roomObj.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("leaveRoom", input);
+  }
 
 	const trackPositionIntervalRef = useRef(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
@@ -100,7 +273,7 @@ const RoomPage = () => {
 		};
 
 		fetchQueue();
-	}, [roomData.id]);
+	}, [roomData.roomID]);
 
 	useEffect(() => {
 		return () => {
@@ -177,33 +350,24 @@ const RoomPage = () => {
 		setChatExpanded(!isChatExpanded);
 	};
 
-	const sendMessage = () => {
-		if (message.trim()) {
-			setMessages([
-				...messages,
-				{
-					username: "Me",
-					message,
-					profilePictureUrl:
-						"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-					me: true,
-				},
-			]);
-			setMessage("");
-		}
-	};
-
 	const navigateToPlaylist = () => {
 		router.navigate({
 			pathname: "/screens/Playlist",
 			params: {
 				queue: JSON.stringify(queue),
 				currentTrackIndex,
-				Room_id: roomData.id,
-        mine: roomData.mine,
+				Room_id: roomData.roomID,
+                mine: roomData.mine,
 			},
 		});
 	};
+
+	//automatically join the room on component mount
+	useEffect(() => {
+		console.log("Joining room...");
+		console.log(user);
+		joinRoom();
+	  }, []);
 
 	return (
 		<View style={styles.container}>
@@ -370,12 +534,12 @@ const RoomPage = () => {
 				{isChatExpanded && (
 					<>
 						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{messages.map((msg, index) => (
+							{messages.map((msg,index) => (
 								<CommentWidget
 									key={index}
-									username={msg.username}
-									message={msg.message}
-									profilePictureUrl={msg.profilePictureUrl}
+									username={msg.message.sender.username}
+									message={msg.message.messageBody}
+									profilePictureUrl={msg.message.sender.profilePictureUrl}
 									me={msg.me}
 								/>
 							))}
