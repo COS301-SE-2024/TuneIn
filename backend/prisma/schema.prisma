@@ -158,13 +158,16 @@ model scheduled_room {
 }
 
 model song {
-  song_id    String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name       String
-  artist     String
-  genre      String?
-  lyrics_url String?
-  duration   Int?    @default(0)
-  queue      queue[]
+  song_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String
+  artist      String
+  genre       String?
+  lyrics_url  String?
+  duration    Int?     @default(0)
+  genres      String[]
+  artwork_url String?
+  spotify_id  String?
+  queue       queue[]
 }
 
 model users {
