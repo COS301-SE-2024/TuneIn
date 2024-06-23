@@ -8,6 +8,8 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons from Expo Icons
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const WelcomeScreen: React.FC = () => {
 	const router = useRouter();
@@ -27,7 +29,11 @@ const WelcomeScreen: React.FC = () => {
 				source={require("../../assets/text.jpg")}
 				style={[styles.imageBackground, { width, height: height * 0.5 }]}
 				resizeMode="cover"
-			/>
+			>
+				<TouchableOpacity style={styles.helpButton} onPress={() => console.log("Help pressed")}>
+				<MaterialCommunityIcons name="help-circle-outline" size={24}  color="#FFF" style={styles.helpIcon} />
+				</TouchableOpacity>
+			</ImageBackground>
 			<View style={styles.innerContainer}>
 				<Text style={styles.logoText}>Logo</Text>
 				<Text style={styles.titleText}>TuneIn</Text>
@@ -50,6 +56,7 @@ const styles = StyleSheet.create({
 	imageBackground: {
 		width: "100%",
 		height: "50%",
+		position: 'relative', // Ensure the ImageBackground is relative for absolute positioning to work
 	},
 	innerContainer: {
 		flex: 1,
@@ -106,6 +113,16 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: "bold",
 		color: "#000",
+	},
+	helpButton: {
+		position: 'absolute',
+		top: 20,
+		right: 20,
+		backgroundColor: 'transparent',
+		padding: 10,
+	},
+	helpIcon: {
+		marginRight: 5,
 	},
 });
 
