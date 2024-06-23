@@ -7,15 +7,15 @@ const NavBar: React.FC = () => {
     const router = useRouter();
 
     const navigateToHome = () => {
-        router.navigate("/");
+        router.navigate("/screens/Home");
     };
 
     const navigateToSpotifyAuth = () => {
         router.navigate("/screens/SpotifyAuth");
     };
 
-    const navigateToProfile = () => {
-        router.navigate("/screens/EditProfile");
+    const navigateToHelpMenu= () => {
+        router.navigate("/screens/help/HelpScreen");
     };
 
     return (
@@ -26,8 +26,8 @@ const NavBar: React.FC = () => {
             <TouchableOpacity onPress={navigateToSpotifyAuth}>
                 <Text style={styles.text}>SpotifyAuth</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateToProfile}>
-                <Text style={styles.text}>Profile</Text>
+            <TouchableOpacity onPress={navigateToHelpMenu}>
+                <Text style={styles.text}>Help</Text>
             </TouchableOpacity>
         </View>
     );

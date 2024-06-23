@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
+import { AntDesign } from '@expo/vector-icons';
 
 export default function GettingStarted({  }) {
   const router = useRouter();
@@ -15,15 +16,32 @@ export default function GettingStarted({  }) {
 
   return (
     <ScrollView style={styles.container}>
+       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Ionicons name="chevron-back" size={24} color="black" />
+      </TouchableOpacity>
       <Text style={styles.header}>Getting Started</Text>
 
       <TouchableOpacity style={styles.card} >
         <View style={styles.cardContent}>
-          <FontAwesome name="music" size={24} color="#2ecc71" style={styles.icon} />
+          <FontAwesome name="music" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
             <Text style={styles.cardTitle}>Introduction</Text>
             <Text style={styles.cardText}>
-              Welcome to TuneIn! Discover and share music with friends and make new ones around the world.
+              
+            Welcome to TuneIn, where music becomes a shared experience that connects people, transcending distances and creating lasting bonds through the power of music.
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+
+      <TouchableOpacity style={styles.card} >
+        <View style={styles.cardContent}>
+        <AntDesign name="infocirlceo" size={24} color="#08bdbd" style={styles.icon} />
+          <View style={styles.textContainer}>
+            <Text style={styles.cardTitle}>About</Text>
+            <Text style={styles.cardText}>
+              Discover and share music with friends and make new ones around the world. With TuneIn you can create rooms, join rooms, and listen to music together with others.
             </Text>
           </View>
         </View>
@@ -31,7 +49,7 @@ export default function GettingStarted({  }) {
 
       <TouchableOpacity style={styles.card} onPress={navigateToRegister}>
         <View style={styles.cardContent}>
-          <MaterialCommunityIcons name="account" size={24} color="#3498db" style={styles.icon} />
+          <MaterialCommunityIcons name="account" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
             <Text style={styles.cardTitle}>Creating an Account</Text>
             <Text style={styles.cardText}>
@@ -43,7 +61,7 @@ export default function GettingStarted({  }) {
 
       <TouchableOpacity style={styles.card} onPress={navigateToLogin}>
         <View style={styles.cardContent}>
-          <Ionicons name="log-in-outline" size={24} color="#e74c3c" style={styles.icon} />
+          <Ionicons name="log-in-outline" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
             <Text style={styles.cardTitle}>Logging In</Text>
             <Text style={styles.cardText}>
@@ -103,4 +121,11 @@ const styles = StyleSheet.create({
     color: '#34495e',
     lineHeight: 22,
   },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
 });
+

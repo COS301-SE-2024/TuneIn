@@ -1,38 +1,39 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';  // Import Ionicons
 
 const menuItems = [
   {
     title: 'Getting Started',
     icon: '🚀',
     subcategories: [
-      { title: 'Introduction', screen: 'GettingStarted' },
-      { title: 'Creating an Account', screen: 'GettingStarted' },
-      { title: 'Logging In', screen: 'GettingStarted' },
+      { title: 'Introduction', screen: 'screens/help/GettingStarted' },
+      { title: 'Creating an Account', screen: 'screens/help/GettingStarted' },
+      { title: 'Logging In', screen: 'screens/help/GettingStarted' },
     ],
-    route: '/screens/help/GettingStarted'
+    route: 'screens/help/GettingStarted'
   },
   {
     title: 'Profile Management',
     icon: '👤',
     subcategories: [
-      { title: 'Creating and Updating Your Profile', screen: 'ProfileManagement' },
-      { title: 'Music Preferences', screen: 'ProfileManagement' },
-      { title: 'Personalized Recommendations', screen: 'ProfileManagement' },
+      { title: 'Creating and Updating Your Profile', screen: 'screens/help/ProfileManagement' },
+      { title: 'Music Preferences', screen: 'screens/help/ProfileManagement' },
+      { title: 'Personalized Recommendations', screen: 'screens/help/ProfileManagement' },
     ],
-    route: '/help/ProfileManagement'
+    route: 'screens/help/ProfileManagement'
   },
   {
     title: 'Interactive Sessions/Rooms',
     icon: '🎤',
     subcategories: [
-      { title: 'Creating Rooms', screen: 'InteractiveSessions' },
-      { title: 'Room Settings', screen: 'InteractiveSessions' },
-      { title: 'Joining Rooms', screen: 'InteractiveSessions' },
-      { title: 'Managing Rooms', screen: 'InteractiveSessions' },
+      { title: 'Creating Rooms', screen: 'screens/help/RoomInteraction' },
+      { title: 'Room Settings', screen: 'screens/help/RoomInteraction' },
+      { title: 'Joining Rooms', screen: 'screens/help/RoomInteraction' },
+      { title: 'Managing Rooms', screen: 'screens/help/RoomInteraction' },
     ],
-    route: '/help/InteractiveSessions'
+    route: 'screens/help/RoomInteraction'
   },
   // ... (Add more sections here)
 ];
@@ -41,23 +42,14 @@ export default function HelpMenu() {
   const router = useRouter();
 
   const navigateToScreen = (screen) => {
-    router.push(`/${screen}`);
+    router.navigate(`/${screen}`);
   };
-
-  // const navigateToRegister = () => {
-	// 	router.navigate("/screens/help/ProfileManagement");
-	// };
-
-  // const navigateToRegister = () => {
-	// 	router.navigate("/screens/help/GettingStarted");
-	// };
-
-  const navigateToRegister = () => {
-		router.navigate("/screens/help/RoomInteraction");
-	};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Ionicons name="chevron-back" size={24} color="black" />
+      </TouchableOpacity>
       <Text style={styles.title}>Help Center</Text>
       {menuItems.map((item, index) => (
         <View key={index} style={styles.section}>
@@ -74,15 +66,8 @@ export default function HelpMenu() {
               onPress={() => navigateToScreen(subcategory.screen)}
             >
               <Text style={styles.subcategoryText}>{subcategory.title}</Text>
-
-              
             </TouchableOpacity>
-            
           ))}
-
-<TouchableOpacity style={styles.registerButton} onPress={navigateToRegister}>
-					<Text style={styles.registerButtonText}>Register</Text>
-				</TouchableOpacity>
         </View>
       ))}
     </ScrollView>
@@ -94,6 +79,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: '#f0f0f0',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 30,
+    left: 20,
+    zIndex: 1,
   },
   title: {
     fontSize: 24,
@@ -126,29 +117,6 @@ const styles = StyleSheet.create({
   },
   subcategoryText: {
     fontSize: 16,
-    color: '#007bff',
+    color: '#08bdbd',
   },
-  registerButton: {
-		width: "92%",
-		height: 48,
-		justifyContent: "center",
-		alignItems: "center",
-		backgroundColor: "#FFF",
-		borderColor: "#000",
-		borderWidth: 1,
-		borderRadius: 24,
-		marginBottom: 20,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	registerButtonText: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#000",
-	},
 });
-
-

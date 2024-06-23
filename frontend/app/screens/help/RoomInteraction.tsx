@@ -1,53 +1,65 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 
-export default function GettingStarted({  }) {
+export default function InteractiveSessions() {
   const router = useRouter();
-  const navigateToLogin = () => {
-    router.navigate('../LoginScreen');
-  };
 
-  const navigateToRegister = () => {
-    router.navigate('../RegisterScreen');
+  const navigateToScreen = (screen) => {
+    router.navigate(screen);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Getting Started</Text>
+       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Ionicons name="chevron-back" size={24} color="black" />
+      </TouchableOpacity>
+      <Text style={styles.header}>Interactive Sessions/Rooms</Text>
 
-      <TouchableOpacity style={styles.card} >
+      <TouchableOpacity style={styles.card} onPress={() => navigateToScreen('../CreateRoom')}>
         <View style={styles.cardContent}>
-          <FontAwesome name="music" size={24} color="#2ecc71" style={styles.icon} />
+          <FontAwesome5 name="door-open" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>Introduction</Text>
+            <Text style={styles.cardTitle}>Creating Rooms</Text>
             <Text style={styles.cardText}>
-              Welcome to TuneIn! Discover and share music with friends and make new ones around the world.
+              Users can create rooms that are permanent or temporary, public or private, and scheduled.
             </Text>
           </View>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={navigateToRegister}>
+      <TouchableOpacity style={styles.card} onPress={() => navigateToScreen('')}>
         <View style={styles.cardContent}>
-          <MaterialCommunityIcons name="account" size={24} color="#3498db" style={styles.icon} />
+          <Ionicons name="settings" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>Creating an Account</Text>
+            <Text style={styles.cardTitle}>Room Settings</Text>
             <Text style={styles.cardText}>
-              Sign up using your premium Spotify account or your email but don't forget to link your Spotify account to seamlessly sync your music library into the app.
+              Configure room settings including room name, description, genre, language, explicitness, NSFW, playlist photo, and visibility/privacy options.
             </Text>
           </View>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={navigateToLogin}>
+      <TouchableOpacity style={styles.card} onPress={() => navigateToScreen('../Home')}>
         <View style={styles.cardContent}>
-          <Ionicons name="log-in-outline" size={24} color="#e74c3c" style={styles.icon} />
+          <Ionicons name="enter-outline" size={24} color="#08bdbd" style={styles.icon} />
           <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>Logging In</Text>
+            <Text style={styles.cardTitle}>Joining Rooms</Text>
             <Text style={styles.cardText}>
-              Log in with your registered credentials to access personalized content.
+              Users can enter and exit rooms, participate and vote, chat or voice chat, and direct message other users if allowed by settings.
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={() => navigateToScreen('ManagingRooms')}>
+        <View style={styles.cardContent}>
+          <FontAwesome5 name="tools" size={24} color="#08bdbd" style={styles.icon} />
+          <View style={styles.textContainer}>
+            <Text style={styles.cardTitle}>Managing Rooms</Text>
+            <Text style={styles.cardText}>
+              Room owners can manage participants, moderate content, delete the room and control what other users are allowed to do in room such as enabling chat, voting and if they may add to queue.
             </Text>
           </View>
         </View>
@@ -63,6 +75,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecf0f1',
     paddingVertical: 20,
     paddingHorizontal: 15,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
   },
   header: {
     fontSize: 28,
