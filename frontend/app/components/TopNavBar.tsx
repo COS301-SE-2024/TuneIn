@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 
 const TopNavBar: React.FC = () => {
@@ -13,7 +14,7 @@ const TopNavBar: React.FC = () => {
   useEffect(() => {
     const fetchProfilePicture = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await StorageService.getItem("token"); // Use StorageService to get the token
         if (token) {
           const response = await axios.get(`${baseURL}/profile`, {
             headers: {

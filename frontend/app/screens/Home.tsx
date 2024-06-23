@@ -9,6 +9,7 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Entypo } from '@expo/vector-icons';
 import axios from 'axios';
 
@@ -79,10 +80,10 @@ const Home: React.FC = () => {
 
   const loadCachedData = async () => {
     try {
-      const cachedRecents = await AsyncStorage.getItem('cachedRecents');
-      const cachedPicks = await AsyncStorage.getItem('cachedPicks');
-      const cachedMyRooms = await AsyncStorage.getItem('cachedMyRooms');
-      const cachedFriends = await AsyncStorage.getItem('cachedFriends');
+      const cachedRecents = await StorageService.getItem('cachedRecents');
+      const cachedPicks = await StorageService.getItem('cachedPicks');
+      const cachedMyRooms = await StorageService.getItem('cachedMyRooms');
+      const cachedFriends = await StorageService.getItem('cachedFriends');
 
       if (cachedRecents) setMyRecents(JSON.parse(cachedRecents));
       if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
@@ -97,7 +98,7 @@ const Home: React.FC = () => {
 
   const refreshData = async () => {
     setLoading(true);
-    const storedToken = await AsyncStorage.getItem('token');
+    const storedToken = await StorageService.getItem('token');
     setToken(storedToken);
 
     if (storedToken) {
@@ -117,9 +118,9 @@ const Home: React.FC = () => {
       setMyPicks(formattedPicksForYouRooms);
       setMyRecents(formattedRecentRooms);
 
-      await AsyncStorage.setItem('cachedRecents', JSON.stringify(formattedRecentRooms));
-      await AsyncStorage.setItem('cachedPicks', JSON.stringify(formattedPicksForYouRooms));
-      await AsyncStorage.setItem('cachedMyRooms', JSON.stringify(formattedMyRooms));
+      await StorageService.setItem('cachedRecents', JSON.stringify(formattedRecentRooms));
+      await StorageService.setItem('cachedPicks', JSON.stringify(formattedPicksForYouRooms));
+      await StorageService.setItem('cachedMyRooms', JSON.stringify(formattedMyRooms));
 
       // Fetch friends
       const fetchedFriends = await getFriends(storedToken);
@@ -129,7 +130,7 @@ const Home: React.FC = () => {
       }));
       setFriends(formattedFriends);
 
-      await AsyncStorage.setItem('cachedFriends', JSON.stringify(formattedFriends));
+      await StorageService.setItem('cachedFriends', JSON.stringify(formattedFriends));
     }
 
     setLoading(false);

@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
 import { RoomDto } from '../../api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import AWS from 'aws-sdk';
 import uploadImage from '../services/ImageUpload';
 
@@ -103,7 +104,7 @@ const RoomDetails: React.FC = () => {
       // console.log('Image URL:', imageURL);
     }
     newRoom['room_image'] = imageURL;
-    const token = await AsyncStorage.getItem('token');
+    const token = await StorageService.getItem('token');
     // console.log('Token:', token);
     fetch(`${BASE_URL}users/rooms`, {
       method: "POST",

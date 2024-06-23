@@ -75,9 +75,9 @@ const SpotifyRedirect = () => {
       const refreshToken = data.refresh_token;
       const expiresIn = data.expires_in;
   
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-      await AsyncStorage.setItem('expiresIn', expiresIn.toString());
+      await StorageService.setItem('accessToken', accessToken);
+      await StorageService.setItem('refreshToken', refreshToken);
+      await StorageService.setItem('expiresIn', expiresIn.toString());
   
       setTokenDetails({
         accessToken,

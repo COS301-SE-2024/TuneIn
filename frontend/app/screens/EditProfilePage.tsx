@@ -18,6 +18,7 @@ import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../services/ImageUpload";
 
@@ -47,7 +48,7 @@ const EditProfileScreen = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await AsyncStorage.getItem("token");
+				const storedToken = await StorageService.getItem("token");
 				setToken(storedToken);
 			} catch (error) {
 				console.error("Failed to retrieve token:", error);

@@ -4,6 +4,7 @@ import {useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Room } from '../models/Room';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from 'axios';
 import uploadImage from '../services/ImageUpload';
 
@@ -11,7 +12,7 @@ const BASE_URL = 'http://localhost:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching
-  const token = await AsyncStorage.getItem('token');
+  const token = await StorageService.getItem('token');
   try {
     const data = await axios.get(`${BASE_URL}rooms/${roomId}`, {
       headers: {
@@ -136,7 +137,7 @@ const EditRoom: React.FC = () => {
       console.log('Image URL:', imageURL);
       newRoom['room_image'] = imageURL;
     }
-    const token = await AsyncStorage.getItem('token');
+    const token = await StorageService.getItem('token');
     console.log('Token:', token);
     try {
       console.log('Room ID:', roomDetails.roomID);

@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Entypo } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -21,9 +22,9 @@ const LoginScreen = () => {
 
   useEffect(() => {
     const checkTokenValidity = async () => {
-      const accessToken = await AsyncStorage.getItem("Spotify token");
-      const refreshToken = await AsyncStorage.getItem("Spotify refresh token");
-      const expirationDate = await AsyncStorage.getItem("expirationDate");
+      const accessToken = await StorageService.getItem("Spotify token");
+      const refreshToken = await StorageService.getItem("Spotify refresh token");
+      const expirationDate = await StorageService.getItem("expirationDate");
 
       if (accessToken && refreshToken && expirationDate) {
         const currentTime = Date.now();
@@ -63,8 +64,8 @@ const LoginScreen = () => {
       const newExpiration = Date.now() + data.expires_in * 1000; // Convert seconds to milliseconds
 
       // Store new access token and possibly new refresh token
-      await AsyncStorage.setItem("accessToken", newAccessToken);
-      await AsyncStorage.setItem("expirationDate", newExpiration.toString());
+      await StorageService.setItem("accessToken", newAccessToken);
+      await StorageService.setItem("expirationDate", newExpiration.toString());
 
       router.navigate("/screens/Home");
     } catch (error) {
