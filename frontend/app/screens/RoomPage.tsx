@@ -20,48 +20,26 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const getQueue = () => {
-	return [
-		{
-			albumArtUrl:
-				"https://i.scdn.co/image/ab67616d0000b2731ea0c62b2339cbf493a999ad",
-			artistNames: "Kendrick Lamar",
-			explicit: true,
-			id: "6AI3ezQ4o3HUoP6Dhudph3",
-			name: "Not Like Us",
-			preview_url: null,
-			uri: "spotify:track:6AI3ezQ4o3HUoP6Dhudph3",
-      duration_ms:319958
-		},
-		{
-			albumArtUrl:
-				"https://i.scdn.co/image/ab67616d0000b2736a6387ab37f64034cdc7b367",
-			artistNames: "Outkast",
-			explicit: false,
-			id: "2PpruBYCo4H7WOBJ7Q2EwM",
-			name: "Hey Ya!",
-			preview_url:
-				"https://p.scdn.co/mp3-preview/d24b3c4135ced9157b0ea3015a6bcc048e0c2e3a?cid=4902747b9d7c4f4195b991f29f8a680a",
-			uri: "spotify:track:2PpruBYCo4H7WOBJ7Q2EwM",
-      duration_ms:373805
-		},
-	];
-};
+
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	const roomData = JSON.parse(room);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
-
-  const [joined, setJoined] = useState(false);
+	
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
+  	const [joined, setJoined] = useState(false);
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
+	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
+	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
 	const [messages, setMessages] = useState([
 		{
 			username: "JohnDoe",
@@ -91,16 +69,54 @@ const RoomPage = () => {
 	const expandedHeight = screenHeight - 80;
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
-
-
 	useEffect(() => {
 		const fetchQueue = async () => {
-			const data = getQueue();
-			setQueue(data);
-		};
-
+			const storedToken = await AsyncStorage.getItem('token');
+		  
+			if (!storedToken) {
+			  console.error("No stored token found");
+			  return;
+			}
+		  
+			try {
+			  const response = await fetch(`http://192.168.56.1:3000/rooms/${roomData.id}/songs`, {
+				method: 'GET',
+				headers: {
+				  'Content-Type': 'application/json',
+				  Authorization: `Bearer ${storedToken}`
+				},
+			  });
+		  
+			  if (!response.ok) {
+				const errorText = await response.text();
+				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
+				return;
+			  }
+		  
+			  const data = await response.json();
+			  console.log("Fetched queue data:", data);
+		  
+			  if (Array.isArray(data) && data.length > 0) {
+				setQueue(data[0]);
+			  } else {
+				console.error("Unexpected response data format:", data);
+			  }
+			} catch (error) {
+			  console.error("Failed to fetch queue:", error);
+			}
+		  };
+		  
+	
 		fetchQueue();
 	}, [roomData.id]);
+
+
+	const getRoomState = () => {
+		return {
+		  currentTrackIndex,
+		  secondsPlayed
+		};
+	  };
 
 	useEffect(() => {
 		return () => {
@@ -114,27 +130,59 @@ const RoomPage = () => {
 	// 	// router.goBack();
 	// };
 
-  const handleJoinLeave = () => {
-    // Simulate toggling join/leave
-    setJoined(prevJoined => !prevJoined);
-  };
-
-	const playPauseTrack = (track, index) => {
-		if (!track) {
-			console.error("Invalid track:", track);
-			return;
-		}
-
-		if (index === currentTrackIndex && isPlaying) {
-			handlePlayback("pause");
-			setIsPlaying(false);
+	useEffect(() => {
+		if (isPlaying) {
+		  trackPositionIntervalRef.current = setInterval(() => {
+			setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+		  }, 1000);
 		} else {
-			handlePlayback("play", track.uri).then(() => {
-				setCurrentTrackIndex(index);
-				setIsPlaying(true);
-			});
+		  clearInterval(trackPositionIntervalRef.current);
 		}
-	};
+	
+		return () => {
+		  clearInterval(trackPositionIntervalRef.current);
+		};
+	  }, [isPlaying]);
+
+	  const handleJoinLeave = () => {
+		if (!joined) {
+		  setJoined(true);
+		  setJoinedSongIndex(currentTrackIndex);
+		  setJoinedSecondsPlayed(secondsPlayed);
+		  console.log(
+			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`
+		  );
+		  if (queue.length > 0) {
+			playPauseTrack(queue[0], 0);
+		  }
+		} else {
+		  setJoined(false);
+		  setJoinedSongIndex(null);
+		  setJoinedSecondsPlayed(null);
+		  handlePlayback("pause");
+		  setIsPlaying(false);
+		}
+	  };
+	  
+	
+
+  const playPauseTrack = (track, index) => {
+    if (!track) {
+      console.error("Invalid track:", track);
+      return;
+    }
+
+    if (index === currentTrackIndex && isPlaying) {
+      handlePlayback("pause");
+      setIsPlaying(false);
+    } else {
+      const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
+      handlePlayback("play", track.uri, offset).then(() => {
+        setCurrentTrackIndex(index);
+        setIsPlaying(true);
+      });
+    }
+  };
 
 	const playNextTrack = () => {
 		const nextIndex = currentTrackIndex + 1;
