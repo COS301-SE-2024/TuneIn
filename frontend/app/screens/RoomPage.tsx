@@ -152,12 +152,18 @@ const RoomPage = () => {
 		  console.log(
 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`
 		  );
+		  if (queue.length > 0) {
+			playPauseTrack(queue[0], 0);
+		  }
 		} else {
 		  setJoined(false);
 		  setJoinedSongIndex(null);
 		  setJoinedSecondsPlayed(null);
+		  handlePlayback("pause");
+		  setIsPlaying(false);
 		}
 	  };
+	  
 	
 
   const playPauseTrack = (track, index) => {

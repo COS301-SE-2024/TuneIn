@@ -86,7 +86,7 @@ const ProfileScreen: React.FC = () => {
   }, []);
 
   const renderLinks = () => {
-    if (profileData.links.count > 1) {
+    if (profileData.links.count && profileData.links.count > 1) {
       const firstLink = profileData.links.data[0].links;
       const remainingCount = profileData.links.count - 1;
 
