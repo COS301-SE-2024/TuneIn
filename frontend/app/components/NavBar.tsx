@@ -6,15 +6,15 @@ const NavBar: React.FC = () => {
     const router = useRouter();
 
     const navigateToHome = () => {
-        router.navigate("/");
+        router.navigate("/screens/Home");
     };
 
     const navigateToSitemap = () => {
         router.navigate("/screens/Sitemap");
     };
 
-    const navigateToProfile = () => {
-        router.navigate("/screens/EditProfile");
+    const navigateToHelpMenu= () => {
+        router.navigate("/screens/help/HelpScreen");
     };
 
     return (
@@ -25,8 +25,8 @@ const NavBar: React.FC = () => {
             <TouchableOpacity onPress={navigateToSitemap}>
                 <Text style={styles.text}>Sitemap</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateToProfile}>
-                <Text style={styles.text}>Profile</Text>
+            <TouchableOpacity onPress={navigateToHelpMenu}>
+                <Text style={styles.text}>Help</Text>
             </TouchableOpacity>
         </View>
     );
