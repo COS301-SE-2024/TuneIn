@@ -194,6 +194,7 @@ const RoomPage = () => {
 	};
 
 	const navigateToPlaylist = () => {
+		console.log("RP mine: ",roomData.mine);
 		router.navigate({
 			pathname: "/screens/Playlist",
 			params: {
@@ -514,12 +515,13 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	nowPlayingTrackName: {
-		fontSize: 20,
+		fontSize: 21,
 		fontWeight: "bold",
 	},
 	nowPlayingTrackArtist: {
 		fontSize: 18,
-		color: "gray",
+		color: "black",
+		fontWeight: 400
 	},
 	queueAlbumArt: {
 		width: 60,
@@ -541,7 +543,7 @@ const styles = StyleSheet.create({
 	},
 	queueTrackArtist: {
 		fontSize: 14,
-		color: "gray",
+		color: "black",
 	},
 	controls: {
 		flexDirection: "row",

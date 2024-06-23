@@ -17,6 +17,7 @@ const Playlist = () => {
   const router = useRouter();
   const { queue, currentTrackIndex,Room_id,mine } = useLocalSearchParams();
   console.log("playlist owner: ", mine);
+  const isMine = mine === "true";
   // Ensure queue is correctly typed as an array of Track objects
   const [playlist, setPlaylist] = useState<Track[]>([]);
 
@@ -65,11 +66,11 @@ const Playlist = () => {
             voteCount={track.voteCount}
             showVoting={track.showVoting}
             index={index} // Pass index for swapping (if needed)
-            highlighted={index == currentTrackIndex} // Highlight the currently playing song
+           
           />
         ))}
       </View>
-      {mine ? (
+      {isMine ? (
       <View style={styles.addButtonContainer}>
         <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
           <Text style={styles.addButtonText}>Add Song</Text>
