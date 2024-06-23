@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -19,13 +19,14 @@ import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
-import io from "socket.io-client";
+import * as io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../api-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
+import RoomOptions from "./RoomOptions";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -68,13 +69,15 @@ const getQueue = () => {
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
+	console.log("Room data:", room);
 	const roomData: Room = JSON.parse(room);
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
 
-	const [token, setToken] = useState<string | null>(null);
-	const [user, setUser] = useState<UserProfileDto | null>(null);
+	const token = useRef<string | null>(null);
+	const userRef = useRef<UserProfileDto | null>(null);
+	const roomObjRef = useRef<RoomDto | null>(null);
 
 	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState([]);
@@ -83,44 +86,22 @@ const RoomPage = () => {
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	/*
-	const [messages, setMessages] = useState([
-		{
-			username: "JohnDoe",
-			message: "This is a sample comment.",
-			profilePictureUrl:
-				"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-		},
-		{
-			username: "JaneSmith",
-			message: "Another sample comment here.",
-			profilePictureUrl:
-				"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-		},
-		{
-			username: "Me",
-			message: "This is my own message.",
-			profilePictureUrl:
-				"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-			me: true,
-		},
-	]);
-	*/
 	const [messages, setMessages] = useState<Message[]>([]);
 
-	const socket = useRef(null);
+	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
+			const storedToken = await StorageService.getItem("token");
+			token.current = storedToken;
+			console.log("Stored token:", token.current);
 			try {
-				const storedToken = await StorageService.getItem("token");
-				setToken(storedToken);
-				const whoami = async (token: string | null, type?: string) => {
+				const whoami = async (givenToken: string) => {
 					try {
 						const response = await axios.get(`${BASE_URL}/profile`, {
 							headers: {
-								Authorization: `Bearer ${token}`,
+								Authorization: `Bearer ${givenToken}`,
 							},
 						});
 						console.log("User's own info:", response.data);
@@ -130,137 +111,176 @@ const RoomPage = () => {
 						//user is not authenticated
 					}
 				};
-				setUser(await whoami(token));
+				if (!userRef.current){
+					userRef.current = await whoami(storedToken);
+				}
 			} catch (error) {
 				console.error("Error fetching token:", error);
 				//user is not authenticated
 			}
 
 			try {
-				const roomDto: RoomDto = (await axios.get(
-					`${BASE_URL}/room/${roomData.roomID}`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
+				if (roomObjRef === null){
+					const roomDto: RoomDto = (await axios.get(
+						`${BASE_URL}/room/${roomData.roomID}`,
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				)) as RoomDto;
-				setRoomObj(roomDto);
+					)) as RoomDto;
+					console.log("Room object:", roomDto);
+					roomObjRef.current = roomDto;
+					setRoomObj(roomDto);
+				}
 			} catch (error) {
 				console.error("Error fetching room:", error);
 			}
 		};
 		getTokenAndSelf();
 
-		socket.current = io(BASE_URL + "/live-chat", {
+		socket.current = io.io(BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
 
-		socket.current.on("connect", () => {
-			console.log("Connected to the server!");
-			const input: ChatEventDto = {
-				userID: user.userID,
-			};
-			socket.current.emit("connectUser", input);
-		});
+		const setupSocketEventHandlers = () => {
+			console.log("Setting up socket event handlers...");
+			socket.current.on("connect", () => {
+				console.log("Connected to the server!");
+				const input: ChatEventDto = {
+					userID: userRef.current.userID,
+				};
+				console.log("Socket emit: connectUser", input);
+				socket.current.emit("connectUser", input);
+			});
+	
+			socket.current.on("connected", (response: ChatEventDto) => {
+				//an event that should be in response to the connectUser event
+				console.log("User connected:", response);
+			});
+	
+			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+				//if someone joins (could be self)
+				const u = userRef.current;
+				console.log("User joined room:", response);
+				const input: ChatEventDto = {
+					userID: u.userID,
+					body: {
+						messageBody: "",
+						sender: u,
+						roomID: roomObjRef.current.roomID,
+						dateCreated: new Date(),
+					},
+				};
+				console.log("Socket emit: getChatHistory", input);
+				socket.current.emit("getChatHistory", input);
+			});
+	
+			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+				//an event that should be in response to the getChatHistory event
+				const u = userRef.current;
+				const chatHistory = history.map((msg) => ({
+					message: msg,
+					me: msg.sender.userID === u.userID,
+				}));
+				setMessages(chatHistory);
+			});
+	
+			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+				const message = newMessage.body;
+				const u = userRef.current;
+				const me: boolean = message.sender.userID === u.userID;
+				if (me) {
+					//clear message only after it has been sent & confirmed as received
+					setMessage("");
+				}
+				setMessages((prevMessages) => [
+					...prevMessages,
+					{ message, me: message.sender.userID === u.userID },
+				]);
+			});
+	
+			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+				//an event that should be in response to the leaveRoom event (could be self or other people)
+				console.log("User left room:", response);
+			});
+	
+			socket.current.on("error", (response: ChatEventDto) => {
+				console.error("Error:", response.errorMessage);
+			});
+		};
 
-		socket.current.on("connected", (response: ChatEventDto) => {
-			//an event that should be in response to the connectUser event
-			console.log("User connected:", response);
-		});
-
-		socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-			//if someone joins (could be self)
-			console.log("User joined room:", response);
-			const input: ChatEventDto = {
-				userID: user.userID,
-				body: {
-					messageBody: "",
-					sender: user,
-					roomID: roomData.roomID,
-					dateCreated: new Date(),
-				},
-			};
-			socket.current.emit("getChatHistory", input);
-		});
-
-		socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-			//an event that should be in response to the getChatHistory event
-			const chatHistory = history.map((msg) => ({
-				message: msg,
-				me: msg.sender.userID === user.userID,
-			}));
-			setMessages(chatHistory);
-		});
-
-		socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-			const message = newMessage.body;
-			const me: boolean = message.sender.userID === user.userID;
-			if (me) {
-				//clear message only after it has been sent & confirmed as received
-				setMessage("");
-			}
-			setMessages((prevMessages) => [
-				...prevMessages,
-				{ message, me: message.sender.userID === user.userID },
-			]);
-		});
-
-		socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-			//an event that should be in response to the leaveRoom event (could be self or other people)
-			console.log("User left room:", response);
-		});
-
-		socket.current.on("error", (response: ChatEventDto) => {
-			console.error("Error:", response.errorMessage);
-		});
+		if (socket.current && userRef.current && roomObjRef.current) {
+			setupSocketEventHandlers();
+		}
 
 		return () => {
-			socket.current.disconnect();
+			if (socket.current){
+				console.log("Disconnecting socket...");
+				socket.current.disconnect();
+			}
 		};
 	}, []);
 
 	const sendMessage = () => {
 		if (message.trim()) {
+			const u: UserProfileDto = userRef.current;
 			const newMessage: LiveChatMessageDto = {
 				messageBody: message,
-				sender: user,
+				sender: u,
 				roomID: roomData.roomID,
 				dateCreated: new Date(),
 			};
 			const input: ChatEventDto = {
-				userID: user.userID,
+				userID: u.userID,
 				body: newMessage,
 			};
+			console.log("Sending message:", input);
 			socket.current.emit("sendMessage", input);
 			// do not add the message to the state here, wait for the server to send it back
 			//setMessages([...messages, { message: newMessage, me: true }]);
 		}
 	};
 
-	const joinRoom = () => {
+	useEffect(() => {
+		//do this to ensure the useStates are updated
+		console.log("Room data:", roomData);
+		console.log("Room object:", roomObj);
+		console.log("User:", userRef.current);
+		console.log("Token:", token);
+	}, [roomData, roomObj, userRef.current, token]);
+
+	const joinRoom = useCallback(() => {
+		if (!userRef.current || !roomObjRef.current) {
+			console.error("User or room object not found!");
+			return;
+		}
+		const u: UserProfileDto = userRef.current;
 		const input: ChatEventDto = {
-			userID: user.userID,
+			userID: u.userID,
 			body: {
 				messageBody: "",
-				sender: user,
-				roomID: roomObj.roomID,
+				sender: u,
+				roomID: roomObjRef.current.roomID,
 				dateCreated: new Date(),
 			},
 		};
+		console.log("Socket emit: joinRoom", input);
 		socket.current.emit("joinRoom", input);
-	};
+	}, []);
 
 	const leaveRoom = () => {
+		const u: UserProfileDto = userRef.current;
 		const input: ChatEventDto = {
-			userID: user.userID,
+			userID: u.userID,
 			body: {
 				messageBody: "",
-				sender: user,
+				sender: u,
 				roomID: roomObj.roomID,
 				dateCreated: new Date(),
 			},
 		};
+		console.log("Socket emit: leaveRoom", input);
 		socket.current.emit("leaveRoom", input);
 	};
 
@@ -370,9 +390,9 @@ const RoomPage = () => {
 	//automatically join the room on component mount
 	useEffect(() => {
 		console.log("Joining room...");
-		console.log(user);
+		console.log(userRef.current, roomObjRef.current);
 		joinRoom();
-	}, []);
+	}, [joinRoom]);
 
 	return (
 		<View style={styles.container}>
