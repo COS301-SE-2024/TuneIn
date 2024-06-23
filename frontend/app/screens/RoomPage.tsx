@@ -358,7 +358,7 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontWeight: "bold", fontSize: 16 }}>
+					<Text >
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
 	},
 	backButtonText: {
 		fontSize: 18,
-		fontWeight: "bold",
+		
 	},
 	backgroundImage: {
 		width: "100%",
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
 	},
 	username: {
 		fontSize: 18,
-		fontWeight: "bold",
+	
 		color: "white"
 	},
 	roomDetails: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
 	},
 	roomName: {
 		fontSize: 24,
-		fontWeight: "bold",
+	
 		color: "white",
 	},
 	description: {
@@ -518,12 +518,11 @@ const styles = StyleSheet.create({
 	},
 	nowPlayingTrackName: {
 		fontSize: 21,
-		fontWeight: "bold",
+	
 	},
 	nowPlayingTrackArtist: {
 		fontSize: 18,
 		color: "black",
-		fontWeight: 400
 	},
 	queueAlbumArt: {
 		width: 60,
@@ -562,7 +561,7 @@ const styles = StyleSheet.create({
 	},
 	queueButtonText: {
 		fontSize: 16,
-		fontWeight: "bold",
+
 	},
 	queueContainer: {
 		paddingHorizontal: 20,
@@ -590,7 +589,6 @@ const styles = StyleSheet.create({
 	},
 	viewQueueButtonText: {
 		color: "white",
-		fontWeight: "bold",
 		fontSize: 16,
 	},
 	joinLeaveButton: {
@@ -603,7 +601,7 @@ const styles = StyleSheet.create({
 	},
 	joinLeaveButtonText: {
 		color: "white",
-		fontWeight: "bold",
+
 		fontSize: 16,
 	},
 });
