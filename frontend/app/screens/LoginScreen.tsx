@@ -26,7 +26,7 @@ const LoginScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToHome = () => {
-    console.log(emailOrUsername, password);
+
     const userData = {
       Username: emailOrUsername,
       Pool: UserPool,
