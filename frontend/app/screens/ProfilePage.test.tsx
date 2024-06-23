@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor, act } from "@testing-library/react-native";
+import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ProfileScreen from "./ProfilePage";
@@ -358,6 +358,62 @@ describe("ProfileScreen", () => {
 			// Assert the absence of the testID on the container view
 			const favRoomsContainer = queryByTestId("fav-rooms");
 			expect(favRoomsContainer).toBeNull();
+		});
+	});
+
+	it("should toggle LinkBottomSheet visibility", async () => {
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 10 },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ links: "https://example.com" }],
+			},
+			fav_genres: { data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: {
+				count: 0,
+				data: [],
+			},
+			recent_rooms: {
+				count: 2,
+				data: [
+					{
+						roomId: 1,
+						room_name: "Room 1",
+						current_song: { title: "Song 1", artists: "Artist 1" },
+						creator: { username: "user1" },
+					},
+					{
+						roomId: 2,
+						room_name: "Room 2",
+						current_song: { title: "Song 2", artists: "Artist 2" },
+						creator: { username: "user2" },
+					},
+				],
+			},
+		};
+
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		const { getByTestId, queryByTestId, getByText } = render(<ProfileScreen />);
+
+		// Wait for async operations to complete and profile data to be rendered
+		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
+		expect(queryByTestId("link-bottom-sheet")).toBeNull();
+
+		await act(async () => {
+			const touchableOpacity = getByTestId("links-touchable");
+			fireEvent.press(touchableOpacity);
+
+			await waitFor(() => {
+				// Check if LinkBottomSheet is visible
+				expect(getByTestId("link-bottom-sheet")).toBeTruthy();
+			});
 		});
 	});
 });

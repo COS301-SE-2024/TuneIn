@@ -74,7 +74,7 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
             visible={visible}
             onRequestClose={onClose}
         >
-            <View style={styles.modalContainer}>
+            <View style={styles.modalContainer} testID="link-bottom-sheet">
                 <Animated.View
                     style={[styles.modal, { transform: [{ translateY: animation }] }]}
                 >
