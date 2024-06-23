@@ -88,27 +88,6 @@ export class SpotifyAuthService {
 	}
 
 	async exchangeCodeForToken(code: string): Promise<SpotifyTokenResponse> {
-		/*
-		const details = await fetch("https://accounts.spotify.com/api/token", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: "Basic " + this.authHeader,
-			},
-			body: new URLSearchParams({
-				grant_type: "authorization_code",
-				code: code,
-				redirect_uri: this.redirectUri,
-			}),
-		})
-			.then((response) => response.json())
-			.catch((error) => {
-				console.error("Error:", error);
-				throw new Error("Failed to exchange code for token");
-			});
-
-		return details as SpotifyTokenResponse;
-        */
 		try {
 			const response = await firstValueFrom(
 				this.httpService.post(
@@ -140,7 +119,46 @@ export class SpotifyAuthService {
 		}
 	}
 
-	async refreshAccessToken(tk: SpotifyTokenResponse): Promise<SpotifyTokenResponse> {
+	async refreshAccessToken(
+		tk: SpotifyTokenResponse,
+	): Promise<SpotifyTokenResponse> {
+		try {
+			const response = await firstValueFrom(
+				this.httpService.post(
+					"https://accounts.spotify.com/api/token",
+					{
+						grant_type: "refresh_token",
+						refresh_token: tk.refresh_token,
+					},
+					{
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+							Authorization: `Basic ${this.authHeader}`,
+						},
+					},
+				),
+			);
+
+			if (!response || !response.data) {
+				throw new Error("Failed to refresh token");
+			}
+
+			const refreshToken: SpotifyTokenRefreshResponse =
+				response.data as SpotifyTokenRefreshResponse;
+			const result: SpotifyTokenResponse = {
+				access_token: refreshToken.access_token,
+				token_type: refreshToken.token_type,
+				scope: refreshToken.scope,
+				expires_in: refreshToken.expires_in,
+				refresh_token: tk.refresh_token,
+			};
+			return result;
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err.response?.data);
+			}
+			throw new Error("Failed to refresh token");
+		}
 	}
 
 	async generateJWT(user: PrismaTypes.users): Promise<string> {
