@@ -50,6 +50,12 @@ export class LoginBody {
 	token: string;
 }
 
+export class RefreshBody {
+	@ApiProperty()
+	@IsString()
+	refreshToken: string;
+}
+
 @Injectable()
 export class AuthService {
 	private cognitoIdentityServiceProvider: AWS.CognitoIdentityServiceProvider;

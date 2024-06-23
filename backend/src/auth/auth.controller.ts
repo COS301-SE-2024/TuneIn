@@ -11,6 +11,7 @@ import {
 	JWTPayload,
 	RegisterBody,
 	LoginBody,
+	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "src/modules/users/users.service";
@@ -116,18 +117,23 @@ export class AuthController {
 		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
-	async refresh(@Body() token: string) {
-		if (!token || token === null) {
+	async refresh(@Body() rb: RefreshBody) {
+		if (!rb || rb === null) {
 			throw new HttpException(
 				"Invalid request. Missing JWT token. AuthControllerRefreshError01",
 				HttpStatus.UNAUTHORIZED,
 			);
 		}
 		try {
+			console.log("rb");
+			console.log(rb);
+			console.log(typeof rb);
+			const token: string = rb.refreshToken;
 			const payload: JWTPayload = await this.authService.verifyJWT(token);
 			const newToken: string = await this.authService.generateJWT(payload);
 			return { token: newToken };
 		} catch (e) {
+			console.error(e);
 			throw new HttpException(
 				"Invalid JWT token. AuthControllerRefreshError02",
 				HttpStatus.UNAUTHORIZED,
