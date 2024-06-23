@@ -71,6 +71,8 @@ const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
 	const roomData: Room = JSON.parse(room);
+	const roomID = roomData.roomID ? roomData.roomID : roomData.id;
+	console.log("Room ID:", roomID);
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
@@ -78,6 +80,7 @@ const RoomPage = () => {
 	const token = useRef<string | null>(null);
 	const userRef = useRef<UserProfileDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
+	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 
 	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState([]);
@@ -120,9 +123,10 @@ const RoomPage = () => {
 			}
 
 			try {
-				if (roomObjRef === null){
+
+				if (roomObjRef.current === null){
 					const roomDto: RoomDto = (await axios.get(
-						`${BASE_URL}/room/${roomData.roomID}`,
+						`${BASE_URL}/rooms/${roomID}`,
 						{
 							headers: {
 								Authorization: `Bearer ${storedToken}`,
@@ -143,22 +147,24 @@ const RoomPage = () => {
 			transports: ["websocket"],
 		});
 
-		const setupSocketEventHandlers = () => {
-			console.log("Setting up socket event handlers...");
+		if (userRef.current){
 			socket.current.on("connect", () => {
 				console.log("Connected to the server!");
 				const input: ChatEventDto = {
 					userID: userRef.current.userID,
 				};
 				console.log("Socket emit: connectUser", input);
-				socket.current.emit("connectUser", input);
+				socket.current.emit("connectUser", JSON.stringify(input));
 			});
 	
 			socket.current.on("connected", (response: ChatEventDto) => {
 				//an event that should be in response to the connectUser event
 				console.log("User connected:", response);
 			});
-	
+		}
+
+		const setupSocketEventHandlers = () => {
+			console.log("Setting up socket event handlers...");	
 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
 				//if someone joins (could be self)
 				const u = userRef.current;
@@ -168,12 +174,12 @@ const RoomPage = () => {
 					body: {
 						messageBody: "",
 						sender: u,
-						roomID: roomObjRef.current.roomID,
+						roomID: roomID,
 						dateCreated: new Date(),
 					},
 				};
 				console.log("Socket emit: getChatHistory", input);
-				socket.current.emit("getChatHistory", input);
+				socket.current.emit("getChatHistory", JSON.stringify(input));
 			});
 	
 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
@@ -211,6 +217,7 @@ const RoomPage = () => {
 		};
 
 		if (socket.current && userRef.current && roomObjRef.current) {
+			setReadyToJoinRoom(true);
 			setupSocketEventHandlers();
 		}
 
@@ -228,7 +235,7 @@ const RoomPage = () => {
 			const newMessage: LiveChatMessageDto = {
 				messageBody: message,
 				sender: u,
-				roomID: roomData.roomID,
+				roomID: roomID,
 				dateCreated: new Date(),
 			};
 			const input: ChatEventDto = {
@@ -236,7 +243,7 @@ const RoomPage = () => {
 				body: newMessage,
 			};
 			console.log("Sending message:", input);
-			socket.current.emit("sendMessage", input);
+			socket.current.emit("sendMessage", JSON.stringify(input));
 			// do not add the message to the state here, wait for the server to send it back
 			//setMessages([...messages, { message: newMessage, me: true }]);
 		}
@@ -261,12 +268,12 @@ const RoomPage = () => {
 			body: {
 				messageBody: "",
 				sender: u,
-				roomID: roomObjRef.current.roomID,
+				roomID: roomID,
 				dateCreated: new Date(),
 			},
 		};
 		console.log("Socket emit: joinRoom", input);
-		socket.current.emit("joinRoom", input);
+		socket.current.emit("joinRoom", JSON.stringify(input));
 	}, []);
 
 	const leaveRoom = () => {
@@ -276,12 +283,12 @@ const RoomPage = () => {
 			body: {
 				messageBody: "",
 				sender: u,
-				roomID: roomObj.roomID,
+				roomID: roomID,
 				dateCreated: new Date(),
 			},
 		};
 		console.log("Socket emit: leaveRoom", input);
-		socket.current.emit("leaveRoom", input);
+		socket.current.emit("leaveRoom", JSON.stringify(input));
 	};
 
 	const trackPositionIntervalRef = useRef(null);
@@ -389,10 +396,13 @@ const RoomPage = () => {
 
 	//automatically join the room on component mount
 	useEffect(() => {
-		console.log("Joining room...");
-		console.log(userRef.current, roomObjRef.current);
-		joinRoom();
-	}, [joinRoom]);
+		// Check if userRef and roomObjRef are not null
+		if (userRef.current && roomObjRef.current) {
+			console.log("Joining room...");
+			console.log(userRef.current, roomObjRef.current);
+			joinRoom();
+		}
+	}, [joinRoom, userRef.current, roomObjRef.current]);
 
 	return (
 		<View style={styles.container}>
