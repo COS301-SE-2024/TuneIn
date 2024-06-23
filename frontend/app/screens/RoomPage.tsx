@@ -100,43 +100,27 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const whoami = async (givenToken: string) => {
-					try {
-						const response = await axios.get(`${BASE_URL}/profile`, {
-							headers: {
-								Authorization: `Bearer ${givenToken}`,
-							},
-						});
-						console.log("User's own info:", response.data);
-						return response.data as UserProfileDto;
-					} catch (error) {
-						console.error("Error fetching user's own info:", error);
-						//user is not authenticated
-					}
-				};
-				if (!userRef.current){
-					userRef.current = await whoami(storedToken);
-				}
+				const response = await axios.get(`${BASE_URL}/profile`, {
+					headers: {
+						Authorization: `Bearer ${storedToken}`,
+					},
+				});
+				userRef.current = response.data as UserProfileDto;
 			} catch (error) {
-				console.error("Error fetching token:", error);
-				//user is not authenticated
+				console.error("Error fetching user's own info:", error);
 			}
 
 			try {
-
-				if (roomObjRef.current === null){
-					const roomDto: RoomDto = (await axios.get(
-						`${BASE_URL}/rooms/${roomID}`,
-						{
-							headers: {
-								Authorization: `Bearer ${storedToken}`,
-							},
+				const roomDto = await axios.get(
+					`${BASE_URL}/rooms/${roomID}`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
 						},
-					)) as RoomDto;
-					console.log("Room object:", roomDto);
-					roomObjRef.current = roomDto;
-					setRoomObj(roomDto);
-				}
+					},
+				);
+				roomObjRef.current = roomDto.data;
+				setRoomObj(roomDto.data);
 			} catch (error) {
 				console.error("Error fetching room:", error);
 			}
@@ -146,22 +130,6 @@ const RoomPage = () => {
 		socket.current = io.io(BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
-
-		if (userRef.current){
-			socket.current.on("connect", () => {
-				console.log("Connected to the server!");
-				const input: ChatEventDto = {
-					userID: userRef.current.userID,
-				};
-				console.log("Socket emit: connectUser", input);
-				socket.current.emit("connectUser", JSON.stringify(input));
-			});
-	
-			socket.current.on("connected", (response: ChatEventDto) => {
-				//an event that should be in response to the connectUser event
-				console.log("User connected:", response);
-			});
-		}
 
 		const setupSocketEventHandlers = () => {
 			console.log("Setting up socket event handlers...");	
@@ -193,6 +161,7 @@ const RoomPage = () => {
 			});
 	
 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+				console.log("Received live message:", newMessage);
 				const message = newMessage.body;
 				const u = userRef.current;
 				const me: boolean = message.sender.userID === u.userID;
@@ -216,8 +185,20 @@ const RoomPage = () => {
 			});
 		};
 
-		if (socket.current && userRef.current && roomObjRef.current) {
-			setReadyToJoinRoom(true);
+		if (socket.current && userRef.current) {
+			socket.current.on("connect", () => {
+				const input: ChatEventDto = {
+					userID: userRef.current.userID,
+				};
+				socket.current.emit("connectUser", JSON.stringify(input));
+			});
+
+			socket.current.on("connected", (response: ChatEventDto) => {
+				if (!joined && readyToJoinRoom) {
+					joinRoom();
+				}
+			});
+
 			setupSocketEventHandlers();
 		}
 
@@ -227,7 +208,7 @@ const RoomPage = () => {
 				socket.current.disconnect();
 			}
 		};
-	}, []);
+	}, [readyToJoinRoom]);
 
 	const sendMessage = () => {
 		if (message.trim()) {
@@ -243,25 +224,13 @@ const RoomPage = () => {
 				body: newMessage,
 			};
 			console.log("Sending message:", input);
-			socket.current.emit("sendMessage", JSON.stringify(input));
+			socket.current.emit("liveMessage", JSON.stringify(input));
 			// do not add the message to the state here, wait for the server to send it back
 			//setMessages([...messages, { message: newMessage, me: true }]);
 		}
 	};
 
-	useEffect(() => {
-		//do this to ensure the useStates are updated
-		console.log("Room data:", roomData);
-		console.log("Room object:", roomObj);
-		console.log("User:", userRef.current);
-		console.log("Token:", token);
-	}, [roomData, roomObj, userRef.current, token]);
-
 	const joinRoom = useCallback(() => {
-		if (!userRef.current || !roomObjRef.current) {
-			console.error("User or room object not found!");
-			return;
-		}
 		const u: UserProfileDto = userRef.current;
 		const input: ChatEventDto = {
 			userID: u.userID,
@@ -274,6 +243,7 @@ const RoomPage = () => {
 		};
 		console.log("Socket emit: joinRoom", input);
 		socket.current.emit("joinRoom", JSON.stringify(input));
+		setJoined(true);
 	}, []);
 
 	const leaveRoom = () => {
@@ -289,6 +259,7 @@ const RoomPage = () => {
 		};
 		console.log("Socket emit: leaveRoom", input);
 		socket.current.emit("leaveRoom", JSON.stringify(input));
+		setJoined(false);
 	};
 
 	const trackPositionIntervalRef = useRef(null);
@@ -322,6 +293,11 @@ const RoomPage = () => {
 	const handleJoinLeave = () => {
 		// Simulate toggling join/leave
 		setJoined((prevJoined) => !prevJoined);
+		if (joined) {
+			leaveRoom();
+		} else {
+			joinRoom();
+		}
 	};
 
 	const playPauseTrack = (track, index) => {
@@ -394,15 +370,21 @@ const RoomPage = () => {
 		});
 	};
 
-	//automatically join the room on component mount
 	useEffect(() => {
-		// Check if userRef and roomObjRef are not null
 		if (userRef.current && roomObjRef.current) {
-			console.log("Joining room...");
+			setReadyToJoinRoom(true);
+			console.log("Ready to join room...");
 			console.log(userRef.current, roomObjRef.current);
+		}
+	}, [userRef.current, roomObjRef.current]);
+
+	useEffect(() => {
+		if (readyToJoinRoom && !joined) {
+			console.log("Joining room...");
+			console.log(readyToJoinRoom, joined);
 			joinRoom();
 		}
-	}, [joinRoom, userRef.current, roomObjRef.current]);
+	}, [readyToJoinRoom, joined, joinRoom]);
 
 	return (
 		<View style={styles.container}>
