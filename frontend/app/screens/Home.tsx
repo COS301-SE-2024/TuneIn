@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const baseURL = "http://10.32.253.158:3000"; // change to your own IP Address for it to WORK
+  const baseURL = "http://192.168.137.1:3000"; // change to your own IP Address for it to WORK
 
 
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -28,7 +28,6 @@ const Home: React.FC = () => {
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
-      console.log('fetching rooms', `${baseURL}/users/rooms${type ? type : ''}`)
       const response = await axios.get(`${baseURL}/users/rooms${type ? type : ''}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
