@@ -197,6 +197,17 @@ export class AuthService {
 		return token;
 	}
 
+	verifyJWT(jwt_token: string): JWTPayload {
+		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
+		if (!secretKey || secretKey === undefined || secretKey === "") {
+			throw new Error("Missing JWT secret key");
+		}
+
+		const decoded = jwt.verify(jwt_token, secretKey);
+		const result: JWTPayload = decoded as JWTPayload;
+		return result;
+	}
+
 	/*
 	async getUserInfo(jwt_token: string): Promise<any> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
