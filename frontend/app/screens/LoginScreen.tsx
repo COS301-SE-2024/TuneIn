@@ -60,6 +60,7 @@ const LoginScreen: React.FC = () => {
 
         // POST request to backend
         fetch("http://10.32.253.158:3000/auth/login", {
+        fetch("http://172.16.12.166:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
