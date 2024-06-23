@@ -129,7 +129,7 @@ export class AuthController {
 			console.log(rb);
 			console.log(typeof rb);
 			const token: string = rb.refreshToken;
-			const payload: JWTPayload = await this.authService.verifyJWT(token);
+			const payload: JWTPayload = await this.authService.refreshJWT(token);
 			const newToken: string = await this.authService.generateJWT(payload);
 			return { token: newToken };
 		} catch (e) {
