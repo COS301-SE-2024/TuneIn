@@ -114,7 +114,7 @@ const ProfileScreen: React.FC = () => {
   const renderFavRooms = () => {
     if (profileData.fav_rooms.count > 0) {
       return (
-        <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+        <View style={{ paddingHorizontal: 20, paddingTop: 10 }} testID="fav-rooms">
           <Text style={styles.title}>Favorite Rooms</Text>
           <View style={styles.roomCardsContainer}>
             {profileData.fav_rooms.data.slice(0, 2).map((room) => (
@@ -136,7 +136,7 @@ const ProfileScreen: React.FC = () => {
     if (profileData.recent_rooms.count > 0) {
       console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
       return (
-        <View style={{ paddingHorizontal: 20 }}>
+        <View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
           <Text style={styles.title}>Recently Visited</Text>
           <View style={styles.roomCardsContainer}>
             {profileData.recent_rooms.data.slice(0, 2).map((room) => (
@@ -186,7 +186,7 @@ const ProfileScreen: React.FC = () => {
 				<Text style={{ fontWeight: "600", fontSize: 20, textAlign: "center" }}>
 					Profile
 				</Text>
-				<View style={{ alignItems: "center", marginTop: 20 }}>
+				<View style={{ alignItems: "center", marginTop: 20 }} testID="profile-pic">
 					<Image
 						source={{ uri: profileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
@@ -254,13 +254,13 @@ const ProfileScreen: React.FC = () => {
 						duration={favoriteSongsData[0].duration}
 					/>
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="bio">
 					<BioSection content={profileData.bio} />
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="genres">
 					<GenreList items={profileData.fav_genres.data}></GenreList>
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{profileData.fav_songs.data.slice(0, 2).map((song, index) => (
 						<FavoriteSongs
