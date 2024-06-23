@@ -17,5 +17,6 @@ import { AuthService } from "src/auth/auth.service";
 		DbUtilsService,
 		AuthService,
 	],
+	exports: [UsersService],
 })
 export class UsersModule {}

@@ -12,6 +12,9 @@ import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
+import { ChatGateway } from "./chat/chat.gateway";
+import { ConnectedUsersService } from "./chat/connecteduser/connecteduser.service";
+import { ChatModule } from "./chat/chat.module";
 import { S3Service } from "./s3/s3.service";
 import { S3Module } from "./s3/s3.module";
 import { SpotifyService } from "./spotify/spotify.service";
@@ -32,6 +35,7 @@ import { memoryStorage } from "multer";
 		ProfileModule,
 		DtoGenModule,
 		DbUtilsModule,
+		ChatModule,
 		S3Module,
 		MulterModule.register({
 			dest: "./uploads",
@@ -49,6 +53,8 @@ import { memoryStorage } from "multer";
 		DtoGenService,
 		DbUtilsService,
 		S3Service,
+		ChatGateway,
+		ConnectedUsersService,
 		SpotifyService,
 	],
 })

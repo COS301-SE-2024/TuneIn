@@ -10,8 +10,8 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest build --webpack --webpackPath webpack-hmr.config.js --watch",
-    "start:dev:old": "nest start --watch",
+    "start:dev": "npm run prestart && nest build --webpack --webpackPath webpack-hmr.config.js --watch",
+    "start:dev:old": "npm run prestart && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -22,7 +22,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "gen-api-client": "java -jar ./../tools/swagger-codegen-cli.jar generate -i http://localhost:3000/api-yaml -l typescript-fetch -o ./../frontend/api-client --additional-properties supportsES6=true",
     "gen-docs": "compodoc -p tsconfig.json",
-    "serve-docs": "compodoc -p tsconfig.json -s"
+    "serve-docs": "compodoc -p tsconfig.json -s",
+    "prisma-read": "prisma introspect",
+    "prisma-gen": "prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.592.0",
@@ -37,8 +39,10 @@
     "@nestjs/core": "^10.3.9",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
-    "@nestjs/platform-express": "^10.3.9",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.3.9",
     "@nestjs/swagger": "^7.3.1",
+    "@nestjs/websockets": "^10.3.9",
     "@prisma/client": "^5.15.0",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "aws-jwt-verify": "^4.0.1",
@@ -55,7 +59,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.25",
@@ -68,6 +73,7 @@
     "@types/node": "^20.3.1",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/socket.io": "^3.0.2",
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

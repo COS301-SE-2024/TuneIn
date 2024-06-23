@@ -5,6 +5,7 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
 
 /*
 ## UserProfileDto (User Profile Info)
@@ -93,14 +94,20 @@ export class DtoGenService {
 	async generateUserProfileDto(
 		userID: string,
 		fully_qualify: boolean = true,
-	): Promise<UserProfileDto | null> {
+	): Promise<UserProfileDto> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new Error("User with id " + userID + " does not exist");
+		}
+
 		//check if userID exists
 		const user: Prisma.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
 
 		if (!user || user === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserProfileDto():ERROR01",
+			);
 		}
 
 		//get user info
@@ -251,17 +258,20 @@ export class DtoGenService {
 		});
 
 		if (!users || users === null) {
-			return [];
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserProfileDto():ERROR01",
+			);
 		}
 
 		const result: UserProfileDto[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user = await this.generateUserProfileDto(u.user_id, false);
-				if (user && user !== null) {
-					result.push(user);
-				}
+				const user: UserProfileDto = await this.generateUserProfileDto(
+					u.user_id,
+					false,
+				);
+				result.push(user);
 			}
 		}
 		return result;
@@ -447,5 +457,113 @@ export class DtoGenService {
 
 	async generateUserDto(): Promise<UserDto | null> {
 		return new UserDto();
+	}
+
+	async generateLiveChatMessageDto(
+		messageID: string,
+	): Promise<LiveChatMessageDto> {
+		const roomMessage: Prisma.room_message | null =
+			await this.prisma.room_message.findUnique({
+				where: { message_id: messageID },
+			});
+
+		if (!roomMessage || roomMessage === null) {
+			throw new Error(
+				"Message with id " +
+					messageID +
+					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR01",
+			);
+		}
+
+		const message: Prisma.message | null = await this.prisma.message.findUnique(
+			{
+				where: { message_id: messageID },
+			},
+		);
+
+		if (!message || message === null) {
+			throw new Error(
+				"Message with id " +
+					messageID +
+					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR02",
+			);
+		}
+
+		const sender: UserProfileDto = await this.generateUserProfileDto(
+			message.sender,
+		);
+
+		const result: LiveChatMessageDto = {
+			messageBody: message.contents,
+			sender: sender,
+			roomID: roomMessage.room_id,
+			dateCreated: message.date_sent,
+		};
+
+		return result;
+	}
+
+	async generateMultipleLiveChatMessageDto(
+		messages: Prisma.message[],
+	): Promise<LiveChatMessageDto[]> {
+		const senderIDs: string[] = messages.map((m) => m.sender);
+		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
+		const senders: Map<string, UserProfileDto> = new Map<
+			string,
+			UserProfileDto
+		>();
+		for (let i = 0; i < uniqueSenderIDs.length; i++) {
+			const sender: UserProfileDto = await this.generateUserProfileDto(
+				uniqueSenderIDs[i],
+			);
+			senders.set(uniqueSenderIDs[i], sender);
+		}
+
+		const roomIDs = await this.prisma.room_message.findMany({
+			where: {
+				message_id: {
+					in: messages.map((m) => m.message_id),
+				},
+			},
+		});
+
+		if (!roomIDs || roomIDs === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch room IDs. DTOGenService.generateMultipleLiveChatMessageDto():ERROR01",
+			);
+		}
+
+		const result: LiveChatMessageDto[] = [];
+		for (let i = 0; i < messages.length; i++) {
+			const m = messages[i];
+			if (m && m !== null) {
+				const s: UserProfileDto | undefined = senders.get(m.sender);
+				if (!s || s === null) {
+					throw new Error(
+						"Weird error. Got messages from Messages table but user (" +
+							m.sender +
+							") not found in Users table",
+					);
+				}
+
+				const roomMessage = roomIDs.find((r) => r.message_id === m.message_id);
+				if (!roomMessage || roomMessage === null) {
+					throw new Error(
+						"Weird error. Got messages from Messages table but message (" +
+							m.message_id +
+							") not found in Room Messages table",
+					);
+				}
+
+				const message: LiveChatMessageDto = {
+					messageBody: m.contents,
+					sender: s,
+					roomID: roomMessage.room_id,
+					dateCreated: m.date_sent,
+				};
+				result.push(message);
+			}
+		}
+		return result;
 	}
 }

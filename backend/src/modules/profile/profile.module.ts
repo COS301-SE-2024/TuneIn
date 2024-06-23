@@ -17,5 +17,6 @@ import { AuthService } from "src/auth/auth.service";
 		AuthService,
 	],
 	imports: [PrismaModule],
+	exports: [ProfileService],
 })
 export class ProfileModule {}

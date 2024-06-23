@@ -18,33 +18,35 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
+
 
 const ProfileScreen: React.FC = () => {
-  const baseURL = "http://10.32.253.158:3000";
-  const router = useRouter();
-  const [favoriteSongsData, setFavoriteSongsData] = useState([
-    {
-      songTitle: "Don't Smile At Me",
-      artist: "Billie Eilish",
-      duration: "5:33",
-      albumArt: "https://example.com/path-to-album-art1.jpg",
-    },
-    {
-      songTitle: "Blinding Lights",
-      artist: "The Weekend",
-      duration: "3:20",
-      albumArt: "https://example.com/path-to-album-art2.jpg",
-    },
-    {
-      songTitle: "Shape of You",
-      artist: "Ed Sheeran",
-      duration: "4:24",
-      albumArt: "https://example.com/path-to-album-art3.jpg",
-    },
-  ]);
-  const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
-  const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
+	const baseURL = "http://localhost:3000";
+	const router = useRouter();
+	const [favoriteSongsData, setFavoriteSongsData] = useState([
+		{
+			songTitle: "Don't Smile At Me",
+			artist: "Billie Eilish",
+			duration: "5:33",
+			albumArt: "https://example.com/path-to-album-art1.jpg",
+		},
+		{
+			songTitle: "Blinding Lights",
+			artist: "The Weekend",
+			duration: "3:20",
+			albumArt: "https://example.com/path-to-album-art2.jpg",
+		},
+		{
+			songTitle: "Shape of You",
+			artist: "Ed Sheeran",
+			duration: "4:24",
+			albumArt: "https://example.com/path-to-album-art3.jpg",
+		},
+	]);
+	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
+	const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
@@ -52,7 +54,7 @@ const ProfileScreen: React.FC = () => {
   useEffect(() => {
     const getTokenAndData = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem("token");
+        const storedToken = await StorageService.getItem("token");
         setToken(storedToken);
 
         if (storedToken) {

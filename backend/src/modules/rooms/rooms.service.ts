@@ -8,6 +8,7 @@ import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
 
 @Injectable()
 export class RoomsService {
@@ -285,6 +286,161 @@ export class RoomsService {
 	getCurrentSong(roomID: string): SongInfoDto {
 		// TODO: Implement logic to get current playing song
 		return new SongInfoDto();
+	}
+
+	async roomExists(roomID: string): Promise<boolean> {
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		if (!room || room === null) {
+			return false;
+		}
+		return true;
+	}
+
+	async getLiveChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
+		if (!(await this.roomExists(roomID))) {
+			throw new HttpException(
+				"Room with id '" + roomID + "' does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+
+		const roomMessages: PrismaTypes.room_message[] | null =
+			await this.prisma.room_message.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
+
+		if (!roomMessages || roomMessages === null) {
+			throw new Error(
+				"Failed to get chat history (query returned null) for room with id '" +
+					roomID +
+					"'",
+			);
+		}
+
+		if (roomMessages.length === 0) {
+			return [];
+		}
+
+		const ids: string[] = [];
+		for (const message of roomMessages) {
+			ids.push(message.message_id);
+		}
+
+		const messages: PrismaTypes.message[] | null =
+			await this.prisma.message.findMany({
+				where: {
+					message_id: {
+						in: ids,
+					},
+				},
+			});
+
+		if (!messages || messages === null) {
+			throw new Error(
+				"Failed to get chat history (query returned null) for room with id '" +
+					roomID +
+					"'",
+			);
+		}
+
+		if (messages.length === 0) {
+			throw new Error(
+				"Failed to get chat history (no messages found) matching IDs for room with id '" +
+					roomID +
+					"'. DB may be corrupted.",
+			);
+		}
+		return messages;
+	}
+
+	async getLiveChatHistoryDto(roomID: string): Promise<LiveChatMessageDto[]> {
+		const messages: PrismaTypes.message[] =
+			await this.getLiveChatHistory(roomID);
+		const result: LiveChatMessageDto[] =
+			await this.dtogen.generateMultipleLiveChatMessageDto(messages);
+		return result;
+	}
+
+	async createMessage(message: Prisma.messageCreateInput): Promise<string> {
+		const newMessage: PrismaTypes.message | null =
+			await this.prisma.message.create({
+				data: message,
+			});
+
+		if (!newMessage || newMessage === null) {
+			throw new Error(
+				"Failed to create message with id '" +
+					message.message_id +
+					"'. Unknown database error",
+			);
+		}
+
+		return newMessage.message_id;
+	}
+
+	async createLiveChatMessage(
+		message: LiveChatMessageDto,
+		userID?: string,
+	): Promise<string> {
+		if (!(await this.roomExists(message.roomID))) {
+			throw new Error("Room with id '" + message.roomID + "' does not exist");
+		}
+
+		let u: string = message.sender.userID;
+		if (userID) {
+			u = userID;
+		}
+		const sender: PrismaTypes.users | null = await this.prisma.users.findUnique(
+			{
+				where: {
+					user_id: u,
+				},
+			},
+		);
+
+		if (!sender || sender === null) {
+			throw new Error(
+				"Failed to get user with id '" +
+					u +
+					"' and name '" +
+					message.sender.username +
+					"'",
+			);
+		}
+
+		const newMessage: Prisma.messageCreateInput = {
+			contents: message.messageBody,
+			users: {
+				connect: {
+					user_id: sender.user_id,
+				},
+			},
+		};
+
+		const messageID: string = await this.createMessage(newMessage);
+
+		const roomMessage: PrismaTypes.room_message | null =
+			await this.prisma.room_message.create({
+				data: {
+					room_id: message.roomID,
+					message_id: messageID,
+				},
+			});
+
+		if (!roomMessage || roomMessage === null) {
+			throw new Error(
+				"Failed to create room message for room with id '" +
+					message.roomID +
+					"'. Unknown database error",
+			);
+		}
+		return messageID;
 	}
 
 	async bookmarkRoom(roomID: string, userID: string): Promise<void> {
