@@ -25,6 +25,13 @@ export type SpotifyTokenResponse = {
 	refresh_token: string;
 };
 
+export type SpotifyTokenRefreshResponse = {
+	access_token: string;
+	token_type: string;
+	scope: string;
+	expires_in: number;
+};
+
 export type SpotifyTokenPair = {
 	tokens: SpotifyTokenResponse;
 	epoch_expiry: number;
@@ -133,6 +140,9 @@ export class SpotifyAuthService {
 		}
 	}
 
+	async refreshAccessToken(tk: SpotifyTokenResponse): Promise<SpotifyTokenResponse> {
+	}
+
 	async generateJWT(user: PrismaTypes.users): Promise<string> {
 		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
 		const expiresIn = this.configService.get<string>("JWT_EXPIRATION_TIME");
@@ -211,5 +221,48 @@ export class SpotifyAuthService {
 			console.log(err);
 			throw new Error("Failed to create user");
 		}
+	}
+
+	async saveUserSpotfiyTokens(tk: SpotifyTokenPair, userID: string) {
+		const user = await this.prisma.users.findFirst({
+			where: { user_id: userID },
+		});
+
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		const tokens: Prisma.authenticationCreateInput = {
+			token: JSON.stringify(tk),
+			users: {
+				connect: {
+					user_id: user.user_id,
+				},
+			},
+		};
+
+		try {
+			await this.prisma.authentication.create({ data: tokens });
+		} catch (err) {
+			console.log(err);
+			throw new Error("Failed to save tokens");
+		}
+	}
+
+	async getSpotifyTokens(userID: string): Promise<SpotifyTokenPair> {
+		const tokens = await this.prisma.authentication.findFirst({
+			where: { user_id: userID },
+		});
+
+		if (!tokens) {
+			throw new Error("No tokens found");
+		}
+
+		const tk: SpotifyTokenPair = JSON.parse(tokens.token) as SpotifyTokenPair;
+		if (tk.epoch_expiry < Date.now()) {
+			//Token expired
+			tk = await this.refreshAccessToken(tk.tokens);
+		}
+		return JSON.parse(tokens.token) as SpotifyTokenPair;
 	}
 }

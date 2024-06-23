@@ -33,7 +33,33 @@ console.log(
 	`Navigate to the following URL to authenticate with Spotify:\n${authUrl}`,
 );
 
+import axios from "axios";
+const refresh_token = "";
+const authOptions = {
+	method: "POST",
+	url: "https://accounts.spotify.com/api/token",
+	headers: {
+		"content-type": "application/x-www-form-urlencoded",
+		Authorization:
+			"Basic " + Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+	},
+	data: new URLSearchParams({
+		grant_type: "refresh_token",
+		refresh_token: refresh_token,
+	}),
+};
+
+try {
+	const response = await axios(authOptions);
+	const { access_token, refresh_token } = response.data;
+	console.log({ access_token, refresh_token });
+	console.log(response.data);
+} catch (error) {
+	res.status(500).json({ error: "Failed to refresh token" });
+}
+
 //receive URL in Terminal
+/*
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
@@ -106,7 +132,6 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
 
 	console.log("=========================================");
 	let playlist = userPlaylists[0];
-	/*
     total = playlist.tracks.total;
     retrieved = 0;
     let playlistTracks = [];
@@ -118,7 +143,7 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
         playlistTracks.push(...tracks.items);
         retrieved += tracks.items.length;
     }
-        */
+	
 	let playlistItself = await sdk.playlists.getPlaylist(playlist.id);
 	console.log(playlistItself.name);
 	console.log(playlistItself.tracks.total + " tracks");
@@ -131,3 +156,4 @@ rl.question("Enter the URL you were redirected to: ", async (redirect) => {
 		);
 	}
 });
+*/
