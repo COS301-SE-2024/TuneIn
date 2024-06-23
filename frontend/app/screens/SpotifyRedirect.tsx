@@ -3,11 +3,22 @@ import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-nat
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import { VITE_SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET, VITE_REDIRECT_TARGET } from '@env';
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_TARGET } from '@env';
 
-const clientId = VITE_SPOTIFY_CLIENT_ID;
-const clientSecret = VITE_SPOTIFY_CLIENT_SECRET;
-const redirectTarget = VITE_REDIRECT_TARGET;
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+  throw new Error('No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables');
+}
+
+const clientSecret = SPOTIFY_CLIENT_SECRET;
+if (!clientSecret) {
+  throw new Error('No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables');
+}
+
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+if (!redirectTarget) {
+  throw new Error('No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables');
+}
 
 const SpotifyRedirect = () => {
   const [tokenDetails, setTokenDetails] = useState(null);
@@ -75,9 +86,9 @@ const SpotifyRedirect = () => {
       const refreshToken = data.refresh_token;
       const expiresIn = data.expires_in;
   
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-      await AsyncStorage.setItem('expiresIn', expiresIn.toString());
+      await StorageService.setItem('accessToken', accessToken);
+      await StorageService.setItem('refreshToken', refreshToken);
+      await StorageService.setItem('expiresIn', expiresIn.toString());
   
       setTokenDetails({
         accessToken,

@@ -2,9 +2,30 @@ import AWS from 'aws-sdk';
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
+const AWS_NEST_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
 const AWS_S3_REGION = process.env.AWS_S3_REGION;
 const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
+
+if (!AWS_ACCESS_KEY_ID) {
+  throw new Error('No AWS access key ID (AWS_ACCESS_KEY_ID) provided in environment variables');
+}
+
+if (!_AWS_SECRET_ACCESS_KEY) {
+  throw new Error('No AWS secret access key (AWS_SECRET_ACCESS_KEY) provided in environment variables');
+}
+
+if (!AWS_NEST_BUCKET_NAME) {
+  throw new Error('No AWS bucket name (AWS_S3_BUCKET_NAME) provided in environment variables');
+}
+
+if (!AWS_S3_REGION) {
+  throw new Error('No AWS region (AWS_S3_REGION) provided in environment variables');
+}
+
+if (!AWS_S3_ENDPOINT) {
+  throw new Error('No AWS endpoint (AWS_S3_ENDPOINT) provided in environment variables');
+}
+
 const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace('+', '+')
 console.log(AWS_SECRET_ACCESS_KEY);
 

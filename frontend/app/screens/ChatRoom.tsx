@@ -1,39 +1,190 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons'; // Import FontAwesome5 for Spotify-like icons
-import { MaterialIcons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
+import io from 'socket.io-client';
+import { LiveChatMessageDto, RoomDto, UserProfileDto } from '../../api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StorageService from "./../services/StorageService"; // Import StorageService
+import axios from 'axios';
+import { ChatEventDto } from '../models/ChatEventDto';
 import RoomDetails from './RoomDetails';
 
+const BASE_URL = 'http://localhost:3000';
+
 type Message = {
-  username: string;
-  message: string;
-  profilePictureUrl: string;
+  message: LiveChatMessageDto;
   me?: boolean;
 };
 
-const ChatRoomScreen: React.FC = () => {
+interface ChatRoomScreenProps {
+  roomObj: string;
+}
+
+const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   const router = useRouter();
   const _roomDetails = useLocalSearchParams(); // room details from previous screen
   console.log(_roomDetails);
   const [isChatExpanded, setChatExpanded] = useState(false);
+
+  const room: RoomDto = JSON.parse(roomObj) as RoomDto;
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserProfileDto | null>(null);
   const [message, setMessage] = useState('');
+  /*
   const [messages, setMessages] = useState<Message[]>([
     { username: 'JohnDoe', message: 'This is a sample comment.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
     { username: 'JaneSmith', message: 'Another sample comment here.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
     { username: 'Me', message: 'This is my own message.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true },
   ]);
+  */
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
   const [isRoomCreator, setIsRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
+  const socket = useRef(null);
+  
+  //init & connect to socket
+  useEffect(() => {
+    const getTokenAndSelf = async () => {
+      try {
+        const storedToken = await StorageService.getItem('token');
+        setToken(storedToken);
+        const whoami = async (token: string | null, type?: string) => {
+          try {
+            const response = await axios.get(`${BASE_URL}/profile`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log('User\'s own info:', response.data);
+            return response.data as UserProfileDto;
+          } catch (error) {
+            console.error('Error fetching user\'s own info:', error);
+            //user is not authenticated
+          }
+        };
+        setUser(await whoami(token));
+      }
+      catch (error) {
+        console.error('Error fetching token:', error);
+        //user is not authenticated
+      }
+    };
+    getTokenAndSelf();
+
+    socket.current = io(BASE_URL + "/live-chat", {
+      transports: ["websocket"],
+    });
+
+    socket.current.on("connect", () => {
+      console.log("Connected to the server!");
+      const input: ChatEventDto = {
+        userID: user.userID,
+      }
+      socket.current.emit("connectUser", input);
+    });
+
+    socket.current.on("connected", (response: ChatEventDto) => {
+      //an event that should be in response to the connectUser event
+      console.log("User connected:", response);
+    });
+
+    socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+      //if someone joins (could be self)
+      console.log("User joined room:", response);
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: {
+          messageBody: "",
+          sender: user,
+          roomID: room.roomID,
+          dateCreated: new Date(),
+        },
+      };
+      socket.current.emit("getChatHistory", input);
+    });
+
+    socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+      //an event that should be in response to the getChatHistory event
+      const chatHistory = history.map((msg) => ({ message: msg, me: msg.sender.userID === user.userID }));
+      setMessages(chatHistory);
+    });
+
+    socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+      const message = newMessage.body;
+      const me: boolean = message.sender.userID === user.userID;
+      if (me){
+        //clear message only after it has been sent & confirmed as received
+        setMessage('');
+      }
+      setMessages(prevMessages => [...prevMessages, { message, me: message.sender.userID === user.userID }]);
+    });
+
+    socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+      //an event that should be in response to the leaveRoom event (could be self or other people)
+      console.log("User left room:", response);
+    });
+
+    socket.current.on("error", (response: ChatEventDto) => {
+      console.error("Error:", response.errorMessage);
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
+  }, []);
 
   // Get screen height to calculate the expanded height
   const screenHeight = Dimensions.get('window').height;
   const collapsedHeight = 60;
   const expandedHeight = screenHeight - 80; // Adjust as needed for your layout
   const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
+
+  const sendMessage = () => {
+    if (message.trim()) {
+      const newMessage: LiveChatMessageDto = {
+        messageBody: message,
+        sender: user,
+        roomID: room.roomID,
+        dateCreated: new Date(),
+      };
+      const input: ChatEventDto = {
+        userID: user.userID,
+        body: newMessage,
+      };
+      socket.current.emit("sendMessage", input);
+      // do not add the message to the state here, wait for the server to send it back
+      //setMessages([...messages, { message: newMessage, me: true }]);
+    }
+  };
+
+  const joinRoom = () => {
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: room.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("joinRoom", input);
+  };
+
+  const leaveRoom = () => {
+    const input: ChatEventDto = {
+      userID: user.userID,
+      body: {
+        messageBody: "",
+        sender: user,
+        roomID: room.roomID,
+        dateCreated: new Date(),
+      },
+    };
+    socket.current.emit("leaveRoom", input);
+  }
 
   const navigateToAdvancedSettings = () => {
     router.navigate({
@@ -50,12 +201,7 @@ const ChatRoomScreen: React.FC = () => {
     router.navigate("/screens/Lyrics");
   };
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, { username: 'Me', message, profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true }]);
-      setMessage(''); // Clear input after sending message
-    }
-  };
+  
 
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -74,6 +220,13 @@ const ChatRoomScreen: React.FC = () => {
   const navigateToRoomOptions = () => {
     router.navigate("/screens/RoomOptions");
   };
+
+  //automatically join the room on component mount
+  useEffect(() => {
+    console.log("Joining room...");
+    console.log(user);
+    joinRoom();
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white', paddingHorizontal: 20, paddingTop: 20 }}>
@@ -135,12 +288,12 @@ const ChatRoomScreen: React.FC = () => {
                 <View style={{ marginBottom: 10 }}>
                   <View style={{ borderBottomWidth: 1, borderBottomColor: '#D1D5DB', paddingBottom: 10 }}></View>
                   <View style={{ marginTop: 10 }}>
-                    {messages.map((msg, index) => (
+                    {messages.map((msg,index) => (
                       <CommentWidget
                         key={index}
-                        username={msg.username}
-                        message={msg.message}
-                        profilePictureUrl={msg.profilePictureUrl}
+                        username={msg.message.sender.username}
+                        message={msg.message.messageBody}
+                        profilePictureUrl={msg.message.sender.profilePictureUrl}
                         me={msg.me}
                       />
                     ))}

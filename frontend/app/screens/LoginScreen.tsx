@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "../services/StorageService";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +27,7 @@ const LoginScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToHome = () => {
-    console.log(emailOrUsername, password);
+
     const userData = {
       Username: emailOrUsername,
       Pool: UserPool,
@@ -52,7 +53,7 @@ const LoginScreen: React.FC = () => {
 
         // Store token in AsyncStorage if remember me is checked
         if (rememberMe) {
-          AsyncStorage.setItem(
+          StorageService.setItem(
             "cognitoToken",
             result.getAccessToken().getJwtToken()
           );
@@ -71,11 +72,8 @@ const LoginScreen: React.FC = () => {
           .then((response) => response.json())
           .then((data) => {
             const token = data.token; // Extract the token from the response
-            AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
-            router.navigate("/screens/Home");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
+            StorageService.setItem("token", token); // Save the token to AsyncStorage
+            console.log("jwt : " + token);
           });
       },
       onFailure: function (err) {

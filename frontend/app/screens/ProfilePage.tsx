@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -19,9 +18,11 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
+
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://10.32.253.158:3000";
+	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{
@@ -85,10 +86,41 @@ const ProfileScreen: React.FC = () => {
 		getTokenAndData();
 	}, []);
 
-	const renderLinks = () => {
-		if (profileData.links.count > 1) {
-			const firstLink = profileData.links.data[0].links;
-			const remainingCount = profileData.links.count - 1;
+  const fetchProfileInfo = async (token: string | null) => {
+    try {
+      const response = await axios.get(`${baseURL}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching profile info:", error);
+      return null;
+    }
+  };
+
+  const handleJoinLeave = async () => {
+    try {
+      const response = await axios.post(`${baseURL}/joinLeaveRoom`, {
+        roomId: profileData.current_room.roomId,
+        action: profileData.current_room.joined ? "leave" : "join",
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const updatedProfileData = { ...profileData, current_room: response.data };
+      setProfileData(updatedProfileData);
+    } catch (error) {
+      console.error("Error updating room join/leave:", error);
+    }
+  };
+
+  const renderLinks = () => {
+    if (profileData.links.count && profileData.links.count > 1) {
+      const firstLink = profileData.links.data[0].links;
+      const remainingCount = profileData.links.count - 1;
 
 			return (
 				<View>
@@ -323,3 +355,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+
