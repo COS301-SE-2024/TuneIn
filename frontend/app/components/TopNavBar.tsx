@@ -1,26 +1,43 @@
 // TopNavBar.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { Friend } from "../models/friend";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const TopNavBar: React.FC = () => {
   const router = useRouter();
+  const baseURL = "http://192.168.56.1:3000";
+  const [profileImage, setProfileImage] = useState<string>("https://cdn-.jk.-png.freepik.com/512/3135/3135715.png");
 
-  const profileData: Friend = {
-    profilePicture: "https://cdn-icons-png.freepik.com/512/3135/3135715.png",
-    name: "User123"
-  };
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          const response = await axios.get(`${baseURL}/profile`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log(response);
+          setProfileImage(response.data.profile_picture_url);
+        }
+      } catch (error) {
+        console.error("Error fetching profile info:", error);
+      }
+    };
+
+    fetchProfilePicture();
+  }, []);
 
   const navigateToProfile = () => {
-    router.navigate({
+    router.push({
       pathname: "/screens/ProfilePage",
-      params: { friend: JSON.stringify(profileData) },
     });
   };
 
   const appName = "TuneIn"; // Change this to your app's name
-  const profileImage = profileData.profilePicture; // Use profile data image
 
   return (
     <View style={styles.container}>

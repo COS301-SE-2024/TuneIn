@@ -24,7 +24,7 @@ const Home: React.FC = () => {
 
 
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-  const ProfileIMG: string = "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
+  const ProfileIMG: string = "https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
