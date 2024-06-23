@@ -4,6 +4,7 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import * as Prisma from "@prisma/client";
+import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 
 @Injectable()
 export class ProfileService {
@@ -13,29 +14,62 @@ export class ProfileService {
 		private readonly dbUtilsService: DbUtilsService,
 	) {}
 
-	getProfile(): UserProfileDto {
-		// an an example to generate a UserProfileDto
-		/*
-		const userID = "311ce2e8-8041-70bd-0ab5-be97283ee182"
-		const user = await this.dtogen.generateUserProfileDto(userID);
+	async getProfile(uid: string): Promise<UserProfileDto> {
+		const user_id = uid;
+		const user = await this.dtogen.generateUserProfileDto(uid);
 		if (user) {
-			return user;
+		  return user;
 		}
-		*/
+	
 		return new UserProfileDto();
-	}
-
-	updateProfile(): UserProfileDto {
+	  }
+	
+	  async updateProfile(
+		userId: string,
+		updateProfileDto: UpdateUserProfileDto,
+	  ): Promise<UserProfileDto> {
+		const user = await this.prisma.users.findUnique({
+		  where: { user_id: userId },
+		});
+	
+		if (!user) {
+		  throw new Error("User not found");
+		}
+	
+		const updateData = this.dbUtilsService.buildUpdateData(
+		  user,
+		  updateProfileDto,
+		);
+	
+		await this.prisma.users.update({
+		  where: { user_id: userId },
+		  data: updateData,
+		});
+	
+		const userProfile = await this.dtogen.generateUserProfileDto(userId);
+		if (!userProfile) {
+		  throw new Error("Failed to generate user profile");
+		}
+	
+		return userProfile;
+	  }
+	
+	  async getProfileByUsername(username: string): Promise<UserProfileDto> {
+		const userData = await this.prisma.users.findFirst({
+		  where: { username: username },
+		});
+	
+		if (!userData) {
+		  throw new Error("User not found");
+		} else {
+		  const user = await this.dtogen.generateUserProfileDto(userData.user_id);
+		  if (user) {
+			return user;
+		  }
+		}
+	
 		return new UserProfileDto();
-	}
-
-	patchProfile(): UserProfileDto {
-		return new UserProfileDto();
-	}
-
-	getProfileByUsername(): UserProfileDto {
-		return new UserProfileDto();
-	}
+	  }
 
 	/*
 	follower: the person who does the following

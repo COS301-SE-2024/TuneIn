@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
+import { MulterModule } from "@nestjs/platform-express";
+import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "./../prisma/prisma.module";
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./auth/auth.module";
@@ -19,6 +20,7 @@ import { HttpModule } from "@nestjs/axios";
 import { TasksModule } from "./tasks/tasks.module";
 import { BullConfigModule } from "./bull-config/bull-config.module";
 import { BullBoardModule } from "./bull-board/bull-board.module";
+import { memoryStorage } from "multer";
 
 @Module({
 	imports: [
@@ -31,6 +33,10 @@ import { BullBoardModule } from "./bull-board/bull-board.module";
 		DtoGenModule,
 		DbUtilsModule,
 		S3Module,
+		MulterModule.register({
+			dest: "./uploads",
+			storage: memoryStorage(),
+		}),
 		SpotifyModule,
 		HttpModule,
 		BullBoardModule,

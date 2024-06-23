@@ -21,15 +21,17 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
 
 	const pickImage = async () => {
 		let result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.All,
-			allowsEditing: true,
-			aspect: [4, 3],
-			quality: 1,
-		});
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+
+        console.log(JSON.stringify(result));
 
 		if (!result.canceled) {
-			setImage(result["uri"]);
-			onImageUpload(result["uri"]);
+            console.log(result.assets[0].uri);
+			onImageUpload(result.assets[0].uri);
 		}
 	};
 
@@ -49,11 +51,11 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
                             <Ionicons name="close" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
-                    {image && (
+                    {/* {image && (
                         <View style={styles.imageContainer}>
                             <Image source={{ uri: image }} style={styles.image} />
                         </View>
-                    )}
+                    )} */}
                     <Button title="Choose from Library" onPress={pickImage} />
                 </View>
             </View>

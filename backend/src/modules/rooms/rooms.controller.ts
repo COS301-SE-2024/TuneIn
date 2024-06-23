@@ -84,8 +84,23 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID")
 	@ApiTags("rooms")
-	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
-		return this.roomsService.getRoomInfo(roomID);
+	@ApiOkResponse({
+		description: "The room info as a RoomDto.",
+		type: RoomDto,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	@ApiBadRequestResponse({
+		description: "Room not found.",
+		type: RoomDto,
+	})
+	// generate summary
+	@ApiOperation({ summary: "Get room info" })
+	async getRoomInfo(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<RoomDto> {
+		console.log("getting room with ID", roomID);
+		return await this.roomsService.getRoomInfo(roomID);
 	}
 
 	/*
@@ -97,12 +112,24 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Patch(":roomID")
 	@ApiTags("rooms")
-	updateRoomInfo(
+	@ApiOkResponse({
+		description: "Room info updated successfully.",
+		type: RoomDto,
+	})
+	// response for when room is not found
+	@ApiNotFoundResponse({
+		description: "Room not found.",
+	})
+	@ApiParam({ name: "roomID", required: true })
+	// provide summary
+	@ApiOperation({ summary: "Update room info" })
+	async updateRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
-	): RoomDto {
-		return this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+	): Promise<RoomDto> {
+		console.log("updating room with ID", roomID, "with data", updateRoomDto);
+		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -125,8 +152,26 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Delete(":roomID")
 	@ApiTags("rooms")
-	deleteRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.deleteRoom(roomID);
+	@ApiOkResponse({
+		description: "Room deleted successfully.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "User is not the creator of the room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	@ApiBearerAuth()
+	@ApiOperation({ summary: "Delete a room" })
+	async deleteRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
+		// check using jwt token whether the user is the creator of the room
+		// if not, return 403
+		// if yes, delete the room and return 200
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
 	/*
@@ -135,11 +180,26 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+	// @ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/join")
 	@ApiTags("rooms")
-	joinRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.joinRoom(roomID);
+	@ApiOkResponse({
+		description: "User joined room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Join a room" })
+	@ApiBadRequestResponse({
+		description: "User already in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async joinRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.joinRoom(roomID, userID.id);
 	}
 
 	/*
@@ -148,11 +208,26 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/leave")
 	@ApiTags("rooms")
-	leaveRoom(@Request() req: any, @Param("roomID") roomID: string): boolean {
-		return this.roomsService.leaveRoom(roomID);
+	@ApiOkResponse({
+		description: "User left room successfully.",
+		type: Boolean,
+	})
+	@ApiOperation({ summary: "Leave a room" })
+	@ApiBadRequestResponse({
+		description: "User not in room.",
+		type: Boolean,
+	})
+	@ApiParam({ name: "roomID", required: true })
+	async leaveRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
+		const userID: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
 	/*
@@ -161,14 +236,22 @@ export class RoomsController {
     no input
     response: array of ProfileDto
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/users")
 	@ApiTags("rooms")
-	getRoomUsers(
+	@ApiOkResponse({
+		description: "The users in the room as an array of UserProfileDto.",
+		type: UserProfileDto,
+		isArray: true,
+	})
+	@ApiOperation({ summary: "Get users in a room" })
+	@ApiParam({ name: "roomID", required: true })
+	async getRoomUsers(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
-	): UserProfileDto[] {
-		return this.roomsService.getRoomUsers(roomID);
+	): Promise<UserProfileDto[]> {
+		return await this.roomsService.getRoomUsers(roomID);
 	}
 
 	/*
@@ -194,7 +277,7 @@ export class RoomsController {
 	async getRoomQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
-	//): SongInfoDto[] {
+		//): SongInfoDto[] {
 	): Promise<string[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		//return this.roomsService.getRoomQueue(roomID);
@@ -242,7 +325,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 		//@Body() songInfoDto: SongInfoDto,
 		@Body() songInfoDto: string,
-	//): SongInfoDto[] {
+		//): SongInfoDto[] {
 	): string[] {
 		//return this.roomsService.addSongToQueue(roomID, songInfoDto);
 		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);

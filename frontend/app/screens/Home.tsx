@@ -20,13 +20,14 @@ const Home: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const baseURL = "http://192.168.56.1:3000";
+  const baseURL = "http://10.32.253.158:3000"; // change to your own IP Address for it to WORK
 
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string = "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
+      console.log('fetching rooms', `${baseURL}/users/rooms${type ? type : ''}`)
       const response = await axios.get(`${baseURL}/users/rooms${type ? type : ''}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -50,16 +51,22 @@ const Home: React.FC = () => {
   };
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
+    // console.log('formatting rooms', rooms)
     return rooms.map(room => ({
+      roomID: room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
+      language: room.language,
       songName: room.current_song ? (room.current_song.title) : null,
       artistName: room.current_song ? (room.current_song.artists.join(", ")) : null,
       description: room.description,
       userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
       username: room.creator ? room.creator.username : "Unknown",
+      roomSize: "50",
       tags: room.tags ? room.tags : [],
       mine: mine,
+      isNsfw: room.has_nsfw_content,
+      isExplicit: room.has_explicit_content,
     }));
   };
 
@@ -153,15 +160,23 @@ const Home: React.FC = () => {
 
   const router = useRouter();
   const navigateToAllFriends = () => {
+    console.log("Navigating to all friends")
     router.navigate("/screens/AllFriends");
   };
 
   const navigateToCreateNew = () => {
+    console.log("Navigating to create new room")
     router.navigate("/screens/CreateRoom");
   };
 
   const navigateToChatList = () => {
+    console.log("Navigating to chat list")
     router.navigate("/screens/ChatListScreen");
+  }
+
+  const navigateToEditRoom = () => {
+    console.log("Navigating to edit room")
+    router.navigate("/screens/EditRoom");
   }
 
   const handleScroll = useCallback(({ nativeEvent }) => {
