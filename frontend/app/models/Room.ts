@@ -7,6 +7,7 @@ export interface Room {
     artistName?: string;
     description: string;
     userProfile?: string;
+    userID:string;
     username?: string;
     mine?:boolean;
     tags: string[];

@@ -11,16 +11,17 @@ interface SongListProps {
   showVoting?: boolean;
   songNumber: number; // Add this prop for the song number
   index: number; // Index of the song in the list
+  isCurrent: boolean; // Indicates if this song is the currently playing song
   swapSongs: (index: number, direction: 'up' | 'down') => void; // Function to swap songs
 }
 
-const SongList: React.FC<SongListProps> = ({ songName, artist, albumCoverUrl, voteCount, showVoting = false, songNumber, index, swapSongs }) => {
+const SongList: React.FC<SongListProps> = ({ songName, artist, albumCoverUrl, voteCount, showVoting = false, songNumber, index, isCurrent, swapSongs }) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isCurrent ? styles.currentSong : null]}>
       <Text style={styles.songNumber}>{songNumber}</Text>
       <Image source={{ uri: albumCoverUrl }} style={styles.albumCover} />
       <View style={styles.infoContainer}>
-        <Text style={styles.songName}>{songName}</Text>
+        <Text style={[styles.songName, isCurrent ? styles.currentSongText : null]}>{songName}</Text>
         <Text style={styles.artist}>{artist}</Text>
       </View>
       {showVoting && (
@@ -47,6 +48,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 8,
   },
+  currentSong: {
+    backgroundColor: '#f0f0f0', // Highlight color for current song
+  },
   songNumber: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -65,6 +69,9 @@ const styles = StyleSheet.create({
   songName: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  currentSongText: {
+    color: 'blue', // Text color for current song
   },
   artist: {
     fontSize: 14,
