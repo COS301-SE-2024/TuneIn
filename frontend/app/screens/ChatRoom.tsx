@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import SongRoomWidget from '../components/SongRoomWidget';
 import CommentWidget from '../components/CommentWidget';
@@ -9,6 +9,7 @@ import { LiveChatMessageDto, RoomDto, UserProfileDto } from '../../api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { ChatEventDto } from '../models/ChatEventDto';
+import RoomDetails from './RoomDetails';
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -23,6 +24,8 @@ interface ChatRoomScreenProps {
 
 const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   const router = useRouter();
+  const _roomDetails = useLocalSearchParams(); // room details from previous screen
+  console.log(_roomDetails);
   const [isChatExpanded, setChatExpanded] = useState(false);
 
   const room: RoomDto = JSON.parse(roomObj) as RoomDto;
@@ -183,7 +186,10 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   }
 
   const navigateToAdvancedSettings = () => {
-    router.navigate("/screens/AdvancedSettings");
+    router.navigate({
+      pathname:"/screens/AdvancedSettings",
+      params: _roomDetails
+    });
   };
 
   const navigateToPlaylist = () => {

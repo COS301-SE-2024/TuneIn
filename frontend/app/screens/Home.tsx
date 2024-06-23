@@ -27,6 +27,7 @@ const Home: React.FC = () => {
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
+      console.log('fetching rooms', `${baseURL}/users/rooms${type ? type : ''}`)
       const response = await axios.get(`${baseURL}/users/rooms${type ? type : ''}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -50,16 +51,22 @@ const Home: React.FC = () => {
   };
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
+    // console.log('formatting rooms', rooms)
     return rooms.map(room => ({
+      roomID: room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
+      language: room.language,
       songName: room.current_song ? (room.current_song.title) : null,
       artistName: room.current_song ? (room.current_song.artists.join(", ")) : null,
       description: room.description,
       userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
       username: room.creator ? room.creator.username : "Unknown",
+      roomSize: "50",
       tags: room.tags ? room.tags : [],
       mine: mine,
+      isNsfw: room.has_nsfw_content,
+      isExplicit: room.has_explicit_content,
     }));
   };
 
@@ -153,15 +160,23 @@ const Home: React.FC = () => {
 
   const router = useRouter();
   const navigateToAllFriends = () => {
+    console.log("Navigating to all friends")
     router.navigate("/screens/AllFriends");
   };
 
   const navigateToCreateNew = () => {
+    console.log("Navigating to create new room")
     router.navigate("/screens/CreateRoom");
   };
 
   const navigateToChatList = () => {
+    console.log("Navigating to chat list")
     router.navigate("/screens/ChatListScreen");
+  }
+
+  const navigateToEditRoom = () => {
+    console.log("Navigating to edit room")
+    router.navigate("/screens/EditRoom");
   }
 
   const handleScroll = useCallback(({ nativeEvent }) => {

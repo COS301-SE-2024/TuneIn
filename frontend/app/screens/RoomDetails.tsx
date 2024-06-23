@@ -1,13 +1,43 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button, Alert } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
 import { RoomDto } from '../../api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AWS from 'aws-sdk';
+import uploadImage from '../services/ImageUpload';
+
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
+const AWS_S3_REGION = process.env.AWS_S3_REGION;
+const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
+const BASE_URL = "http://10.32.253.158:3000/";
 
 
 const RoomDetails: React.FC = () => {
+  
+  const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace('+', '+')
+
+  // console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_NEST_BUCKET_NAME, AWS_S3_REGION, AWS_S3_ENDPOINT)
   const router = useRouter();
+  const { room } = useLocalSearchParams();
+  // console.log('room', room)
+  const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
+  // console.log('room', newRoom);
+  AWS.config.update({ 
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    region: AWS_S3_REGION,
+  });
+  AWS.config.logger = console
+
+// Create an S3 instance
+  const s3 = new AWS.S3({
+    apiVersion: '2006-03-01',
+    signatureVersion: 'v4'
+  });
   const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
     name: '',
     description: '',
@@ -22,15 +52,78 @@ const RoomDetails: React.FC = () => {
 
   const screenWidth = Dimensions.get('window').width;
 
-  const navigateToChatRoom = () => {
+  const navigateToChatRoom = async () => {
     // create room here i guess?
     //const roomID: string = '777b6f7c-71f3-4ad5-849b-5eea361d7d87';
     //const room: RoomDto = // get room info
+    /*
     const roomInfo = '{"creator":{"profile_name":"kane","userID":"413c6268-6051-7024-2806-f4627605df0b","username":"@gmail.com","profile_picture_url":"https://images.unsplash.com/photo-1628563694622-5a76957fd09c?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwcm9maWxlLWxpa2VkfDF8fHxlbnwwfHx8fHw%3D","followers":{"count":0,"data":[]},"following":{"count":0,"data":[]},"links":{"count":0,"data":[]},"bio":"im new","current_song":{"title":"","artists":[],"cover":"","start_time":"2024-06-20T19:09:23.506Z"},"fav_genres":{"count":0,"data":[]},"fav_songs":{"count":0,"data":[]},"fav_rooms":{"count":0,"data":[]},"recent_rooms":{"count":0,"data":[]}},"roomID":"777b6f7c-71f3-4ad5-849b-5eea361d7d87","participant_count":0,"room_name":"\'Concrete Boys\' album listening session","description":"We will be gathering to listen to the new album by Lil Yatchy\'s eclectic new collective \'Concrete Boys\'","is_temporary":true,"is_private":false,"is_scheduled":false,"start_date":"2024-06-20T19:09:23.431Z","end_date":"2024-06-20T19:09:23.431Z","language":"English","has_explicit_content":true,"has_nsfw_content":false,"room_image":"https://media.pitchfork.com/photos/66143cc84fbf8f78dfee2468/16:9/w_1280,c_limit/Concrete%20Boys-%20It\'s%20Us%20Vol.%201.jpg","current_song":{"title":"","artists":[],"cover":"","start_time":"2024-06-20T19:09:23.431Z"},"tags":[]}';
     router.navigate({
       pathname: 'ChatRoom',
       params: { room: roomInfo },
     });
+    */
+
+    newRoom['has_nsfw_content'] = roomDetails.isNsfw;
+    console.log('Room Details FROM ROOM DETAILS PAGE:', roomDetails.language)
+    if(roomDetails.language !== '') {
+      console.log('Language:', roomDetails.language)
+      newRoom['language'] = roomDetails.language;
+    }
+    else {
+      console.log('Language:', 'English')
+      newRoom['language'] = 'English';
+    }
+    if(roomDetails.genre !== '')
+      newRoom['genre'] = roomDetails.genre;
+    else{
+      // delete genre field from newRoom
+      delete newRoom['genre'];
+    }
+    if(roomDetails.description !== '')
+      newRoom['description'] = roomDetails.description;
+    else{
+      newRoom['description'] = 'This room has no description.';
+    }
+    newRoom['has_explicit_content'] = roomDetails.isExplicit;
+    newRoom['room_name'] = roomDetails.name;
+    var imageURL = '';
+    if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
+      // alert user to enter room name
+      Alert.alert(
+        "Room Name Required",
+        "Please enter a room name.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+    if(image !== null){
+      imageURL = await uploadImage(image, roomDetails.name)
+      // console.log('Image URL:', imageURL);
+    }
+    newRoom['room_image'] = imageURL;
+    const token = await AsyncStorage.getItem('token');
+    // console.log('Token:', token);
+    fetch(`${BASE_URL}users/rooms`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` || ""
+      },
+      body: JSON.stringify(newRoom),
+    }).then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      const moreData = JSON.stringify(data)
+      router.navigate({
+        pathname: '/screens/ChatRoom',
+        params: data
+      });
+    }).catch((error) => {
+      console.error("Error:", error);
+    });
+    // router.navigate("/screens/ChatRoom");
   };
 
   const pickImage = async () => {
@@ -61,7 +154,7 @@ const RoomDetails: React.FC = () => {
           <View style={{ width: 20 }} />
         </View>
         <View style={{ paddingHorizontal: 10, paddingVertical: 20 }}>
-          {_buildInputField('Room Name', roomDetails.name, (value) => handleInputChange('name', value))}
+          {_buildInputField('Room Name (required)', roomDetails.name, (value) => handleInputChange('name', value))}
           {_buildInputField('Description', roomDetails.description, (value) => handleInputChange('description', value), 4)}
           {_buildInputField('Genre', roomDetails.genre, (value) => handleInputChange('genre', value))}
           {_buildInputField('Language', roomDetails.language, (value) => handleInputChange('language', value))}
