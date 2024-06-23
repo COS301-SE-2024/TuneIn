@@ -27,10 +27,8 @@ import { SpotifyModule } from "src/spotify/spotify.module";
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
-		SpotifyAuthModule,
-		HttpModule,
-		DbUtilsModule,
 		SpotifyModule,
+		SpotifyAuthModule,
 	],
 	providers: [
 		AuthService,
@@ -40,10 +38,9 @@ import { SpotifyModule } from "src/spotify/spotify.module";
 		DtoGenService,
 		DbUtilsService,
 		UsersService,
-		SpotifyAuthService,
 		ConfigService,
 	],
 	controllers: [AuthController, SpotifyAuthController],
-	exports: [AuthService, SpotifyAuthService],
+	exports: [AuthService],
 })
 export class AuthModule {}

@@ -39,7 +39,6 @@ export class SpotifyAuthController {
 		};
 		console.log(tokens);
 		const user: PrismaTypes.users = await this.spotifyAuth.createUser(tp);
-		await this.spotify.importUserLibrary(tp, user.user_id);
 		const jwt: string = await this.spotifyAuth.generateJWT(user);
 
 		const response: SpotifyCallbackResponse = {

@@ -14,6 +14,7 @@ import { IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { SpotifyService } from "src/spotify/spotify.service";
+import { TasksService } from "src/tasks/tasks.service";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -51,6 +52,7 @@ export class SpotifyAuthService {
 		private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly spotify: SpotifyService,
+		private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -195,6 +197,7 @@ export class SpotifyAuthService {
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
+			await this.tasksService.addImportLibraryTask(tk, response.user_id);
 			return response;
 		} catch (err) {
 			console.log(err);

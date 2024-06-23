@@ -5,9 +5,16 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
 import { DbUtilsModule } from "src/modules/db-utils/db-utils.module";
 import { SpotifyModule } from "src/spotify/spotify.module";
+import { TasksModule } from "src/tasks/tasks.module";
 
 @Module({
-	imports: [HttpModule, PrismaModule, DbUtilsModule, SpotifyModule],
+	imports: [
+		HttpModule,
+		PrismaModule,
+		DbUtilsModule,
+		SpotifyModule,
+		TasksModule,
+	],
 	controllers: [],
 	providers: [SpotifyAuthService, ConfigService],
 	exports: [SpotifyAuthService],
