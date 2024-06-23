@@ -8,6 +8,8 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 } from "react-native";
+import fs from "fs";
+import FormData from "form-data";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../components/EditGenreBubble";
 import EditDialog from "../components/EditDialog";
@@ -17,6 +19,7 @@ import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import uploadImage from "../services/ImageUpload";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -36,7 +39,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://localhost:3000";
+	const baseURL = "http://10.32.253.158:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -73,10 +76,51 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const handleImageUpload = (uri) => {
-		setProfilePic(uri);
-		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
+	const handleImageUpload = async (uri) => {
+		const form = new FormData();
+		console.log(uri);
+		try {
+			// Fetch the file from the URI
+			// const response = await fetch(uri);
+			// const blob = await response.blob();
+			// const fileName = uri.split('/').pop(); // Extract filename from URI
+	
+			// Append the file to the FormData
+			// form.append("file", new File([blob], fileName, { type: blob.type }));
+	
+			const headers = {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'multipart/form-data',
+			};
+	
+			// const uploadResponse = await axios.post("http://10.32.253.158:3000/upload", form, { headers });
+			console.log(profileData)
+			console.log("Uploading image...", uri)
+			const imageLink = await uploadImage(uri, 'image');
+			console.log('image link:', imageLink);
+			// console.log("File uploaded successfully", uploadResponse.data);
+			return imageLink; // Assuming response.data has the URL
+		} catch (error) {
+			console.error("Error uploading file", error);
+			throw error;
+		}
 	};
+
+	const updateImage = async (uri) => {
+		try {
+
+			const image = await handleImageUpload(uri); // Wait for image upload to complete
+			console.log('image:', image)
+			setProfileData((prevProfileData) => ({
+				...prevProfileData,
+				profile_picture_url: image,
+			}));
+			console.log('\n\nUpdated profile data:', profileData)
+		} catch (error) {
+			console.error("Error updating image:", error);
+		}
+	}
+	
 
 	const dialogs = {
 		name: setNameDialogVisible,
@@ -134,18 +178,18 @@ const EditProfileScreen = () => {
 				bio: text,
 			}));
 			console.log("Changed: " + JSON.stringify(changedFields));
-		} else if (value === "instagramLink") {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				links: { data: text },
-			}));
-			setChanged(true);
+			// } else if (value === "instagramLink") {
+			// 	setProfileData((prevProfileData) => ({
+			// 		...prevProfileData,
+			// 		links: { data: text },
+			// 	}));
+			// 	setChanged(true);
 
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				links: { data: text },
-			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// 	setChangedFields((prevChangedFields) => ({
+			// 		...prevChangedFields,
+			// 		links: { data: text },
+			// 	}));
+			// 	console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "genres") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -211,7 +255,7 @@ const EditProfileScreen = () => {
 		setCurrentLinkIndex(index);
 		setCurrentLinkEditText(text);
 		setLinkEditDialogVisible(true);
-	  };
+	};
 
 	const handleLinkEdit = (index, newLink) => {
 		if (profileData.links && Array.isArray(profileData.links.data)) {
@@ -324,7 +368,7 @@ const EditProfileScreen = () => {
 					<PhotoSelect
 						isVisible={isPhotoDialogVisible}
 						onClose={() => setPhotoDialogVisible(false)}
-						onImageUpload={handleImageUpload} // Pass the URI of the photo you want to display
+						onImageUpload={updateImage} // Pass the URI of the photo you want to display
 					/>
 				</View>
 				{/* Name */}

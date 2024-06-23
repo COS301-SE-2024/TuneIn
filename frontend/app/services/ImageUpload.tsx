@@ -21,6 +21,7 @@ const s3 = new AWS.S3({
 });
 
 const uploadImage = async (imageURI: string, roomName: string) => {
+  try {
     const response = await fetch(imageURI);
       const blob = await response.blob();
       const params = {
@@ -33,6 +34,10 @@ const uploadImage = async (imageURI: string, roomName: string) => {
       .promise()
       console.log('Successfully uploaded image', data.Location);
       return data.Location;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
 }
 
 export default uploadImage;
