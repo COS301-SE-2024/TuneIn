@@ -109,6 +109,7 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
+			setChanged(true);
 		} catch (error) {
 			console.error("Error updating image:", error);
 		}
