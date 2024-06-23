@@ -10,7 +10,10 @@ import {
 	SpotifyTokenPair,
 	SpotifyTokenResponse,
 } from "../auth/spotify/spotifyauth.service";
-import { PrismaService } from "prisma/prisma.service";
+import { PrismaService } from "./../../prisma/prisma.service";
+
+const NUMBER_OF_RETRIES: number = 3;
+const MAX_LIKED_SONGS_PER_REQUEST: number = 1000;
 
 @Injectable()
 export class SpotifyService {
@@ -100,17 +103,29 @@ export class SpotifyService {
 		let total = Number.MAX_SAFE_INTEGER;
 		let retrieved = 0;
 		const likedSongs: Spotify.SavedTrack[] = [];
-		while (retrieved < total) {
+		while (retrieved < total && retrieved <= MAX_LIKED_SONGS_PER_REQUEST) {
 			console.log(retrieved + " / " + total + " liked songs");
-			const tracks = await api.currentUser.tracks.savedTracks(50, retrieved);
-			if (total === Number.MAX_SAFE_INTEGER) {
-				total = tracks.total;
+			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+				try {
+					const tracks = await api.currentUser.tracks.savedTracks(
+						50,
+						retrieved,
+					);
+					if (total === Number.MAX_SAFE_INTEGER) {
+						total = tracks.total;
+					}
+					likedSongs.push(...tracks.items);
+					retrieved += tracks.items.length;
+					break;
+				} catch (e) {
+					console.error(e);
+				}
+				console.log("Retrying...");
 			}
-			likedSongs.push(...tracks.items);
-			retrieved += tracks.items.length;
 		}
 
 		//dedupe
+		console.log("Deduping liked songs");
 		const seen = new Set();
 		const likedSongsDeduped = likedSongs.filter((el) => {
 			const duplicate = seen.has(el.track.id);
@@ -149,7 +164,10 @@ export class SpotifyService {
 				name: track.track.name,
 				duration: track.track.duration_ms,
 				artist: track.track.artists[0].name,
-				genre: track.track.album.genres[0],
+				genre:
+					track.track.album.genres && track.track.album.genres.length > 0
+						? track.track.album.genres[0]
+						: "Unknown",
 			};
 			const search = await this.prisma.song.findFirst({
 				where: {
