@@ -56,6 +56,7 @@ const Home: React.FC = () => {
       roomID: room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
+      language: room.language,
       songName: room.current_song ? (room.current_song.title) : null,
       artistName: room.current_song ? (room.current_song.artists.join(", ")) : null,
       description: room.description,

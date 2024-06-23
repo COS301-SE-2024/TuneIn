@@ -53,10 +53,13 @@ const RoomDetails: React.FC = () => {
 
   const navigateToChatRoom = async () => {
     newRoom['has_nsfw_content'] = roomDetails.isNsfw;
+    console.log('Room Details FROM ROOM DETAILS PAGE:', roomDetails.language)
     if(roomDetails.language !== '') {
+      console.log('Language:', roomDetails.language)
       newRoom['language'] = roomDetails.language;
     }
     else {
+      console.log('Language:', 'English')
       newRoom['language'] = 'English';
     }
     if(roomDetails.genre !== '')

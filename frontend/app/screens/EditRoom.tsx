@@ -28,18 +28,20 @@ const fetchRoomDetails = async (roomId: string) => {
 
 const EditRoom: React.FC = () => {
   const router = useRouter();
-  const room = useLocalSearchParams();
-  console.log('Room after search params:', room)
-  const _room = Array.isArray(room) ? room[0] : room;
-  console.log('Room:', _room);
-  console.log('local params', useLocalSearchParams())
-  const roomData = JSON.parse(_room);
+  const roomData = useLocalSearchParams();
+  console.log('Room data:', roomData)
+  // console.log('Room after search params:', room)
+  // const _room = Array.isArray(room) ? room[0] : room;
+  // console.log('Room:', _room);
+  // console.log('local params', useLocalSearchParams())
+  // const roomData = JSON.parse(_room);
   const [changedImage, setChangedImage] = useState<boolean>(false);
   const [roomDetails, setRoomDetails] = useState<Room>({
-    roomID: "roomData",
-    name: "roomData",
-    description: "roomData",
+    roomID: '',
+    name: '',
+    description: '',
     backgroundImage: '',
+    language: '',
     tags: [],
     roomSize: 50,
     isExplicit: false,
@@ -52,8 +54,8 @@ const EditRoom: React.FC = () => {
 
   useEffect(() => {
     const loadRoomDetails = async () => {
-      const _details = await fetchRoomDetails(roomId);
-      console.log('Room details:', _details);
+      // const _details = await fetchRoomDetails(roomId);
+      // console.log('Room details:', _details);
       const __details = { // Return default values
         name: 'Sample Room',
         description: 'This is a sample room description.',
@@ -64,9 +66,11 @@ const EditRoom: React.FC = () => {
         isNsfw: false,
         image: 'https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-1170x780.jpg' // Replace with actual image URL
       };
-      const details = await fetchRoomDetails("demo");
+      // const details = await fetchRoomDetails("demo");
+      
       setRoomDetails(roomData);
-      setImage(roomData.backgroundImage);
+      setImage(roomData.backgroundImage as string);
+      console.log('Room details:', roomDetails)
     };
 
     loadRoomDetails();
@@ -135,11 +139,22 @@ const EditRoom: React.FC = () => {
     const token = await AsyncStorage.getItem('token');
     console.log('Token:', token);
     try {
-      const data = await axios.patch(`${BASE_URL}rooms/${roomDetails.roomID}`, newRoom, {
+      console.log('Room ID:', roomDetails.roomID);
+      console.log('New Room:', newRoom)
+      // const data = await axios.patch(`${BASE_URL}rooms/${roomDetails.roomID}`, newRoom, {
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': 'Bearer ' + token
+      //   }});
+      const data = await fetch(`${BASE_URL}rooms/${roomDetails.roomID}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
-        }});
+        },
+        body: JSON.stringify(newRoom)
+      }
+      )
       console.log(data);
       Alert.alert(
         "Changes Saved",
@@ -173,7 +188,7 @@ const EditRoom: React.FC = () => {
           {buildInputField('Description', roomDetails.description, (value) => handleInputChange('description', value), 4)}
           {buildInputField('Genre', roomDetails.genre, (value) => handleInputChange('genre', value))}
           {buildInputField('Language', roomDetails.language, (value) => handleInputChange('language', value))}
-          {buildInputField('Room Size', roomDetails.roomSize.toString(), (value) => handleInputChange('roomSize', value))}
+          {buildInputField('Room Size', "50".toString(), (value) => handleInputChange('roomSize', value))}
           {buildToggle('Explicit', roomDetails.isExplicit, (value) => handleInputChange('isExplicit', value))}
           {buildToggle('NSFW', roomDetails.isNsfw, (value) => handleInputChange('isNsfw', value))}
 
@@ -216,6 +231,7 @@ const buildInputField = (labelText: string, value: string, onChange: (value: str
 };
 
 const buildToggle = (labelText: string, value: boolean, onChange: (value: boolean) => void) => {
+  console.log(labelText ,value)
   return (
     <View style={styles.toggleContainer}>
       <Text style={styles.toggleLabel}>{labelText}</Text>

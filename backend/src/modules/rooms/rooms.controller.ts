@@ -113,9 +113,9 @@ export class RoomsController {
 		description: "Room info updated successfully.",
 		type: RoomDto,
 	})
-	@ApiBadRequestResponse({
-		description: "User is not the creator of the room.",
-		type: RoomDto,
+	// response for when room is not found
+	@ApiNotFoundResponse({
+		description: "Room not found.",
 	})
 	@ApiParam({ name: "roomID", required: true })
 	// provide summary
@@ -125,6 +125,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
+		console.log("updating room with ID", roomID, "with data", updateRoomDto)
 		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 

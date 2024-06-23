@@ -115,6 +115,7 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
+			setChanged(true)
 			console.log('\n\nUpdated profile data:', profileData)
 		} catch (error) {
 			console.error("Error updating image:", error);
