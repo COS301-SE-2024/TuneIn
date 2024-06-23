@@ -54,14 +54,17 @@ const RoomPage = () => {
 	const roomData = JSON.parse(room);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
-
-  const [joined, setJoined] = useState(false);
+	
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
+  	const [joined, setJoined] = useState(false);
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
+	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
+	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
 	const [messages, setMessages] = useState([
 		{
 			username: "JohnDoe",
@@ -102,6 +105,13 @@ const RoomPage = () => {
 		fetchQueue();
 	}, [roomData.id]);
 
+	const getRoomState = () => {
+		return {
+		  currentTrackIndex,
+		  secondsPlayed
+		};
+	  };
+
 	useEffect(() => {
 		return () => {
 			if (trackPositionIntervalRef.current) {
@@ -114,27 +124,53 @@ const RoomPage = () => {
 	// 	// router.goBack();
 	// };
 
-  const handleJoinLeave = () => {
-    // Simulate toggling join/leave
-    setJoined(prevJoined => !prevJoined);
-  };
-
-	const playPauseTrack = (track, index) => {
-		if (!track) {
-			console.error("Invalid track:", track);
-			return;
-		}
-
-		if (index === currentTrackIndex && isPlaying) {
-			handlePlayback("pause");
-			setIsPlaying(false);
+	useEffect(() => {
+		if (isPlaying) {
+		  trackPositionIntervalRef.current = setInterval(() => {
+			setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+		  }, 1000);
 		} else {
-			handlePlayback("play", track.uri).then(() => {
-				setCurrentTrackIndex(index);
-				setIsPlaying(true);
-			});
+		  clearInterval(trackPositionIntervalRef.current);
 		}
-	};
+	
+		return () => {
+		  clearInterval(trackPositionIntervalRef.current);
+		};
+	  }, [isPlaying]);
+
+	  const handleJoinLeave = () => {
+		if (!joined) {
+		  setJoined(true);
+		  setJoinedSongIndex(currentTrackIndex);
+		  setJoinedSecondsPlayed(secondsPlayed);
+		  console.log(
+			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`
+		  );
+		} else {
+		  setJoined(false);
+		  setJoinedSongIndex(null);
+		  setJoinedSecondsPlayed(null);
+		}
+	  };
+	
+
+  const playPauseTrack = (track, index) => {
+    if (!track) {
+      console.error("Invalid track:", track);
+      return;
+    }
+
+    if (index === currentTrackIndex && isPlaying) {
+      handlePlayback("pause");
+      setIsPlaying(false);
+    } else {
+      const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
+      handlePlayback("play", track.uri, offset).then(() => {
+        setCurrentTrackIndex(index);
+        setIsPlaying(true);
+      });
+    }
+  };
 
 	const playNextTrack = () => {
 		const nextIndex = currentTrackIndex + 1;
