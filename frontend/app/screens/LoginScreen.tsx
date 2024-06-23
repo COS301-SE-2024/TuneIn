@@ -67,7 +67,25 @@ const LoginScreen: React.FC = () => {
 				console.error("Error:", error);
 			});
 
-        router.navigate("/screens/Home");
+        // POST request to backend
+        fetch("http://localhost:3000/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: result.getAccessToken().getJwtToken(),
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const token = data.token; // Extract the token from the response
+            AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
+            router.navigate("/screens/Home");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       },
       onFailure: function (err) {
         console.error(err);

@@ -3,6 +3,16 @@ import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AWS from 'aws-sdk';
+import uploadImage from '../services/ImageUpload';
+
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
+const AWS_S3_REGION = process.env.AWS_S3_REGION;
+const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
+const BASE_URL = "http://localhost:3000/";
 
 
 const RoomDetails: React.FC = () => {

@@ -161,7 +161,7 @@ const ProfileScreen: React.FC = () => {
 
 	if (loading) {
 		return (
-			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} testID="loading-indicator">
 				<ActivityIndicator size="large" color="#0000ff" />
 			</View>
 		);
@@ -179,7 +179,7 @@ const ProfileScreen: React.FC = () => {
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
-			<View style={{ padding: 15 }}>
+			<View style={{ padding: 15 }} testID="profile-screen">
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<View style={{ flex: 1 }} />
 					<TouchableOpacity>

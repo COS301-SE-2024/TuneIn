@@ -73,9 +73,34 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const handleImageUpload = (uri) => {
-		setProfilePic(uri);
-		setPhotoDialogVisible(false); // Close the ImageUploadDialog after image upload
+	const handleImageUpload = async (uri) => {
+		const form = new FormData();
+		console.log(uri);
+		try {
+			// Fetch the file from the URI
+			// const response = await fetch(uri);
+			// const blob = await response.blob();
+			// const fileName = uri.split('/').pop(); // Extract filename from URI
+	
+			// Append the file to the FormData
+			// form.append("file", new File([blob], fileName, { type: blob.type }));
+	
+			const headers = {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'multipart/form-data',
+			};
+	
+			// const uploadResponse = await axios.post("http://localhost:3000/upload", form, { headers });
+			console.log(profileData)
+			console.log("Uploading image...", uri)
+			const imageLink = await uploadImage(uri, 'image');
+			console.log('image link:', imageLink);
+			// console.log("File uploaded successfully", uploadResponse.data);
+			return imageLink; // Assuming response.data has the URL
+		} catch (error) {
+			console.error("Error uploading file", error);
+			throw error;
+		}
 	};
 
 	const dialogs = {

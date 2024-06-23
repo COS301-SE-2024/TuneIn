@@ -4,6 +4,7 @@ import {useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Room } from '../models/Room';
 
+const BASE_URL = 'http://localhost:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string): Promise<Room> => {
   // Replace with real data fetching

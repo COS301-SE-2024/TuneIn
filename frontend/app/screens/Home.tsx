@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const baseURL = "http://172.16.12.166:3000";
+  const baseURL = "http://localhost:3000"; // change to your own IP Address for it to WORK
 
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string = "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
