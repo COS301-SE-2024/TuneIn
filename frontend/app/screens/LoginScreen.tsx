@@ -48,7 +48,7 @@ const LoginScreen: React.FC = () => {
         console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
         
         //POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://172.16.12.166:3000/auth/login", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
