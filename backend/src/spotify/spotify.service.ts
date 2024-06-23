@@ -11,9 +11,10 @@ import {
 	SpotifyTokenResponse,
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
+import { sleep } from "../common/utils";
+
 
 const NUMBER_OF_RETRIES: number = 3;
-const MAX_LIKED_SONGS_PER_REQUEST: number = 1000;
 
 @Injectable()
 export class SpotifyService {
@@ -82,6 +83,7 @@ export class SpotifyService {
 			});
 			userPlaylists.push(...playlists.items);
 			retrieved += playlists.items.length;
+			await sleep(1000);
 		}
 
 		//dedupe
@@ -103,7 +105,7 @@ export class SpotifyService {
 		let total = Number.MAX_SAFE_INTEGER;
 		let retrieved = 0;
 		const likedSongs: Spotify.SavedTrack[] = [];
-		while (retrieved < total && retrieved <= MAX_LIKED_SONGS_PER_REQUEST) {
+		while (retrieved < total) {
 			console.log(retrieved + " / " + total + " liked songs");
 			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 				try {
@@ -122,6 +124,7 @@ export class SpotifyService {
 				}
 				console.log("Retrying...");
 			}
+			await sleep(1000);
 		}
 
 		//dedupe
@@ -182,6 +185,7 @@ export class SpotifyService {
 				});
 
 			foundSongs.push(...newSongs);
+			await sleep(1000);
 		}
 
 		//find liked songs already in db
