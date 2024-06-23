@@ -223,7 +223,7 @@ export class SpotifyAuthService {
 		}
 	}
 
-	async saveUserSpotfiyTokens(tk: SpotifyTokenPair, userID: string) {
+	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
 		const user = await this.prisma.users.findFirst({
 			where: { user_id: userID },
 		});
@@ -261,7 +261,13 @@ export class SpotifyAuthService {
 		const tk: SpotifyTokenPair = JSON.parse(tokens.token) as SpotifyTokenPair;
 		if (tk.epoch_expiry < Date.now()) {
 			//Token expired
-			tk = await this.refreshAccessToken(tk.tokens);
+			const newToken = await this.refreshAccessToken(tk.tokens);
+			const newPair: SpotifyTokenPair = {
+				tokens: newToken,
+				epoch_expiry: Date.now() + newToken.expires_in * 1000,
+			};
+			await this.saveUserSpotifyTokens(newPair, userID);
+			return newPair;
 		}
 		return JSON.parse(tokens.token) as SpotifyTokenPair;
 	}
