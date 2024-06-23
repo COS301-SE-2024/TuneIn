@@ -23,7 +23,7 @@ const Home: React.FC = () => {
   const baseURL = "http://localhost:3000";
 
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-  const ProfileIMG: string = "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
+  const ProfileIMG: string = "https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
@@ -32,6 +32,7 @@ const Home: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
+      
     } catch (error) {
       console.error('Error fetching rooms:', error);
       return [];
@@ -51,15 +52,16 @@ const Home: React.FC = () => {
   };
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
-    // console.log('formatting rooms', rooms)
+    
     return rooms.map(room => ({
-      roomID: room.roomID,
+      id:room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
       name: room.room_name,
       language: room.language,
       songName: room.current_song ? (room.current_song.title) : null,
       artistName: room.current_song ? (room.current_song.artists.join(", ")) : null,
       description: room.description,
+      userID: room.creator.userID,
       userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
       username: room.creator ? room.creator.username : "Unknown",
       roomSize: "50",
@@ -252,7 +254,7 @@ const Home: React.FC = () => {
         contentContainerStyle={styles.scrollViewContent}
       >
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size= {60} color="#0000ff" style={{marginTop:260}} />
         ) : (
           <View style={styles.contentContainer}>
             <Text style={styles.sectionTitle}>Recent Rooms</Text>

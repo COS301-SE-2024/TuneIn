@@ -17,6 +17,12 @@ import { ConnectedUsersService } from "./chat/connecteduser/connecteduser.servic
 import { ChatModule } from "./chat/chat.module";
 import { S3Service } from "./s3/s3.service";
 import { S3Module } from "./s3/s3.module";
+import { SpotifyService } from "./spotify/spotify.service";
+import { SpotifyModule } from "./spotify/spotify.module";
+import { HttpModule } from "@nestjs/axios";
+import { TasksModule } from "./tasks/tasks.module";
+import { BullConfigModule } from "./bull-config/bull-config.module";
+import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 
 @Module({
@@ -35,7 +41,13 @@ import { memoryStorage } from "multer";
 			dest: "./uploads",
 			storage: memoryStorage(),
 		}),
+		SpotifyModule,
+		HttpModule,
+		BullBoardModule,
+		TasksModule,
+		BullConfigModule,
 	],
+	controllers: [AppController],
 	providers: [
 		AppService,
 		DtoGenService,
@@ -43,7 +55,7 @@ import { memoryStorage } from "multer";
 		S3Service,
 		ChatGateway,
 		ConnectedUsersService,
+		SpotifyService,
 	],
-	controllers: [AppController],
 })
 export class AppModule {}

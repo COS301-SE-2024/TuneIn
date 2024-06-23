@@ -5,12 +5,18 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { LocalStrategy } from "./local.strategy";
 import { JwtStrategy } from "./jwt.strategy";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { PrismaModule } from "../../prisma/prisma.module";
 import { UsersService } from "src/modules/users/users.service";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
+import { SpotifyAuthService } from "./spotify/spotifyauth.service";
+import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
+import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
+import { HttpModule } from "@nestjs/axios";
+import { DbUtilsModule } from "src/modules/db-utils/db-utils.module";
+import { SpotifyModule } from "src/spotify/spotify.module";
 
 @Module({
 	imports: [
@@ -21,6 +27,8 @@ import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
+		SpotifyModule,
+		SpotifyAuthModule,
 	],
 	providers: [
 		AuthService,
@@ -30,8 +38,9 @@ import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 		DtoGenService,
 		DbUtilsService,
 		UsersService,
+		ConfigService,
 	],
-	controllers: [AuthController],
+	controllers: [AuthController, SpotifyAuthController],
 	exports: [AuthService],
 })
 export class AuthModule {}

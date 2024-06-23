@@ -98,7 +98,10 @@ export class RoomsController {
 	})
 	// generate summary
 	@ApiOperation({ summary: "Get room info" })
-	async getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): Promise<RoomDto> {
+	async getRoomInfo(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<RoomDto> {
 		console.log("getting room with ID", roomID);
 		return await this.roomsService.getRoomInfo(roomID);
 	}
@@ -128,7 +131,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		console.log("updating room with ID", roomID, "with data", updateRoomDto)
+		console.log("updating room with ID", roomID, "with data", updateRoomDto);
 		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
@@ -143,7 +146,7 @@ export class RoomsController {
 		return this.roomsService.updateRoom(roomID, updateRoomDto);
 	}
 
-		/*
+	/*
     DELETE /rooms/{roomID}
     deletes the room (only if it belongs to the user)
     no input
@@ -163,7 +166,10 @@ export class RoomsController {
 	@ApiParam({ name: "roomID", required: true })
 	@ApiBearerAuth()
 	@ApiOperation({ summary: "Delete a room" })
-	async deleteRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+	async deleteRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
 		// check using jwt token whether the user is the creator of the room
 		// if not, return 403
 		// if yes, delete the room and return 200
@@ -177,7 +183,7 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
-   	// @ApiBearerAuth()
+	// @ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/join")
 	@ApiTags("rooms")
@@ -185,15 +191,18 @@ export class RoomsController {
 		description: "User joined room successfully.",
 		type: Boolean,
 	})
-	@ApiOperation({ summary: "Join a room"})
-	@ApiBadRequestResponse({ 
+	@ApiOperation({ summary: "Join a room" })
+	@ApiBadRequestResponse({
 		description: "User already in room.",
 		type: Boolean,
 	})
 	@ApiParam({ name: "roomID", required: true })
-	async joinRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+	async joinRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.joinRoom(roomID, userID.id)
+		return await this.roomsService.joinRoom(roomID, userID.id);
 	}
 
 	/*
@@ -216,7 +225,10 @@ export class RoomsController {
 		type: Boolean,
 	})
 	@ApiParam({ name: "roomID", required: true })
-	async leaveRoom(@Request() req: any, @Param("roomID") roomID: string): Promise<boolean> {
+	async leaveRoom(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<boolean> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
 		return await this.roomsService.leaveRoom(roomID, userID.id);
 	}
@@ -238,8 +250,57 @@ export class RoomsController {
 	})
 	@ApiOperation({ summary: "Get users in a room" })
 	@ApiParam({ name: "roomID", required: true })
-	async getRoomUsers(@Request() req: any, @Param("roomID") roomID: string): Promise<UserProfileDto[]> {
+	async getRoomUsers(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<UserProfileDto[]> {
 		return await this.roomsService.getRoomUsers(roomID);
+	}
+
+	/*
+    GET /rooms/{roomID}/songs
+    returns the queue
+    no input
+    response: array of SongInfoDto
+    */
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(":roomID/songs")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get the queue of a room" })
+	@ApiOkResponse({
+		description: "The queue of the room as an array of SongInfoDto.",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async getRoomQueue(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+		//): SongInfoDto[] {
+	): Promise<string[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		//return this.roomsService.getRoomQueue(roomID);
+		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
+	}
+
+	/*
+    DELETE /rooms/{roomID}/songs
+    clears the queue (except for current song, if playing)
+    no input
+    response: (2xx for success, 4xx for error)
+    */
+	@UseGuards(JwtAuthGuard)
+	@Delete(":roomID/songs")
+	@ApiTags("rooms")
+	clearRoomQueue(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): boolean {
+		return this.roomsService.clearRoomQueue(roomID);
 	}
 
 	/*
@@ -248,15 +309,29 @@ export class RoomsController {
     input: SongInfoDto
     response: array of SongInfoDto (room queue)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/songs")
 	@ApiTags("rooms")
+	@ApiOperation({ summary: "Add a song to the queue of a room" })
+	@ApiOkResponse({
+		description: "The queue of the room as an array of SongInfoDto.",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
 	addSongToQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
-		@Body() songInfoDto: SongInfoDto,
-	): SongInfoDto[] {
-		return this.roomsService.addSongToQueue(roomID, songInfoDto);
+		//@Body() songInfoDto: SongInfoDto,
+		@Body() songInfoDto: string,
+		//): SongInfoDto[] {
+	): string[] {
+		//return this.roomsService.addSongToQueue(roomID, songInfoDto);
+		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
 	}
 
 	/*

@@ -26,6 +26,7 @@ export const useSpotifyDevices = (accessToken: string) => {
       }
 
       const data = await response.json();
+  
       setDevices(data.devices);
     } catch (err) {
       setError('An error occurred while fetching devices');
