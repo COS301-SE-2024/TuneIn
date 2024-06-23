@@ -22,6 +22,7 @@ const Home: React.FC = () => {
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const baseURL = "http://192.168.56.1:3000";
 
+
   const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
   const ProfileIMG: string = "https://cdn-icons-png.freepik.com/512/3135/3135715.png";
 
@@ -51,6 +52,7 @@ const Home: React.FC = () => {
   };
 
   const formatRoomData = (rooms: any[], mine: boolean = false) => {
+    
     return rooms.map(room => ({
       id:room.roomID,
       backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -58,6 +60,7 @@ const Home: React.FC = () => {
       songName: room.current_song ? (room.current_song.title) : null,
       artistName: room.current_song ? (room.current_song.artists.join(", ")) : null,
       description: room.description,
+      userID: room.creator.userID,
       userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
       username: room.creator ? room.creator.username : "Unknown",
       tags: room.tags ? room.tags : [],

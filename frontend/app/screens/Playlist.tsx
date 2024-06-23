@@ -15,8 +15,8 @@ interface Track {
 
 const Playlist = () => {
   const router = useRouter();
-  const { queue, currentTrackIndex,Room_id } = useLocalSearchParams();
-
+  const { queue, currentTrackIndex,Room_id,mine } = useLocalSearchParams();
+  console.log("playlist owner: ", mine);
   // Ensure queue is correctly typed as an array of Track objects
   const [playlist, setPlaylist] = useState<Track[]>([]);
 
@@ -69,11 +69,15 @@ const Playlist = () => {
           />
         ))}
       </View>
+      {mine ? (
       <View style={styles.addButtonContainer}>
         <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
           <Text style={styles.addButtonText}>Add Song</Text>
         </TouchableOpacity>
       </View>
+      ) : (
+				<View></View>
+			)}
     </View>
   );
 };

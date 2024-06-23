@@ -15,6 +15,7 @@ interface Track {
   explicit: boolean;
   preview_url: string; // URL for previewing the song
   uri: string; // URI used to play the song
+  duration_ms:number;
 }
 
 interface SimplifiedTrack {
@@ -25,6 +26,7 @@ interface SimplifiedTrack {
   explicit: boolean;
   preview_url: string;
   uri: string;
+  duration_ms: number;
 }
 
 const EditPlaylist: React.FC = () => {
@@ -88,6 +90,7 @@ const EditPlaylist: React.FC = () => {
       explicit: track.explicit,
       preview_url: track.preview_url,
       uri: track.uri,
+      duration_ms:track.duration_ms,
     };
     setPlaylist(prevPlaylist => [...prevPlaylist, simplifiedTrack]);
   };
