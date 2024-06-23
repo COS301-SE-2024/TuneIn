@@ -12,6 +12,7 @@ import {
 	Platform,
 	Dimensions,
 	Easing,
+	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Room } from "../models/Room";
@@ -20,6 +21,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const getQueue = () => {
 	return [
@@ -54,7 +56,8 @@ const RoomPage = () => {
 	const roomData = JSON.parse(room);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
-	
+	const [token, setToken] = useState("");
+	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -100,9 +103,14 @@ const RoomPage = () => {
 		const fetchQueue = async () => {
 			const data = getQueue();
 			setQueue(data);
+			const _token = await AsyncStorage.getItem('token');
+			setToken(_token);
+			console.log('token', _token)
 		};
 
 		fetchQueue();
+		checkBookmark();
+		
 	}, [roomData.id]);
 
 	const getRoomState = () => {
@@ -123,6 +131,29 @@ const RoomPage = () => {
 	// const handleGoBack = () => {
 	// 	// router.goBack();
 	// };
+	const checkBookmark = async () => {
+		try {
+			const response = await fetch(`http://10.32.253.158:3000/users/bookmarks`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`,
+				},
+			});
+			const data = await response.json();
+			// check whether the room is bookmarked or not
+			for (let i = 0; i < data.length; i++) {
+				if (data[i].roomID === roomData.id) {
+					console.log("Room is bookmarked");
+					setIsBookmarked(true);
+					break;
+				}
+			}
+			console.log(data)
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 
 	useEffect(() => {
 		if (isPlaying) {
@@ -137,7 +168,40 @@ const RoomPage = () => {
 		  clearInterval(trackPositionIntervalRef.current);
 		};
 	  }, [isPlaying]);
+	  // create a function that will check whether room is bookmarked or not and make a request to the backend
+	  const handleBookmark = async () => {
+		// make a request to the backend to check if the room is bookmarked
+		// if it is bookmarked, set isBookmarked to true
+		setIsBookmarked(!isBookmarked);
+		console.log(token)
 
+		try {
+			console.log(roomData.id)
+			const response = await fetch(`http://10.32.253.158:3000/rooms/${roomData.id}/${isBookmarked? "unbookmark":"bookmark"}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`,
+				},
+			});
+			console.log(response)
+			if (response.status === 201) {
+				Alert.alert(
+				"Success",
+				`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
+				[
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]
+			);
+			}
+
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	  }
 	  const handleJoinLeave = () => {
 		if (!joined) {
 		  setJoined(true);
@@ -289,6 +353,17 @@ const RoomPage = () => {
             </Text>
 						</TouchableOpacity>
 					</View>
+					
+					<View style={styles.joinLeaveButtonContainer}>
+						<TouchableOpacity
+							style={styles.joinLeaveButton}
+							onPress={handleBookmark}
+						>
+							<Text style={styles.joinLeaveButtonText}>
+              { isBookmarked ? 'Unbookmark' : 'Bookmark'}
+            </Text>
+						</TouchableOpacity>
+					</View>
 				</View>
 			
 
@@ -394,7 +469,7 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontWeight: "bold", fontSize: 16 }}>
+					<Text style={{ fontSize: 16 }}>
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
@@ -470,7 +545,6 @@ const styles = StyleSheet.create({
 	},
 	backButtonText: {
 		fontSize: 18,
-		fontWeight: "bold",
 	},
 	backgroundImage: {
 		width: "100%",
@@ -510,7 +584,6 @@ const styles = StyleSheet.create({
 	},
 	username: {
 		fontSize: 18,
-		fontWeight: "bold",
 		color: "white"
 	},
 	roomDetails: {
@@ -519,7 +592,6 @@ const styles = StyleSheet.create({
 	},
 	roomName: {
 		fontSize: 24,
-		fontWeight: "bold",
 		color: "white",
 	},
 	description: {
@@ -554,12 +626,10 @@ const styles = StyleSheet.create({
 	},
 	nowPlayingTrackName: {
 		fontSize: 21,
-		fontWeight: "bold",
 	},
 	nowPlayingTrackArtist: {
 		fontSize: 18,
 		color: "black",
-		fontWeight: 400
 	},
 	queueAlbumArt: {
 		width: 60,
@@ -598,7 +668,6 @@ const styles = StyleSheet.create({
 	},
 	queueButtonText: {
 		fontSize: 16,
-		fontWeight: "bold",
 	},
 	queueContainer: {
 		paddingHorizontal: 20,
@@ -626,7 +695,6 @@ const styles = StyleSheet.create({
 	},
 	viewQueueButtonText: {
 		color: "white",
-		fontWeight: "bold",
 		fontSize: 16,
 	},
 	joinLeaveButton: {
@@ -639,7 +707,6 @@ const styles = StyleSheet.create({
 	},
 	joinLeaveButtonText: {
 		color: "white",
-		fontWeight: "bold",
 		fontSize: 16,
 	},
 });
