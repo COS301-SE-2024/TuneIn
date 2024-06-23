@@ -1,6 +1,6 @@
 // src/types/RoomCard.ts
 export interface Room {
-    id?: string;
+    roomID?: string;
     backgroundImage: string;
     name: string;
     songName?: string;

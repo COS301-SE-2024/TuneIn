@@ -19,11 +19,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
   const screenWidth = Dimensions.get("window").width;
   const cardWidth = screenWidth * 0.8; // 80% of screen width
   const router = useRouter();
-
+  const room = JSON.parse(JSON.stringify(roomCard))
+  // console.log("roomCard", roomCard);
   const navigateToEditRoom = () => {
     router.navigate({
       pathname: "/screens/EditRoom",
-      params: { room: JSON.stringify(roomCard) },
+      params: room,
     });
   };
 

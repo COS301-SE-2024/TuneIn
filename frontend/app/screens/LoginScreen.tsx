@@ -59,7 +59,7 @@ const LoginScreen: React.FC = () => {
         }
 
         // POST request to backend
-        fetch("http://192.168.56.1:3000/auth/login", {
+        fetch("http://10.32.253.158:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -72,7 +72,6 @@ const LoginScreen: React.FC = () => {
           .then((data) => {
             const token = data.token; // Extract the token from the response
             AsyncStorage.setItem("token", token); // Save the token to AsyncStorage
-            console.log("Backend Token: " + token);
             router.navigate("/screens/Home");
           })
           .catch((error) => {

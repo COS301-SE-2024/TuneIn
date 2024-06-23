@@ -21,31 +21,31 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
-  const baseURL = "http://192.168.56.1:3000";
-  const router = useRouter();
-  const [favoriteSongsData, setFavoriteSongsData] = useState([
-    {
-      songTitle: "Don't Smile At Me",
-      artist: "Billie Eilish",
-      duration: "5:33",
-      albumArt: "https://example.com/path-to-album-art1.jpg",
-    },
-    {
-      songTitle: "Blinding Lights",
-      artist: "The Weekend",
-      duration: "3:20",
-      albumArt: "https://example.com/path-to-album-art2.jpg",
-    },
-    {
-      songTitle: "Shape of You",
-      artist: "Ed Sheeran",
-      duration: "4:24",
-      albumArt: "https://example.com/path-to-album-art3.jpg",
-    },
-  ]);
-  const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
-  const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
+	const baseURL = "http://10.32.253.158:3000";
+	const router = useRouter();
+	const [favoriteSongsData, setFavoriteSongsData] = useState([
+		{
+			songTitle: "Don't Smile At Me",
+			artist: "Billie Eilish",
+			duration: "5:33",
+			albumArt: "https://example.com/path-to-album-art1.jpg",
+		},
+		{
+			songTitle: "Blinding Lights",
+			artist: "The Weekend",
+			duration: "3:20",
+			albumArt: "https://example.com/path-to-album-art2.jpg",
+		},
+		{
+			songTitle: "Shape of You",
+			artist: "Ed Sheeran",
+			duration: "4:24",
+			albumArt: "https://example.com/path-to-album-art3.jpg",
+		},
+	]);
+	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
+	const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string | null>(null);
 
