@@ -14,25 +14,42 @@ import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 import { S3Service } from "./s3/s3.service";
 import { S3Module } from "./s3/s3.module";
+import { SpotifyService } from "./spotify/spotify.service";
+import { SpotifyModule } from "./spotify/spotify.module";
+import { HttpModule } from "@nestjs/axios";
+import { TasksModule } from "./tasks/tasks.module";
+import { BullConfigModule } from "./bull-config/bull-config.module";
+import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        PrismaModule,
-        UsersModule,
-        AuthModule,
-        RoomsModule,
-        ProfileModule,
-        DtoGenModule,
-        DbUtilsModule,
-        S3Module,
-        MulterModule.register({
-            dest: './uploads',
+	imports: [
+		ConfigModule.forRoot({ isGlobal: true }),
+		PrismaModule,
+		UsersModule,
+		AuthModule,
+		RoomsModule,
+		ProfileModule,
+		DtoGenModule,
+		DbUtilsModule,
+		S3Module,
+		MulterModule.register({
+			dest: "./uploads",
 			storage: memoryStorage(),
-        }),
-    ],
-    controllers: [AppController],
-    providers: [AppService, DtoGenService, DbUtilsService, S3Service],
+		}),
+		SpotifyModule,
+		HttpModule,
+		BullBoardModule,
+		TasksModule,
+		BullConfigModule,
+	],
+	controllers: [AppController],
+	providers: [
+		AppService,
+		DtoGenService,
+		DbUtilsService,
+		S3Service,
+		SpotifyService,
+	],
 })
 export class AppModule {}

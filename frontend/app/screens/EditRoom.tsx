@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import uploadImage from '../services/ImageUpload';
 
-const BASE_URL = 'http://10.32.253.158:3000/'; // Replace with actual backend URL
+const BASE_URL = 'http://172.16.12.166:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching

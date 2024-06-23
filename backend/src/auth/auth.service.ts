@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
+import { IsString } from "class-validator";
 //import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
@@ -31,17 +32,21 @@ export type JWTPayload = {
 
 export class RegisterBody {
 	@ApiProperty()
+	@IsString()
 	username: string;
 
 	@ApiProperty()
+	@IsString()
 	userCognitoSub: string;
 
 	@ApiProperty()
+	@IsString()
 	email: string;
 }
 
 export class LoginBody {
 	@ApiProperty()
+	@IsString()
 	token: string;
 }
 
