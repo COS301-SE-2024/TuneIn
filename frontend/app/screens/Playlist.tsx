@@ -1,83 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import SongList from '../components/SongList'; // Import the SongList component
 
+interface Track {
+  id: string;
+  name: string;
+  artistNames: string;
+  albumArtUrl: string;
+  voteCount: number;
+  showVoting: boolean;
+}
+
 const Playlist = () => {
   const router = useRouter();
+  const { queue, currentTrackIndex, Room_id, mine } = useLocalSearchParams();
+  const isMine = mine === "true";
+  const [playlist, setPlaylist] = useState<Track[]>([]);
+
+  useEffect(() => {
+    if (typeof queue === 'string') {
+      const parsedQueue = JSON.parse(queue) as Track[];
+      setPlaylist(parsedQueue);
+    } else if (Array.isArray(queue)) {
+      setPlaylist(queue);
+    }
+  }, [queue]);
+
+  useEffect(() => {
+    console.log('Current Track Index:', Number(currentTrackIndex));
+  }, [currentTrackIndex]);
+  
 
   const navigateToAddSong = () => {
-    router.push('screens/AddSongPage');
-  };
-
-  // Sample data for songs
-  const [songs, setSongs] = useState([
-    {
-      songName: 'Eternal Sunshine',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: true, // Show voting for this song
-    },
-    {
-      songName: 'bye',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: true, // Do not show voting for this song
-    },
-    {
-      songName: 'supernatural',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    {
-      songName: 'yes, and?',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    {
-      songName: 'true story',
-      artist: 'Ariana Grande',
-      albumCoverUrl: 'https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png',
-      voteCount: 0,
-      showVoting: false,
-    },
-    // Add more songs here
-  ]);
-
-  const setVoteCount = (newCount, index) => {
-    const updatedSongs = [...songs];
-    updatedSongs[index].voteCount = newCount;
-    setSongs(updatedSongs);
-  };
-
-  // Function to swap songs based on vote count
-  const swapSongs = (index, direction) => {
-    const newSongs = [...songs];
-    const currentSong = newSongs[index];
-    let swapIndex = index;
-
-    if (direction === 'up') {
-      while (swapIndex > 0 && currentSong.voteCount > newSongs[swapIndex - 1].voteCount) {
-        swapIndex--;
-      }
-    } else if (direction === 'down') {
-      while (swapIndex < newSongs.length - 1 && currentSong.voteCount < newSongs[swapIndex + 1].voteCount) {
-        swapIndex++;
-      }
-    }
-
-    if (swapIndex !== index) {
-      newSongs.splice(index, 1);
-      newSongs.splice(swapIndex, 0, currentSong);
-      setSongs(newSongs);
-    }
+    router.navigate({
+      pathname: "/screens/rooms/EditPlaylist",
+      params: {
+        queue: queue,
+        currentTrackIndex: currentTrackIndex,
+        Room_id: Room_id,
+      },
+    });
   };
 
   return (
@@ -86,29 +50,32 @@ const Playlist = () => {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.pageName}>Songs</Text>
+        <Text style={styles.pageName}>Queue</Text>
       </View>
       <View style={styles.songListContainer}>
-        {songs.map((song, index) => (
+        {playlist.map((track, index) => (
           <SongList
             key={index}
-            songNumber={index + 1} // Pass the song number
-            songName={song.songName}
-            artist={song.artist}
-            albumCoverUrl={song.albumCoverUrl}
-            voteCount={song.voteCount} // Pass vote count to SongList
-            showVoting={song.showVoting}
-            index={index} // Pass index for swapping
-            swapSongs={swapSongs} // Pass swapSongs function
-            // setVoteCount={setVoteCount} // Pass setVoteCount function
+            songNumber={index + 1}
+            songName={track.name}
+            artist={track.artistNames}
+            albumCoverUrl={track.albumArtUrl}
+            voteCount={track.voteCount}
+            showVoting={track.showVoting}
+            index={index}
+            isCurrent={index === Number(currentTrackIndex)} // Check if current song
           />
         ))}
       </View>
-      <View style={styles.addButtonContainer}>
-        <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
-          <Text style={styles.addButtonText}>Add Song</Text>
-        </TouchableOpacity>
-      </View>
+      {isMine ? (
+        <View style={styles.addButtonContainer}>
+          <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+            <Text style={styles.addButtonText}>Add Song</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+          <View></View>
+        )}
     </View>
   );
 };

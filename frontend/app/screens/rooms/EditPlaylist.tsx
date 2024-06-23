@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, ScrollView, StyleSheet, Alert, Text, Image } from 'react-native';
+import { View, TextInput, ScrollView, StyleSheet, Alert, Text, Image, TouchableOpacity } from 'react-native';
 import SongCard from '../../components/Spotify/SongCard';
 import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
 import { useLocalSearchParams } from 'expo-router'; // Assuming useLocalSearchParams is correctly implemented
 import { useRouter } from "expo-router";
 
-   
 interface Track {
   id: string;
   name: string;
@@ -15,6 +14,7 @@ interface Track {
   explicit: boolean;
   preview_url: string; // URL for previewing the song
   uri: string; // URI used to play the song
+  duration_ms: number;
 }
 
 interface SimplifiedTrack {
@@ -25,12 +25,13 @@ interface SimplifiedTrack {
   explicit: boolean;
   preview_url: string;
   uri: string;
+  duration_ms: number;
 }
 
 const EditPlaylist: React.FC = () => {
-
   const router = useRouter();
-  const { roomId, playlists: initialPlaylist } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+  const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch();
 
@@ -76,7 +77,7 @@ const EditPlaylist: React.FC = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() => parseInitialPlaylist(initialPlaylist));
+  const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() => parseInitialPlaylist(queue));
 
   const addToPlaylist = (track: Track) => {
     const simplifiedTrack: SimplifiedTrack = {
@@ -87,6 +88,7 @@ const EditPlaylist: React.FC = () => {
       explicit: track.explicit,
       preview_url: track.preview_url,
       uri: track.uri,
+      duration_ms: track.duration_ms,
     };
     setPlaylist(prevPlaylist => [...prevPlaylist, simplifiedTrack]);
   };
@@ -101,19 +103,19 @@ const EditPlaylist: React.FC = () => {
     // Add logic to save the playlist to the backend if necessary
     try {
       // Replace with your backend API URL
-      const response = await fetch('http://192.168.56.1:4000/room/' + roomId + '/playlist', {
+      const response = await fetch(`http://192.168.56.1:4000/room/${Room_id}/playlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ roomId, playlist }),
+        body: JSON.stringify({ Room_id, playlist }),
       });
       const data = await response.json();
       console.log('Playlist saved to backend:', data);
     } catch (error) {
       console.error('Error saving playlist:', error);
     }
-  router.navigate('/screens/Home');
+    router.navigate('/screens/Home');
   };
 
   const playPreview = (previewUrl: string) => {
@@ -123,26 +125,30 @@ const EditPlaylist: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
+      <TextInput 
         style={styles.input}
         placeholder="Search for songs..."
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
-      <Button title="Search" onPress={() => handleSearch(searchQuery)} />
+      <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch(searchQuery)}>
+        <Text style={styles.buttonText}>Search</Text>
+      </TouchableOpacity>
 
       {/* Selected Playlist Section */}
       <ScrollView style={styles.selectedContainer}>
-        <Text style={styles.selectedTitle}>Selected Tracks</Text>
+        <Text style={styles.sectionTitle}>Selected Tracks</Text>
         {playlist.map(track => (
-          <View key={track.id} style={styles.selectedItem}>
+          <View key={track.id} style={styles.trackContainer}>
             <Image source={{ uri: track.albumArtUrl }} style={styles.albumArt} />
             <View style={styles.trackInfo}>
               <Text style={styles.trackName}>{track.name}</Text>
               <Text style={styles.artistNames}>{track.artistNames}</Text>
               {track.explicit && <Text style={styles.explicitTag}>Explicit</Text>}
             </View>
-            <Button title="Remove" onPress={() => removeFromPlaylist(track.id)} />
+            <TouchableOpacity style={styles.removeButton} onPress={() => removeFromPlaylist(track.id)}>
+              <Text style={styles.buttonText}>Remove</Text>
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
@@ -161,9 +167,10 @@ const EditPlaylist: React.FC = () => {
         ))}
       </ScrollView>
 
-      <View style={styles.saveButtonContainer}>
-        <Button title="Save Playlist" onPress={savePlaylist} disabled={playlist.length === 0} />
-      </View>
+      {/* Save Button */}
+      <TouchableOpacity style={styles.saveButton} onPress={savePlaylist} disabled={playlist.length === 0}>
+        <Text style={styles.buttonText}>Save Playlist</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -177,32 +184,33 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 15,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   selectedContainer: {
     maxHeight: 200,
     marginBottom: 10,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 10,
   },
-  selectedTitle: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10,
   },
-  selectedItem: {
+  trackContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 5,
+    marginBottom: 10,
   },
   albumArt: {
     width: 50,
     height: 50,
     marginRight: 10,
+    borderRadius: 5,
   },
   trackInfo: {
     flex: 1,
@@ -222,10 +230,38 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     flex: 1,
-    marginTop: 10,
   },
-  saveButtonContainer: {
+  searchButton: {
+    backgroundColor: '#4c50bf',
+    borderRadius: 30,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  saveButton: {
+    backgroundColor: '#8b8fa8',
+    borderRadius: 30,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
     marginTop: 20,
+  },
+  removeButton: {
+    backgroundColor: 'red',
+    borderRadius: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

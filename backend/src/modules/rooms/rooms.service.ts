@@ -11,6 +11,8 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 
 @Injectable()
 export class RoomsService {
+	DUMBroomQueues: Map<string, string[]> = new Map<string, string[]>();
+
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly dtogen: DtoGenService,
@@ -56,7 +58,7 @@ export class RoomsService {
 		return result;
 	}
 
-	getRoomInfo(roomID: string): RoomDto {
+	async getRoomInfo(roomID: string): Promise<RoomDto> {
 		// TODO: Implement logic to get room info
 		// an an example to generate a RoomDto
 		/*
@@ -66,12 +68,62 @@ export class RoomsService {
 			return room;
 		}
 		*/
-		return new RoomDto();
+		try{
+			const room = await this.prisma.room.findFirst({
+				where: {
+					room_id: roomID
+				}
+			});
+			if (!room) {
+				return new RoomDto();
+			}
+			// filter out null values
+			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+			return roomDto? roomDto : new RoomDto();
+		} catch (error) {
+			console.error("Error getting room info:", error);
+			return new RoomDto();
+		}
+		// const room = await this.prisma.room.findFirst({
+		// 	where: {
+		// 		room_id: roomID
+		// 	}
+		// });
+		// if (!room) {
+		// 	return new RoomDto();
+		// }
+		// // filter out null values
+		// const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+		// return roomDto? roomDto : new RoomDto();
 	}
 
-	updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
+	async updateRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto): Promise<RoomDto> {
 		// TODO: Implement logic to update room info
-		return new RoomDto();
+		const data = {
+			name: updateRoomDto.room_name!,
+			description: updateRoomDto.description!,
+			playlist_photo: updateRoomDto.room_image!,
+			explicit: updateRoomDto.has_explicit_content!,
+			nsfw: updateRoomDto.has_explicit_content!,
+			room_language: updateRoomDto.language!
+		}
+
+		Object.keys(data).forEach(key => data[key as keyof typeof data] === undefined && delete data[key as keyof typeof data]);
+
+		console.log("Updating room", roomID, "with data", data)
+		try{
+			const room = await this.prisma.room.update({
+				where: {
+					room_id: roomID
+				},
+				data: data
+			});
+			const updatedRoom = room? await this.dtogen.generateRoomDtoFromRoom(room): new RoomDto();
+			return updatedRoom? updatedRoom : new RoomDto();
+		} catch (error) {
+			console.error("Error updating room info:", error);
+			return new RoomDto();
+		}
 	}
 
 	updateRoom(roomID: string, updateRoomDto: UpdateRoomDto): RoomDto {
@@ -79,29 +131,137 @@ export class RoomsService {
 		return new RoomDto();
 	}
 
-	deleteRoom(roomID: string): boolean {
-		// TODO: Implement logic to delete room
-		return false;
+	async deleteRoom(room_id: string, room_creator: string): Promise<boolean> {
+		// Check if the room exists
+		// delete the room user is the owner
+		var isDeleted = false;
+		try {
+			await this.prisma.room.delete({
+				where: { room_id, room_creator }
+			}).then((room) => {
+				// console.log("is deleting", room);
+				isDeleted = true;
+			}
+			);
+			// console.log(isDeleted);
+			return isDeleted;
+		} catch (error) {
+			return false;
+		}
+	  }
+
+	async joinRoom(room_id: string, user_id: string): Promise<boolean> {
+		console.log("user", user_id, "joining room", room_id);
+		try {
+			// Check if the user is already in the room
+			const room = await this.prisma.participate.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id
+				}
+			})
+
+			if (room !== null) {
+				return false;
+			}
+			// Add the user to the room
+			await this.prisma.participate.create({
+				data: {
+					room_id: room_id,
+					user_id: user_id
+				}
+			});
+	
+			return true;
+		} catch (error) {
+			console.error("Error joining room:");
+			return false;
+		}
 	}
 
-	joinRoom(roomID: string): boolean {
-		// TODO: Implement logic to join room
-		return false;
-	}
-
-	leaveRoom(roomID: string): boolean {
+	async leaveRoom(room_id: string, user_id: string): Promise<boolean> {
 		// TODO: Implement logic to leave room
-		return false;
+		console.log("user", user_id, "leaving room", room_id);
+		try {
+			// Check if the user is already in the room
+			const room = await this.prisma.participate.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id
+				}
+			})
+	
+			// If the user is already in the room, return false
+			if (room === null) {
+				return false;
+			}
+	
+			// Add the user to the room
+			await this.prisma.participate.delete({
+				where: {
+					participate_id: room.participate_id
+				}
+			});
+	
+			return true;
+		} catch (error) {
+			console.error("Error leaving room:");
+			return false;
+		}
 	}
 
-	getRoomUsers(roomID: string): UserProfileDto[] {
-		// TODO: Implement logic to get room users
-		return [];
+	async getNumFollowers(user_id: string, getFollowers: boolean): Promise<number> {
+		try {
+			const _where: object = getFollowers? {
+				follower: user_id
+			} : {
+				followee: user_id
+			};
+			const followers: number = await this.prisma.follows.count({
+				where: _where
+			});
+			return followers;
+		} catch(error) {
+			return 0;
+		}
+	}
+
+	async getRoomUsers(room_id: string): Promise<UserProfileDto[]> {
+		try {
+			// write a query to get all the users in the room
+			const users = await this.prisma.participate.findMany({
+				where: {
+					room_id: room_id
+				},
+				include: {
+					users: true
+				}
+			});
+			// map all the users to the userprofiledto
+			console.log("Users in room", users);
+			const userProfiles: (UserProfileDto | null)[] = await Promise.all(users.map(async (user) => {
+				const userProfile = await this.dtogen.generateUserProfileDto(user.users.user_id);
+				return userProfile;
+			}));
+	
+			// filter out null values
+			const filteredUserProfiles: UserProfileDto[] = userProfiles.filter((userProfile) => userProfile !== null) as UserProfileDto[];
+			console.log("Filtered user profiles", filteredUserProfiles);
+			return filteredUserProfiles;
+		} catch (error) {
+			console.error("Error getting room users:", error);
+			return [];
+		}
 	}
 
 	getRoomQueue(roomID: string): SongInfoDto[] {
 		// TODO: Implement logic to get room queue
 		return [];
+	}
+
+	getRoomQueueDUMBVERSION(roomID: string): string[] {
+		// TODO: Implement logic to get room queue
+		return this.DUMBroomQueues.get(roomID) || [];
 	}
 
 	clearRoomQueue(roomID: string): boolean {
@@ -112,6 +272,13 @@ export class RoomsService {
 	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue
 		return [];
+	}
+
+	addSongToQueueDUMBVERSION(roomID: string, songID: string): string[] {
+		const queue = this.DUMBroomQueues.get(roomID) || [];
+		queue.push(songID);
+		this.DUMBroomQueues.set(roomID, queue);
+		return queue;
 	}
 
 	getCurrentSong(roomID: string): SongInfoDto {

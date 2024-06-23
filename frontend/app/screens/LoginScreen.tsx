@@ -45,27 +45,18 @@ const LoginScreen: React.FC = () => {
           "access token + " + result.getAccessToken().getJwtToken()
         );
 
-        console.log("result.getAccessToken().decodePayload()", result.getAccessToken().decodePayload());
-        
-        //POST request to backend
-        fetch("http://localhost:3000/auth/login", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-			},
-			body: JSON.stringify({
-				token: result.getAccessToken().getJwtToken(),
-			}),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log(data);
-				localStorage.setItem("token", data.token);
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
+        console.log(
+          "result.getAccessToken().decodePayload()",
+          result.getAccessToken().decodePayload()
+        );
+
+        // Store token in AsyncStorage if remember me is checked
+        if (rememberMe) {
+          AsyncStorage.setItem(
+            "cognitoToken",
+            result.getAccessToken().getJwtToken()
+          );
+        }
 
         // POST request to backend
         fetch("http://localhost:3000/auth/login", {

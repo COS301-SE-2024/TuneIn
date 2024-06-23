@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button, Alert } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { RoomDetailsProps } from '../models/roomdetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,7 +16,27 @@ const BASE_URL = "http://localhost:3000/";
 
 
 const RoomDetails: React.FC = () => {
+  
+  const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace('+', '+')
+
+  // console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_NEST_BUCKET_NAME, AWS_S3_REGION, AWS_S3_ENDPOINT)
   const router = useRouter();
+  const { room } = useLocalSearchParams();
+  // console.log('room', room)
+  const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
+  // console.log('room', newRoom);
+  AWS.config.update({ 
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    region: AWS_S3_REGION,
+  });
+  AWS.config.logger = console
+
+// Create an S3 instance
+  const s3 = new AWS.S3({
+    apiVersion: '2006-03-01',
+    signatureVersion: 'v4'
+  });
   const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
     name: '',
     description: '',
@@ -31,8 +51,67 @@ const RoomDetails: React.FC = () => {
 
   const screenWidth = Dimensions.get('window').width;
 
-  const navigateToChatRoom = () => {
-    router.navigate("/screens/ChatRoom");
+  const navigateToChatRoom = async () => {
+    newRoom['has_nsfw_content'] = roomDetails.isNsfw;
+    console.log('Room Details FROM ROOM DETAILS PAGE:', roomDetails.language)
+    if(roomDetails.language !== '') {
+      console.log('Language:', roomDetails.language)
+      newRoom['language'] = roomDetails.language;
+    }
+    else {
+      console.log('Language:', 'English')
+      newRoom['language'] = 'English';
+    }
+    if(roomDetails.genre !== '')
+      newRoom['genre'] = roomDetails.genre;
+    else{
+      // delete genre field from newRoom
+      delete newRoom['genre'];
+    }
+    if(roomDetails.description !== '')
+      newRoom['description'] = roomDetails.description;
+    else{
+      newRoom['description'] = 'This room has no description.';
+    }
+    newRoom['has_explicit_content'] = roomDetails.isExplicit;
+    newRoom['room_name'] = roomDetails.name;
+    var imageURL = '';
+    if(newRoom['room_name'] === '' || newRoom['room_name'] === undefined) {
+      // alert user to enter room name
+      Alert.alert(
+        "Room Name Required",
+        "Please enter a room name.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+    if(image !== null){
+      imageURL = await uploadImage(image, roomDetails.name)
+      // console.log('Image URL:', imageURL);
+    }
+    newRoom['room_image'] = imageURL;
+    const token = await AsyncStorage.getItem('token');
+    // console.log('Token:', token);
+    fetch(`${BASE_URL}users/rooms`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` || ""
+      },
+      body: JSON.stringify(newRoom),
+    }).then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      const moreData = JSON.stringify(data)
+      router.navigate({
+        pathname: '/screens/ChatRoom',
+        params: data
+      });
+    }).catch((error) => {
+      console.error("Error:", error);
+    });
+    // router.navigate("/screens/ChatRoom");
   };
 
   const pickImage = async () => {
@@ -63,7 +142,7 @@ const RoomDetails: React.FC = () => {
           <View style={{ width: 20 }} />
         </View>
         <View style={{ paddingHorizontal: 10, paddingVertical: 20 }}>
-          {_buildInputField('Room Name', roomDetails.name, (value) => handleInputChange('name', value))}
+          {_buildInputField('Room Name (required)', roomDetails.name, (value) => handleInputChange('name', value))}
           {_buildInputField('Description', roomDetails.description, (value) => handleInputChange('description', value), 4)}
           {_buildInputField('Genre', roomDetails.genre, (value) => handleInputChange('genre', value))}
           {_buildInputField('Language', roomDetails.language, (value) => handleInputChange('language', value))}

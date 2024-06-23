@@ -1,13 +1,13 @@
 import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
-	View,
-	Text,
-	Image,
-	StyleSheet,
-	TouchableOpacity,
-	ScrollView,
-	ActivityIndicator,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import NowPlaying from "../components/NowPlaying";
@@ -21,7 +21,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://localhost:3000";
+	const baseURL = "http://10.32.253.158:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{
@@ -47,117 +47,112 @@ const ProfileScreen: React.FC = () => {
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 
-	const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-	const fetchProfileInfo = async (token: string | null) => {
-		try {
-			const response = await axios.get(`${baseURL}/profile`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			console.log(response);
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
-			return [];
-		}
-	};
+  const fetchProfileInfo = async (token: string | null) => {
+    try {
+      const response = await axios.get(`${baseURL}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching profile info:", error);
+      return [];
+    }
+  };
 
-	const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>(null);
 
-	useEffect(() => {
-		const getTokenAndData = async () => {
-			try {
-				const storedToken = await AsyncStorage.getItem("token");
-				setToken(storedToken);
+  useEffect(() => {
+    const getTokenAndData = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+        setToken(storedToken);
 
-				if (storedToken) {
-					const data = await fetchProfileInfo(storedToken);
-					setProfileData(data);
-					setLoading(false);
-				}
-			} catch (error) {
-				console.error("Failed to retrieve token:", error);
-			}
-		};
+        if (storedToken) {
+          const data = await fetchProfileInfo(storedToken);
+          setProfileData(data);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to retrieve token:", error);
+      }
+    };
 
-		getTokenAndData();
-	}, []);
+    getTokenAndData();
+  }, []);
 
-	const renderLinks = () => {
-		if (profileData.links.count > 1) {
-			const firstLink = profileData.links.data[0].links;
-			const remainingCount = profileData.links.count - 1;
+  const renderLinks = () => {
+    if (profileData.links.count > 1) {
+      const firstLink = profileData.links.data[0].links;
+      const remainingCount = profileData.links.count - 1;
 
-			return (
-				<View>
-					<Text
-						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
-					>
-						{firstLink} and {remainingCount} more link
-						{remainingCount > 1 ? "s" : ""}
-					</Text>
-				</View>
-			);
-		} else if (profileData.links.count == 1) {
-			return (
-				<View>
-					<Text
-						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
-					>
-						{profileData.links.data[0].links}
-					</Text>
-				</View>
-			);
-		} else {
-			return null; // No links to display
-		}
-	};
+      return (
+        <View>
+          <Text style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}>
+            {firstLink} and {remainingCount} more link
+            {remainingCount > 1 ? "s" : ""}
+          </Text>
+        </View>
+      );
+    } else if (profileData.links.count == 1) {
+      return (
+        <View>
+          <Text style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}>
+            {profileData.links.data[0].links}
+          </Text>
+        </View>
+      );
+    } else {
+      return null; // No links to display
+    }
+  };
 
-	const renderFavRooms = () => {
-		if (profileData.fav_rooms.count > 0) {
-			return (
-				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-					<Text style={styles.title}>Favorite Rooms</Text>
-					<View style={styles.roomCardsContainer}>
-						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.roomId}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-							/>
-						))}
-					</View>
-				</View>
-			);
-		}
-	};
+  const renderFavRooms = () => {
+    if (profileData.fav_rooms.count > 0) {
+      return (
+        <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+          <Text style={styles.title}>Favorite Rooms</Text>
+          <View style={styles.roomCardsContainer}>
+            {profileData.fav_rooms.data.slice(0, 2).map((room) => (
+              <RoomCard
+                key={room.roomId}
+                roomName={room.room_name}
+                songName={room.current_song.title}
+                artistName={room.current_song.artists}
+                username={room.creator.username}
+              />
+            ))}
+          </View>
+        </View>
+      );
+    }
+  };
 
-	const renderRecentRooms = () => {
-		if (profileData.recent_rooms.count > 0) {
-			console.log('profileData:', profileData.recent_rooms.data.slice(0, 2));
-			return (
-				<View style={{ paddingHorizontal: 20 }}>
-					<Text style={styles.title}>Recently Visited</Text>
-					<View style={styles.roomCardsContainer}>
-						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.roomId}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-							/>
-						))}
-					</View>
-				</View>
-			);
-		}
-	};
-	
+  const renderRecentRooms = () => {
+    if (profileData.recent_rooms.count > 0) {
+      console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
+      return (
+        <View style={{ paddingHorizontal: 20 }}>
+          <Text style={styles.title}>Recently Visited</Text>
+          <View style={styles.roomCardsContainer}>
+            {profileData.recent_rooms.data.slice(0, 2).map((room) => (
+              <RoomCard
+                key={room.roomId}
+                roomName={room.room_name}
+                songName={room.current_song.title}
+                artistName={room.current_song.artists}
+                username={room.creator.username}
+              />
+            ))}
+          </View>
+        </View>
+      );
+    }
+  };
 
 	if (loading) {
 		return (
@@ -167,15 +162,15 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
-	const profileInfo = {
-		profile_picture_url: profileData.profile_picture_url,
-		profile_name: profileData.profile_name,
-		username: profileData.username,
-		bio: profileData.bio,
-		links: profileData.links,
-		fav_genres: profileData.fav_genres,
-		fav_songs: profileData.fav_songs,
-	};
+  const profileInfo = {
+    profile_picture_url: profileData.profile_picture_url,
+    profile_name: profileData.profile_name,
+    username: profileData.username,
+    bio: profileData.bio,
+    links: profileData.links,
+    fav_genres: profileData.fav_genres,
+    fav_songs: profileData.fav_songs,
+  };
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
@@ -290,29 +285,27 @@ const ProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-	roomCardsContainer: {
-		flexDirection: "row",
-		// justifyContent: 'space-between',
-		marginBottom: 20,
-	},
-
-	title: {
-		fontSize: 20,
-		fontWeight: "600",
-		paddingBottom: 10,
-	},
-	button: {
-		width: 155,
-		height: 37,
-		backgroundColor: "rgba(158, 171, 184, 1)",
-		borderRadius: 18.5,
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	buttonText: {
-		color: "black",
-		fontWeight: "600",
-	},
+  roomCardsContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    paddingBottom: 10,
+  },
+  button: {
+    width: 155,
+    height: 37,
+    backgroundColor: "rgba(158, 171, 184, 1)",
+    borderRadius: 18.5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "black",
+    fontWeight: "600",
+  },
 });
 
 export default ProfileScreen;
