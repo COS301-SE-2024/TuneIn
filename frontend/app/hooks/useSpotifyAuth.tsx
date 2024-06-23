@@ -5,7 +5,14 @@ import axios from 'axios';
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 
 const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
+if (!clientId) {
+  throw new Error('No client ID (VITE_SPOTIFY_CLIENT_ID) provided in environment variables');
+}
 const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
+if (!clientSecret) {
+  throw new Error('No client secret (VITE_SPOTIFY_CLIENT_SECRET) provided in environment variables');
+}
+
 
 export const useSpotifyAuth = () => {
   const [accessToken, setAccessToken] = useState<string>('');

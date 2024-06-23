@@ -15,7 +15,14 @@ import { useRouter } from "expo-router";
 import { VITE_SPOTIFY_CLIENT_ID, VITE_REDIRECT_TARGET } from "@env";
 
 const clientId = VITE_SPOTIFY_CLIENT_ID;
+if (!clientId) {
+  throw new Error("No Spotify client ID (VITE_SPOTIFY_CLIENT_ID) provided in environment variables");
+}
+
 const redirectTarget = VITE_REDIRECT_TARGET;
+if (!redirectTarget) {
+  throw new Error("No redirect target (VITE_REDIRECT_TARGET) provided in environment variables");
+}
 
 const LoginScreen = () => {
   const router = useRouter();
