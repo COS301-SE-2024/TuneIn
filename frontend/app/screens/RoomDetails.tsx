@@ -13,7 +13,7 @@ const _AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_NEST_BUCKET_NAME = "tunein-nest-bucket";
 const AWS_S3_REGION = process.env.AWS_S3_REGION;
 const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT;
-const BASE_URL = "http://10.32.253.158:3000/";
+const BASE_URL = "http://localhost:3000/";
 
 
 const RoomDetails: React.FC = () => {
