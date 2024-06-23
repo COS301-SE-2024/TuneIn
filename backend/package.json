@@ -27,6 +27,9 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.592.0",
     "@aws-sdk/credential-providers": "^3.592.0",
+    "@bull-board/api": "^5.20.2",
+    "@bull-board/express": "^5.20.2",
+    "@bull-board/ui": "^5.20.2",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/bull": "^10.1.1",
     "@nestjs/common": "^10.3.9",
@@ -44,6 +47,7 @@
     "bull": "^4.13.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "express": "^4.19.2",
     "ioredis": "^5.4.1",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",

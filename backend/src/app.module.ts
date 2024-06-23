@@ -18,6 +18,7 @@ import { SpotifyModule } from "./spotify/spotify.module";
 import { HttpModule } from "@nestjs/axios";
 import { TasksModule } from "./tasks/tasks.module";
 import { BullConfigModule } from "./bull-config/bull-config.module";
+import { BullBoardModule } from "./bull-board/bull-board.module";
 
 @Module({
 	imports: [
@@ -32,6 +33,7 @@ import { BullConfigModule } from "./bull-config/bull-config.module";
 		S3Module,
 		SpotifyModule,
 		HttpModule,
+		BullBoardModule,
 		TasksModule,
 		BullConfigModule,
 	],

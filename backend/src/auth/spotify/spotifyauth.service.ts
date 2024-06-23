@@ -15,6 +15,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { SpotifyService } from "src/spotify/spotify.service";
 import { TasksService } from "src/tasks/tasks.service";
+import { AxiosError } from "axios";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -101,28 +102,35 @@ export class SpotifyAuthService {
 
 		return details as SpotifyTokenResponse;
         */
-		const response = await firstValueFrom(
-			this.httpService.post(
-				"https://accounts.spotify.com/api/token",
-				{
-					grant_type: "authorization_code",
-					code: code,
-					redirect_uri: this.redirectUri,
-				},
-				{
-					headers: {
-						"Content-Type": "application/x-www-form-urlencoded",
-						Authorization: `Basic ${this.authHeader}`,
+		try {
+			const response = await firstValueFrom(
+				this.httpService.post(
+					"https://accounts.spotify.com/api/token",
+					{
+						grant_type: "authorization_code",
+						code: code,
+						redirect_uri: this.redirectUri,
 					},
-				},
-			),
-		);
+					{
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+							Authorization: `Basic ${this.authHeader}`,
+						},
+					},
+				),
+			);
 
-		if (!response || !response.data) {
+			if (!response || !response.data) {
+				throw new Error("Failed to exchange code for token");
+			}
+
+			return response.data as SpotifyTokenResponse;
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err.response?.data);
+			}
 			throw new Error("Failed to exchange code for token");
 		}
-
-		return response.data as SpotifyTokenResponse;
 	}
 
 	async generateJWT(user: PrismaTypes.users): Promise<string> {
@@ -198,6 +206,9 @@ export class SpotifyAuthService {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
 			await this.tasksService.addImportLibraryTask(tk, response.user_id);
+			for (let i = 0; i < 10; i++) {
+				await this.tasksService.addTask({ i });
+			}
 			return response;
 		} catch (err) {
 			console.log(err);
