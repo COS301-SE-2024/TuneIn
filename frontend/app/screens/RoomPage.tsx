@@ -72,19 +72,40 @@ const RoomPage = () => {
 	useEffect(() => {
 		const fetchQueue = async () => {
 			const storedToken = await AsyncStorage.getItem('token');
-			try {
-				const response = await fetch(`http://192.168.56.1:4000/rooms/${roomData.id}/songs`,{
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${storedToken}`
-						}},
-				);
-				const data = await response.json();
-				setQueue(data[0]);
-			} catch (error) {
-				console.error("Failed to fetch queue:", error);
+		  
+			if (!storedToken) {
+			  console.error("No stored token found");
+			  return;
 			}
-		};
+		  
+			try {
+			  const response = await fetch(`http://192.168.56.1:3000/rooms/${roomData.id}/songs`, {
+				method: 'GET',
+				headers: {
+				  'Content-Type': 'application/json',
+				  Authorization: `Bearer ${storedToken}`
+				},
+			  });
+		  
+			  if (!response.ok) {
+				const errorText = await response.text();
+				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
+				return;
+			  }
+		  
+			  const data = await response.json();
+			  console.log("Fetched queue data:", data);
+		  
+			  if (Array.isArray(data) && data.length > 0) {
+				setQueue(data[0]);
+			  } else {
+				console.error("Unexpected response data format:", data);
+			  }
+			} catch (error) {
+			  console.error("Failed to fetch queue:", error);
+			}
+		  };
+		  
 	
 		fetchQueue();
 	}, [roomData.id]);
