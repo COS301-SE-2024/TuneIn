@@ -20,7 +20,7 @@ export const useSpotifyAuth = () => {
     if (expirationTime) {
       const interval = setInterval(() => {
         const currentTime = Date.now();
-        if (currentTime >= expirationTime - 180000) { // Refresh token 1 minute before expiration
+        if (currentTime >= expirationTime - 180000) { // Refresh token 3 minutes before expiration
           refreshAccessToken();
         }
       }, 10000); // Check every 10 seconds
@@ -116,6 +116,34 @@ export const useSpotifyAuth = () => {
     }
   };
 
+const getToken = async (): Promise<string> => {
+  try {
+    let token = await AsyncStorage.getItem('access_token');
+    const storedExpirationTime = await AsyncStorage.getItem('expiration_time');
+    
+
+    if (!token || !storedExpirationTime) {
+      throw new Error('No access token found');
+    }
+
+    const expirationTime = parseInt(storedExpirationTime, 10);
+    const currentTime = Date.now();
+
+    if (currentTime >= expirationTime) {
+      console.log('Token has expired. Refreshing token...');
+      await getRefreshToken();
+      token = await AsyncStorage.getItem('access_token');
+      console.log('Token refreshed:', token);
+    }
+
+    return token;
+  } catch (err) {
+    console.error('An error occurred while getting the token', err);
+    throw err;
+  }
+};
+
+
   return {
     accessToken,
     refreshToken,
@@ -123,20 +151,6 @@ export const useSpotifyAuth = () => {
     handleTokenChange,
     handleRefreshTokenChange,
     getRefreshToken,
-    getToken, // Export the getToken function
+    getToken,
   };
 };
-
-export const getToken = async (): Promise<string> => {
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      if (token) {
-        return token;
-      } else {
-        throw new Error('No access token found');
-      }
-    } catch (err) {
-      console.error('An error occurred while getting the token', err);
-      throw err;
-    }
-  };
