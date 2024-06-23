@@ -28,7 +28,6 @@ const Home: React.FC = () => {
 
   const fetchRooms = async (token: string | null, type?: string) => {
     try {
-      console.log('fetching rooms', `${baseURL}/users/rooms${type ? type : ''}`)
       const response = await axios.get(`${baseURL}/users/rooms${type ? type : ''}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

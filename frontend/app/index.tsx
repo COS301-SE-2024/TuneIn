@@ -14,14 +14,14 @@ const App: React.FC = () => {
     const checkToken = async () => {
       try {
         const token = await StorageService.getItem("cognitoToken"); // Use StorageService to get the token
-        // Perform token validation if necessary
-        if (token) {
-          // Redirect to the HomeScreen or appropriate route
-          router.push("/screens/Home");
-        } else {
+        // // Perform token validation if necessary
+        // if (token) {
+        //   // Redirect to the HomeScreen or appropriate route
+        //   router.push("/screens/Home");
+        // } else {
           // Redirect to the WelcomeScreen or appropriate route
           router.push("/screens/WelcomeScreen");
-        }
+        // }
       } catch (error) {
         console.error("Error checking token:", error);
         // Redirect to the WelcomeScreen or appropriate route

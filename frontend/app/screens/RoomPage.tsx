@@ -86,10 +86,14 @@ const RoomPage = () => {
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
+  	const [joined, setJoined] = useState(false);
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<Message[]>([]);
+	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
+	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
 
 	const socket = useRef<io.Socket | null>(null);
 
@@ -271,12 +275,52 @@ const RoomPage = () => {
 
 	useEffect(() => {
 		const fetchQueue = async () => {
-			const data = getQueue();
-			setQueue(data);
-		};
-
+			const storedToken = await AsyncStorage.getItem('token');
+		  
+			if (!storedToken) {
+			  console.error("No stored token found");
+			  return;
+			}
+		  
+			try {
+			  const response = await fetch(`http://192.168.56.1:3000/rooms/${roomData.id}/songs`, {
+				method: 'GET',
+				headers: {
+				  'Content-Type': 'application/json',
+				  Authorization: `Bearer ${storedToken}`
+				},
+			  });
+		  
+			  if (!response.ok) {
+				const errorText = await response.text();
+				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
+				return;
+			  }
+		  
+			  const data = await response.json();
+			  console.log("Fetched queue data:", data);
+		  
+			  if (Array.isArray(data) && data.length > 0) {
+				setQueue(data[0]);
+			  } else {
+				console.error("Unexpected response data format:", data);
+			  }
+			} catch (error) {
+			  console.error("Failed to fetch queue:", error);
+			}
+		  };
+		  
+	
 		fetchQueue();
 	}, [roomData.roomID]);
+
+
+	const getRoomState = () => {
+		return {
+		  currentTrackIndex,
+		  secondsPlayed
+		};
+	  };
 
 	useEffect(() => {
 		return () => {
@@ -290,32 +334,62 @@ const RoomPage = () => {
 	// 	// router.goBack();
 	// };
 
-	const handleJoinLeave = () => {
-		// Simulate toggling join/leave
+	useEffect(() => {
+		if (isPlaying) {
+		  trackPositionIntervalRef.current = setInterval(() => {
+			setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+		  }, 1000);
+		} else {
+		  clearInterval(trackPositionIntervalRef.current);
+		}
+	
+		return () => {
+		  clearInterval(trackPositionIntervalRef.current);
+		};
+	  }, [isPlaying]);
+
+	  const handleJoinLeave = () => {
 		setJoined((prevJoined) => !prevJoined);
-		if (joined) {
-			leaveRoom();
-		} else {
+		if (!joined) {
 			joinRoom();
-		}
-	};
-
-	const playPauseTrack = (track, index) => {
-		if (!track) {
-			console.error("Invalid track:", track);
-			return;
-		}
-
-		if (index === currentTrackIndex && isPlaying) {
-			handlePlayback("pause");
-			setIsPlaying(false);
+			setJoined(true);
+		  setJoinedSongIndex(currentTrackIndex);
+		  setJoinedSecondsPlayed(secondsPlayed);
+		  console.log(
+			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`
+		  );
+		  if (queue.length > 0) {
+			playPauseTrack(queue[0], 0);
+		  }
 		} else {
-			handlePlayback("play", track.uri).then(() => {
-				setCurrentTrackIndex(index);
-				setIsPlaying(true);
-			});
+			leaveRoom();
+			setJoined(false);
+		  setJoinedSongIndex(null);
+		  setJoinedSecondsPlayed(null);
+		  handlePlayback("pause");
+		  setIsPlaying(false);
 		}
-	};
+	  };
+	  
+	
+
+  const playPauseTrack = (track, index) => {
+    if (!track) {
+      console.error("Invalid track:", track);
+      return;
+    }
+
+    if (index === currentTrackIndex && isPlaying) {
+      handlePlayback("pause");
+      setIsPlaying(false);
+    } else {
+      const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
+      handlePlayback("play", track.uri, offset).then(() => {
+        setCurrentTrackIndex(index);
+        setIsPlaying(true);
+      });
+    }
+  };
 
 	const playNextTrack = () => {
 		const nextIndex = currentTrackIndex + 1;

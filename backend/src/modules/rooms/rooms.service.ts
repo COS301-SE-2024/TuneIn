@@ -276,11 +276,12 @@ export class RoomsService {
 	}
 
 	addSongToQueueDUMBVERSION(roomID: string, songID: string): string[] {
-		const queue = this.DUMBroomQueues.get(roomID) || [];
-		queue.push(songID);
-		this.DUMBroomQueues.set(roomID, queue);
-		return queue;
-	}
+		// Replace the old queue with a new queue containing only the new song
+		const newQueue = [songID];
+		this.DUMBroomQueues.set(roomID, newQueue);
+		return newQueue;
+	  }
+	  
 
 	getCurrentSong(roomID: string): SongInfoDto {
 		// TODO: Implement logic to get current playing song

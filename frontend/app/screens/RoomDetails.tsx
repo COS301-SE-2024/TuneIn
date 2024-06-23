@@ -135,10 +135,9 @@ const RoomDetails: React.FC = () => {
       body: JSON.stringify(newRoom),
     }).then((response) => response.json())
     .then((data) => {
-      console.log(data);
       const moreData = JSON.stringify(data)
       router.navigate({
-        pathname: '/screens/ChatRoom',
+        pathname: '/screens/Home',
         params: data
       });
     }).catch((error) => {

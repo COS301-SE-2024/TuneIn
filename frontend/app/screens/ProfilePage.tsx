@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -50,22 +49,6 @@ const ProfileScreen: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string | null>(null);
-
-  const fetchProfileInfo = async (token: string | null) => {
-    try {
-      const response = await axios.get(`${baseURL}/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching profile info:", error);
-      return [];
-    }
-  };
-
   const [profileData, setProfileData] = useState<any>(null);
 
   useEffect(() => {
@@ -87,8 +70,39 @@ const ProfileScreen: React.FC = () => {
     getTokenAndData();
   }, []);
 
+  const fetchProfileInfo = async (token: string | null) => {
+    try {
+      const response = await axios.get(`${baseURL}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching profile info:", error);
+      return null;
+    }
+  };
+
+  const handleJoinLeave = async () => {
+    try {
+      const response = await axios.post(`${baseURL}/joinLeaveRoom`, {
+        roomId: profileData.current_room.roomId,
+        action: profileData.current_room.joined ? "leave" : "join",
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const updatedProfileData = { ...profileData, current_room: response.data };
+      setProfileData(updatedProfileData);
+    } catch (error) {
+      console.error("Error updating room join/leave:", error);
+    }
+  };
+
   const renderLinks = () => {
-    if (profileData.links.count > 1) {
+    if (profileData.links.count && profileData.links.count > 1) {
       const firstLink = profileData.links.data[0].links;
       const remainingCount = profileData.links.count - 1;
 
@@ -148,6 +162,7 @@ const ProfileScreen: React.FC = () => {
                 songName={room.current_song.title}
                 artistName={room.current_song.artists}
                 username={room.creator.username}
+                imageUrl = {room.room_image}
               />
             ))}
           </View>
@@ -179,13 +194,13 @@ const ProfileScreen: React.FC = () => {
       <View style={{ padding: 15 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity>
+          {/* <TouchableOpacity>
             <Text style={[styles.buttonText, { paddingBottom: 20 }]}>
               Settings
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
-        <Text style={{ fontWeight: "600", fontSize: 20, textAlign: "center" }}>
+        <Text style={{ fontWeight: "600", fontSize: 20, textAlign: "center", marginTop: 20 }}>
           Profile
         </Text>
         <View style={{ alignItems: "center", marginTop: 20 }}>
@@ -241,18 +256,18 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.buttonText}>Edit</Text>
           </TouchableOpacity>
         </View>
-        <View style={{ paddingHorizontal: 20 }}>
+        {/* <View style={{ paddingHorizontal: 20 }}>
           <NowPlaying
             title={favoriteSongsData[0].songTitle}
             artist={favoriteSongsData[0].artist}
             duration={favoriteSongsData[0].duration}
           />
-        </View>
+        </View> */}
         <View style={{ paddingHorizontal: 20 }}>
           <BioSection content={profileData.bio} />
         </View>
         <View style={{ paddingHorizontal: 20 }}>
-          <GenreList items={profileData.fav_genres.data} />
+        <GenreList items={profileData.fav_genres.data} />
         </View>
         <View style={{ paddingHorizontal: 20 }}>
           <Text style={styles.title}>Favorite Songs</Text>
@@ -273,6 +288,18 @@ const ProfileScreen: React.FC = () => {
         </View>
         {renderFavRooms()}
         {renderRecentRooms()}
+        {profileData.current_room ? (
+          <View style={{ alignItems: "center", marginTop: 20 }}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleJoinLeave}
+            >
+              <Text style={styles.buttonText}>
+                {profileData.current_room.joined ? "Leave Room" : "Join Room"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -303,3 +330,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+

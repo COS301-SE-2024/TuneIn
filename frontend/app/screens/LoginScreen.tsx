@@ -27,7 +27,7 @@ const LoginScreen: React.FC = () => {
   const router = useRouter();
 
   const navigateToHome = () => {
-    console.log(emailOrUsername, password);
+
     const userData = {
       Username: emailOrUsername,
       Pool: UserPool,
@@ -73,10 +73,7 @@ const LoginScreen: React.FC = () => {
           .then((data) => {
             const token = data.token; // Extract the token from the response
             StorageService.setItem("token", token); // Save the token to AsyncStorage
-            router.navigate("/screens/Home");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
+            console.log("jwt : " + token);
           });
       },
       onFailure: function (err) {
