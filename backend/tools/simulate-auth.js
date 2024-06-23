@@ -1,7 +1,7 @@
 // required env variables
 /*
-    - EXPO_USER_POOL_ID
-    - EXPO_CLIENT_ID
+    - AWS_COGNITO_USER_POOL_ID
+    - AWS_COGNITO_CLIENT_ID
     - PERSONAL_EMAIL
     - PERSONAL_PASSWORD
 */
@@ -16,8 +16,8 @@ import {
 } from "amazon-cognito-identity-js";
 
 const poolData = {
-	UserPoolId: process.env.EXPO_USER_POOL_ID,
-	ClientId: process.env.EXPO_CLIENT_ID,
+	UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID,
+	ClientId: process.env.AWS_COGNITO_CLIENT_ID,
 };
 
 console.log("UserPool.tsx: poolData", poolData);

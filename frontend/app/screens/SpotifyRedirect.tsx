@@ -3,11 +3,11 @@ import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-nat
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
-import { VITE_SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET, VITE_REDIRECT_TARGET } from '@env';
+import { SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_TARGET } from '@env';
 
-const clientId = VITE_SPOTIFY_CLIENT_ID;
+const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
-  throw new Error('No Spotify client ID (VITE_SPOTIFY_CLIENT_ID) provided in environment variables');
+  throw new Error('No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables');
 }
 
 const clientSecret = VITE_SPOTIFY_CLIENT_SECRET;
@@ -15,9 +15,9 @@ if (!clientSecret) {
   throw new Error('No Spotify client secret (VITE_SPOTIFY_CLIENT_SECRET) provided in environment variables');
 }
 
-const redirectTarget = VITE_REDIRECT_TARGET;
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
-  throw new Error('No redirect target (VITE_REDIRECT_TARGET) provided in environment variables');
+  throw new Error('No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables');
 }
 
 const SpotifyRedirect = () => {

@@ -4,9 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 
-const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
+const clientId = process.env.SPOTIFY_CLIENT_ID;
 if (!clientId) {
-  throw new Error('No client ID (VITE_SPOTIFY_CLIENT_ID) provided in environment variables');
+  throw new Error('No client ID (SPOTIFY_CLIENT_ID) provided in environment variables');
 }
 const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
 if (!clientSecret) {
