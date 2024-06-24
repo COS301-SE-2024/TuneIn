@@ -44,6 +44,8 @@ const ProfileScreen: React.FC = () => {
 			albumArt: "https://example.com/path-to-album-art3.jpg",
 		},
 	]);
+	const BackgroundIMG: string = "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
+
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -85,20 +87,6 @@ const ProfileScreen: React.FC = () => {
 
 		getTokenAndData();
 	}, []);
-
-  const fetchProfileInfo = async (token: string | null) => {
-    try {
-      const response = await axios.get(`${baseURL}/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching profile info:", error);
-      return null;
-    }
-  };
 
   const handleJoinLeave = async () => {
     try {
@@ -163,6 +151,7 @@ const ProfileScreen: React.FC = () => {
 								songName={room.current_song.title}
 								artistName={room.current_song.artists}
 								username={room.creator.username}
+								imageUrl={room.room_image ? room.room_image : BackgroundIMG}
 							/>
 						))}
 					</View>
@@ -185,6 +174,7 @@ const ProfileScreen: React.FC = () => {
 								songName={room.current_song.title}
 								artistName={room.current_song.artists}
 								username={room.creator.username}
+								imageUrl={room.room_image ? room.room_image : BackgroundIMG}
 							/>
 						))}
 					</View>
