@@ -757,6 +757,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	backButtonText: {
+		fontWeight: "bold",
 		fontSize: 18,
 	},
 	backgroundImage: {
