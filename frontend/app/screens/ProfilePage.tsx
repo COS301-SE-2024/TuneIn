@@ -22,7 +22,7 @@ import * as StorageService from "./../services/StorageService"; // Import Storag
 
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://localhost:3000";
+	const baseURL = "http://10.0.2.2:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{

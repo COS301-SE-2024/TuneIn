@@ -28,7 +28,7 @@ import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://10.0.2.2:3000";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -87,7 +87,6 @@ const RoomPage = () => {
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-  	const [joined, setJoined] = useState(false);
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
