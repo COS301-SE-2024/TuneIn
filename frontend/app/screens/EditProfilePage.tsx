@@ -94,7 +94,7 @@ const EditProfileScreen = () => {
 				'Content-Type': 'multipart/form-data',
 			};
 	
-			// const uploadResponse = await axios.post("http://localhost:3000/upload", form, { headers });
+			// const uploadResponse = await axios.post("http://10.0.2.2:3000/upload", form, { headers });
 			console.log(profileData)
 			console.log("Uploading image...", uri)
 			const imageLink = await uploadImage(uri, 'image');

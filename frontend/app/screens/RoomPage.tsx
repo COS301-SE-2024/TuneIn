@@ -71,8 +71,8 @@ const getQueue = () => {
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
-	const roomData: Room = JSON.parse(room);
-	const roomID = roomData.roomID ? roomData.roomID : roomData.id;
+	const roomData = JSON.parse(room);
+	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();

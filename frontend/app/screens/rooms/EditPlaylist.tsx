@@ -100,7 +100,8 @@ const EditPlaylist: React.FC = () => {
 
   const savePlaylist = async () => {
     console.log('Playlist saved:', playlist);
-    Alert.alert('Playlist Saved', 'Playlist saved successfully.');
+    console.log('in room :',Room_id);
+
     // Add logic to save the playlist to the backend if necessary
     try {
       const storedToken = await AsyncStorage.getItem('token');
