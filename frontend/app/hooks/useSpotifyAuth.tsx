@@ -5,13 +5,14 @@ import axios from 'axios';
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
-if (!clientId) {
-  throw new Error('No client ID (SPOTIFY_CLIENT_ID) provided in environment variables');
-}
+// if (!clientId) {
+//   throw new Error('No client ID (SPOTIFY_CLIENT_ID) provided in environment variables');
+// }
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-if (!clientSecret) {
-  throw new Error('No client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables');
-}
+// if (!clientSecret) {
+//   throw new Error('No client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables');
+// }
+console.log(clientId);
 
 
 export const useSpotifyAuth = () => {
