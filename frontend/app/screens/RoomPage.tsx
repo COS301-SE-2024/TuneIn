@@ -12,6 +12,7 @@ import {
 	Platform,
 	Dimensions,
 	Easing,
+	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Room } from "../models/Room";
@@ -81,7 +82,7 @@ const RoomPage = () => {
 	const userRef = useRef<UserProfileDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
-
+	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -93,7 +94,7 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-
+	const IPAddress = "10.32.253.158" // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -129,6 +130,7 @@ const RoomPage = () => {
 			}
 		};
 		getTokenAndSelf();
+		checkBookmark();
 
 		socket.current = io.io(BASE_URL + "/live-chat", {
 			transports: ["websocket"],
@@ -248,6 +250,63 @@ const RoomPage = () => {
 		socket.current.emit("joinRoom", JSON.stringify(input));
 		setJoined(true);
 	}, []);
+	const checkBookmark = async () => {
+		console.log('Checking bookmark')
+		try {
+			const response = await fetch(`http://${IPAddress}:3000/users/bookmarks`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token.current}`,
+				},
+			});
+			const data = await response.json();
+			// check whether the room is bookmarked or not
+			for (let i = 0; i < data.length; i++) {
+				if (data[i].roomID === roomData.roomID) {
+					console.log("Room is bookmarked");
+					setIsBookmarked(true);
+					break;
+				}
+			}
+			console.log(data)
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
+	const handleBookmark = async () => {
+		// make a request to the backend to check if the room is bookmarked
+		// if it is bookmarked, set isBookmarked to true
+		setIsBookmarked(!isBookmarked);
+		console.log('tokeeen', token)
+
+		try {
+			console.log(roomID)
+			const response = await fetch(`http://${IPAddress}:3000/rooms/${roomID}/${isBookmarked? "unbookmark":"bookmark"}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token.current}`,
+				},
+			});
+			console.log(response)
+			if (response.status === 201) {
+				Alert.alert(
+				"Success",
+				`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
+				[
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]
+			);
+			}
+
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	  }
 
 	const leaveRoom = () => {
 		const u: UserProfileDto = userRef.current;
@@ -275,27 +334,27 @@ const RoomPage = () => {
 	useEffect(() => {
 		const fetchQueue = async () => {
 			const storedToken = await AsyncStorage.getItem('token');
-		  
+
 			if (!storedToken) {
 			  console.error("No stored token found");
 			  return;
 			}
-		  
+
 			try {
-			  const response = await fetch(`http://192.168.56.1:3000/rooms/${roomData.id}/songs`, {
+			  const response = await fetch(`http://${IPAddress}:3000/rooms/${roomID}/songs`, {
 				method: 'GET',
 				headers: {
 				  'Content-Type': 'application/json',
 				  Authorization: `Bearer ${storedToken}`
 				},
 			  });
-		  
+
 			  if (!response.ok) {
 				const errorText = await response.text();
 				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
 				return;
 			  }
-		  
+
 			  const data = await response.json();
 			  console.log("Fetched queue data:", data);
 		  
@@ -507,6 +566,16 @@ const RoomPage = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
+					<View style={styles.joinLeaveButtonContainer}>
+						<TouchableOpacity
+							style={styles.joinLeaveButton}
+							onPress={handleBookmark}
+						>
+							<Text style={styles.joinLeaveButtonText}>
+              { isBookmarked ? 'Unbookmark' : 'Bookmark'}
+            </Text>
+						</TouchableOpacity>
+					</View>
 				</View>
 
 				<View style={styles.trackDetails}>
@@ -613,7 +682,7 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontWeight: "bold", fontSize: 16 }}>
+					<Text style={{ fontSize: 16 }}>
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
@@ -688,8 +757,8 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	backButtonText: {
-		fontSize: 18,
 		fontWeight: "bold",
+		fontSize: 18,
 	},
 	backgroundImage: {
 		width: "100%",
@@ -729,7 +798,6 @@ const styles = StyleSheet.create({
 	},
 	username: {
 		fontSize: 18,
-		fontWeight: "bold",
 		color: "white",
 	},
 	roomDetails: {
@@ -738,7 +806,6 @@ const styles = StyleSheet.create({
 	},
 	roomName: {
 		fontSize: 24,
-		fontWeight: "bold",
 		color: "white",
 	},
 	description: {
@@ -773,12 +840,10 @@ const styles = StyleSheet.create({
 	},
 	nowPlayingTrackName: {
 		fontSize: 21,
-		fontWeight: "bold",
 	},
 	nowPlayingTrackArtist: {
 		fontSize: 18,
 		color: "black",
-		fontWeight: "bold",
 	},
 	queueAlbumArt: {
 		width: 60,
@@ -816,7 +881,6 @@ const styles = StyleSheet.create({
 	},
 	queueButtonText: {
 		fontSize: 16,
-		fontWeight: "bold",
 	},
 	queueContainer: {
 		paddingHorizontal: 20,
@@ -844,7 +908,6 @@ const styles = StyleSheet.create({
 	},
 	viewQueueButtonText: {
 		color: "white",
-		fontWeight: "bold",
 		fontSize: 16,
 	},
 	joinLeaveButton: {
@@ -857,7 +920,6 @@ const styles = StyleSheet.create({
 	},
 	joinLeaveButtonText: {
 		color: "white",
-		fontWeight: "bold",
 		fontSize: 16,
 	},
 });
