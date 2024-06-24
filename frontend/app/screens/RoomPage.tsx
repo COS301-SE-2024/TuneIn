@@ -40,34 +40,6 @@ interface ChatRoomScreenProps {
 	roomObj: string;
 }
 
-const getQueue = () => {
-	return [
-		{
-			albumArtUrl:
-				"https://i.scdn.co/image/ab67616d0000b2731ea0c62b2339cbf493a999ad",
-			artistNames: "Kendrick Lamar",
-			explicit: true,
-			id: "6AI3ezQ4o3HUoP6Dhudph3",
-			name: "Not Like Us",
-			preview_url: null,
-			uri: "spotify:track:6AI3ezQ4o3HUoP6Dhudph3",
-			duration_ms: 319958,
-		},
-		{
-			albumArtUrl:
-				"https://i.scdn.co/image/ab67616d0000b2736a6387ab37f64034cdc7b367",
-			artistNames: "Outkast",
-			explicit: false,
-			id: "2PpruBYCo4H7WOBJ7Q2EwM",
-			name: "Hey Ya!",
-			preview_url:
-				"https://p.scdn.co/mp3-preview/d24b3c4135ced9157b0ea3015a6bcc048e0c2e3a?cid=4902747b9d7c4f4195b991f29f8a680a",
-			uri: "spotify:track:2PpruBYCo4H7WOBJ7Q2EwM",
-			duration_ms: 373805,
-		},
-	];
-};
-
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
@@ -94,7 +66,7 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "10.32.253.158" // change IP address to your own IP address
+	const IPAddress = "192.168.56.1" // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -349,7 +321,8 @@ const RoomPage = () => {
 				  Authorization: `Bearer ${storedToken}`
 				},
 			  });
-
+			  console.log("URL: ",`http://${IPAddress}:3000/rooms/${roomID}/songs`);
+			  console.log("response: ",response);
 			  if (!response.ok) {
 				const errorText = await response.text();
 				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
