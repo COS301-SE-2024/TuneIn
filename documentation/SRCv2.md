@@ -1005,11 +1005,13 @@ Technology: React Native for cross-platform development (iOS, Android).
 Limitations: Ensuring consistent performance across different devices and screen sizes.
 
 **Back-End** 
-Technology: Node.js with Express.js for a scalable, modular back-end. 
-Constraints: Node.js version 14.x or later.
+Technology: Nest.js with Prisma ORM, Swagger/OpenAPI specification API,
+JWT auth tokens Socket.io. 
+Constraints: .
 
 **Database** 
-Primary Database: AWS RDS for structured data. 
+Primary Database: AWS RDS for structured data.
+PostGres RDS.
 Secondary Database: None due to free tier limitations (consider in-memory caching using Lambda).
 
 **APIs** 
