@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model authentication {
+  user_id String @id @db.Uuid
+  token   String
+  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+model blocked {
+  blocker                      String   @db.Uuid
+  blockee                      String   @db.Uuid
+  date_blocked                 DateTime @default(now()) @db.Timestamptz(6)
+  blocked_id                   String   @id(map: "blocked_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users_blocked_blockeeTousers users    @relation("blocked_blockeeTousers", fields: [blockee], references: [user_id], onDelete: Cascade, map: "blockee")
+  users_blocked_blockerTousers users    @relation("blocked_blockerTousers", fields: [blocker], references: [user_id], onDelete: Cascade, map: "blocker")
+
+  @@index([blockee], map: "fki_blockee")
+  @@index([blocker], map: "fki_blocker")
+}
+
+model bookmark {
+  user_id     String @db.Uuid
+  room_id     String @db.Uuid
+  bookmark_id String @id(map: "bookmark_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+}
+
+model follows {
+  follower                      String?  @db.Uuid
+  followee                      String?  @db.Uuid
+  date_followed                 DateTime @default(now()) @db.Timestamptz(6)
+  follows_id                    String   @id(map: "follow_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users_follows_followeeTousers users?   @relation("follows_followeeTousers", fields: [followee], references: [user_id], onDelete: Cascade, map: "followee")
+  users_follows_followerTousers users?   @relation("follows_followerTousers", fields: [follower], references: [user_id], onDelete: Cascade, map: "follower")
+
+  @@index([followee], map: "fki_followee")
+}
+
+model friends {
+  is_pending                   Boolean   @default(true)
+  is_close_friend              Boolean   @default(false)
+  date_friended                DateTime? @db.Timestamptz(6)
+  date_requested               DateTime  @default(now()) @db.Timestamptz(6)
+  friend1                      String    @db.Uuid
+  friend2                      String    @db.Uuid
+  friend_id                    String    @id(map: "friend_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users_friends_friend1Tousers users     @relation("friends_friend1Tousers", fields: [friend1], references: [user_id], onDelete: Cascade, map: "friend1")
+  users_friends_friend2Tousers users     @relation("friends_friend2Tousers", fields: [friend2], references: [user_id], onDelete: Cascade, map: "friend2")
+
+  @@index([friend2], map: "fki_friend2")
+}
+
+model message {
+  message_id      String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contents        String
+  date_sent       DateTime         @default(now()) @db.Timestamptz(6)
+  sender          String           @db.Uuid
+  users           users            @relation(fields: [sender], references: [user_id], onDelete: Cascade, map: "sender")
+  private_message private_message?
+  room_message    room_message?
+}
+
+model participate {
+  user_id        String   @db.Uuid
+  room_id        String   @db.Uuid
+  date_joined    DateTime @default(now()) @db.Timestamptz(6)
+  participate_id String   @id(map: "participate_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  banned         Boolean? @default(false)
+  users          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
+  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+
+  @@index([room_id], map: "fki_room")
+}
+
+model playlist {
+  playlist_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  name        String
+  playlist    String[]
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+model private_message {
+  p_message_id String  @id @db.Uuid
+  recipient    String  @db.Uuid
+  message      message @relation(fields: [p_message_id], references: [message_id], onDelete: Cascade)
+  users        users   @relation(fields: [recipient], references: [user_id], onDelete: Cascade, map: "recipient")
+
+  @@index([recipient], map: "fki_recipient")
+}
+
+model private_room {
+  room_id   String  @id @db.Uuid
+  is_listed Boolean @default(true)
+  room      room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model public_room {
+  room_id String @id @db.Uuid
+  room    room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model queue {
+  room_id         String  @db.Uuid
+  song_id         String  @db.Uuid
+  is_done_playing Boolean @default(false)
+  queue_id        String  @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room            room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  song            song    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
+  vote            vote[]
+
+  @@index([song_id], map: "fki_song_id")
+}
+
+model room {
+  room_id        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name           String
+  room_creator   String          @db.Uuid
+  playlist_photo String?
+  description    String?         @default("This room has no description")
+  date_created   DateTime        @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean         @default(false)
+  is_temporary   Boolean?        @default(false)
+  room_language  String?         @default("English")
+  explicit       Boolean?        @default(false)
+  tags           String[]
+  bookmark       bookmark[]
+  participate    participate[]
+  private_room   private_room?
+  public_room    public_room?
+  queue          queue[]
+  users          users           @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  room_message   room_message[]
+  scheduled_room scheduled_room?
+}
+
+model room_message {
+  message_id String  @id @db.Uuid
+  room_id    String  @db.Uuid
+  room       room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  message    message @relation(fields: [message_id], references: [message_id], onDelete: Cascade)
+}
+
+model scheduled_room {
+  room_id        String   @id @db.Uuid
+  scheduled_date DateTime @db.Timestamptz(6)
+  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
+
+  @@index([room_id], map: "fki_scheduled_room ")
+}
+
+model song {
+  song_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String
+  artist      String
+  genre       String?
+  lyrics_url  String?
+  duration    Int?     @default(0)
+  genres      String[]
+  artwork_url String?
+  spotify_id  String?
+  queue       queue[]
+}
+
+model users {
+  user_id                         String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                        String
+  bio                             String?
+  profile_picture                 String?
+  activity                        Json?             @db.Json
+  preferences                     Json?             @db.Json
+  full_name                       String?
+  external_links                  Json?             @db.Json
+  email                           String?
+  authentication                  authentication?
+  blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
+  blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
+  bookmark                        bookmark[]
+  follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
+  follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
+  friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
+  friends_friends_friend2Tousers  friends[]         @relation("friends_friend2Tousers")
+  message                         message[]
+  participate                     participate[]
+  playlist                        playlist[]
+  private_message                 private_message[]
+  room                            room[]
+}
+
+model vote {
+  vote_id   String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  is_upvote Boolean @default(true)
+  queue_id  String  @db.Uuid
+  queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+}

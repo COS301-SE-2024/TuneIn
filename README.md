@@ -1,7 +1,9 @@
 # TuneIn
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
 
-(code coverage badges temporarily removed)
+<a href="https://codecov.io/gh/COS301-SE-2024/TuneIn">
+    <img alt="Coverage" src="https://codecov.io/gh/COS301-SE-2024/TuneIn/branch/main/graph/badge.svg?token=7T6WCYXEIO">
+</a>
 
 ## TuneIn - Apollo - Project Description
 
@@ -22,10 +24,8 @@ Key Features:
 
 TuneIn isn't just an app—it's a gateway to a world where music brings people closer together. Whether you're sharing a favourite track with friends or discovering new beats in a virtual room, TuneIn is here to amplify the joy of music and strengthen connections. Let's turn up the volume on togetherness with TuneIn!
 
-(demo link here)
-
 # 🧑‍💻Meet the team
-(team member images temporarily removed due to weird spacing)
+(team member images temporarily removed due to poor spacing)
 
 <table style="border-width: 1px; width: 100%; font-family: Arial, sans-serif; border-collapse: collapse;">
   <tr>
@@ -135,11 +135,11 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 
 ## :blue_book: Documentation
 
-(link to SRS document)
+[our UI design / wireframe](https://www.figma.com/design/vM3jH8s1Xt2CLlFjRRkzQ8/LoFi?node-id=0-1&t=8Qu3n4sAnXvIIUYE-1)
 
-(link to Design Specification)
+[link to our SRS document](https://github.com/COS301-SE-2024/TuneIn/blob/main/documentation/SRS.md)
 
-
+[link to our Functional Requirements document (also included in SRS above)](https://github.com/COS301-SE-2024/TuneIn/blob/main/documentation/FR.md)
 
 ## :gear: Technologies
 
