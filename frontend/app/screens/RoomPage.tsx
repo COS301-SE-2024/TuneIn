@@ -82,7 +82,6 @@ const RoomPage = () => {
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 
-	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -283,7 +282,7 @@ const RoomPage = () => {
 			}
 		  
 			try {
-			  const response = await fetch(`http://192.168.56.1:3000/rooms/${roomData.id}/songs`, {
+			  const response = await fetch(`http://localhost:3000/rooms/${roomData.id}/songs`, {
 				method: 'GET',
 				headers: {
 				  'Content-Type': 'application/json',
