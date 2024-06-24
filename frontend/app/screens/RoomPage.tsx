@@ -70,8 +70,8 @@ const getQueue = () => {
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
-	const roomData: Room = JSON.parse(room);
-	const roomID = roomData.roomID ? roomData.roomID : roomData.id;
+	const roomData = JSON.parse(room);
+	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
@@ -87,7 +87,6 @@ const RoomPage = () => {
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-  	const [joined, setJoined] = useState(false);
 	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
@@ -779,7 +778,7 @@ const styles = StyleSheet.create({
 	nowPlayingTrackArtist: {
 		fontSize: 18,
 		color: "black",
-		fontWeight: 400,
+		fontWeight: "bold",
 	},
 	queueAlbumArt: {
 		width: 60,

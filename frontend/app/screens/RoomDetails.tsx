@@ -34,7 +34,7 @@ if (!AWS_S3_ENDPOINT) {
   throw new Error('No AWS endpoint (AWS_S3_ENDPOINT) provided in environment variables');
 }
 
-const BASE_URL = "http://localhost:3000/";
+const BASE_URL = "http://10.0.2.2:3000/";
 
 
 const RoomDetails: React.FC = () => {

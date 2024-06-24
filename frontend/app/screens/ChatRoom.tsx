@@ -12,7 +12,7 @@ import axios from 'axios';
 import { ChatEventDto } from '../models/ChatEventDto';
 import RoomDetails from './RoomDetails';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://10.0.2.2:3000';
 
 type Message = {
   message: LiveChatMessageDto;
