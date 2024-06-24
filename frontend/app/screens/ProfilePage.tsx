@@ -18,35 +18,36 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
-
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://10.0.2.2:3000";
-	const router = useRouter();
-	const [favoriteSongsData, setFavoriteSongsData] = useState([
-		{
-			songTitle: "Don't Smile At Me",
-			artist: "Billie Eilish",
-			duration: "5:33",
-			albumArt: "https://example.com/path-to-album-art1.jpg",
-		},
-		{
-			songTitle: "Blinding Lights",
-			artist: "The Weekend",
-			duration: "3:20",
-			albumArt: "https://example.com/path-to-album-art2.jpg",
-		},
-		{
-			songTitle: "Shape of You",
-			artist: "Ed Sheeran",
-			duration: "4:24",
-			albumArt: "https://example.com/path-to-album-art3.jpg",
-		},
-	]);
-	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
-	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
-	const [loading, setLoading] = useState<boolean>(true);
+  const baseURL = "http://192.168.56.1:3000";
+  const router = useRouter();
+  const [favoriteSongsData, setFavoriteSongsData] = useState([
+    {
+      id: 1,
+      songTitle: "Don't Smile At Me",
+      artist: "Billie Eilish",
+      duration: "5:33",
+      albumArt: "https://example.com/path-to-album-art1.jpg",
+    },
+    {
+      id: 2,
+      songTitle: "Blinding Lights",
+      artist: "The Weekend",
+      duration: "3:20",
+      albumArt: "https://example.com/path-to-album-art2.jpg",
+    },
+    {
+      id: 3,
+      songTitle: "Shape of You",
+      artist: "Ed Sheeran",
+      duration: "4:24",
+      albumArt: "https://example.com/path-to-album-art3.jpg",
+    },
+  ]);
+  const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+  const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
@@ -54,7 +55,7 @@ const ProfileScreen: React.FC = () => {
   useEffect(() => {
     const getTokenAndData = async () => {
       try {
-        const storedToken = await StorageService.getItem("token");
+        const storedToken = await AsyncStorage.getItem("token");
         setToken(storedToken);
 
         if (storedToken) {
@@ -162,7 +163,7 @@ const ProfileScreen: React.FC = () => {
                 songName={room.current_song.title}
                 artistName={room.current_song.artists}
                 username={room.creator.username}
-                imageUrl = {room.room_image}
+                imageUrl={room.room_image}
               />
             ))}
           </View>
@@ -271,9 +272,9 @@ const ProfileScreen: React.FC = () => {
         </View>
         <View style={{ paddingHorizontal: 20 }}>
           <Text style={styles.title}>Favorite Songs</Text>
-          {profileData.fav_songs.data.slice(0, 2).map((song, index) => (
+          {profileData.fav_songs.data.slice(0, 2).map((song) => (
             <FavoriteSongs
-              key={index}
+              key={song.id}
               songTitle={song.title}
               artist={song.artists}
               duration={song.duration}
@@ -330,4 +331,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
-
