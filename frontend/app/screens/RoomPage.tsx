@@ -28,6 +28,7 @@ import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const BASE_URL = "http://192.168.56.1:3000";
 
@@ -66,7 +67,7 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "192.168.56.1" // change IP address to your own IP address
+	const IPAddress = "192.168.56.1"; // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -88,18 +89,15 @@ const RoomPage = () => {
 			}
 
 			try {
-				const roomDto = await axios.get(
-					`${BASE_URL}/rooms/${roomID}`,
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
-						},
+				const roomDto = await axios.get(`${BASE_URL}/rooms/${roomID}`, {
+					headers: {
+						Authorization: `Bearer ${storedToken}`,
 					},
-				);
+				});
 				roomObjRef.current = roomDto.data;
 				setRoomObj(roomDto.data);
 			} catch (error) {
-				console.error("Error fetching room:", error);
+				// console.error("Error fetching room:", error);
 			}
 		};
 		getTokenAndSelf();
@@ -110,7 +108,7 @@ const RoomPage = () => {
 		});
 
 		const setupSocketEventHandlers = () => {
-			console.log("Setting up socket event handlers...");	
+			console.log("Setting up socket event handlers...");
 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
 				//if someone joins (could be self)
 				const u = userRef.current;
@@ -127,7 +125,7 @@ const RoomPage = () => {
 				console.log("Socket emit: getChatHistory", input);
 				socket.current.emit("getChatHistory", JSON.stringify(input));
 			});
-	
+
 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
 				//an event that should be in response to the getChatHistory event
 				const u = userRef.current;
@@ -137,7 +135,7 @@ const RoomPage = () => {
 				}));
 				setMessages(chatHistory);
 			});
-	
+
 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
 				console.log("Received live message:", newMessage);
 				const message = newMessage.body;
@@ -152,14 +150,14 @@ const RoomPage = () => {
 					{ message, me: message.sender.userID === u.userID },
 				]);
 			});
-	
+
 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
 				//an event that should be in response to the leaveRoom event (could be self or other people)
 				console.log("User left room:", response);
 			});
-	
+
 			socket.current.on("error", (response: ChatEventDto) => {
-				console.error("Error:", response.errorMessage);
+				// console.error("Error:", response.errorMessage);
 			});
 		};
 
@@ -181,7 +179,7 @@ const RoomPage = () => {
 		}
 
 		return () => {
-			if (socket.current){
+			if (socket.current) {
 				console.log("Disconnecting socket...");
 				socket.current.disconnect();
 			}
@@ -224,62 +222,64 @@ const RoomPage = () => {
 		setJoined(true);
 	}, []);
 	const checkBookmark = async () => {
-		console.log('Checking bookmark')
+		console.log("Checking bookmark");
 		try {
 			const response = await fetch(`http://${IPAddress}:3000/users/bookmarks`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
-					"Authorization": `Bearer ${token.current}`,
+					Authorization: `Bearer ${token.current}`,
 				},
 			});
 			const data = await response.json();
 			// check whether the room is bookmarked or not
 			for (let i = 0; i < data.length; i++) {
-				if (data[i].roomID === roomData.roomID) {
+				if (data[i].roomID === roomID) {
 					console.log("Room is bookmarked");
 					setIsBookmarked(true);
 					break;
 				}
 			}
-			console.log(data)
+			console.log(data);
 		} catch (error) {
-			console.error("Error:", error);
+			// console.error("Error:", error);
 		}
-	}
+	};
 	const handleBookmark = async () => {
 		// make a request to the backend to check if the room is bookmarked
 		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
-		console.log('tokeeen', token)
+		console.log("tokeeen", token);
 
 		try {
-			console.log(roomID)
-			const response = await fetch(`http://${IPAddress}:3000/rooms/${roomID}/${isBookmarked? "unbookmark":"bookmark"}`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": `Bearer ${token.current}`,
+			console.log(roomID);
+			const response = await fetch(
+				`http://${IPAddress}:3000/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token.current}`,
+					},
 				},
-			});
-			console.log(response)
+			);
+			console.log(response);
 			if (response.status === 201) {
 				Alert.alert(
-				"Success",
-				`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
-				[
-					{
-						text: "OK",
-						onPress: () => console.log("OK Pressed"),
-					},
-				]
-			);
+					"Success",
+					`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
+					[
+						{
+							text: "OK",
+							onPress: () => console.log("OK Pressed"),
+						},
+					],
+				);
 			}
-
 		} catch (error) {
-			console.error("Error:", error);
+			// console.error("Error:", error);
 		}
-	  }
+	};
 
 	const leaveRoom = () => {
 		const u: UserProfileDto = userRef.current;
@@ -301,58 +301,62 @@ const RoomPage = () => {
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const collapsedHeight = 60;
 	const screenHeight = Dimensions.get("window").height;
-	const expandedHeight = screenHeight - 80;
+	const expandedHeight = screenHeight - 350;
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	useEffect(() => {
 		const fetchQueue = async () => {
-			const storedToken = await AsyncStorage.getItem('token');
+			const storedToken = await AsyncStorage.getItem("token");
 
 			if (!storedToken) {
-			  console.error("No stored token found");
-			  return;
+				// console.error("No stored token found");
+				return;
 			}
 
 			try {
-			  const response = await fetch(`http://${IPAddress}:3000/rooms/${roomID}/songs`, {
-				method: 'GET',
-				headers: {
-				  'Content-Type': 'application/json',
-				  Authorization: `Bearer ${storedToken}`
-				},
-			  });
-			  console.log("URL: ",`http://${IPAddress}:3000/rooms/${roomID}/songs`);
-			  console.log("response: ",response);
-			  if (!response.ok) {
-				const errorText = await response.text();
-				console.error(`Failed to fetch queue: ${response.status} ${response.statusText}`, errorText);
-				return;
-			  }
+				const response = await fetch(
+					`http://${IPAddress}:3000/rooms/${roomID}/songs`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+				console.log("URL: ", `http://${IPAddress}:3000/rooms/${roomID}/songs`);
+				console.log("response: ", response);
+				if (!response.ok) {
+					const errorText = await response.text();
+					// console.error(
+					// 	`Failed to fetch queue: ${response.status} ${response.statusText}`,
+					// 	errorText,
+					// );
+					return;
+				}
 
-			  const data = await response.json();
-			  console.log("Fetched queue data:", data);
-		  
-			  if (Array.isArray(data) && data.length > 0) {
-				setQueue(data[0]);
-			  } else {
-				console.error("Unexpected response data format:", data);
-			  }
+				const data = await response.json();
+				console.log("Fetched queue data:", data);
+
+				if (Array.isArray(data) && data.length > 0) {
+					setQueue(data[0]);
+				} else {
+					// console.error("Unexpected response data format:", data);
+				}
 			} catch (error) {
-			  console.error("Failed to fetch queue:", error);
+				// console.error("Failed to fetch queue:", error);
 			}
-		  };
-		  
-	
+		};
+
 		fetchQueue();
 	}, [roomData.roomID]);
 
-
 	const getRoomState = () => {
 		return {
-		  currentTrackIndex,
-		  secondsPlayed
+			currentTrackIndex,
+			secondsPlayed,
 		};
-	  };
+	};
 
 	useEffect(() => {
 		return () => {
@@ -368,60 +372,58 @@ const RoomPage = () => {
 
 	useEffect(() => {
 		if (isPlaying) {
-		  trackPositionIntervalRef.current = setInterval(() => {
-			setSecondsPlayed((prevSeconds) => prevSeconds + 1);
-		  }, 1000);
+			trackPositionIntervalRef.current = setInterval(() => {
+				setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+			}, 1000);
 		} else {
-		  clearInterval(trackPositionIntervalRef.current);
+			clearInterval(trackPositionIntervalRef.current);
 		}
-	
-		return () => {
-		  clearInterval(trackPositionIntervalRef.current);
-		};
-	  }, [isPlaying]);
 
-	  const handleJoinLeave = () => {
+		return () => {
+			clearInterval(trackPositionIntervalRef.current);
+		};
+	}, [isPlaying]);
+
+	const handleJoinLeave = () => {
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
 			joinRoom();
 			setJoined(true);
-		  setJoinedSongIndex(currentTrackIndex);
-		  setJoinedSecondsPlayed(secondsPlayed);
-		  console.log(
-			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`
-		  );
-		  if (queue.length > 0) {
-			playPauseTrack(queue[0], 0);
-		  }
+			setJoinedSongIndex(currentTrackIndex);
+			setJoinedSecondsPlayed(secondsPlayed);
+			console.log(
+				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+			);
+			if (queue.length > 0) {
+				playPauseTrack(queue[0], 0);
+			}
 		} else {
 			leaveRoom();
 			setJoined(false);
-		  setJoinedSongIndex(null);
-		  setJoinedSecondsPlayed(null);
-		  handlePlayback("pause");
-		  setIsPlaying(false);
+			setJoinedSongIndex(null);
+			setJoinedSecondsPlayed(null);
+			handlePlayback("pause");
+			setIsPlaying(false);
 		}
-	  };
-	  
-	
+	};
 
-  const playPauseTrack = (track, index) => {
-    if (!track) {
-      console.error("Invalid track:", track);
-      return;
-    }
+	const playPauseTrack = (track, index) => {
+		if (!track) {
+			// console.error("Invalid track:", track);
+			return;
+		}
 
-    if (index === currentTrackIndex && isPlaying) {
-      handlePlayback("pause");
-      setIsPlaying(false);
-    } else {
-      const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
-      handlePlayback("play", track.uri, offset).then(() => {
-        setCurrentTrackIndex(index);
-        setIsPlaying(true);
-      });
-    }
-  };
+		if (index === currentTrackIndex && isPlaying) {
+			handlePlayback("pause");
+			setIsPlaying(false);
+		} else {
+			const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
+			handlePlayback("play", track.uri, offset).then(() => {
+				setCurrentTrackIndex(index);
+				setIsPlaying(true);
+			});
+		}
+	};
 
 	const playNextTrack = () => {
 		const nextIndex = currentTrackIndex + 1;
@@ -439,20 +441,8 @@ const RoomPage = () => {
 		}
 	};
 
-	const formatTime = (seconds) => {
-		const minutes = Math.floor(seconds / 60);
-		const remainingSeconds = seconds % 60;
-		return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-	};
-
-	const toggleQueue = () => {
-		Animated.timing(queueHeight, {
-			toValue: isQueueExpanded ? 0 : 200,
-			duration: 300,
-			useNativeDriver: false,
-		}).start();
-		setIsQueueExpanded((prev) => !prev);
-	};
+	
+	
 
 	const toggleChat = () => {
 		Animated.timing(animatedHeight, {
@@ -470,7 +460,7 @@ const RoomPage = () => {
 			params: {
 				queue: JSON.stringify(queue),
 				currentTrackIndex,
-				Room_id:roomID,
+				Room_id: roomID,
 				mine: roomData.mine,
 			},
 		});
@@ -541,17 +531,21 @@ const RoomPage = () => {
 						</TouchableOpacity>
 					</View>
 					<View style={styles.joinLeaveButtonContainer}>
-						<TouchableOpacity
-							style={styles.joinLeaveButton}
-							onPress={handleBookmark}
-						>
-							<Text style={styles.joinLeaveButtonText}>
-              { isBookmarked ? 'Unbookmark' : 'Bookmark'}
-            </Text>
-						</TouchableOpacity>
 					</View>
 				</View>
-
+				<TouchableOpacity
+					onPress={handleBookmark}
+					style={styles.bookmarkButton}
+				>
+					<Icon
+						name={isBookmarked ? "bookmark" : "bookmark-border"}
+						size={34}
+						color={isBookmarked ? "gold" : "black"}
+					/>
+					<Text style={styles.joinLeaveButtonText}>
+						{isBookmarked ? "Unbookmark" : "Bookmark"}
+					</Text>
+				</TouchableOpacity>
 				<View style={styles.trackDetails}>
 					<Image
 						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
@@ -597,6 +591,7 @@ const RoomPage = () => {
 				) : (
 					<View></View>
 				)}
+
 				<TouchableOpacity
 					style={styles.queueButton}
 					onPress={navigateToPlaylist}
@@ -656,12 +651,12 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontSize: 16 }}>
+					<Text style={{ fontSize: 18,fontWeight: "bold" }}>
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
 						name={isChatExpanded ? "keyboard-arrow-down" : "keyboard-arrow-up"}
-						size={20}
+						size={34}
 						style={{ marginLeft: 10 }}
 					/>
 				</TouchableOpacity>
@@ -730,6 +725,12 @@ const styles = StyleSheet.create({
 		left: 20,
 		zIndex: 1,
 	},
+	bookmarkButton: {
+		marginTop:20,
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 10,
+	},
 	backButtonText: {
 		fontWeight: "bold",
 		fontSize: 18,
@@ -752,6 +753,9 @@ const styles = StyleSheet.create({
 		paddingTop: 40,
 	},
 	joinLeaveButtonContainer: {
+		position: "absolute",
+		paddingRight: 8,
+		right: 0,
 		flex: 1,
 		alignItems: "flex-end",
 	},
@@ -779,29 +783,41 @@ const styles = StyleSheet.create({
 		marginTop: 60,
 	},
 	roomName: {
-		fontSize: 24,
+		fontSize: 27,
 		color: "white",
-	},
-	description: {
+		fontWeight: "bold", // Make the room name bold for emphasis
+		textAlign: "center", // Center align the room name
+		marginBottom: 10, // Add some bottom margin for spacing
+	  },
+	  description: {
 		fontSize: 16,
 		color: "white",
 		textAlign: "center",
 		marginHorizontal: 20,
 		marginTop: 10,
-	},
+		lineHeight: 22, // Adjust line height for better readability
+	  },
 	tagsContainer: {
 		flexDirection: "row",
 		justifyContent: "center",
 		marginTop: 10,
 	},
 	tag: {
-		fontSize: 14,
-		color: "white",
-		backgroundColor: "gray",
-		borderRadius: 10,
-		padding: 5,
-		marginHorizontal: 5,
-	},
+		backgroundColor: '#4CAF50', // Green background color (example)
+		borderRadius: 20, // Adjust the border radius to make the pill more rounded
+		paddingHorizontal: 12, // Horizontal padding for text inside the pill
+		paddingVertical: 6, // Vertical padding for text inside the pill
+		marginHorizontal: 5, // Space between pills
+		alignItems: 'center', // Center text horizontally
+		justifyContent: 'center', // Center text vertically
+		elevation: 2, // Android elevation for shadow
+		shadowColor: '#000', // Shadow color for iOS
+		shadowOffset: { width: 0, height: 1 }, // Shadow offset for iOS
+		shadowOpacity: 0.8, // Shadow opacity for iOS
+		shadowRadius: 1, // Shadow radius for iOS
+		fontWeight: "bold", // Font weight for iOS
+		fontSize: 16, // Font size for iOS
+	  },
 	trackDetails: {
 		flexDirection: "row",
 		alignItems: "center",
