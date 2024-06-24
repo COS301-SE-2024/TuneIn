@@ -28,7 +28,7 @@ import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 
-const BASE_URL = "http://10.0.2.2:3000";
+const BASE_URL = "http://localhost:3000";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -70,8 +70,8 @@ const getQueue = () => {
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
-	const roomData: Room = JSON.parse(room);
-	const roomID = roomData.roomID ? roomData.roomID : roomData.id;
+	const roomData = JSON.parse(room);
+	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
 	nowPlayingTrackArtist: {
 		fontSize: 18,
 		color: "black",
-		fontWeight: 400,
+		fontWeight: "bold",
 	},
 	queueAlbumArt: {
 		width: 60,
