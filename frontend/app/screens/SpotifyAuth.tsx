@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
 
 const clientId = SPOTIFY_CLIENT_ID;
+console.log("clientId", clientId);
 if (!clientId) {
   throw new Error("No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables");
 }
