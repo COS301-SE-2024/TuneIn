@@ -27,6 +27,7 @@ if (!AWS_S3_ENDPOINT) {
 }
 
 const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace('+', '+')
+console.log(AWS_SECRET_ACCESS_KEY);
 
 AWS.config.update({ 
     accessKeyId: AWS_ACCESS_KEY_ID,
