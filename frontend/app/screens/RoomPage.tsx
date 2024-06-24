@@ -470,7 +470,7 @@ const RoomPage = () => {
 			params: {
 				queue: JSON.stringify(queue),
 				currentTrackIndex,
-				Room_id: roomData.roomID,
+				Room_id:roomID,
 				mine: roomData.mine,
 			},
 		});

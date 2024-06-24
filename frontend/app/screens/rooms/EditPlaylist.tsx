@@ -32,7 +32,7 @@ interface SimplifiedTrack {
 const EditPlaylist: React.FC = () => {
   const router = useRouter();
   const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
-
+  console.log("passed in Room id:",Room_id);
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch();
 
