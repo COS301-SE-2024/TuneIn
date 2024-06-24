@@ -28,7 +28,7 @@ import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://192.168.56.1:3000";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -100,6 +100,7 @@ const RoomPage = () => {
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
 			const storedToken = await StorageService.getItem("token");
+			console.log("token:", token);
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
@@ -110,7 +111,7 @@ const RoomPage = () => {
 				});
 				userRef.current = response.data as UserProfileDto;
 			} catch (error) {
-				console.error("Error fetching user's own info:", error);
+				// console.error("Error fetching user's own info:", error);
 			}
 
 			try {

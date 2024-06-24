@@ -41,9 +41,9 @@ const App: React.FC = () => {
 
   // Wrap your App component with PlayerContextProvider to provide global state
   return (
-    <PlayerContextProvider>
+
       <LoginScreen />
-    </PlayerContextProvider>
+ 
   );
 };
 

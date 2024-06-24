@@ -52,7 +52,7 @@ const LoginScreen: React.FC = () => {
         }
 
         // POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://192.168.56.1:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,7 +71,8 @@ const LoginScreen: React.FC = () => {
 
       },
       onFailure: function (err) {
-        console.error(err);
+        // console.error(err);
+        Alert.alert(err.message)
       },
     });
   };
