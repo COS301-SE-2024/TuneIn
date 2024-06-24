@@ -18,6 +18,7 @@ import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../services/ImageUpload";
 
@@ -39,7 +40,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://10.32.253.158:3000";
+	const baseURL = "http://localhost:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -47,7 +48,7 @@ const EditProfileScreen = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await AsyncStorage.getItem("token");
+				const storedToken = await StorageService.getItem("token");
 				setToken(storedToken);
 			} catch (error) {
 				console.error("Failed to retrieve token:", error);
@@ -93,7 +94,7 @@ const EditProfileScreen = () => {
 				'Content-Type': 'multipart/form-data',
 			};
 	
-			// const uploadResponse = await axios.post("http://10.32.253.158:3000/upload", form, { headers });
+			// const uploadResponse = await axios.post("http://localhost:3000/upload", form, { headers });
 			console.log(profileData)
 			console.log("Uploading image...", uri)
 			const imageLink = await uploadImage(uri, 'image');

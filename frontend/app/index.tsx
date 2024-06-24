@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoginScreen from "./screens/LoginScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { PlayerContextProvider } from './screens/PlayerContext'; // Import PlayerContextProvider
+import * as StorageService from "./services/StorageService";
 
 const App: React.FC = () => {
   const router = useRouter();
@@ -12,7 +13,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem("cognitoToken");
+        const token = await StorageService.getItem("cognitoToken"); // Use StorageService to get the token
         // // Perform token validation if necessary
         // if (token) {
         //   // Redirect to the HomeScreen or appropriate route

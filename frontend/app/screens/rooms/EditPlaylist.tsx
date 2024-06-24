@@ -5,6 +5,7 @@ import { useSpotifyAuth } from '../../hooks/useSpotifyAuth';
 import { useSpotifySearch } from '../../hooks/useSpotifySearch';
 import { useLocalSearchParams } from 'expo-router'; // Assuming useLocalSearchParams is correctly implemented
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Track {
   id: string;
@@ -102,13 +103,14 @@ const EditPlaylist: React.FC = () => {
     Alert.alert('Playlist Saved', 'Playlist saved successfully.');
     // Add logic to save the playlist to the backend if necessary
     try {
+      const storedToken = await AsyncStorage.getItem('token');
       // Replace with your backend API URL
-      const response = await fetch(`http://192.168.56.1:4000/room/${Room_id}/playlist`, {
+      const response = await fetch(`http://localhost:3000/rooms/${Room_id}/songs`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        headers: {'Content-Type': 'application/json',
+        Authorization: `Bearer ${storedToken}`
         },
-        body: JSON.stringify({ Room_id, playlist }),
+        body: JSON.stringify(playlist),
       });
       const data = await response.json();
       console.log('Playlist saved to backend:', data);

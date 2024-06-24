@@ -40,6 +40,9 @@ describe("DefaultApi", () => {
   test("appControllerGetHello", () => {
     return expect(instance.appControllerGetHello({})).resolves.toBe(null)
   })
+  test("appControllerUploadFile", () => {
+    return expect(instance.appControllerUploadFile({})).resolves.toBe(null)
+  })
 })
 
 describe("ProfileApi", () => {
@@ -81,6 +84,10 @@ describe("RoomsApi", () => {
     const roomID: string = "roomID_example"
     return expect(instance.roomsControllerAddSongToQueue(body, roomID, {})).resolves.toBe(null)
   })
+  test("roomsControllerBookmarkRoom", () => {
+    const roomID: string = "roomID_example"
+    return expect(instance.roomsControllerBookmarkRoom(roomID, {})).resolves.toBe(null)
+  })
   test("roomsControllerClearRoomQueue", () => {
     const roomID: string = "roomID_example"
     return expect(instance.roomsControllerClearRoomQueue(roomID, {})).resolves.toBe(null)
@@ -92,6 +99,10 @@ describe("RoomsApi", () => {
   test("roomsControllerGetCurrentSong", () => {
     const roomID: string = "roomID_example"
     return expect(instance.roomsControllerGetCurrentSong(roomID, {})).resolves.toBe(null)
+  })
+  test("roomsControllerGetLiveChatHistory", () => {
+    const roomID: string = "roomID_example"
+    return expect(instance.roomsControllerGetLiveChatHistory(roomID, {})).resolves.toBe(null)
   })
   test("roomsControllerGetNewRooms", () => {
     const none: any = undefined
@@ -116,6 +127,10 @@ describe("RoomsApi", () => {
   test("roomsControllerLeaveRoom", () => {
     const roomID: string = "roomID_example"
     return expect(instance.roomsControllerLeaveRoom(roomID, {})).resolves.toBe(null)
+  })
+  test("roomsControllerUnbookmarkRoom", () => {
+    const roomID: string = "roomID_example"
+    return expect(instance.roomsControllerUnbookmarkRoom(roomID, {})).resolves.toBe(null)
   })
   test("roomsControllerUpdateRoom", () => {
     const body: api.UpdateRoomDto = undefined
@@ -144,6 +159,14 @@ describe("UsersApi", () => {
     const body: api.CreateRoomDto = undefined
     const none: any = undefined
     return expect(instance.usersControllerCreateRoom_0(body, none, {})).resolves.toBe(null)
+  })
+  test("usersControllerGetBookmarks", () => {
+    const none: any = undefined
+    return expect(instance.usersControllerGetBookmarks(none, {})).resolves.toBe(null)
+  })
+  test("usersControllerGetBookmarks_0", () => {
+    const none: any = undefined
+    return expect(instance.usersControllerGetBookmarks_0(none, {})).resolves.toBe(null)
   })
   test("usersControllerGetFollowers", () => {
     const none: any = undefined

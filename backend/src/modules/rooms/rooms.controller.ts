@@ -29,12 +29,15 @@ import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "src/auth/auth.service";
+import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
 
 @Controller("rooms")
 export class RoomsController {
 	constructor(
 		private readonly roomsService: RoomsService,
 		private readonly auth: AuthService,
+		private readonly dtogen: DtoGenService,
 	) {}
 
 	//NOTE TO DEV:
@@ -349,6 +352,24 @@ export class RoomsController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
+	@Get(":roomID/chat/history")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get room's chat history" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "The chat history as an array of LiveChatMessageDto.",
+		type: LiveChatMessageDto,
+		isArray: true,
+	})
+	async getLiveChatHistory(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+	): Promise<LiveChatMessageDto[]> {
+		return await this.roomsService.getLiveChatHistoryDto(roomID);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Post(":roomID/bookmark")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Bookmark a room" })
@@ -369,6 +390,7 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.bookmarkRoom(roomID, userInfo.id);
 	}
+
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
