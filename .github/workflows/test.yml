@@ -20,18 +20,6 @@ jobs:
         run: |
           echo "Beginning to test ${{ github.repository }}"
 
-      - name: Create backend env file
-        run: |
-          touch backend/.env
-          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
-          cat backend/.env
-
-      - name: Create frontend env file
-        run: |
-          touch frontend/.env
-          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
-          cat frontend/.env
-
   run_frontend_tests:
     name: Test Frontend
     needs: start
@@ -39,6 +27,12 @@ jobs:
     steps:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
+
+      - name: Create frontend env file
+        run: |
+          touch frontend/.env
+          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+          cat frontend/.env
 
       - name: Set up Node v21
         uses: actions/setup-node@v4
@@ -75,6 +69,12 @@ jobs:
     steps:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
+
+      - name: Create backend env file
+        run: |
+          touch backend/.env
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          cat backend/.env
 
       - name: Set up Node v21
         uses: actions/setup-node@v4
