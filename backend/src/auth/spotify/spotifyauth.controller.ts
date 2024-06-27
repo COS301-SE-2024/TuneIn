@@ -7,7 +7,7 @@ import {
 } from "./spotifyauth.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import * as PrismaTypes from "@prisma/client";
-import { SpotifyService } from "src/spotify/spotify.service";
+import { SpotifyService } from "../../spotify/spotify.service";
 
 @Controller("auth/spotify")
 export class SpotifyAuthController {

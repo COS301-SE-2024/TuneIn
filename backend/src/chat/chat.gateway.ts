@@ -8,13 +8,13 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { SOCKET_EVENTS } from "src/config/constants";
+import { SOCKET_EVENTS } from "../config/constants";
 import { ChatEventDto } from "./dto/chatevent.dto";
 import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
-import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
-import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
+import { DbUtilsService } from "../modules/db-utils/db-utils.service";
+import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
-import { RoomsService } from "src/modules/rooms/rooms.service";
+import { RoomsService } from "../modules/rooms/rooms.service";
 
 @WebSocketGateway({
 	namespace: "/live-chat",

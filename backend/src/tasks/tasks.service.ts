@@ -2,7 +2,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bull";
 import { Queue } from "bull";
-import { SpotifyTokenPair } from "src/auth/spotify/spotifyauth.service";
+import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
 
 @Injectable()
 export class TasksService {

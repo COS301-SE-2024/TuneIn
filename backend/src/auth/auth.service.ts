@@ -7,7 +7,7 @@ import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-//import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+//import { CreateUserDto } from "../modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
 	sub: string;

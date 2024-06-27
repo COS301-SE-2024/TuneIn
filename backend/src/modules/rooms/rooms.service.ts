@@ -8,7 +8,7 @@ import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
-import { LiveChatMessageDto } from "src/chat/dto/livechatmessage.dto";
+import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
 
 @Injectable()
 export class RoomsService {

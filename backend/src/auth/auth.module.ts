@@ -8,18 +8,23 @@ import { JwtStrategy } from "./jwt.strategy";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { PrismaModule } from "../../prisma/prisma.module";
-import { UsersService } from "src/modules/users/users.service";
-import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
-import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
+import { UsersService } from "../modules/users/users.service";
+import { DbUtilsService } from "../modules/db-utils/db-utils.service";
+import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
-import { SpotifyModule } from "src/spotify/spotify.module";
+import { SpotifyModule } from "../spotify/spotify.module";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET === undefined) {
+	throw new Error("Missing JWT_SECRET in environment variables");
+}
 
 @Module({
 	imports: [
 		PassportModule,
 		JwtModule.register({
-			secret: process.env.JWT_SECRET || "your_jwt_secret",
+			secret: JWT_SECRET,
 			signOptions: { expiresIn: "2h" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables

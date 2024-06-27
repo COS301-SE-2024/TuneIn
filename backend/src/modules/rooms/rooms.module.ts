@@ -5,7 +5,8 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import { PrismaModule } from "../../../prisma/prisma.module";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
-import { AuthService } from "src/auth/auth.service";
+import { AuthService } from "../../auth/auth.service";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
 	controllers: [RoomsController],
@@ -16,7 +17,7 @@ import { AuthService } from "src/auth/auth.service";
 		DbUtilsService,
 		AuthService,
 	],
-	imports: [PrismaModule],
+	imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
 	exports: [RoomsService],
 })
 export class RoomsModule {}
