@@ -164,3 +164,7 @@ node_modules/
 aws-exports.js
 awsconfiguration.json
 .aws
+
+# Tests
+coverage
+.nyc_output
