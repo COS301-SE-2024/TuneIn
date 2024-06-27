@@ -21,7 +21,7 @@ export const mockConfigService = {
 				return "test-spotify-client-secret";
 			case "SPOTIFY_REDIRECT_URI":
 				return "test-spotify-redirect-uri";
-			case "JWT_SECRET":
+			case "JWT_SECRET_KEY":
 				return "test-jwt-secret";
 			case "JWT_EXPIRATION_TIME":
 				return "test-jwt-expiration-time";
