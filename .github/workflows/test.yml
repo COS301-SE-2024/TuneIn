@@ -45,8 +45,7 @@ jobs:
 
       - name: Test Codebase
         run:  |
-          cd frontend && npm run test
-
+          cd frontend && npm run test:cov
 
       - name: Jest Coverage Comment
         id: coverageComment
@@ -54,6 +53,11 @@ jobs:
         with:
           hide-comment: true
           coverage-summary-path: ./frontend/coverage/coverage-summary.json
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check the output coverage
         run: |
@@ -87,8 +91,7 @@ jobs:
 
       - name: Test Codebase
         run:  |
-          cd backend && npm run test
-
+          cd backend && npm run test:cov
 
       - name: Jest Coverage Comment
         id: coverageComment
@@ -96,6 +99,11 @@ jobs:
         with:
           hide-comment: true
           coverage-summary-path: ./backend/coverage/coverage-summary.json
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check the output coverage
         run: |

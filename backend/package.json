@@ -113,6 +113,7 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "coverageReporters": ["json", "text-summary", "json-summary", "lcov"],
     "testEnvironment": "node"
   },
   "engines": {

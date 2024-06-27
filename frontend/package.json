@@ -11,7 +11,8 @@
     "web": "expo start --web",
     "lint-fix": "eslint --fix .",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@aws-amplify/react-native": "^1.1.1",
@@ -99,7 +100,9 @@
     "preset": "jest-expo",
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
-    ]
+    ],
+    "coverageDirectory": "../coverage",
+    "coverageReporters": ["json", "text-summary", "json-summary", "lcov"]
   },
   "engines": {
     "node": "18.18.2",
