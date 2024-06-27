@@ -8,7 +8,6 @@ import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 
 import { mockPrismaService } from "../../../jest-mocking";
 
-
 describe("ConnectedUsersService", () => {
 	let service: ConnectedUsersService;
 
