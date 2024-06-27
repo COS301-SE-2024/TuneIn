@@ -9,6 +9,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "lint-fix": "eslint --fix .",
     "lint": "eslint .",
     "test": "jest"
   },
