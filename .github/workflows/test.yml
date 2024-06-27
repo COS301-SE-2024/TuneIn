@@ -34,10 +34,10 @@ jobs:
           echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
           cat frontend/.env
 
-      - name: Set up Node v21
+      - name: Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: '21.x'
+          node-version: 'stable'
 
       - name: Install dependencies
         run:  |
@@ -80,10 +80,10 @@ jobs:
           echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
           cat backend/.env
 
-      - name: Set up Node v21
+      - name: Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: '21.x'
+          node-version: 'stable'
 
       - name: Install dependencies
         run:  |
