@@ -35,8 +35,20 @@ jobs:
         run:  |
           cd frontend && npm ci
 
-      - name: Lint Codebase
+      - name: Auto-fix Frontend Linting
         run:  |
+          cd frontend && npm run lint-fix
+
+      - name: Commit fixes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "Auto-fix frontend linting issues" || echo "No changes to commit"
+          git push
+
+      - name: Run Frontend Linting
+        run: |
           cd frontend && npm run lint
 
   lint_backend:
@@ -55,9 +67,22 @@ jobs:
         run:  |
           cd backend && npm ci
 
-      - name: Lint Codebase
+      - name: Auto-fix Backend Linting
+        run:  |
+          cd backend && npm run lint-fix
+
+      - name: Commit fixes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions
+          git add -A
+          git commit -m "Auto-fix backend linting issues" || echo "No changes to commit"
+          git push
+
+      - name: Run Backend Linting
         run:  |
           cd backend && npm run lint
+  
   end:
     name: The end
     runs-on: ubuntu-latest
