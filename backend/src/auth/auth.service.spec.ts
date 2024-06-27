@@ -9,9 +9,9 @@ import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
 import { SpotifyModule } from "../spotify/spotify.module";
 
 import { mockConfigService } from "../../jest-mocking";
-const JWT_SECRET: string | null = mockConfigService.get("JWT_SECRET");
-if (!JWT_SECRET) {
-	throw new Error("Mock JWT_SECRET is not defined");
+const JWT_SECRET_KEY: string | null = mockConfigService.get("JWT_SECRET_KEY");
+if (!JWT_SECRET_KEY) {
+	throw new Error("Mock JWT_SECRET_KEY is not defined");
 }
 
 describe("AuthService", () => {
@@ -22,7 +22,7 @@ describe("AuthService", () => {
 			imports: [
 				PassportModule,
 				JwtModule.register({
-					secret: JWT_SECRET,
+					secret: JWT_SECRET_KEY,
 					signOptions: { expiresIn: "2h" },
 				}),
 				ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables

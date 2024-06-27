@@ -15,16 +15,16 @@ import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
 import { SpotifyModule } from "../spotify/spotify.module";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET || JWT_SECRET === undefined) {
-	throw new Error("Missing JWT_SECRET in environment variables");
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
+	throw new Error("Missing JWT_SECRET_KEY in environment variables");
 }
 
 @Module({
 	imports: [
 		PassportModule,
 		JwtModule.register({
-			secret: JWT_SECRET,
+			secret: JWT_SECRET_KEY,
 			signOptions: { expiresIn: "2h" },
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
