@@ -117,7 +117,9 @@ export class SpotifyAuthService {
 		}
 	}
 
-	async refreshAccessToken(tk: SpotifyTokenResponse): Promise<SpotifyTokenResponse> {
+	async refreshAccessToken(
+		tk: SpotifyTokenResponse,
+	): Promise<SpotifyTokenResponse> {
 		try {
 			const response = await firstValueFrom(
 				this.httpService.post(
