@@ -20,6 +20,18 @@ jobs:
         run: |
           echo "Beginning to test ${{ github.repository }}"
 
+      - name: Create backend env file
+        run: |
+          touch backend/.env
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          cat backend/.env
+
+      - name: Create frontend env file
+        run: |
+          touch frontend/.env
+          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+          cat frontend/.env
+
   run_frontend_tests:
     name: Test Frontend
     needs: start
