@@ -30,7 +30,7 @@ export class TasksProcessor {
 			throw new Error("Token has expired");
 		}
 
-		const playlists = await this.spotifyService.getUserPlaylists(tk);
+		//const playlists = await this.spotifyService.getUserPlaylists(tk);
 		const likedSongs = await this.spotifyService.getAllLikedSongs(tk);
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];

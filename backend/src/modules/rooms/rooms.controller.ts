@@ -17,13 +17,11 @@ import {
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
-	ApiResponse,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService } from "./rooms.service";
-import { CreateRoomDto } from "./dto/createroomdto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserProfileDto } from "../profile/dto/userprofile.dto";
@@ -138,12 +136,12 @@ export class RoomsController {
 	@UseGuards(JwtAuthGuard)
 	@Put(":roomID")
 	@ApiTags("rooms")
-	updateRoom(
+	async updateRoom(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
-	): RoomDto {
-		return this.roomsService.updateRoom(roomID, updateRoomDto);
+	): Promise<RoomDto> {
+		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
 	/*
@@ -282,7 +280,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 		//): SongInfoDto[] {
 	): Promise<string[]> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		//const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		//return this.roomsService.getRoomQueue(roomID);
 		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
 	}
@@ -390,7 +388,6 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.bookmarkRoom(roomID, userInfo.id);
 	}
-
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)

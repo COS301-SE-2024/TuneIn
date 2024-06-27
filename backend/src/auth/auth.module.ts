@@ -11,11 +11,8 @@ import { PrismaModule } from "../../prisma/prisma.module";
 import { UsersService } from "src/modules/users/users.service";
 import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
-import { SpotifyAuthService } from "./spotify/spotifyauth.service";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
-import { HttpModule } from "@nestjs/axios";
-import { DbUtilsModule } from "src/modules/db-utils/db-utils.module";
 import { SpotifyModule } from "src/spotify/spotify.module";
 
 @Module({

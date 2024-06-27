@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
-import { SpotifyUser } from "src/spotify/models/user";
 import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";

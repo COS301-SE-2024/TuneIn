@@ -15,8 +15,6 @@ import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
 import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
 import { RoomsService } from "src/modules/rooms/rooms.service";
-import { UseFilters } from "@nestjs/common";
-import { WsExceptionFilter } from "src/common/filter/ws-exception.filter";
 
 @WebSocketGateway({
 	namespace: "/live-chat",
@@ -37,6 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer() server: Server;
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async handleConnection(client: Socket, ...args: any[]) {
 		console.log("Client connected with ID: " + client.id);
 	}
@@ -219,6 +218,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
 		try {
 			//this.server.emit();
+			console.log(p);
 		} catch (error) {
 			console.error(error);
 			this.handleThrownError(client, error);
@@ -232,6 +232,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	): Promise<void> {
 		console.log("Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY);
 		try {
+			console.log(p);
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
@@ -256,6 +257,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			emit to room: TYPING, { userId: user.id }
 			*/
+			console.log(p);
 		} catch (error) {
 			console.error(error);
 			this.handleThrownError(client, error);
@@ -279,6 +281,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			emit to room: STOP_TYPING, { userId: user.id }
 			*/
+			console.log(p);
 		} catch (error) {
 			console.error(error);
 			this.handleThrownError(client, error);

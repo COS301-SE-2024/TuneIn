@@ -113,33 +113,33 @@ export class DtoGenService {
 		//get user info
 		const result: UserProfileDto = this.generateBriefUserProfileDto(user);
 		result.links = await this.dbUtils.getLinks(user);
-    const preferences = await this.dbUtils.getPreferences(user);
-    result.fav_genres = preferences.fav_genres;
-    result.fav_songs = preferences.fav_songs;
-    const recent_rooms = await this.dbUtils.getActivity(user);
-    result.recent_rooms = {
-      count: recent_rooms.count,
-      data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
-    };
+		const preferences = await this.dbUtils.getPreferences(user);
+		result.fav_genres = preferences.fav_genres;
+		result.fav_songs = preferences.fav_songs;
+		const recent_rooms = await this.dbUtils.getActivity(user);
+		result.recent_rooms = {
+			count: recent_rooms.count,
+			data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
+		};
 
-    const favRooms = await this.prisma.bookmark.findMany({
-      where: { user_id: userID },
-    });
+		const favRooms = await this.prisma.bookmark.findMany({
+			where: { user_id: userID },
+		});
 
-    const roomDtoArray: RoomDto[] = [];
+		const roomDtoArray: RoomDto[] = [];
 
-    // Iterate through each room_id and generate RoomDto
-    for (const room of favRooms) {
-      const roomDto = await this.generateRoomDto(room.room_id);
-      if (roomDto) {
-        roomDtoArray.push(roomDto);
-      }
-    }
+		// Iterate through each room_id and generate RoomDto
+		for (const room of favRooms) {
+			const roomDto = await this.generateRoomDto(room.room_id);
+			if (roomDto) {
+				roomDtoArray.push(roomDto);
+			}
+		}
 
-    result.fav_rooms = {
-      count: roomDtoArray.length,
-      data: roomDtoArray,
-    };
+		result.fav_rooms = {
+			count: roomDtoArray.length,
+			data: roomDtoArray,
+		};
 
 		const following: Prisma.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
