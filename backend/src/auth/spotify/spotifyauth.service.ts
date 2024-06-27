@@ -10,9 +10,9 @@ import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
-import { SpotifyService } from "src/spotify/spotify.service";
-import { TasksService } from "src/tasks/tasks.service";
+import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
+import { SpotifyService } from "../../spotify/spotify.service";
+import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
 
 export type SpotifyTokenResponse = {
@@ -117,9 +117,7 @@ export class SpotifyAuthService {
 		}
 	}
 
-	async refreshAccessToken(
-		tk: SpotifyTokenResponse,
-	): Promise<SpotifyTokenResponse> {
+	async refreshAccessToken(tk: SpotifyTokenResponse): Promise<SpotifyTokenResponse> {
 		try {
 			const response = await firstValueFrom(
 				this.httpService.post(
