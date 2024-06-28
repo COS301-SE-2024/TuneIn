@@ -441,9 +441,6 @@ const RoomPage = () => {
 		}
 	};
 
-	
-	
-
 	const toggleChat = () => {
 		Animated.timing(animatedHeight, {
 			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
@@ -530,8 +527,7 @@ const RoomPage = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
-					<View style={styles.joinLeaveButtonContainer}>
-					</View>
+					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
 				<TouchableOpacity
 					onPress={handleBookmark}
@@ -651,7 +647,7 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontSize: 18,fontWeight: "bold" }}>
+					<Text style={{ fontSize: 18, fontWeight: "bold" }}>
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
@@ -726,7 +722,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	bookmarkButton: {
-		marginTop:20,
+		marginTop: 20,
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
@@ -788,36 +784,36 @@ const styles = StyleSheet.create({
 		fontWeight: "bold", // Make the room name bold for emphasis
 		textAlign: "center", // Center align the room name
 		marginBottom: 10, // Add some bottom margin for spacing
-	  },
-	  description: {
+	},
+	description: {
 		fontSize: 16,
 		color: "white",
 		textAlign: "center",
 		marginHorizontal: 20,
 		marginTop: 10,
 		lineHeight: 22, // Adjust line height for better readability
-	  },
+	},
 	tagsContainer: {
 		flexDirection: "row",
 		justifyContent: "center",
 		marginTop: 10,
 	},
 	tag: {
-		backgroundColor: '#4CAF50', // Green background color (example)
+		backgroundColor: "#4CAF50", // Green background color (example)
 		borderRadius: 20, // Adjust the border radius to make the pill more rounded
 		paddingHorizontal: 12, // Horizontal padding for text inside the pill
 		paddingVertical: 6, // Vertical padding for text inside the pill
 		marginHorizontal: 5, // Space between pills
-		alignItems: 'center', // Center text horizontally
-		justifyContent: 'center', // Center text vertically
+		alignItems: "center", // Center text horizontally
+		justifyContent: "center", // Center text vertically
 		elevation: 2, // Android elevation for shadow
-		shadowColor: '#000', // Shadow color for iOS
+		shadowColor: "#000", // Shadow color for iOS
 		shadowOffset: { width: 0, height: 1 }, // Shadow offset for iOS
 		shadowOpacity: 0.8, // Shadow opacity for iOS
 		shadowRadius: 1, // Shadow radius for iOS
 		fontWeight: "bold", // Font weight for iOS
 		fontSize: 16, // Font size for iOS
-	  },
+	},
 	trackDetails: {
 		flexDirection: "row",
 		alignItems: "center",

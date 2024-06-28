@@ -54,14 +54,11 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string | null) => {
 		try {
-			const response = await axios.get(
-				`${baseURL}/profile/${username}`,
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await axios.get(`${baseURL}/profile/${username}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			);
+			});
 			console.log(response);
 			return response.data;
 		} catch (error) {
@@ -169,7 +166,7 @@ const ProfileScreen: React.FC = () => {
 
 	const renderRecentRooms = () => {
 		if (profileData.recent_rooms.count > 0) {
-			console.log('profileData:', profileData.recent_rooms.data.slice(0, 2));
+			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
 				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Recently Visited</Text>
@@ -198,43 +195,38 @@ const ProfileScreen: React.FC = () => {
 	}
 
 	const followHandler = async () => {
-		if(following){
+		if (following) {
 			const response = await axios.post(
 				`${baseURL}/profile/${profileData.userID}/unfollow`,
-				{}, 
+				{},
 				{
-				  headers: {
-					Authorization: `Bearer ${token}`,
-				  },
-				}
-			  );
-			  
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
 
-			if(response){
+			if (response) {
 				setFollowing(false);
 				profileData.followers.count--;
-			}
-			else{
+			} else {
 				console.error("Issue unfollowing user");
 			}
-		}
-		else{
+		} else {
 			const response = await axios.post(
 				`${baseURL}/profile/${profileData.userID}/follow`,
-				{}, 
+				{},
 				{
-				  headers: {
-					Authorization: `Bearer ${token}`,
-				  },
-				}
-			  );
-			  
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
 
-			if(response){
+			if (response) {
 				setFollowing(true);
 				profileData.followers.count++;
-			}
-			else{
+			} else {
 				console.error("Issue unfollowing user");
 			}
 		}

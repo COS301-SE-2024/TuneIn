@@ -103,8 +103,18 @@
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["json", "text-summary", "json-summary", "lcov"],
-    "collectCoverageFrom": ["**/*.{ts,tsx}", "!**/node_modules/**", "!**/vendor/**", "!**/api-client/**"],
+    "coverageReporters": [
+      "json",
+      "text-summary",
+      "json-summary",
+      "lcov"
+    ],
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/node_modules/**",
+      "!**/vendor/**",
+      "!**/api-client/**"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/api-client/"
