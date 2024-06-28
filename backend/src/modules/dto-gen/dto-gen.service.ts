@@ -7,82 +7,6 @@ import * as Prisma from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
 
-/*
-## UserProfileDto (User Profile Info)
-A object representing User Profile information.
-```json
-{
-	profile_name : string,
-	userID : string,
-	username : string,
-	profile_picture_url : string,
-	followers: {
-		count: int,
-		data: [ProfileDto]
-	},
-	following: {
-		count: int,
-		data: [ProfileDto]
-	},
-	links: {
-		count: int,
-		data: [string]
-	},
-	bio : string,
-	current_song: SongInfoDto,
-	fav_genres: {
-		count: int,
-		data: [string]
-	},
-	fav_songs: {
-		count: int,
-		data: [SongInfoDto]
-	},
-	fav_rooms: {
-		count: int,
-		data: [RoomDto]
-	},
-	recent_rooms: {
-		count: int,
-		data: [RoomDto]
-	}
-}
-```
-
-## RoomDto (Room Info)
-A object representing Room information.
-```json
-{
-	creator: ProfileDto,
-	roomID: string,
-	partipicant_count: number,
-	room_name: string,
-	description: string,
-	is_temporary: boolean,
-	is_private: boolean,
-	is_scheduled: boolean,
-	start_date: DateTime,
-	end_date: DateTime,
-	language: string,
-	has_explicit_content: boolean,
-	has_nsfw_content: boolean,
-	room_image: string,
-	current_song: SongInfoDto,
-	tags: [string]
-}
-```
-
-## SongInfoDto (Song Info)
-A object representing Song information.
-```json
-{
-	title: string,
-	artists: [string],
-	cover: string,
-	start_time: DateTime
-}
-```
-*/
 // A service that will generate DTOs
 @Injectable()
 export class DtoGenService {
@@ -116,30 +40,28 @@ export class DtoGenService {
 		const preferences = await this.dbUtils.getPreferences(user);
 		result.fav_genres = preferences.fav_genres;
 		result.fav_songs = preferences.fav_songs;
-		const recent_rooms = await this.dbUtils.getActivity(user);
-		result.recent_rooms = {
-			count: recent_rooms.count,
-			data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
-		};
 
-		const favRooms = await this.prisma.bookmark.findMany({
-			where: { user_id: userID },
-		});
+		if (fully_qualify) {
+			const recent_rooms = await this.dbUtils.getActivity(user);
+			result.recent_rooms = {
+				count: recent_rooms.count,
+				data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
+			};
 
-		const roomDtoArray: RoomDto[] = [];
+			const favRooms = await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
 
-		// Iterate through each room_id and generate RoomDto
-		for (const room of favRooms) {
-			const roomDto = await this.generateRoomDto(room.room_id);
-			if (roomDto) {
-				roomDtoArray.push(roomDto);
+			const roomDtoArray: RoomDto[] | null =
+				await this.generateMultipleRoomDto(favRoomIDs);
+			if (roomDtoArray && roomDtoArray !== null) {
+				result.fav_rooms = {
+					count: roomDtoArray.length,
+					data: roomDtoArray,
+				};
 			}
 		}
-
-		result.fav_rooms = {
-			count: roomDtoArray.length,
-			data: roomDtoArray,
-		};
 
 		const following: Prisma.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
