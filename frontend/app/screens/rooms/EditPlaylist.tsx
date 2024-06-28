@@ -122,7 +122,7 @@ const EditPlaylist: React.FC = () => {
 			const storedToken = await auth.getToken();
 			// Replace with your backend API URL
 			const response = await fetch(
-				`http://192.168.56.1:3000/rooms/${Room_id}/songs`,
+				`http://localhost:3000/rooms/${Room_id}/songs`,
 				{
 					method: "POST",
 					headers: {

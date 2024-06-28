@@ -29,7 +29,7 @@ import RoomOptions from "./RoomOptions";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import auth from "../services/AuthManagement";
 
-const BASE_URL = "http://192.168.56.1:3000";
+const BASE_URL = "http://localhost:3000";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -66,7 +66,7 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "192.168.56.1"; // change IP address to your own IP address
+	const IPAddress = "localhost"; // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket

@@ -21,7 +21,7 @@ import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://10.0.2.2:3000";
+	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;

@@ -54,7 +54,7 @@ if (!AWS_S3_ENDPOINT) {
 	);
 }
 
-const BASE_URL = "http://10.0.2.2:3000/";
+const BASE_URL = "http://localhost:3000/";
 
 const RoomDetails: React.FC = () => {
 	const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace(
