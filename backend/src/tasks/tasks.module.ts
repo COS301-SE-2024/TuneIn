@@ -3,8 +3,8 @@ import { Module } from "@nestjs/common";
 import { TasksService } from "./tasks.service";
 import { TasksProcessor } from "./tasks.processor";
 import { PrismaModule } from "../../prisma/prisma.module";
-import { SpotifyModule } from "src/spotify/spotify.module";
-import { BullBoardModule } from "src/bull-board/bull-board.module";
+import { SpotifyModule } from "../spotify/spotify.module";
+import { BullBoardModule } from "../bull-board/bull-board.module";
 import { BullModule } from "@nestjs/bull";
 
 @Module({

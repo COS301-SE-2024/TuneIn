@@ -3,7 +3,6 @@ import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import {
@@ -12,7 +11,6 @@ import {
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
 import { sleep } from "../common/utils";
-
 
 const NUMBER_OF_RETRIES: number = 3;
 
@@ -225,6 +223,7 @@ export class SpotifyService {
 				data: dbLikedSongs,
 				skipDuplicates: true,
 			});
+		console.log("Created " + newSongs.length + " new songs");
 
 		let allIDs: string[] = likedSongs.map((track) => track.track.id);
 		likedSongsInDB = await this.prisma.song.findMany({

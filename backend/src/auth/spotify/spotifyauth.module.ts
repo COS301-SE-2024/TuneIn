@@ -3,9 +3,9 @@ import { Module } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
 import { ConfigService } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
-import { DbUtilsModule } from "src/modules/db-utils/db-utils.module";
-import { SpotifyModule } from "src/spotify/spotify.module";
-import { TasksModule } from "src/tasks/tasks.module";
+import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
+import { SpotifyModule } from "../../spotify/spotify.module";
+import { TasksModule } from "../../tasks/tasks.module";
 
 @Module({
 	imports: [

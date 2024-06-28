@@ -3,7 +3,7 @@ import { SpotifyService } from "./spotify.service";
 import { ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { PrismaModule } from "./../../prisma/prisma.module";
-import { DbUtilsModule } from "src/modules/db-utils/db-utils.module";
+import { DbUtilsModule } from "../modules/db-utils/db-utils.module";
 
 @Module({
 	imports: [HttpModule, PrismaModule, DbUtilsModule],

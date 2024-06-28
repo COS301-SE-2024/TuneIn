@@ -14,7 +14,7 @@ import {
 	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { UsersService } from "src/modules/users/users.service";
+import { UsersService } from "../modules/users/users.service";
 import * as PrismaTypes from "@prisma/client";
 
 @Controller("auth")

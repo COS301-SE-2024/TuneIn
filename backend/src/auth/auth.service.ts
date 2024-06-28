@@ -1,5 +1,9 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import * as AWS from "aws-sdk";
+import {
+	AdminInitiateAuthCommandInput,
+	CognitoIdentityProvider,
+	ListUsersCommandOutput,
+} from "@aws-sdk/client-cognito-identity-provider";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
@@ -8,7 +12,7 @@ import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-//import { CreateUserDto } from "src/modules/users/dto/create-user.dto";
+//import { CreateUserDto } from "../modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
 	sub: string;
@@ -59,7 +63,7 @@ export class RefreshBody {
 
 @Injectable()
 export class AuthService {
-	private cognitoIdentityServiceProvider: AWS.CognitoIdentityServiceProvider;
+	private cognitoIdentityServiceProvider: CognitoIdentityProvider;
 	private accessKeyId: string;
 	private secretAccessKey: string;
 	private userPoolId: string;
@@ -98,12 +102,14 @@ export class AuthService {
 		}
 		this.clientId = clientId;
 
-		this.cognitoIdentityServiceProvider =
-			new AWS.CognitoIdentityServiceProvider({
-				region: "af-south-1",
+		this.cognitoIdentityServiceProvider = new CognitoIdentityProvider({
+			region: "af-south-1",
+
+			credentials: {
 				accessKeyId: this.accessKeyId,
 				secretAccessKey: this.secretAccessKey,
-			});
+			},
+		});
 	}
 
 	async validateUser(username: string, password: string): Promise<any> {
@@ -111,28 +117,24 @@ export class AuthService {
 			throw new Error("Missing Cognito configuration");
 		}
 
-		const params: AWS.CognitoIdentityServiceProvider.AdminInitiateAuthRequest =
-			{
-				AuthFlow: "ADMIN_NO_SRP_AUTH",
-				ClientId: this.clientId,
-				UserPoolId: this.userPoolId,
-				AuthParameters: {
-					USERNAME: username,
-					PASSWORD: password,
-				},
-			};
+		const params: AdminInitiateAuthCommandInput = {
+			AuthFlow: "ADMIN_NO_SRP_AUTH",
+			ClientId: this.clientId,
+			UserPoolId: this.userPoolId,
+			AuthParameters: {
+				USERNAME: username,
+				PASSWORD: password,
+			},
+		};
 
 		try {
-			const authResponse = await this.cognitoIdentityServiceProvider
-				.adminInitiateAuth(params)
-				.promise();
+			const authResponse =
+				await this.cognitoIdentityServiceProvider.adminInitiateAuth(params);
 			if (authResponse.AuthenticationResult) {
-				const user = await this.cognitoIdentityServiceProvider
-					.adminGetUser({
-						UserPoolId: this.userPoolId,
-						Username: username,
-					})
-					.promise();
+				const user = await this.cognitoIdentityServiceProvider.adminGetUser({
+					UserPoolId: this.userPoolId,
+					Username: username,
+				});
 
 				return {
 					username: user.Username,
@@ -146,15 +148,14 @@ export class AuthService {
 	}
 
 	// eslint-disable-next-line prettier/prettier
-  	async listUsers(): Promise<AWS.CognitoIdentityServiceProvider.ListUsersResponse> {
+  	async listUsers(): Promise<ListUsersCommandOutput> {
 		const params = {
 			UserPoolId: this.userPoolId,
 		};
 
 		try {
-			const responsePromise = await this.cognitoIdentityServiceProvider
-				.listUsers(params)
-				.promise();
+			const responsePromise =
+				await this.cognitoIdentityServiceProvider.listUsers(params);
 			const response = await responsePromise;
 			return response;
 		} catch (error) {

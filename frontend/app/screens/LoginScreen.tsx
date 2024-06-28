@@ -42,15 +42,7 @@ const LoginScreen: React.FC = () => {
     const authenticationDetails = new AuthenticationDetails(authenticationData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-        console.log(
-          "access token + " + result.getAccessToken().getJwtToken()
-        );
-
-        console.log(
-          "result.getAccessToken().decodePayload()",
-          result.getAccessToken().decodePayload()
-        );
-
+        
         // Store token in AsyncStorage if remember me is checked
         if (rememberMe) {
           StorageService.setItem(
@@ -60,7 +52,7 @@ const LoginScreen: React.FC = () => {
         }
 
         // POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://192.168.56.1:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -73,11 +65,14 @@ const LoginScreen: React.FC = () => {
           .then((data) => {
             const token = data.token; // Extract the token from the response
             StorageService.setItem("token", token); // Save the token to AsyncStorage
-            console.log("jwt : " + token);
+            console.log("jwt: ",token);
+            router.navigate("/screens/Home");
           });
+
       },
       onFailure: function (err) {
-        console.error(err);
+        // console.error(err);
+        Alert.alert(err.message)
       },
     });
   };

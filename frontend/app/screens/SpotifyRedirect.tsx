@@ -19,6 +19,7 @@ const redirectTarget = SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
   throw new Error('No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables');
 }
+console.log(clientId)
 
 const SpotifyRedirect = () => {
   const [tokenDetails, setTokenDetails] = useState(null);

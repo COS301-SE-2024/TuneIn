@@ -8,7 +8,7 @@ import * as StorageService from "./../services/StorageService"; // Import Storag
 import axios from 'axios';
 import uploadImage from '../services/ImageUpload';
 
-const BASE_URL = 'http://localhost:3000/'; // Replace with actual backend URL
+const BASE_URL = 'http://192.168.56.1:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching
@@ -44,6 +44,7 @@ const EditRoom: React.FC = () => {
     backgroundImage: '',
     language: '',
     tags: [],
+    userID: '',
     roomSize: 50,
     isExplicit: false,
     isNsfw: false,
@@ -140,14 +141,14 @@ const EditRoom: React.FC = () => {
     const token = await StorageService.getItem('token');
     console.log('Token:', token);
     try {
-      console.log('Room ID:', roomDetails.roomID);
+      console.log('Room ID:', roomData.id);
       console.log('New Room:', newRoom)
       // const data = await axios.patch(`${BASE_URL}rooms/${roomDetails.roomID}`, newRoom, {
       //   headers: {
       //     'Content-Type': 'application/json',
       //     'Authorization': 'Bearer ' + token
       //   }});
-      const data = await fetch(`${BASE_URL}rooms/${roomDetails.roomID}`, {
+      const data = await fetch(`${BASE_URL}rooms/${roomData.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

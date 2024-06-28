@@ -9,8 +9,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "lint-fix": "eslint --fix .",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@aws-amplify/react-native": "^1.1.1",
@@ -18,6 +20,9 @@
     "@expo-google-fonts/plus-jakarta-sans": "^0.2.3",
     "@expo-google-fonts/poppins": "^0.2.3",
     "@expo/vector-icons": "^14.0.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-native-fontawesome": "^0.3.2",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.1.1",
     "@react-native-community/netinfo": "^11.3.2",
@@ -96,6 +101,13 @@
     "preset": "jest-expo",
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["json", "text-summary", "json-summary", "lcov"],
+    "collectCoverageFrom": ["**/*.{ts,tsx}", "!**/node_modules/**", "!**/vendor/**", "!**/api-client/**"],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/api-client/"
     ]
   },
   "engines": {

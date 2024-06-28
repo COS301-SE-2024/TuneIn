@@ -1,18 +1,32 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ChatGateway } from './chat.gateway';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ChatGateway } from "./chat.gateway";
 
-describe('ChatGateway', () => {
-  let gateway: ChatGateway;
+import { DbUtilsModule } from "../modules/db-utils/db-utils.module"; // Assuming this exists
+import { DtoGenModule } from "../modules/dto-gen/dto-gen.module"; // Assuming this exists
+import { RoomsModule } from "../modules/rooms/rooms.module";
+import { ConnectedUsersModule } from "./connecteduser/connecteduser.module";
+import { PrismaService } from "../../prisma/prisma.service";
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ChatGateway],
-    }).compile();
+import { mockConfigService, mockPrismaService } from "../../jest-mocking";
+import { ConfigService } from "@nestjs/config";
 
-    gateway = module.get<ChatGateway>(ChatGateway);
-  });
+describe("ChatGateway", () => {
+	let gateway: ChatGateway;
 
-  it('should be defined', () => {
-    expect(gateway).toBeDefined();
-  });
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			providers: [
+				ChatGateway,
+				{ provide: ConfigService, useValue: mockConfigService },
+				{ provide: PrismaService, useValue: mockPrismaService },
+			],
+			imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
+		}).compile();
+
+		gateway = module.get<ChatGateway>(ChatGateway);
+	});
+
+	it("should be defined", () => {
+		expect(gateway).toBeDefined();
+	});
 });
