@@ -16,7 +16,6 @@ import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Entypo } from "@expo/vector-icons";
 import axios from "axios";

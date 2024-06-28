@@ -15,7 +15,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../models/roomdetails";
 import { RoomDto } from "../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import AWS from "aws-sdk";
 import uploadImage from "../services/ImageUpload";

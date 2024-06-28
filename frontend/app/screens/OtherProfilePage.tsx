@@ -18,7 +18,6 @@ import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 
 const ProfileScreen: React.FC = () => {

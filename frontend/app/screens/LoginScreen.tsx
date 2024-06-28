@@ -11,7 +11,6 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../services/StorageService";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
@@ -41,7 +40,7 @@ const LoginScreen: React.FC = () => {
 		const authenticationDetails = new AuthenticationDetails(authenticationData);
 		cognitoUser.authenticateUser(authenticationDetails, {
 			onSuccess: function (result) {
-				// Store token in AsyncStorage if remember me is checked
+				// Store token in storage if remember me is checked
 				if (rememberMe) {
 					StorageService.setItem(
 						"cognitoToken",
@@ -62,7 +61,7 @@ const LoginScreen: React.FC = () => {
 					.then((response) => response.json())
 					.then((data) => {
 						const token = data.token; // Extract the token from the response
-						StorageService.setItem("token", token); // Save the token to AsyncStorage
+						StorageService.setItem("token", token); // Save the token
 						console.log("jwt: ", token);
 						router.navigate("/screens/Home");
 					});

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { View, Text, Pressable, SafeAreaView, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Entypo } from "@expo/vector-icons";
 import * as Linking from "expo-linking";

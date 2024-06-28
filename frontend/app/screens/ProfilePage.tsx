@@ -17,7 +17,7 @@ import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "../services/StorageService";
 
 const ProfileScreen: React.FC = () => {
 	const baseURL = "http://192.168.56.1:3000";
@@ -55,7 +55,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await AsyncStorage.getItem("token");
+				const storedToken = await StorageService.getItem("token");
 				setToken(storedToken);
 
 				if (storedToken) {
@@ -124,7 +124,7 @@ const ProfileScreen: React.FC = () => {
 					</Text>
 				</View>
 			);
-		} else if (profileData.links.count == 1) {
+		} else if (profileData.links.count === 1) {
 			return (
 				<View>
 					<Text
