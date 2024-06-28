@@ -87,9 +87,10 @@ const EditProfileScreen = () => {
 
 			// Append the file to the FormData
 			// form.append("file", new File([blob], fileName, { type: blob.type }));
-
+			const t = await auth.getToken();
+			setToken(t);
 			const headers = {
-				Authorization: `Bearer ${token}`,
+				Authorization: `Bearer ${t}`,
 				"Content-Type": "multipart/form-data",
 			};
 

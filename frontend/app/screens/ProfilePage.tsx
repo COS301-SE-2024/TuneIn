@@ -71,7 +71,7 @@ const ProfileScreen: React.FC = () => {
 		getTokenAndData();
 	}, []);
 
-	const fetchProfileInfo = async (token: string | null) => {
+	const fetchProfileInfo = async (token: string) => {
 		try {
 			const response = await axios.get(`${baseURL}/profile`, {
 				headers: {
@@ -87,6 +87,8 @@ const ProfileScreen: React.FC = () => {
 
 	const handleJoinLeave = async () => {
 		try {
+			const t = await auth.getToken();
+			setToken(t);
 			const response = await axios.post(
 				`${baseURL}/joinLeaveRoom`,
 				{
@@ -95,7 +97,7 @@ const ProfileScreen: React.FC = () => {
 				},
 				{
 					headers: {
-						Authorization: `Bearer ${token}`,
+						Authorization: `Bearer ${t}`,
 					},
 				},
 			);

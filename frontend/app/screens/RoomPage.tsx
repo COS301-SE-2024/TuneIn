@@ -221,13 +221,14 @@ const RoomPage = () => {
 		setJoined(true);
 	}, []);
 	const checkBookmark = async () => {
+		const t = await auth.getToken();
 		console.log("Checking bookmark");
 		try {
 			const response = await fetch(`http://${IPAddress}:3000/users/bookmarks`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${token.current}`,
+					Authorization: `Bearer ${t}`,
 				},
 			});
 			const data = await response.json();
@@ -250,6 +251,8 @@ const RoomPage = () => {
 		setIsBookmarked(!isBookmarked);
 		console.log("tokeeen", token);
 
+		const t = await auth.getToken();
+
 		try {
 			console.log(roomID);
 			const response = await fetch(
@@ -258,7 +261,7 @@ const RoomPage = () => {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						Authorization: `Bearer ${token.current}`,
+						Authorization: `Bearer ${t}`,
 					},
 				},
 			);
