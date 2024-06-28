@@ -17,14 +17,14 @@ import { Room } from "../models/Room";
 import axios from "axios";
 import uploadImage from "../services/ImageUpload";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
-const BASE_URL = "http://localhost:3000/"; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
 	// Replace with real data fetching
 	const token = await auth.getToken();
 	try {
-		const data = await axios.get(`${BASE_URL}rooms/${roomId}`, {
+		const data = await axios.get(`${utils.getAPIBaseURL()}rooms/${roomId}`, {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: "Bearer " + token,
@@ -161,7 +161,7 @@ const EditRoom: React.FC = () => {
 			//     'Content-Type': 'application/json',
 			//     'Authorization': 'Bearer ' + token
 			//   }});
-			const data = await fetch(`${BASE_URL}rooms/${roomData.id}`, {
+			const data = await fetch(`${utils.getAPIBaseURL()}rooms/${roomData.id}`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",

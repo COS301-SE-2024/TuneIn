@@ -18,9 +18,9 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{
@@ -73,7 +73,7 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${baseURL}/profile`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -90,7 +90,7 @@ const ProfileScreen: React.FC = () => {
 			const t = await auth.getToken();
 			setToken(t);
 			const response = await axios.post(
-				`${baseURL}/joinLeaveRoom`,
+				`${utils.getAPIBaseURL()}/joinLeaveRoom`,
 				{
 					roomId: profileData.current_room.roomId,
 					action: profileData.current_room.joined ? "leave" : "join",

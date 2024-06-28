@@ -28,8 +28,7 @@ import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import auth from "../services/AuthManagement";
-
-const BASE_URL = "http://localhost:3000";
+import * as utils from "../services/Utils";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -66,7 +65,6 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "localhost"; // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -77,7 +75,7 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${BASE_URL}/profile`, {
+				const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
@@ -88,11 +86,14 @@ const RoomPage = () => {
 			}
 
 			try {
-				const roomDto = await axios.get(`${BASE_URL}/rooms/${roomID}`, {
-					headers: {
-						Authorization: `Bearer ${storedToken}`,
+				const roomDto = await axios.get(
+					`${utils.getAPIBaseURL()}/rooms/${roomID}`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
 					},
-				});
+				);
 				roomObjRef.current = roomDto.data;
 				setRoomObj(roomDto.data);
 			} catch (error) {
@@ -102,7 +103,7 @@ const RoomPage = () => {
 		getTokenAndSelf();
 		checkBookmark();
 
-		socket.current = io.io(BASE_URL + "/live-chat", {
+		socket.current = io.io(utils.getAPIBaseURL() + "/live-chat", {
 			transports: ["websocket"],
 		});
 
@@ -224,13 +225,16 @@ const RoomPage = () => {
 		const t = await auth.getToken();
 		console.log("Checking bookmark");
 		try {
-			const response = await fetch(`http://${IPAddress}:3000/users/bookmarks`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${t}`,
+			const response = await fetch(
+				`http://${utils.getAPIBaseURL()}/users/bookmarks`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${t}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
 			// check whether the room is bookmarked or not
 			for (let i = 0; i < data.length; i++) {
@@ -256,7 +260,7 @@ const RoomPage = () => {
 		try {
 			console.log(roomID);
 			const response = await fetch(
-				`http://${IPAddress}:3000/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				`http://${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
 				{
 					method: "POST",
 					headers: {
@@ -317,7 +321,7 @@ const RoomPage = () => {
 
 			try {
 				const response = await fetch(
-					`http://${IPAddress}:3000/rooms/${roomID}/songs`,
+					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
 					{
 						method: "GET",
 						headers: {
@@ -326,7 +330,10 @@ const RoomPage = () => {
 						},
 					},
 				);
-				console.log("URL: ", `http://${IPAddress}:3000/rooms/${roomID}/songs`);
+				console.log(
+					"URL: ",
+					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+				);
 				console.log("response: ", response);
 				if (!response.ok) {
 					const errorText = await response.text();

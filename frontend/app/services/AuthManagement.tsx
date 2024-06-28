@@ -2,6 +2,7 @@ import axios from "axios";
 import * as StorageService from "./../services/StorageService";
 //import decode from "react-native-pure-jwt";
 import { jwtDecode } from "jwt-decode";
+import * as utils from "./Utils";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 if (!JWT_SECRET_KEY) {
@@ -45,9 +46,12 @@ class AuthManagement {
 	public async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
 		try {
-			const response = await axios.post("http://localhost:3000/auth/refresh", {
-				refreshToken: this.token,
-			});
+			const response = await axios.post(
+				`${utils.getAPIBaseURL()}/auth/refresh`,
+				{
+					refreshToken: this.token,
+				},
+			);
 			const newToken = response.data.token;
 			if (newToken) {
 				this.setToken(newToken);

@@ -14,6 +14,7 @@ import { useSpotifyAuth } from "../../hooks/useSpotifyAuth";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 interface Track {
 	id: string;
@@ -122,7 +123,7 @@ const EditPlaylist: React.FC = () => {
 			const storedToken = await auth.getToken();
 			// Replace with your backend API URL
 			const response = await fetch(
-				`http://localhost:3000/rooms/${Room_id}/songs`,
+				`${utils.getAPIBaseURL()}/rooms/${Room_id}/songs`,
 				{
 					method: "POST",
 					headers: {

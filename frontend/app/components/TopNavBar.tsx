@@ -4,10 +4,10 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
-	const baseURL = "http://localhost:3000";
 	const [profileImage, setProfileImage] = useState<string>(
 		"https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
 	);
@@ -17,7 +17,7 @@ const TopNavBar: React.FC = () => {
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					const response = await axios.get(`${baseURL}/profile`, {
+					const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 						headers: {
 							Authorization: `Bearer ${token}`,
 						},

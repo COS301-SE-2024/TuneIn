@@ -18,6 +18,7 @@ import { RoomDto } from "../../api-client";
 import AWS from "aws-sdk";
 import uploadImage from "../services/ImageUpload";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 if (!AWS_ACCESS_KEY_ID) {
@@ -53,8 +54,6 @@ if (!AWS_S3_ENDPOINT) {
 		"No AWS endpoint (AWS_S3_ENDPOINT) provided in environment variables",
 	);
 }
-
-const BASE_URL = "http://localhost:3000/";
 
 const RoomDetails: React.FC = () => {
 	const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace(
@@ -145,7 +144,7 @@ const RoomDetails: React.FC = () => {
 		newRoom["room_image"] = imageURL;
 		const token = await auth.getToken();
 		// console.log('Token:', token);
-		fetch(`${BASE_URL}users/rooms`, {
+		fetch(`${utils.getAPIBaseURL()}users/rooms`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

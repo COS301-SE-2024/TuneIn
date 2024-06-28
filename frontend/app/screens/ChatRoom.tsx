@@ -27,8 +27,7 @@ import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
-
-const BASE_URL = "http://localhost:3000";
+import * as utils from "./../services/Utils"; // Import Utils
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -69,11 +68,14 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				setToken(storedToken);
 				const whoami = async (token: string | null, type?: string) => {
 					try {
-						const response = await axios.get(`${BASE_URL}/profile`, {
-							headers: {
-								Authorization: `Bearer ${token}`,
+						const response = await axios.get(
+							`${utils.getAPIBaseURL()}/profile`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						});
+						);
 						console.log("User's own info:", response.data);
 						return response.data as UserProfileDto;
 					} catch (error) {
@@ -89,7 +91,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		};
 		getTokenAndSelf();
 
-		socket.current = io(BASE_URL + "/live-chat", {
+		socket.current = io(utils.getAPIBaseURL() + "/live-chat", {
 			transports: ["websocket"],
 		});
 

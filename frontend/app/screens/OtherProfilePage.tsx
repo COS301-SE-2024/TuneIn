@@ -19,9 +19,9 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://localhost:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;
@@ -53,11 +53,14 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${baseURL}/profile/${username}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await axios.get(
+				`${utils.getAPIBaseURL()}/profile/${username}`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			});
+			);
 			console.log(response);
 			return response.data;
 		} catch (error) {
@@ -68,7 +71,7 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchUserProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${baseURL}/profile`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -127,7 +130,7 @@ const ProfileScreen: React.FC = () => {
 					</Text>
 				</View>
 			);
-		} else if (profileData.links.count == 1) {
+		} else if (profileData.links.count === 1) {
 			return (
 				<View>
 					<Text
@@ -198,7 +201,7 @@ const ProfileScreen: React.FC = () => {
 		setToken(t);
 		if (following) {
 			const response = await axios.post(
-				`${baseURL}/profile/${profileData.userID}/unfollow`,
+				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/unfollow`,
 				{},
 				{
 					headers: {
@@ -215,7 +218,7 @@ const ProfileScreen: React.FC = () => {
 			}
 		} else {
 			const response = await axios.post(
-				`${baseURL}/profile/${profileData.userID}/follow`,
+				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/follow`,
 				{},
 				{
 					headers: {

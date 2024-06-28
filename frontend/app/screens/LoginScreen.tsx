@@ -16,6 +16,7 @@ import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import axios from "axios";
 import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -49,7 +50,7 @@ const LoginScreen: React.FC = () => {
 				}
 
 				// POST request to backend
-				fetch("http://localhost:3000/auth/login", {
+				fetch(`${utils.getAPIBaseURL()}/auth/login`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",

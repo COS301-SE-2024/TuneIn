@@ -20,6 +20,7 @@ import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../services/ImageUpload";
 import auth from "./../services/AuthManagement";
+import * as utils from "./../services/Utils";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -38,8 +39,6 @@ const EditProfileScreen = () => {
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
-
-	const baseURL = "http://localhost:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -61,11 +60,15 @@ const EditProfileScreen = () => {
 		console.log("Changed: " + JSON.stringify(profileData));
 		if (changed) {
 			try {
-				const response = await axios.patch(`${baseURL}/profile`, profileData, {
-					headers: {
-						Authorization: `Bearer ${token}`,
+				const response = await axios.patch(
+					`${utils.getAPIBaseURL()}/profile`,
+					profileData,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
 					},
-				});
+				);
 
 				console.log(response.data);
 				return response.data;
@@ -94,7 +97,13 @@ const EditProfileScreen = () => {
 				"Content-Type": "multipart/form-data",
 			};
 
-			// const uploadResponse = await axios.post("http://localhost:3000/upload", form, { headers });
+			/*
+			const uploadResponse = await axios.post(
+				`${utils.getAPIBaseURL()}/upload`,
+				form,
+				{ headers },
+			);
+			*/
 			console.log(profileData);
 			console.log("Uploading image...", uri);
 			const imageLink = await uploadImage(uri, "image");
