@@ -17,7 +17,7 @@ import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
-import * as StorageService from "../services/StorageService";
+import auth from "../services/AuthManagement";
 
 const ProfileScreen: React.FC = () => {
 	const baseURL = "http://192.168.56.1:3000";
@@ -55,7 +55,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 
 				if (storedToken) {

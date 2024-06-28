@@ -19,6 +19,7 @@ import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Entypo } from "@expo/vector-icons";
 import axios from "axios";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
@@ -109,7 +110,7 @@ const Home: React.FC = () => {
 
 	const refreshData = async () => {
 		setLoading(true);
-		const storedToken = await StorageService.getItem("token");
+		const storedToken = await auth.getToken();
 		setToken(storedToken);
 
 		if (storedToken) {

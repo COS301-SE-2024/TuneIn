@@ -15,9 +15,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../models/roomdetails";
 import { RoomDto } from "../../api-client";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import AWS from "aws-sdk";
 import uploadImage from "../services/ImageUpload";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 if (!AWS_ACCESS_KEY_ID) {
@@ -143,7 +143,7 @@ const RoomDetails: React.FC = () => {
 			// console.log('Image URL:', imageURL);
 		}
 		newRoom["room_image"] = imageURL;
-		const token = await StorageService.getItem("token");
+		const token = await auth.getToken();
 		// console.log('Token:', token);
 		fetch(`${BASE_URL}users/rooms`, {
 			method: "POST",

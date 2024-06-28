@@ -9,13 +9,13 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import * as StorageService from "../services/StorageService";
 import UserPool from "../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import auth from "../services/AuthManagement";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -61,7 +61,7 @@ const LoginScreen: React.FC = () => {
 					.then((response) => response.json())
 					.then((data) => {
 						const token = data.token; // Extract the token from the response
-						StorageService.setItem("token", token); // Save the token
+						auth.setToken(token); // Set the token in the AuthManagement service
 						console.log("jwt: ", token);
 						router.navigate("/screens/Home");
 					});

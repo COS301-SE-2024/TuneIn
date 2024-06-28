@@ -4,6 +4,7 @@ import LoginScreen from "./screens/LoginScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { PlayerContextProvider } from "./screens/PlayerContext"; // Import PlayerContextProvider
 import * as StorageService from "./services/StorageService";
+import auth from "./services/AuthManagement";
 
 const App: React.FC = () => {
 	const router = useRouter();
@@ -13,7 +14,10 @@ const App: React.FC = () => {
 		const checkToken = async () => {
 			try {
 				const cognitioToken = await StorageService.getItem("cognitoToken"); // Use StorageService to get the token
-				const authToken = await StorageService.getItem("authToken");
+				const authToken = await StorageService.getItem("backendToken");
+				if (authToken && authToken !== "undefined" && authToken !== "null") {
+					auth.setToken(authToken);
+				}
 				// // Perform token validation if necessary
 				// if (token) {
 				//   // Redirect to the HomeScreen or appropriate route

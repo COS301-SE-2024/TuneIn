@@ -22,12 +22,12 @@ import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../api-client";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import auth from "../services/AuthManagement";
 
 const BASE_URL = "http://192.168.56.1:3000";
 
@@ -72,7 +72,7 @@ const RoomPage = () => {
 	//init & connect to socket
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
-			const storedToken = await StorageService.getItem("token");
+			const storedToken = await auth.getToken();
 			console.log("token:", token);
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
@@ -305,7 +305,7 @@ const RoomPage = () => {
 
 	useEffect(() => {
 		const fetchQueue = async () => {
-			const storedToken = await StorageService.getItem("token");
+			const storedToken = await auth.getToken();
 
 			if (!storedToken) {
 				// console.error("No stored token found");

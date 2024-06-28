@@ -14,15 +14,15 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../models/Room";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import uploadImage from "../services/ImageUpload";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const BASE_URL = "http://192.168.56.1:3000/"; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
 	// Replace with real data fetching
-	const token = await StorageService.getItem("token");
+	const token = await auth.getToken();
 	try {
 		const data = await axios.get(`${BASE_URL}rooms/${roomId}`, {
 			headers: {
@@ -151,7 +151,7 @@ const EditRoom: React.FC = () => {
 			console.log("Image URL:", imageURL);
 			newRoom["room_image"] = imageURL;
 		}
-		const token = await StorageService.getItem("token");
+		const token = await auth.getToken();
 		console.log("Token:", token);
 		try {
 			console.log("Room ID:", roomData.id);

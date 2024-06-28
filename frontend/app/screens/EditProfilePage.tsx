@@ -17,9 +17,9 @@ import FavoriteSongs from "../components/FavoriteSong";
 import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../services/ImageUpload";
+import auth from "./../services/AuthManagement";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -47,7 +47,7 @@ const EditProfileScreen = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 			} catch (error) {
 				console.error("Failed to retrieve token:", error);

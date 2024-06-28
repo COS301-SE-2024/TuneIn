@@ -23,10 +23,10 @@ import SongRoomWidget from "../components/SongRoomWidget";
 import CommentWidget from "../components/CommentWidget";
 import io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../api-client";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const BASE_URL = "http://10.0.2.2:3000";
 
@@ -65,7 +65,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 				const whoami = async (token: string | null, type?: string) => {
 					try {

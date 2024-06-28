@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
@@ -15,7 +15,7 @@ const TopNavBar: React.FC = () => {
 	useEffect(() => {
 		const fetchProfilePicture = async () => {
 			try {
-				const token = await StorageService.getItem("token"); // Use StorageService to get the token
+				const token = await auth.getToken();
 				if (token) {
 					const response = await axios.get(`${baseURL}/profile`, {
 						headers: {
