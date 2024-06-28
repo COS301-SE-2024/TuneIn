@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as StorageService from "./../services/StorageService";
-import decode from "react-native-pure-jwt";
+//import decode from "react-native-pure-jwt";
+import { jwtDecode } from "jwt-decode";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 if (!JWT_SECRET_KEY) {
@@ -30,7 +31,9 @@ class AuthManagement {
 		}
 
 		// Check if token is expired
+		console.log("Token:", this.token);
 		const decodedToken = decodeToken(this.token);
+		console.log("Decoded token:", decodedToken);
 		if (!decodedToken || !decodedToken.exp) {
 			throw new Error("Failed to decode token");
 		}
@@ -42,7 +45,7 @@ class AuthManagement {
 	public async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
 		try {
-			const response = await axios.post("/auth/refresh", {
+			const response = await axios.post("http://localhost:3000/auth/refresh", {
 				refreshToken: this.token,
 			});
 			const newToken = response.data.token;
@@ -57,7 +60,8 @@ class AuthManagement {
 
 function decodeToken(token: string): any {
 	try {
-		return decode.decode(token, JWT_SECRET_KEY);
+		//return decode.decode(token, JWT_SECRET_KEY);
+		return jwtDecode(token);
 	} catch (error) {
 		console.error("Failed to decode token:", error);
 		return null;
