@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
-import UserPool from "../services/UserPool";
+import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 import { Ionicons } from "@expo/vector-icons";
 

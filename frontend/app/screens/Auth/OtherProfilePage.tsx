@@ -10,16 +10,16 @@ import {
 	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import NowPlaying from "../components/NowPlaying";
-import BioSection from "../components/BioSection";
-import GenreList from "../components/GenreList";
-import RoomCard from "../components/RoomCard";
-import FavoriteSongs from "../components/FavoriteSong";
-import LinkBottomSheet from "../components/LinkBottomSheet";
-import MusicBottomSheet from "../components/MusicBottomSheet";
+import NowPlaying from "../../components/NowPlaying";
+import BioSection from "../../components/BioSection";
+import GenreList from "../../components/GenreList";
+import RoomCard from "../../components/RoomCard";
+import FavoriteSongs from "../../components/FavoriteSong";
+import LinkBottomSheet from "../../components/LinkBottomSheet";
+import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 
 const ProfileScreen: React.FC = () => {
 	const baseURL = "http://10.0.2.2:3000";

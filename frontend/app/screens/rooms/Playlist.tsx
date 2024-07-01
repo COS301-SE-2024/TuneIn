@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import SongList from '../components/SongList'; // Import the SongList component
+import SongList from '../../components/SongList'; // Import the SongList component
 
 interface Track {
   id: string;

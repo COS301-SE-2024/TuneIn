@@ -20,7 +20,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
-  const baseURL = "http://192.168.56.1:3000";
+  const baseURL = "http://localhost:3000";
   const router = useRouter();
   const [favoriteSongsData, setFavoriteSongsData] = useState([
     {

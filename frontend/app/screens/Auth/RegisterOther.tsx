@@ -1,12 +1,52 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 import { useRouter } from 'expo-router';
 import { Poppins_400Regular, Poppins_500Medium, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
+import { Entypo } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
+
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+  throw new Error("No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables");
+}
+
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+if (!redirectTarget) {
+  throw new Error("No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables");
+}
 
 const RegisterOtherScreen: React.FC = () => {
   const router = useRouter();
+
+  const authenticate = async () => {
+    const scopes = [
+      "user-read-email",
+      "user-library-read",
+      "user-read-recently-played",
+      "user-top-read",
+      "playlist-read-private",
+      "playlist-read-collaborative",
+      "playlist-modify-public", // or "playlist-modify-private"
+      "user-modify-playback-state",
+      "user-read-playback-state",
+      "user-read-currently-playing",
+    ].join(" ");
+
+    const authUrl =
+      `https://accounts.spotify.com/authorize` +
+      `?client_id=${clientId}` +
+      `&response_type=code` + // Change response_type to 'code'
+      `&redirect_uri=${encodeURIComponent(redirectTarget)}` +
+      `&show_dialog=true` +
+      `&scope=${scopes}`;
+
+    // Open Spotify authorization page in a web browser
+    Linking.openURL(authUrl);
+
+  };
   const { width } = Dimensions.get('window');
 
   let [fontsLoaded] = useFonts({
@@ -38,29 +78,15 @@ const RegisterOtherScreen: React.FC = () => {
       <Text style={styles.welcomeText}>Authenticate With</Text>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, styles.otherButton]}>
-          <AntDesign name="google" size={24} color="#000" style={styles.icon} />
-          <Text style={styles.buttonText}>Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.otherButton]}>
-          <FontAwesome name="facebook" size={24} color="#000" style={styles.icon} />
-          <Text style={styles.buttonText}>Facebook</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.otherButton]}>
-          <FontAwesome name="apple" size={24} color="#000" style={styles.icon} />
-          <Text style={styles.buttonText}>Apple</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.otherButton]}>
-          <MaterialIcons name="email" size={24} color="#000" style={styles.icon} />
-          <Text style={styles.buttonText}>Email</Text>
+        
+        <TouchableOpacity style={[styles.button, styles.otherButton]} onPress={authenticate}>
+          <FontAwesome name="spotify" size={24} color="#000" style={styles.icon} />
+          <Text style={styles.buttonText}>spotify</Text>
         </TouchableOpacity>
 
         <View style={styles.dividerContainer}>
           <View style={styles.divider} />
-          <Text style={styles.dividerText}>Or Login with Details</Text>
+          <Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
           <View style={styles.divider} />
         </View>
 

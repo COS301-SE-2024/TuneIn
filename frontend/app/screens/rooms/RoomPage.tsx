@@ -15,17 +15,17 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Room } from "../models/Room";
-import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
+import { Room } from "../../models/Room";
+import { useSpotifyPlayback } from "../../hooks/useSpotifyPlayback";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import CommentWidget from "../components/CommentWidget";
+import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../api-client";
+import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../../api-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
-import { ChatEventDto } from "../models/ChatEventDto";
+import { ChatEventDto } from "../../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 

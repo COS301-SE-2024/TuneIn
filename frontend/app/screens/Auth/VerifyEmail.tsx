@@ -11,7 +11,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { CognitoUser } from "amazon-cognito-identity-js";
-import UserPool from "../services/UserPool";
+import UserPool from "../../services/UserPool";
 
 const VerifyEmailScreen: React.FC = () => {
   const router = useRouter();

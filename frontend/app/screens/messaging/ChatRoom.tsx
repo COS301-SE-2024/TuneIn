@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from 'axios';
 import { ChatEventDto } from '../models/ChatEventDto';
-import RoomDetails from './RoomDetails';
+import RoomDetails from './rooms/RoomDetails';
 
 const BASE_URL = 'http://10.0.2.2:3000';
 

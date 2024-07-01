@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import RoomDetails, { RoomDetailsProps } from '../components/RoomDetailsComponent';
+import RoomDetails, { RoomDetailsProps } from '../../components/RoomDetailsComponent';
 import { useRouter } from 'expo-router';
 
 const roomDetails: RoomDetailsProps = {
