@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router'; // Import useRouter from 'expo-router'
 import MyToggleWidget from '../components/ToggleWidget'; // Adjust the import path as needed
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -9,33 +9,72 @@ const CreateRoomScreen: React.FC = () => {
   const router = useRouter(); 
   const [isSwitched, setIsSwitched] = useState(false);
   const [roomName, setRoomName] = useState('');
+  const [newRoom, setNewRoom] = useState({
+    is_permanent: true,
+    is_private: false,
+  });
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   const handleToggleChange = (isFirstOptionSelected: boolean) => {
-    console.log(isFirstOptionSelected ? 'Permanent selected' : 'Temporary selected');
+    newRoom['is_permanent'] = isFirstOptionSelected;
+    console.log(isFirstOptionSelected ? 'Permanent selected' : 'Temporary selected', newRoom);
   };
 
   const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
-    console.log(isFirstOptionSelected ? 'Public selected' : 'Private selected');
+    newRoom['is_private'] = !isFirstOptionSelected;
+    console.log(isFirstOptionSelected ? 'Public selected' : 'Private selected', newRoom);
   };
 
   const navigateToRoomDetails = () => {
-    router.navigate("/screens/RoomDetails");
+    console.log('Navigating to RoomDetails screen');
+    if (isSwitched) {
+      const currentDate = moment(date).format('MM/DD/YYYY');
+      const currentTime = moment(time).format('HH:mm');
+      console.log('Date before:', date)
+      const newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
+      
+      if (newDate < new Date()) {
+        Alert.alert(
+          "Invalid Date",
+          "Please select a future date and time.",
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+        return;
+      }
+      Alert.alert
+      (
+        "Scheduled Room",
+        `Room will be scheduled for ${currentDate} at ${currentTime}.`,
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      newRoom['start_date'] = newDate;
+    }
+    newRoom['is_scheduled'] = isSwitched;
+    const room = JSON.stringify(newRoom);
+    router.navigate({
+      pathname: '/screens/RoomDetails',
+      params: {room: room},
+    });
   };
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === 'ios');
     setDate(currentDate);
+    console.log('Selected date:', selectedDate, currentDate, moment(currentDate).format('MM/DD/YYYY'))
+    currentDate.setHours(time.getHours());
   };
 
   const handleTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
     setShowTimePicker(Platform.OS === 'ios');
     setTime(currentTime);
+    console.log('Selected time:', selectedTime, currentTime, moment(currentTime).format('HH:mm'))
   };
 
   return (

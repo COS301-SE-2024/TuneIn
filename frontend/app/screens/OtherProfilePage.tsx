@@ -19,9 +19,10 @@ import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://localhost:3000";
+	const baseURL = "http://10.0.2.2:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;
@@ -90,7 +91,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await AsyncStorage.getItem("token");
+				const storedToken = await StorageService.getItem("token");
 				setToken(storedToken);
 
 				if (storedToken) {

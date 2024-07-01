@@ -30,6 +30,7 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
         // console.log(JSON.stringify(result));
 
 		if (!result.canceled) {
+            console.log(result.assets[0].uri);
 			onImageUpload(result.assets[0].uri);
 		}
 	};

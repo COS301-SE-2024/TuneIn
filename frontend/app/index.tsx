@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoginScreen from "./screens/LoginScreen";
-import WelcomeScreen from "./screens/WelcomeScreen"; // Import the WelcomeScreen if it's used
+import WelcomeScreen from "./screens/WelcomeScreen";
+import { PlayerContextProvider } from './screens/PlayerContext'; // Import PlayerContextProvider
+import * as StorageService from "./services/StorageService";
 
 const App: React.FC = () => {
   const router = useRouter();
@@ -11,15 +13,18 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem("cognitoToken");
+        const token = await StorageService.getItem("cognitoToken"); // Use StorageService to get the token
+        // // Perform token validation if necessary
         // if (token) {
-        //   // Validate token if necessary
+        //   // Redirect to the HomeScreen or appropriate route
         //   router.push("/screens/Home");
         // } else {
+          // Redirect to the WelcomeScreen or appropriate route
           router.push("/screens/WelcomeScreen");
         // }
       } catch (error) {
         console.error("Error checking token:", error);
+        // Redirect to the WelcomeScreen or appropriate route
         router.push("/screens/WelcomeScreen");
       } finally {
         setIsCheckingToken(false);
@@ -30,11 +35,16 @@ const App: React.FC = () => {
   }, []);
 
   if (isCheckingToken) {
-    // You can render a loading indicator while checking the token
+    // Render a loading indicator while checking the token
     return <WelcomeScreen />;
   }
 
-  return <LoginScreen />;
+  // Wrap your App component with PlayerContextProvider to provide global state
+  return (
+
+      <LoginScreen />
+ 
+  );
 };
 
 export default App;

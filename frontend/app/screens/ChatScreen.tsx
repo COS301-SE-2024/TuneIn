@@ -13,8 +13,9 @@ const messages: Message[] = [
 
 const ChatScreen = () => {
   const [message, setMessage] = useState('');
-  const { name } = useLocalSearchParams();
   const router = useRouter();
+  const { name } = useLocalSearchParams();
+  console.log(name);
 
   const avatarUrl = 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg';
 

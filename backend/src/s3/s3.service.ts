@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { S3 } from "aws-sdk";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Upload } from "@aws-sdk/lib-storage";
+import { GetObjectCommand, S3 } from "@aws-sdk/client-s3";
+import * as awsS3 from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
 import { Express } from "express";
 
@@ -39,8 +42,11 @@ export class S3Service {
 		this.region = region;
 
 		this.s3 = new S3({
-			accessKeyId: this.accessKeyId,
-			secretAccessKey: this.secretAccessKey,
+			credentials: {
+				accessKeyId: this.accessKeyId,
+				secretAccessKey: this.secretAccessKey,
+			},
+
 			region: this.region,
 		});
 		this.bucketName = bucketName;
@@ -48,7 +54,7 @@ export class S3Service {
 
 	async uploadFile(
 		file: Express.Multer.File,
-	): Promise<S3.ManagedUpload.SendData> {
+	): Promise<awsS3.CompleteMultipartUploadOutput> {
 		console.log("Uploading file to S3");
 		console.log(file);
 		const params = {
@@ -58,11 +64,20 @@ export class S3Service {
 			ContentType: file.mimetype,
 		};
 
-		return await this.s3.upload(params).promise();
+		const va = await new Upload({
+			client: this.s3,
+			params,
+		}).done();
+		if (!va.Location) {
+			throw new Error("Failed to upload file to S3");
+		}
+		console.log("File uploaded to S3");
+		console.log(va);
+		return va;
 	}
 
 	async getFileUrl(key: string): Promise<string> {
 		const params = { Bucket: this.bucketName, Key: key };
-		return this.s3.getSignedUrlPromise("getObject", params);
+		return getSignedUrl(this.s3, new GetObjectCommand(params));
 	}
 }

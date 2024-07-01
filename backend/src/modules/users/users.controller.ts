@@ -24,7 +24,7 @@ import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { AuthService, JWTPayload } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "../../auth/auth.service";
 
 @ApiTags("users")
 @Controller("users")

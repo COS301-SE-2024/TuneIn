@@ -1,18 +1,34 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { RoomsController } from './rooms.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { RoomsController } from "./rooms.controller";
+import { RoomsService } from "./rooms.service";
+import { PrismaService } from "./../../../prisma/prisma.service";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { DbUtilsService } from "../db-utils/db-utils.service";
+import { AuthService } from "../../auth/auth.service";
 
-describe('RoomsController', () => {
-  let controller: RoomsController;
+import { mockPrismaService, mockConfigService } from "../../../jest-mocking";
+import { ConfigService } from "@nestjs/config";
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [RoomsController],
-    }).compile();
+describe("RoomsController", () => {
+	let controller: RoomsController;
 
-    controller = module.get<RoomsController>(RoomsController);
-  });
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			controllers: [RoomsController],
+			providers: [
+				RoomsService,
+				{ provide: PrismaService, useValue: mockPrismaService },
+				{ provide: ConfigService, useValue: mockConfigService },
+				DtoGenService,
+				DbUtilsService,
+				AuthService,
+			],
+		}).compile();
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+		controller = module.get<RoomsController>(RoomsController);
+	});
+
+	it("should be defined", () => {
+		expect(controller).toBeDefined();
+	});
 });

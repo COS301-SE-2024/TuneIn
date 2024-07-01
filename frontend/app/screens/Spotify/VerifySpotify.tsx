@@ -41,9 +41,9 @@ const VerifySpotify: React.FC = () => {
       const { requestToken, refreshToken, expiresIn } = data;
       const expirationDate = Date.now() + expiresIn;
 
-      await AsyncStorage.setItem("Spotify requestToken", requestToken);
-      await AsyncStorage.setItem("Spotify refreshToken", refreshToken);
-      await AsyncStorage.setItem("Spotify expirationDate", expirationDate.toString());
+      await StorageService.setItem("Spotify requestToken", requestToken);
+      await StorageService.setItem("Spotify refreshToken", refreshToken);
+      await StorageService.setItem("Spotify expirationDate", expirationDate.toString());
 
       Alert.alert("Success!", "Verification successful", [{ text: "OK" }], { cancelable: false });
       navigateToLogin();

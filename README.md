@@ -1,8 +1,8 @@
 # TuneIn
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
 
-<a href="https://codecov.io/gh/COS301-SE-2024/TuneIn">
-    <img alt="Coverage" src="https://codecov.io/gh/COS301-SE-2024/TuneIn/branch/main/graph/badge.svg?token=7T6WCYXEIO">
+<a href="https://codecov.io/github/COS301-SE-2024/TuneIn" > 
+ <img src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/> 
 </a>
 
 ## TuneIn - Apollo - Project Description

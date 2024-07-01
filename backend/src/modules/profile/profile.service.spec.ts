@@ -1,12 +1,28 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProfileService } from "./profile.service";
+import { ProfileController } from "./profile.controller";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { DbUtilsService } from "../db-utils/db-utils.service";
+import { AuthService } from "../../auth/auth.service";
+
+import { mockPrismaService, mockConfigService } from "../../../jest-mocking";
+import { ConfigService } from "@nestjs/config";
 
 describe("ProfileService", () => {
 	let service: ProfileService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [ProfileService],
+			controllers: [ProfileController],
+			providers: [
+				ProfileService,
+				{ provide: PrismaService, useValue: mockPrismaService },
+				{ provide: ConfigService, useValue: mockConfigService },
+				DtoGenService,
+				DbUtilsService,
+				AuthService,
+			],
 		}).compile();
 
 		service = module.get<ProfileService>(ProfileService);

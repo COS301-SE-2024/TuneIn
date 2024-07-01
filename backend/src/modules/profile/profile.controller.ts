@@ -21,7 +21,7 @@ import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService, JWTPayload } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "../../auth/auth.service";
 
 @Controller("profile")
 export class ProfileController {
@@ -53,64 +53,78 @@ export class ProfileController {
     such that the API documentation is more detailed and informative for the next dev.
   */
 	@UseGuards(JwtAuthGuard)
-    @Get()
-    @ApiTags("profile")
-    @ApiOperation({ summary: "Get current user's profile info" })
-    @ApiOkResponse({
-        description: "Successfully returned user profile info.",
-        type: UserProfileDto,
-    })
+	@Get()
 	@ApiTags("profile")
-	getProfile(@Request() req: any): Promise<UserProfileDto>  {
+	@ApiOperation({ summary: "Get current user's profile info" })
+	@ApiOkResponse({
+		description: "Successfully returned user profile info.",
+		type: UserProfileDto,
+	})
+	@ApiTags("profile")
+	getProfile(@Request() req: any): Promise<UserProfileDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.profileService.getProfile(userInfo.id);
 	}
 
-	
 	@UseGuards(JwtAuthGuard)
-    @Put()
-    @ApiTags("profile")
-    @ApiOperation({ summary: "Update user's profile info" })
-    @ApiOkResponse({
-        description: "Returns the updated user profile info.",
-        type: UserProfileDto,
-    })
+	@Put()
+	@ApiTags("profile")
+	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOkResponse({
+		description: "Returns the updated user profile info.",
+		type: UserProfileDto,
+	})
 	@ApiBadRequestResponse({
-        description: "Bad request. The request body may be malformed.",
-    })
-	async putProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
+		description: "Bad request. The request body may be malformed.",
+	})
+	async putProfile(
+		@Request() req: any,
+		@Body() updateProfileDto: UpdateUserProfileDto,
+	): Promise<UserProfileDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.profileService.updateProfile(userInfo.id, updateProfileDto);
+		return await this.profileService.updateProfile(
+			userInfo.id,
+			updateProfileDto,
+		);
 	}
 
-	
 	@UseGuards(JwtAuthGuard)
-    @Patch()
-    @ApiTags("profile")
-    @ApiOperation({ summary: "Update user's profile info" })
-    @ApiOkResponse({
-        description: "Returns the updated user profile info.",
-        type: UserProfileDto,
-    })
-    @ApiBadRequestResponse({
-        description: "Bad request. The request body may be malformed.",
-    })
-	async patchProfile(@Request() req: any, @Body() updateProfileDto: UpdateUserProfileDto): Promise<UserProfileDto> {
+	@Patch()
+	@ApiTags("profile")
+	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOkResponse({
+		description: "Returns the updated user profile info.",
+		type: UserProfileDto,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request. The request body may be malformed.",
+	})
+	async patchProfile(
+		@Request() req: any,
+		@Body() updateProfileDto: UpdateUserProfileDto,
+	): Promise<UserProfileDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.profileService.updateProfile(userInfo.id, updateProfileDto);
+		return await this.profileService.updateProfile(
+			userInfo.id,
+			updateProfileDto,
+		);
 	}
 
-	
 	@UseGuards(JwtAuthGuard)
-    @Get(":username")
-    @ApiTags("profile")
-    @ApiOperation({ summary: "Get user profile info by username" })
-    @ApiParam({ name: "username", description: "The username of the user to fetch profile info for." })
-    @ApiOkResponse({
-        description: "Returns the user profile.",
-        type: UserProfileDto,
-    })
-	async getProfileByUsername(@Param("username") username: string): Promise<UserProfileDto> {
+	@Get(":username")
+	@ApiTags("profile")
+	@ApiOperation({ summary: "Get user profile info by username" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to fetch profile info for.",
+	})
+	@ApiOkResponse({
+		description: "Returns the user profile.",
+		type: UserProfileDto,
+	})
+	async getProfileByUsername(
+		@Param("username") username: string,
+	): Promise<UserProfileDto> {
 		return this.profileService.getProfileByUsername(username);
 	}
 
