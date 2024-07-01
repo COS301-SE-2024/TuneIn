@@ -1,3 +1,3 @@
-import { defineBackend } from '@aws-amplify/backend';
+import { defineBackend } from "@aws-amplify/backend";
 
 defineBackend({});

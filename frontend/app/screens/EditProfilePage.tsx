@@ -17,10 +17,10 @@ import FavoriteSongs from "../components/FavoriteSong";
 import PhotoSelect from "../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../services/ImageUpload";
+import auth from "./../services/AuthManagement";
+import * as utils from "./../services/Utils";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -40,15 +40,13 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://192.168.56.1:3000";
-
 	const [loading, setLoading] = useState<boolean>(true);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 			} catch (error) {
 				console.error("Failed to retrieve token:", error);
@@ -62,11 +60,15 @@ const EditProfileScreen = () => {
 		console.log("Changed: " + JSON.stringify(profileData));
 		if (changed) {
 			try {
-				const response = await axios.patch(`${baseURL}/profile`, profileData, {
-					headers: {
-						Authorization: `Bearer ${token}`,
+				const response = await axios.patch(
+					`${utils.getAPIBaseURL()}/profile`,
+					profileData,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
 					},
-				});
+				);
 
 				console.log(response.data);
 				return response.data;
@@ -85,20 +87,27 @@ const EditProfileScreen = () => {
 			// const response = await fetch(uri);
 			// const blob = await response.blob();
 			// const fileName = uri.split('/').pop(); // Extract filename from URI
-	
+
 			// Append the file to the FormData
 			// form.append("file", new File([blob], fileName, { type: blob.type }));
-	
+			const t = await auth.getToken();
+			setToken(t);
 			const headers = {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'multipart/form-data',
+				Authorization: `Bearer ${t}`,
+				"Content-Type": "multipart/form-data",
 			};
-	
-			// const uploadResponse = await axios.post("http://10.0.2.2:3000/upload", form, { headers });
-			console.log(profileData)
-			console.log("Uploading image...", uri)
-			const imageLink = await uploadImage(uri, 'image');
-			console.log('image link:', imageLink);
+
+			/*
+			const uploadResponse = await axios.post(
+				`${utils.getAPIBaseURL()}/upload`,
+				form,
+				{ headers },
+			);
+			*/
+			console.log(profileData);
+			console.log("Uploading image...", uri);
+			const imageLink = await uploadImage(uri, "image");
+			console.log("image link:", imageLink);
 			// console.log("File uploaded successfully", uploadResponse.data);
 			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
@@ -109,20 +118,18 @@ const EditProfileScreen = () => {
 
 	const updateImage = async (uri) => {
 		try {
-
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
-			console.log('image:', image)
+			console.log("image:", image);
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
-			setChanged(true)
-			console.log('\n\nUpdated profile data:', profileData)
+			setChanged(true);
+			console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
 		}
-	}
-	
+	};
 
 	const dialogs = {
 		name: setNameDialogVisible,

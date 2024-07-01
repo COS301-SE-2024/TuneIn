@@ -11,15 +11,15 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const MusicBottomSheet = ({ isVisible, onClose}) => {
-    const spotifyImg = "../assets/spotify.png";
-    const ytMusicImg = "../assets/ytMusic.png"
+const MusicBottomSheet = ({ isVisible, onClose }) => {
+	const spotifyImg = "../assets/spotify.png";
+	const ytMusicImg = "../assets/ytMusic.png";
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 	const [visible, setVisible] = useState(isVisible); // State to manage visibility
 
 	useEffect(() => {
-        setVisible(isVisible); // Update visibility state when prop changes
-    }, [isVisible]);
+		setVisible(isVisible); // Update visibility state when prop changes
+	}, [isVisible]);
 
 	const handleOnClose = () => {
 		setVisible(false); // Set visibility to false
@@ -67,8 +67,18 @@ const MusicBottomSheet = ({ isVisible, onClose}) => {
 				>
 					<View style={styles.dragHandle} {...panResponder.panHandlers} />
 					<View style={styles.textContainer}>
-						<MusicPlatform title={"Spotify"} link="" onPress={() => {}} image={require("../assets/spotify.png")} />
-						<MusicPlatform title={"YouTube Music"} link="" onPress={() => {}} image={require("../assets/ytMusic.png")} />
+						<MusicPlatform
+							title={"Spotify"}
+							link=""
+							onPress={() => {}}
+							image={require("../assets/spotify.png")}
+						/>
+						<MusicPlatform
+							title={"YouTube Music"}
+							link=""
+							onPress={() => {}}
+							image={require("../assets/ytMusic.png")}
+						/>
 					</View>
 				</Animated.View>
 			</View>
@@ -84,14 +94,11 @@ const Links = ({ mediaPlatform, link }) => {
 	);
 };
 
-const MusicPlatform = ({ title, link = "", onPress, image="" }) => {
+const MusicPlatform = ({ title, link = "", onPress, image = "" }) => {
 	return (
 		<TouchableOpacity>
 			<View style={styles.platformContainer}>
-				<Image
-					source={image}
-					style={styles.platformArt}
-				/>
+				<Image source={image} style={styles.platformArt} />
 				<View style={styles.spacer}>
 					<Text style={styles.platformName}>{title}</Text>
 				</View>
@@ -118,7 +125,7 @@ const styles = StyleSheet.create({
 	},
 	textContainer: {
 		alignSelf: "flex-start",
-        paddingTop: 10,
+		paddingTop: 10,
 		marginLeft: 20,
 		marginBottom: 10,
 	},
@@ -151,18 +158,18 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 
-    //Music Platform Styling
+	//Music Platform Styling
 	platformName: {
 		fontSize: 16,
 		fontWeight: "700",
-	},    
+	},
 	platformContainer: {
-        width: 330,
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 10,
-        paddingBottom: 10,
-      },
+		width: 330,
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 10,
+		paddingBottom: 10,
+	},
 	platformArt: {
 		width: 57,
 		height: 57,
@@ -171,9 +178,9 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	spacer: {
-        flex: 1,
-      },
-      
+		flex: 1,
+	},
+
 	icon: {
 		marginLeft: 30,
 	},

@@ -1,42 +1,45 @@
-import { useState } from 'react';
-import { useSpotifyAuth } from './useSpotifyAuth';
+import { useState } from "react";
+import { useSpotifyAuth } from "./useSpotifyAuth";
 
 export const useSpotifySearch = () => {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const { getToken } = useSpotifyAuth();
-  const handleSearch = async (query: string) => {
-    try {
-      console.log("handleSearch: ",query);
-      const accessToken = await getToken(); // Get a valid access token
+	const [searchResults, setSearchResults] = useState<any[]>([]);
+	const [error, setError] = useState<string | null>(null);
+	const { getToken } = useSpotifyAuth();
+	const handleSearch = async (query: string) => {
+		try {
+			console.log("handleSearch: ", query);
+			const accessToken = await getToken(); // Get a valid access token
 
-      if (!accessToken) {
-        throw new Error('Access token not found');
-      }
+			if (!accessToken) {
+				throw new Error("Access token not found");
+			}
 
-      const response = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+			const response = await fetch(
+				`https://api.spotify.com/v1/search?q=${query}&type=track`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+				},
+			);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
 
-      const data = await response.json();
-      setSearchResults(data.tracks.items);
-    } catch (err) {
-      setError('An error occurred while searching');
-      console.error('An error occurred while searching', err);
-    }
-  };
+			const data = await response.json();
+			setSearchResults(data.tracks.items);
+		} catch (err) {
+			setError("An error occurred while searching");
+			console.error("An error occurred while searching", err);
+		}
+	};
 
-  return {
-    searchResults,
-    handleSearch,
-    error,
-  };
+	return {
+		searchResults,
+		handleSearch,
+		error,
+	};
 };

@@ -1,15 +1,22 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	ScrollView,
+	StyleSheet,
+	Dimensions,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 const LyricsScreen: React.FC = () => {
-  const router = useRouter();
+	const router = useRouter();
 
-  const song = {
-    title: "Eternal Sunshine",
-    artist: "Ariana Grande",
-    lyrics: `
+	const song = {
+		title: "Eternal Sunshine",
+		artist: "Ariana Grande",
+		lyrics: `
       I don't care what people say
       We both know I couldn't change you
       I guess you could say the same
@@ -76,54 +83,57 @@ const LyricsScreen: React.FC = () => {
       Deep (deep) breaths (breaths), tight (tight) chest (chest)
       Life (life), death (death)
     `,
-  };
+	};
 
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.songTitle}>{song.title}</Text>
-      <Text style={styles.songArtist}>{song.artist}</Text>
-      <ScrollView style={styles.lyricsContainer}>
-        <Text style={styles.lyricsText}>{song.lyrics}</Text>
-      </ScrollView>
-    </View>
-  );
+	return (
+		<View style={styles.container}>
+			<TouchableOpacity
+				onPress={() => router.back()}
+				style={styles.closeButton}
+			>
+				<Ionicons name="chevron-back" size={24} color="black" />
+			</TouchableOpacity>
+			<Text style={styles.songTitle}>{song.title}</Text>
+			<Text style={styles.songArtist}>{song.artist}</Text>
+			<ScrollView style={styles.lyricsContainer}>
+				<Text style={styles.lyricsText}>{song.lyrics}</Text>
+			</ScrollView>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingTop: 20, // Adjust top padding to accommodate status bar or navigation bar
-    paddingHorizontal: 20,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 10,
-  },
-  songTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  songArtist: {
-    fontSize: 18,
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  lyricsContainer: {
-    flex: 1,
-    marginTop: 10,
-  },
-  lyricsText: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
+	container: {
+		flex: 1,
+		backgroundColor: "white",
+		paddingTop: 20, // Adjust top padding to accommodate status bar or navigation bar
+		paddingHorizontal: 20,
+	},
+	closeButton: {
+		position: "absolute",
+		top: 10,
+		left: 10,
+		zIndex: 10,
+	},
+	songTitle: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 10,
+		textAlign: "center",
+	},
+	songArtist: {
+		fontSize: 18,
+		marginBottom: 5,
+		textAlign: "center",
+	},
+	lyricsContainer: {
+		flex: 1,
+		marginTop: 10,
+	},
+	lyricsText: {
+		fontSize: 16,
+		lineHeight: 24,
+	},
 });
 
 export default LyricsScreen;

@@ -18,11 +18,10 @@ import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://10.0.2.2:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;
@@ -52,10 +51,10 @@ const ProfileScreen: React.FC = () => {
 	const [token, setToken] = useState<string | null>(null);
 	const [following, setFollowing] = useState<boolean>(false);
 
-	const fetchProfileInfo = async (token: string | null) => {
+	const fetchProfileInfo = async (token: string) => {
 		try {
 			const response = await axios.get(
-				`${baseURL}/profile/${username}`,
+				`${utils.getAPIBaseURL()}/profile/${username}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -70,9 +69,9 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchUserProfileInfo = async (token: string | null) => {
+	const fetchUserProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${baseURL}/profile`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -91,7 +90,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 
 				if (storedToken) {
@@ -131,7 +130,7 @@ const ProfileScreen: React.FC = () => {
 					</Text>
 				</View>
 			);
-		} else if (profileData.links.count == 1) {
+		} else if (profileData.links.count === 1) {
 			return (
 				<View>
 					<Text
@@ -169,7 +168,7 @@ const ProfileScreen: React.FC = () => {
 
 	const renderRecentRooms = () => {
 		if (profileData.recent_rooms.count > 0) {
-			console.log('profileData:', profileData.recent_rooms.data.slice(0, 2));
+			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
 				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Recently Visited</Text>
@@ -198,43 +197,40 @@ const ProfileScreen: React.FC = () => {
 	}
 
 	const followHandler = async () => {
-		if(following){
+		const t = await auth.getToken();
+		setToken(t);
+		if (following) {
 			const response = await axios.post(
-				`${baseURL}/profile/${profileData.userID}/unfollow`,
-				{}, 
+				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/unfollow`,
+				{},
 				{
-				  headers: {
-					Authorization: `Bearer ${token}`,
-				  },
-				}
-			  );
-			  
+					headers: {
+						Authorization: `Bearer ${t}`,
+					},
+				},
+			);
 
-			if(response){
+			if (response) {
 				setFollowing(false);
 				profileData.followers.count--;
-			}
-			else{
+			} else {
 				console.error("Issue unfollowing user");
 			}
-		}
-		else{
+		} else {
 			const response = await axios.post(
-				`${baseURL}/profile/${profileData.userID}/follow`,
-				{}, 
+				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/follow`,
+				{},
 				{
-				  headers: {
-					Authorization: `Bearer ${token}`,
-				  },
-				}
-			  );
-			  
+					headers: {
+						Authorization: `Bearer ${t}`,
+					},
+				},
+			);
 
-			if(response){
+			if (response) {
 				setFollowing(true);
 				profileData.followers.count++;
-			}
-			else{
+			} else {
 				console.error("Issue unfollowing user");
 			}
 		}
