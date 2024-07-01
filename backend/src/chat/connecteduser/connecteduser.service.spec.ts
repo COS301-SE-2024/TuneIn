@@ -1,18 +1,31 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConnectedUsersService } from './connecteduser.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConnectedUsersService } from "./connecteduser.service";
 
-describe('ConnectedUsersService', () => {
-  let service: ConnectedUsersService;
+import { PrismaModule } from "../../../prisma/prisma.module";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
+import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ConnectedUsersService],
-    }).compile();
+import { mockPrismaService } from "../../../jest-mocking";
 
-    service = module.get<ConnectedUsersService>(ConnectedUsersService);
-  });
+describe("ConnectedUsersService", () => {
+	let service: ConnectedUsersService;
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			imports: [PrismaModule],
+			providers: [
+				{ provide: PrismaService, useValue: mockPrismaService },
+				DtoGenService,
+				DbUtilsService,
+				ConnectedUsersService,
+			],
+		}).compile();
+
+		service = module.get<ConnectedUsersService>(ConnectedUsersService);
+	});
+
+	it("should be defined", () => {
+		expect(service).toBeDefined();
+	});
 });

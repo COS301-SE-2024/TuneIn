@@ -32,7 +32,7 @@ interface SimplifiedTrack {
 const EditPlaylist: React.FC = () => {
   const router = useRouter();
   const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
-
+  console.log("passed in Room id:",Room_id);
   const { accessToken } = useSpotifyAuth();
   const { searchResults, handleSearch } = useSpotifySearch();
 
@@ -106,7 +106,7 @@ const EditPlaylist: React.FC = () => {
     try {
       const storedToken = await AsyncStorage.getItem('token');
       // Replace with your backend API URL
-      const response = await fetch(`http://localhost:3000/rooms/${Room_id}/songs`, {
+      const response = await fetch(`http://192.168.56.1:3000/rooms/${Room_id}/songs`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json',
         Authorization: `Bearer ${storedToken}`

@@ -8,7 +8,7 @@ on:
     branches: [ main, develop ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   start:
@@ -28,10 +28,16 @@ jobs:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
 
-      - name: Set up Node v21
+      - name: Create frontend env file
+        run: |
+          touch frontend/.env
+          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+          cat frontend/.env
+
+      - name: Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: '21.x'
+          node-version: 18.18
 
       - name: Install dependencies
         run:  |
@@ -39,8 +45,7 @@ jobs:
 
       - name: Test Codebase
         run:  |
-          cd frontend && npm run test
-
+          cd frontend && npm run test:cov
 
       - name: Jest Coverage Comment
         id: coverageComment
@@ -48,6 +53,11 @@ jobs:
         with:
           hide-comment: true
           coverage-summary-path: ./frontend/coverage/coverage-summary.json
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check the output coverage
         run: |
@@ -64,10 +74,16 @@ jobs:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
 
-      - name: Set up Node v21
+      - name: Create backend env file
+        run: |
+          touch backend/.env
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          cat backend/.env
+
+      - name: Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: '21.x'
+          node-version: 18.18
 
       - name: Install dependencies
         run:  |
@@ -75,8 +91,7 @@ jobs:
 
       - name: Test Codebase
         run:  |
-          cd backend && npm run test
-
+          cd backend && npm run test:cov
 
       - name: Jest Coverage Comment
         id: coverageComment
@@ -84,6 +99,11 @@ jobs:
         with:
           hide-comment: true
           coverage-summary-path: ./backend/coverage/coverage-summary.json
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check the output coverage
         run: |

@@ -40,7 +40,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://localhost:3000";
+	const baseURL = "http://192.168.56.1:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 

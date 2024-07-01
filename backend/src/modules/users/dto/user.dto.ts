@@ -1,16 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsInt, ValidateNested } from "class-validator";
+import { IsString } from "class-validator";
 
 export class UserDto {
-    //TBA
-    /*
+	//TBA
 	@ApiProperty()
-    @IsString()
-    username: string;
+	@IsString()
+	username: string;
 
-    @ApiProperty()
-    @IsString()
-    email: string;
-
-    */
+	@ApiProperty()
+	@IsString()
+	email: string;
 }

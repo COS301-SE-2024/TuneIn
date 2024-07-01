@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
-import { SpotifyUser } from "src/spotify/models/user";
 import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
@@ -12,9 +10,9 @@ import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
-import { SpotifyService } from "src/spotify/spotify.service";
-import { TasksService } from "src/tasks/tasks.service";
+import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
+import { SpotifyService } from "../../spotify/spotify.service";
+import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
 
 export type SpotifyTokenResponse = {

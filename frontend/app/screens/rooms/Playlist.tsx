@@ -34,6 +34,7 @@ const Playlist = () => {
   
 
   const navigateToAddSong = () => {
+    console.log("curr room_id:", Room_id);
     router.navigate({
       pathname: "/screens/rooms/EditPlaylist",
       params: {

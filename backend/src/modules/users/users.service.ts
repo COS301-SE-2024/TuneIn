@@ -70,11 +70,13 @@ export class UsersService {
 
 	updateUserProfile(updateUserDto: UpdateUserDto): UserDto {
 		// implementation goes here
+		console.log(updateUserDto);
 		return new UserDto();
 	}
 
 	updateProfile(updateUserDto: UpdateUserDto): UserDto {
 		// implementation goes here
+		console.log(updateUserDto);
 		return new UserDto();
 	}
 
@@ -265,6 +267,7 @@ export class UsersService {
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
+		console.log("Getting recommended rooms for user " + userID);
 		const r = await this.dbUtils.getRandomRooms(5);
 		if (!r || r === null) {
 			throw new Error(

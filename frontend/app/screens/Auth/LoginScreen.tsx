@@ -65,13 +65,14 @@ const LoginScreen: React.FC = () => {
           .then((data) => {
             const token = data.token; // Extract the token from the response
             StorageService.setItem("token", token); // Save the token to AsyncStorage
-          
+            console.log("jwt: ",token);
             router.navigate("/screens/Home");
           });
 
       },
       onFailure: function (err) {
-        console.error(err);
+        // console.error(err);
+        Alert.alert(err.message)
       },
     });
   };
