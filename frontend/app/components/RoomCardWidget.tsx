@@ -23,7 +23,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
   // console.log("roomCard", roomCard);
   const navigateToEditRoom = () => {
     router.navigate({
-      pathname: "/screens/EditRoom",
+      pathname: "/screens/rooms/EditRoom",
       params: room,
     });
   };

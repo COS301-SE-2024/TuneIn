@@ -52,7 +52,7 @@ const LoginScreen: React.FC = () => {
         }
 
         // POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://192.168.0.158:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -78,11 +78,11 @@ const LoginScreen: React.FC = () => {
   };
 
   const navigateToRegister = () => {
-    router.navigate("/screens/RegisterScreen");
+    router.navigate("/screens/Auth/RegisterScreen");
   };
 
   const navigateToForgot = () => {
-    router.navigate("/screens/ForgotPassword");
+    router.navigate("/screens/Auth/ForgotPassword");
   };
 
   return (

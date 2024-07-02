@@ -15,7 +15,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
         {friends.slice(0, maxVisible).map((friend, index) => (
           <Link
             key={index}
-            href={`/screens/ProfilePage?friend=${JSON.stringify(friend)}`}
+            href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}`}
             style={styles.link}
           >
             <View style={styles.friendContainer}>

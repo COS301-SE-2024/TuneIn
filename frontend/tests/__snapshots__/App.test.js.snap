@@ -280,7 +280,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
                   onPress={[Function]}
                   role="link"
                 >
@@ -596,7 +596,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
                   onPress={[Function]}
                   role="link"
                 >
@@ -1009,7 +1009,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
                   onPress={[Function]}
                   role="link"
                 >
@@ -1325,7 +1325,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%7D"
                   onPress={[Function]}
                   role="link"
                 >
@@ -2610,7 +2610,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%2C%22mine%22%3Atrue%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Chill%20Vibes%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%2C%22mine%22%3Atrue%7D"
                   onPress={[Function]}
                   role="link"
                 >
@@ -2935,7 +2935,7 @@ exports[`<App /> renders the Home component correctly 1`] = `
                 }
               >
                 <Text
-                  href="/screens/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Party%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%2C%22mine%22%3Atrue%7D"
+                  href="/screens/rooms/RoomPage?room=%7B%22backgroundImage%22%3A%22https%3A%2F%2Fimages.pexels.com%2Fphotos%2F255379%2Fpexels-photo-255379.jpeg%3Fauto%3Dcompress%26cs%3Dtinysrgb%26w%3D600%22%2C%22name%22%3A%22Party%22%2C%22songName%22%3A%22Song%20Title%22%2C%22artistName%22%3A%22Artist%20Name%22%2C%22description%22%3A%22A%20description%20of%20the%20room%20goes%20here.%22%2C%22userProfile%22%3A%22https%3A%2F%2Fcdn-icons-png.freepik.com%2F512%2F3135%2F3135715.png%22%2C%22username%22%3A%22User123%22%2C%22tags%22%3A%5B%22Tag1%22%2C%22Tag2%22%2C%22Tag3%22%5D%2C%22mine%22%3Atrue%7D"
                   onPress={[Function]}
                   role="link"
                 >

@@ -16,11 +16,11 @@ const WelcomeScreen: React.FC = () => {
 	const { width, height } = Dimensions.get("window");
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/LoginScreen");
+		router.navigate("/screens/Auth/LoginScreen");
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterScreen");
 	};
 
 	return (

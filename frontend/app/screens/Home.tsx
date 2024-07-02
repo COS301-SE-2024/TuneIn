@@ -29,7 +29,7 @@ const Home: React.FC = () => {
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const baseURL = "http://192.168.56.1:3000";
+	const baseURL = "http://192.168.0.158:3000";
 
 	const BackgroundIMG: string =
 		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -179,7 +179,7 @@ const Home: React.FC = () => {
 	const renderItem = ({ item }: { item: Room }) => (
 		<Link
 			href={{
-				pathname: "/screens/RoomPage",
+				pathname: "/screens/rooms/RoomPage",
 				params: { room: JSON.stringify(item) },
 			}}
 		>
@@ -205,7 +205,7 @@ const Home: React.FC = () => {
 
 	const navigateToEditRoom = () => {
 		console.log("Navigating to edit room");
-		router.navigate("/screens/EditRoom");
+		router.navigate("/screens/rooms/EditRoom");
 	};
 
 	const handleScroll = useCallback(({ nativeEvent }) => {

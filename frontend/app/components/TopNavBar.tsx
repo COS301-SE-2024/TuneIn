@@ -8,7 +8,7 @@ import axios from "axios";
 
 const TopNavBar: React.FC = () => {
   const router = useRouter();
-  const baseURL = "http://192.168.56.1:3000";
+  const baseURL = "http://192.168.0.158:3000";
   const [profileImage, setProfileImage] = useState<string>("https://cdn-.jk.-png.freepik.com/512/3135/3135715.png");
 
   useEffect(() => {

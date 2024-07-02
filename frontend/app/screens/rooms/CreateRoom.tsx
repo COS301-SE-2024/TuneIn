@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router'; // Import useRouter from 'expo-router'
-import MyToggleWidget from '../components/ToggleWidget'; // Adjust the import path as needed
+import MyToggleWidget from '../../components/ToggleWidget'; // Adjust the import path as needed
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 

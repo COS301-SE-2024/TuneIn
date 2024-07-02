@@ -9,18 +9,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import NowPlaying from "../components/NowPlaying";
-import BioSection from "../components/BioSection";
-import GenreList from "../components/GenreList";
-import RoomCard from "../components/RoomCard";
-import FavoriteSongs from "../components/FavoriteSong";
-import LinkBottomSheet from "../components/LinkBottomSheet";
-import MusicBottomSheet from "../components/MusicBottomSheet";
+import NowPlaying from "../../components/NowPlaying";
+import BioSection from "../../components/BioSection";
+import GenreList from "../../components/GenreList";
+import RoomCard from "../../components/RoomCard";
+import FavoriteSongs from "../../components/FavoriteSong";
+import LinkBottomSheet from "../../components/LinkBottomSheet";
+import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen: React.FC = () => {
-  const baseURL = "http://localhost:3000";
+  const baseURL = "http://192.168.0.158:3000";
   const router = useRouter();
   const [favoriteSongsData, setFavoriteSongsData] = useState([
     {

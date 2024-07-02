@@ -23,7 +23,7 @@ const AdvancedSettings = () => {
   const toggleSwitch4 = () => setToggle4(previousState => !previousState);
 
   const goToEditScreen = () => {
-    router.navigate({pathname:"/screens/EditRoom", params: {
+    router.navigate({pathname:"/screens/rooms/EditRoom", params: {
       name: _roomDetails.room_name,
       description: _roomDetails.description,
       isNsfw: _roomDetails.has_nsfw_content,

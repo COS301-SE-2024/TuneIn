@@ -77,7 +77,7 @@ export const useSpotifyAuth = () => {
     try {
       const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
       if (!storedRefreshToken) throw new Error('No refresh token found');
-      const response = await axios.post('http://192.168.56.1:4000/refresh_token', {
+      const response = await axios.post('http://192.168.0.158:4000/refresh_token', {
         refresh_token: storedRefreshToken,
       });
 
@@ -102,7 +102,7 @@ export const useSpotifyAuth = () => {
     try {
       const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
       if (!storedRefreshToken) throw new Error('No refresh token found');
-      const response = await axios.post('http://192.168.56.1:4000/refresh_token', {
+      const response = await axios.post('http://192.168.0.158:4000/refresh_token', {
         refresh_token: storedRefreshToken,
       });
 

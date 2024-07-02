@@ -11,16 +11,16 @@ import {
 import fs from "fs";
 import FormData from "form-data";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import EditGenreBubble from "../components/EditGenreBubble";
-import EditDialog from "../components/EditDialog";
-import FavoriteSongs from "../components/FavoriteSong";
-import PhotoSelect from "../components/PhotoSelect";
+import EditGenreBubble from "../../components/EditGenreBubble";
+import EditDialog from "../../components/EditDialog";
+import FavoriteSongs from "../../components/FavoriteSong";
+import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
-import uploadImage from "../services/ImageUpload";
+import uploadImage from "../../services/ImageUpload";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -40,7 +40,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://192.168.56.1:3000";
+	const baseURL = "http://192.168.0.158:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -332,7 +332,7 @@ const EditProfileScreen = () => {
 	};
 
 	const [profilePic, setProfilePic] = useState(
-		require("../assets/MockProfilePic.jpeg"),
+		require("../../assets/MockProfilePic.jpeg"),
 	);
 
 	return (
