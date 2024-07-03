@@ -77,12 +77,11 @@ export const useSpotifyDevices = () => {
       });
 
       if (!response.ok) {
-        Alert.alert('No Devices Found', 'No devices are currently active.');
         return null;
       }
 
       const data = await response.json();
-      console.log("Response from getDeviceIDs: " + data.devices);
+      
       return data.devices ;
     } catch (err) {
       setError('An error occurred while fetching devices');

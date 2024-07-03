@@ -6,6 +6,7 @@ import {
 	Modal,
 	TouchableOpacity,
 	Alert,
+	ActivityIndicator,
 } from "react-native";
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
@@ -16,6 +17,7 @@ const DevicePicker = () => {
 	const [isVisible, setIsVisible] = useState(false);
 	const [devices, setDevices] = useState([]);
 	const [selectedDevice, setSelectedDevice] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
 	const { getDeviceIDs } = useSpotifyDevices();
 	const [accessToken, setAccessToken] = useState<string>("");
 
@@ -68,31 +70,29 @@ const DevicePicker = () => {
 	};
 
 	const handleDeviceSelect = async (deviceId) => {
-		console.log("accessToken: ", accessToken);
+		setIsLoading(true);
 		setSelectedDevice(deviceId);
-		try {
-			const response = await fetch("https://api.spotify.com/v1/me/player", {
-				method: "PUT",
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					device_ids: [deviceId],
-				}),
-			});
-			console.log(
-				"Body : ",
-				JSON.stringify({
-					device_ids: [deviceId],
-				}),
-			);
-			if (!response.ok) {
-				throw new Error("Failed to transfer playback to the selected device.");
+		setTimeout(async () => {
+			try {
+				const response = await fetch("https://api.spotify.com/v1/me/player", {
+					method: "PUT",
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						device_ids: [deviceId],
+					}),
+				});
+				if (!response.ok) {
+					throw new Error("Failed to transfer playback to the selected device.");
+				}
+			} catch (error) {
+				Alert.alert("Error", error.message);
+			} finally {
+				setIsLoading(false);
 			}
-		} catch (error) {
-			Alert.alert("Error", error.message);
-		}
+		}, 500); // 2 seconds delay
 	};
 
 	return (
@@ -103,11 +103,7 @@ const DevicePicker = () => {
 			</TouchableOpacity>
 
 			<Modal visible={isVisible} transparent={true} animationType="fade">
-				<TouchableOpacity
-					style={styles.modalBackground}
-					activeOpacity={1}
-					onPress={handleClosePopup}
-				>
+				<View style={styles.modalBackground}>
 					<View style={styles.popupContainer}>
 						{!devices || devices.length === 0 ? (
 							<>
@@ -119,28 +115,32 @@ const DevicePicker = () => {
 						) : (
 							<>
 								<Text style={styles.popupTitle}>Select a Device</Text>
-								{devices.map((device, index) => (
-									<View key={index} style={styles.deviceOption}>
-										<RadioButton
-											value={device.id}
-											status={
-												selectedDevice === device.id ? "checked" : "unchecked"
-											}
+								{isLoading ? (
+									<ActivityIndicator size="large" color="blue" />
+								) : (
+									devices.map((device, index) => (
+										<TouchableOpacity
+											key={index}
+											style={styles.deviceOption}
 											onPress={() => handleDeviceSelect(device.id)}
-										/>
-										<Text style={styles.deviceButtonText}>{device.name}</Text>
-									</View>
-								))}
+										>
+											<RadioButton
+												value={device.id}
+												status={
+													selectedDevice === device.id ? "checked" : "unchecked"
+												}
+											/>
+											<Text style={styles.deviceButtonText}>{device.name}</Text>
+										</TouchableOpacity>
+									))
+								)}
 							</>
 						)}
-						<TouchableOpacity
-							onPress={handleClosePopup}
-							style={styles.closeButton}
-						>
+						<TouchableOpacity onPress={handleClosePopup}>
 							<Text style={styles.closeButtonText}>Close</Text>
 						</TouchableOpacity>
 					</View>
-				</TouchableOpacity>
+				</View>
 			</Modal>
 		</View>
 	);
@@ -177,10 +177,12 @@ const styles = StyleSheet.create({
 	popupContainer: {
 		backgroundColor: "white",
 		padding: 20,
-		borderRadius: 5,
-		alignItems: "center",
+		borderRadius: 15,
+	
+		width: 315,
 	},
 	popupTitle: {
+        alignSelf: "center",
 		fontSize: 20,
 		fontWeight: "bold",
 		marginBottom: 20,
@@ -194,19 +196,17 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
+        marginLeft:20
 	},
 	deviceButtonText: {
 		fontSize: 16,
 	},
-	closeButton: {
-		marginTop: 20,
-		padding: 10,
-		backgroundColor: "blue",
-		borderRadius: 5,
-	},
 	closeButtonText: {
-		color: "white",
-		fontSize: 16,
+        marginTop:15,
+        marginBottom: 5 ,
+        alignSelf: "center",
+		color: "black",
+		fontSize: 17,
 		fontWeight: "bold",
 	},
 });
