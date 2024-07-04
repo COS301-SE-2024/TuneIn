@@ -25,8 +25,9 @@ export const useSpotifySearch = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+      
       const data = await response.json();
+      console.log("Tracks : ",data.tracks.items)
       setSearchResults(data.tracks.items);
     } catch (err) {
       setError('An error occurred while searching');

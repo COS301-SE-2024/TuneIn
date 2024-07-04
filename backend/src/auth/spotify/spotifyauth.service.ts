@@ -207,6 +207,8 @@ export class SpotifyAuthService {
 			}
 		}
 
+		console.log("spotifyUser image : " + spotifyUser.images);
+		console.log("\nimage size: " + largest);
 		const existingUser: PrismaTypes.users[] | null =
 			await this.prisma.users.findMany({
 				where: { username: spotifyUser.id },
@@ -218,9 +220,11 @@ export class SpotifyAuthService {
 			return existingUser[0];
 		}
 
+		const profilePicture = largest > 0 ? spotifyUser.images[largest]?.url : 'https://example.com/default-profile-picture.png';
+
 		const user: Prisma.usersCreateInput = {
 			username: spotifyUser.id,
-			profile_picture: spotifyUser.images[largest].url,
+			profile_picture: profilePicture,
 			full_name: spotifyUser.display_name,
 			external_links: {
 				spotify: spotifyUser.external_urls.spotify,

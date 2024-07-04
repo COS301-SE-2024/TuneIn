@@ -89,8 +89,6 @@ export const useSpotifyDevices = () => {
     }
   };
 
-
-
   return {
     devices,
     getFirstDevice,
