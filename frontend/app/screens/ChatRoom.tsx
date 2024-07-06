@@ -77,7 +77,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 							},
 						);
 						console.log("User's own info:", response.data);
-						return response.data as UserProfileDto;
+						return response.data as UserDto;
 					} catch (error) {
 						console.error("Error fetching user's own info:", error);
 						//user is not authenticated
