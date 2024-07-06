@@ -61,7 +61,7 @@ const EditProfileScreen = () => {
 		if (changed) {
 			try {
 				const response = await axios.patch(
-					`${utils.getAPIBaseURL()}/profile`,
+					`${utils.getAPIBaseURL()}/users`,
 					profileData,
 					{
 						headers: {

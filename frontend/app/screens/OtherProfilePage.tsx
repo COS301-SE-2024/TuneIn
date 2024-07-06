@@ -54,7 +54,7 @@ const ProfileScreen: React.FC = () => {
 	const fetchProfileInfo = async (token: string) => {
 		try {
 			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/profile/${username}`,
+				`${utils.getAPIBaseURL()}/users/${username}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchUserProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/users`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -201,7 +201,7 @@ const ProfileScreen: React.FC = () => {
 		setToken(t);
 		if (following) {
 			const response = await axios.post(
-				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/unfollow`,
+				`${utils.getAPIBaseURL()}/users/${profileData.userID}/unfollow`,
 				{},
 				{
 					headers: {
@@ -218,7 +218,7 @@ const ProfileScreen: React.FC = () => {
 			}
 		} else {
 			const response = await axios.post(
-				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/follow`,
+				`${utils.getAPIBaseURL()}/users/${profileData.userID}/follow`,
 				{},
 				{
 					headers: {

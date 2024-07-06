@@ -69,7 +69,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				const whoami = async (token: string | null, type?: string) => {
 					try {
 						const response = await axios.get(
-							`${utils.getAPIBaseURL()}/profile`,
+							`${utils.getAPIBaseURL()}/users`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,

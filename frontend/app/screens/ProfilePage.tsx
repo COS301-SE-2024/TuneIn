@@ -73,7 +73,7 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/users`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
