@@ -75,7 +75,7 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+				const response = await axios.get(`${utils.getAPIBaseURL()}/users`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
@@ -226,7 +226,7 @@ const RoomPage = () => {
 		console.log("Checking bookmark");
 		try {
 			const response = await fetch(
-				`http://${utils.getAPIBaseURL()}/users/bookmarks`,
+				`${utils.getAPIBaseURL()}/users/bookmarks`,
 				{
 					method: "GET",
 					headers: {
@@ -260,7 +260,7 @@ const RoomPage = () => {
 		try {
 			console.log(roomID);
 			const response = await fetch(
-				`http://${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				`${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
 				{
 					method: "POST",
 					headers: {
@@ -321,7 +321,7 @@ const RoomPage = () => {
 
 			try {
 				const response = await fetch(
-					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+					`${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
 					{
 						method: "GET",
 						headers: {
@@ -332,7 +332,7 @@ const RoomPage = () => {
 				);
 				console.log(
 					"URL: ",
-					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+					`${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
 				);
 				console.log("response: ", response);
 				if (!response.ok) {
