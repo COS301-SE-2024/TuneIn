@@ -18,7 +18,7 @@ import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
+import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 
 const ProfileScreen: React.FC = () => {

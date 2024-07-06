@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+console.log(JWT_SECRET_KEY);
 if (!JWT_SECRET_KEY) {
 	throw new Error(
 		"No JWT Secret (JWT_SECRET_KEY) provided in environment variables",

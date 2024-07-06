@@ -38,17 +38,19 @@ const DevicePicker = () => {
 		let interval;
 		if (isVisible) {
 			const fetchDevices = async () => {
-				const deviceList = await getDeviceIDs();
-				setDevices(deviceList);
-				if (deviceList) {
-					const activeDevice = deviceList.find((device) => device.is_active);
-					if (activeDevice) {
-						setSelectedDevice(activeDevice.id);
+				try {
+					const deviceList = await getDeviceIDs();
+					if (deviceList) {
+						setDevices(deviceList);
+						const activeDevice = deviceList.find((device) => device.is_active);
+						if (activeDevice) {
+							setSelectedDevice(activeDevice.id);
+						}
+					} else {
+						console.warn("Received null or undefined deviceList");
 					}
-
-					if (deviceList && deviceList.length === 0) {
-						setIsVisible(true);
-					}
+				} catch (err) {
+					console.error("An error occurred while fetching devices", err);
 				}
 			};
 
@@ -128,9 +130,8 @@ const DevicePicker = () => {
 										>
 											<RadioButton
 												value={device.id}
-												status={
-													selectedDevice === device.id ? "checked" : "unchecked"
-												}
+												testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
+												status={device.is_active ? "checked" : "unchecked"}
 											/>
 											<Text style={styles.deviceButtonText}>{device.name}</Text>
 										</TouchableOpacity>
@@ -180,7 +181,6 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		padding: 20,
 		borderRadius: 15,
-
 		width: 315,
 	},
 	popupTitle: {

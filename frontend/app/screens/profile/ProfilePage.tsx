@@ -17,8 +17,8 @@ import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const ProfileScreen: React.FC = () => {
 	const baseURL = "http://getFirstDevice:3000";
