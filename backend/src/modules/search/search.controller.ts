@@ -1,12 +1,11 @@
 import { Controller, Get } from "@nestjs/common";
-import { SearchService } from "./search.service";
+import { SearchService, CombinedSearchResults } from "./search.service";
 import {
 	ApiBadRequestResponse,
 	ApiOkResponse,
 	ApiOperation,
 	ApiQuery,
 	ApiTags,
-	getSchemaPath,
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
@@ -20,15 +19,7 @@ export class SearchController {
 	@ApiOperation({ summary: "Search for rooms and users" })
 	@ApiOkResponse({
 		description: "Search results as an array of mixed UserDto and RoomDto.",
-		schema: {
-			type: "array",
-			items: {
-				oneOf: [
-					{ $ref: getSchemaPath(UserDto) },
-					{ $ref: getSchemaPath(RoomDto) },
-				],
-			},
-		},
+		type: CombinedSearchResults,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
