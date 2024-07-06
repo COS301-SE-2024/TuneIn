@@ -24,7 +24,7 @@ const fetchRoomDetails = async (roomId: string) => {
 	// Replace with real data fetching
 	const token = await auth.getToken();
 	try {
-		const data = await axios.get(`${utils.getAPIBaseURL()}rooms/${roomId}`, {
+		const data = await axios.get(`${utils.API_BASE_URL}rooms/${roomId}`, {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: "Bearer " + token,
@@ -161,7 +161,7 @@ const EditRoom: React.FC = () => {
 			//     'Content-Type': 'application/json',
 			//     'Authorization': 'Bearer ' + token
 			//   }});
-			const data = await fetch(`${utils.getAPIBaseURL()}rooms/${roomData.id}`, {
+			const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",

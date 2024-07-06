@@ -69,7 +69,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				const whoami = async (token: string | null, type?: string) => {
 					try {
 						const response = await axios.get(
-							`${utils.getAPIBaseURL()}/users`,
+							`${utils.API_BASE_URL}/users`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		};
 		getTokenAndSelf();
 
-		socket.current = io(utils.getAPIBaseURL() + "/live-chat", {
+		socket.current = io(utils.API_BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
 

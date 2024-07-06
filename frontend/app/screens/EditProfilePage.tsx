@@ -61,7 +61,7 @@ const EditProfileScreen = () => {
 		if (changed) {
 			try {
 				const response = await axios.patch(
-					`${utils.getAPIBaseURL()}/users`,
+					`${utils.API_BASE_URL}/users`,
 					profileData,
 					{
 						headers: {
@@ -99,7 +99,7 @@ const EditProfileScreen = () => {
 
 			/*
 			const uploadResponse = await axios.post(
-				`${utils.getAPIBaseURL()}/upload`,
+				`${utils.API_BASE_URL}/upload`,
 				form,
 				{ headers },
 			);

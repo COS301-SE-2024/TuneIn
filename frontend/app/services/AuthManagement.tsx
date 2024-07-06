@@ -47,7 +47,7 @@ class AuthManagement {
 		// Make an API call to refresh the token
 		try {
 			const response = await axios.post(
-				`${utils.getAPIBaseURL()}/auth/refresh`,
+				`${utils.API_BASE_URL}/auth/refresh`,
 				{
 					refreshToken: this.token,
 				},

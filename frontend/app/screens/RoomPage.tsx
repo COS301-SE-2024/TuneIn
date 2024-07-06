@@ -75,7 +75,7 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${utils.getAPIBaseURL()}/users`, {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
@@ -87,7 +87,7 @@ const RoomPage = () => {
 
 			try {
 				const roomDto = await axios.get(
-					`${utils.getAPIBaseURL()}/rooms/${roomID}`,
+					`${utils.API_BASE_URL}/rooms/${roomID}`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -103,7 +103,7 @@ const RoomPage = () => {
 		getTokenAndSelf();
 		checkBookmark();
 
-		socket.current = io.io(utils.getAPIBaseURL() + "/live-chat", {
+		socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
 
@@ -226,7 +226,7 @@ const RoomPage = () => {
 		console.log("Checking bookmark");
 		try {
 			const response = await fetch(
-				`${utils.getAPIBaseURL()}/users/bookmarks`,
+				`${utils.API_BASE_URL}/users/bookmarks`,
 				{
 					method: "GET",
 					headers: {
@@ -260,7 +260,7 @@ const RoomPage = () => {
 		try {
 			console.log(roomID);
 			const response = await fetch(
-				`${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				`${utils.API_BASE_URL}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
 				{
 					method: "POST",
 					headers: {
@@ -321,7 +321,7 @@ const RoomPage = () => {
 
 			try {
 				const response = await fetch(
-					`${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
 					{
 						method: "GET",
 						headers: {
@@ -332,7 +332,7 @@ const RoomPage = () => {
 				);
 				console.log(
 					"URL: ",
-					`${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
 				);
 				console.log("response: ", response);
 				if (!response.ok) {

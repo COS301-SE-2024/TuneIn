@@ -17,7 +17,7 @@ const TopNavBar: React.FC = () => {
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					const response = await axios.get(`${utils.getAPIBaseURL()}/users`, {
+					const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 						headers: {
 							Authorization: `Bearer ${token}`,
 						},
