@@ -1,5 +1,6 @@
-import { execSync } from "child_process";
-import { engines } from "./package.json";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { execSync } = require("child_process");
+const { engines } = require("./package.json");
 
 const compareVersions = (currentVersion, requiredVersion) => {
 	const current = currentVersion.split(".").map(Number);
