@@ -1,7 +1,8 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
 import { SearchService, CombinedSearchResults } from "./search.service";
 import {
 	ApiBadRequestResponse,
+	ApiBearerAuth,
 	ApiOkResponse,
 	ApiOperation,
 	ApiQuery,
@@ -9,10 +10,15 @@ import {
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @Controller("search")
 export class SearchController {
-	constructor(private readonly searchService: SearchService) {}
+	constructor(
+		private readonly searchService: SearchService,
+		private readonly auth: AuthService,
+	) {}
 
 	@Get()
 	@ApiTags("search")
@@ -34,8 +40,15 @@ export class SearchController {
 		description: "A room creator's profile name or username",
 		type: "string",
 	})
-	async combinedSearch() {
-		return await this.searchService.combinedSearch();
+	async combinedSearch(
+		@Query("q") q: string,
+		@Query("creator") creator?: string,
+	): Promise<CombinedSearchResults> {
+		const query_params = {
+			q,
+			creator,
+		};
+		return await this.searchService.combinedSearch(query_params);
 	}
 
 	/* ************************************************** */
@@ -59,8 +72,15 @@ export class SearchController {
 		description: "A room creator's profile name / username",
 		type: "string",
 	})
-	async searchRooms() {
-		return await this.searchService.searchRooms();
+	async searchRooms(
+		@Query("q") q: string,
+		@Query("creator") creator?: string,
+	): Promise<RoomDto[]> {
+		const query_params = {
+			q,
+			creator,
+		};
+		return await this.searchService.searchRooms(query_params);
 	}
 
 	/* ************************************************** */
@@ -157,12 +177,45 @@ export class SearchController {
 		description: "An array of tags to compare",
 		type: "array",
 	})
-	async advancedSearchRooms() {
-		return await this.searchService.advancedSearchRooms();
+	async advancedSearchRooms(
+		@Query("q") q: string,
+		@Query("creator_username") creator_username?: string,
+		@Query("creator_name") creator_name?: string,
+		@Query("participant_count") participant_count?: number,
+		@Query("description") description?: string,
+		@Query("is_temp") is_temp?: boolean,
+		@Query("is_priv") is_priv?: boolean,
+		@Query("is_scheduled") is_scheduled?: boolean,
+		@Query("start_date") start_date?: string,
+		@Query("end_date") end_date?: string,
+		@Query("lang") lang?: string,
+		@Query("explicit") explicit?: boolean,
+		@Query("nsfw") nsfw?: boolean,
+		@Query("tags") tags?: string[],
+	): Promise<RoomDto[]> {
+		const query_params = {
+			q,
+			creator_username,
+			creator_name,
+			participant_count,
+			description,
+			is_temp,
+			is_priv,
+			is_scheduled,
+			start_date,
+			end_date,
+			lang,
+			explicit,
+			nsfw,
+			tags,
+		};
+		return await this.searchService.advancedSearchRooms(query_params);
 	}
 
 	/* ************************************************** */
 
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms/history")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched rooms" })
@@ -171,8 +224,9 @@ export class SearchController {
 		type: [RoomDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchRoomsHistory() {
-		return await this.searchService.searchRoomsHistory();
+	async searchRoomsHistory(@Request() req: Request): Promise<RoomDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.searchService.searchRoomsHistory(userInfo.id);
 	}
 
 	/* ************************************************** */
@@ -191,8 +245,8 @@ export class SearchController {
 		description: "A username or profile name",
 		type: "string",
 	})
-	async searchUsers() {
-		return await this.searchService.searchUsers();
+	async searchUsers(@Query("q") q: string): Promise<UserDto[]> {
+		return await this.searchService.searchUsers(q);
 	}
 
 	/* ************************************************** */
@@ -235,12 +289,27 @@ export class SearchController {
 		description: "Minimum number of followers",
 		type: "number",
 	})
-	async advancedSearchUsers() {
-		return await this.searchService.advancedSearchUsers();
+	async advancedSearchUsers(
+		@Query("q") q: string,
+		@Query("creator_username") creator_username?: string,
+		@Query("creator_name") creator_name?: string,
+		@Query("following") following?: number,
+		@Query("followers") followers?: number,
+	): Promise<UserDto[]> {
+		const query_params = {
+			q,
+			creator_username,
+			creator_name,
+			following,
+			followers,
+		};
+		return await this.searchService.advancedSearchUsers(query_params);
 	}
 
 	/* ************************************************** */
 
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Get("users/history")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched users" })
@@ -249,7 +318,8 @@ export class SearchController {
 		type: [UserDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchUsersHistory() {
-		return await this.searchService.searchUsersHistory();
+	async searchUsersHistory(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.searchService.searchUsersHistory(userInfo.id);
 	}
 }
