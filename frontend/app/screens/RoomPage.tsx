@@ -21,7 +21,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserProfileDto } from "../../api-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
@@ -52,7 +52,7 @@ const RoomPage = () => {
 	const { handlePlayback } = useSpotifyPlayback();
 
 	const token = useRef<string | null>(null);
-	const userRef = useRef<UserProfileDto | null>(null);
+	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
@@ -78,12 +78,12 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${BASE_URL}/profile`, {
+				const response = await axios.get(`${BASE_URL}/user`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
 				});
-				userRef.current = response.data as UserProfileDto;
+				userRef.current = response.data as UserDto;
 			} catch (error) {
 				// console.error("Error fetching user's own info:", error);
 			}
@@ -188,7 +188,7 @@ const RoomPage = () => {
 
 	const sendMessage = () => {
 		if (message.trim()) {
-			const u: UserProfileDto = userRef.current;
+			const u: UserDto = userRef.current;
 			const newMessage: LiveChatMessageDto = {
 				messageBody: message,
 				sender: u,
@@ -207,7 +207,7 @@ const RoomPage = () => {
 	};
 
 	const joinRoom = useCallback(() => {
-		const u: UserProfileDto = userRef.current;
+		const u: UserDto = userRef.current;
 		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
@@ -282,7 +282,7 @@ const RoomPage = () => {
 	};
 
 	const leaveRoom = () => {
-		const u: UserProfileDto = userRef.current;
+		const u: UserDto = userRef.current;
 		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
@@ -441,9 +441,6 @@ const RoomPage = () => {
 		}
 	};
 
-	
-	
-
 	const toggleChat = () => {
 		Animated.timing(animatedHeight, {
 			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
@@ -530,8 +527,7 @@ const RoomPage = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
-					<View style={styles.joinLeaveButtonContainer}>
-					</View>
+					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
 				<TouchableOpacity
 					onPress={handleBookmark}
@@ -651,7 +647,7 @@ const RoomPage = () => {
 						paddingBottom: 10,
 					}}
 				>
-					<Text style={{ fontSize: 18,fontWeight: "bold" }}>
+					<Text style={{ fontSize: 18, fontWeight: "bold" }}>
 						{isChatExpanded ? "Hide Chat" : "Show Chat"}
 					</Text>
 					<MaterialIcons
@@ -726,7 +722,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	bookmarkButton: {
-		marginTop:20,
+		marginTop: 20,
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
@@ -788,36 +784,36 @@ const styles = StyleSheet.create({
 		fontWeight: "bold", // Make the room name bold for emphasis
 		textAlign: "center", // Center align the room name
 		marginBottom: 10, // Add some bottom margin for spacing
-	  },
-	  description: {
+	},
+	description: {
 		fontSize: 16,
 		color: "white",
 		textAlign: "center",
 		marginHorizontal: 20,
 		marginTop: 10,
 		lineHeight: 22, // Adjust line height for better readability
-	  },
+	},
 	tagsContainer: {
 		flexDirection: "row",
 		justifyContent: "center",
 		marginTop: 10,
 	},
 	tag: {
-		backgroundColor: '#4CAF50', // Green background color (example)
+		backgroundColor: "#4CAF50", // Green background color (example)
 		borderRadius: 20, // Adjust the border radius to make the pill more rounded
 		paddingHorizontal: 12, // Horizontal padding for text inside the pill
 		paddingVertical: 6, // Vertical padding for text inside the pill
 		marginHorizontal: 5, // Space between pills
-		alignItems: 'center', // Center text horizontally
-		justifyContent: 'center', // Center text vertically
+		alignItems: "center", // Center text horizontally
+		justifyContent: "center", // Center text vertically
 		elevation: 2, // Android elevation for shadow
-		shadowColor: '#000', // Shadow color for iOS
+		shadowColor: "#000", // Shadow color for iOS
 		shadowOffset: { width: 0, height: 1 }, // Shadow offset for iOS
 		shadowOpacity: 0.8, // Shadow opacity for iOS
 		shadowRadius: 1, // Shadow radius for iOS
 		fontWeight: "bold", // Font weight for iOS
 		fontSize: 16, // Font size for iOS
-	  },
+	},
 	trackDetails: {
 		flexDirection: "row",
 		alignItems: "center",

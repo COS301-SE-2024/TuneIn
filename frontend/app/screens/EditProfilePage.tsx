@@ -85,20 +85,20 @@ const EditProfileScreen = () => {
 			// const response = await fetch(uri);
 			// const blob = await response.blob();
 			// const fileName = uri.split('/').pop(); // Extract filename from URI
-	
+
 			// Append the file to the FormData
 			// form.append("file", new File([blob], fileName, { type: blob.type }));
-	
+
 			const headers = {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'multipart/form-data',
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "multipart/form-data",
 			};
-	
+
 			// const uploadResponse = await axios.post("http://10.0.2.2:3000/upload", form, { headers });
-			console.log(profileData)
-			console.log("Uploading image...", uri)
-			const imageLink = await uploadImage(uri, 'image');
-			console.log('image link:', imageLink);
+			console.log(profileData);
+			console.log("Uploading image...", uri);
+			const imageLink = await uploadImage(uri, "image");
+			console.log("image link:", imageLink);
 			// console.log("File uploaded successfully", uploadResponse.data);
 			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
@@ -109,20 +109,18 @@ const EditProfileScreen = () => {
 
 	const updateImage = async (uri) => {
 		try {
-
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
-			console.log('image:', image)
+			console.log("image:", image);
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
-			setChanged(true)
-			console.log('\n\nUpdated profile data:', profileData)
+			setChanged(true);
+			console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
 		}
-	}
-	
+	};
 
 	const dialogs = {
 		name: setNameDialogVisible,
