@@ -1,5 +1,9 @@
 const nodeExternals = require('webpack-node-externals');
 const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin');
+const path = require('path');
+
+console.log('webpack-hmr.config.js');
+console.log(path.join(__dirname, 'archive'));
 
 module.exports = function (options, webpack) {
   return {
@@ -14,7 +18,13 @@ module.exports = function (options, webpack) {
       ...options.plugins,
       new webpack.HotModuleReplacementPlugin(),
       new webpack.WatchIgnorePlugin({
-        paths: [/\.js$/, /\.d\.ts$/],
+        paths: [
+          /\.js$/,
+          /\.d\.ts$/,
+          path.resolve(__dirname, 'archive'),
+          /archive/,
+          /node_modules/,
+        ],
       }),
       new RunScriptWebpackPlugin({ name: options.output.filename, autoRestart: false }),
     ],
