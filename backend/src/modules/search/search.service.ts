@@ -4,6 +4,8 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import { PrismaService } from "../../../prisma/prisma.service";
+import { Prisma } from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 
@@ -26,6 +28,40 @@ export class SearchService {
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 	) {}
+
+	// Fuzzy search tutorial
+	/*
+	using pg_trgm to fuzzy search with threshold 0.4
+	```
+	SELECT
+	*
+	FROM artists
+	WHERE SIMILARITY(name,'Claud Monay') > 0.4 ;
+	```
+
+	using pg_trgm to fuzzy search to search part of a string (with default threshold 0.3)
+	```
+	SELECT
+	*
+	FROM artists
+	WHERE 'Cadinsky' % ANY(STRING_TO_ARRAY(name,' '));
+	```
+
+	using Levenstein distances (for closest matching words)
+	```
+	SELECT
+		*,
+		LEVENSHTEIN(name, 'Freda Kallo')
+	FROM artists
+	ORDER BY LEVENSHTEIN(name, 'Freda Kallo') ASC
+	LIMIT 5
+	```
+	*/
+	async demoSearch() {
+		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		SELECT * FROM room WHERE SIMILARITY(name,'Conbrete') > 0.4;`
+		console.log(result);
+	}
 
 	async combinedSearch(params: {
 		q: string;
