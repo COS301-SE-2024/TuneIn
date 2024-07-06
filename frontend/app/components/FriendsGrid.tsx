@@ -9,29 +9,29 @@ interface FriendsGridProps {
 }
 
 const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.gridContainer}>
-        {friends.slice(0, maxVisible).map((friend, index) => (
-          <Link
-            key={index}
-            href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}`}
-            style={styles.link}
-          >
-            <View style={styles.friendContainer}>
-              <View style={styles.imageBorder}>
-                <Image
-                  source={{ uri: friend.profilePicture }}
-                  style={styles.profileImage}
-                />
-              </View>
-              <Text style={styles.friendName}>{friend.name}</Text>
-            </View>
-          </Link>
-        ))}
-      </View>
-    </View>
-  );
+	return (
+		<View style={styles.container}>
+			<View style={styles.gridContainer}>
+				{friends.slice(0, maxVisible).map((friend, index) => (
+					<Link
+						key={index}
+						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}`}
+						style={styles.link}
+					>
+						<View style={styles.friendContainer}>
+							<View style={styles.imageBorder}>
+								<Image
+									source={{ uri: friend.profilePicture }}
+									style={styles.profileImage}
+								/>
+							</View>
+							<Text style={styles.friendName}>{friend.name}</Text>
+						</View>
+					</Link>
+				))}
+			</View>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
