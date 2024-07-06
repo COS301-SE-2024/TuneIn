@@ -22,34 +22,37 @@ export const useSpotifyDevices = () => {
     fetchToken();
   }, [getToken]);
 
-  useEffect(() => {
-    if (accessToken) {
-      getDevices(accessToken);
-    }
-  }, [accessToken]);
+	useEffect(() => {
+		if (accessToken) {
+			getDevices(accessToken);
+		}
+	}, [accessToken]);
 
-  const getDevices = async (token: string) => {
-    try {
-      const response = await fetch('https://api.spotify.com/v1/me/player/devices', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+	const getDevices = async (token: string) => {
+		try {
+			const response = await fetch(
+				"https://api.spotify.com/v1/me/player/devices",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+					},
+				},
+			);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
 
-      const data = await response.json();
-  
-      setDevices(data.devices);
-    } catch (err) {
-      setError('An error occurred while fetching devices');
-      console.error('An error occurred while fetching devices', err);
-    }
-  };
+			const data = await response.json();
+
+			setDevices(data.devices);
+		} catch (err) {
+			setError("An error occurred while fetching devices");
+			console.error("An error occurred while fetching devices", err);
+		}
+	};
 
   const getFirstDevice = async (): Promise<string | null> => {
     try {

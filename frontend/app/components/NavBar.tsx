@@ -4,13 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 const NavBar: React.FC = () => {
-    const router = useRouter();
-    const [activeTab, setActiveTab] = useState<string>("Home");
+	const router = useRouter();
+	const [activeTab, setActiveTab] = useState<string>("Home");
 
-    const navigate = (route: string, tab: string) => {
-        setActiveTab(tab);
-        router.navigate(route);
-    };
+	const navigate = (route: string, tab: string) => {
+		setActiveTab(tab);
+		router.navigate(route);
+	};
 
     return (
         <View style={styles.container}>
@@ -58,37 +58,37 @@ const NavBar: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        backgroundColor: "#FFF",
-        borderTopWidth: 1, // Grey line at the top
-        borderTopColor: "#E5E5E5", // Grey color
-        paddingTop: 8, // Add padding to the top
-        paddingBottom: 8, // Add padding to the bottom
-        elevation: 4, // Elevation for Android shadow
-    },
-    topLine: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 1,
-        backgroundColor: "#E5E5E5", // Grey line color
-    },
-    tabItem: {
-        alignItems: "center",
-    },
-    text: {
-        color: "#333",
-        fontSize: 14,
-        marginTop: 4,
-    },
-    activeText: {
-        color: "#0000ff",
-        fontWeight: "bold", // Bold text for active tab
-    },
+	container: {
+		flexDirection: "row",
+		justifyContent: "space-around",
+		alignItems: "center",
+		backgroundColor: "#FFF",
+		borderTopWidth: 1, // Grey line at the top
+		borderTopColor: "#E5E5E5", // Grey color
+		paddingTop: 8, // Add padding to the top
+		paddingBottom: 8, // Add padding to the bottom
+		elevation: 4, // Elevation for Android shadow
+	},
+	topLine: {
+		position: "absolute",
+		top: 0,
+		left: 0,
+		right: 0,
+		height: 1,
+		backgroundColor: "#E5E5E5", // Grey line color
+	},
+	tabItem: {
+		alignItems: "center",
+	},
+	text: {
+		color: "#333",
+		fontSize: 14,
+		marginTop: 4,
+	},
+	activeText: {
+		color: "#0000ff",
+		fontWeight: "bold", // Bold text for active tab
+	},
 });
 
 export default NavBar;

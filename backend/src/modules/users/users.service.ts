@@ -289,6 +289,7 @@ export class UsersService {
 		const f = await this.prisma.friends.findMany({
 			where: { OR: [{ friend1: userID }, { friend2: userID }] },
 		});
+		console.log(f);
 		if (!f) {
 			return [];
 		}
@@ -302,6 +303,7 @@ export class UsersService {
 			}
 		}
 		const r = await this.dtogen.generateMultipleUserProfileDto(ids);
+		console.log(r);
 		return r;
 	}
 

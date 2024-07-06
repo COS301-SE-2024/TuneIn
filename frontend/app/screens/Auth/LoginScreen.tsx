@@ -10,14 +10,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 const LoginScreen: React.FC = () => {
   const [obscureText, setObscureText] = useState(true);
@@ -26,7 +27,7 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
+	const router = useRouter();
 
   const navigateToHome = () => {
     setIsLoading(true);
@@ -36,7 +37,7 @@ const LoginScreen: React.FC = () => {
       Pool: UserPool,
     };
 
-    const cognitoUser = new CognitoUser(userData);
+		const cognitoUser = new CognitoUser(userData);
 
     const authenticationData = {
       Username: emailOrUsername,
@@ -162,102 +163,102 @@ const LoginScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  backButton: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    zIndex: 10,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  headerText: {
-    padding: 16,
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  formContainer: {
-    alignItems: "center",
-    width: "100%",
-  },
-  inputGroup: {
-    width: "92%",
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  input: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    width: "100%",
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "gray",
-  },
-  visibilityToggle: {
-    position: "absolute",
-    right: 12,
-  },
-  forgotPasswordButton: {
-    alignSelf: "flex-end",
-    marginRight: 16,
-  },
-  forgotPasswordText: {
-    color: "black",
-  },
-  checkboxContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    padding: 0,
-  },
-  loginButton: {
-    width: "92%",
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#4C51BF",
-    borderRadius: 24,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  loginButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
-  },
-  registerLink: {
-    marginTop: 20,
-  },
-  registerLinkText: {
-    fontSize: 18,
-    textAlign: "center",
-  },
-  registerLinkBold: {
-    fontWeight: "bold",
-  },
+	container: {
+		flex: 1,
+		padding: 16,
+	},
+	backButton: {
+		position: "absolute",
+		top: 16,
+		left: 16,
+		zIndex: 10,
+	},
+	logoContainer: {
+		alignItems: "center",
+		marginBottom: 40,
+	},
+	headerText: {
+		padding: 16,
+		fontSize: 32,
+		fontWeight: "bold",
+		textAlign: "center",
+		marginBottom: 40,
+	},
+	formContainer: {
+		alignItems: "center",
+		width: "100%",
+	},
+	inputGroup: {
+		width: "92%",
+		marginBottom: 20,
+	},
+	label: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 8,
+	},
+	input: {
+		padding: 12,
+		borderBottomWidth: 1,
+		borderBottomColor: "gray",
+		width: "100%",
+	},
+	passwordContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		width: "100%",
+	},
+	passwordInput: {
+		flex: 1,
+		padding: 12,
+		borderBottomWidth: 1,
+		borderBottomColor: "gray",
+	},
+	visibilityToggle: {
+		position: "absolute",
+		right: 12,
+	},
+	forgotPasswordButton: {
+		alignSelf: "flex-end",
+		marginRight: 16,
+	},
+	forgotPasswordText: {
+		color: "black",
+	},
+	checkboxContainer: {
+		backgroundColor: "transparent",
+		borderWidth: 0,
+		padding: 0,
+	},
+	loginButton: {
+		width: "92%",
+		height: 48,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#4C51BF",
+		borderRadius: 24,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	loginButtonText: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#FFF",
+	},
+	registerLink: {
+		marginTop: 20,
+	},
+	registerLinkText: {
+		fontSize: 18,
+		textAlign: "center",
+	},
+	registerLinkBold: {
+		fontWeight: "bold",
+	},
 });
 
 export default LoginScreen;

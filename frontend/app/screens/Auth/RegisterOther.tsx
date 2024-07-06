@@ -90,33 +90,33 @@ window.addEventListener('message', (event) => {
 });
   const { width } = Dimensions.get('window');
 
-  let [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_700Bold,
-  });
+	let [fontsLoaded] = useFonts({
+		Poppins_400Regular,
+		Poppins_500Medium,
+		Poppins_700Bold,
+	});
 
-  if (!fontsLoaded) {
-    return null;
-  }
+	if (!fontsLoaded) {
+		return null;
+	}
 
-  const navigateToLogin = () => {
-    router.navigate('screens/LoginStreaming');
-  };
+	const navigateToLogin = () => {
+		router.navigate("screens/LoginStreaming");
+	};
 
-  const navigateToRegister = () => {
-    router.navigate('screens/RegisterScreen');
-  };
+	const navigateToRegister = () => {
+		router.navigate("screens/RegisterScreen");
+	};
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
+	return (
+		<View style={styles.container}>
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => router.back()}>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+			</View>
 
-      <Text style={styles.welcomeText}>Authenticate With</Text>
+			<Text style={styles.welcomeText}>Authenticate With</Text>
 
       <View style={styles.buttonContainer}>
         
@@ -131,18 +131,25 @@ window.addEventListener('message', (event) => {
           <View style={styles.divider} />
         </View>
 
-        <TouchableOpacity style={[styles.button, styles.otherButton]} onPress={navigateToRegister}>
-          <Text style={styles.buttonText}>Account</Text>
-        </TouchableOpacity>
-      </View>
+				<TouchableOpacity
+					style={[styles.button, styles.otherButton]}
+					onPress={navigateToRegister}
+				>
+					<Text style={styles.buttonText}>Account</Text>
+				</TouchableOpacity>
+			</View>
 
-      <TouchableOpacity style={styles.registerContainer} onPress={navigateToLogin}>
-        <Text style={styles.registerText}>
-          Don’t have an account? <Text style={styles.registerBoldText}>Register Now</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
+			<TouchableOpacity
+				style={styles.registerContainer}
+				onPress={navigateToLogin}
+			>
+				<Text style={styles.registerText}>
+					Don’t have an account?{" "}
+					<Text style={styles.registerBoldText}>Register Now</Text>
+				</Text>
+			</TouchableOpacity>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({

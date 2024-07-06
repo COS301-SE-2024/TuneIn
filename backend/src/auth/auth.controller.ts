@@ -11,6 +11,7 @@ import {
 	JWTPayload,
 	RegisterBody,
 	LoginBody,
+	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "../modules/users/users.service";
@@ -28,80 +29,12 @@ export class AuthController {
 	@ApiOperation({ summary: "Login in the API using Cognito" })
 	@ApiBody({ type: LoginBody })
 	@ApiResponse({
-		status: 201,
-		description: "The record has been successfully created.",
+		status: 200,
+		description: "User successfully logged in. JWT token returned.",
 		type: String,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
 	async login(@Body() loginInfo: LoginBody) {
-		/*
-		const users = await this.authService.listUsers();
-		console.log(users);
-		console.log(users.Users);
-		if (!users) {
-			throw new HttpException(
-				"Invalid credentials. Could not create user. AuthError01",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		if (!users.Users || users.Users.length === 0) {
-			throw new HttpException(
-				"Invalid credentials. Could not create user. AuthError02",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		//match the email address given with the email in the UserPool
-		let userMatch = null;
-		let userEmail = "";
-		for (let i = 0; i < users.Users.length; i++) {
-			if (!users.Users[i] || users.Users[i] === undefined) {
-				continue;
-			}
-			console.log("users.Users[i]", users.Users[i]);
-			const attrs = users.Users[i].Attributes;
-			console.log("attrs", attrs);
-			if (!attrs || attrs === undefined || attrs.length === 0) {
-				continue;
-			}
-
-			// if "email" is the Name of an attribute in users.Users[i].Attributes
-			if (attrs.find((attribute) => attribute.Name === "email")) {
-				const attr = attrs.find((attribute) => attribute.Name === "email");
-				if (!attr || attr === undefined) {
-					continue;
-				}
-				//if the userCognitoSub matches the UserSub in the UserPool
-				if (users.Users[i].Username === authInfo.userCognitoSub && attr.Value) {
-					userMatch = users.Users[i];
-					userEmail = attr.Value;
-					break;
-				}
-			}
-		}
-
-		if (userMatch === null || !userMatch) {
-			throw new HttpException(
-				"Invalid credentials. Could not create user. AuthError03",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		// add users to table
-		const successful: boolean = await this.authService.createUser(
-			authInfo.username,
-			userEmail,
-			authInfo.userCognitoSub,
-		);
-
-		if (!successful) {
-			throw new HttpException(
-				"Invalid credentials. Could not create user. AuthError04",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-		*/
 		if (!loginInfo.token || loginInfo.token === null) {
 			throw new HttpException(
 				"Invalid request. Missing Cognito access token. AuthControllerLoginError01",
@@ -152,8 +85,8 @@ export class AuthController {
 	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
 	@ApiBody({ type: RegisterBody })
 	@ApiResponse({
-		status: 201,
-		description: "The record has been successfully created.",
+		status: 200,
+		description: "User successfully registered.",
 		type: RegisterBody,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
@@ -175,5 +108,38 @@ export class AuthController {
 	}
 
 	//TODO: Add a POST method to refresh an expired JWT token
+	@Post("refresh")
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Refresh an expired (or almost expired) JWT token" })
+	@ApiResponse({
+		status: 200,
+		description: "JWT token successfully refreshed.",
+		type: String,
+	})
+	@ApiResponse({ status: 403, description: "Forbidden." })
+	async refresh(@Body() rb: RefreshBody) {
+		if (!rb || rb === null) {
+			throw new HttpException(
+				"Invalid request. Missing JWT token. AuthControllerRefreshError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+		try {
+			console.log("rb");
+			console.log(rb);
+			console.log(typeof rb);
+			const token: string = rb.refreshToken;
+			const payload: JWTPayload = await this.authService.refreshJWT(token);
+			const newToken: string = await this.authService.generateJWT(payload);
+			return { token: newToken };
+		} catch (e) {
+			console.error(e);
+			throw new HttpException(
+				"Invalid JWT token. AuthControllerRefreshError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+	}
+
 	//TODO: Add a POST method to logout a user
 }

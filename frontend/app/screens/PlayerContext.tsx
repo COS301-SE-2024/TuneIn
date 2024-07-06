@@ -18,15 +18,17 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export const usePlayerContext = () => {
-  const context = useContext(PlayerContext);
-  if (!context) {
-    throw new Error('usePlayerContext must be used within a PlayerContextProvider');
-  }
-  return context;
+	const context = useContext(PlayerContext);
+	if (!context) {
+		throw new Error(
+			"usePlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+	return context;
 };
 
 interface PlayerContextProviderProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({ children }) => {

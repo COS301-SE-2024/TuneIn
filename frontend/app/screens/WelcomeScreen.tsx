@@ -8,8 +8,8 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from '@expo/vector-icons'; // Import Ionicons from Expo Icons
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons"; // Import Ionicons from Expo Icons
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const WelcomeScreen: React.FC = () => {
 	const router = useRouter();
@@ -30,8 +30,16 @@ const WelcomeScreen: React.FC = () => {
 				style={[styles.imageBackground, { width, height: height * 0.5 }]}
 				resizeMode="cover"
 			>
-				<TouchableOpacity style={styles.helpButton} onPress={() => console.log("Help pressed")}>
-				<MaterialCommunityIcons name="help-circle-outline" size={24}  color="#FFF" style={styles.helpIcon} />
+				<TouchableOpacity
+					style={styles.helpButton}
+					onPress={() => console.log("Help pressed")}
+				>
+					<MaterialCommunityIcons
+						name="help-circle-outline"
+						size={24}
+						color="#FFF"
+						style={styles.helpIcon}
+					/>
 				</TouchableOpacity>
 			</ImageBackground>
 			<View style={styles.innerContainer}>
@@ -40,7 +48,10 @@ const WelcomeScreen: React.FC = () => {
 				<TouchableOpacity style={styles.loginButton} onPress={navigateToLogin}>
 					<Text style={styles.loginButtonText}>Login</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={styles.registerButton} onPress={navigateToRegister}>
+				<TouchableOpacity
+					style={styles.registerButton}
+					onPress={navigateToRegister}
+				>
 					<Text style={styles.registerButtonText}>Register</Text>
 				</TouchableOpacity>
 			</View>
@@ -56,7 +67,7 @@ const styles = StyleSheet.create({
 	imageBackground: {
 		width: "100%",
 		height: "50%",
-		position: 'relative', // Ensure the ImageBackground is relative for absolute positioning to work
+		position: "relative", // Ensure the ImageBackground is relative for absolute positioning to work
 	},
 	innerContainer: {
 		flex: 1,
@@ -115,10 +126,10 @@ const styles = StyleSheet.create({
 		color: "#000",
 	},
 	helpButton: {
-		position: 'absolute',
+		position: "absolute",
 		top: 20,
 		right: 20,
-		backgroundColor: 'transparent',
+		backgroundColor: "transparent",
 		padding: 10,
 	},
 	helpIcon: {
