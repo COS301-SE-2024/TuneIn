@@ -2,7 +2,7 @@
   "name": "tunein",
   "version": "1.0.0",
   "main": "expo-router/entry",
-  "scheme": "your-app-scheme",
+  "scheme": "tunein-app",
   "scripts": {
     "prestart": "node check-versions.js",
     "start": "expo start",
@@ -65,6 +65,7 @@
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.17.0",
     "react-native-get-random-values": "^1.11.0",
+    "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-paper": "^5.12.3",
     "react-native-reanimated": "^3.12.1",
     "react-native-reanimated-carousel": "^3.5.1",
@@ -79,7 +80,9 @@
     "tailwind-react-native-classnames": "^1.5.1",
     "tailwindcss": "^3.3.2",
     "twrnc": "^4.2.0",
-    "url": "^0.11.3"
+    "url": "^0.11.3",
+    "expo-web-browser": "~13.0.3",
+    "expo-linking": "~6.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

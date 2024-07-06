@@ -40,7 +40,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 
-	const baseURL = "http://192.168.0.158:3000";
+	const baseURL = "http://getFirstDevice:3000";
 
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -94,7 +94,7 @@ const EditProfileScreen = () => {
 				'Content-Type': 'multipart/form-data',
 			};
 	
-			// const uploadResponse = await axios.post("http://10.0.2.2:3000/upload", form, { headers });
+			// const uploadResponse = await axios.post("http://192.168.118.63:3000/upload", form, { headers });
 			console.log(profileData)
 			console.log("Uploading image...", uri)
 			const imageLink = await uploadImage(uri, 'image');

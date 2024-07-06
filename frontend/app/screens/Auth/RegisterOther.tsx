@@ -1,19 +1,19 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Alert } from "react-native";
 import { useRouter } from 'expo-router';
 import { Poppins_400Regular, Poppins_500Medium, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
-import { Ionicons } from '@expo/vector-icons';
-import { FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
-import { Entypo } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
+import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
   throw new Error("No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables");
 }
 
-const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+let redirectTarget = "http://localhost:5000";
 if (!redirectTarget) {
   throw new Error("No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables");
 }
@@ -21,32 +21,73 @@ if (!redirectTarget) {
 const RegisterOtherScreen: React.FC = () => {
   const router = useRouter();
 
+  useEffect(() => {
+    const handleRedirect = (event) => {
+      let { queryParams } = Linking.parse(event.url);
+      console.log('Redirect Data:', queryParams);
+      WebBrowser.dismissBrowser();
+      // Handle the redirect data (e.g., exchange code for access token)
+    };
+
+    const getInitialURL = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        handleRedirect({ url: initialUrl });
+      }
+    };
+
+    getInitialURL();
+
+    const subscription = Linking.addEventListener('url', handleRedirect);
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const authenticate = async () => {
     const scopes = [
-      "user-read-email",
-      "user-library-read",
-      "user-read-recently-played",
-      "user-top-read",
-      "playlist-read-private",
-      "playlist-read-collaborative",
-      "playlist-modify-public", // or "playlist-modify-private"
-      "user-modify-playback-state",
-      "user-read-playback-state",
-      "user-read-currently-playing",
+        "user-read-email",
+        "user-library-read",
+        "user-read-recently-played",
+        "user-top-read",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-public", // or "playlist-modify-private"
+        "user-modify-playback-state",
+        "user-read-playback-state",
+        "user-read-currently-playing",
     ].join(" ");
 
     const authUrl =
-      `https://accounts.spotify.com/authorize` +
-      `?client_id=${clientId}` +
-      `&response_type=code` + // Change response_type to 'code'
-      `&redirect_uri=${encodeURIComponent(redirectTarget)}` +
-      `&show_dialog=true` +
-      `&scope=${scopes}`;
+        `https://accounts.spotify.com/authorize` +
+        `?client_id=${clientId}` +
+        `&response_type=code` + // Change response_type to 'code'
+        `&redirect_uri=${encodeURIComponent(redirectTarget)}` +
+        `&show_dialog=true` +
+        `&scope=${scopes}`;
+
+    console.log("redirectTarget: " + redirectTarget);
 
     // Open Spotify authorization page in a web browser
-    Linking.openURL(authUrl);
+    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTarget);
+    console.log("After Auth Session Result: \n", result);
+    console.log("Type: \n", typeof result);
 
-  };
+    if (result.type === 'success') {
+        // The user has successfully authenticated, handle the result.url to extract the authorization code
+        console.log({ url: result.url });
+    }
+};
+
+// Function to handle messages from the dummy page
+window.addEventListener('message', (event) => {
+    if (event.origin === window.location.origin) {
+        console.log('Received message:', event.data);
+    } else {
+        console.log('Message from unknown origin');
+    }
+});
   const { width } = Dimensions.get('window');
 
   let [fontsLoaded] = useFonts({
@@ -107,7 +148,7 @@ const RegisterOtherScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 20,
+  paddingVertical: 20,
     paddingHorizontal: 16,
   },
   header: {

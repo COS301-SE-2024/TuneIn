@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -23,10 +24,12 @@ const LoginScreen: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
   const navigateToHome = () => {
+    setIsLoading(true);
 
     const userData = {
       Username: emailOrUsername,
@@ -42,7 +45,6 @@ const LoginScreen: React.FC = () => {
     const authenticationDetails = new AuthenticationDetails(authenticationData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-        
         // Store token in AsyncStorage if remember me is checked
         if (rememberMe) {
           StorageService.setItem(
@@ -52,7 +54,7 @@ const LoginScreen: React.FC = () => {
         }
 
         // POST request to backend
-        fetch("http://localhost:3000/auth/login", {
+        fetch("http://192.168.118.63:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -65,14 +67,16 @@ const LoginScreen: React.FC = () => {
           .then((data) => {
             const token = data.token; // Extract the token from the response
             StorageService.setItem("token", token); // Save the token to AsyncStorage
-            console.log("jwt: ",token);
+            console.log("jwt: ", token);
             router.navigate("/screens/Home");
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
-
       },
       onFailure: function (err) {
-        // console.error(err);
-        Alert.alert(err.message)
+        setIsLoading(false);
+        Alert.alert(err.message);
       },
     });
   };
@@ -135,8 +139,16 @@ const LoginScreen: React.FC = () => {
             onPress={() => setRememberMe(!rememberMe)}
           />
         </View>
-        <TouchableOpacity style={styles.loginButton} onPress={navigateToHome}>
-          <Text style={styles.loginButtonText}>LOGIN</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={navigateToHome}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.loginButtonText}>LOGIN</Text>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.registerLink} onPress={navigateToRegister}>
           <Text style={styles.registerLinkText}>

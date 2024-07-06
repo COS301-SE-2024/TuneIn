@@ -8,7 +8,7 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import axios from 'axios';
 import uploadImage from '../../services/ImageUpload';
 
-const BASE_URL = 'http://192.168.0.158:3000/'; // Replace with actual backend URL
+const BASE_URL = 'http://getFirstDevice:3000/'; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
   // Replace with real data fetching

@@ -11,7 +11,7 @@ const UsersContext = createContext<UsersApi | null>(null);
 
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const config = new Configuration({ basePath: 'http://10.0.2.2:3000' });
+  const config = new Configuration({ basePath: 'http://192.168.118.63:3000' });
   const apiService = new DefaultApi(config);
 
   return (

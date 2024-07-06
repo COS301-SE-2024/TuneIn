@@ -27,7 +27,7 @@ const NavBar: React.FC = () => {
                     </Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigate("/screens/Testpage", "Sitemap")}>
+            <TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
                 <View style={styles.tabItem}>
                     <Ionicons
                         name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}

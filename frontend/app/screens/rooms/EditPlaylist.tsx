@@ -106,7 +106,7 @@ const EditPlaylist: React.FC = () => {
     try {
       const storedToken = await AsyncStorage.getItem('token');
       // Replace with your backend API URL
-      const response = await fetch(`http://192.168.0.158:3000/rooms/${Room_id}/songs`, {
+      const response = await fetch(`http://getFirstDevice:3000/rooms/${Room_id}/songs`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json',
         Authorization: `Bearer ${storedToken}`
