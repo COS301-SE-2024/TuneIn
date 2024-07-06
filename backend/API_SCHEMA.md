@@ -149,6 +149,10 @@ query params
 - tags: string array to compare (if any match)
 response: return an array of RoomDto
 
+### `/search/rooms/history`
+#### GET: returns a list of recently searched rooms (rooms discovered from search)
+response: return an array of RoomDto
+
 ### `/search/users`
 #### GET: gets a list of users that match given names
 query params
@@ -163,6 +167,10 @@ query params
 - creator_name: string to match creator profile name
 - following: number of minimum following
 - followers: number of minimum followers
+response: return an array of UserDto
+
+### `/search/users/history`
+#### GET: returns a list of recently searched users (users discovered from search)
 response: return an array of UserDto
 
 # Data Transfer Objects (Dtos)
