@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsBoolean, IsNumber, IsDateString } from "class-validator";
-import { UserDto } from "src/modules/users/dto/user.dto";
+import { UserDto } from "../../users/dto/user.dto";
 import { SongInfoDto } from "./songinfo.dto";
 
 export class RoomDto {

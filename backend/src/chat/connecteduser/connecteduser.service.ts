@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
-import { UserDto } from "src/modules/users/dto/user.dto";
+import { UserDto } from "../../modules/users/dto/user.dto";
 
 interface liveChatUser {
 	user: UserDto;

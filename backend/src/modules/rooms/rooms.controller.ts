@@ -194,7 +194,7 @@ export class RoomsController {
     GET /rooms/{roomID}/users
     returns people currently (and previously in room)
     no input
-    response: array of ProfileDto
+    response: array of UserDto
     */
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UserDto } from "src/modules/users/dto/user.dto";
+import { UserDto } from "../../users/dto/user.dto";
 import { SongInfoDto } from "../dto/songinfo.dto";
 
 export class RoomEntity {
