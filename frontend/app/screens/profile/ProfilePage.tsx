@@ -21,7 +21,6 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://getFirstDevice:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{

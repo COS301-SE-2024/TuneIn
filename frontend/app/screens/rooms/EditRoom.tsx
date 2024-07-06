@@ -14,12 +14,11 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
 import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
 
-const BASE_URL = "http://getFirstDevice:3000/"; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
 	// Replace with real data fetching

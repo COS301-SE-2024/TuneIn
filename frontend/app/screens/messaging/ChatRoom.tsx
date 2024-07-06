@@ -27,13 +27,11 @@ import {
 	RoomDto,
 	UserProfileDto,
 } from "../../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import RoomDetails from "../rooms/RoomDetails";
-
-const BASE_URL = "http://192.168.118.63:3000";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
 
 type Message = {
 	message: LiveChatMessageDto;

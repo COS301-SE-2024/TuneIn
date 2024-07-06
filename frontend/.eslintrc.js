@@ -28,10 +28,10 @@ module.exports = {
     // Prevent conflicts with Prettier
     ...rules,
     "prettier/prettier": [
-  "error",
-  {
-    "endOfLine": "auto"
-  }
-],
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
   },
 };

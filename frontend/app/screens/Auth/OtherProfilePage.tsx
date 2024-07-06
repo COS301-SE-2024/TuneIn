@@ -22,7 +22,6 @@ import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://192.168.118.63:3000";
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;

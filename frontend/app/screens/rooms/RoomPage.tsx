@@ -28,8 +28,8 @@ import {
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
-const BASE_URL = "http://getFirstDevice:3000";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -66,7 +66,6 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "getFirstDevice"; // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket

@@ -26,7 +26,7 @@ if (!clientId) {
 	);
 }
 
-let redirectTarget = "http://localhost:5000";
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
 	throw new Error(
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
@@ -74,21 +74,19 @@ const RegisterOtherScreen: React.FC = () => {
 			"user-read-currently-playing",
 		].join(" ");
 
+		const rt = "http://localhost:5000";
 		const authUrl =
 			`https://accounts.spotify.com/authorize` +
 			`?client_id=${clientId}` +
 			`&response_type=code` + // Change response_type to 'code'
-			`&redirect_uri=${encodeURIComponent(redirectTarget)}` +
+			`&redirect_uri=${encodeURIComponent(rt)}` +
 			`&show_dialog=true` +
 			`&scope=${scopes}`;
 
-		console.log("redirectTarget: " + redirectTarget);
+		console.log("rt: " + rt);
 
 		// Open Spotify authorization page in a web browser
-		const result = await WebBrowser.openAuthSessionAsync(
-			authUrl,
-			redirectTarget,
-		);
+		const result = await WebBrowser.openAuthSessionAsync(authUrl, rt);
 		console.log("After Auth Session Result: \n", result);
 		console.log("Type: \n", typeof result);
 

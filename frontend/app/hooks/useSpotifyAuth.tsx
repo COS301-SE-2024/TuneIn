@@ -2,10 +2,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "@env";
 
-const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
+}
+
+const clientSecret = SPOTIFY_CLIENT_SECRET;
+if (!clientSecret) {
+	throw new Error(
+		"No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables",
+	);
+}
 
 export const useSpotifyAuth = () => {
 	const [accessToken, setAccessToken] = useState<string>("");
@@ -81,7 +92,7 @@ export const useSpotifyAuth = () => {
 
 	const getRefreshToken = async (): Promise<void> => {
 		try {
-			const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
+			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
 				"http://192.168.118.63:4000/refresh_token",
@@ -110,7 +121,7 @@ export const useSpotifyAuth = () => {
 
 	const refreshAccessToken = async () => {
 		try {
-			const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
+			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
 				"http://192.168.118.63:4000/refresh_token",

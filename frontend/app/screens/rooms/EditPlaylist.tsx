@@ -120,10 +120,10 @@ const EditPlaylist: React.FC = () => {
 
 		// Add logic to save the playlist to the backend if necessary
 		try {
-			const storedToken = await AsyncStorage.getItem("token");
+			const storedToken = await auth.getToken();
 			// Replace with your backend API URL
 			const response = await fetch(
-				`http://getFirstDevice:3000/rooms/${Room_id}/songs`,
+				`${utils.getAPIBaseURL()}/rooms/${Room_id}/songs`,
 				{
 					method: "POST",
 					headers: {
