@@ -8,7 +8,6 @@ import { PrismaModule } from "./../prisma/prisma.module";
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
-import { ProfileModule } from "./modules/profile/profile.module";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
 import { ChatModule } from "./chat/chat.module";
@@ -33,7 +32,6 @@ describe("AppController", () => {
 				UsersModule,
 				AuthModule,
 				RoomsModule,
-				ProfileModule,
 				DtoGenModule,
 				DbUtilsModule,
 				ChatModule,

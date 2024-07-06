@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
@@ -8,7 +7,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
 
 /*
-## UserProfileDto (User Profile Info)
+## UserDto (User Profile Info)
 A object representing User Profile information.
 ```json
 {
@@ -91,10 +90,10 @@ export class DtoGenService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async generateUserProfileDto(
+	async generateUserDto(
 		userID: string,
 		fully_qualify: boolean = true,
-	): Promise<UserProfileDto> {
+	): Promise<UserDto> {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new Error("User with id " + userID + " does not exist");
 		}
@@ -106,12 +105,12 @@ export class DtoGenService {
 
 		if (!user || user === null) {
 			throw new Error(
-				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserProfileDto():ERROR01",
+				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserDto():ERROR01",
 			);
 		}
 
 		//get user info
-		const result: UserProfileDto = this.generateBriefUserProfileDto(user);
+		const result: UserDto = this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
 		const preferences = await this.dbUtils.getPreferences(user);
 		result.fav_genres = preferences.fav_genres;
@@ -149,7 +148,7 @@ export class DtoGenService {
 				for (let i = 0; i < following.length; i++) {
 					const f = following[i];
 					if (f && f !== null) {
-						const u: UserProfileDto = this.generateBriefUserProfileDto(f);
+						const u: UserDto = this.generateBriefUserDto(f);
 						result.following.data.push(u);
 					}
 				}
@@ -164,7 +163,7 @@ export class DtoGenService {
 				for (let i = 0; i < followers.length; i++) {
 					const f = followers[i];
 					if (f && f !== null) {
-						const u: UserProfileDto = this.generateBriefUserProfileDto(f);
+						const u: UserDto = this.generateBriefUserDto(f);
 						result.followers.data.push(u);
 					}
 				}
@@ -205,8 +204,8 @@ export class DtoGenService {
 		return result;
 	}
 
-	generateBriefUserProfileDto(user: Prisma.users): UserProfileDto {
-		const result: UserProfileDto = {
+	generateBriefUserDto(user: Prisma.users): UserDto {
+		const result: UserDto = {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
 			username: user.username,
@@ -250,27 +249,22 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleUserProfileDto(
-		user_ids: string[],
-	): Promise<UserProfileDto[]> {
+	async generateMultipleUserDto(user_ids: string[]): Promise<UserDto[]> {
 		const users: Prisma.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: user_ids } },
 		});
 
 		if (!users || users === null) {
 			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserProfileDto():ERROR01",
+				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserDto():ERROR01",
 			);
 		}
 
-		const result: UserProfileDto[] = [];
+		const result: UserDto[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user: UserProfileDto = await this.generateUserProfileDto(
-					u.user_id,
-					false,
-				);
+				const user: UserDto = await this.generateUserDto(u.user_id, false);
 				result.push(user);
 			}
 		}
@@ -291,7 +285,7 @@ export class DtoGenService {
 		});
 
 		const result: RoomDto = {
-			creator: new UserProfileDto(),
+			creator: new UserDto(),
 			roomID: room.room_id,
 			participant_count: 0,
 			room_name: room.name,
@@ -322,7 +316,7 @@ export class DtoGenService {
 			*/
 		}
 
-		const creator = await this.generateUserProfileDto(room.room_creator, false);
+		const creator = await this.generateUserDto(room.room_creator, false);
 		if (creator && creator !== null) {
 			result.creator = creator;
 		}
@@ -345,7 +339,7 @@ export class DtoGenService {
 		});
 
 		const result: RoomDto = {
-			creator: new UserProfileDto(),
+			creator: new UserDto(),
 			roomID: room.room_id,
 			participant_count: 0,
 			room_name: room.name,
@@ -368,7 +362,7 @@ export class DtoGenService {
 			tags: room.tags || [],
 		};
 
-		const creator = await this.generateUserProfileDto(room.room_creator, false);
+		const creator = await this.generateUserDto(room.room_creator, false);
 		if (creator && creator !== null) {
 			result.creator = creator;
 		}
@@ -405,12 +399,12 @@ export class DtoGenService {
 			where: { user_id: { in: uniqueUserIds } },
 		});
 
-		const userProfiles: UserProfileDto[] = [];
+		const userDtos: UserDto[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user = this.generateBriefUserProfileDto(u);
-				userProfiles.push(user);
+				const user = this.generateBriefUserDto(u);
+				userDtos.push(user);
 			}
 		}
 
@@ -418,7 +412,7 @@ export class DtoGenService {
 		for (let i = 0; i < rooms.length; i++) {
 			const r = rooms[i];
 			if (r && r !== null) {
-				const u = userProfiles.find((u) => u.userID === r.room_creator);
+				const u = userDtos.find((u) => u.userID === r.room_creator);
 				if (!u || u === null) {
 					throw new Error(
 						"Weird error. Got users from Rooms table but user (" +
@@ -427,7 +421,7 @@ export class DtoGenService {
 					);
 				}
 				const room: RoomDto = {
-					creator: u || new UserProfileDto(),
+					creator: u || new UserDto(),
 					roomID: r.room_id,
 					participant_count: 0, //to fix soon
 					room_name: r.name,
@@ -453,10 +447,6 @@ export class DtoGenService {
 			}
 		}
 		return result;
-	}
-
-	async generateUserDto(): Promise<UserDto | null> {
-		return new UserDto();
 	}
 
 	async generateLiveChatMessageDto(
@@ -489,9 +479,7 @@ export class DtoGenService {
 			);
 		}
 
-		const sender: UserProfileDto = await this.generateUserProfileDto(
-			message.sender,
-		);
+		const sender: UserDto = await this.generateUserDto(message.sender);
 
 		const result: LiveChatMessageDto = {
 			messageBody: message.contents,
@@ -508,14 +496,9 @@ export class DtoGenService {
 	): Promise<LiveChatMessageDto[]> {
 		const senderIDs: string[] = messages.map((m) => m.sender);
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
-		const senders: Map<string, UserProfileDto> = new Map<
-			string,
-			UserProfileDto
-		>();
+		const senders: Map<string, UserDto> = new Map<string, UserDto>();
 		for (let i = 0; i < uniqueSenderIDs.length; i++) {
-			const sender: UserProfileDto = await this.generateUserProfileDto(
-				uniqueSenderIDs[i],
-			);
+			const sender: UserDto = await this.generateUserDto(uniqueSenderIDs[i]);
 			senders.set(uniqueSenderIDs[i], sender);
 		}
 
@@ -537,7 +520,7 @@ export class DtoGenService {
 		for (let i = 0; i < messages.length; i++) {
 			const m = messages[i];
 			if (m && m !== null) {
-				const s: UserProfileDto | undefined = senders.get(m.sender);
+				const s: UserDto | undefined = senders.get(m.sender);
 				if (!s || s === null) {
 					throw new Error(
 						"Weird error. Got messages from Messages table but user (" +

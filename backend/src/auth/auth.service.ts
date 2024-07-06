@@ -11,7 +11,6 @@ import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-//import { CreateUserDto } from "../modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
 	sub: string;
@@ -261,9 +260,11 @@ export class AuthService {
 
 		try {
 			const payload = await verifier.verify(jwt_token);
+			console.log("Cognito Verification", payload);
 			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
 			return result;
 		} catch (error) {
+			console.log(error);
 			throw new UnauthorizedException("Invalid JWT token");
 		}
 	}

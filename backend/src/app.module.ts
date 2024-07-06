@@ -7,7 +7,6 @@ import { PrismaModule } from "./../prisma/prisma.module";
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
-import { ProfileModule } from "./modules/profile/profile.module";
 import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsService } from "./modules/db-utils/db-utils.service";
@@ -32,7 +31,6 @@ import { memoryStorage } from "multer";
 		UsersModule,
 		AuthModule,
 		RoomsModule,
-		ProfileModule,
 		DtoGenModule,
 		DbUtilsModule,
 		ChatModule,
