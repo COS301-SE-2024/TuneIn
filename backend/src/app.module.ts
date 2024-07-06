@@ -23,6 +23,9 @@ import { TasksModule } from "./tasks/tasks.module";
 import { BullConfigModule } from "./bull-config/bull-config.module";
 import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
+import { SearchService } from "./modules/search/search.service";
+import { SearchController } from "./modules/search/search.controller";
+import { SearchModule } from "./modules/search/search.module";
 
 @Module({
 	imports: [
@@ -44,6 +47,7 @@ import { memoryStorage } from "multer";
 		BullBoardModule,
 		TasksModule,
 		BullConfigModule,
+		SearchModule,
 	],
 	controllers: [AppController],
 	providers: [
@@ -54,6 +58,7 @@ import { memoryStorage } from "multer";
 		ChatGateway,
 		ConnectedUsersService,
 		SpotifyService,
+		SearchService,
 	],
 })
 export class AppModule {}
