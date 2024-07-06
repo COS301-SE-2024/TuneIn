@@ -15,7 +15,6 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Room } from "../../models/Room";
 import { useSpotifyPlayback } from "../../hooks/useSpotifyPlayback";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
@@ -26,12 +25,8 @@ import {
 	RoomDto,
 	UserProfileDto,
 } from "../../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
-import RoomDetails from "./RoomDetails";
-import RoomOptions from "./RoomOptions";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 const BASE_URL = "http://getFirstDevice:3000";
@@ -294,6 +289,44 @@ const RoomPage = () => {
 		}
 	};
 
+	const getQueueState = () => {
+		// Simulated queue state with UTC start times
+		const queue = [
+			{
+				song: "Song A",
+				startTime: new Date(Date.UTC(2024, 6, 6, 12, 0, 0)),
+				index: 0,
+			}, // July 6th, 2024, 12:00:00 UTC
+			{
+				song: "Song B",
+				startTime: new Date(Date.UTC(2024, 6, 6, 12, 10, 0)),
+				index: 1,
+			}, // July 6th, 2024, 12:10:00 UTC
+			{
+				song: "Song C",
+				startTime: new Date(Date.UTC(2024, 6, 6, 12, 20, 0)),
+				index: 2,
+			}, // July 6th, 2024, 12:20:00 UTC
+		];
+
+		// Function to return the UTC start time and index of a song in the queue
+		const getSongState = (index) => {
+			const song = queue.find((item) => item.index === index);
+			if (song) {
+				return {
+					startTimeUTC: song.startTime.toISOString(), // Convert to ISO string for universal representation
+					index: song.index,
+				};
+			} else {
+				return null; // Handle case when song index is not found
+			}
+		};
+
+		return {
+			getSongState,
+		};
+	};
+
 	const leaveRoom = () => {
 		const u: UserProfileDto = userRef.current;
 		const input: ChatEventDto = {
@@ -381,10 +414,6 @@ const RoomPage = () => {
 			}
 		};
 	}, [isPlaying, handlePlayback]);
-
-	// const handleGoBack = () => {
-	// 	// router.goBack();
-	// };
 
 	useEffect(() => {
 		if (isPlaying) {
