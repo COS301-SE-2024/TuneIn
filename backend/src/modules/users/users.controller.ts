@@ -118,98 +118,6 @@ export class UsersController {
 		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
 	}
 
-	@UseGuards(JwtAuthGuard)
-	@Get(":username")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get user profile info by username" })
-	@ApiParam({
-		name: "username",
-		description: "The username of the user to fetch profile info for.",
-	})
-	@ApiOkResponse({
-		description: "Returns the user profile.",
-		type: UserDto,
-	})
-	async getProfileByUsername(
-		@Param("username") username: string,
-	): Promise<UserDto> {
-		return this.usersService.getProfileByUsername(username);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Post(":username/follow")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Follow the given user" })
-	@ApiParam({ name: "username" })
-	@ApiOkResponse({
-		description: "Successfully followed the user.",
-		type: Boolean,
-	})
-	@ApiBadRequestResponse({
-		description: "Error following the user.",
-		type: Boolean,
-	})
-	async followUser(
-		@Request() req: any,
-		@Param("username") username: string,
-	): Promise<boolean> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, username);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Post(":username/unfollow")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Unfollow the given user" })
-	@ApiParam({ name: "username" })
-	@ApiOkResponse({
-		description: "Successfully unfollowed the user.",
-		type: Boolean,
-	})
-	@ApiBadRequestResponse({
-		description: "Error unfollowing the user.",
-		type: Boolean,
-	})
-	async unfollowUser(
-		@Request() req: any,
-		@Param("username") username: string,
-	): Promise<boolean> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, username);
-	}
-
-	/*
-    GET /users
-    gets user info
-    no input
-    response: return UserDto
-  */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get()
-	@ApiTags("users")
-	getUserInfo(@Request() req: any): UserDto {
-		//try to get sub, username & email back from JWT token
-		console.log("1");
-		console.log("2", req);
-		console.log("3", req.user);
-		//req.user
-		/*
-		{
-			userId: '311ce2e8-8041-70bd-0ab5-be97283ee182',
-			username: 'bigdaddy'
-		}
-		*/
-		console.log("4", req.user.sub);
-		console.log("5", req.user.username);
-		console.log("6", req.user.email);
-
-		//return this.usersService.getUserInfo();
-		return new UserDto();
-	}
-
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
@@ -222,6 +130,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+		console.log("called /users/rooms");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserRooms(userInfo.id);
 	}
@@ -338,5 +247,67 @@ export class UsersController {
 	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getBookmarks(userInfo.id);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get(":username")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get user profile info by username" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to fetch profile info for.",
+	})
+	@ApiOkResponse({
+		description: "Returns the user profile.",
+		type: UserDto,
+	})
+	async getProfileByUsername(
+		@Param("username") username: string,
+	): Promise<UserDto> {
+		return this.usersService.getProfileByUsername(username);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/follow")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Follow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully followed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error following the user.",
+		type: Boolean,
+	})
+	async followUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.followUser(userInfo.id, username);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/unfollow")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Unfollow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully unfollowed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error unfollowing the user.",
+		type: Boolean,
+	})
+	async unfollowUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.unfollowUser(userInfo.id, username);
 	}
 }
