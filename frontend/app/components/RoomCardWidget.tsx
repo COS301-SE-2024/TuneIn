@@ -16,17 +16,17 @@ interface RoomCardWidgetProps {
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-  const screenWidth = Dimensions.get("window").width;
-  const cardWidth = 290; // 80% of screen width
-  const router = useRouter();
-  const room = JSON.parse(JSON.stringify(roomCard))
-  // console.log("roomCard", roomCard);
-  const navigateToEditRoom = () => {
-    router.navigate({
-      pathname: "/screens/rooms/EditRoom",
-      params: room,
-    });
-  };
+	const screenWidth = Dimensions.get("window").width;
+	const cardWidth = 290; // 80% of screen width
+	const router = useRouter();
+	const room = JSON.parse(JSON.stringify(roomCard));
+	// console.log("roomCard", roomCard);
+	const navigateToEditRoom = () => {
+		router.navigate({
+			pathname: "/screens/rooms/EditRoom",
+			params: room,
+		});
+	};
 
 	const renderSongInfo = () => {
 		if (!roomCard.songName || !roomCard.artistName) {

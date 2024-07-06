@@ -1,94 +1,112 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Alert } from "react-native";
-import { useRouter } from 'expo-router';
-import { Poppins_400Regular, Poppins_500Medium, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Dimensions,
+	Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import {
+	Poppins_400Regular,
+	Poppins_500Medium,
+	Poppins_700Bold,
+	useFonts,
+} from "@expo-google-fonts/poppins";
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
 import * as Linking from "expo-linking";
-import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
+import * as WebBrowser from "expo-web-browser";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
-  throw new Error("No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables");
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
 }
 
 let redirectTarget = "http://localhost:5000";
 if (!redirectTarget) {
-  throw new Error("No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables");
+	throw new Error(
+		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
+	);
 }
 
 const RegisterOtherScreen: React.FC = () => {
-  const router = useRouter();
+	const router = useRouter();
 
-  useEffect(() => {
-    const handleRedirect = (event) => {
-      let { queryParams } = Linking.parse(event.url);
-      console.log('Redirect Data:', queryParams);
-      WebBrowser.dismissBrowser();
-      // Handle the redirect data (e.g., exchange code for access token)
-    };
+	useEffect(() => {
+		const handleRedirect = (event) => {
+			let { queryParams } = Linking.parse(event.url);
+			console.log("Redirect Data:", queryParams);
+			WebBrowser.dismissBrowser();
+			// Handle the redirect data (e.g., exchange code for access token)
+		};
 
-    const getInitialURL = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      if (initialUrl) {
-        handleRedirect({ url: initialUrl });
-      }
-    };
+		const getInitialURL = async () => {
+			const initialUrl = await Linking.getInitialURL();
+			if (initialUrl) {
+				handleRedirect({ url: initialUrl });
+			}
+		};
 
-    getInitialURL();
+		getInitialURL();
 
-    const subscription = Linking.addEventListener('url', handleRedirect);
+		const subscription = Linking.addEventListener("url", handleRedirect);
 
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+		return () => {
+			subscription.remove();
+		};
+	}, []);
 
-  const authenticate = async () => {
-    const scopes = [
-        "user-read-email",
-        "user-library-read",
-        "user-read-recently-played",
-        "user-top-read",
-        "playlist-read-private",
-        "playlist-read-collaborative",
-        "playlist-modify-public", // or "playlist-modify-private"
-        "user-modify-playback-state",
-        "user-read-playback-state",
-        "user-read-currently-playing",
-    ].join(" ");
+	const authenticate = async () => {
+		const scopes = [
+			"user-read-email",
+			"user-library-read",
+			"user-read-recently-played",
+			"user-top-read",
+			"playlist-read-private",
+			"playlist-read-collaborative",
+			"playlist-modify-public", // or "playlist-modify-private"
+			"user-modify-playback-state",
+			"user-read-playback-state",
+			"user-read-currently-playing",
+		].join(" ");
 
-    const authUrl =
-        `https://accounts.spotify.com/authorize` +
-        `?client_id=${clientId}` +
-        `&response_type=code` + // Change response_type to 'code'
-        `&redirect_uri=${encodeURIComponent(redirectTarget)}` +
-        `&show_dialog=true` +
-        `&scope=${scopes}`;
+		const authUrl =
+			`https://accounts.spotify.com/authorize` +
+			`?client_id=${clientId}` +
+			`&response_type=code` + // Change response_type to 'code'
+			`&redirect_uri=${encodeURIComponent(redirectTarget)}` +
+			`&show_dialog=true` +
+			`&scope=${scopes}`;
 
-    console.log("redirectTarget: " + redirectTarget);
+		console.log("redirectTarget: " + redirectTarget);
 
-    // Open Spotify authorization page in a web browser
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTarget);
-    console.log("After Auth Session Result: \n", result);
-    console.log("Type: \n", typeof result);
+		// Open Spotify authorization page in a web browser
+		const result = await WebBrowser.openAuthSessionAsync(
+			authUrl,
+			redirectTarget,
+		);
+		console.log("After Auth Session Result: \n", result);
+		console.log("Type: \n", typeof result);
 
-    if (result.type === 'success') {
-        // The user has successfully authenticated, handle the result.url to extract the authorization code
-        console.log({ url: result.url });
-    }
-};
+		if (result.type === "success") {
+			// The user has successfully authenticated, handle the result.url to extract the authorization code
+			console.log({ url: result.url });
+		}
+	};
 
-// Function to handle messages from the dummy page
-window.addEventListener('message', (event) => {
-    if (event.origin === window.location.origin) {
-        console.log('Received message:', event.data);
-    } else {
-        console.log('Message from unknown origin');
-    }
-});
-  const { width } = Dimensions.get('window');
+	// Function to handle messages from the dummy page
+	window.addEventListener("message", (event) => {
+		if (event.origin === window.location.origin) {
+			console.log("Received message:", event.data);
+		} else {
+			console.log("Message from unknown origin");
+		}
+	});
+	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -118,18 +136,25 @@ window.addEventListener('message', (event) => {
 
 			<Text style={styles.welcomeText}>Authenticate With</Text>
 
-      <View style={styles.buttonContainer}>
-        
-        <TouchableOpacity style={[styles.button, styles.otherButton]} onPress={authenticate}>
-          <FontAwesome name="spotify" size={24} color="#000" style={styles.icon} />
-          <Text style={styles.buttonText}>spotify</Text>
-        </TouchableOpacity>
+			<View style={styles.buttonContainer}>
+				<TouchableOpacity
+					style={[styles.button, styles.otherButton]}
+					onPress={authenticate}
+				>
+					<FontAwesome
+						name="spotify"
+						size={24}
+						color="#000"
+						style={styles.icon}
+					/>
+					<Text style={styles.buttonText}>spotify</Text>
+				</TouchableOpacity>
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.divider} />
-          <Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
-          <View style={styles.divider} />
-        </View>
+				<View style={styles.dividerContainer}>
+					<View style={styles.divider} />
+					<Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
+					<View style={styles.divider} />
+				</View>
 
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
@@ -153,97 +178,97 @@ window.addEventListener('message', (event) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    marginRight: 'auto',
-  },
-  backText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  welcomeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    fontFamily: 'Poppins_700Bold',
-    textAlign: 'center',
-    marginTop: 30,
-    marginBottom: 50,
-    paddingHorizontal: 20,
-  },
-  buttonContainer: {
-    alignItems: 'center',
-  },
-  button: {
-    width: '75%',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderRadius: 30,
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-  },
-  otherButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#808080',
-    borderWidth: 1,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    fontFamily: 'Poppins_700Bold',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-    width: '80%',
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#808080',
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    fontSize: 14,
-    color: '#000',
-    fontFamily: 'Poppins_500Medium',
-  },
-  registerContainer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 0,
-    right: 0,
-    padding: 16,
-    alignItems: 'center',
-  },
-  registerText: {
-    fontSize: 16,
-    color: '#000',
-    fontFamily: 'Poppins_500Medium',
-  },
-  registerBoldText: {
-    fontWeight: 'bold',
-    fontFamily: 'Poppins_700Bold',
-  },
+	container: {
+		flex: 1,
+		paddingVertical: 20,
+		paddingHorizontal: 16,
+	},
+	header: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	backButton: {
+		marginRight: "auto",
+	},
+	backText: {
+		fontSize: 24,
+		fontWeight: "bold",
+	},
+	welcomeText: {
+		fontSize: 32,
+		fontWeight: "bold",
+		fontFamily: "Poppins_700Bold",
+		textAlign: "center",
+		marginTop: 30,
+		marginBottom: 50,
+		paddingHorizontal: 20,
+	},
+	buttonContainer: {
+		alignItems: "center",
+	},
+	button: {
+		width: "75%",
+		height: 60,
+		justifyContent: "center",
+		alignItems: "center",
+		marginBottom: 20,
+		borderRadius: 30,
+		flexDirection: "row",
+		paddingHorizontal: 10,
+		elevation: 5,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 3.84,
+	},
+	otherButton: {
+		backgroundColor: "#FFFFFF",
+		borderColor: "#808080",
+		borderWidth: 1,
+	},
+	icon: {
+		marginRight: 10,
+	},
+	buttonText: {
+		fontSize: 16,
+		fontWeight: "bold",
+		color: "#000",
+		fontFamily: "Poppins_700Bold",
+	},
+	dividerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginVertical: 20,
+		width: "80%",
+	},
+	divider: {
+		flex: 1,
+		height: 1,
+		backgroundColor: "#808080",
+	},
+	dividerText: {
+		marginHorizontal: 10,
+		fontSize: 14,
+		color: "#000",
+		fontFamily: "Poppins_500Medium",
+	},
+	registerContainer: {
+		position: "absolute",
+		bottom: 16,
+		left: 0,
+		right: 0,
+		padding: 16,
+		alignItems: "center",
+	},
+	registerText: {
+		fontSize: 16,
+		color: "#000",
+		fontFamily: "Poppins_500Medium",
+	},
+	registerBoldText: {
+		fontWeight: "bold",
+		fontFamily: "Poppins_700Bold",
+	},
 });
 
 export default RegisterOtherScreen;

@@ -1,9 +1,9 @@
 // EditRoom.test.tsx
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import EditRoom from '../app/screens/rooms/EditRoom';
-import { Room } from '../app/models/Room';
+import React from "react";
+import { render, fireEvent } from "@testing-library/react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import EditRoom from "../app/screens/rooms/EditRoom";
+import { Room } from "../app/models/Room";
 
 // Mock the router and useLocalSearchParams hooks
 jest.mock("expo-router", () => ({

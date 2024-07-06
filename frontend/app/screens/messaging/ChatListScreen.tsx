@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import ChatItem from '../../components/ChatItem';
-import { Chat } from '../../models/chat';
-import { useRouter } from 'expo-router';
-
+import React, { useState } from "react";
+import {
+	View,
+	Text,
+	FlatList,
+	TextInput,
+	StyleSheet,
+	TouchableOpacity,
+	Dimensions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import ChatItem from "../../components/ChatItem";
+import { Chat } from "../../models/chat";
+import { useRouter } from "expo-router";
 
 const chats: Chat[] = [
 	{

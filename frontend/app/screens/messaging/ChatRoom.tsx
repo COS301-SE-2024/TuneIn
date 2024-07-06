@@ -1,18 +1,39 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import SongRoomWidget from '../../components/SongRoomWidget';
-import CommentWidget from '../../components/CommentWidget';
-import io from 'socket.io-client';
-import { LiveChatMessageDto, RoomDto, UserProfileDto } from '../../../api-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useRef, useEffect } from "react";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	TextInput,
+	ScrollView,
+	Image,
+	KeyboardAvoidingView,
+	Platform,
+	Animated,
+	Easing,
+	Dimensions,
+	StyleSheet,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+	FontAwesome5,
+	MaterialIcons,
+	MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import SongRoomWidget from "../../components/SongRoomWidget";
+import CommentWidget from "../../components/CommentWidget";
+import io from "socket.io-client";
+import {
+	LiveChatMessageDto,
+	RoomDto,
+	UserProfileDto,
+} from "../../../api-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
-import axios from 'axios';
-import { ChatEventDto } from '../../models/ChatEventDto';
-import RoomDetails from '../rooms/RoomDetails';
+import axios from "axios";
+import { ChatEventDto } from "../../models/ChatEventDto";
+import RoomDetails from "../rooms/RoomDetails";
 
-const BASE_URL = 'http://192.168.118.63:3000';
+const BASE_URL = "http://192.168.118.63:3000";
 
 type Message = {
 	message: LiveChatMessageDto;

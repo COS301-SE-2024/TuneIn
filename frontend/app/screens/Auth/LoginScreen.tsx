@@ -1,165 +1,169 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  StyleSheet,
-  ActivityIndicator,
+	View,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	ScrollView,
+	Alert,
+	StyleSheet,
+	ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
 
 const LoginScreen: React.FC = () => {
-  const [obscureText, setObscureText] = useState(true);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+	const [obscureText, setObscureText] = useState(true);
+	const [rememberMe, setRememberMe] = useState(false);
+	const [emailOrUsername, setEmailOrUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 
 	const router = useRouter();
 
-  const navigateToHome = () => {
-    setIsLoading(true);
+	const navigateToHome = () => {
+		setIsLoading(true);
 
-    const userData = {
-      Username: emailOrUsername,
-      Pool: UserPool,
-    };
+		const userData = {
+			Username: emailOrUsername,
+			Pool: UserPool,
+		};
 
 		const cognitoUser = new CognitoUser(userData);
 
-    const authenticationData = {
-      Username: emailOrUsername,
-      Password: password,
-    };
-    const authenticationDetails = new AuthenticationDetails(authenticationData);
-    cognitoUser.authenticateUser(authenticationDetails, {
-      onSuccess: function (result) {
-        // Store token in AsyncStorage if remember me is checked
-        if (rememberMe) {
-          StorageService.setItem(
-            "cognitoToken",
-            result.getAccessToken().getJwtToken()
-          );
-        }
+		const authenticationData = {
+			Username: emailOrUsername,
+			Password: password,
+		};
+		const authenticationDetails = new AuthenticationDetails(authenticationData);
+		cognitoUser.authenticateUser(authenticationDetails, {
+			onSuccess: function (result) {
+				// Store token in AsyncStorage if remember me is checked
+				if (rememberMe) {
+					StorageService.setItem(
+						"cognitoToken",
+						result.getAccessToken().getJwtToken(),
+					);
+				}
 
-        // POST request to backend
-        fetch("http://192.168.118.63:3000/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: result.getAccessToken().getJwtToken(),
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            const token = data.token; // Extract the token from the response
-            StorageService.setItem("token", token); // Save the token to AsyncStorage
-            console.log("jwt: ", token);
-            router.navigate("/screens/Home");
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      },
-      onFailure: function (err) {
-        setIsLoading(false);
-        Alert.alert(err.message);
-      },
-    });
-  };
+				// POST request to backend
+				fetch("http://192.168.118.63:3000/auth/login", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						token: result.getAccessToken().getJwtToken(),
+					}),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						const token = data.token; // Extract the token from the response
+						StorageService.setItem("token", token); // Save the token to AsyncStorage
+						console.log("jwt: ", token);
+						router.navigate("/screens/Home");
+					})
+					.finally(() => {
+						setIsLoading(false);
+					});
+			},
+			onFailure: function (err) {
+				setIsLoading(false);
+				Alert.alert(err.message);
+			},
+		});
+	};
 
-  const navigateToRegister = () => {
-    router.navigate("/screens/Auth/RegisterScreen");
-  };
+	const navigateToRegister = () => {
+		router.navigate("/screens/Auth/RegisterScreen");
+	};
 
-  const navigateToForgot = () => {
-    router.navigate("/screens/Auth/ForgotPassword");
-  };
+	const navigateToForgot = () => {
+		router.navigate("/screens/Auth/ForgotPassword");
+	};
 
-  return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
-      <View style={styles.logoContainer}>{/* <Text style={styles.logoText}>Logo</Text> */}</View>
-      <Text style={styles.headerText}>Welcome Back to TuneIn</Text>
-      <View style={styles.formContainer}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email or Username</Text>
-          <TextInput
-            style={styles.input}
-            value={emailOrUsername}
-            onChangeText={setEmailOrUsername}
-            placeholder="Enter your email or username"
-          />
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="*********"
-              secureTextEntry={obscureText}
-            />
-            <TouchableOpacity
-              style={styles.visibilityToggle}
-              onPress={() => setObscureText(!obscureText)}
-            >
-              <MaterialIcons
-                name={obscureText ? "visibility-off" : "visibility"}
-                size={24}
-                color="gray"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.forgotPasswordButton} onPress={navigateToForgot}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-        <View style={styles.inputGroup}>
-          <CheckBox
-            containerStyle={styles.checkboxContainer}
-            title="Remember Me"
-            checked={rememberMe}
-            onPress={() => setRememberMe(!rememberMe)}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={navigateToHome}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#FFF" />
-          ) : (
-            <Text style={styles.loginButtonText}>LOGIN</Text>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.registerLink} onPress={navigateToRegister}>
-          <Text style={styles.registerLinkText}>
-            Don’t have an account?{" "}
-            <Text style={styles.registerLinkBold}>Register Now</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
+	return (
+		<ScrollView style={styles.container}>
+			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+				<Ionicons name="chevron-back" size={24} color="black" />
+			</TouchableOpacity>
+			<View style={styles.logoContainer}>
+				{/* <Text style={styles.logoText}>Logo</Text> */}
+			</View>
+			<Text style={styles.headerText}>Welcome Back to TuneIn</Text>
+			<View style={styles.formContainer}>
+				<View style={styles.inputGroup}>
+					<Text style={styles.label}>Email or Username</Text>
+					<TextInput
+						style={styles.input}
+						value={emailOrUsername}
+						onChangeText={setEmailOrUsername}
+						placeholder="Enter your email or username"
+					/>
+				</View>
+				<View style={styles.inputGroup}>
+					<Text style={styles.label}>Password</Text>
+					<View style={styles.passwordContainer}>
+						<TextInput
+							style={styles.passwordInput}
+							value={password}
+							onChangeText={setPassword}
+							placeholder="*********"
+							secureTextEntry={obscureText}
+						/>
+						<TouchableOpacity
+							style={styles.visibilityToggle}
+							onPress={() => setObscureText(!obscureText)}
+						>
+							<MaterialIcons
+								name={obscureText ? "visibility-off" : "visibility"}
+								size={24}
+								color="gray"
+							/>
+						</TouchableOpacity>
+					</View>
+				</View>
+				<TouchableOpacity
+					style={styles.forgotPasswordButton}
+					onPress={navigateToForgot}
+				>
+					<Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+				</TouchableOpacity>
+				<View style={styles.inputGroup}>
+					<CheckBox
+						containerStyle={styles.checkboxContainer}
+						title="Remember Me"
+						checked={rememberMe}
+						onPress={() => setRememberMe(!rememberMe)}
+					/>
+				</View>
+				<TouchableOpacity
+					style={styles.loginButton}
+					onPress={navigateToHome}
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<ActivityIndicator size="small" color="#FFF" />
+					) : (
+						<Text style={styles.loginButtonText}>LOGIN</Text>
+					)}
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.registerLink}
+					onPress={navigateToRegister}
+				>
+					<Text style={styles.registerLinkText}>
+						Don’t have an account?{" "}
+						<Text style={styles.registerLinkBold}>Register Now</Text>
+					</Text>
+				</TouchableOpacity>
+			</View>
+		</ScrollView>
+	);
 };
 
 const styles = StyleSheet.create({

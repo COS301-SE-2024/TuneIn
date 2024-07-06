@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, Button, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { RoomDetailsProps } from '../../models/roomdetails';
-import { RoomDto } from '../../../api-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	Switch,
+	TouchableOpacity,
+	Dimensions,
+	ScrollView,
+	Image,
+	Button,
+	Alert,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { RoomDetailsProps } from "../../models/roomdetails";
+import { RoomDto } from "../../../api-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
-import AWS from 'aws-sdk';
-import uploadImage from '../../services/ImageUpload';
+import AWS from "aws-sdk";
+import uploadImage from "../../services/ImageUpload";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 if (!AWS_ACCESS_KEY_ID) {
@@ -45,7 +56,6 @@ if (!AWS_S3_ENDPOINT) {
 }
 
 const BASE_URL = "http://192.168.118.63:3000/";
-
 
 const RoomDetails: React.FC = () => {
 	const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace(

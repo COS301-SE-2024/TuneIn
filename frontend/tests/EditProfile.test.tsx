@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import EditProfile from "../app/screens/EditProfile"; // Adjust the import path accordingly
+import EditProfile from "../app/screens/profile/EditProfilePage"; // Adjust the import path accordingly
 import { useNavigation, useLocalSearchParams } from "expo-router";
 
 // Mock useNavigation from expo-router

@@ -118,24 +118,28 @@ const EditPlaylist: React.FC = () => {
 		console.log("Playlist saved:", playlist);
 		console.log("in room :", Room_id);
 
-    // Add logic to save the playlist to the backend if necessary
-    try {
-      const storedToken = await AsyncStorage.getItem('token');
-      // Replace with your backend API URL
-      const response = await fetch(`http://getFirstDevice:3000/rooms/${Room_id}/songs`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json',
-        Authorization: `Bearer ${storedToken}`
-        },
-        body: JSON.stringify(playlist),
-      });
-      const data = await response.json();
-      console.log('Playlist saved to backend:', data);
-    } catch (error) {
-      console.error('Error saving playlist:', error);
-    }
-    router.navigate('/screens/Home');
-  };
+		// Add logic to save the playlist to the backend if necessary
+		try {
+			const storedToken = await AsyncStorage.getItem("token");
+			// Replace with your backend API URL
+			const response = await fetch(
+				`http://getFirstDevice:3000/rooms/${Room_id}/songs`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${storedToken}`,
+					},
+					body: JSON.stringify(playlist),
+				},
+			);
+			const data = await response.json();
+			console.log("Playlist saved to backend:", data);
+		} catch (error) {
+			console.error("Error saving playlist:", error);
+		}
+		router.navigate("/screens/Home");
+	};
 
 	const playPreview = (previewUrl: string) => {
 		const audio = new Audio(previewUrl);

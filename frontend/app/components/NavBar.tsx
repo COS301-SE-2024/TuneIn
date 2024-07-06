@@ -12,49 +12,57 @@ const NavBar: React.FC = () => {
 		router.navigate(route);
 	};
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.topLine}></View>
-            <TouchableOpacity onPress={() => navigate("/screens/Home", "Home")}>
-                <View style={styles.tabItem}>
-                    <Ionicons
-                        name={activeTab === "Home" ? "home-sharp" : "home-outline"}
-                        size={24}
-                        color={activeTab === "Home" ? "#0000ff" : "#333"}
-                    />
-                    <Text style={[styles.text, activeTab === "Home" && styles.activeText]}>
-                        Home
-                    </Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
-                <View style={styles.tabItem}>
-                    <Ionicons
-                        name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
-                        size={24}
-                        color={activeTab === "Sitemap" ? "#0000ff" : "#333"}
-                    />
-                    <Text
-                        style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
-                    >
-                        Test
-                    </Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigate("/screens/help/HelpScreen", "Help")}>
-                <View style={styles.tabItem}>
-                    <Ionicons
-                        name={activeTab === "Help" ? "help-circle-sharp" : "help-circle-outline"}
-                        size={24}
-                        color={activeTab === "Help" ? "#0000ff" : "#333"}
-                    />
-                    <Text style={[styles.text, activeTab === "Help" && styles.activeText]}>
-                        Help
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        </View>
-    );
+	return (
+		<View style={styles.container}>
+			<View style={styles.topLine}></View>
+			<TouchableOpacity onPress={() => navigate("/screens/Home", "Home")}>
+				<View style={styles.tabItem}>
+					<Ionicons
+						name={activeTab === "Home" ? "home-sharp" : "home-outline"}
+						size={24}
+						color={activeTab === "Home" ? "#0000ff" : "#333"}
+					/>
+					<Text
+						style={[styles.text, activeTab === "Home" && styles.activeText]}
+					>
+						Home
+					</Text>
+				</View>
+			</TouchableOpacity>
+			<TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
+				<View style={styles.tabItem}>
+					<Ionicons
+						name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
+						size={24}
+						color={activeTab === "Sitemap" ? "#0000ff" : "#333"}
+					/>
+					<Text
+						style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
+					>
+						Test
+					</Text>
+				</View>
+			</TouchableOpacity>
+			<TouchableOpacity
+				onPress={() => navigate("/screens/help/HelpScreen", "Help")}
+			>
+				<View style={styles.tabItem}>
+					<Ionicons
+						name={
+							activeTab === "Help" ? "help-circle-sharp" : "help-circle-outline"
+						}
+						size={24}
+						color={activeTab === "Help" ? "#0000ff" : "#333"}
+					/>
+					<Text
+						style={[styles.text, activeTab === "Help" && styles.activeText]}
+					>
+						Help
+					</Text>
+				</View>
+			</TouchableOpacity>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({

@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Switch, TouchableOpacity, Dimensions, ScrollView, Image, StyleSheet, Alert } from 'react-native';
-import {useLocalSearchParams, useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { Room } from '../../models/Room';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	Switch,
+	TouchableOpacity,
+	Dimensions,
+	ScrollView,
+	Image,
+	StyleSheet,
+	Alert,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { Room } from "../../models/Room";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
-import axios from 'axios';
-import uploadImage from '../../services/ImageUpload';
+import axios from "axios";
+import uploadImage from "../../services/ImageUpload";
 
-const BASE_URL = 'http://getFirstDevice:3000/'; // Replace with actual backend URL
+const BASE_URL = "http://getFirstDevice:3000/"; // Replace with actual backend URL
 // Mock function to fetch room details. Replace with actual data fetching logic.
 const fetchRoomDetails = async (roomId: string) => {
 	// Replace with real data fetching
@@ -29,34 +40,33 @@ const fetchRoomDetails = async (roomId: string) => {
 };
 
 const EditRoom: React.FC = () => {
-  const router = useRouter();
-  const roomData = useLocalSearchParams();
-  console.log('Room data:', roomData)
-  const [changedImage, setChangedImage] = useState<boolean>(false);
-  const [roomDetails, setRoomDetails] = useState<Room>({
-    roomID: '',
-    name: '',
-    description: '',
-    backgroundImage: '',
-    language: '',
-    tags: [],
-    userID: '',
-    roomSize: 50,
-    isExplicit: false,
-    isNsfw: false,
-  });
+	const router = useRouter();
+	const roomData = useLocalSearchParams();
+	console.log("Room data:", roomData);
+	const [changedImage, setChangedImage] = useState<boolean>(false);
+	const [roomDetails, setRoomDetails] = useState<Room>({
+		roomID: "",
+		name: "",
+		description: "",
+		backgroundImage: "",
+		language: "",
+		tags: [],
+		userID: "",
+		roomSize: 50,
+		isExplicit: false,
+		isNsfw: false,
+	});
 
 	const [image, setImage] = useState<string | null>(null);
 	const [roomId, setRoomId] = useState<string>(""); // Add room ID here
 	const [token, setToken] = useState<string>("");
 
-  useEffect(() => {
-    const loadRoomDetails = async () => {
-
-      setRoomDetails(roomData);
-      setImage(roomData.backgroundImage as string);
-      console.log('Room details:', roomDetails)
-    };
+	useEffect(() => {
+		const loadRoomDetails = async () => {
+			setRoomDetails(roomData);
+			setImage(roomData.backgroundImage as string);
+			console.log("Room details:", roomDetails);
+		};
 
 		loadRoomDetails();
 	}, []);
@@ -88,19 +98,18 @@ const EditRoom: React.FC = () => {
 		}
 	};
 
-  const handleInputChange = (field: keyof Room, value: string | boolean) => {
-    if (field === 'roomSize') {
-      setRoomDetails({ ...roomDetails, [field]: Number(value) });
-    } else {
-      setRoomDetails({ ...roomDetails, [field]: value });
-    }
-  };
+	const handleInputChange = (field: keyof Room, value: string | boolean) => {
+		if (field === "roomSize") {
+			setRoomDetails({ ...roomDetails, [field]: Number(value) });
+		} else {
+			setRoomDetails({ ...roomDetails, [field]: value });
+		}
+	};
 
-  const handleToggleChange = (value: boolean) => {
-    console.log(value); 
-    setRoomDetails({ ...roomDetails, isExplicit: value });
-  };
-  
+	const handleToggleChange = (value: boolean) => {
+		console.log(value);
+		setRoomDetails({ ...roomDetails, isExplicit: value });
+	};
 
 	const saveChanges = async () => {
 		// Add logic to save changes
@@ -160,24 +169,37 @@ const EditRoom: React.FC = () => {
 		}
 	};
 
-  return (
-    <ScrollView contentContainerStyle={styles.scrollView}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.closeButton}>×</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Room Details</Text>
-          <View style={styles.headerPlaceholder} />
-        </View>
-        <View style={styles.form}>
-          {buildInputField('Room Name', roomDetails.name, (value) => handleInputChange('name', value))}
-          {buildInputField('Description', roomDetails.description, (value) => handleInputChange('description', value), 4)}
-          {buildInputField('Genre', roomDetails.genre, (value) => handleInputChange('genre', value))}
-          {buildInputField('Language', roomDetails.language, (value) => handleInputChange('language', value))}
-          {buildInputField('Room Size', "50".toString(), (value) => handleInputChange('roomSize', value))}
-          {buildToggle('Explicit', roomDetails.isExplicit, handleToggleChange)}
-          {buildToggle('NSFW', roomDetails.isNsfw, handleToggleChange)}
+	return (
+		<ScrollView contentContainerStyle={styles.scrollView}>
+			<View style={styles.container}>
+				<View style={styles.header}>
+					<TouchableOpacity onPress={() => router.back()}>
+						<Text style={styles.closeButton}>×</Text>
+					</TouchableOpacity>
+					<Text style={styles.headerTitle}>Edit Room Details</Text>
+					<View style={styles.headerPlaceholder} />
+				</View>
+				<View style={styles.form}>
+					{buildInputField("Room Name", roomDetails.name, (value) =>
+						handleInputChange("name", value),
+					)}
+					{buildInputField(
+						"Description",
+						roomDetails.description,
+						(value) => handleInputChange("description", value),
+						4,
+					)}
+					{buildInputField("Genre", roomDetails.genre, (value) =>
+						handleInputChange("genre", value),
+					)}
+					{buildInputField("Language", roomDetails.language, (value) =>
+						handleInputChange("language", value),
+					)}
+					{buildInputField("Room Size", "50".toString(), (value) =>
+						handleInputChange("roomSize", value),
+					)}
+					{buildToggle("Explicit", roomDetails.isExplicit, handleToggleChange)}
+					{buildToggle("NSFW", roomDetails.isNsfw, handleToggleChange)}
 
 					<View style={styles.imagePickerContainer}>
 						<Text style={styles.imagePickerLabel}>Change Photo</Text>
@@ -233,14 +255,18 @@ const buildInputField = (
 	);
 };
 
-const  buildToggle = (labelText: string, value: boolean, onChange: (value: boolean) => void) => {
-  console.log(labelText ,value)
-  return (
-    <View style={styles.toggleContainer}>
-      <Text style={styles.toggleLabel}>{labelText}</Text>
-      <Switch value={value} onValueChange={onChange} />
-    </View>
-  );
+const buildToggle = (
+	labelText: string,
+	value: boolean,
+	onChange: (value: boolean) => void,
+) => {
+	console.log(labelText, value);
+	return (
+		<View style={styles.toggleContainer}>
+			<Text style={styles.toggleLabel}>{labelText}</Text>
+			<Switch value={value} onValueChange={onChange} />
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({

@@ -1,8 +1,8 @@
-import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import ChatScreen from '../app/screens/messaging/ChatScreen';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { TextInput, TouchableOpacity } from 'react-native';
+import React from "react";
+import renderer, { act } from "react-test-renderer";
+import ChatScreen from "../app/screens/messaging/ChatScreen";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { TextInput, TouchableOpacity } from "react-native";
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),

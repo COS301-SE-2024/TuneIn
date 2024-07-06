@@ -85,7 +85,9 @@ const DevicePicker = () => {
 					}),
 				});
 				if (!response.ok) {
-					throw new Error("Failed to transfer playback to the selected device.");
+					throw new Error(
+						"Failed to transfer playback to the selected device.",
+					);
 				}
 			} catch (error) {
 				Alert.alert("Error", error.message);
@@ -178,11 +180,11 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		padding: 20,
 		borderRadius: 15,
-	
+
 		width: 315,
 	},
 	popupTitle: {
-        alignSelf: "center",
+		alignSelf: "center",
 		fontSize: 20,
 		fontWeight: "bold",
 		marginBottom: 20,
@@ -196,15 +198,15 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
-        marginLeft:20
+		marginLeft: 20,
 	},
 	deviceButtonText: {
 		fontSize: 16,
 	},
 	closeButtonText: {
-        marginTop:15,
-        marginBottom: 5 ,
-        alignSelf: "center",
+		marginTop: 15,
+		marginBottom: 5,
+		alignSelf: "center",
 		color: "black",
 		fontSize: 17,
 		fontWeight: "bold",

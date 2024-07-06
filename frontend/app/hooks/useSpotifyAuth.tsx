@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
@@ -78,13 +79,16 @@ export const useSpotifyAuth = () => {
 		}
 	};
 
-  const getRefreshToken = async (): Promise<void> => {
-    try {
-      const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
-      if (!storedRefreshToken) throw new Error('No refresh token found');
-      const response = await axios.post('http://192.168.118.63:4000/refresh_token', {
-        refresh_token: storedRefreshToken,
-      });
+	const getRefreshToken = async (): Promise<void> => {
+		try {
+			const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
+			if (!storedRefreshToken) throw new Error("No refresh token found");
+			const response = await axios.post(
+				"http://192.168.118.63:4000/refresh_token",
+				{
+					refresh_token: storedRefreshToken,
+				},
+			);
 
 			if (!response) throw new Error("Failed to refresh token");
 
@@ -104,13 +108,16 @@ export const useSpotifyAuth = () => {
 		}
 	};
 
-  const refreshAccessToken = async () => {
-    try {
-      const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
-      if (!storedRefreshToken) throw new Error('No refresh token found');
-      const response = await axios.post('http://192.168.118.63:4000/refresh_token', {
-        refresh_token: storedRefreshToken,
-      });
+	const refreshAccessToken = async () => {
+		try {
+			const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
+			if (!storedRefreshToken) throw new Error("No refresh token found");
+			const response = await axios.post(
+				"http://192.168.118.63:4000/refresh_token",
+				{
+					refresh_token: storedRefreshToken,
+				},
+			);
 
 			if (!response) throw new Error("Failed to refresh token");
 

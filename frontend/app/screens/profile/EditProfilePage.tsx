@@ -98,12 +98,12 @@ const EditProfileScreen = () => {
 				Authorization: `Bearer ${t}`,
 				"Content-Type": "multipart/form-data",
 			};
-	
+
 			// const uploadResponse = await axios.post("http://192.168.118.63:3000/upload", form, { headers });
-			console.log(profileData)
-			console.log("Uploading image...", uri)
-			const imageLink = await uploadImage(uri, 'image');
-			console.log('image link:', imageLink);
+			console.log(profileData);
+			console.log("Uploading image...", uri);
+			const imageLink = await uploadImage(uri, "image");
+			console.log("image link:", imageLink);
 			// console.log("File uploaded successfully", uploadResponse.data);
 			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
