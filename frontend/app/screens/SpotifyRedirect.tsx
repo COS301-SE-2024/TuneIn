@@ -6,7 +6,6 @@ import {
 	StyleSheet,
 	ScrollView,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import {

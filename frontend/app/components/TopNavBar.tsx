@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
-	const baseURL = "http://192.168.56.1:3000";
 	const [profileImage, setProfileImage] = useState<string>(
 		"https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
 	);
@@ -16,9 +15,9 @@ const TopNavBar: React.FC = () => {
 	useEffect(() => {
 		const fetchProfilePicture = async () => {
 			try {
-				const token = await StorageService.getItem("token"); // Use StorageService to get the token
+				const token = await auth.getToken();
 				if (token) {
-					const response = await axios.get(`${baseURL}/profile`, {
+					const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 						headers: {
 							Authorization: `Bearer ${token}`,
 						},

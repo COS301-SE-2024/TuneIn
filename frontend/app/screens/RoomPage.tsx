@@ -22,15 +22,13 @@ import CommentWidget from "../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
 import RoomOptions from "./RoomOptions";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
-const BASE_URL = "http://192.168.56.1:3000";
+import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -67,18 +65,17 @@ const RoomPage = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
 	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "192.168.56.1"; // change IP address to your own IP address
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
-			const storedToken = await StorageService.getItem("token");
+			const storedToken = await auth.getToken();
 			console.log("token:", token);
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${BASE_URL}/user`, {
+				const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
@@ -89,11 +86,14 @@ const RoomPage = () => {
 			}
 
 			try {
-				const roomDto = await axios.get(`${BASE_URL}/rooms/${roomID}`, {
-					headers: {
-						Authorization: `Bearer ${storedToken}`,
+				const roomDto = await axios.get(
+					`${utils.getAPIBaseURL()}/rooms/${roomID}`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
 					},
-				});
+				);
 				roomObjRef.current = roomDto.data;
 				setRoomObj(roomDto.data);
 			} catch (error) {
@@ -103,7 +103,7 @@ const RoomPage = () => {
 		getTokenAndSelf();
 		checkBookmark();
 
-		socket.current = io.io(BASE_URL + "/live-chat", {
+		socket.current = io.io(utils.getAPIBaseURL() + "/live-chat", {
 			transports: ["websocket"],
 		});
 
@@ -222,15 +222,19 @@ const RoomPage = () => {
 		setJoined(true);
 	}, []);
 	const checkBookmark = async () => {
+		const t = await auth.getToken();
 		console.log("Checking bookmark");
 		try {
-			const response = await fetch(`http://${IPAddress}:3000/users/bookmarks`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token.current}`,
+			const response = await fetch(
+				`http://${utils.getAPIBaseURL()}/users/bookmarks`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${t}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
 			// check whether the room is bookmarked or not
 			for (let i = 0; i < data.length; i++) {
@@ -251,15 +255,17 @@ const RoomPage = () => {
 		setIsBookmarked(!isBookmarked);
 		console.log("tokeeen", token);
 
+		const t = await auth.getToken();
+
 		try {
 			console.log(roomID);
 			const response = await fetch(
-				`http://${IPAddress}:3000/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				`http://${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
 				{
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						Authorization: `Bearer ${token.current}`,
+						Authorization: `Bearer ${t}`,
 					},
 				},
 			);
@@ -306,7 +312,7 @@ const RoomPage = () => {
 
 	useEffect(() => {
 		const fetchQueue = async () => {
-			const storedToken = await AsyncStorage.getItem("token");
+			const storedToken = await auth.getToken();
 
 			if (!storedToken) {
 				// console.error("No stored token found");
@@ -315,7 +321,7 @@ const RoomPage = () => {
 
 			try {
 				const response = await fetch(
-					`http://${IPAddress}:3000/rooms/${roomID}/songs`,
+					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
 					{
 						method: "GET",
 						headers: {
@@ -324,7 +330,10 @@ const RoomPage = () => {
 						},
 					},
 				);
-				console.log("URL: ", `http://${IPAddress}:3000/rooms/${roomID}/songs`);
+				console.log(
+					"URL: ",
+					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+				);
 				console.log("response: ", response);
 				if (!response.ok) {
 					const errorText = await response.text();

@@ -7,6 +7,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
 import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
@@ -51,6 +52,12 @@ export class LoginBody {
 	@ApiProperty()
 	@IsString()
 	token: string;
+}
+
+export class RefreshBody {
+	@ApiProperty()
+	@IsString()
+	refreshToken: string;
 }
 
 @Injectable()
@@ -195,6 +202,38 @@ export class AuthService {
 
 		const token = jwt.sign(payload, secretKey, { expiresIn });
 		return token;
+	}
+
+	async refreshJWT(jwt_token: string): Promise<JWTPayload> {
+		const secretKey = this.configService.get<string>("JWT_SECRET_KEY");
+		if (!secretKey || secretKey === undefined || secretKey === "") {
+			throw new Error("Missing JWT secret key");
+		}
+
+		const decoded: jwt.JwtPayload = jwt.decode(jwt_token) as jwt.JwtPayload;
+		console.log("decoded", decoded);
+
+		//ensure user data in Payload is valid
+		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
+			where: {
+				user_id: decoded.id,
+				email: decoded.email,
+				username: decoded.username,
+			},
+		});
+
+		console.log("user", user);
+
+		if (!user) {
+			throw new UnauthorizedException("Invalid JWT token");
+		}
+
+		const result: JWTPayload = {
+			id: decoded.id as string,
+			email: decoded.email as string,
+			username: decoded.username as string,
+		};
+		return result;
 	}
 
 	/*

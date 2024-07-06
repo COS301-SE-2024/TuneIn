@@ -17,10 +17,10 @@ import FavoriteSongs from "../components/FavoriteSong";
 import LinkBottomSheet from "../components/LinkBottomSheet";
 import MusicBottomSheet from "../components/MusicBottomSheet";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://192.168.56.1:3000";
 	const router = useRouter();
 	const [favoriteSongsData, setFavoriteSongsData] = useState([
 		{
@@ -55,7 +55,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
-				const storedToken = await AsyncStorage.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 
 				if (storedToken) {
@@ -71,9 +71,9 @@ const ProfileScreen: React.FC = () => {
 		getTokenAndData();
 	}, []);
 
-	const fetchProfileInfo = async (token: string | null) => {
+	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${baseURL}/user`, {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -87,15 +87,17 @@ const ProfileScreen: React.FC = () => {
 
 	const handleJoinLeave = async () => {
 		try {
+			const t = await auth.getToken();
+			setToken(t);
 			const response = await axios.post(
-				`${baseURL}/joinLeaveRoom`,
+				`${utils.getAPIBaseURL()}/joinLeaveRoom`,
 				{
 					roomId: profileData.current_room.roomId,
 					action: profileData.current_room.joined ? "leave" : "join",
 				},
 				{
 					headers: {
-						Authorization: `Bearer ${token}`,
+						Authorization: `Bearer ${t}`,
 					},
 				},
 			);
@@ -124,7 +126,7 @@ const ProfileScreen: React.FC = () => {
 					</Text>
 				</View>
 			);
-		} else if (profileData.links.count == 1) {
+		} else if (profileData.links.count === 1) {
 			return (
 				<View>
 					<Text

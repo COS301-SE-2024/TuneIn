@@ -23,13 +23,11 @@ import SongRoomWidget from "../components/SongRoomWidget";
 import CommentWidget from "../components/CommentWidget";
 import io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../models/ChatEventDto";
 import RoomDetails from "./RoomDetails";
-
-const BASE_URL = "http://10.0.2.2:3000";
+import auth from "./../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -66,17 +64,20 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
 			try {
-				const storedToken = await StorageService.getItem("token");
+				const storedToken = await auth.getToken();
 				setToken(storedToken);
 				const whoami = async (token: string | null, type?: string) => {
 					try {
-						const response = await axios.get(`${BASE_URL}/user`, {
-							headers: {
-								Authorization: `Bearer ${token}`,
+						const response = await axios.get(
+							`${utils.getAPIBaseURL()}/profile`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						});
+						);
 						console.log("User's own info:", response.data);
-						return response.data as UserDto;
+						return response.data as UserProfileDto;
 					} catch (error) {
 						console.error("Error fetching user's own info:", error);
 						//user is not authenticated
@@ -90,7 +91,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		};
 		getTokenAndSelf();
 
-		socket.current = io(BASE_URL + "/live-chat", {
+		socket.current = io(utils.getAPIBaseURL() + "/live-chat", {
 			transports: ["websocket"],
 		});
 

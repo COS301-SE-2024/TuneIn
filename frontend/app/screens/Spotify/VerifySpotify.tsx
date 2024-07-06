@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const VerifySpotify: React.FC = () => {
 	const router = useRouter();

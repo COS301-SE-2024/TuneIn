@@ -12,9 +12,9 @@ import {
 import SongCard from "../../components/Spotify/SongCard";
 import { useSpotifyAuth } from "../../hooks/useSpotifyAuth";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
-import { useLocalSearchParams } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 interface Track {
 	id: string;
@@ -120,10 +120,10 @@ const EditPlaylist: React.FC = () => {
 
 		// Add logic to save the playlist to the backend if necessary
 		try {
-			const storedToken = await AsyncStorage.getItem("token");
+			const storedToken = await auth.getToken();
 			// Replace with your backend API URL
 			const response = await fetch(
-				`http://192.168.56.1:3000/rooms/${Room_id}/songs`,
+				`${utils.getAPIBaseURL()}/rooms/${Room_id}/songs`,
 				{
 					method: "POST",
 					headers: {
