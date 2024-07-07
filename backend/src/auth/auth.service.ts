@@ -35,27 +35,27 @@ export type JWTPayload = {
 };
 
 export class RegisterBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The user's username" })
 	@IsString()
 	username: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's Cognito sub/ID" })
 	@IsString()
 	userCognitoSub: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's email address" })
 	@IsString()
 	email: string;
 }
 
 export class LoginBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The Cognito JWT token" })
 	@IsString()
 	token: string;
 }
 
 export class RefreshBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The JWT token to be refreshed" })
 	@IsString()
 	refreshToken: string;
 }

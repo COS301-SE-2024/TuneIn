@@ -26,8 +26,12 @@ export class AuthController {
 
 	@Post("login")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Login in the API using Cognito" })
-	@ApiBody({ type: LoginBody })
+	@ApiOperation({ summary: "Authenticate a user using the Cognito JWT token" })
+	@ApiBody({
+		type: LoginBody,
+		required: true,
+		description: "Cognito JWT token",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "User successfully logged in. JWT token returned.",
@@ -83,13 +87,13 @@ export class AuthController {
 	@Post("register")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
-	@ApiBody({ type: RegisterBody })
+	@ApiBody({ type: RegisterBody, required: true, description: "User info" })
 	@ApiResponse({
 		status: 200,
 		description: "User successfully registered.",
 		type: RegisterBody,
 	})
-	@ApiResponse({ status: 403, description: "Forbidden." })
+	@ApiResponse({ status: 400, description: "Bad request." })
 	async register(@Body() registerInfo: RegisterBody) {
 		const successful: boolean = await this.authService.createUser(
 			registerInfo.username,
@@ -100,7 +104,7 @@ export class AuthController {
 		if (!successful) {
 			throw new HttpException(
 				"Invalid credentials. Could not create user. AuthRegisterError01",
-				HttpStatus.UNAUTHORIZED,
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -111,17 +115,23 @@ export class AuthController {
 	@Post("refresh")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Refresh an expired (or almost expired) JWT token" })
+	@ApiBody({
+		type: RefreshBody,
+		required: true,
+		description: "The expired JWT token",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "JWT token successfully refreshed.",
 		type: String,
 	})
-	@ApiResponse({ status: 403, description: "Forbidden." })
+	@ApiResponse({ status: 400, description: "Bad request." })
+	@ApiResponse({ status: 401, description: "Unauthorized." })
 	async refresh(@Body() rb: RefreshBody) {
 		if (!rb || rb === null) {
 			throw new HttpException(
 				"Invalid request. Missing JWT token. AuthControllerRefreshError01",
-				HttpStatus.UNAUTHORIZED,
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		try {
