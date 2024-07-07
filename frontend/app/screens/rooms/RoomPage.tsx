@@ -298,43 +298,43 @@ const RoomPage = () => {
 		setJoined(false);
 	};
 
-	const getQueueState = () => {
-		// Simulated queue state with UTC start times
-		const queue = [
-			{
-				song: "Song A",
-				startTime: new Date(Date.UTC(2024, 6, 6, 12, 0, 0)),
-				index: 0,
-			}, // July 6th, 2024, 12:00:00 UTC
-			{
-				song: "Song B",
-				startTime: new Date(Date.UTC(2024, 6, 6, 12, 10, 0)),
-				index: 1,
-			}, // July 6th, 2024, 12:10:00 UTC
-			{
-				song: "Song C",
-				startTime: new Date(Date.UTC(2024, 6, 6, 12, 20, 0)),
-				index: 2,
-			}, // July 6th, 2024, 12:20:00 UTC
-		];
+	// const getQueueState = () => {
+	// 	// Simulated queue state with UTC start times
+	// 	const queue = [
+	// 		{
+	// 			song: "Song A",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 0, 0)),
+	// 			index: 0,
+	// 		}, // July 6th, 2024, 12:00:00 UTC
+	// 		{
+	// 			song: "Song B",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 10, 0)),
+	// 			index: 1,
+	// 		}, // July 6th, 2024, 12:10:00 UTC
+	// 		{
+	// 			song: "Song C",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 20, 0)),
+	// 			index: 2,
+	// 		}, // July 6th, 2024, 12:20:00 UTC
+	// 	];
 
-		// Function to return the UTC start time and index of a song in the queue
-		const getSongState = (index) => {
-			const song = queue.find((item) => item.index === index);
-			if (song) {
-				return {
-					startTimeUTC: song.startTime.toISOString(), // Convert to ISO string for universal representation
-					index: song.index,
-				};
-			} else {
-				return null; // Handle case when song index is not found
-			}
-		};
+	// 	// Function to return the UTC start time and index of a song in the queue
+	// 	const getSongState = (index) => {
+	// 		const song = queue.find((item) => item.index === index);
+	// 		if (song) {
+	// 			return {
+	// 				startTimeUTC: song.startTime.toISOString(), // Convert to ISO string for universal representation
+	// 				index: song.index,
+	// 			};
+	// 		} else {
+	// 			return null; // Handle case when song index is not found
+	// 		}
+	// 	};
 
-		return {
-			getSongState,
-		};
-	};
+	// 	return {
+	// 		getSongState,
+	// 	};
+	// };
 
 	const trackPositionIntervalRef = useRef(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
@@ -393,12 +393,12 @@ const RoomPage = () => {
 		fetchQueue();
 	}, [roomData.roomID, roomID]);
 
-	const getRoomState = () => {
-		return {
-			currentTrackIndex,
-			secondsPlayed,
-		};
-	};
+	// const getRoomState = () => {
+	// 	return {
+	// 		currentTrackIndex,
+	// 		secondsPlayed,
+	// 	};
+	// };
 
 	useEffect(() => {
 		return () => {
@@ -501,18 +501,11 @@ const RoomPage = () => {
 		});
 	};
 
-	useEffect(() => {
-		if (userRef.current && roomObjRef.current) {
-			setReadyToJoinRoom(true);
-			console.log("Ready to join room...");
-			console.log(userRef.current, roomObjRef.current);
-		}
-	}, [
-		userRef.current,
-		roomObjRef.current,
-		roomObjRef.current,
-		userRef.current,
-	]);
+	if (userRef.current && roomObjRef.current) {
+		setReadyToJoinRoom(true);
+		console.log("Ready to join room...");
+		console.log(userRef.current, roomObjRef.current);
+	}
 
 	useEffect(() => {
 		if (readyToJoinRoom && !joined) {

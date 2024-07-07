@@ -15,7 +15,6 @@ import { CheckBox } from "react-native-elements";
 import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 
