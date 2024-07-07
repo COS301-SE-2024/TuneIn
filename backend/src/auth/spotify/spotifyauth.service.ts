@@ -8,27 +8,52 @@ import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
-import { IsObject, IsString } from "class-validator";
+import { IsNumber, IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
 
-export type SpotifyTokenResponse = {
+export class SpotifyTokenResponse {
+	@ApiProperty()
+	@IsString()
 	access_token: string;
-	token_type: string;
-	scope: string;
-	expires_in: number;
-	refresh_token: string;
-};
 
-export type SpotifyTokenRefreshResponse = {
-	access_token: string;
+	@ApiProperty()
+	@IsString()
 	token_type: string;
+
+	@ApiProperty()
+	@IsString()
 	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
 	expires_in: number;
-};
+
+	@ApiProperty()
+	@IsString()
+	refresh_token: string;
+}
+
+export class SpotifyTokenRefreshResponse {
+	@ApiProperty()
+	@IsString()
+	access_token: string;
+
+	@ApiProperty()
+	@IsString()
+	token_type: string;
+
+	@ApiProperty()
+	@IsString()
+	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
+	expires_in: number;
+}
 
 export type SpotifyTokenPair = {
 	tokens: SpotifyTokenResponse;
