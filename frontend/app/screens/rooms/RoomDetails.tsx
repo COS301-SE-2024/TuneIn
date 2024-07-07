@@ -15,6 +15,8 @@ import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../../models/roomdetails";
 import AWS from "aws-sdk";
 import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 if (!AWS_ACCESS_KEY_ID) {

@@ -16,6 +16,8 @@ import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
 
 const EditProfileScreen = () => {
 	const router = useRouter();

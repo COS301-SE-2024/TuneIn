@@ -15,6 +15,9 @@ import { CheckBox } from "react-native-elements";
 import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
+import axios from "axios";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -42,7 +45,7 @@ const LoginScreen: React.FC = () => {
 		const authenticationDetails = new AuthenticationDetails(authenticationData);
 		cognitoUser.authenticateUser(authenticationDetails, {
 			onSuccess: function (result) {
-				// Store token in AsyncStorage if remember me is checked
+				// Store token in storage if remember me is checked
 				if (rememberMe) {
 					StorageService.setItem(
 						"cognitoToken",
@@ -51,7 +54,7 @@ const LoginScreen: React.FC = () => {
 				}
 
 				// POST request to backend
-				fetch("http://192.168.118.63:3000/auth/login", {
+				fetch(`${utils.getAPIBaseURL()}/auth/login`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -63,7 +66,7 @@ const LoginScreen: React.FC = () => {
 					.then((response) => response.json())
 					.then((data) => {
 						const token = data.token; // Extract the token from the response
-						StorageService.setItem("token", token); // Save the token to AsyncStorage
+						auth.setToken(token); // Set the token in the AuthManagement service
 						console.log("jwt: ", token);
 						router.navigate("/screens/Home");
 					})
