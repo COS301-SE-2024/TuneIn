@@ -7,3 +7,4 @@
 
 # ignore node_modules in the proxyserver folder
 proxyserver/node_modules/
+/Recommendation/.idea
