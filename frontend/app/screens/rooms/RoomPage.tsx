@@ -20,11 +20,9 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
-import {
-	LiveChatMessageDto,
-	RoomDto,
-	UserProfileDto,
-} from "../../../api-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -40,12 +38,12 @@ const RoomPage = () => {
 	const roomData = JSON.parse(room);
 	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
-	const [setRoomObj] = useState<RoomDto | null>(null);
+	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
 
 	const token = useRef<string | null>(null);
-	const userRef = useRef<UserProfileDto | null>(null);
+	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
@@ -69,19 +67,19 @@ const RoomPage = () => {
 			token.current = storedToken;
 			console.log("Stored token:", token.current);
 			try {
-				const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: {
 						Authorization: `Bearer ${storedToken}`,
 					},
 				});
-				userRef.current = response.data as UserProfileDto;
+				userRef.current = response.data as UserDto;
 			} catch (error) {
 				console.error("Error fetching user's own info:", error);
 			}
 
 			try {
 				const roomDto = await axios.get(
-					`${utils.getAPIBaseURL()}/rooms/${roomID}`,
+					`${utils.API_BASE_URL}/rooms/${roomID}`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -97,7 +95,7 @@ const RoomPage = () => {
 		getTokenAndSelf();
 		checkBookmark();
 
-		socket.current = io.io(utils.getAPIBaseURL() + "/live-chat", {
+		socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
 
@@ -182,7 +180,7 @@ const RoomPage = () => {
 
 	const sendMessage = () => {
 		if (message.trim()) {
-			const u: UserProfileDto = userRef.current;
+			const u: UserDto = userRef.current;
 			const newMessage: LiveChatMessageDto = {
 				messageBody: message,
 				sender: u,
@@ -201,7 +199,7 @@ const RoomPage = () => {
 	};
 
 	const joinRoom = useCallback(() => {
-		const u: UserProfileDto = userRef.current;
+		const u: UserDto = userRef.current;
 		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
@@ -220,16 +218,13 @@ const RoomPage = () => {
 		const t = await auth.getToken();
 		console.log("Checking bookmark");
 		try {
-			const response = await fetch(
-				`http://${utils.getAPIBaseURL()}/users/bookmarks`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${t}`,
-					},
+			const response = await fetch(`${utils.API_BASE_URL}/users/bookmarks`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${t}`,
 				},
-			);
+			});
 			const data = await response.json();
 			// check whether the room is bookmarked or not
 			for (let i = 0; i < data.length; i++) {
@@ -255,7 +250,7 @@ const RoomPage = () => {
 		try {
 			console.log(roomID);
 			const response = await fetch(
-				`http://${utils.getAPIBaseURL()}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
+				`${utils.API_BASE_URL}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
 				{
 					method: "POST",
 					headers: {
@@ -283,7 +278,7 @@ const RoomPage = () => {
 	};
 
 	const leaveRoom = () => {
-		const u: UserProfileDto = userRef.current;
+		const u: UserDto = userRef.current;
 		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
@@ -354,7 +349,7 @@ const RoomPage = () => {
 
 			try {
 				const response = await fetch(
-					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
+					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
 					{
 						method: "GET",
 						headers: {
@@ -363,10 +358,7 @@ const RoomPage = () => {
 						},
 					},
 				);
-				console.log(
-					"URL: ",
-					`http://${utils.getAPIBaseURL()}/rooms/${roomID}/songs`,
-				);
+				console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
 				console.log("response: ", response);
 				if (!response.ok) {
 					const errorText = await response.text();

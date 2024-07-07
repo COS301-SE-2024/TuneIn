@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
-import { UserProfileDto } from "../../modules/profile/dto/userprofile.dto";
+import { UserDto } from "../../modules/users/dto/user.dto";
 
 interface liveChatUser {
-	user: UserProfileDto;
+	user: UserDto;
 	roomID?: string;
 }
 
@@ -28,8 +28,7 @@ export class ConnectedUsersService {
 		if (!(await this.dbUtils.userExists(userId))) {
 			throw new Error("User with ID " + userId + " does not exist");
 		}
-		const user: UserProfileDto =
-			await this.dtogen.generateUserProfileDto(userId);
+		const user: UserDto = await this.dtogen.generateUserDto(userId);
 
 		if (roomID && roomID !== undefined) {
 			if (!(await this.dbUtils.roomExists(roomID))) {
@@ -104,8 +103,8 @@ export class ConnectedUsersService {
 		return u.roomID;
 	}
 
-	getRoomUsers(roomID: string): UserProfileDto[] {
-		const users: UserProfileDto[] = [];
+	getRoomUsers(roomID: string): UserDto[] {
+		const users: UserDto[] = [];
 		this.connectedUsers.forEach((value) => {
 			if (value.roomID === roomID) {
 				users.push(value.user);

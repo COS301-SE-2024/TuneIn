@@ -38,7 +38,7 @@ const Home: React.FC = () => {
 	const fetchRooms = async (token: string | null, type?: string) => {
 		try {
 			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/users/rooms${type ? type : ""}`,
+				`${utils.API_BASE_URL}/users/rooms${type ? type : ""}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -53,7 +53,7 @@ const Home: React.FC = () => {
 	const getFriends = async (token) => {
 		try {
 			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/users/friends`,
+				`${utils.API_BASE_URL}/users/friends`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},

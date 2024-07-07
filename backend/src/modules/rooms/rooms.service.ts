@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { SongInfoDto } from "./dto/songinfo.dto";
-import { UserProfileDto } from "../profile/dto/userprofile.dto";
+import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
@@ -237,7 +237,7 @@ export class RoomsService {
 		}
 	}
 
-	async getRoomUsers(room_id: string): Promise<UserProfileDto[]> {
+	async getRoomUsers(room_id: string): Promise<UserDto[]> {
 		try {
 			// write a query to get all the users in the room
 			const users = await this.prisma.participate.findMany({
@@ -248,23 +248,22 @@ export class RoomsService {
 					users: true,
 				},
 			});
-			// map all the users to the userprofiledto
+
+			// map all the users to the userdto
 			console.log("Users in room", users);
-			const userProfiles: (UserProfileDto | null)[] = await Promise.all(
+			const userDtos: (UserDto | null)[] = await Promise.all(
 				users.map(async (user) => {
-					const userProfile = await this.dtogen.generateUserProfileDto(
-						user.users.user_id,
-					);
-					return userProfile;
+					const u = await this.dtogen.generateUserDto(user.users.user_id);
+					return u;
 				}),
 			);
 
 			// filter out null values
-			const filteredUserProfiles: UserProfileDto[] = userProfiles.filter(
-				(userProfile) => userProfile !== null,
-			) as UserProfileDto[];
-			console.log("Filtered user profiles", filteredUserProfiles);
-			return filteredUserProfiles;
+			const filteredUsers: UserDto[] = userDtos.filter(
+				(u) => u !== null,
+			) as UserDto[];
+			console.log("Filtered users", filteredUsers);
+			return filteredUsers;
 		} catch (error) {
 			console.error("Error getting room users:", error);
 			return [];

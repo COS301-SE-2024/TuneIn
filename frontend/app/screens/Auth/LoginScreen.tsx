@@ -53,7 +53,7 @@ const LoginScreen: React.FC = () => {
 				}
 
 				// POST request to backend
-				fetch(`${utils.getAPIBaseURL()}/auth/login`, {
+				fetch(`${utils.API_BASE_URL}/auth/login`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",

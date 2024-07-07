@@ -1,86 +1,77 @@
 # All endpoints list
-## User Profiles
-### `/profile`
-#### GET: gets profile info
-no input
-response: return ProfileDto
-#### PUT or PATCH: edits profile info
-input: ProfileDto
-output: updated ProfileDto
-
-### `/profile/{username}`
-#### GET: gets profile info for given username
-no input
-response: ProfileDto
-
-### `/profile/{username}/follow`
-#### POST: follows the user with the username given
-no input
-response: code (2xx for success, 4xx for error)
-
-### `/profile/{username}/unfollow`
-#### POST: unfollows the user with the username given
-no input
-response: code (2xx for success, 4xx for error)
-
-(Note: add stuff for friends later)
-
-## User (general for authenticated user)
-### `/user`
-#### GET: gets user info
+## Users
+### `/users`
+#### GET: gets profile info✅
 no input
 response: return UserDto
-#### PUT or PATCH: edits profile info
+#### PUT or PATCH: edits profile info✅
 input: UserDto
-response: return updated UserDto
+output: updated UserDto
 
-### `/user/rooms`
+### `/users/{username}`
+#### GET: gets profile info for given username✅
+no input
+response: UserDto
+
+### `/users/{username}/follow`
+#### POST: follows the user with the username given✅
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/unfollow`
+#### POST: unfollows the user with the username given✅
+no input
+response: code (2xx for success, 4xx for error)
+
+# (Note: add stuff for friends later)
+
+### `/users/rooms`
 related to a user's own rooms
-#### GET: get a user's rooms
+#### GET: get a user's rooms✅
 no input
 response: an array of RoomDto
-#### POST: create a new room
+#### POST: create a new room✅
 input: partial RoomDto
 response: final RoomDto for room (including new id)
 
-### `/user/rooms/recent`
-#### GET: get user's recent rooms
+### `/users/rooms/recent`
+#### GET: get user's recent rooms✅
 no input
 response: an array of RoomDto
 
-### `/user/rooms/foryou`
+### `/users/rooms/foryou`
 #### GET: get user's recommended rooms
 no input
 response: an array of RoomDto
 
-### `/user/friends`
-#### GET: get user's friends
+### `/users/friends`
+#### GET: get user's friends✅
 no input
-response: an array of ProfileDto
+response: an array of UserDto
 
-### `/user/followers`
-#### GET: get list of followers
+### `/users/followers`
+#### GET: get list of followers✅
 no input
-response: an array of ProfileDto
+response: an array of UserDto
 ### `/users/following`
-#### GET: get list of people user is following
+#### GET: get list of people user is following✅
 no input
-response: an array of ProfileDto
+response: an array of UserDto
 
 ## Rooms
 ### `/rooms`
 
 ### `/rooms/new`
-#### GET: returns newly created public rooms
+#### GET: returns newly created public rooms✅
 no input
 response: an array of RoomDto
 
 ### `/rooms/{room_id}`
-#### GET: returns info about a room
+#### GET: returns info about a room✅
 no input
 response: RoomDto
 
-#### PUT or PATCH: edits room info (only if it belongs to the user)
+#### PUT or PATCH: edits room info (only if it belongs to the user)✅
 input: partial RoomDto
 response: updated RoomDto
 
@@ -89,21 +80,22 @@ no input
 response: (2xx for success, 4xx for error)
 
 ### `/rooms/{room_id}/join`
-#### POST: adds current user as a participant to the room
+#### POST: adds current user as a participant to the room✅
 no input
 response: (2xx for success, 4xx for error)
 
 ### `/rooms/{room_id}/leave`
-#### POST: remove current user as a participant to the room
+#### POST: remove current user as a participant to the room✅
 no input
 response: (2xx for success, 4xx for error)
 
 ### `/rooms/{room_id}/users`
 #### GET: returns people currently (and previously in room)
-no input
-response: array of ProfileDto
+query params
+- active: boolean
+response: array of UserDto
 
-### `/rooms/{room_id}/songs` (not for demo 1)
+### `/rooms/{room_id}/songs`
 #### GET: returns the queue
 no input
 response: array of SongInfoDto
@@ -116,7 +108,7 @@ response: (2xx for success, 4xx for error)
 input: SongInfoDto
 response: array of SongInfoDto (room queue)
 
-### `/rooms/{room_id}/songs/current` (not for demo 1)
+### `/rooms/{room_id}/songs/current` 
 #### GET: returns the current playing song
 no input
 response: SongInfoDto
@@ -125,23 +117,79 @@ response: SongInfoDto
 no input
 response: SongInfoDto (updated with new song playing)
 
+## Search
+### `/search`
+#### GET: combines results of both `/search/users` and `/search/rooms`✅
+no input
+response: return an array of mixed data types of UserDto and RoomDto
+
+### `/search/rooms`
+#### GET: gets a list of rooms that match given names
+query params
+- q: string to match room name
+- creator: string to match creator name
+response: return an array of RoomDto
+
+### `/search/rooms/advanced`
+#### GET: gets a list of rooms that match given params
+query params
+- q: string to match room name
+- creator_username: string to match creator username
+- creator_name: string to match creator profile name
+- partipicant_count: number of minimum participants
+- description: string 's' to find in desc
+- is_temp
+- is_priv
+- is_scheduled
+- start_date
+- end_date
+- lang
+- explicit: boolean to match
+- nsfw: boolean to match
+- tags: string array to compare (if any match)
+response: return an array of RoomDto
+
+### `/search/rooms/history`
+#### GET: returns a list of recently searched rooms (rooms discovered from search)
+response: return an array of RoomDto
+
+### `/search/users`
+#### GET: gets a list of users that match given names
+query params
+- q: string to match username or profile name
+response: return an array of UserDto
+
+### `/search/users/advanced`
+#### GET: gets a list of users that match given params
+query params
+- q: string to match username or profile name
+- creator_username: string to match creator username
+- creator_name: string to match creator profile name
+- following: number of minimum following
+- followers: number of minimum followers
+response: return an array of UserDto
+
+### `/search/users/history`
+#### GET: returns a list of recently searched users (users discovered from search)
+response: return an array of UserDto
+
 # Data Transfer Objects (Dtos)
 
-## UserProfileDto (User Profile Info)
+## UserDto (User Profile Info)
 A object representing User Profile information.
 ```json
 {
 	profile_name : string,
-	userID : string,
+	user_id : string,
 	username : string,
 	profile_picture_url : string,
 	followers: {
 		count: int,
-		data: [ProfileDto]
+		data: [UserDto]
 	},
 	following: {
 		count: int,
-		data: [ProfileDto]
+		data: [UserDto]
 	},
 	links: {
 		count: int,
@@ -172,7 +220,7 @@ A object representing User Profile information.
 A object representing Room information.
 ```json
 {
-	creator: ProfileDto,
+	creator: UserDto,
 	room_id: string,
 	partipicant_count: number,
 	room_name: string,
@@ -195,9 +243,12 @@ A object representing Room information.
 A object representing Song information.
 ```json
 {
+	id: string,
 	title: string,
 	artists: [string],
-	cover: string,
-	start_time: DateTime
+	genres: [string],
+	lyrics_url: string,
+	duration: number,
+	cover: string
 }
 ```

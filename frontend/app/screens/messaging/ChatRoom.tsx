@@ -45,7 +45,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 
 	const room: RoomDto = JSON.parse(roomObj) as RoomDto;
 	const [token, setToken] = useState<string | null>(null);
-	const [user, setUser] = useState<UserProfileDto | null>(null);
+	const [user, setUser] = useState<UserDto | null>(null);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
@@ -61,7 +61,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				const whoami = async (token: string | null, type?: string) => {
 					try {
 						const response = await axios.get(
-							`${utils.getAPIBaseURL()}/profile`,
+							`${utils.API_BASE_URL}/users`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
@@ -69,7 +69,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 							},
 						);
 						console.log("User's own info:", response.data);
-						return response.data as UserProfileDto;
+						return response.data as UserDto;
 					} catch (error) {
 						console.error("Error fetching user's own info:", error);
 						//user is not authenticated
@@ -83,7 +83,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		};
 		getTokenAndSelf();
 
-		socket.current = io(utils.getAPIBaseURL() + "/live-chat", {
+		socket.current = io(utils.API_BASE_URL + "/live-chat", {
 			transports: ["websocket"],
 		});
 

@@ -56,7 +56,7 @@ const EditProfileScreen = () => {
 		if (changed) {
 			try {
 				const response = await axios.patch(
-					`${utils.getAPIBaseURL()}/profile`,
+					`${utils.API_BASE_URL}/users`,
 					profileData,
 					{
 						headers: {
@@ -87,7 +87,13 @@ const EditProfileScreen = () => {
 			const t = await auth.getToken();
 			setToken(t);
 
-			// const uploadResponse = await axios.post("http://192.168.118.63:3000/upload", form, { headers });
+			/*
+			const uploadResponse = await axios.post(
+				`${utils.API_BASE_URL}/upload`,
+				form,
+				{ headers },
+			);
+			*/
 			console.log(profileData);
 			console.log("Uploading image...", uri);
 			const imageLink = await uploadImage(uri, "image");

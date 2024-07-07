@@ -4,12 +4,12 @@ import LoginScreen from "./screens/Auth/LoginScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
-import { getAPIBaseURL } from "./services/Utils";
+import { API_BASE_URL } from "./services/Utils";
 
 const App: React.FC = () => {
 	const router = useRouter();
 	const [isCheckingToken, setIsCheckingToken] = useState(true);
-	console.log(getAPIBaseURL());
+	console.log(API_BASE_URL);
 
 	useEffect(() => {
 		const checkToken = async () => {

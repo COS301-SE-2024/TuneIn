@@ -12,7 +12,6 @@ import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-//import { CreateUserDto } from "../modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
 	sub: string;
@@ -36,27 +35,27 @@ export type JWTPayload = {
 };
 
 export class RegisterBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The user's username" })
 	@IsString()
 	username: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's Cognito sub/ID" })
 	@IsString()
 	userCognitoSub: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's email address" })
 	@IsString()
 	email: string;
 }
 
 export class LoginBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The Cognito JWT token" })
 	@IsString()
 	token: string;
 }
 
 export class RefreshBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The JWT token to be refreshed" })
 	@IsString()
 	refreshToken: string;
 }
@@ -300,9 +299,11 @@ export class AuthService {
 
 		try {
 			const payload = await verifier.verify(jwt_token);
+			console.log("Cognito Verification", payload);
 			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
 			return result;
 		} catch (error) {
+			console.log(error);
 			throw new UnauthorizedException("Invalid JWT token");
 		}
 	}

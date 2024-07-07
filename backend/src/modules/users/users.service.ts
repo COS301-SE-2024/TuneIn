@@ -2,14 +2,13 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserDto } from "./dto/user.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
-import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { UpdateUserDto } from "./dto/updateuser.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
 
 @Injectable()
 export class UsersService {
@@ -19,6 +18,7 @@ export class UsersService {
 		private readonly dtogen: DtoGenService,
 	) {}
 
+	// Tutorial CRUD operations
 	create(createUserDto: CreateUserDto) {
 		const user: Prisma.usersCreateInput = {
 			user_id: createUserDto.userID,
@@ -63,25 +63,142 @@ export class UsersService {
 		});
 	}
 
-	getUserInfo(): UserDto {
-		// implementation goes here
+	async getProfile(uid: string): Promise<UserDto> {
+		const user = await this.dtogen.generateUserDto(uid);
+		return user;
+	}
+
+	async updateProfile(
+		userId: string,
+		updateProfileDto: UpdateUserDto,
+	): Promise<UserDto> {
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userId },
+		});
+
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		const updateData = this.dbUtils.buildUpdateData(user, updateProfileDto);
+
+		await this.prisma.users.update({
+			where: { user_id: userId },
+			data: updateData,
+		});
+
+		const u = await this.dtogen.generateUserDto(userId);
+		if (!u) {
+			throw new Error("Failed to generate user profile");
+		}
+
+		return u;
+	}
+
+	async getProfileByUsername(username: string): Promise<UserDto> {
+		const userData = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+
+		if (!userData) {
+			throw new Error("User not found");
+		} else {
+			const user = await this.dtogen.generateUserDto(userData.user_id);
+			if (user) {
+				return user;
+			}
+		}
+
 		return new UserDto();
 	}
 
-	updateUserProfile(updateUserDto: UpdateUserDto): UserDto {
-		// implementation goes here
-		console.log(updateUserDto);
-		return new UserDto();
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
+	async followUser(
+		userId: string,
+		accountFollowedId: string,
+	): Promise<boolean> {
+		if (userId === accountFollowedId) {
+			throw new Error("You cannot follow yourself");
+		}
+
+		if (!(await this.dbUtils.userExists(accountFollowedId))) {
+			throw new Error("User (" + accountFollowedId + ") does not exist");
+		}
+
+		if (!(await this.dbUtils.userExists(userId))) {
+			throw new Error("User (" + userId + ") does not exist");
+		}
+
+		if (await this.dbUtils.isFollowing(userId, accountFollowedId)) {
+			return true;
+		}
+
+		try {
+			await this.prisma.follows.create({
+				data: {
+					follower: userId,
+					followee: accountFollowedId,
+				},
+			});
+			return true;
+		} catch (e) {
+			throw new Error("Failed to follow user (" + accountFollowedId + ")");
+		}
 	}
 
-	updateProfile(updateUserDto: UpdateUserDto): UserDto {
-		// implementation goes here
-		console.log(updateUserDto);
-		return new UserDto();
+	/*
+	follower: the person who does the following
+	followee (leader): the person being followed
+	*/
+	async unfollowUser(
+		userId: string,
+		accountUnfollowedId: string,
+	): Promise<boolean> {
+		if (userId === accountUnfollowedId) {
+			throw new Error("You cannot unfollow yourself");
+		}
+
+		if (!(await this.dbUtils.userExists(accountUnfollowedId))) {
+			throw new Error("User (" + accountUnfollowedId + ") does not exist");
+		}
+
+		if (!(await this.dbUtils.userExists(userId))) {
+			throw new Error("User (" + userId + ") does not exist");
+		}
+
+		if (!(await this.dbUtils.isFollowing(userId, accountUnfollowedId))) {
+			return true;
+		}
+
+		try {
+			//find the follow relationship and delete it
+			const follow = await this.prisma.follows.findFirst({
+				where: {
+					follower: userId,
+					followee: accountUnfollowedId,
+				},
+			});
+			if (!follow) {
+				return true;
+			}
+
+			await this.prisma.follows.delete({
+				where: {
+					follows_id: follow.follows_id,
+					follower: userId,
+					followee: accountUnfollowedId,
+				},
+			});
+			return true;
+		} catch (e) {
+			throw new Error("Failed to unfollow user (" + accountUnfollowedId + ")");
+		}
 	}
 
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
-		// implementation goes here
 		const user = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
@@ -285,7 +402,7 @@ export class UsersService {
 		return recommends;
 	}
 
-	async getUserFriends(userID: string): Promise<UserProfileDto[]> {
+	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
 			where: { OR: [{ friend1: userID }, { friend2: userID }] },
 		});
@@ -302,38 +419,38 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		const r = await this.dtogen.generateMultipleUserProfileDto(ids);
+		const r = await this.dtogen.generateMultipleUserDto(ids);
 		console.log(r);
 		return r;
 	}
 
-	async getFollowers(userID: string): Promise<UserProfileDto[]> {
+	async getFollowers(userID: string): Promise<UserDto[]> {
 		const f = await this.dbUtils.getUserFollowers(userID);
 		if (!f) {
 			return [];
 		}
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
-				"An unknown error occurred while generating UserProfileDto for followers. Received null.",
+				"An unknown error occurred while generating UserDto for followers. Received null.",
 			);
 		}
 		return result;
 	}
 
-	async getFollowing(userID: string): Promise<UserProfileDto[]> {
+	async getFollowing(userID: string): Promise<UserDto[]> {
 		const following = await this.dbUtils.getUserFollowing(userID);
 		if (!following) {
 			return [];
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		const result = await this.dtogen.generateMultipleUserProfileDto(ids);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
-				"An unknown error occurred while generating UserProfileDto for following. Received null.",
+				"An unknown error occurred while generating UserDto for following. Received null.",
 			);
 		}
 		return result;

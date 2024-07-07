@@ -7,10 +7,11 @@ import {
 	Put,
 	UseGuards,
 	Request,
+	Param,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import {
+	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiOkResponse,
 	ApiOperation,
@@ -20,11 +21,11 @@ import {
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
-import { UserProfileDto } from "../profile/dto/userprofile.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
+import { UpdateUserDto } from "./dto/updateuser.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -65,62 +66,56 @@ export class UsersController {
 		return this.usersService.remove(id);
 	}
   */
-
-	/*
-    GET /users
-    gets user info
-    no input
-    response: return UserDto
-  */
-	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("users")
-	getUserInfo(@Request() req: any): UserDto {
-		//try to get sub, username & email back from JWT token
-		console.log("1");
-		console.log("2", req);
-		console.log("3", req.user);
-		//req.user
-		/*
-		{
-			userId: '311ce2e8-8041-70bd-0ab5-be97283ee182',
-			username: 'bigdaddy'
-		}
-		*/
-		console.log("4", req.user.sub);
-		console.log("5", req.user.username);
-		console.log("6", req.user.email);
-
-		return this.usersService.getUserInfo();
-	}
-
-	/*
-    PUT/PATCH /users
-    user profile info
-    input: UserDto
-    response: return updated UserDto
-  */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Patch()
+	@ApiOperation({ summary: "Get current user's profile info" })
+	@ApiOkResponse({
+		description: "Successfully returned user profile info.",
+		type: UserDto,
+	})
 	@ApiTags("users")
-	updateUserProfile(
-		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateUserProfile(updateUserDto);
+	getProfile(@Request() req: any): Promise<UserDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return this.usersService.getProfile(userInfo.id);
 	}
 
-	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags("users")
-	updateProfile(
+	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOkResponse({
+		description: "Returns the updated user profile info.",
+		type: UserDto,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request. The request body may be malformed.",
+	})
+	async putProfile(
 		@Request() req: any,
-		@Body() updateUserDto: UpdateUserDto,
-	): UserDto {
-		return this.usersService.updateProfile(updateUserDto);
+		@Body() updateProfileDto: UpdateUserDto,
+	): Promise<UserDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Patch()
+	@ApiTags("users")
+	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOkResponse({
+		description: "Returns the updated user profile info.",
+		type: UserDto,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request. The request body may be malformed.",
+	})
+	async patchProfile(
+		@Request() req: any,
+		@Body() updateProfileDto: UpdateUserDto,
+	): Promise<UserDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
 	}
 
 	@ApiBearerAuth()
@@ -135,6 +130,7 @@ export class UsersController {
 		isArray: true,
 	})
 	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+		console.log("called /users/rooms");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserRooms(userInfo.id);
 	}
@@ -196,11 +192,11 @@ export class UsersController {
 	@ApiOperation({ summary: "Get a user's friends" })
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
-		description: "The user's friends as an array of UserProfileDto.",
-		type: UserProfileDto,
+		description: "The user's friends as an array of UserDto.",
+		type: UserDto,
 		isArray: true,
 	})
-	async getUserFriends(@Request() req: any): Promise<UserProfileDto[]> {
+	async getUserFriends(@Request() req: any): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserFriends(userInfo.id);
 	}
@@ -212,11 +208,11 @@ export class UsersController {
 	@ApiOperation({ summary: "Get a user's followers" })
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
-		description: "The user's followers as an array of UserProfileDto.",
-		type: UserProfileDto,
+		description: "The user's followers as an array of UserDto.",
+		type: UserDto,
 		isArray: true,
 	})
-	async getFollowers(@Request() req: any): Promise<UserProfileDto[]> {
+	async getFollowers(@Request() req: any): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowers(userInfo.id);
 	}
@@ -228,11 +224,11 @@ export class UsersController {
 	@ApiOperation({ summary: "Get a user's following" })
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
-		description: "The user's following as an array of UserProfileDto.",
-		type: UserProfileDto,
+		description: "The user's following as an array of UserDto.",
+		type: UserDto,
 		isArray: true,
 	})
-	async getFollowing(@Request() req: any): Promise<UserProfileDto[]> {
+	async getFollowing(@Request() req: any): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowing(userInfo.id);
 	}
@@ -251,5 +247,67 @@ export class UsersController {
 	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getBookmarks(userInfo.id);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get(":username")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get user profile info by username" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to fetch profile info for.",
+	})
+	@ApiOkResponse({
+		description: "Returns the user profile.",
+		type: UserDto,
+	})
+	async getProfileByUsername(
+		@Param("username") username: string,
+	): Promise<UserDto> {
+		return this.usersService.getProfileByUsername(username);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/follow")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Follow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully followed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error following the user.",
+		type: Boolean,
+	})
+	async followUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.followUser(userInfo.id, username);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/unfollow")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Unfollow the given user" })
+	@ApiParam({ name: "username" })
+	@ApiOkResponse({
+		description: "Successfully unfollowed the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error unfollowing the user.",
+		type: Boolean,
+	})
+	async unfollowUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.unfollowUser(userInfo.id, username);
 	}
 }
