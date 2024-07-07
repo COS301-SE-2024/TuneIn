@@ -9,7 +9,6 @@ import {
 	useFonts,
 } from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import { SPOTIFY_CLIENT_ID } from "@env";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
@@ -20,7 +19,7 @@ if (!clientId) {
 	);
 }
 
-const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = process.env.SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
 	throw new Error(
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",

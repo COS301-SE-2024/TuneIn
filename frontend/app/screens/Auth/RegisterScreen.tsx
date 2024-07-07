@@ -9,7 +9,7 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MaterialIcons, ionicons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";

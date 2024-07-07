@@ -8,27 +8,22 @@ import {
 	ScrollView,
 } from "react-native";
 import * as Linking from "expo-linking";
-import {
-	SPOTIFY_CLIENT_ID,
-	SPOTIFY_CLIENT_SECRET,
-	SPOTIFY_REDIRECT_TARGET,
-} from "@env";
 
-const clientId = SPOTIFY_CLIENT_ID;
+const clientId = process.env.SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
 	);
 }
 
-const clientSecret = SPOTIFY_CLIENT_SECRET;
+const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 if (!clientSecret) {
 	throw new Error(
 		"No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables",
 	);
 }
 
-const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = process.env.SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
 	throw new Error(
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",

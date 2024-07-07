@@ -11,7 +11,6 @@ import {
 	Animated,
 	Easing,
 	Dimensions,
-	StyleSheet,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -20,7 +19,6 @@ import {
 	MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import SongRoomWidget from "../../components/SongRoomWidget";
-import CommentWidget from "../../components/CommentWidget";
 import io from "socket.io-client";
 import {
 	LiveChatMessageDto,
@@ -49,13 +47,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	const [token, setToken] = useState<string | null>(null);
 	const [user, setUser] = useState<UserProfileDto | null>(null);
 	const [message, setMessage] = useState("");
-	/*
-  const [messages, setMessages] = useState<Message[]>([
-    { username: 'JohnDoe', message: 'This is a sample comment.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
-    { username: 'JaneSmith', message: 'Another sample comment here.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg' },
-    { username: 'Me', message: 'This is my own message.', profilePictureUrl: 'https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg', me: true },
-  ]);
-  */
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
 	const [isRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
@@ -98,10 +89,12 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 
 		socket.current.on("connect", () => {
 			console.log("Connected to the server!");
-			const input: ChatEventDto = {
-				userID: user.userID,
-			};
-			socket.current.emit("connectUser", input);
+			if (user) {
+				const input: ChatEventDto = {
+					userID: user.userID,
+				};
+				socket.current.emit("connectUser", input);
+			}
 		});
 
 		socket.current.on("connected", (response: ChatEventDto) => {
@@ -112,16 +105,18 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
 			//if someone joins (could be self)
 			console.log("User joined room:", response);
-			const input: ChatEventDto = {
-				userID: user.userID,
-				body: {
-					messageBody: "",
-					sender: user,
-					roomID: room.roomID,
-					dateCreated: new Date(),
-				},
-			};
-			socket.current.emit("getChatHistory", input);
+			if (user) {
+				const input: ChatEventDto = {
+					userID: user.userID,
+					body: {
+						messageBody: "",
+						sender: user,
+						roomID: room.roomID,
+						dateCreated: new Date(),
+					},
+				};
+				socket.current.emit("getChatHistory", input);
+			}
 		});
 
 		socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
@@ -167,7 +162,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	const sendMessage = () => {
-		if (message.trim()) {
+		if (message.trim() && user) {
 			const newMessage: LiveChatMessageDto = {
 				messageBody: message,
 				sender: user,
@@ -184,18 +179,24 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		}
 	};
 
-	const joinRoom = () => {
-		const input: ChatEventDto = {
-			userID: user.userID,
-			body: {
-				messageBody: "",
-				sender: user,
-				roomID: room.roomID,
-				dateCreated: new Date(),
-			},
-		};
-		socket.current.emit("joinRoom", input);
-	};
+	useEffect(() => {
+		if (user) {
+			const joinRoom = () => {
+				const input: ChatEventDto = {
+					userID: user.userID,
+					body: {
+						messageBody: "",
+						sender: user,
+						roomID: room.roomID,
+						dateCreated: new Date(),
+					},
+				};
+				socket.current.emit("joinRoom", input);
+			};
+
+			joinRoom();
+		}
+	}, [user, room.roomID]);
 
 	const navigateToAdvancedSettings = () => {
 		router.navigate({
@@ -229,13 +230,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	const navigateToRoomOptions = () => {
 		router.navigate("/screens/RoomOptions");
 	};
-
-	//automatically join the room on component mount
-	useEffect(() => {
-		console.log("Joining room...");
-		console.log(user);
-		joinRoom();
-	}, [joinRoom, user]);
 
 	return (
 		<View
@@ -279,174 +273,136 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 						<View
 							style={{
 								flexDirection: "row",
+								alignItems: "center",
 								justifyContent: "space-between",
-								marginVertical: 10,
-								paddingHorizontal: 50,
+								paddingVertical: 20,
 							}}
 						>
-							<TouchableOpacity>
-								<FontAwesome5 name="step-backward" size={30} color="black" />
-							</TouchableOpacity>
 							<TouchableOpacity onPress={togglePlayPause}>
 								<FontAwesome5
-									name={isPlaying ? "pause" : "play"}
+									name={isPlaying ? "pause-circle" : "play-circle"}
 									size={30}
 									color="black"
 								/>
 							</TouchableOpacity>
-							<TouchableOpacity>
-								<FontAwesome5 name="step-forward" size={30} color="black" />
-							</TouchableOpacity>
+							<View style={{ flexDirection: "row" }}>
+								<TouchableOpacity onPress={navigateToPlaylist}>
+									<MaterialIcons
+										name="queue-music"
+										size={30}
+										color="black"
+										style={{ marginRight: 20 }}
+									/>
+								</TouchableOpacity>
+								<TouchableOpacity onPress={navigateToLyrics}>
+									<MaterialCommunityIcons
+										name="file-music-outline"
+										size={30}
+										color="black"
+									/>
+								</TouchableOpacity>
+							</View>
 						</View>
 					)}
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginVertical: 70,
-							paddingHorizontal: 50,
-						}}
-					>
-						<TouchableOpacity
-							onPress={navigateToPlaylist}
-							style={{ flexDirection: "row", alignItems: "center" }}
-						>
-							<MaterialIcons name="playlist-play" size={37} color="black" />
-							<Text style={{ marginLeft: 5, fontSize: 19 }}>Playlist</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={navigateToLyrics}
-							style={{ flexDirection: "row", alignItems: "center" }}
-						>
-							<MaterialCommunityIcons
-								name="music-clef-treble"
-								size={33}
-								color="black"
-							/>
-							<Text style={{ marginLeft: 5, fontSize: 19 }}>Lyrics</Text>
-						</TouchableOpacity>
-					</View>
 				</View>
 			)}
 			<Animated.View
 				style={{
-					position: "absolute",
-					bottom: 0,
-					left: 0,
-					right: 0,
 					height: animatedHeight,
-					backgroundColor: "#E8EBF2",
+					backgroundColor: "#f3f3f3",
 					borderTopLeftRadius: 20,
 					borderTopRightRadius: 20,
-					elevation: 5,
 					paddingHorizontal: 20,
 					paddingTop: 10,
 				}}
 			>
-				<TouchableOpacity
+				<View
 					style={{
 						flexDirection: "row",
-						justifyContent: "center",
 						alignItems: "center",
-						paddingTop: 10,
+						justifyContent: "space-between",
 					}}
-					onPress={toggleChat}
 				>
-					<Text style={{ fontSize: 16, fontWeight: "bold" }}>
-						Chat Messages
-					</Text>
-					<FontAwesome5
-						name={isChatExpanded ? "chevron-down" : "chevron-up"}
-						size={16}
-						style={{ marginLeft: 5 }}
-					/>
-				</TouchableOpacity>
-				{isChatExpanded && (
-					<>
-						<View style={{ flex: 1 }}>
-							<ScrollView style={{ marginTop: 10, flex: 1 }}>
-								<View style={{ marginBottom: 10 }}>
-									<View
-										style={{
-											borderBottomWidth: 1,
-											borderBottomColor: "#D1D5DB",
-											paddingBottom: 10,
-										}}
-									></View>
-									<View style={{ marginTop: 10 }}>
-										{messages.map((msg, index) => (
-											<CommentWidget
-												key={index}
-												username={msg.message.sender.username}
-												message={msg.message.messageBody}
-												profilePictureUrl={msg.message.sender.profilePictureUrl}
-												me={msg.me}
-											/>
-										))}
-									</View>
-								</View>
-							</ScrollView>
-						</View>
-						<KeyboardAvoidingView
-							behavior={Platform.OS === "ios" ? "padding" : "height"}
-							style={styles.inputContainer}
+					<Text style={{ fontSize: 18, fontWeight: "bold" }}>Chat Room</Text>
+					<TouchableOpacity onPress={toggleChat}>
+						<Text style={{ fontSize: 16, color: "#007BFF" }}>
+							{isChatExpanded ? "Collapse" : "Expand"}
+						</Text>
+					</TouchableOpacity>
+				</View>
+				<ScrollView style={{ flex: 1, marginVertical: 10 }}>
+					{messages.map((msg, index) => (
+						<View
+							key={index}
+							style={{
+								flexDirection: msg.me ? "row-reverse" : "row",
+								alignItems: "center",
+								marginVertical: 5,
+							}}
 						>
 							<Image
-								source={{
-									uri: "https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
+								source={{ uri: msg.message.sender.profilePictureUrl }}
+								style={{
+									width: 40,
+									height: 40,
+									borderRadius: 20,
+									marginHorizontal: 10,
 								}}
-								style={{ width: 40, height: 40, borderRadius: 20 }}
 							/>
-							<TextInput
-								placeholder="Message..."
-								style={styles.input}
-								value={message}
-								onChangeText={setMessage}
-							/>
-							<TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-								<Image
-									source={{
-										uri: "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
-									}}
-									style={styles.sendIcon}
-								/>
-							</TouchableOpacity>
-						</KeyboardAvoidingView>
-					</>
-				)}
+							<View
+								style={{
+									backgroundColor: msg.me ? "#DCF8C6" : "#EAEAEA",
+									padding: 10,
+									borderRadius: 10,
+									maxWidth: "70%",
+								}}
+							>
+								<Text style={{ fontSize: 14, fontWeight: "bold" }}>
+									{msg.message.sender.name}
+								</Text>
+								<Text>{msg.message.messageBody}</Text>
+								<Text
+									style={{ fontSize: 10, color: "gray", textAlign: "right" }}
+								>
+									{new Date(msg.message.dateCreated).toLocaleTimeString()}
+								</Text>
+							</View>
+						</View>
+					))}
+				</ScrollView>
+				<KeyboardAvoidingView
+					behavior={Platform.OS === "ios" ? "padding" : "height"}
+				>
+					<View
+						style={{
+							flexDirection: "row",
+							alignItems: "center",
+							borderTopWidth: 1,
+							borderTopColor: "#EAEAEA",
+							paddingVertical: 10,
+						}}
+					>
+						<TextInput
+							style={{
+								flex: 1,
+								height: 40,
+								borderColor: "#EAEAEA",
+								borderWidth: 1,
+								borderRadius: 20,
+								paddingHorizontal: 15,
+							}}
+							placeholder="Type a message"
+							value={message}
+							onChangeText={setMessage}
+						/>
+						<TouchableOpacity onPress={sendMessage}>
+							<MaterialIcons name="send" size={30} color="black" />
+						</TouchableOpacity>
+					</View>
+				</KeyboardAvoidingView>
 			</Animated.View>
 		</View>
 	);
 };
-
-const styles = StyleSheet.create({
-	inputContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		paddingVertical: 5,
-		paddingHorizontal: 5,
-		borderTopWidth: 1,
-		borderTopColor: "#000000",
-		backgroundColor: "#E8EBF2",
-	},
-	input: {
-		flex: 1,
-		backgroundColor: "#FFFFFF",
-		paddingVertical: 10,
-		paddingHorizontal: 15,
-		borderRadius: 25,
-		marginRight: 10,
-		marginLeft: 20,
-		marginBottom: 10,
-		marginTop: 10,
-	},
-	sendButton: {
-		padding: 10,
-	},
-	sendIcon: {
-		width: 24,
-		height: 24,
-	},
-});
 
 export default ChatRoomScreen;

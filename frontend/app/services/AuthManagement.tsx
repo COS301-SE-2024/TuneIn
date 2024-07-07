@@ -3,9 +3,8 @@ import * as StorageService from "./../services/StorageService";
 //import decode from "react-native-pure-jwt";
 import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
-import { JWT_SECRET_KEY } from "@env";
 
-const jwtSecretKey = JWT_SECRET_KEY;
+const jwtSecretKey = process.env.JWT_SECRET_KEY;
 if (!jwtSecretKey) {
 	throw new Error(
 		"No JWT Secret (JWT_SECRET_KEY) provided in environment variables",
