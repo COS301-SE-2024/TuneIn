@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
@@ -271,7 +271,7 @@ export class SpotifyAuthService {
 		});
 
 		if (!tokens) {
-			throw new Error("No tokens found");
+			throw new HttpException("User's Spotify tokens not found", 404);
 		}
 
 		const tk: SpotifyTokenPair = JSON.parse(tokens.token) as SpotifyTokenPair;

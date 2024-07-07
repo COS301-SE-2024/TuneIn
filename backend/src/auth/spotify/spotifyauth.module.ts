@@ -6,6 +6,7 @@ import { PrismaModule } from "../../../prisma/prisma.module";
 import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
 import { TasksModule } from "../../tasks/tasks.module";
+import { AuthService } from "../auth.service";
 
 @Module({
 	imports: [
@@ -14,6 +15,7 @@ import { TasksModule } from "../../tasks/tasks.module";
 		DbUtilsModule,
 		SpotifyModule,
 		TasksModule,
+		AuthService,
 	],
 	controllers: [],
 	providers: [SpotifyAuthService, ConfigService],
