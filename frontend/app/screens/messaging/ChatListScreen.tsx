@@ -6,11 +6,10 @@ import {
 	TextInput,
 	StyleSheet,
 	TouchableOpacity,
-	Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import ChatItem from "../components/ChatItem";
-import { Chat } from "../models/chat";
+import ChatItem from "../../components/ChatItem";
+import { Chat } from "../../models/chat";
 import { useRouter } from "expo-router";
 
 const chats: Chat[] = [
@@ -34,7 +33,6 @@ const chats: Chat[] = [
 const ChatListScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const router = useRouter();
-	const screenWidth = Dimensions.get("window").width;
 
 	const handleSearch = () => {
 		console.log("Searching for:", searchQuery);

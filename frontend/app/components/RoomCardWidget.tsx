@@ -4,7 +4,6 @@ import {
 	Text,
 	ImageBackground,
 	Image,
-	Dimensions,
 	StyleSheet,
 	TouchableOpacity,
 } from "react-native";
@@ -16,14 +15,13 @@ interface RoomCardWidgetProps {
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-	const screenWidth = Dimensions.get("window").width;
-	const cardWidth = 290; // 80% of screen width
+	const cardWidth = 290;
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 	// console.log("roomCard", roomCard);
 	const navigateToEditRoom = () => {
 		router.navigate({
-			pathname: "/screens/EditRoom",
+			pathname: "/screens/rooms/EditRoom",
 			params: room,
 		});
 	};

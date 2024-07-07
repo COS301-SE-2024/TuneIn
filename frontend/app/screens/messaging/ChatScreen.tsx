@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import MessageItem from "../components/MessageItem";
-import { Message } from "../models/message";
+import MessageItem from "../../components/MessageItem";
+import { Message } from "../../models/message";
 
 const messages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },

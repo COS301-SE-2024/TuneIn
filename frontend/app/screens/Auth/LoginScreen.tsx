@@ -7,26 +7,29 @@ import {
 	ScrollView,
 	Alert,
 	StyleSheet,
+	ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
-import * as StorageService from "../services/StorageService";
-import UserPool from "../services/UserPool";
+import * as StorageService from "../../services/StorageService";
+import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
-import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
 	const [rememberMe, setRememberMe] = useState(false);
 	const [emailOrUsername, setEmailOrUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 
 	const router = useRouter();
 
 	const navigateToHome = () => {
+		setIsLoading(true);
+
 		const userData = {
 			Username: emailOrUsername,
 			Pool: UserPool,
@@ -65,21 +68,24 @@ const LoginScreen: React.FC = () => {
 						auth.setToken(token); // Set the token in the AuthManagement service
 						console.log("jwt: ", token);
 						router.navigate("/screens/Home");
+					})
+					.finally(() => {
+						setIsLoading(false);
 					});
 			},
 			onFailure: function (err) {
-				// console.error(err);
+				setIsLoading(false);
 				Alert.alert(err.message);
 			},
 		});
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterScreen");
 	};
 
 	const navigateToForgot = () => {
-		router.navigate("/screens/ForgotPassword");
+		router.navigate("/screens/Auth/ForgotPassword");
 	};
 
 	return (
@@ -137,8 +143,16 @@ const LoginScreen: React.FC = () => {
 						onPress={() => setRememberMe(!rememberMe)}
 					/>
 				</View>
-				<TouchableOpacity style={styles.loginButton} onPress={navigateToHome}>
-					<Text style={styles.loginButtonText}>LOGIN</Text>
+				<TouchableOpacity
+					style={styles.loginButton}
+					onPress={navigateToHome}
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<ActivityIndicator size="small" color="#FFF" />
+					) : (
+						<Text style={styles.loginButtonText}>LOGIN</Text>
+					)}
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={styles.registerLink}

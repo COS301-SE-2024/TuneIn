@@ -4,34 +4,34 @@ import {
 	Text,
 	TouchableOpacity,
 	ScrollView,
-	Alert,
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-const PasswordChangedScreen: React.FC = () => {
+const IncorrectCodeScreen: React.FC = () => {
 	const router = useRouter();
 
-	const navigateToLogin = () => {
-		router.navigate("/screens/LoginScreen");
+	const navigateToOTP = () => {
+		router.navigate("/screens/OTP");
 	};
 
 	return (
 		<View style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
+				<TouchableOpacity onPress={() => router.back()}>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
 				<View style={styles.header}>
 					{/* <Text style={styles.logoText}>Logo</Text> */}
 				</View>
-				<Text style={styles.title}>Password Changed!</Text>
+				<Text style={styles.title}>Verification Code Incorrect</Text>
 				<Text style={styles.instructionText}>
-					Your password has been changed successfully.
+					Would you like us to send you a new code?
 				</Text>
 				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.resendButton}
-						onPress={navigateToLogin}
-					>
-						<Text style={styles.resendButtonText}>BACK TO LOGIN</Text>
+					<TouchableOpacity style={styles.resendButton} onPress={navigateToOTP}>
+						<Text style={styles.resendButtonText}>RESEND CODE</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 	},
 	header: {
 		alignItems: "center",
-		marginBottom: 250,
+		marginBottom: 200,
 	},
 	title: {
 		fontSize: 32,
@@ -90,4 +90,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default PasswordChangedScreen;
+export default IncorrectCodeScreen;

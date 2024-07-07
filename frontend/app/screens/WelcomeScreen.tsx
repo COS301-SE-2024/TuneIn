@@ -8,7 +8,6 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // Import Ionicons from Expo Icons
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const WelcomeScreen: React.FC = () => {
@@ -16,11 +15,11 @@ const WelcomeScreen: React.FC = () => {
 	const { width, height } = Dimensions.get("window");
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/LoginScreen");
+		router.navigate("/screens/Auth/LoginScreen");
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterScreen");
 	};
 
 	return (

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -13,12 +7,11 @@ import {
 	Poppins_700Bold,
 	useFonts,
 } from "@expo-google-fonts/poppins";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
 
-const LoginOtherScreen: React.FC = () => {
+const LoginStreamingScreen: React.FC = () => {
 	const router = useRouter();
-	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -34,8 +27,8 @@ const LoginOtherScreen: React.FC = () => {
 		router.navigate("screens/RegisterStreaming");
 	};
 
-	const navigateToLogin = () => {
-		router.navigate("screens/LoginScreen");
+	const navigateToOther = () => {
+		router.navigate("screens/LoginOther");
 	};
 
 	return (
@@ -46,55 +39,34 @@ const LoginOtherScreen: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
-			<Text style={styles.welcomeText}>Authenticate With</Text>
+			<Text style={styles.welcomeText}>Welcome Back to TuneIn</Text>
 
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<AntDesign name="google" size={24} color="#000" style={styles.icon} />
-					<Text style={styles.buttonText}>Google</Text>
+					<Icon name="spotify" size={24} color="#000" style={styles.icon} />
+					<Text style={styles.buttonText}>Spotify</Text>
 				</TouchableOpacity>
 
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<FontAwesome
-						name="facebook"
+					<Icon
+						name="youtube-play"
 						size={24}
 						color="#000"
 						style={styles.icon}
 					/>
-					<Text style={styles.buttonText}>Facebook</Text>
+					<Text style={styles.buttonText}>YouTube Music</Text>
 				</TouchableOpacity>
 
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<FontAwesome
-						name="apple"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Apple</Text>
+					<Icon name="music" size={24} color="#000" style={styles.icon} />
+					<Text style={styles.buttonText}>Apple Music</Text>
 				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<MaterialIcons
-						name="email"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Email</Text>
-				</TouchableOpacity>
-
-				<View style={styles.dividerContainer}>
-					<View style={styles.divider} />
-					<Text style={styles.dividerText}>Or Login with Details</Text>
-					<View style={styles.divider} />
-				</View>
 
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={navigateToLogin}
+					onPress={navigateToOther}
 				>
-					<Text style={styles.buttonText}>Account</Text>
+					<Text style={styles.buttonText}>Other</Text>
 				</TouchableOpacity>
 			</View>
 
@@ -128,6 +100,11 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 	},
+	logoText: {
+		fontSize: 24,
+		fontWeight: "bold",
+		fontFamily: "Poppins_700Bold",
+	},
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
@@ -145,7 +122,7 @@ const styles = StyleSheet.create({
 		height: 60,
 		justifyContent: "center",
 		alignItems: "center",
-		marginBottom: 20,
+		marginBottom: 30,
 		borderRadius: 30,
 		flexDirection: "row",
 		paddingHorizontal: 10,
@@ -154,6 +131,15 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.3,
 		shadowRadius: 3.84,
+	},
+	spotifyButton: {
+		backgroundColor: "#1DB954",
+	},
+	youtubeButton: {
+		backgroundColor: "#FF0000",
+	},
+	appleButton: {
+		backgroundColor: "#fc3c44",
 	},
 	otherButton: {
 		backgroundColor: "#FFFFFF",
@@ -168,23 +154,6 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "#000",
 		fontFamily: "Poppins_700Bold",
-	},
-	dividerContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		marginVertical: 20,
-		width: "80%",
-	},
-	divider: {
-		flex: 1,
-		height: 1,
-		backgroundColor: "#808080",
-	},
-	dividerText: {
-		marginHorizontal: 10,
-		fontSize: 14,
-		color: "#000",
-		fontFamily: "Poppins_500Medium",
 	},
 	registerContainer: {
 		position: "absolute",
@@ -205,4 +174,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default LoginOtherScreen;
+export default LoginStreamingScreen;

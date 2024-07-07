@@ -29,20 +29,20 @@ const NavBar: React.FC = () => {
 					</Text>
 				</View>
 			</TouchableOpacity>
-			{/* <TouchableOpacity onPress={() => navigate("/screens/Sitemap", "Sitemap")}>
-                <View style={styles.tabItem}>
-                    <Ionicons
-                        name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
-                        size={24}
-                        color={activeTab === "Sitemap" ? "#0000ff" : "#333"}
-                    />
-                    <Text
-                        style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
-                    >
-                        Sitemap
-                    </Text>
-                </View>
-            </TouchableOpacity> */}
+			<TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
+				<View style={styles.tabItem}>
+					<Ionicons
+						name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
+						size={24}
+						color={activeTab === "Sitemap" ? "#0000ff" : "#333"}
+					/>
+					<Text
+						style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
+					>
+						Test
+					</Text>
+				</View>
+			</TouchableOpacity>
 			<TouchableOpacity
 				onPress={() => navigate("/screens/help/HelpScreen", "Help")}
 			>

@@ -13,40 +13,13 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { Room } from "../models/Room";
-import axios from "axios";
-import uploadImage from "../services/ImageUpload";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
-
-// Mock function to fetch room details. Replace with actual data fetching logic.
-const fetchRoomDetails = async (roomId: string) => {
-	// Replace with real data fetching
-	const token = await auth.getToken();
-	try {
-		const data = await axios.get(`${utils.getAPIBaseURL()}rooms/${roomId}`, {
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: "Bearer " + token,
-			},
-		});
-		console.log(data);
-		return data;
-	} catch (error) {
-		console.error("Error:", error);
-		return null;
-	}
-};
+import { Room } from "../../models/Room";
+import uploadImage from "../../services/ImageUpload";
 
 const EditRoom: React.FC = () => {
 	const router = useRouter();
 	const roomData = useLocalSearchParams();
 	console.log("Room data:", roomData);
-	// console.log('Room after search params:', room)
-	// const _room = Array.isArray(room) ? room[0] : room;
-	// console.log('Room:', _room);
-	// console.log('local params', useLocalSearchParams())
-	// const roomData = JSON.parse(_room);
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -62,43 +35,18 @@ const EditRoom: React.FC = () => {
 	});
 
 	const [image, setImage] = useState<string | null>(null);
-	const [roomId, setRoomId] = useState<string>(""); // Add room ID here
-	const [token, setToken] = useState<string>("");
 
 	useEffect(() => {
 		const loadRoomDetails = async () => {
-			// const _details = await fetchRoomDetails(roomId);
-			// console.log('Room details:', _details);
-			const __details = {
-				// Return default values
-				name: "Sample Room",
-				description: "This is a sample room description.",
-				genre: "Music",
-				language: "English",
-				roomSize: "50",
-				isExplicit: false,
-				isNsfw: false,
-				image:
-					"https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-1170x780.jpg", // Replace with actual image URL
-			};
-			// const details = await fetchRoomDetails("demo");
-
 			setRoomDetails(roomData);
 			setImage(roomData.backgroundImage as string);
 			console.log("Room details:", roomDetails);
 		};
 
 		loadRoomDetails();
-	}, []);
+	}, [roomData, roomDetails]);
 
 	const screenWidth = Dimensions.get("window").width;
-
-	const navigateToChatRoom = () => {
-		router.navigate({
-			pathname: "/screens/ChatRoom",
-			params: { room: JSON.stringify(roomDetails) },
-		});
-	};
 
 	const navigateToEditPlaylist = () => {
 		router.navigate("/screens/rooms/EditPlaylist");
@@ -124,6 +72,11 @@ const EditRoom: React.FC = () => {
 		} else {
 			setRoomDetails({ ...roomDetails, [field]: value });
 		}
+	};
+
+	const handleToggleChange = (value: boolean) => {
+		console.log(value);
+		setRoomDetails({ ...roomDetails, isExplicit: value });
 	};
 
 	const saveChanges = async () => {
@@ -213,12 +166,8 @@ const EditRoom: React.FC = () => {
 					{buildInputField("Room Size", "50".toString(), (value) =>
 						handleInputChange("roomSize", value),
 					)}
-					{buildToggle("Explicit", roomDetails.isExplicit, (value) =>
-						handleInputChange("isExplicit", value),
-					)}
-					{buildToggle("NSFW", roomDetails.isNsfw, (value) =>
-						handleInputChange("isNsfw", value),
-					)}
+					{buildToggle("Explicit", roomDetails.isExplicit, handleToggleChange)}
+					{buildToggle("NSFW", roomDetails.isNsfw, handleToggleChange)}
 
 					<View style={styles.imagePickerContainer}>
 						<Text style={styles.imagePickerLabel}>Change Photo</Text>

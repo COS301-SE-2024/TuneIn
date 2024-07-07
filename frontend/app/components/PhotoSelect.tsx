@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
 	View,
 	Text,
-	Image,
 	StyleSheet,
 	Modal,
 	TouchableOpacity,
@@ -12,7 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker"; // Import Expo's image picker library
 
 const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
-	const [image, setImage] = useState(null);
 	const [visibility, setVisibility] = useState(isVisible);
 
 	useEffect(() => {

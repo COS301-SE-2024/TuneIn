@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Assume you have a Friend model
 
@@ -15,7 +15,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
 				{friends.slice(0, maxVisible).map((friend, index) => (
 					<Link
 						key={index}
-						href={`/screens/ProfilePage?friend=${JSON.stringify(friend)}`}
+						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}`}
 						style={styles.link}
 					>
 						<View style={styles.friendContainer}>

@@ -3,18 +3,29 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
 
-const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
+const clientId = process.env.SPOTIFY_CLIENT_ID;
+if (!clientId) {
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
+}
+
+const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+if (!clientSecret) {
+	throw new Error(
+		"No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables",
+	);
+}
 
 export const useSpotifyAuth = () => {
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [refreshToken, setRefreshToken] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
-	const [expirationTime, setExpirationTime] = useState<number | null>(null);
+	const [expirationTime, setExpirationTime] = useState<number | null>();
 
 	useEffect(() => {
 		fetchData();
-	}, []);
+	});
 
 	useEffect(() => {
 		if (expirationTime) {
@@ -27,7 +38,7 @@ export const useSpotifyAuth = () => {
 			}, 10000); // Check every 10 seconds
 			return () => clearInterval(interval);
 		}
-	}, [expirationTime]);
+	});
 
 	const fetchData = async () => {
 		try {
@@ -83,7 +94,7 @@ export const useSpotifyAuth = () => {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.56.1:4000/refresh_token",
+				"http://192.168.118.63:4000/refresh_token",
 				{
 					refresh_token: storedRefreshToken,
 				},
@@ -112,7 +123,7 @@ export const useSpotifyAuth = () => {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.56.1:4000/refresh_token",
+				"http://192.168.118.63:4000/refresh_token",
 				{
 					refresh_token: storedRefreshToken,
 				},

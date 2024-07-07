@@ -16,7 +16,7 @@ import {
 	FontAwesome,
 } from "@expo/vector-icons";
 
-const RoomOptions = ({}) => {
+const RoomOptions = () => {
 	const router = useRouter();
 
 	const [isBookmarked, setIsBookmarked] = useState(false);

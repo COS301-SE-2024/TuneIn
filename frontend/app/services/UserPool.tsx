@@ -1,23 +1,24 @@
 import { CognitoUserPool } from "amazon-cognito-identity-js";
-import { AWS_COGNITO_USER_POOL_ID, AWS_COGNITO_CLIENT_ID } from "@env";
+// eslint-disable-next-line import/no-unresolved
 
-if (!AWS_COGNITO_USER_POOL_ID) {
+const UserPoolId = process.env.AWS_COGNITO_USER_POOL_ID;
+const ClientId = process.env.AWS_COGNITO_CLIENT_ID;
+
+if (!UserPoolId) {
 	throw new Error(
 		"No user pool ID (AWS_COGNITO_USER_POOL_ID) provided in environment variables",
 	);
 }
 
-if (!AWS_COGNITO_CLIENT_ID) {
+if (!ClientId) {
 	throw new Error(
 		"No client ID (AWS_COGNITO_CLIENT_ID) provided in environment variables",
 	);
 }
 
-console.log(AWS_COGNITO_USER_POOL_ID, AWS_COGNITO_CLIENT_ID);
-
 const poolData = {
-	UserPoolId: AWS_COGNITO_USER_POOL_ID,
-	ClientId: AWS_COGNITO_CLIENT_ID,
+	UserPoolId: UserPoolId,
+	ClientId: ClientId,
 };
 
 export default new CognitoUserPool(poolData);

@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -9,83 +8,25 @@ import {
 	ScrollView,
 	ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import NowPlaying from "../components/NowPlaying";
-import BioSection from "../components/BioSection";
-import GenreList from "../components/GenreList";
-import RoomCard from "../components/RoomCard";
-import FavoriteSongs from "../components/FavoriteSong";
-import LinkBottomSheet from "../components/LinkBottomSheet";
-import MusicBottomSheet from "../components/MusicBottomSheet";
+import { useRouter } from "expo-router";
+import BioSection from "../../components/BioSection";
+import GenreList from "../../components/GenreList";
+import RoomCard from "../../components/RoomCard";
+import FavoriteSongs from "../../components/FavoriteSong";
+import LinkBottomSheet from "../../components/LinkBottomSheet";
+import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const ProfileScreen: React.FC = () => {
 	const router = useRouter();
-	const params = useLocalSearchParams();
-	const username = params.username;
-	const [favoriteSongsData, setFavoriteSongsData] = useState([
-		{
-			songTitle: "Don't Smile At Me",
-			artist: "Billie Eilish",
-			duration: "5:33",
-			albumArt: "https://example.com/path-to-album-art1.jpg",
-		},
-		{
-			songTitle: "Blinding Lights",
-			artist: "The Weekend",
-			duration: "3:20",
-			albumArt: "https://example.com/path-to-album-art2.jpg",
-		},
-		{
-			songTitle: "Shape of You",
-			artist: "Ed Sheeran",
-			duration: "4:24",
-			albumArt: "https://example.com/path-to-album-art3.jpg",
-		},
-	]);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [token, setToken] = useState<string | null>(null);
-	const [following, setFollowing] = useState<boolean>(false);
 
-	const fetchProfileInfo = async (token: string) => {
-		try {
-			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/profile/${username}`,
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-			console.log(response);
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
-			return [];
-		}
-	};
-
-	const fetchUserProfileInfo = async (token: string) => {
-		try {
-			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			console.log(response);
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
-			return [];
-		}
-	};
-
+	const [setToken] = useState<string | null>(null);
 	const [profileData, setProfileData] = useState<any>(null);
-	const [userProfileData, setUserProfileData] = useState<any>(null);
 
 	useEffect(() => {
 		const getTokenAndData = async () => {
@@ -95,16 +36,7 @@ const ProfileScreen: React.FC = () => {
 
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
-					const userData = await fetchUserProfileInfo(storedToken);
 					setProfileData(data);
-					setUserProfileData(userData);
-
-					const isFollowing = data.followers.data.some(
-						(item) => item.userID === userData.userID,
-					);
-					console.log(isFollowing);
-					setFollowing(isFollowing);
-
 					setLoading(false);
 				}
 			} catch (error) {
@@ -113,10 +45,50 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	}, []);
+	}, [setToken]);
+
+	const fetchProfileInfo = async (token: string) => {
+		try {
+			const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			return response.data;
+		} catch (error) {
+			console.error("Error fetching profile info:", error);
+			return null;
+		}
+	};
+
+	const handleJoinLeave = async () => {
+		try {
+			const t = await auth.getToken();
+			setToken(t);
+			const response = await axios.post(
+				`${utils.getAPIBaseURL()}/joinLeaveRoom`,
+				{
+					roomId: profileData.current_room.roomId,
+					action: profileData.current_room.joined ? "leave" : "join",
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${t}`,
+					},
+				},
+			);
+			const updatedProfileData = {
+				...profileData,
+				current_room: response.data,
+			};
+			setProfileData(updatedProfileData);
+		} catch (error) {
+			console.error("Error updating room join/leave:", error);
+		}
+	};
 
 	const renderLinks = () => {
-		if (profileData.links.count > 1) {
+		if (profileData.links.count && profileData.links.count > 1) {
 			const firstLink = profileData.links.data[0].links;
 			const remainingCount = profileData.links.count - 1;
 
@@ -180,6 +152,7 @@ const ProfileScreen: React.FC = () => {
 								songName={room.current_song.title}
 								artistName={room.current_song.artists}
 								username={room.creator.username}
+								imageUrl={room.room_image}
 							/>
 						))}
 					</View>
@@ -191,49 +164,19 @@ const ProfileScreen: React.FC = () => {
 	if (loading) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-				<ActivityIndicator size="large" color="#0000ff" />
+				<ActivityIndicator size={100} color="#0000ff" />
 			</View>
 		);
 	}
 
-	const followHandler = async () => {
-		const t = await auth.getToken();
-		setToken(t);
-		if (following) {
-			const response = await axios.post(
-				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/unfollow`,
-				{},
-				{
-					headers: {
-						Authorization: `Bearer ${t}`,
-					},
-				},
-			);
-
-			if (response) {
-				setFollowing(false);
-				profileData.followers.count--;
-			} else {
-				console.error("Issue unfollowing user");
-			}
-		} else {
-			const response = await axios.post(
-				`${utils.getAPIBaseURL()}/profile/${profileData.userID}/follow`,
-				{},
-				{
-					headers: {
-						Authorization: `Bearer ${t}`,
-					},
-				},
-			);
-
-			if (response) {
-				setFollowing(true);
-				profileData.followers.count++;
-			} else {
-				console.error("Issue unfollowing user");
-			}
-		}
+	const profileInfo = {
+		profile_picture_url: profileData.profile_picture_url,
+		profile_name: profileData.profile_name,
+		username: profileData.username,
+		bio: profileData.bio,
+		links: profileData.links,
+		fav_genres: profileData.fav_genres,
+		fav_songs: profileData.fav_songs,
 	};
 
 	return (
@@ -241,13 +184,20 @@ const ProfileScreen: React.FC = () => {
 			<View style={{ padding: 15 }}>
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<View style={{ flex: 1 }} />
-					<TouchableOpacity>
-						<Text style={[styles.buttonText, { paddingBottom: 20 }]}>
-							Settings
-						</Text>
-					</TouchableOpacity>
+					{/* <TouchableOpacity>
+            <Text style={[styles.buttonText, { paddingBottom: 20 }]}>
+              Settings
+            </Text>
+          </TouchableOpacity> */}
 				</View>
-				<Text style={{ fontWeight: "600", fontSize: 20, textAlign: "center" }}>
+				<Text
+					style={{
+						fontWeight: "600",
+						fontSize: 20,
+						textAlign: "center",
+						marginTop: 20,
+					}}
+				>
 					Profile
 				</Text>
 				<View style={{ alignItems: "center", marginTop: 20 }}>
@@ -301,31 +251,34 @@ const ProfileScreen: React.FC = () => {
 				>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => followHandler()}
+						onPress={() =>
+							router.push({
+								pathname: "screens/EditProfilePage",
+								params: { profile: JSON.stringify(profileInfo) },
+							})
+						}
 					>
-						<Text style={styles.buttonText}>
-							{following ? "Unfollow" : "Follow"}
-						</Text>
+						<Text style={styles.buttonText}>Edit</Text>
 					</TouchableOpacity>
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
-					<NowPlaying
-						title={favoriteSongsData[0].songTitle}
-						artist={favoriteSongsData[0].artist}
-						duration={favoriteSongsData[0].duration}
-					/>
-				</View>
+				{/* <View style={{ paddingHorizontal: 20 }}>
+          <NowPlaying
+            title={favoriteSongsData[0].songTitle}
+            artist={favoriteSongsData[0].artist}
+            duration={favoriteSongsData[0].duration}
+          />
+        </View> */}
 				<View style={{ paddingHorizontal: 20 }}>
 					<BioSection content={profileData.bio} />
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
-					<GenreList items={profileData.fav_genres.data}></GenreList>
+					<GenreList items={profileData.fav_genres.data} />
 				</View>
 				<View style={{ paddingHorizontal: 20 }}>
 					<Text style={styles.title}>Favorite Songs</Text>
-					{profileData.fav_songs.data.slice(0, 2).map((song, index) => (
+					{profileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
-							key={index}
+							key={song.id}
 							songTitle={song.title}
 							artist={song.artists}
 							duration={song.duration}
@@ -340,6 +293,15 @@ const ProfileScreen: React.FC = () => {
 				</View>
 				{renderFavRooms()}
 				{renderRecentRooms()}
+				{profileData.current_room ? (
+					<View style={{ alignItems: "center", marginTop: 20 }}>
+						<TouchableOpacity style={styles.button} onPress={handleJoinLeave}>
+							<Text style={styles.buttonText}>
+								{profileData.current_room.joined ? "Leave Room" : "Join Room"}
+							</Text>
+						</TouchableOpacity>
+					</View>
+				) : null}
 			</View>
 		</ScrollView>
 	);
@@ -348,10 +310,8 @@ const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
 	roomCardsContainer: {
 		flexDirection: "row",
-		// justifyContent: 'space-between',
 		marginBottom: 20,
 	},
-
 	title: {
 		fontSize: 20,
 		fontWeight: "600",
