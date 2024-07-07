@@ -1,5 +1,3 @@
-import Constants from "expo-constants";
-
 export function getAPIBaseURL(): string {
 	/*
 	console.log("Constants:", Constants);

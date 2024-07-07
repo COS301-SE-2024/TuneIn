@@ -9,11 +9,10 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
-import { Ionicons } from "@expo/vector-icons";
 
 const RegisterScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -29,13 +28,6 @@ const RegisterScreen: React.FC = () => {
 
 	const navigateToLogin = () => {
 		router.navigate("/screens/LoginScreen");
-	};
-
-	const generateUniqueUsername = () => {
-		return (
-			Math.random().toString(36).substring(2, 15) +
-			Math.random().toString(36).substring(2, 15)
-		);
 	};
 
 	const validateEmail = (email: string) => {

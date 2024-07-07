@@ -4,18 +4,15 @@ import axios from "axios";
 import * as StorageService from "../services/StorageService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const clientId = process.env.VITE_SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET;
-
 export const useSpotifyAuth = () => {
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [refreshToken, setRefreshToken] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
-	const [expirationTime, setExpirationTime] = useState<number | null>(null);
+	const [expirationTime, setExpirationTime] = useState<number | null>();
 
 	useEffect(() => {
 		fetchData();
-	}, []);
+	});
 
 	useEffect(() => {
 		if (expirationTime) {
@@ -28,7 +25,7 @@ export const useSpotifyAuth = () => {
 			}, 10000); // Check every 10 seconds
 			return () => clearInterval(interval);
 		}
-	}, [expirationTime]);
+	});
 
 	const fetchData = async () => {
 		try {

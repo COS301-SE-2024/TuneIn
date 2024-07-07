@@ -29,16 +29,10 @@ import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const BASE_URL = "http://getFirstDevice:3000";
-
 type Message = {
 	message: LiveChatMessageDto;
 	me?: boolean;
 };
-
-interface ChatRoomScreenProps {
-	roomObj: string;
-}
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
@@ -46,7 +40,7 @@ const RoomPage = () => {
 	const roomData = JSON.parse(room);
 	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
-	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
+	const [setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
 
@@ -60,13 +54,11 @@ const RoomPage = () => {
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
-	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
-	const IPAddress = "getFirstDevice"; // change IP address to your own IP address
+	const [setJoinedSongIndex] = useState(null);
+	const [setJoinedSecondsPlayed] = useState(null);
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -84,7 +76,7 @@ const RoomPage = () => {
 				});
 				userRef.current = response.data as UserProfileDto;
 			} catch (error) {
-				// console.error("Error fetching user's own info:", error);
+				console.error("Error fetching user's own info:", error);
 			}
 
 			try {
@@ -99,7 +91,7 @@ const RoomPage = () => {
 				roomObjRef.current = roomDto.data;
 				setRoomObj(roomDto.data);
 			} catch (error) {
-				// console.error("Error fetching room:", error);
+				console.error("Error fetching room:", error);
 			}
 		};
 		getTokenAndSelf();
@@ -159,7 +151,7 @@ const RoomPage = () => {
 			});
 
 			socket.current.on("error", (response: ChatEventDto) => {
-				// console.error("Error:", response.errorMessage);
+				console.error("Error:", response.errorMessage);
 			});
 		};
 
@@ -186,7 +178,7 @@ const RoomPage = () => {
 				socket.current.disconnect();
 			}
 		};
-	}, [readyToJoinRoom]);
+	});
 
 	const sendMessage = () => {
 		if (message.trim()) {
@@ -222,7 +214,8 @@ const RoomPage = () => {
 		console.log("Socket emit: joinRoom", input);
 		socket.current.emit("joinRoom", JSON.stringify(input));
 		setJoined(true);
-	}, []);
+	}, [roomID]);
+
 	const checkBookmark = async () => {
 		const t = await auth.getToken();
 		console.log("Checking bookmark");
@@ -248,7 +241,7 @@ const RoomPage = () => {
 			}
 			console.log(data);
 		} catch (error) {
-			// console.error("Error:", error);
+			console.error("Error:", error);
 		}
 	};
 	const handleBookmark = async () => {
@@ -285,8 +278,24 @@ const RoomPage = () => {
 				);
 			}
 		} catch (error) {
-			// console.error("Error:", error);
+			console.error("Error:", error);
 		}
+	};
+
+	const leaveRoom = () => {
+		const u: UserProfileDto = userRef.current;
+		const input: ChatEventDto = {
+			userID: u.userID,
+			body: {
+				messageBody: "",
+				sender: u,
+				roomID: roomID,
+				dateCreated: new Date(),
+			},
+		};
+		console.log("Socket emit: leaveRoom", input);
+		socket.current.emit("leaveRoom", JSON.stringify(input));
+		setJoined(false);
 	};
 
 	const getQueueState = () => {
@@ -327,22 +336,6 @@ const RoomPage = () => {
 		};
 	};
 
-	const leaveRoom = () => {
-		const u: UserProfileDto = userRef.current;
-		const input: ChatEventDto = {
-			userID: u.userID,
-			body: {
-				messageBody: "",
-				sender: u,
-				roomID: roomID,
-				dateCreated: new Date(),
-			},
-		};
-		console.log("Socket emit: leaveRoom", input);
-		socket.current.emit("leaveRoom", JSON.stringify(input));
-		setJoined(false);
-	};
-
 	const trackPositionIntervalRef = useRef(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const collapsedHeight = 60;
@@ -355,7 +348,7 @@ const RoomPage = () => {
 			const storedToken = await auth.getToken();
 
 			if (!storedToken) {
-				// console.error("No stored token found");
+				console.error("No stored token found");
 				return;
 			}
 
@@ -377,10 +370,10 @@ const RoomPage = () => {
 				console.log("response: ", response);
 				if (!response.ok) {
 					const errorText = await response.text();
-					// console.error(
-					// 	`Failed to fetch queue: ${response.status} ${response.statusText}`,
-					// 	errorText,
-					// );
+					console.error(
+						`Failed to fetch queue: ${response.status} ${response.statusText}`,
+						errorText,
+					);
 					return;
 				}
 
@@ -390,15 +383,15 @@ const RoomPage = () => {
 				if (Array.isArray(data) && data.length > 0) {
 					setQueue(data[0]);
 				} else {
-					// console.error("Unexpected response data format:", data);
+					console.error("Unexpected response data format:", data);
 				}
 			} catch (error) {
-				// console.error("Failed to fetch queue:", error);
+				console.error("Failed to fetch queue:", error);
 			}
 		};
 
 		fetchQueue();
-	}, [roomData.roomID]);
+	}, [roomData.roomID, roomID]);
 
 	const getRoomState = () => {
 		return {
@@ -454,7 +447,7 @@ const RoomPage = () => {
 
 	const playPauseTrack = (track, index) => {
 		if (!track) {
-			// console.error("Invalid track:", track);
+			console.error("Invalid track:", track);
 			return;
 		}
 
@@ -514,7 +507,12 @@ const RoomPage = () => {
 			console.log("Ready to join room...");
 			console.log(userRef.current, roomObjRef.current);
 		}
-	}, [userRef.current, roomObjRef.current]);
+	}, [
+		userRef.current,
+		roomObjRef.current,
+		roomObjRef.current,
+		userRef.current,
+	]);
 
 	useEffect(() => {
 		if (readyToJoinRoom && !joined) {

@@ -6,10 +6,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
-	ActivityIndicator,
 } from "react-native";
-import fs from "fs";
-import FormData from "form-data";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
 import EditDialog from "../../components/EditDialog";
@@ -17,8 +14,6 @@ import FavoriteSongs from "../../components/FavoriteSong";
 import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 
@@ -39,10 +34,6 @@ const EditProfileScreen = () => {
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
-
-	const baseURL = "http://getFirstDevice:3000";
-
-	const [loading, setLoading] = useState<boolean>(true);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -82,7 +73,6 @@ const EditProfileScreen = () => {
 	};
 
 	const handleImageUpload = async (uri) => {
-		const form = new FormData();
 		console.log(uri);
 		try {
 			// Fetch the file from the URI
@@ -94,10 +84,6 @@ const EditProfileScreen = () => {
 			// form.append("file", new File([blob], fileName, { type: blob.type }));
 			const t = await auth.getToken();
 			setToken(t);
-			const headers = {
-				Authorization: `Bearer ${t}`,
-				"Content-Type": "multipart/form-data",
-			};
 
 			// const uploadResponse = await axios.post("http://192.168.118.63:3000/upload", form, { headers });
 			console.log(profileData);
@@ -333,10 +319,6 @@ const EditProfileScreen = () => {
 			);
 		}
 	};
-
-	const [profilePic, setProfilePic] = useState(
-		require("../../assets/MockProfilePic.jpeg"),
-	);
 
 	return (
 		<View style={styles.container}>

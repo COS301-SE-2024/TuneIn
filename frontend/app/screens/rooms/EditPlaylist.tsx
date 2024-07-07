@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
 	View,
 	TextInput,
 	ScrollView,
 	StyleSheet,
-	Alert,
 	Text,
 	Image,
 	TouchableOpacity,
 } from "react-native";
 import SongCard from "../../components/Spotify/SongCard";
-import { useSpotifyAuth } from "../../hooks/useSpotifyAuth";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
-import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 
 interface Track {
 	id: string;
@@ -42,7 +38,6 @@ const EditPlaylist: React.FC = () => {
 	const router = useRouter();
 	const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
 	console.log("passed in Room id:", Room_id);
-	const { accessToken } = useSpotifyAuth();
 	const { searchResults, handleSearch } = useSpotifySearch();
 
 	const parseInitialPlaylist = (data: string | string[]): SimplifiedTrack[] => {

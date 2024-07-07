@@ -8,15 +8,11 @@ import {
 	Dimensions,
 	ScrollView,
 	Image,
-	Button,
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../../models/roomdetails";
-import { RoomDto } from "../../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import AWS from "aws-sdk";
 import uploadImage from "../../services/ImageUpload";
 
@@ -55,8 +51,6 @@ if (!AWS_S3_ENDPOINT) {
 	);
 }
 
-const BASE_URL = "http://192.168.118.63:3000/";
-
 const RoomDetails: React.FC = () => {
 	const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace(
 		"+",
@@ -76,11 +70,6 @@ const RoomDetails: React.FC = () => {
 	});
 	AWS.config.logger = console;
 
-	// Create an S3 instance
-	const s3 = new AWS.S3({
-		apiVersion: "2006-03-01",
-		signatureVersion: "v4",
-	});
 	const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
 		name: "",
 		description: "",
@@ -156,7 +145,6 @@ const RoomDetails: React.FC = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				const moreData = JSON.stringify(data);
 				router.navigate({
 					pathname: "/screens/Home",
 					params: data,

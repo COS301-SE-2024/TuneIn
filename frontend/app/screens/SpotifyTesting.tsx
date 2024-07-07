@@ -6,9 +6,7 @@ import {
 	Button,
 	ScrollView,
 	StyleSheet,
-	Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
 import SongCard from "../components/Spotify/SongCard";
 import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
 import { useSpotifySearch } from "../hooks/useSpotifySearch";
@@ -16,7 +14,6 @@ import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
 
 const SpotifyTestingPage: React.FC = () => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const router = useRouter();
 
 	const {
 		accessToken,
@@ -33,11 +30,7 @@ const SpotifyTestingPage: React.FC = () => {
 		error: searchError,
 	} = useSpotifySearch();
 
-	const {
-		handlePlayback,
-		selectedTrackUri,
-		error: playbackError,
-	} = useSpotifyPlayback();
+	const { handlePlayback, error: playbackError } = useSpotifyPlayback();
 
 	return (
 		<View style={styles.container}>

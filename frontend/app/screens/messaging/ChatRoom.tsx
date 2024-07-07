@@ -27,13 +27,8 @@ import {
 	RoomDto,
 	UserProfileDto,
 } from "../../../api-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
-import RoomDetails from "../rooms/RoomDetails";
-
-const BASE_URL = "http://192.168.118.63:3000";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -63,7 +58,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
   */
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isPlaying, setIsPlaying] = useState(false); // State to toggle play/pause
-	const [isRoomCreator, setIsRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
+	const [isRoomCreator] = useState(true); // false will lead to RoomInfo, true will lead to AdvancedSettings
 	const socket = useRef(null);
 
 	//init & connect to socket
@@ -163,7 +158,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		return () => {
 			socket.current.disconnect();
 		};
-	}, []);
+	}, [room.roomID, token, user]);
 
 	// Get screen height to calculate the expanded height
 	const screenHeight = Dimensions.get("window").height;
@@ -200,19 +195,6 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 			},
 		};
 		socket.current.emit("joinRoom", input);
-	};
-
-	const leaveRoom = () => {
-		const input: ChatEventDto = {
-			userID: user.userID,
-			body: {
-				messageBody: "",
-				sender: user,
-				roomID: room.roomID,
-				dateCreated: new Date(),
-			},
-		};
-		socket.current.emit("leaveRoom", input);
 	};
 
 	const navigateToAdvancedSettings = () => {
@@ -253,7 +235,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 		console.log("Joining room...");
 		console.log(user);
 		joinRoom();
-	}, []);
+	}, [joinRoom, user]);
 
 	return (
 		<View

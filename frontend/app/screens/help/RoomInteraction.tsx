@@ -6,11 +6,7 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from "react-native";
-import {
-	FontAwesome5,
-	MaterialCommunityIcons,
-	Ionicons,
-} from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 export default function InteractiveSessions() {

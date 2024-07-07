@@ -1,11 +1,5 @@
 import React from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -13,12 +7,15 @@ import {
 	Poppins_700Bold,
 	useFonts,
 } from "@expo-google-fonts/poppins";
-import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import {
+	Ionicons,
+	FontAwesome,
+	MaterialIcons,
+	AntDesign,
+} from "@expo/vector-icons";
 
 const LoginOtherScreen: React.FC = () => {
 	const router = useRouter();
-	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,

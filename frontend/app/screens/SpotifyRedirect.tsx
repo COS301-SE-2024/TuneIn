@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -7,7 +8,6 @@ import {
 	ScrollView,
 } from "react-native";
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET,
@@ -40,7 +40,6 @@ const SpotifyRedirect = () => {
 	const [tokenDetails, setTokenDetails] = useState(null);
 	const [error, setError] = useState(null);
 	const [success, setSuccess] = useState(false);
-	const router = useRouter();
 
 	useEffect(() => {
 		const extractToken = async () => {

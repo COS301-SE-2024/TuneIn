@@ -8,7 +8,6 @@ import {
 	StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // Import Ionicons from Expo Icons
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const WelcomeScreen: React.FC = () => {

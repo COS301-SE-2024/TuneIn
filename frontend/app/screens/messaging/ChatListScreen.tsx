@@ -6,7 +6,6 @@ import {
 	TextInput,
 	StyleSheet,
 	TouchableOpacity,
-	Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ChatItem from "../../components/ChatItem";
@@ -34,7 +33,6 @@ const chats: Chat[] = [
 const ChatListScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const router = useRouter();
-	const screenWidth = Dimensions.get("window").width;
 
 	const handleSearch = () => {
 		console.log("Searching for:", searchQuery);

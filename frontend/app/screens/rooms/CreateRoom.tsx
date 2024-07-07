@@ -5,7 +5,6 @@ import {
 	TextInput,
 	Switch,
 	TouchableOpacity,
-	Dimensions,
 	KeyboardAvoidingView,
 	Platform,
 	ScrollView,
@@ -19,8 +18,7 @@ import moment from "moment";
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
 	const [isSwitched, setIsSwitched] = useState(false);
-	const [roomName, setRoomName] = useState("");
-	const [newRoom, setNewRoom] = useState({
+	const [newRoom] = useState({
 		is_permanent: true,
 		is_private: false,
 	});

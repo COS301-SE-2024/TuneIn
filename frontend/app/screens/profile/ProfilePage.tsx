@@ -9,7 +9,6 @@ import {
 	ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import NowPlaying from "../../components/NowPlaying";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
 import RoomCard from "../../components/RoomCard";
@@ -21,36 +20,12 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 
 const ProfileScreen: React.FC = () => {
-	const baseURL = "http://getFirstDevice:3000";
 	const router = useRouter();
-	const [favoriteSongsData, setFavoriteSongsData] = useState([
-		{
-			id: 1,
-			songTitle: "Don't Smile At Me",
-			artist: "Billie Eilish",
-			duration: "5:33",
-			albumArt: "https://example.com/path-to-album-art1.jpg",
-		},
-		{
-			id: 2,
-			songTitle: "Blinding Lights",
-			artist: "The Weekend",
-			duration: "3:20",
-			albumArt: "https://example.com/path-to-album-art2.jpg",
-		},
-		{
-			id: 3,
-			songTitle: "Shape of You",
-			artist: "Ed Sheeran",
-			duration: "4:24",
-			albumArt: "https://example.com/path-to-album-art3.jpg",
-		},
-	]);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 
-	const [token, setToken] = useState<string | null>(null);
+	const [setToken] = useState<string | null>(null);
 	const [profileData, setProfileData] = useState<any>(null);
 
 	useEffect(() => {
@@ -70,7 +45,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	}, []);
+	}, [setToken]);
 
 	const fetchProfileInfo = async (token: string) => {
 		try {

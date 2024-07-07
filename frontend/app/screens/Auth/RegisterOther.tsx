@@ -1,12 +1,6 @@
+/* eslint-disable import/no-unresolved */
 import React, { useEffect } from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-	Alert,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -15,7 +9,7 @@ import {
 	useFonts,
 } from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
+import { SPOTIFY_CLIENT_ID } from "@env";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
@@ -106,7 +100,6 @@ const RegisterOtherScreen: React.FC = () => {
 			console.log("Message from unknown origin");
 		}
 	});
-	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,

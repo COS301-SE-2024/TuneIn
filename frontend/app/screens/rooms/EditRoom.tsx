@@ -14,30 +14,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
-import axios from "axios";
 import uploadImage from "../../services/ImageUpload";
-
-const BASE_URL = "http://getFirstDevice:3000/"; // Replace with actual backend URL
-// Mock function to fetch room details. Replace with actual data fetching logic.
-const fetchRoomDetails = async (roomId: string) => {
-	// Replace with real data fetching
-	const token = await auth.getToken();
-	try {
-		const data = await axios.get(`${utils.getAPIBaseURL()}rooms/${roomId}`, {
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: "Bearer " + token,
-			},
-		});
-		console.log(data);
-		return data;
-	} catch (error) {
-		console.error("Error:", error);
-		return null;
-	}
-};
 
 const EditRoom: React.FC = () => {
 	const router = useRouter();
@@ -58,8 +35,6 @@ const EditRoom: React.FC = () => {
 	});
 
 	const [image, setImage] = useState<string | null>(null);
-	const [roomId, setRoomId] = useState<string>(""); // Add room ID here
-	const [token, setToken] = useState<string>("");
 
 	useEffect(() => {
 		const loadRoomDetails = async () => {
@@ -69,16 +44,9 @@ const EditRoom: React.FC = () => {
 		};
 
 		loadRoomDetails();
-	}, []);
+	}, [roomData, roomDetails]);
 
 	const screenWidth = Dimensions.get("window").width;
-
-	const navigateToChatRoom = () => {
-		router.navigate({
-			pathname: "/screens/ChatRoom",
-			params: { room: JSON.stringify(roomDetails) },
-		});
-	};
 
 	const navigateToEditPlaylist = () => {
 		router.navigate("/screens/rooms/EditPlaylist");

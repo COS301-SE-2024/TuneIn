@@ -17,7 +17,6 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
-import { Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
@@ -26,11 +25,10 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cacheLoaded, setCacheLoaded] = useState(false);
+	const [setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const baseURL = "http://192.168.118.63:3000";
 
 	const BackgroundIMG: string =
 		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -92,7 +90,7 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [token, setToken] = useState<string | null>(null);
+	const [setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
@@ -178,7 +176,7 @@ const Home: React.FC = () => {
 		}, 240000); // Refresh data every 60 seconds
 
 		return () => clearInterval(interval);
-	}, []);
+	});
 
 	const renderItem = ({ item }: { item: Room }) => (
 		<Link
@@ -202,42 +200,35 @@ const Home: React.FC = () => {
 		router.navigate("/screens/CreateRoom");
 	};
 
-	const navigateToChatList = () => {
-		console.log("Navigating to chat list");
-		router.navigate("/screens/ChatListScreen");
-	};
+	const handleScroll = useCallback(
+		({ nativeEvent }) => {
+			const currentOffset = nativeEvent.contentOffset.y;
+			const direction = currentOffset > previousScrollY.current ? "down" : "up";
+			previousScrollY.current = currentOffset;
+			scrollY.setValue(currentOffset);
 
-	const navigateToEditRoom = () => {
-		console.log("Navigating to edit room");
-		router.navigate("/screens/rooms/EditRoom");
-	};
-
-	const handleScroll = useCallback(({ nativeEvent }) => {
-		const currentOffset = nativeEvent.contentOffset.y;
-		const direction = currentOffset > previousScrollY.current ? "down" : "up";
-		previousScrollY.current = currentOffset;
-		scrollY.setValue(currentOffset);
-
-		if (scrollTimeout.current) {
-			clearTimeout(scrollTimeout.current);
-		}
-
-		scrollTimeout.current = setTimeout(() => {
-			if (currentOffset <= 0 || direction === "up") {
-				Animated.timing(scrollY, {
-					toValue: 0,
-					duration: 150,
-					useNativeDriver: true,
-				}).start();
-			} else {
-				Animated.timing(scrollY, {
-					toValue: 100,
-					duration: 150,
-					useNativeDriver: true,
-				}).start();
+			if (scrollTimeout.current) {
+				clearTimeout(scrollTimeout.current);
 			}
-		}, 50); // Reduced debounce timeout to make it more responsive
-	}, []);
+
+			scrollTimeout.current = setTimeout(() => {
+				if (currentOffset <= 0 || direction === "up") {
+					Animated.timing(scrollY, {
+						toValue: 0,
+						duration: 150,
+						useNativeDriver: true,
+					}).start();
+				} else {
+					Animated.timing(scrollY, {
+						toValue: 100,
+						duration: 150,
+						useNativeDriver: true,
+					}).start();
+				}
+			}, 50); // Reduced debounce timeout to make it more responsive
+		},
+		[scrollY],
+	);
 
 	const topNavBarTranslateY = scrollY.interpolate({
 		inputRange: [0, 100],

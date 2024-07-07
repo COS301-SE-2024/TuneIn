@@ -1,11 +1,5 @@
 import React from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -18,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 const LoginStreamingScreen: React.FC = () => {
 	const router = useRouter();
-	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,

@@ -14,9 +14,9 @@ import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
 
 const DevicePicker = () => {
 	const { getToken } = useSpotifyAuth();
-	const [isVisible, setIsVisible] = useState(false);
+	const [isVisible, setIsVisible] = useState();
 	const [devices, setDevices] = useState([]);
-	const [selectedDevice, setSelectedDevice] = useState(null);
+	const [setSelectedDevice] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const { getDeviceIDs } = useSpotifyDevices();
 	const [accessToken, setAccessToken] = useState<string>("");
@@ -61,7 +61,7 @@ const DevicePicker = () => {
 		}
 
 		return () => clearInterval(interval);
-	}, [isVisible, getDeviceIDs]);
+	});
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
