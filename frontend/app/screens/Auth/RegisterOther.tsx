@@ -1,11 +1,6 @@
-import React from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-} from "react-native";
+/* eslint-disable import/no-unresolved */
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -13,12 +8,95 @@ import {
 	Poppins_700Bold,
 	useFonts,
 } from "@expo-google-fonts/poppins";
-import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
+}
+
+const redirectTarget = process.env.SPOTIFY_REDIRECT_TARGET;
+if (!redirectTarget) {
+	throw new Error(
+		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
+	);
+}
 
 const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
-	const { width } = Dimensions.get("window");
+
+	useEffect(() => {
+		const handleRedirect = (event) => {
+			let { queryParams } = Linking.parse(event.url);
+			console.log("Redirect Data:", queryParams);
+			WebBrowser.dismissBrowser();
+			// Handle the redirect data (e.g., exchange code for access token)
+		};
+
+		const getInitialURL = async () => {
+			const initialUrl = await Linking.getInitialURL();
+			if (initialUrl) {
+				handleRedirect({ url: initialUrl });
+			}
+		};
+
+		getInitialURL();
+
+		const subscription = Linking.addEventListener("url", handleRedirect);
+
+		return () => {
+			subscription.remove();
+		};
+	}, []);
+
+	const authenticate = async () => {
+		const scopes = [
+			"user-read-email",
+			"user-library-read",
+			"user-read-recently-played",
+			"user-top-read",
+			"playlist-read-private",
+			"playlist-read-collaborative",
+			"playlist-modify-public", // or "playlist-modify-private"
+			"user-modify-playback-state",
+			"user-read-playback-state",
+			"user-read-currently-playing",
+		].join(" ");
+
+		const rt = "http://localhost:5000";
+		const authUrl =
+			`https://accounts.spotify.com/authorize` +
+			`?client_id=${clientId}` +
+			`&response_type=code` + // Change response_type to 'code'
+			`&redirect_uri=${encodeURIComponent(rt)}` +
+			`&show_dialog=true` +
+			`&scope=${scopes}`;
+
+		console.log("rt: " + rt);
+
+		// Open Spotify authorization page in a web browser
+		const result = await WebBrowser.openAuthSessionAsync(authUrl, rt);
+		console.log("After Auth Session Result: \n", result);
+		console.log("Type: \n", typeof result);
+
+		if (result.type === "success") {
+			// The user has successfully authenticated, handle the result.url to extract the authorization code
+			console.log({ url: result.url });
+		}
+	};
+
+	// Function to handle messages from the dummy page
+	window.addEventListener("message", (event) => {
+		if (event.origin === window.location.origin) {
+			console.log("Received message:", event.data);
+		} else {
+			console.log("Message from unknown origin");
+		}
+	});
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -49,44 +127,22 @@ const RegisterOtherScreen: React.FC = () => {
 			<Text style={styles.welcomeText}>Authenticate With</Text>
 
 			<View style={styles.buttonContainer}>
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<AntDesign name="google" size={24} color="#000" style={styles.icon} />
-					<Text style={styles.buttonText}>Google</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
+				<TouchableOpacity
+					style={[styles.button, styles.otherButton]}
+					onPress={authenticate}
+				>
 					<FontAwesome
-						name="facebook"
+						name="spotify"
 						size={24}
 						color="#000"
 						style={styles.icon}
 					/>
-					<Text style={styles.buttonText}>Facebook</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<FontAwesome
-						name="apple"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Apple</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<MaterialIcons
-						name="email"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Email</Text>
+					<Text style={styles.buttonText}>spotify</Text>
 				</TouchableOpacity>
 
 				<View style={styles.dividerContainer}>
 					<View style={styles.divider} />
-					<Text style={styles.dividerText}>Or Login with Details</Text>
+					<Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
 					<View style={styles.divider} />
 				</View>
 

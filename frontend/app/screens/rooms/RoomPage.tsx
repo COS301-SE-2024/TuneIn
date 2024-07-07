@@ -15,29 +15,22 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Room } from "../models/Room";
-import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
+import { useSpotifyPlayback } from "../../hooks/useSpotifyPlayback";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import CommentWidget from "../components/CommentWidget";
+import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import * as io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import axios from "axios";
-import { ChatEventDto } from "../models/ChatEventDto";
-import RoomDetails from "./RoomDetails";
-import RoomOptions from "./RoomOptions";
+import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
 
 type Message = {
 	message: LiveChatMessageDto;
 	me?: boolean;
 };
-
-interface ChatRoomScreenProps {
-	roomObj: string;
-}
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
@@ -59,12 +52,11 @@ const RoomPage = () => {
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-	const [isQueueExpanded, setIsQueueExpanded] = useState(false);
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [joinedSongIndex, setJoinedSongIndex] = useState(null);
-	const [joinedSecondsPlayed, setJoinedSecondsPlayed] = useState(null);
+	const [setJoinedSongIndex] = useState(null);
+	const [setJoinedSecondsPlayed] = useState(null);
 	const socket = useRef<io.Socket | null>(null);
 
 	//init & connect to socket
@@ -82,7 +74,7 @@ const RoomPage = () => {
 				});
 				userRef.current = response.data as UserDto;
 			} catch (error) {
-				// console.error("Error fetching user's own info:", error);
+				console.error("Error fetching user's own info:", error);
 			}
 
 			try {
@@ -97,7 +89,7 @@ const RoomPage = () => {
 				roomObjRef.current = roomDto.data;
 				setRoomObj(roomDto.data);
 			} catch (error) {
-				// console.error("Error fetching room:", error);
+				console.error("Error fetching room:", error);
 			}
 		};
 		getTokenAndSelf();
@@ -157,7 +149,7 @@ const RoomPage = () => {
 			});
 
 			socket.current.on("error", (response: ChatEventDto) => {
-				// console.error("Error:", response.errorMessage);
+				console.error("Error:", response.errorMessage);
 			});
 		};
 
@@ -184,7 +176,7 @@ const RoomPage = () => {
 				socket.current.disconnect();
 			}
 		};
-	}, [readyToJoinRoom]);
+	});
 
 	const sendMessage = () => {
 		if (message.trim()) {
@@ -220,21 +212,19 @@ const RoomPage = () => {
 		console.log("Socket emit: joinRoom", input);
 		socket.current.emit("joinRoom", JSON.stringify(input));
 		setJoined(true);
-	}, []);
+	}, [roomID]);
+
 	const checkBookmark = async () => {
 		const t = await auth.getToken();
 		console.log("Checking bookmark");
 		try {
-			const response = await fetch(
-				`${utils.API_BASE_URL}/users/bookmarks`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${t}`,
-					},
+			const response = await fetch(`${utils.API_BASE_URL}/users/bookmarks`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${t}`,
 				},
-			);
+			});
 			const data = await response.json();
 			// check whether the room is bookmarked or not
 			for (let i = 0; i < data.length; i++) {
@@ -246,7 +236,7 @@ const RoomPage = () => {
 			}
 			console.log(data);
 		} catch (error) {
-			// console.error("Error:", error);
+			console.error("Error:", error);
 		}
 	};
 	const handleBookmark = async () => {
@@ -283,7 +273,7 @@ const RoomPage = () => {
 				);
 			}
 		} catch (error) {
-			// console.error("Error:", error);
+			console.error("Error:", error);
 		}
 	};
 
@@ -303,6 +293,44 @@ const RoomPage = () => {
 		setJoined(false);
 	};
 
+	// const getQueueState = () => {
+	// 	// Simulated queue state with UTC start times
+	// 	const queue = [
+	// 		{
+	// 			song: "Song A",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 0, 0)),
+	// 			index: 0,
+	// 		}, // July 6th, 2024, 12:00:00 UTC
+	// 		{
+	// 			song: "Song B",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 10, 0)),
+	// 			index: 1,
+	// 		}, // July 6th, 2024, 12:10:00 UTC
+	// 		{
+	// 			song: "Song C",
+	// 			startTime: new Date(Date.UTC(2024, 6, 6, 12, 20, 0)),
+	// 			index: 2,
+	// 		}, // July 6th, 2024, 12:20:00 UTC
+	// 	];
+
+	// 	// Function to return the UTC start time and index of a song in the queue
+	// 	const getSongState = (index) => {
+	// 		const song = queue.find((item) => item.index === index);
+	// 		if (song) {
+	// 			return {
+	// 				startTimeUTC: song.startTime.toISOString(), // Convert to ISO string for universal representation
+	// 				index: song.index,
+	// 			};
+	// 		} else {
+	// 			return null; // Handle case when song index is not found
+	// 		}
+	// 	};
+
+	// 	return {
+	// 		getSongState,
+	// 	};
+	// };
+
 	const trackPositionIntervalRef = useRef(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const collapsedHeight = 60;
@@ -315,7 +343,7 @@ const RoomPage = () => {
 			const storedToken = await auth.getToken();
 
 			if (!storedToken) {
-				// console.error("No stored token found");
+				console.error("No stored token found");
 				return;
 			}
 
@@ -330,17 +358,14 @@ const RoomPage = () => {
 						},
 					},
 				);
-				console.log(
-					"URL: ",
-					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
-				);
+				console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
 				console.log("response: ", response);
 				if (!response.ok) {
 					const errorText = await response.text();
-					// console.error(
-					// 	`Failed to fetch queue: ${response.status} ${response.statusText}`,
-					// 	errorText,
-					// );
+					console.error(
+						`Failed to fetch queue: ${response.status} ${response.statusText}`,
+						errorText,
+					);
 					return;
 				}
 
@@ -350,22 +375,22 @@ const RoomPage = () => {
 				if (Array.isArray(data) && data.length > 0) {
 					setQueue(data[0]);
 				} else {
-					// console.error("Unexpected response data format:", data);
+					console.error("Unexpected response data format:", data);
 				}
 			} catch (error) {
-				// console.error("Failed to fetch queue:", error);
+				console.error("Failed to fetch queue:", error);
 			}
 		};
 
 		fetchQueue();
-	}, [roomData.roomID]);
+	}, [roomData.roomID, roomID]);
 
-	const getRoomState = () => {
-		return {
-			currentTrackIndex,
-			secondsPlayed,
-		};
-	};
+	// const getRoomState = () => {
+	// 	return {
+	// 		currentTrackIndex,
+	// 		secondsPlayed,
+	// 	};
+	// };
 
 	useEffect(() => {
 		return () => {
@@ -374,10 +399,6 @@ const RoomPage = () => {
 			}
 		};
 	}, [isPlaying, handlePlayback]);
-
-	// const handleGoBack = () => {
-	// 	// router.goBack();
-	// };
 
 	useEffect(() => {
 		if (isPlaying) {
@@ -418,7 +439,7 @@ const RoomPage = () => {
 
 	const playPauseTrack = (track, index) => {
 		if (!track) {
-			// console.error("Invalid track:", track);
+			console.error("Invalid track:", track);
 			return;
 		}
 
@@ -472,13 +493,11 @@ const RoomPage = () => {
 		});
 	};
 
-	useEffect(() => {
-		if (userRef.current && roomObjRef.current) {
-			setReadyToJoinRoom(true);
-			console.log("Ready to join room...");
-			console.log(userRef.current, roomObjRef.current);
-		}
-	}, [userRef.current, roomObjRef.current]);
+	if (userRef.current && roomObjRef.current) {
+		setReadyToJoinRoom(true);
+		console.log("Ready to join room...");
+		console.log(userRef.current, roomObjRef.current);
+	}
 
 	useEffect(() => {
 		if (readyToJoinRoom && !joined) {

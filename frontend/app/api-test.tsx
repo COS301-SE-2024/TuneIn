@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useApi } from "../api/APIContext";
-import { DefaultApi } from "../api-client";
 
 const ApiTest: React.FC = () => {
 	const api = useApi();

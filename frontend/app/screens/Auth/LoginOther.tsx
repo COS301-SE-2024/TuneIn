@@ -1,11 +1,5 @@
 import React from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -13,12 +7,15 @@ import {
 	Poppins_700Bold,
 	useFonts,
 } from "@expo-google-fonts/poppins";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { Ionicons } from "@expo/vector-icons";
+import {
+	Ionicons,
+	FontAwesome,
+	MaterialIcons,
+	AntDesign,
+} from "@expo/vector-icons";
 
-const RegisterStreamingScreen: React.FC = () => {
+const LoginOtherScreen: React.FC = () => {
 	const router = useRouter();
-	const { width } = Dimensions.get("window");
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -30,12 +27,12 @@ const RegisterStreamingScreen: React.FC = () => {
 		return null;
 	}
 
-	const navigateToLogin = () => {
-		router.navigate("screens/LoginStreaming");
+	const navigateToRegister = () => {
+		router.navigate("screens/RegisterStreaming");
 	};
 
-	const navigateToOther = () => {
-		router.navigate("screens/RegisterOther");
+	const navigateToLogin = () => {
+		router.navigate("screens/LoginScreen");
 	};
 
 	return (
@@ -46,46 +43,65 @@ const RegisterStreamingScreen: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
-			<Text style={styles.welcomeText}>
-				Join the Fastest Growing Listening Community
-			</Text>
+			<Text style={styles.welcomeText}>Authenticate With</Text>
 
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<Icon name="spotify" size={24} color="#000" style={styles.icon} />
-					<Text style={styles.buttonText}>Spotify</Text>
+					<AntDesign name="google" size={24} color="#000" style={styles.icon} />
+					<Text style={styles.buttonText}>Google</Text>
 				</TouchableOpacity>
 
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<Icon
-						name="youtube-play"
+					<FontAwesome
+						name="facebook"
 						size={24}
 						color="#000"
 						style={styles.icon}
 					/>
-					<Text style={styles.buttonText}>YouTube Music</Text>
+					<Text style={styles.buttonText}>Facebook</Text>
 				</TouchableOpacity>
 
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<Icon name="music" size={24} color="#000" style={styles.icon} />
-					<Text style={styles.buttonText}>Apple Music</Text>
+					<FontAwesome
+						name="apple"
+						size={24}
+						color="#000"
+						style={styles.icon}
+					/>
+					<Text style={styles.buttonText}>Apple</Text>
 				</TouchableOpacity>
+
+				<TouchableOpacity style={[styles.button, styles.otherButton]}>
+					<MaterialIcons
+						name="email"
+						size={24}
+						color="#000"
+						style={styles.icon}
+					/>
+					<Text style={styles.buttonText}>Email</Text>
+				</TouchableOpacity>
+
+				<View style={styles.dividerContainer}>
+					<View style={styles.divider} />
+					<Text style={styles.dividerText}>Or Login with Details</Text>
+					<View style={styles.divider} />
+				</View>
 
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={navigateToOther}
+					onPress={navigateToLogin}
 				>
-					<Text style={styles.buttonText}>Other</Text>
+					<Text style={styles.buttonText}>Account</Text>
 				</TouchableOpacity>
 			</View>
 
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={navigateToLogin}
+				onPress={navigateToRegister}
 			>
 				<Text style={styles.registerText}>
-					Already have an account?{" "}
-					<Text style={styles.registerBoldText}>Login Now</Text>
+					Don’t have an account?{" "}
+					<Text style={styles.registerBoldText}>Register Now</Text>
 				</Text>
 			</TouchableOpacity>
 		</View>
@@ -109,11 +125,6 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 	},
-	logoText: {
-		fontSize: 24,
-		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
-	},
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
@@ -131,7 +142,7 @@ const styles = StyleSheet.create({
 		height: 60,
 		justifyContent: "center",
 		alignItems: "center",
-		marginBottom: 30,
+		marginBottom: 20,
 		borderRadius: 30,
 		flexDirection: "row",
 		paddingHorizontal: 10,
@@ -140,15 +151,6 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.3,
 		shadowRadius: 3.84,
-	},
-	spotifyButton: {
-		backgroundColor: "#1DB954",
-	},
-	youtubeButton: {
-		backgroundColor: "#FF0000",
-	},
-	appleButton: {
-		backgroundColor: "#fc3c44",
 	},
 	otherButton: {
 		backgroundColor: "#FFFFFF",
@@ -163,6 +165,23 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "#000",
 		fontFamily: "Poppins_700Bold",
+	},
+	dividerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginVertical: 20,
+		width: "80%",
+	},
+	divider: {
+		flex: 1,
+		height: 1,
+		backgroundColor: "#808080",
+	},
+	dividerText: {
+		marginHorizontal: 10,
+		fontSize: 14,
+		color: "#000",
+		fontFamily: "Poppins_500Medium",
 	},
 	registerContainer: {
 		position: "absolute",
@@ -183,4 +202,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default RegisterStreamingScreen;
+export default LoginOtherScreen;

@@ -24,7 +24,7 @@ const AdvancedSettings = () => {
 
 	const goToEditScreen = () => {
 		router.navigate({
-			pathname: "/screens/EditRoom",
+			pathname: "/screens/rooms/EditRoom",
 			params: {
 				name: _roomDetails.room_name,
 				description: _roomDetails.description,

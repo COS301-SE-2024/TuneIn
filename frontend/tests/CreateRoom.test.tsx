@@ -1,7 +1,7 @@
 // CreateRoom.test.tsx
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import CreateRoom from "../app/screens/CreateRoom"; // Adjust the import path accordingly
+import CreateRoom from "../app/screens/rooms/CreateRoom"; // Adjust the import path accordingly
 import { useNavigation } from "expo-router";
 
 // Mock useNavigation from expo-router

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import LoginScreen from "./screens/LoginScreen";
+import LoginScreen from "./screens/Auth/LoginScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
-import { PlayerContextProvider } from "./screens/PlayerContext"; // Import PlayerContextProvider
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
@@ -15,7 +14,6 @@ const App: React.FC = () => {
 	useEffect(() => {
 		const checkToken = async () => {
 			try {
-				const cognitioToken = await StorageService.getItem("cognitoToken"); // Use StorageService to get the token
 				const authToken = await StorageService.getItem("backendToken");
 				if (authToken && authToken !== "undefined" && authToken !== "null") {
 					auth.setToken(authToken);
@@ -38,7 +36,7 @@ const App: React.FC = () => {
 		};
 
 		checkToken();
-	}, []);
+	});
 
 	if (isCheckingToken) {
 		// Render a loading indicator while checking the token

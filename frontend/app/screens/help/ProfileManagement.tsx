@@ -7,19 +7,11 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from "react-native";
-import {
-	FontAwesome,
-	MaterialCommunityIcons,
-	Ionicons,
-} from "@expo/vector-icons";
-import { Octicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function ProfileManagement({}) {
+export default function ProfileManagement() {
 	const router = useRouter();
-	const navigateToProfile = () => {
-		router.navigate("../");
-	};
 
 	return (
 		<ScrollView style={styles.container}>

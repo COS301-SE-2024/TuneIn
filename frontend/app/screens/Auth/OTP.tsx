@@ -7,7 +7,7 @@ import {
 	ScrollView,
 	StyleSheet,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 const VerifyEmailScreen: React.FC = () => {

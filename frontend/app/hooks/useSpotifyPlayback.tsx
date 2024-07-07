@@ -8,7 +8,7 @@ export const useSpotifyPlayback = () => {
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [selectedTrackUri, setSelectedTrackUri] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
-	const { getDeviceId } = useSpotifyDevices(accessToken);
+	const { getFirstDevice } = useSpotifyDevices();
 
 	useEffect(() => {
 		const fetchToken = async () => {
@@ -33,7 +33,7 @@ export const useSpotifyPlayback = () => {
 			if (!accessToken) {
 				throw new Error("Access token not found");
 			}
-			const activeDevice = await getDeviceId();
+			const activeDevice = await getFirstDevice();
 			if (!activeDevice) {
 				Alert.alert("Please connect a device to Spotify");
 				return;

@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -9,46 +8,26 @@ import {
 	ScrollView,
 	ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import NowPlaying from "../components/NowPlaying";
-import BioSection from "../components/BioSection";
-import GenreList from "../components/GenreList";
-import RoomCard from "../components/RoomCard";
-import FavoriteSongs from "../components/FavoriteSong";
-import LinkBottomSheet from "../components/LinkBottomSheet";
-import MusicBottomSheet from "../components/MusicBottomSheet";
+import { useLocalSearchParams } from "expo-router";
+import NowPlaying from "../../components/NowPlaying";
+import BioSection from "../../components/BioSection";
+import GenreList from "../../components/GenreList";
+import RoomCard from "../../components/RoomCard";
+import FavoriteSongs from "../../components/FavoriteSong";
+import LinkBottomSheet from "../../components/LinkBottomSheet";
+import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
 
 const ProfileScreen: React.FC = () => {
-	const router = useRouter();
 	const params = useLocalSearchParams();
 	const username = params.username;
-	const [favoriteSongsData, setFavoriteSongsData] = useState([
-		{
-			songTitle: "Don't Smile At Me",
-			artist: "Billie Eilish",
-			duration: "5:33",
-			albumArt: "https://example.com/path-to-album-art1.jpg",
-		},
-		{
-			songTitle: "Blinding Lights",
-			artist: "The Weekend",
-			duration: "3:20",
-			albumArt: "https://example.com/path-to-album-art2.jpg",
-		},
-		{
-			songTitle: "Shape of You",
-			artist: "Ed Sheeran",
-			duration: "4:24",
-			albumArt: "https://example.com/path-to-album-art3.jpg",
-		},
-	]);
+
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [token, setToken] = useState<string | null>(null);
+	const [setToken] = useState<string | null>(null);
 	const [following, setFollowing] = useState<boolean>(false);
 
 	const fetchProfileInfo = async (token: string) => {
@@ -85,7 +64,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const [profileData, setProfileData] = useState<any>(null);
-	const [userProfileData, setUserProfileData] = useState<any>(null);
+	const [setUserProfileData] = useState<any>(null);
 
 	useEffect(() => {
 		const getTokenAndData = async () => {
@@ -113,7 +92,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	}, []);
+	});
 
 	const renderLinks = () => {
 		if (profileData.links.count > 1) {
