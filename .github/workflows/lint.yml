@@ -32,9 +32,10 @@ jobs:
         with:
           node-version: 18.18
 
-      - name: Install dependencies
+      - name: Install linting dependencies only
         run:  |
-          cd frontend && npm ci
+          cd frontend
+          npm install eslint@8.57.0 eslint-config-expo@7.0.0 eslint-config-prettier@9.1.0 eslint-plugin-prettier@5.1.3 prettier@3.3.0
 
       - name: Auto-fix Frontend Linting
         run:  |
@@ -70,9 +71,10 @@ jobs:
         with:
           node-version: 18.18
 
-      - name: Install dependencies
+      - name: Install linting dependencies only
         run:  |
-          cd backend && npm ci
+          cd backend
+          npm install @typescript-eslint/eslint-plugin@6.0.0 @typescript-eslint/parser@6.0.0 eslint@8.42.0 eslint-config-prettier@9.0.0 eslint-plugin-prettier@5.0.0 prettier@3.3.2
 
       - name: Auto-fix Backend Linting
         run:  |
