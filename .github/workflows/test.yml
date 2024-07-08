@@ -1,9 +1,7 @@
-
 name: Test Codebase
 on:
   push:
     branches: [ main, develop ]
-
   pull_request:
     branches: [ main, develop ]
 
@@ -17,88 +15,47 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Starting Job
-        run: |
-          echo "Beginning to test ${{ github.repository }}"
+        run: echo "Beginning to test ${{ github.repository }}"
 
-  run_frontend_tests:
-    name: Test Frontend
+  test_codebase:
+    name: Test ${{ matrix.component }}
     needs: start
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - component: Frontend
+            directory: frontend
+            env_file: ${{ secrets.FRONTEND_ENV_FILE }}
+          - component: Backend
+            directory: backend
+            env_file: ${{ secrets.BACKEND_ENV_FILE }}
     steps:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
 
-      - name: Create frontend env file
+      - name: Create ${{ matrix.component }} env file
         run: |
-          touch frontend/.env
-          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
-        shell: bash
+          mkdir -p ${{ matrix.directory }}
+          echo "${{ matrix.env_file }}" > ${{ matrix.directory }}/.env
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: 18.18
+          node-version: '18.18'
 
       - name: Install dependencies
-        run:  |
-          cd frontend && npm ci
+        run: cd ${{ matrix.directory }} && npm ci
 
       - name: Test Codebase
-        run:  |
-          cd frontend && npm run test:cov
+        run: cd ${{ matrix.directory }} && npm run test:cov
 
       - name: Jest Coverage Comment
         id: coverageComment
         uses: MishaKav/jest-coverage-comment@main
         with:
           hide-comment: true
-          coverage-summary-path: ./frontend/coverage/coverage-summary.json
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Check the output coverage
-        run: |
-          echo "Coverage Percentage - ${{ steps.coverageComment.outputs.coverage }}"
-          echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
-          echo "Summary HTML - ${{ steps.coverageComment.outputs.summaryHtml }}"
-
-
-  run_backend_tests:
-    name: Test Backend
-    needs: start
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout "${{ github.repository }}"
-        uses: actions/checkout@v4
-
-      - name: Create backend env file
-        run: |
-          touch backend/.env
-          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
-        shell: bash
-
-      - name: Set up Node (stable)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.18
-
-      - name: Install dependencies
-        run:  |
-          cd backend && npm ci
-
-      - name: Test Codebase
-        run:  |
-          cd backend && npm run test:cov
-
-      - name: Jest Coverage Comment
-        id: coverageComment
-        uses: MishaKav/jest-coverage-comment@main
-        with:
-          hide-comment: true
-          coverage-summary-path: ./backend/coverage/coverage-summary.json
+          coverage-summary-path: ./${{ matrix.directory }}/coverage/coverage-summary.json
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
@@ -114,9 +71,7 @@ jobs:
   end:
     name: The end
     runs-on: ubuntu-latest
-    needs: [start, run_frontend_tests, run_backend_tests]
+    needs: test_codebase
     steps:
       - name: Ending
-        id: init
-        run: |
-          echo "${{ github.repository }} has passed all tests"
+        run: echo "${{ github.repository }} has passed all tests"
