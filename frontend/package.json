@@ -106,7 +106,7 @@
   "private": true,
   "jest": {
     "setupFiles": [
-      "./jestSetup.ts"
+      "./jest.setup.ts"
     ],
     "preset": "jest-expo",
     "transformIgnorePatterns": [

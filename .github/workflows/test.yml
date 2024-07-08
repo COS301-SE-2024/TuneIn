@@ -32,6 +32,7 @@ jobs:
         run: |
           touch frontend/.env
           echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+        shell: bash
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4
@@ -77,6 +78,7 @@ jobs:
         run: |
           touch backend/.env
           echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+        shell: bash
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4

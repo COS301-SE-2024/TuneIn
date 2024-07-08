@@ -114,7 +114,8 @@
     ],
     "coverageDirectory": "../coverage",
     "coverageReporters": ["json", "text-summary", "json-summary", "lcov"],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFiles": ["jest.setup.ts"]
   },
   "engines": {
     "node": "18.18.2",
