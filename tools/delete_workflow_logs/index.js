@@ -12,8 +12,6 @@ const octokit = new Octokit({
 
 const owner = 'COS301-SE-2024';
 const repo = 'TuneIn';
-const workflow_id = '104177253'; // Use the workflow file name or workflow ID
-
 async function listWorkflows() {
   try {
     // List all workflows in a repository
@@ -21,14 +19,17 @@ async function listWorkflows() {
       owner,
       repo,
     });
-    console.log(listWorkflowsResponse.data.workflows);
+    const result = listWorkflowsResponse.data.workflows;
+    console.log(result);
+    return result;
   } catch (error) {
     console.error('Error listing workflows:', error);
   }
 }
-listWorkflows();
 
-async function deleteWorkflowRunLogs() {
+const workflows = await listWorkflows();
+
+async function deleteWorkflowRunLogs(workflow_id) {
   try {
     // List all workflow runs for a specific workflow
     const listWorkflowRunsResponse = await octokit.actions.listWorkflowRuns({
@@ -39,6 +40,16 @@ async function deleteWorkflowRunLogs() {
 	console.log(listWorkflowRunsResponse);
 
     const runs = listWorkflowRunsResponse.data.workflow_runs;
+    let i = 1;
+    while (listWorkflowRunsResponse.data.total_count > runs.length) {
+      const nextListWorkflowRunsResponse = await octokit.actions.listWorkflowRuns({
+        owner,
+        repo,
+        workflow_id,
+        page: ++i,
+      });
+      runs.push(...nextListWorkflowRunsResponse.data.workflow_runs);
+    }
 
     console.log(`Found ${runs.length} runs. Deleting logs...`);
 
@@ -56,4 +67,7 @@ async function deleteWorkflowRunLogs() {
     console.error('Error deleting workflow run logs:', error);
   }
 }
-deleteWorkflowRunLogs();
+
+for (const workflow of workflows) {
+  await deleteWorkflowRunLogs(workflow.id);
+}
