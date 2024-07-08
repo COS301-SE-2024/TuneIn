@@ -2,14 +2,9 @@ name: Lint Codebase
 on:
   push:
     branches: [ main, develop ]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
+
   pull_request:
     branches: [ main, develop ]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
     #types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: write
