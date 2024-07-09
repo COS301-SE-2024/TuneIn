@@ -15,7 +15,6 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSpotifyPlayback } from "../../hooks/useSpotifyPlayback";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
@@ -39,9 +38,8 @@ const RoomPage = () => {
 	const roomData = JSON.parse(room);
 	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
-	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
+	const [setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
-	const { handlePlayback } = useSpotifyPlayback();
 	const token = useRef<string | null>(null);
 	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
@@ -399,7 +397,7 @@ const RoomPage = () => {
 				clearInterval(trackPositionIntervalRef.current);
 			}
 		};
-	}, [isPlaying, handlePlayback]);
+	}, [isPlaying]);
 
 	useEffect(() => {
 		if (isPlaying) {
@@ -425,51 +423,34 @@ const RoomPage = () => {
 			console.log(
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
-			if (queue.length > 0) {
-				playPauseTrack(queue[0], 0);
-			}
 		} else {
 			leaveRoom();
 			setJoined(false);
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
-			handlePlayback("pause");
+			playbackManager.pause();
 			setIsPlaying(false);
 		}
 	};
 
-	const playPauseTrack = (track, index) => {
-		if (!track) {
-			console.error("Invalid track:", track);
-			return;
-		}
-
-		if (index === currentTrackIndex && isPlaying) {
-			handlePlayback("pause");
-			setIsPlaying(false);
-		} else {
-			const offset = secondsPlayed > 0 ? secondsPlayed * 1000 : 0;
-			handlePlayback("play", track.uri, offset).then(() => {
-				setCurrentTrackIndex(index);
-				setIsPlaying(true);
-			});
-		}
-	};
+	const playPauseTrack = useCallback(
+		(index) => {
+			playbackManager.playPauseTrack(queue[index], index);
+			setCurrentTrackIndex(index);
+			setIsPlaying(playbackManager.getIsPlaying());
+			setSecondsPlayed(playbackManager.getSecondsPlayed());
+		},
+		[queue, playbackManager],
+	);
 
 	const playNextTrack = () => {
-		const nextIndex = currentTrackIndex + 1;
-		if (nextIndex < queue.length) {
-			const nextTrack = queue[nextIndex];
-			playPauseTrack(nextTrack, nextIndex);
-		}
+		playbackManager.playPreviousTrack();
+		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
 	};
 
 	const playPreviousTrack = () => {
-		const previousIndex = currentTrackIndex - 1;
-		if (previousIndex >= 0) {
-			const previousTrack = queue[previousIndex];
-			playPauseTrack(previousTrack, previousIndex);
-		}
+		playbackManager.playPreviousTrack();
+		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
 	};
 
 	const toggleChat = () => {
@@ -596,9 +577,7 @@ const RoomPage = () => {
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={() =>
-								playPauseTrack(queue[currentTrackIndex], currentTrackIndex)
-							}
+							onPress={() => playPreviousTrack}
 						>
 							<FontAwesome5
 								name={isPlaying ? "pause" : "play"}
@@ -638,7 +617,7 @@ const RoomPage = () => {
 								? styles.currentTrack
 								: styles.queueTrack,
 						]}
-						onPress={() => playPauseTrack(track, index)}
+						onPress={() => playPauseTrack(index)}
 					>
 						<Image
 							source={{ uri: track.albumArtUrl }}

@@ -30,6 +30,10 @@ class PlaybackManager {
 		return this.secondsPlayed;
 	}
 
+	pause() {
+		this.handlePlayback("pause");
+	}
+
 	playPauseTrack(track: Track, index: number) {
 		if (!track) {
 			console.error("Invalid track:", track);
