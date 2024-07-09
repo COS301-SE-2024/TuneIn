@@ -1,23 +1,17 @@
+# TuneIn with Expo Router
 
-
-# TuneIn with NativeWind and Expo Router
-
-This README provides detailed instructions for setting up and using NativeWind (a Tailwind CSS solution for React Native) and Expo Router in your React Native project. It also includes examples of why these libraries are used, their advantages, common commands, and links to their respective resources.
+This README provides detailed instructions for setting up Expo Router in your React Native project. It includes examples of why these libraries are used, their advantages, common commands, and links to their respective resources.
 
 ## Table of Contents
 - [Folder Structure](#folder-structure)
 - [Installation](#installation)
-  - [NativeWind](#nativewind)
   - [Expo Router](#expo-router)
-
 - [Usage Examples](#usage-examples)
-  - [NativeWind Usage](#nativewind-usage)
   - [Expo Router Usage](#expo-router-usage)
 - [Advantages](#advantages)
 - [Common Commands](#common-commands)
 - [Editor Configuration](#editor-configuration)
 - [Resources](#resources)
-
 
 ## Folder Structure
 
@@ -41,89 +35,37 @@ my-app/
 │   │   └── ... (other TypeScript class definitions)
 │   │
 │   ├── screens/
-│   │   ├── AllFriends.tsx
-│   │   ├── CreateRoom.tsx
-│   │   ├── EditProfile.tsx
-│   │   ├── EditRoom.tsx
-│   │   ├── Home.tsx
-│   │   ├── ProfilePage.tsx
-│   │   ├── RoomPage.tsx
-│   │   ├── Search.tsx
+│   │   ├── rooms/
+│   │   │   ├── RoomPage.tsx
+│   │   │   ├── CreateRoom.tsx
+│   │   │   └── ... (other room-related screens)
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── LoginScreen.tsx
+│   │   │   ├── Register.tsx
+│   │   │   └── ... (other auth-related screens)
+│   │   │
 │   │   └── ... (other pages/screens)
+│   │
+│   ├── hooks/
+│   │   └── ... (reusable hooks)
 │   │
 │   └── index.tsx
 │   
-│
 ├── my-app.d.ts
 ├── babel.config.js
-├── tailwind.config.js
-└── package.json
+├── package.json
 ```
 
 - **app/components/**: Contains all reusable components.
 - **app/models/**: Contains TypeScript class definitions to streamline data handling.
 - **app/screens/**: Contains all the screens (pages) of the app.
-- **app/_layout.tsx**: The layout file for the app's routing structure.
+- **app/screens/rooms/**: Contains room-related screens.
+- **app/screens/auth/**: Contains authentication-related screens.
+- **app/hooks/**: Contains reusable hooks.
 - **app/index.tsx**: The entry point for the app.
 
 ## Installation
-
-### NativeWind
-
-NativeWind brings the power of Tailwind CSS to React Native. Follow these steps to install it:
-
-1. **Install NativeWind and dependencies:**
-
-    ```bash
-    npm install nativewind
-    npm install tailwindcss --save-dev
-    ```
-
-2. **Create Tailwind configuration file:**
-
-    ```bash
-    npx tailwindcss init
-    ```
-
-3. **Configure Tailwind for NativeWind:**
-
-    Update `tailwind.config.js`:
-
-    ```js
-    /** @type {import('tailwindcss').Config} */
-    module.exports = {
-      purge: [
-        './App.{js,jsx,ts,tsx}',
-        './screens/**/*.{js,jsx,ts,tsx}',
-        './components/**/*.{js,jsx,ts,tsx}',
-        './app/**/*.{js,jsx,ts,tsx}'
-      ],
-      content: [
-        "./App.{js,jsx,ts,tsx}",
-        "./screens/**/*.{js,jsx,ts,tsx}",
-        "./components/**/*.{js,jsx,ts,tsx}",
-        "./app/**/*.{js,jsx,ts,tsx}",
-      ],
-      theme: {
-        extend: {},
-      },
-      plugins: [],
-    }
-    ```
-
-4. **Configure Babel for NativeWind:**
-
-    Create or update `babel.config.js`:
-
-    ```js
-    module.exports = function(api) {
-      api.cache(true);
-      return {
-        presets: ['babel-preset-expo'],
-        plugins: ['nativewind/babel'],
-      };
-    };
-    ```
 
 ### Expo Router
 
@@ -139,13 +81,11 @@ Expo Router provides a file-based routing solution for Expo projects.
 
     Create a folder structure under your project root with the following files:
 
-    ```
     - app
       - _layout.tsx
       - index.tsx
-    ```
 
-    **`_layout.tsx`:**
+    **_layout.tsx:**
 
     ```tsx
     import { Stack } from 'expo-router';
@@ -157,7 +97,7 @@ Expo Router provides a file-based routing solution for Expo projects.
     export default Layout;
     ```
 
-    **`index.tsx`:**
+    **index.tsx:**
 
     ```tsx
     import React from 'react';
@@ -174,9 +114,9 @@ Expo Router provides a file-based routing solution for Expo projects.
     export default Home;
     ```
 
-3. **Update `app.json`:**
+3. **Update app.json:**
 
-    Make sure to include the `expo-router` plugin:
+    Make sure to include the expo-router plugin:
 
     ```json
     {
@@ -193,33 +133,13 @@ Expo Router provides a file-based routing solution for Expo projects.
     }
     ```
 
-
 ## Usage Examples
-
-### NativeWind Usage
-
-**Example: Using Tailwind CSS classes in React Native components**
-
-```tsx
-import React from 'react';
-import { View, Text } from 'react-native';
-
-const ExampleComponent = () => {
-  return (
-    <View className="flex-1 justify-center items-center bg-blue-500">
-      <Text className="text-white text-lg">Hello, Tailwind CSS with NativeWind!</Text>
-    </View>
-  );
-};
-
-export default ExampleComponent;
-```
 
 ### Expo Router Usage
 
-#### Using `Link` Component
+#### Using Link Component
 
-The `Link` component is a convenient way to navigate between screens declaratively.
+The Link component is a convenient way to navigate between screens declaratively.
 
 1. **Create a new screen component:**
 
@@ -239,7 +159,7 @@ The `Link` component is a convenient way to navigate between screens declarative
     export default Profile;
     ```
 
-2. **Link to the new screen using `Link` component:**
+2. **Link to the new screen using Link component:**
 
     ```tsx
     // screens/Home.tsx
@@ -261,9 +181,9 @@ The `Link` component is a convenient way to navigate between screens declarative
     export default Home;
     ```
 
-#### Using `router.navigate`
+#### Using router.navigate
 
-For more programmatic navigation, use the `router.navigate` method.
+For more programmatic navigation, use the router.navigate method.
 
 1. **Create a new screen component:**
 
@@ -283,7 +203,7 @@ For more programmatic navigation, use the `router.navigate` method.
     export default Settings;
     ```
 
-2. **Navigate to the new screen using `router.navigate`:**
+2. **Navigate to the new screen using router.navigate:**
 
     ```tsx
     // screens/Home.tsx
@@ -307,12 +227,6 @@ For more programmatic navigation, use the `router.navigate` method.
 
 ## Advantages
 
-### NativeWind
-
-- **Efficiency:** Tailwind CSS simplifies styling with utility-first classes, reducing the need for custom CSS.
-- **Consistency:** Enforces consistent styling across the project.
-- **Productivity:** Rapidly prototype and iterate on designs.
-
 ### Expo Router
 
 - **Simplicity:** File-based routing makes navigation structure clear and easy to manage.
@@ -320,10 +234,6 @@ For more programmatic navigation, use the `router.navigate` method.
 - **Integration:** Seamlessly integrates with Expo's existing ecosystem and tools.
 
 ## Common Commands
-
-### Tailwind Purge
-
-Tailwind CSS can purge unused styles to optimize the bundle size. This is configured in `tailwind.config.js`.
 
 ### Expo Router Commands
 
@@ -341,20 +251,158 @@ Tailwind CSS can purge unused styles to optimize the bundle size. This is config
 
 ## Editor Configuration
 
-To prevent the editor from showing redline errors when using `className`, create a `my-app.d.ts` file with the following content:
+To ensure code quality and consistency, follow these practices:
 
-```typescript
-/// <reference types="nativewind/types" />
-```
+- **ESLint and Prettier:** Use Prettier ESLint for linting and formatting.
+
+    ```bash
+    npx eslint --fix 'app/**/*.tsx'
+    ```
+
+- **Naming Conventions:** Use consistent naming conventions for files and folders.
+  - Use `PascalCase` for component and screen files (e.g., `RoomPage.tsx`, `LoginScreen.tsx`).
+  - Use `camelCase` for hooks and utility functions (e.g., `useFetchData.ts`, `formatDate.ts`).
+
+- **Styling:** Use `createStyleSheet` for styling instead of Tailwind CSS. Create a central file for theme colors and other styling elements.
+
+    ```tsx
+    // styles/colors.ts
+    export const colors = {
+      primary: '#3498db',
+      secondary: '#2ecc71',
+      // Add other colors here
+    };
+
+    // styles/themes.ts
+    import { StyleSheet } from 'react-native';
+    import { colors } from './colors';
+
+    export const commonStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: colors.primary,
+      },
+      // Add other styles here
+    });
+    ```
+
+Sure, here's the continuation and completion of the README:
 
 ## Resources
-
-### NativeWind
-
-- [NativeWind GitHub](https://github.com/marklawlor/nativewind)
-- [NativeWind with Expo](https://www.nativewind.dev/quick-starts/expo)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
 ### Expo Router
 
 - [Expo Router Documentation](https://expo.github.io/router/docs/)
+
+### General Resources
+
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [Expo Documentation](https://docs.expo.dev/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+
+## Best Practices
+
+To ensure the maintainability and scalability of your project, follow these best practices:
+
+### Component Structure
+
+- **Separate Concerns:** Split different components of a page into separate files. For example, in a room page, separate the chat functionality from the room page code.
+- **Avoid Coupling:** Avoid tightly coupling components together. Abstract functionality to promote reusability.
+
+### Testing
+
+- **Component Tests:** Ensure all components have passing tests.
+- **Automated Testing:** Use libraries like Jest and React Testing Library for automated testing.
+
+### Code Quality
+
+- **Linting:** Run linting before committing any code changes to ensure code quality.
+
+    ```bash
+    npx eslint --fix 'app/**/*.tsx'
+    ```
+
+- **Formatting:** Use Prettier for consistent code formatting.
+
+### Styling
+
+- **Centralized Styling:** Use a centralized file for colors and other styling elements. This promotes consistency and easy maintenance.
+
+    ```tsx
+    // styles/colors.ts
+    export const colors = {
+      primary: '#3498db',
+      secondary: '#2ecc71',
+      // Add other colors here
+    };
+
+    // styles/themes.ts
+    import { StyleSheet } from 'react-native';
+    import { colors } from './colors';
+
+    export const commonStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: colors.primary,
+      },
+      // Add other styles here
+    });
+    ```
+
+- **StyleSheet Creation:** Use `StyleSheet.create` for defining styles in React Native.
+
+    ```tsx
+    import { StyleSheet } from 'react-native';
+    import { colors } from './styles/colors';
+
+    const styles = StyleSheet.create({
+      button: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 5,
+      },
+      buttonText: {
+        color: '#fff',
+        textAlign: 'center',
+      },
+    });
+
+    export default styles;
+    ```
+
+### Hooks
+
+- **Reusable Hooks:** Store reusable hooks in the `app/hooks` directory.
+
+    ```tsx
+    // hooks/useFetchData.ts
+    import { useState, useEffect } from 'react';
+
+    const useFetchData = (url: string) => {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const fetchData = async () => {
+          const response = await fetch(url);
+          const result = await response.json();
+          setData(result);
+          setLoading(false);
+        };
+
+        fetchData();
+      }, [url]);
+
+      return { data, loading };
+    };
+
+    export default useFetchData;
+    ```
+
+## Conclusion
+
+For any further assistance or questions, refer to the resources linked above or consult the official documentation of the respective libraries and frameworks.
+
+Happy coding!
