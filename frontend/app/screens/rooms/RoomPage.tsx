@@ -434,8 +434,8 @@ const RoomPage = () => {
 	};
 
 	const playPauseTrack = useCallback(
-		(index) => {
-			playbackManager.playPauseTrack(queue[index], index);
+		(index, offset) => {
+			playbackManager.playPauseTrack(queue[index], index, offset);
 			setCurrentTrackIndex(index);
 			setIsPlaying(playbackManager.getIsPlaying());
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
@@ -617,7 +617,7 @@ const RoomPage = () => {
 								? styles.currentTrack
 								: styles.queueTrack,
 						]}
-						onPress={() => playPauseTrack(index)}
+						onPress={() => playPauseTrack(index, 0)}
 					>
 						<Image
 							source={{ uri: track.albumArtUrl }}

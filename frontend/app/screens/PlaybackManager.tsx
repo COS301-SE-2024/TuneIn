@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
 import { Track } from "../models/Track"; // Define Track type if not already defined
 
@@ -34,7 +33,7 @@ class PlaybackManager {
 		this.handlePlayback("pause");
 	}
 
-	playPauseTrack(track: Track, index: number) {
+	playPauseTrack(track: Track, index: number, offset: number | null = null) {
 		if (!track) {
 			console.error("Invalid track:", track);
 			return;
@@ -44,7 +43,6 @@ class PlaybackManager {
 			this.handlePlayback("pause");
 			this.isPlaying = false;
 		} else {
-			const offset = this.secondsPlayed > 0 ? this.secondsPlayed * 1000 : 0;
 			this.handlePlayback("play", track.uri, offset).then(() => {
 				this.currentTrackIndex = index;
 				this.isPlaying = true;
