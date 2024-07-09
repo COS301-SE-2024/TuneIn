@@ -8,11 +8,7 @@ class PlaybackManager {
 	private isPlaying: boolean = false;
 	private secondsPlayed: number = 0;
 	private trackPositionIntervalRef: any = null;
-	private handlePlayback: any;
-
-	constructor(handlePlayback: any) {
-		this.handlePlayback = handlePlayback;
-	}
+	private handlePlayback: any = useSpotifyPlayback();
 
 	setQueue(queue: Track[]) {
 		this.queue = queue;

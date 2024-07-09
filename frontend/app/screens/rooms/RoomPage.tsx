@@ -26,6 +26,7 @@ import * as utils from "../../services/Utils";
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import PlaybackManager from "../PlaybackManager";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -41,7 +42,6 @@ const RoomPage = () => {
 	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
-
 	const token = useRef<string | null>(null);
 	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
@@ -59,6 +59,7 @@ const RoomPage = () => {
 	const [setJoinedSecondsPlayed] = useState(null);
 	const socket = useRef<io.Socket | null>(null);
 
+	const playbackManager = useRef(new PlaybackManager()).current;
 	//init & connect to socket
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
