@@ -3,6 +3,21 @@ import renderer, { act } from "react-test-renderer";
 import ChatListScreen from "../app/screens/messaging/ChatListScreen";
 import { useRouter } from "expo-router";
 import { TouchableOpacity, TextInput } from "react-native";
+import { Font } from "expo-font";
+import { Asset } from "expo-asset";
+
+jest.mock("expo-font", () => ({
+	...jest.requireActual("expo-font"),
+	loadAsync: jest.fn(),
+}));
+
+jest.mock("expo-asset", () => ({
+	...jest.requireActual("expo-asset"),
+	fromModule: jest.fn(() => ({
+		downloadAsync: jest.fn(),
+		uri: "mock-uri",
+	})),
+}));
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
