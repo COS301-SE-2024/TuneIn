@@ -25,7 +25,7 @@ const ProfileScreen: React.FC = () => {
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 
-	const [setToken] = useState<string | null>(null);
+	const [token, setToken] = useState<string | null>(null);
 	const [profileData, setProfileData] = useState<any>(null);
 
 	useEffect(() => {
@@ -120,7 +120,7 @@ const ProfileScreen: React.FC = () => {
 	const renderFavRooms = () => {
 		if (profileData.fav_rooms.count > 0) {
 			return (
-				<View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+				<View style={{ paddingHorizontal: 20, paddingTop: 10 }} testID="fav-rooms">
 					<Text style={styles.title}>Favorite Rooms</Text>
 					<View style={styles.roomCardsContainer}>
 						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
@@ -130,6 +130,7 @@ const ProfileScreen: React.FC = () => {
 								songName={room.current_song.title}
 								artistName={room.current_song.artists}
 								username={room.creator.username}
+								imageUrl={room.room_image}
 							/>
 						))}
 					</View>
@@ -142,7 +143,7 @@ const ProfileScreen: React.FC = () => {
 		if (profileData.recent_rooms.count > 0) {
 			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }}  testID="recent-rooms">
 					<Text style={styles.title}>Recently Visited</Text>
 					<View style={styles.roomCardsContainer}>
 						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
@@ -163,7 +164,7 @@ const ProfileScreen: React.FC = () => {
 
 	if (loading) {
 		return (
-			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} testID="loading-indicator">
 				<ActivityIndicator size={100} color="#0000ff" />
 			</View>
 		);
@@ -181,7 +182,7 @@ const ProfileScreen: React.FC = () => {
 
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
-			<View style={{ padding: 15 }}>
+			<View style={{ padding: 15 }} testID="profile-screen">
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<View style={{ flex: 1 }} />
 					{/* <TouchableOpacity>
@@ -200,7 +201,7 @@ const ProfileScreen: React.FC = () => {
 				>
 					Profile
 				</Text>
-				<View style={{ alignItems: "center", marginTop: 20 }}>
+				<View style={{ alignItems: "center", marginTop: 20 }} testID="profile-pic">
 					<Image
 						source={{ uri: profileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
@@ -236,6 +237,7 @@ const ProfileScreen: React.FC = () => {
 					onPress={() => {
 						setLinkDialogVisible(true);
 					}}
+					testID="links-touchable"
 				>
 					{renderLinks()}
 				</TouchableOpacity>
@@ -268,13 +270,13 @@ const ProfileScreen: React.FC = () => {
             duration={favoriteSongsData[0].duration}
           />
         </View> */}
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="bio">
 					<BioSection content={profileData.bio} />
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="genres">
 					<GenreList items={profileData.fav_genres.data} />
 				</View>
-				<View style={{ paddingHorizontal: 20 }}>
+				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{profileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
