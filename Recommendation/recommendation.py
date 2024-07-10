@@ -1,7 +1,9 @@
 import pandas as pd
 import os
+from dotenv import load_dotenv
 
-print(os.getcwd())
+load_dotenv()
 
-df = pd.read_csv('spotify_millsongdata.csv')
-print(df)
+for key in os.environ.keys():
+    print(key)
+
