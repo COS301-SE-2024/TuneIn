@@ -62,7 +62,7 @@ const RoomOptions = () => {
 					{isBookmarked ? (
 						<FontAwesome name="bookmark" size={20} color="black" />
 					) : (
-						<FontAwesome5 name="bookmark" size={20} color="black" />
+						<FontAwesome5 name="bookmark" size={20} color="#08BDBD" />
 					)}
 					<Text style={styles.buttonText}>Bookmark room</Text>
 				</View>

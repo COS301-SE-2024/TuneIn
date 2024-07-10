@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		fontFamily: "Poppins_700Bold",
 		marginBottom: 10,
+		color: "#08BDBD",
 	},
 	inputContainer: {
 		flexDirection: "row",
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	sendCodeButton: {
-		backgroundColor: "#330066",
+		backgroundColor: "#08BDBD",
 		borderRadius: 30,
 		paddingVertical: 15,
 		width: "85%",

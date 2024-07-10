@@ -228,7 +228,7 @@ const CreateRoomScreen: React.FC = () => {
 						}}
 						onPress={navigateToRoomDetails} // Use navigateToRoomDetails function for onPress
 					>
-						<Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>
+						<Text style={{ fontSize: 16, fontWeight: "bold", color: "#08BDBD" }}>
 							Let's go
 						</Text>
 					</TouchableOpacity>

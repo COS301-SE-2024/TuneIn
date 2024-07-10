@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: "bold",
 		marginBottom: 8,
+		color: "#08BDBD",
 	},
 	input: {
 		padding: 12,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
 		height: 48,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "#4C51BF",
+		backgroundColor: "#08BDBD",
 		borderRadius: 24,
 		marginBottom: 20,
 		shadowColor: "#000",
@@ -264,6 +265,7 @@ const styles = StyleSheet.create({
 	},
 	registerLinkBold: {
 		fontWeight: "bold",
+		color: "#08BDBD",
 	},
 });
 

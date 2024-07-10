@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	resendButtonText: {
-		color: "#fff",
+		color: "#08BDBD",
 		fontSize: 18,
 		fontWeight: "bold",
 	},

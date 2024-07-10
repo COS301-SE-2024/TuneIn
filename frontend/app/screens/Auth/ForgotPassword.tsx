@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
 	},
 	instructionText: {
 		fontSize: 14,
-		color: "#888",
+		color: "#08BDBD",
 		fontFamily: "Poppins_500Medium",
 		textAlign: "center",
 		marginBottom: 20,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	sendCodeButton: {
-		backgroundColor: "#330066",
+		backgroundColor: "#08BDBD",
 		borderRadius: 30,
 		paddingVertical: 15,
 		width: "85%",

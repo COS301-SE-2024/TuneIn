@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
 	},
 	instructionText: {
 		fontSize: 14,
-		color: "#888",
+		color: "#08BDBD",
 		fontWeight: "bold",
 		textAlign: "center",
 		marginBottom: 50,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	verifyButton: {
-		backgroundColor: "#4B0082",
+		backgroundColor: "#08BDBD",
 		borderRadius: 25,
 		paddingVertical: 15,
 		alignItems: "center",
@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
 	registerBoldText: {
 		fontWeight: "bold",
 		fontFamily: "Poppins_700Bold",
+		color: "#08BDBD",
 	},
 });
 
