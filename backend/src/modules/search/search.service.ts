@@ -59,7 +59,7 @@ export class SearchService {
 	*/
 	async demoSearch() {
 		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
-		SELECT * FROM room WHERE SIMILARITY(name,'Conbrete') > 0.4;`
+		SELECT * FROM room WHERE SIMILARITY(name,'Conbrete') > 0.4;`;
 		console.log(result);
 	}
 

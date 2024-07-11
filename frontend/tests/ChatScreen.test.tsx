@@ -4,6 +4,19 @@ import ChatScreen from "../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { TextInput, TouchableOpacity } from "react-native";
 
+jest.mock("expo-font", () => ({
+	...jest.requireActual("expo-font"),
+	loadAsync: jest.fn(),
+}));
+
+jest.mock("expo-asset", () => ({
+	...jest.requireActual("expo-asset"),
+	fromModule: jest.fn(() => ({
+		downloadAsync: jest.fn(),
+		uri: "mock-uri",
+	})),
+}));
+
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
 	useLocalSearchParams: jest.fn(),

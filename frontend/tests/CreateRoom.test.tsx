@@ -5,9 +5,13 @@ import CreateRoom from "../app/screens/rooms/CreateRoom"; // Adjust the import p
 import { useNavigation } from "expo-router";
 
 // Mock useNavigation from expo-router
-jest.mock("expo-router", () => ({
-	useNavigation: jest.fn(),
-}));
+jest.mock("expo-router", () => {
+	const actualModule = jest.requireActual("expo-router");
+	return {
+		...actualModule,
+		useNavigation: jest.fn(),
+	};
+});
 
 describe("<CreateRoom />", () => {
 	it("calls goBack when Go Back button is pressed", () => {
@@ -16,7 +20,7 @@ describe("<CreateRoom />", () => {
 
 		const { getByText } = render(<CreateRoom />);
 
-		const goBackButton = getByText("Go Back");
+		const goBackButton = getByText("×");
 		fireEvent.press(goBackButton);
 
 		expect(goBack).toHaveBeenCalled();

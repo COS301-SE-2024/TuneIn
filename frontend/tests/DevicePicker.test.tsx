@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import DevicePicker from "../app/components/DevicePicker";
 import { useSpotifyAuth } from "../app/hooks/useSpotifyAuth";
 import { useSpotifyDevices } from "../app/hooks/useSpotifyDevices";
