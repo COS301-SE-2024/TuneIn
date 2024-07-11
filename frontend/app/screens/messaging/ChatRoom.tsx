@@ -20,11 +20,7 @@ import {
 } from "@expo/vector-icons";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import io from "socket.io-client";
-import {
-	LiveChatMessageDto,
-	RoomDto,
-	UserProfileDto,
-} from "../../../api-client";
+import { LiveChatMessageDto, RoomDto } from "../../../api-client";
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 
