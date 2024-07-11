@@ -35,15 +35,14 @@ jest.mock("../app/services/StorageService", () => ({
 
 describe("<App />", () => {
 	it("renders the Home component correctly", () => {
-		// (useRouter.push as jest.Mock).mockImplementation(() => {});
 		(StorageService.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
 		const tree = renderer.create(<App />).toJSON();
 		expect(tree).toMatchSnapshot();
 	});
 
-	// it("Home component has 3 children", () => {
-	// 	(StorageService.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
-	// 	const tree = renderer.create(<App />).toJSON();
-	// 	expect(tree.children.length).toBe(3);
-	// });
+	it("Home component has 3 children", () => {
+		(StorageService.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		const tree = renderer.create(<App />).toJSON();
+		expect(tree.children.length).toBe(3);
+	});
 });
