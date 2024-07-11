@@ -60,14 +60,11 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				setToken(storedToken);
 				const whoami = async (token: string | null, type?: string) => {
 					try {
-						const response = await axios.get(
-							`${utils.API_BASE_URL}/users`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
+						});
 						console.log("User's own info:", response.data);
 						return response.data as UserDto;
 					} catch (error) {

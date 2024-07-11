@@ -13,9 +13,6 @@ module.exports = {
 		"./app/**/*.{js,jsx,ts,tsx}",
 	],
 	theme: {
-		extend: {},
-	},
-	theme: {
 		extend: {
 			colors: {
 				primary: "#E1306C",

@@ -52,12 +52,9 @@ const Home: React.FC = () => {
 
 	const getFriends = async (token) => {
 		try {
-			const response = await axios.get(
-				`${utils.API_BASE_URL}/users/friends`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
+			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
