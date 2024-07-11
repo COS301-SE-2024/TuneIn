@@ -1,10 +1,8 @@
 import React from "react";
-import { render, fireEvent, act } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import EditProfileScreen from "../app/screens/profile/EditProfilePage"; // Adjust the import path accordingly
 import { useNavigation, useLocalSearchParams } from "expo-router";
 import auth from "../app/services/AuthManagement";
-import { Font } from "expo-font";
-import { Asset } from "expo-asset";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -59,13 +57,13 @@ describe("<EditProfileScreen />", () => {
 		});
 		(auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
 
-			const { getByText } = render(<EditProfileScreen />);
+		const { getByText } = render(<EditProfileScreen />);
 
-			expect(useLocalSearchParams).toHaveBeenCalled();
+		expect(useLocalSearchParams).toHaveBeenCalled();
 
-			expect(getByText("John Doe")).toBeTruthy();
-			expect(getByText("This is a bio")).toBeTruthy();
-			expect(getByText("@johndoe")).toBeTruthy();
+		expect(getByText("John Doe")).toBeTruthy();
+		expect(getByText("This is a bio")).toBeTruthy();
+		expect(getByText("@johndoe")).toBeTruthy();
 	});
 
 	// it("calls goBack when Back button is pressed", () => {

@@ -3,8 +3,6 @@ import renderer, { act } from "react-test-renderer";
 import ChatScreen from "../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { TextInput, TouchableOpacity } from "react-native";
-import { Font } from "expo-font";
-import { Asset } from "expo-asset";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -18,7 +16,6 @@ jest.mock("expo-asset", () => ({
 		uri: "mock-uri",
 	})),
 }));
-
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),

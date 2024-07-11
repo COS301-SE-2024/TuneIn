@@ -120,7 +120,10 @@ const ProfileScreen: React.FC = () => {
 	const renderFavRooms = () => {
 		if (profileData.fav_rooms.count > 0) {
 			return (
-				<View style={{ paddingHorizontal: 20, paddingTop: 10 }} testID="fav-rooms">
+				<View
+					style={{ paddingHorizontal: 20, paddingTop: 10 }}
+					testID="fav-rooms"
+				>
 					<Text style={styles.title}>Favorite Rooms</Text>
 					<View style={styles.roomCardsContainer}>
 						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
@@ -143,7 +146,7 @@ const ProfileScreen: React.FC = () => {
 		if (profileData.recent_rooms.count > 0) {
 			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
-				<View style={{ paddingHorizontal: 20 }}  testID="recent-rooms">
+				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
 					<Text style={styles.title}>Recently Visited</Text>
 					<View style={styles.roomCardsContainer}>
 						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
@@ -164,7 +167,10 @@ const ProfileScreen: React.FC = () => {
 
 	if (loading) {
 		return (
-			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} testID="loading-indicator">
+			<View
+				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+				testID="loading-indicator"
+			>
 				<ActivityIndicator size={100} color="#0000ff" />
 			</View>
 		);
@@ -201,7 +207,10 @@ const ProfileScreen: React.FC = () => {
 				>
 					Profile
 				</Text>
-				<View style={{ alignItems: "center", marginTop: 20 }} testID="profile-pic">
+				<View
+					style={{ alignItems: "center", marginTop: 20 }}
+					testID="profile-pic"
+				>
 					<Image
 						source={{ uri: profileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}

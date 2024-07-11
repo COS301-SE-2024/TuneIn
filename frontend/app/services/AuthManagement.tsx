@@ -46,12 +46,9 @@ class AuthManagement {
 	public async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
 		try {
-			const response = await axios.post(
-				`${utils.API_BASE_URL}/auth/refresh`,
-				{
-					refreshToken: this.token,
-				},
-			);
+			const response = await axios.post(`${utils.API_BASE_URL}/auth/refresh`, {
+				refreshToken: this.token,
+			});
 			const newToken = response.data.token;
 			if (newToken) {
 				this.setToken(newToken);

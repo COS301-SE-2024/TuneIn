@@ -25,7 +25,7 @@ describe("ProfileScreen", () => {
 		jest.clearAllMocks();
 		(AsyncStorage.getItem as jest.Mock).mockClear();
 		(axios.get as jest.Mock).mockClear();
-        (auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
+		(auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
 	});
 
 	it("renders loading indicator initially", async () => {

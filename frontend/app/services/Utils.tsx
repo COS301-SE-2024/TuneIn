@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import localhost from 'react-native-localhost';
+import localhost from "react-native-localhost";
 
 const USE_LOCAL_BACKEND_SERVER = true;
 
