@@ -18,14 +18,14 @@ jest.mock("expo-asset", () => ({
 }));
 
 jest.mock("expo-router", () => {
-    const actualModule = jest.requireActual("expo-router");
-    return {
-        ...actualModule,
-        useRouter: jest.fn(() => ({
-            push: jest.fn(),
-            back: jest.fn(),
-        })),
-    };
+	const actualModule = jest.requireActual("expo-router");
+	return {
+		...actualModule,
+		useRouter: jest.fn(() => ({
+			push: jest.fn(),
+			back: jest.fn(),
+		})),
+	};
 });
 
 jest.mock("../app/services/StorageService", () => ({

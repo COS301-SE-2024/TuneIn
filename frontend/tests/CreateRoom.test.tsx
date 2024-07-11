@@ -6,15 +6,15 @@ import { useNavigation } from "expo-router";
 
 // Mock useNavigation from expo-router
 jest.mock("expo-router", () => {
-    const actualModule = jest.requireActual("expo-router");
-    return {
-        ...actualModule,
+	const actualModule = jest.requireActual("expo-router");
+	return {
+		...actualModule,
 		useNavigation: jest.fn(),
-        useRouter: jest.fn(() => ({
-            push: jest.fn(),
-            back: jest.fn(),
-        })),
-    };
+		useRouter: jest.fn(() => ({
+			push: jest.fn(),
+			back: jest.fn(),
+		})),
+	};
 });
 
 describe("<CreateRoom />", () => {
