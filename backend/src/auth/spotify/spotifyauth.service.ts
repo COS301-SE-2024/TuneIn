@@ -245,7 +245,10 @@ export class SpotifyAuthService {
 			return existingUser[0];
 		}
 
-		const profilePicture = largest > 0 ? spotifyUser.images[largest]?.url : 'https://example.com/default-profile-picture.png';
+		const profilePicture =
+			largest > 0
+				? spotifyUser.images[largest]?.url
+				: "https://example.com/default-profile-picture.png";
 
 		const user: Prisma.usersCreateInput = {
 			username: spotifyUser.id,
