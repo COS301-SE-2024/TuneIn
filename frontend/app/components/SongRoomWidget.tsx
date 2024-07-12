@@ -14,13 +14,18 @@ const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({
 	return (
 		<View style={styles.container}>
 			<View style={styles.imageContainer}>
-				<Image source={{ uri: albumCoverUrl }} style={styles.image} />
+				<Image
+					source={{ uri: albumCoverUrl }}
+					style={styles.image}
+					testID="album-cover-image"
+				/>
 			</View>
 			<View style={styles.textContainer}>
 				<Text style={styles.songName}>{songName}</Text>
 				<Text style={styles.artist}>{artist}</Text>
 			</View>
 			<Slider
+				testID="song-slider"
 				style={styles.slider}
 				value={progress}
 				minimumValue={0}
