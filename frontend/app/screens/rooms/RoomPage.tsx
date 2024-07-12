@@ -35,10 +35,14 @@ type Message = {
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("Room data:", room);
-	const roomData = JSON.parse(room);
+	let roomData;
+	if (Array.isArray(room)) {
+		roomData = JSON.parse(room[0]);
+	} else {
+		roomData = JSON.parse(room);
+	}
 	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
-	const [roomObj, setRoomObj] = useState<RoomDto | null>(null);
 	const router = useRouter();
 	const { handlePlayback } = useSpotifyPlayback();
 
@@ -87,7 +91,6 @@ const RoomPage = () => {
 					},
 				);
 				roomObjRef.current = roomDto.data;
-				setRoomObj(roomDto.data);
 			} catch (error) {
 				console.error("Error fetching room:", error);
 			}
