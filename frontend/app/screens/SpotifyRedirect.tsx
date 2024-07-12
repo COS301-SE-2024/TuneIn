@@ -8,11 +8,12 @@ import {
 	ScrollView,
 } from "react-native";
 import * as Linking from "expo-linking";
-
+console.log("process.env.SPOTIFY_CLIENT_ID : ", process.env.SPOTIFY_CLIENT_ID);
 const clientId = process.env.SPOTIFY_CLIENT_ID;
+console.log("Client id: ", clientId);
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);
 }
 

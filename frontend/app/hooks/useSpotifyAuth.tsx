@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
 
-const clientId = process.env.SPOTIFY_CLIENT_ID;
+const clientId = process.env;
+console.log("process.env", process.env.AWS_COGNITO_CLIENT_ID);
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 1",
 	);
 }
 
