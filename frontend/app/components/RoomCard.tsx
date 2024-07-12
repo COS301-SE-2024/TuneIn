@@ -7,6 +7,7 @@ const RoomCard = ({ roomName, songName, artistName, username, imageUrl }) => {
 			source={{ uri: imageUrl }}
 			style={styles.background}
 			imageStyle={styles.backgroundImage}
+			testID="room-card-image-background"
 		>
 			<View style={styles.overlay}>
 				<Text style={styles.roomName}>{roomName}</Text>
