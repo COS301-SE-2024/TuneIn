@@ -58,6 +58,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 				source={{ uri: roomCard.backgroundImage }}
 				style={styles.imageBackground}
 				imageStyle={styles.imageBackgroundStyle}
+				testID="room-card-background" // Add testID here
 			>
 				<View style={styles.overlay} />
 				<View style={styles.textContainer}>
