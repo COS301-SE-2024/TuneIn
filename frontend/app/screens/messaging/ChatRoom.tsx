@@ -20,9 +20,11 @@ import {
 } from "@expo/vector-icons";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto } from "../../../api-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
+import * as utils from "../../services/Utils";
+import auth from "../../services/AuthManagement";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -351,7 +353,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 								}}
 							>
 								<Text style={{ fontSize: 14, fontWeight: "bold" }}>
-									{msg.message.sender.name}
+									{msg.message.sender.profileName}
 								</Text>
 								<Text>{msg.message.messageBody}</Text>
 								<Text

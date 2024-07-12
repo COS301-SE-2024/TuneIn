@@ -1,19 +1,8 @@
 // src/api/ApiContext.tsx
 import React, { createContext, useContext } from "react";
-import {
-	Configuration,
-	DefaultApi,
-	ProfileApi,
-	RoomsApi,
-	UsersApi,
-} from "./../api-client";
+import { Configuration, DefaultApi } from "./../api-client";
 
 const ApiContext = createContext<DefaultApi | null>(null);
-
-//for other paths of the API
-const ProfileContext = createContext<ProfileApi | null>(null);
-const RoomsContext = createContext<RoomsApi | null>(null);
-const UsersContext = createContext<UsersApi | null>(null);
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,

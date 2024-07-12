@@ -9,6 +9,8 @@ import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
 import { TasksModule } from "../../tasks/tasks.module";
 import { mockConfigService, mockPrismaService } from "../../../jest-mocking";
+import { AuthService } from "../auth.service";
+import { AuthModule } from "../auth.module";
 
 describe("SpotifyAuthService", () => {
 	let service: SpotifyAuthService;
@@ -21,8 +23,10 @@ describe("SpotifyAuthService", () => {
 				DbUtilsModule,
 				SpotifyModule,
 				TasksModule,
+				AuthModule,
 			],
 			providers: [
+				AuthService,
 				SpotifyAuthService,
 				{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
 				{ provide: PrismaService, useValue: mockPrismaService },

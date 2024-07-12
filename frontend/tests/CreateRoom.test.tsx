@@ -10,6 +10,10 @@ jest.mock("expo-router", () => {
 	return {
 		...actualModule,
 		useNavigation: jest.fn(),
+		useRouter: jest.fn(() => ({
+			push: jest.fn(),
+			back: jest.fn(),
+		})),
 	};
 });
 
