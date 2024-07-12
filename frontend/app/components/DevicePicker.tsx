@@ -14,9 +14,11 @@ import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
 
 const DevicePicker = () => {
 	const { getToken } = useSpotifyAuth();
-	const [isVisible, setIsVisible] = useState();
-	const [devices, setDevices] = useState([]);
-	const [setSelectedDevice] = useState([]);
+	const [isVisible, setIsVisible] = useState(false); // Corrected initialization
+	const [devices, setDevices] = useState([] as any[]); // Corrected initialization
+	const [selectedDevice, setSelectedDevice] = useState<string | undefined>(
+		undefined,
+	); // Corrected initialization
 	const [isLoading, setIsLoading] = useState(false);
 	const { getDeviceIDs } = useSpotifyDevices();
 	const [accessToken, setAccessToken] = useState<string>("");
@@ -35,7 +37,8 @@ const DevicePicker = () => {
 	}, [getToken]);
 
 	useEffect(() => {
-		let interval;
+		let interval: NodeJS.Timeout;
+
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
@@ -61,7 +64,7 @@ const DevicePicker = () => {
 		}
 
 		return () => clearInterval(interval);
-	});
+	}, [isVisible, getDeviceIDs]);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
@@ -71,7 +74,7 @@ const DevicePicker = () => {
 		setIsVisible(false);
 	};
 
-	const handleDeviceSelect = async (deviceId) => {
+	const handleDeviceSelect = async (deviceId: string) => {
 		setIsLoading(true);
 		setSelectedDevice(deviceId);
 		setTimeout(async () => {
@@ -98,7 +101,6 @@ const DevicePicker = () => {
 			}
 		}, 500); // 2 seconds delay
 	};
-
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Previous Screen Content</Text>
