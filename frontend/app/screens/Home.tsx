@@ -25,7 +25,7 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [setCacheLoaded] = useState(false);
+
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -76,7 +76,6 @@ const Home: React.FC = () => {
 			userID: room.creator.userID,
 			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
 			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: "50",
 			tags: room.tags ? room.tags : [],
 			mine: mine,
 			isNsfw: room.has_nsfw_content,
@@ -87,7 +86,6 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
@@ -100,8 +98,6 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
-
-			setCacheLoaded(true);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
 		}
@@ -110,7 +106,6 @@ const Home: React.FC = () => {
 	const refreshData = async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
-		setToken(storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms

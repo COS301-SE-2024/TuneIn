@@ -39,7 +39,7 @@ const NavBar: React.FC = () => {
 					<Text
 						style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
 					>
-						Test
+						Sitemap
 					</Text>
 				</View>
 			</TouchableOpacity>
