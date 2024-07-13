@@ -1,8 +1,9 @@
 import { CognitoUserPool } from "amazon-cognito-identity-js";
 // eslint-disable-next-line import/no-unresolved
+import { AWS_COGNITO_USER_POOL_ID, AWS_COGNITO_CLIENT_ID } from "@env";
 
-const UserPoolId = process.env.AWS_COGNITO_USER_POOL_ID;
-const ClientId = process.env.AWS_COGNITO_CLIENT_ID;
+const UserPoolId = AWS_COGNITO_USER_POOL_ID;
+const ClientId = AWS_COGNITO_CLIENT_ID;
 
 if (!UserPoolId) {
 	throw new Error(

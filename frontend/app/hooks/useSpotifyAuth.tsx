@@ -2,15 +2,19 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "@env";
+const clientId = SPOTIFY_CLIENT_ID;
 
-const clientId = process.env.SPOTIFY_CLIENT_ID;
+console.log("@env clientId: ", SPOTIFY_CLIENT_ID);
+console.log("clientId: ", clientId);
+
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
 	);
 }
 
-const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+const clientSecret = SPOTIFY_CLIENT_SECRET;
 if (!clientSecret) {
 	throw new Error(
 		"No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables",
