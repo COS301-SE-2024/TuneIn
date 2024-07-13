@@ -6,7 +6,7 @@ import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { AuthService } from "../../auth/auth.service";
 
-import { mockPrismaService, mockConfigService } from "../../../jest-mocking";
+import { mockPrismaService, mockConfigService } from "../../../jest_mocking/service-mocking";
 import { ConfigService } from "@nestjs/config";
 
 describe("ProfileService", () => {

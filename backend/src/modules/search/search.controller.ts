@@ -11,7 +11,7 @@ import {
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService, JWTPayload } from "src/auth/auth.service";
+import { AuthService, JWTPayload } from "./../../auth/auth.service";
 
 @Controller("search")
 export class SearchController {

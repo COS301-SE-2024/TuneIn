@@ -1,4 +1,4 @@
-declare module "@env" {
+declare module "react-native-dotenv" {
 	export const AWS_COGNITO_USER_POOL_ID: string;
 	export const AWS_COGNITO_CLIENT_ID: string;
 	export const SPOTIFY_CLIENT_ID: string;
@@ -9,4 +9,6 @@ declare module "@env" {
 	export const AWS_SECRET_ACCESS_KEY: string;
 	export const AWS_S3_BUCKET_NAME: string;
 	export const JWT_SECRET_KEY: string;
+	export const AWS_S3_REGION: string;
+	export const AWS_S3_ENDPOINT: string;
 }
