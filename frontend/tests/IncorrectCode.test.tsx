@@ -10,6 +10,19 @@ jest.mock("expo-router", () => ({
 	}),
 }));
 
+jest.mock("expo-font", () => ({
+	...jest.requireActual("expo-font"),
+	loadAsync: jest.fn(),
+}));
+
+jest.mock("expo-asset", () => ({
+	...jest.requireActual("expo-asset"),
+	fromModule: jest.fn(() => ({
+		downloadAsync: jest.fn(),
+		uri: "mock-uri",
+	})),
+}));
+
 describe("IncorrectCodeScreen", () => {
 	it("renders correctly", () => {
 		const { getByText } = render(<IncorrectCodeScreen />);

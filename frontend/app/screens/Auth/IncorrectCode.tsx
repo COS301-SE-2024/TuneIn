@@ -19,7 +19,7 @@ const IncorrectCodeScreen: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<View style={styles.header}>
