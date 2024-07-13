@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
-import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "@env";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
 const clientId = SPOTIFY_CLIENT_ID;
 
-console.log("@env clientId: ", SPOTIFY_CLIENT_ID);
+console.log("react-native-dotenv clientId: ", SPOTIFY_CLIENT_ID);
 console.log("clientId: ", clientId);
 
 if (!clientId) {

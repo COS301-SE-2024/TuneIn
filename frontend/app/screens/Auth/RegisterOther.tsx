@@ -12,7 +12,7 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
-import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "@env";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_TARGET } from "react-native-dotenv";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {

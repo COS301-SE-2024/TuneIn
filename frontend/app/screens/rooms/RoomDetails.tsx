@@ -24,7 +24,7 @@ import {
 	AWS_S3_BUCKET_NAME,
 	AWS_S3_REGION,
 	AWS_S3_ENDPOINT,
-} from "@env";
+} from "react-native-dotenv";
 
 if (!AWS_ACCESS_KEY_ID) {
 	throw new Error(

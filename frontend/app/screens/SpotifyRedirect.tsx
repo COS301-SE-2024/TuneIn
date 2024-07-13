@@ -13,7 +13,7 @@ import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET,
 	SPOTIFY_REDIRECT_TARGET,
-} from "@env";
+} from "react-native-dotenv";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
