@@ -12,7 +12,7 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
-const clientId = SPOTIFY_CLIENT_ID;
+const clientId = process.env.SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
