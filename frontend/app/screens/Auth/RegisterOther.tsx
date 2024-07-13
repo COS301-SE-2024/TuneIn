@@ -12,6 +12,11 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
+import {
+	SPOTIFY_CLIENT_ID,
+	SPOTIFY_REDIRECT_TARGET,
+} from "react-native-dotenv";
+
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
@@ -19,7 +24,7 @@ if (!clientId) {
 	);
 }
 
-const redirectTarget = process.env.SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
 	throw new Error(
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
