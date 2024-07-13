@@ -146,7 +146,6 @@ export class AuthService {
 		}
 	}
 
-	// eslint-disable-next-line prettier/prettier
   	async listUsers(): Promise<ListUsersCommandOutput> {
 		const params = {
 			UserPoolId: this.userPoolId,
