@@ -35,7 +35,7 @@ const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
 
 	useEffect(() => {
-		const handleRedirect = (event) => {
+		const handleRedirect = (event: any) => {
 			let { queryParams } = Linking.parse(event.url);
 			console.log("Redirect Data:", queryParams);
 			WebBrowser.dismissBrowser();
@@ -72,7 +72,7 @@ const RegisterOtherScreen: React.FC = () => {
 			"user-read-currently-playing",
 		].join(" ");
 
-		const rt = "http://localhost:5000";
+		const rt = redirectTarget;
 		const authUrl =
 			`https://accounts.spotify.com/authorize` +
 			`?client_id=${clientId}` +

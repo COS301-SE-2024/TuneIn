@@ -53,7 +53,7 @@ const LoginScreen: React.FC = () => {
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				Alert.alert("Base url: " + utils.API_BASE_URL);
+				Alert.alert(utils.API_BASE_URL);
 				// POST request to backend
 				fetch(`${utils.API_BASE_URL}/auth/login`, {
 					method: "POST",

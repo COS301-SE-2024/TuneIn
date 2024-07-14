@@ -179,7 +179,7 @@ const RoomPage = () => {
 				socket.current.disconnect();
 			}
 		};
-	});
+	}, []);
 
 	const sendMessage = () => {
 		if (message.trim()) {
@@ -486,7 +486,7 @@ const RoomPage = () => {
 
 	const navigateToPlaylist = () => {
 		router.navigate({
-			pathname: "/screens/Playlist",
+			pathname: "/screens/rooms/Playlist",
 			params: {
 				queue: JSON.stringify(queue),
 				currentTrackIndex,

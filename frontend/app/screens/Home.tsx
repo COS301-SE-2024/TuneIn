@@ -64,7 +64,11 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const formatRoomData = (rooms: any[], mine: boolean = false) => {
+	const formatRoomData = (rooms: any, mine = false) => {
+		if (!Array.isArray(rooms)) {
+			return [];
+		}
+
 		return rooms.map((room) => ({
 			id: room.roomID,
 			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -92,6 +96,7 @@ const Home: React.FC = () => {
 	const [token, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
+		console.log("Loading cached data");
 		try {
 			const cachedRecents = await StorageService.getItem("cachedRecents");
 			const cachedPicks = await StorageService.getItem("cachedPicks");
@@ -147,12 +152,16 @@ const Home: React.FC = () => {
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
-			const formattedFriends = fetchedFriends.map((friend: Friend) => ({
-				profilePicture: friend.profile_picture_url
-					? friend.profile_picture_url
-					: ProfileIMG,
-				name: friend.profile_name,
-			}));
+
+			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
+				? fetchedFriends.map((friend: Friend) => ({
+						profilePicture: friend.profile_picture_url
+							? friend.profile_picture_url
+							: ProfileIMG,
+						profile_name: friend.profile_name, // Ensure you include the profile_name property
+					}))
+				: [];
+
 			setFriends(formattedFriends);
 
 			await StorageService.setItem(
