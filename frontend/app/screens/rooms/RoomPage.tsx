@@ -26,6 +26,7 @@ import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PlaybackManager from "../PlaybackManager";
+import Bookmarker from "./functions/Bookmarker";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -64,6 +65,7 @@ const RoomPage = () => {
 	const socket = useRef<io.Socket | null>(null);
 
 	const playbackManager = useRef(new PlaybackManager()).current;
+	const bookmarker = useRef(new Bookmarker()).current;
 	//init & connect to socket
 	useEffect(() => {
 		const getTokenAndSelf = async () => {
@@ -219,52 +221,33 @@ const RoomPage = () => {
 	}, [roomID]);
 
 	const checkBookmark = async () => {
-		const t = await auth.getToken();
-		console.log("Checking bookmark");
 		try {
-			const response = await fetch(`${utils.API_BASE_URL}/users/bookmarks`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${t}`,
-				},
-			});
-			const data = await response.json();
-			// check whether the room is bookmarked or not
-			for (let i = 0; i < data.length; i++) {
-				if (data[i].roomID === roomID) {
-					console.log("Room is bookmarked");
-					setIsBookmarked(true);
-					break;
-				}
-			}
-			console.log(data);
+			const token = await auth.getToken();
+			const isBookmarked = await bookmarker.checkBookmark(
+				token as string,
+				String(roomID),
+			);
+			setIsBookmarked(isBookmarked ?? false); // Use false as the default value if isBookmarked is undefined
 		} catch (error) {
-			console.error("Error:", error);
+			console.error("Error checking bookmark:", error);
 		}
 	};
+
 	const handleBookmark = async () => {
 		// make a request to the backend to check if the room is bookmarked
 		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
-		console.log("tokeeen", token);
 
-		const t = await auth.getToken();
+		const token = await auth.getToken();
 
 		try {
 			console.log(roomID);
-			const response = await fetch(
-				`${utils.API_BASE_URL}/rooms/${roomID}/${isBookmarked ? "unbookmark" : "bookmark"}`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${t}`,
-					},
-				},
+			const handleBookmark = await bookmarker.handleBookmark(
+				token as string,
+				String(roomID),
+				isBookmarked
 			);
-			console.log(response);
-			if (response.status === 201) {
+			if (handleBookmark) {
 				Alert.alert(
 					"Success",
 					`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
