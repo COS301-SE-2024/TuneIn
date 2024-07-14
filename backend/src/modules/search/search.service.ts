@@ -75,7 +75,30 @@ export class SearchService {
 		q: string;
 		creator?: string;
 	}): Promise<RoomDto[]> {
-		console.log(params);
+		// console.log(params);
+		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		SELECT room_id, name, description, username,
+       	LEAST(levenshtein(name, ${params.q}), levenshtein(username, ${params.creator})) AS distance
+		FROM room INNER JOIN users ON room_creator = user_id
+		WHERE similarity(name, ${params.q}) > 0.2
+		OR similarity(username, ${params.creator}) > 0.2
+		ORDER BY distance ASC
+		LIMIT 10;`;
+
+		// console.log(result);
+
+		if (Array.isArray(result)) {
+			const roomIds = result.map(row => row.room_id.toString());
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
+			console.log(roomDtos);
+			
+			if(roomDtos){
+				return roomDtos;
+			}
+		} else {
+			console.error('Unexpected query result format, expected an array.');
+		}
+
 		return [new RoomDto()];
 	}
 
