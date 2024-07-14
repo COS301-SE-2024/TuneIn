@@ -21,15 +21,22 @@ class AuthManagement {
 	}
 
 	public async getToken(): Promise<string | null> {
-		if (this.checkTokenExpiry()) {
+		if (await this.checkTokenExpiry()) {
 			await this.refreshAccessToken();
 		}
+
+		console.log("Token:", this.token);
+		console.log("Token expiry:", await this.checkTokenExpiry());
 		return this.token;
 	}
 
 	public async checkTokenExpiry(): Promise<boolean> {
-		if (!this.token) {
+		if (!this.token || this.token === null) {
 			this.token = await StorageService.getItem("token");
+		}
+
+		if (!this.token || this.token === null) {
+			throw new Error("No token found");
 		}
 
 		// Check if token is expired
@@ -41,7 +48,7 @@ class AuthManagement {
 		}
 
 		const currentTime = Math.floor(Date.now() / 1000);
-		return decodedToken.exp > currentTime;
+		return currentTime >= decodedToken.exp;
 	}
 
 	public async refreshAccessToken(): Promise<void> {
