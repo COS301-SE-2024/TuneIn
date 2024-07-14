@@ -14,6 +14,9 @@ import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
 import { SpotifyModule } from "../spotify/spotify.module";
+import { DtoGenModule } from "../modules/dto-gen/dto-gen.module";
+import { DbUtilsModule } from "../modules/db-utils/db-utils.module";
+import { UsersModule } from "../modules/users/users.module";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
@@ -32,16 +35,7 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 		SpotifyModule,
 		SpotifyAuthModule,
 	],
-	providers: [
-		AuthService,
-		LocalStrategy,
-		JwtStrategy,
-		PrismaService,
-		DtoGenService,
-		DbUtilsService,
-		UsersService,
-		ConfigService,
-	],
+	providers: [AuthService, LocalStrategy, JwtStrategy],
 	controllers: [AuthController, SpotifyAuthController],
 	exports: [AuthService],
 })

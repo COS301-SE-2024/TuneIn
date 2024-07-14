@@ -5,7 +5,7 @@ import { DbUtilsService } from "./db-utils.service";
 
 @Module({
 	imports: [PrismaModule],
-	providers: [PrismaService, DbUtilsService],
+	providers: [DbUtilsService],
 	exports: [DbUtilsService],
 })
 export class DbUtilsModule {}

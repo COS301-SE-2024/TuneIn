@@ -49,15 +49,6 @@ import { SearchModule } from "./modules/search/search.module";
 		SearchModule,
 	],
 	controllers: [AppController],
-	providers: [
-		AppService,
-		DtoGenService,
-		DbUtilsService,
-		S3Service,
-		ChatGateway,
-		ConnectedUsersService,
-		SpotifyService,
-		SearchService,
-	],
+	providers: [AppService],
 })
 export class AppModule {}

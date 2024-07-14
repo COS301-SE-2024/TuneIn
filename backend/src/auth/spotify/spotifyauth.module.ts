@@ -1,7 +1,7 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
 import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
@@ -16,10 +16,10 @@ import { AuthModule } from "../auth.module";
 		DbUtilsModule,
 		SpotifyModule,
 		TasksModule,
-		AuthModule,
+		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 	],
 	controllers: [],
-	providers: [SpotifyAuthService, ConfigService, AuthService],
+	providers: [SpotifyAuthService],
 	exports: [SpotifyAuthService],
 })
 export class SpotifyAuthModule {}
