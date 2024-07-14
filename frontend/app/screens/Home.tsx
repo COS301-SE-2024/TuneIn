@@ -7,6 +7,8 @@ import {
 	Animated,
 	StyleSheet,
 	ActivityIndicator,
+	NativeScrollEvent,
+	NativeSyntheticEvent,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import RoomCardWidget from "../components/RoomCardWidget";
@@ -25,7 +27,7 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [setCacheLoaded] = useState(false);
+	const [cache, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -50,7 +52,7 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const getFriends = async (token) => {
+	const getFriends = async (token: string) => {
 		try {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
@@ -76,7 +78,7 @@ const Home: React.FC = () => {
 			userID: room.creator.userID,
 			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
 			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: "50",
+			roomSize: 50,
 			tags: room.tags ? room.tags : [],
 			mine: mine,
 			isNsfw: room.has_nsfw_content,
@@ -87,7 +89,7 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [setToken] = useState<string | null>(null);
+	const [token, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
@@ -107,7 +109,8 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const refreshData = async () => {
+	const refreshData = useCallback(async () => {
+		console.log("Refreshing data");
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		setToken(storedToken);
@@ -144,7 +147,7 @@ const Home: React.FC = () => {
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
-			const formattedFriends = fetchedFriends.map((friend) => ({
+			const formattedFriends = fetchedFriends.map((friend: Friend) => ({
 				profilePicture: friend.profile_picture_url
 					? friend.profile_picture_url
 					: ProfileIMG,
@@ -159,7 +162,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	};
+	}, []);
 
 	useEffect(() => {
 		const initialize = async () => {
@@ -170,10 +173,10 @@ const Home: React.FC = () => {
 
 		const interval = setInterval(() => {
 			refreshData();
-		}, 240000); // Refresh data every 60 seconds
+		}, 240000); // Refresh data every 240 seconds (4 minutes)
 
 		return () => clearInterval(interval);
-	});
+	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
 		<Link
@@ -198,7 +201,7 @@ const Home: React.FC = () => {
 	};
 
 	const handleScroll = useCallback(
-		({ nativeEvent }) => {
+		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
 			const direction = currentOffset > previousScrollY.current ? "down" : "up";
 			previousScrollY.current = currentOffset;
