@@ -128,7 +128,30 @@ export class SearchService {
 	}
 
 	async searchUsers(q: string): Promise<UserDto[]> {
-		console.log(q);
+		// console.log(q);
+
+		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
+		SELECT *,
+		LEVENSHTEIN(username, ${q}) AS distance
+		FROM users
+		WHERE similarity(username, ${q}) > 0.2
+		ORDER BY distance ASC
+		LIMIT 5;`;
+
+		// console.log(result);
+
+		if (Array.isArray(result)) {
+			const userIds = result.map(row => row.user_id.toString());
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
+			// console.log(userDtos);
+			
+			if(userDtos){
+				return userDtos;
+			}
+		} else {
+			console.error('Unexpected query result format, expected an array.');
+		}
+
 		return [new UserDto()];
 	}
 
