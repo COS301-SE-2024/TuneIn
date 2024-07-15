@@ -18,7 +18,7 @@ const WhiteButton: React.FC<WhiteButtonProps> = ({ title, onPress}) => {
 const styles = StyleSheet.create({
   button: {
     width: "92%",
-    height: 56,
+    height: 52,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFF",

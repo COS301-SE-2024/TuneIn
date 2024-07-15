@@ -1,6 +1,8 @@
 // CyanButton.tsx
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
+import { colors } from '../styles/colors';
+import { fonts } from '../styles/fonts';
 
 interface CyanButtonProps {
   title: string;
@@ -18,10 +20,10 @@ const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
 const styles = StyleSheet.create({
   button: {
     width: "92%",
-    height: 56,
+    height: 52,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#08BDBD",
+    backgroundColor: colors.primary,
     borderRadius: 56,
     marginBottom: 20,
     shadowColor: "#000",

@@ -17,6 +17,8 @@ import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import CyanButton from "../../components/CyanButton";
+import { colors } from '../../styles/colors';
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -143,17 +145,12 @@ const LoginScreen: React.FC = () => {
 						onPress={() => setRememberMe(!rememberMe)}
 					/>
 				</View>
-				<TouchableOpacity
-					style={styles.loginButton}
-					onPress={navigateToHome}
-					disabled={isLoading}
-				>
-					{isLoading ? (
-						<ActivityIndicator size="small" color="#FFF" />
-					) : (
-						<Text style={styles.loginButtonText}>LOGIN</Text>
-					)}
-				</TouchableOpacity>
+				{isLoading ? (
+					<ActivityIndicator size="small" color="#08BDBD" />
+				) : (
+					<CyanButton title="Login" onPress={navigateToHome} />
+				)}
+
 				<TouchableOpacity
 					style={styles.registerLink}
 					onPress={navigateToRegister}
@@ -184,7 +181,7 @@ const styles = StyleSheet.create({
 		marginBottom: 40,
 	},
 	headerText: {
-		padding: 16,
+		padding: 20,
 		fontSize: 32,
 		fontWeight: "bold",
 		textAlign: "center",
@@ -202,7 +199,7 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: "bold",
 		marginBottom: 8,
-		color: "#08BDBD",
+		color: colors.primary,
 	},
 	input: {
 		padding: 12,
@@ -237,25 +234,6 @@ const styles = StyleSheet.create({
 		borderWidth: 0,
 		padding: 0,
 	},
-	loginButton: {
-		width: "92%",
-		height: 48,
-		justifyContent: "center",
-		alignItems: "center",
-		backgroundColor: "#08BDBD",
-		borderRadius: 24,
-		marginBottom: 20,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	loginButtonText: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#FFF",
-	},
 	registerLink: {
 		marginTop: 20,
 	},
@@ -265,7 +243,7 @@ const styles = StyleSheet.create({
 	},
 	registerLinkBold: {
 		fontWeight: "bold",
-		color: "#08BDBD",
+		color: colors.primary,
 	},
 });
 
