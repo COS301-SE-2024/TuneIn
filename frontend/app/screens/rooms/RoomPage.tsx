@@ -28,6 +28,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
+import DevicePicker from "../../components/DevicePicker";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -516,24 +517,27 @@ const RoomPage = () => {
 					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
-				<TouchableOpacity
-					onPress={handleBookmark}
-					style={styles.bookmarkButton}
-				>
-					<Icon
-						name={isBookmarked ? "bookmark" : "bookmark-border"}
-						size={34}
-						color={isBookmarked ? "gold" : "black"}
-					/>
-					<Text style={styles.joinLeaveButtonText}>
-						{isBookmarked ? "Unbookmark" : "Bookmark"}
-					</Text>
-				</TouchableOpacity>
-				<View style={styles.trackDetails}>
-					<Image
-						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
-						style={styles.nowPlayingAlbumArt}
-					/>
+				<View style={styles.sideBySide}>
+					<TouchableOpacity
+						onPress={handleBookmark}
+						style={styles.bookmarkButton}
+					>
+						<Icon
+							name={isBookmarked ? "bookmark" : "bookmark-border"}
+							size={34}
+							color={isBookmarked ? "gold" : "black"}
+						/>
+						<Text style={styles.joinLeaveButtonText}>
+							{isBookmarked ? "Unbookmark" : "Bookmark"}
+						</Text>
+					</TouchableOpacity>
+					<View style={styles.trackDetails}>
+						<Image
+							source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
+							style={styles.nowPlayingAlbumArt}
+						/>
+						<DevicePicker />
+					</View>
 					<View style={styles.trackInfo}>
 						<Text style={styles.nowPlayingTrackName}>
 							{queue[currentTrackIndex]?.name}
