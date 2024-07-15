@@ -5,16 +5,7 @@ import DevicePicker from "../components/DevicePicker"; // Replace with the corre
 const DevicePickerTest = () => {
 	const [showDevicePicker, setShowDevicePicker] = useState(false);
 
-	const handlePress = () => {
-		setShowDevicePicker(!showDevicePicker);
-	};
-
-	return (
-		<View style={styles.container}>
-			<Button title="Test Device Picker" onPress={handlePress} />
-			{showDevicePicker && <DevicePicker />}
-		</View>
-	);
+	return <DevicePicker />;
 };
 
 const styles = StyleSheet.create({

@@ -45,7 +45,6 @@ const RoomPage = () => {
 	}
 	const roomID = roomData.id;
 	console.log("Room ID:", roomID);
-	const [setRoomObj] = useState<RoomDto | null>(null);
 
 	const router = useRouter();
 	const token = useRef<string | null>(null);

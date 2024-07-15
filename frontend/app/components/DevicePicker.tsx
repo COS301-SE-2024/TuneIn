@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
 	View,
 	Text,
@@ -11,16 +11,19 @@ import {
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
 import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
+import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
+import { Devices } from "../models/Devices";
+import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 
 const DevicePicker = () => {
 	const { getToken } = useSpotifyAuth();
-	const [isVisible, setIsVisible] = useState();
-	const [devices, setDevices] = useState([]);
-	const [setSelectedDevice] = useState([]);
+	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
+	const [isVisible, setIsVisible] = useState(false);
+	const [devices, setDevices] = useState<Devices[]>(initialDevices);
+	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const { getDeviceIDs } = useSpotifyDevices();
 	const [accessToken, setAccessToken] = useState<string>("");
-
+	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
@@ -35,7 +38,8 @@ const DevicePicker = () => {
 	}, [getToken]);
 
 	useEffect(() => {
-		let interval;
+		// Declare intervalId using useRef to ensure it maintains its value across renders
+
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
@@ -54,14 +58,25 @@ const DevicePicker = () => {
 				}
 			};
 
+			// Initial fetchDevices call
 			fetchDevices();
-			interval = setInterval(fetchDevices, 4000);
-		} else {
-			clearInterval(interval);
-		}
 
-		return () => clearInterval(interval);
-	});
+			// Set interval to call fetchDevices every 4 seconds
+			intervalIdRef.current = setInterval(fetchDevices, 4000);
+
+			// Clean up interval on component unmount or dependency change
+			return () => {
+				if (intervalIdRef.current) {
+					clearInterval(intervalIdRef.current);
+				}
+			};
+		} else {
+			// Clear interval when isVisible becomes false
+			if (intervalIdRef.current) {
+				clearInterval(intervalIdRef.current);
+			}
+		}
+	}, [isVisible, getDeviceIDs]);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
@@ -71,45 +86,68 @@ const DevicePicker = () => {
 		setIsVisible(false);
 	};
 
-	const handleDeviceSelect = async (deviceId) => {
+	const handleDeviceSelect = async (deviceId: string) => {
 		setIsLoading(true);
 		setSelectedDevice(deviceId);
-		setTimeout(async () => {
-			try {
-				const response = await fetch("https://api.spotify.com/v1/me/player", {
-					method: "PUT",
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						device_ids: [deviceId],
-					}),
-				});
-				if (!response.ok) {
-					throw new Error(
-						"Failed to transfer playback to the selected device.",
-					);
-				}
-			} catch (error) {
-				Alert.alert("Error", error.message);
-			} finally {
-				setIsLoading(false);
+		try {
+			const response = await fetch("https://api.spotify.com/v1/me/player", {
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					device_ids: [deviceId],
+				}),
+			});
+			if (!response.ok) {
+				throw new Error("Failed to transfer playback to the selected device.");
 			}
-		}, 500); // 2 seconds delay
+		} catch (error) {
+			const errorMessage = (error as Error).message;
+			Alert.alert("Error", errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const renderDeviceName = (device: Devices) => {
+		let icon = null;
+		switch (device.type) {
+			case "Smartphone":
+				icon = <Icon name="mobile" size={43} color="#555" />;
+				break;
+			case "Computer":
+				icon = <Icon name="desktop" size={30} color="#555" />;
+				break;
+			// Add more cases for other types as needed
+			default:
+				break;
+		}
+
+		return (
+			<View style={styles.deviceNameContainer}>
+				{icon}
+				<Text style={styles.deviceName}>{device.name}</Text>
+			</View>
+		);
 	};
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Previous Screen Content</Text>
 			<TouchableOpacity onPress={handleOpenPopup} style={styles.button}>
-				<Text style={styles.buttonText}>Open Pop-up</Text>
+				<SpeakerIcon />
 			</TouchableOpacity>
-
 			<Modal visible={isVisible} transparent={true} animationType="fade">
 				<View style={styles.modalBackground}>
 					<View style={styles.popupContainer}>
-						{!devices || devices.length === 0 ? (
+						{error ? (
+							<>
+								<Text style={styles.popupTitle}>Error Fetching Devices</Text>
+								<Text style={styles.popupMessage}>{error}</Text>
+							</>
+						) : !devices || devices.length === 0 ? (
 							<>
 								<Text style={styles.popupTitle}>No Devices Available</Text>
 								<Text style={styles.popupMessage}>
@@ -122,7 +160,7 @@ const DevicePicker = () => {
 								{isLoading ? (
 									<ActivityIndicator size="large" color="blue" />
 								) : (
-									devices.map((device, index) => (
+									devices.map((device: Devices, index: number) => (
 										<TouchableOpacity
 											key={index}
 											style={styles.deviceOption}
@@ -131,9 +169,11 @@ const DevicePicker = () => {
 											<RadioButton
 												value={device.id}
 												testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
-												status={device.is_active ? "checked" : "unchecked"}
+												status={
+													selectedDevice === device.id ? "checked" : "unchecked"
+												}
 											/>
-											<Text style={styles.deviceButtonText}>{device.name}</Text>
+											{renderDeviceName(device)}
 										</TouchableOpacity>
 									))
 								)}
@@ -161,7 +201,6 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	button: {
-		backgroundColor: "blue",
 		padding: 10,
 		borderRadius: 5,
 		marginBottom: 20,
@@ -200,8 +239,13 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		marginLeft: 20,
 	},
-	deviceButtonText: {
+	deviceNameContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	deviceName: {
 		fontSize: 16,
+		marginLeft: 10,
 	},
 	closeButtonText: {
 		marginTop: 15,
