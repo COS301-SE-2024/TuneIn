@@ -164,6 +164,10 @@ const WelcomeScreen: React.FC = () => {
 	const navigateToRegister = () => {
 	  router.navigate("/screens/Auth/RegisterScreen");
 	};
+
+	const navigateToHelp = () => {
+		router.navigate("/screens/help/HelpScreen");
+	};
   
 	return (
 	  <View style={styles.container}>
@@ -174,7 +178,7 @@ const WelcomeScreen: React.FC = () => {
 		>
 		  <TouchableOpacity
 			style={styles.helpButton}
-			onPress={() => console.log("Help pressed")}
+			onPress={navigateToHelp}
 		  >
 			<MaterialCommunityIcons
 			  name="help-circle-outline"
