@@ -3,15 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
-
-interface Track {
-	id: string;
-	name: string;
-	artistNames: string;
-	albumArtUrl: string;
-	voteCount: number;
-	showVoting: boolean;
-}
+import { Track } from "../../models/Track";
 
 const Playlist = () => {
 	const router = useRouter();
@@ -20,11 +12,16 @@ const Playlist = () => {
 	const [playlist, setPlaylist] = useState<Track[]>([]);
 
 	useEffect(() => {
-		if (typeof queue === "string") {
-			const parsedQueue = JSON.parse(queue) as Track[];
-			setPlaylist(parsedQueue);
-		} else if (Array.isArray(queue)) {
-			setPlaylist(queue);
+		try {
+			if (typeof queue === "string") {
+				const parsedQueue = JSON.parse(queue) as Track[];
+				setPlaylist(parsedQueue);
+			} else if (Array.isArray(queue)) {
+				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
+				setPlaylist(parsedQueue);
+			}
+		} catch (error) {
+			console.error("Failed to parse queue:", error);
 		}
 	}, [queue]);
 
@@ -60,13 +57,12 @@ const Playlist = () => {
 					<SongList
 						key={index}
 						songNumber={index + 1}
-						songName={track.name}
-						artist={track.artistNames}
-						albumCoverUrl={track.albumArtUrl}
-						voteCount={track.voteCount}
-						showVoting={track.showVoting}
+						track={track}
+						voteCount={0} // Assuming voteCount is managed elsewhere
+						showVoting={false} // Assuming showVoting is managed elsewhere
 						index={index}
 						isCurrent={index === Number(currentTrackIndex)} // Check if current song
+						swapSongs={(index, direction) => {}} // Pass an appropriate function here
 					/>
 				))}
 			</View>
