@@ -5,10 +5,9 @@ import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-
 interface WhiteButtonProps {
   title: string;
   onPress: () => void;
-  width?: number | string; // Update the width type to include string for percentages
 }
 
-const WhiteButton: React.FC<WhiteButtonProps> = ({ title, onPress, width = "92%" }) => {
+const WhiteButton: React.FC<WhiteButtonProps> = ({ title, onPress}) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
@@ -18,16 +17,17 @@ const WhiteButton: React.FC<WhiteButtonProps> = ({ title, onPress, width = "92%"
 
 const styles = StyleSheet.create({
   button: {
-    height: 48,
+    width: "92%",
+    height: 56,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFF",
-    borderColor: "#000",
+    borderColor: "#E8ECF4",
     borderWidth: 1,
-    borderRadius: 24,
+    borderRadius: 56,
     marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,

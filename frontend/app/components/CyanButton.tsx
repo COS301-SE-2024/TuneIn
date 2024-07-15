@@ -18,14 +18,14 @@ const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
 const styles = StyleSheet.create({
   button: {
     width: "92%",
-    height: 48,
+    height: 56,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#08BDBD",
-    borderRadius: 24,
+    borderRadius: 56,
     marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
