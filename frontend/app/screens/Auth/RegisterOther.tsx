@@ -114,11 +114,11 @@ const RegisterOtherScreen: React.FC = () => {
 	}
 
 	const navigateToLogin = () => {
-		router.navigate("screens/LoginStreaming");
+		router.navigate("screens/Auth/LoginStreaming");
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("screens/RegisterScreen");
+		router.navigate("screens/Auth/RegisterScreen");
 	};
 
 	return (

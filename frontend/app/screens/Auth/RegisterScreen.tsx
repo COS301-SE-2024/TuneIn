@@ -13,6 +13,8 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { CheckBox } from "react-native-elements";
 import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
+import CyanButton from "../../components/CyanButton";
+import { colors } from '../../styles/colors';
 
 const RegisterScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -27,7 +29,7 @@ const RegisterScreen: React.FC = () => {
 	const router = useRouter();
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/LoginScreen");
+		router.navigate("/screens/Auth/LoginScreen");
 	};
 
 	const validateEmail = (email: string) => {
@@ -114,7 +116,7 @@ const RegisterScreen: React.FC = () => {
 	return (
 		<ScrollView style={styles.container}>
 			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-				<Ionicons name="chevron-back" size={24} color="black" />
+				<Ionicons name="chevron-back" size={30} color="black" />
 			</TouchableOpacity>
 			<View style={styles.logoContainer}>{/* Add Logo Component Here */}</View>
 			<Text style={styles.headerText}>
@@ -196,14 +198,12 @@ const RegisterScreen: React.FC = () => {
 						onPress={() => setAcceptTerms(!acceptTerms)}
 					/>
 				</View>
-				<TouchableOpacity
-					style={styles.registerButton}
-					onPress={handleRegister}
-				>
-					<Text style={styles.registerButtonText}>REGISTER</Text>
-				</TouchableOpacity>
+				<CyanButton title="REGISTER" onPress={handleRegister} />
 			</View>
-			<TouchableOpacity style={styles.loginLink} onPress={navigateToLogin}>
+			<TouchableOpacity 
+				style={styles.loginLink} 
+				onPress={navigateToLogin}
+			>
 				<Text style={styles.loginLinkText}>
 					Already have an account?{" "}
 					<Text style={styles.loginLinkBold}>Login</Text>
@@ -245,10 +245,10 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	label: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: "bold",
 		marginBottom: 8,
-		color: "#08BDBD",
+		color: colors.primary,
 	},
 	input: {
 		padding: 12,
@@ -275,36 +275,18 @@ const styles = StyleSheet.create({
 		backgroundColor: "transparent",
 		borderWidth: 0,
 		padding: 0,
-	},
-	registerButton: {
-		width: "92%",
-		height: 48,
-		justifyContent: "center",
-		alignItems: "center",
-		backgroundColor: "#08BDBD",
-		borderRadius: 24,
-		marginBottom: 20,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	registerButtonText: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#FFF",
-	},
+	},		
 	loginLink: {
 		marginTop: 20,
 	},
 	loginLinkText: {
-		fontSize: 18,
+		fontSize: 16,
 		textAlign: "center",
+		fontWeight: 500,
 	},
 	loginLinkBold: {
 		fontWeight: "bold",
-		color: "#08BDBD",
+		color: colors.primary,
 	},
 	bottomSpacer: {
 		marginBottom: 40,

@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import CyanButton from "../../components/CyanButton";
+import { colors } from '../../styles/colors';
 
 const NewPasswordScreen: React.FC = () => {
 	const router = useRouter();
@@ -19,7 +21,7 @@ const NewPasswordScreen: React.FC = () => {
 	const [confirmPassword, setConfirmPassword] = useState("");
 
 	const navigateToPasswordChaged = () => {
-		router.navigate("/screens/PasswordChaged");
+		router.navigate("/screens/Auth/PasswordChaged");
 	};
 
 	return (
@@ -33,7 +35,7 @@ const NewPasswordScreen: React.FC = () => {
 			>
 				<View style={styles.header}>
 					<TouchableOpacity onPress={() => router.back()}>
-						<Ionicons name="chevron-back" size={24} color="black" />
+						<Ionicons name="chevron-back" size={30} color="black" />
 					</TouchableOpacity>
 				</View>
 
@@ -89,12 +91,7 @@ const NewPasswordScreen: React.FC = () => {
 				</View>
 			</ScrollView>
 			<View style={styles.bottomContainer}>
-				<TouchableOpacity
-					style={styles.sendCodeButton}
-					onPress={navigateToPasswordChaged}
-				>
-					<Text style={styles.sendCodeText}>RESET PASSWORD</Text>
-				</TouchableOpacity>
+				<CyanButton title="RESET PASSWORD" onPress={navigateToPasswordChaged} />
 			</View>
 		</KeyboardAvoidingView>
 	);
@@ -123,19 +120,18 @@ const styles = StyleSheet.create({
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
 		textAlign: "center",
 		marginTop: 50,
 		marginBottom: 20,
 		paddingHorizontal: 20,
 	},
 	instructionText: {
-		fontSize: 15,
-		color: "#888",
-		fontFamily: "Poppins_500Medium",
+		fontSize: 16,
+		color: colors.primary,
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
+		fontWeight: 500,
 	},
 	inputWrapper: {
 		marginHorizontal: 30,
@@ -144,9 +140,8 @@ const styles = StyleSheet.create({
 	inputLabel: {
 		fontSize: 16,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
 		marginBottom: 10,
-		color: "#08BDBD",
+		color: colors.primary,
 	},
 	inputContainer: {
 		flexDirection: "row",
@@ -158,7 +153,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		height: 50,
 		fontSize: 16,
-		fontFamily: "Poppins_500Medium",
 	},
 	visibilityToggle: {
 		padding: 10,
@@ -168,25 +162,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		paddingVertical: 20,
 		backgroundColor: "white",
-	},
-	sendCodeButton: {
-		backgroundColor: "#08BDBD",
-		borderRadius: 30,
-		paddingVertical: 15,
-		width: "85%",
-		alignItems: "center",
-		justifyContent: "center",
-		marginBottom: 20,
-		elevation: 5,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-	},
-	sendCodeText: {
-		color: "#fff",
-		fontSize: 16,
-		fontFamily: "Poppins_700Bold",
 	},
 });
 

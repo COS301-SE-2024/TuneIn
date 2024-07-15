@@ -93,7 +93,7 @@ const LoginScreen: React.FC = () => {
 	return (
 		<ScrollView style={styles.container}>
 			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-				<Ionicons name="chevron-back" size={24} color="black" />
+				<Ionicons name="chevron-back" size={30} color="black" />
 			</TouchableOpacity>
 			<View style={styles.logoContainer}>
 				{/* <Text style={styles.logoText}>Logo</Text> */}
@@ -148,7 +148,7 @@ const LoginScreen: React.FC = () => {
 				{isLoading ? (
 					<ActivityIndicator size="small" color="#08BDBD" />
 				) : (
-					<CyanButton title="Login" onPress={navigateToHome} />
+					<CyanButton title="LOGIN" onPress={navigateToHome} />
 				)}
 
 				<TouchableOpacity
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	label: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: "bold",
 		marginBottom: 8,
 		color: colors.primary,
@@ -238,8 +238,9 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 	registerLinkText: {
-		fontSize: 18,
+		fontSize: 16,
 		textAlign: "center",
+		fontWeight: 500,
 	},
 	registerLinkBold: {
 		fontWeight: "bold",
