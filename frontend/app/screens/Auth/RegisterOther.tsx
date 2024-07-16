@@ -1,6 +1,19 @@
-/* eslint-disable import/no-unresolved */
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import * as React from "react";
+import {
+	makeRedirectUri,
+	useAuthRequest,
+	AuthRequestConfig,
+	DiscoveryDocument,
+	ResponseType,
+} from "expo-auth-session";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Platform,
+	Button,
+} from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -11,11 +24,13 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
+//import * as AuthSession from "expo-auth-session";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -31,77 +46,79 @@ if (!redirectTarget) {
 	);
 }
 
+const scopes = [
+	"user-read-email",
+	"user-library-read",
+	"user-read-recently-played",
+	"user-top-read",
+	"playlist-read-private",
+	"playlist-read-collaborative",
+	"playlist-modify-public", // or "playlist-modify-private"
+	"user-modify-playback-state",
+	"user-read-playback-state",
+	"user-read-currently-playing",
+];
+
+const discovery: DiscoveryDocument = {
+	authorizationEndpoint: "https://accounts.spotify.com/authorize",
+};
+
 const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
-
-	useEffect(() => {
-		const handleRedirect = (event) => {
-			let { queryParams } = Linking.parse(event.url);
-			console.log("Redirect Data:", queryParams);
-			WebBrowser.dismissBrowser();
-			// Handle the redirect data (e.g., exchange code for access token)
-		};
-
-		const getInitialURL = async () => {
-			const initialUrl = await Linking.getInitialURL();
-			if (initialUrl) {
-				handleRedirect({ url: initialUrl });
-			}
-		};
-
-		getInitialURL();
-
-		const subscription = Linking.addEventListener("url", handleRedirect);
-
-		return () => {
-			subscription.remove();
-		};
-	}, []);
-
-	const authenticate = async () => {
-		const scopes = [
-			"user-read-email",
-			"user-library-read",
-			"user-read-recently-played",
-			"user-top-read",
-			"playlist-read-private",
-			"playlist-read-collaborative",
-			"playlist-modify-public", // or "playlist-modify-private"
-			"user-modify-playback-state",
-			"user-read-playback-state",
-			"user-read-currently-playing",
-		].join(" ");
-
-		const rt = "http://localhost:5000";
-		const authUrl =
-			`https://accounts.spotify.com/authorize` +
-			`?client_id=${clientId}` +
-			`&response_type=code` + // Change response_type to 'code'
-			`&redirect_uri=${encodeURIComponent(rt)}` +
-			`&show_dialog=true` +
-			`&scope=${scopes}`;
-
-		console.log("rt: " + rt);
-
-		// Open Spotify authorization page in a web browser
-		const result = await WebBrowser.openAuthSessionAsync(authUrl, rt);
-		console.log("After Auth Session Result: \n", result);
-		console.log("Type: \n", typeof result);
-
-		if (result.type === "success") {
-			// The user has successfully authenticated, handle the result.url to extract the authorization code
-			console.log({ url: result.url });
-		}
-	};
-
-	// Function to handle messages from the dummy page
-	window.addEventListener("message", (event) => {
-		if (event.origin === window.location.origin) {
-			console.log("Received message:", event.data);
-		} else {
-			console.log("Message from unknown origin");
-		}
+	const redirectURI = makeRedirectUri({
+		scheme: "tunein-app",
+		path: "screens/Auth/SpotifyRedirect",
 	});
+
+	const [request, response, promptAsync] = useAuthRequest(
+		{
+			clientId: SPOTIFY_CLIENT_ID,
+			//redirectUri: SPOTIFY_REDIRECT_TARGET,
+			redirectUri: redirectURI,
+			responseType: ResponseType.Code,
+			scopes: [scopes.join(" ")],
+			extraParams: {
+				show_dialog: "true",
+			},
+			usePKCE: false,
+		},
+		discovery,
+	);
+
+	console.log("Request:", request);
+	console.log("Response:", response);
+	console.log("PromptAsync:", promptAsync);
+
+	React.useEffect(() => {
+		console.log("Response:", response);
+		if (response?.type === "success") {
+			if (response.params.error) {
+				console.error("Error:", response.params.error);
+				return;
+			}
+			const { code, state } = response.params;
+			console.log("Code:", code);
+
+			//make post request to backend server get access token
+			fetch(
+				`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(redirectURI)}`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			)
+				.then((res) => res.json())
+				.then((data) => {
+					console.log("Data:", data);
+				})
+				.catch((err) => {
+					console.error("Error:", err);
+					return;
+				});
+		}
+	}, [response]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -113,14 +130,6 @@ const RegisterOtherScreen: React.FC = () => {
 		return null;
 	}
 
-	const navigateToLogin = () => {
-		router.navigate("screens/LoginStreaming");
-	};
-
-	const navigateToRegister = () => {
-		router.navigate("screens/RegisterScreen");
-	};
-
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -128,13 +137,13 @@ const RegisterOtherScreen: React.FC = () => {
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
-
 			<Text style={styles.welcomeText}>Authenticate With</Text>
-
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={authenticate}
+					onPress={() => {
+						promptAsync();
+					}}
 				>
 					<FontAwesome
 						name="spotify"
@@ -142,26 +151,23 @@ const RegisterOtherScreen: React.FC = () => {
 						color="#000"
 						style={styles.icon}
 					/>
-					<Text style={styles.buttonText}>spotify</Text>
+					<Text style={styles.buttonText}>Spotify</Text>
 				</TouchableOpacity>
-
 				<View style={styles.dividerContainer}>
 					<View style={styles.divider} />
 					<Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
 					<View style={styles.divider} />
 				</View>
-
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={navigateToRegister}
+					onPress={() => router.navigate("screens/RegisterScreen")}
 				>
 					<Text style={styles.buttonText}>Account</Text>
 				</TouchableOpacity>
 			</View>
-
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={navigateToLogin}
+				onPress={() => router.navigate("screens/LoginStreaming")}
 			>
 				<Text style={styles.registerText}>
 					Don’t have an account?{" "}

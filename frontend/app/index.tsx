@@ -24,7 +24,8 @@ const App: React.FC = () => {
 				//   router.push("/screens/Home");
 				// } else {
 				// Redirect to the WelcomeScreen or appropriate route
-				router.push("/screens/WelcomeScreen");
+				//router.push("/screens/WelcomeScreen");
+				router.push("/screens/Auth/RegisterOther");
 				// }
 			} catch (error) {
 				console.error("Error checking token:", error);
