@@ -312,6 +312,93 @@ export class SearchService {
 		followers?: number;
 	}): Promise<UserDto[]> {
 		console.log(params);
+
+		let query = `
+        SELECT user_id,`;
+		console.log(params.q);
+
+		if(params.creator_name === undefined && params.creator_username === undefined) {
+			query += ` LEAST(levenshtein(username, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance`;
+		}		
+		// else if(params.creator_name !== undefined && params.creator_username !== undefined) {
+		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+		// }
+		// else if(params.creator_name !== undefined) {
+		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+		// }
+		// else if(params.creator_username !== undefined) {
+		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
+		// }
+
+		if(params.following !== undefined) {
+			query += `, COALESCE(f1.num_followers, 0) AS num_followers`;
+		}
+
+		if(params.followers !== undefined) {
+			query += `, COALESCE(f2.num_following, 0) AS num_following`;
+		}
+
+		query += ` FROM users`;
+
+		
+
+		if(params.following !== undefined) {
+			query += ` LEFT JOIN (
+				SELECT followee, COUNT(*) AS num_followers
+				FROM follows
+				GROUP BY followee
+			) f1 ON f1.followee = users.user_id`;
+		}
+
+		if(params.followers !== undefined) {
+			query += ` LEFT JOIN (
+				SELECT follower, COUNT(*) AS num_following
+				FROM follows
+				GROUP BY follower
+			) f2 ON f2.follower = users.user_id`;
+		}
+
+		query += ` WHERE similarity(username, ${sqlstring.escape(params.q)}) > 0.2 AND similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
+
+		if(params.following !== undefined || params.followers !== undefined) {
+			query += ` GROUP BY users.user_id`;
+
+			if(params.following !== undefined){
+				query += `, f1.num_followers`
+			}
+
+			if(params.followers !== undefined){
+				query += `, f2.num_following`
+			}
+		}
+
+		if(params.following !== undefined && params.followers !== undefined) {
+			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.followers} 
+			AND COALESCE(f2.num_following, 0) >= ${params.following};`
+		}
+		else if(params.following !== undefined) {
+			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.followers};`
+		}
+		else if(params.followers !== undefined) {
+			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.following};`
+		}
+
+		console.log(query);
+
+		const result = await this.prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
+
+		if (Array.isArray(result)) {
+			const userIds = result.map((row) => row.user_id.toString());
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
+			// console.log(userDtos);
+
+			if (userDtos) {
+				return userDtos;
+			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
 		return [new UserDto()];
 	}
 
