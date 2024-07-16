@@ -191,7 +191,7 @@ export class SearchController {
 		@Query("lang") lang?: string,
 		@Query("explicit") explicit?: boolean,
 		@Query("nsfw") nsfw?: boolean,
-		@Query("tags") tags?: string[],
+		@Query("tags") tags?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {
 			q,
