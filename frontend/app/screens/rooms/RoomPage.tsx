@@ -98,7 +98,7 @@ const RoomPage = () => {
 		getTokenAndSelf();
 		checkBookmark();
 
-		socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
+		socket.current = io.io(utils.API_BASE_URL + "/live", {
 			transports: ["websocket"],
 		});
 

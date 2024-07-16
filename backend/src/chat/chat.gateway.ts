@@ -17,7 +17,7 @@ import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 
 @WebSocketGateway({
-	namespace: "/live-chat",
+	namespace: "/live",
 	transports: ["websocket"],
 	cors: {
 		origin: "http://localhost:3000",
