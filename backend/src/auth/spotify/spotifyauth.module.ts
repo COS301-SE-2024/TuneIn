@@ -1,14 +1,11 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
 import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
 import { TasksModule } from "../../tasks/tasks.module";
-import { AuthService } from "../auth.service";
-import { AuthModule } from "../auth.module";
-
 @Module({
 	imports: [
 		HttpModule,

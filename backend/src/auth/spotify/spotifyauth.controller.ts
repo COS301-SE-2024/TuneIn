@@ -1,12 +1,4 @@
-import {
-	Controller,
-	Get,
-	Query,
-	Redirect,
-	Request,
-	Res,
-	UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
