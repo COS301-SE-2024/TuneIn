@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, memo } from "react";
 import {
 	View,
 	Text,
@@ -22,13 +22,14 @@ import * as io from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+
+const MemoizedCommentWidget = memo(CommentWidget);
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -37,7 +38,7 @@ type Message = {
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
-	console.log("Room data:", room);
+	console.log("here");
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -48,7 +49,6 @@ const RoomPage = () => {
 	console.log("Room ID:", roomID);
 
 	const router = useRouter();
-	const token = useRef<string | null>(null);
 	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
@@ -82,6 +82,8 @@ const RoomPage = () => {
 			console.error("Error checking bookmark:", error);
 		}
 	}, [roomID, bookmarker]);
+
+	checkBookmark();
 
 	const handleBookmark = async () => {
 		// make a request to the backend to check if the room is bookmarked
@@ -148,135 +150,132 @@ const RoomPage = () => {
 		}
 	};
 	//init & connect to socket
-	useEffect(() => {
-		const getTokenAndSelf = async () => {
-			const storedToken = await auth.getToken();
-			console.log("token:", token);
-			token.current = storedToken;
-			console.log("Stored token:", token.current);
-			try {
-				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${storedToken}`,
-					},
-				});
-				userRef.current = response.data as UserDto;
-			} catch (error) {
-				console.error("Error fetching user's own info:", error);
-			}
+	// useEffect(() => {
+	// 	const getTokenAndSelf = async () => {
+	// 		const storedToken = await auth.getToken();
+	// 		console.log("token:", token);
+	// 		token.current = storedToken;
+	// 		console.log("Stored token:", token.current);
+	// 		try {
+	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+	// 				headers: {
+	// 					Authorization: `Bearer ${storedToken}`,
+	// 				},
+	// 			});
+	// 			userRef.current = response.data as UserDto;
+	// 		} catch (error) {
+	// 			console.error("Error fetching user's own info:", error);
+	// 		}
 
-			try {
-				const roomDto = await axios.get(
-					`${utils.API_BASE_URL}/rooms/${roomID}`,
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
-						},
-					},
-				);
-				roomObjRef.current = roomDto.data;
-			} catch (error) {
-				console.error("Error fetching room:", error);
-			}
-		};
-		getTokenAndSelf();
-		checkBookmark();
+	// 		try {
+	// 			const roomDto = await axios.get(
+	// 				`${utils.API_BASE_URL}/rooms/${roomID}`,
+	// 				{
+	// 					headers: {
+	// 						Authorization: `Bearer ${storedToken}`,
+	// 					},
+	// 				},
+	// 			);
+	// 			roomObjRef.current = roomDto.data;
+	// 		} catch (error) {
+	// 			console.error("Error fetching room:", error);
+	// 		}
+	// 	};
 
-		socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
-			transports: ["websocket"],
-		});
+	// 	const setupSocketEventHandlers = () => {
+	// 		console.log("Setting up socket event handlers...");
+	// 		if (socket.current) {
+	// 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+	// 				const u = userRef.current;
+	// 				if (u) {
+	// 					console.log("User joined room:", response);
+	// 					const input: ChatEventDto = {
+	// 						userID: u.userID,
+	// 						body: {
+	// 							messageBody: "",
+	// 							sender: u,
+	// 							roomID: roomID,
+	// 							dateCreated: new Date(),
+	// 						},
+	// 					};
 
-		const setupSocketEventHandlers = () => {
-			console.log("Setting up socket event handlers...");
-			if (socket.current) {
-				socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-					//if someone joins (could be self)
-					const u = userRef.current;
-					if (u) {
-						console.log("User joined room:", response);
-						const input: ChatEventDto = {
-							userID: u.userID,
-							body: {
-								messageBody: "",
-								sender: u,
-								roomID: roomID,
-								dateCreated: new Date(),
-							},
-						};
+	// 					console.log("Socket emit: getChatHistory", input);
+	// 					if (socket.current)
+	// 						socket.current.emit("getChatHistory", JSON.stringify(input));
+	// 				}
+	// 			});
 
-						console.log("Socket emit: getChatHistory", input);
-						if (socket.current)
-							socket.current.emit("getChatHistory", JSON.stringify(input));
-					}
-				});
+	// 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+	// 				const u = userRef.current;
+	// 				if (u) {
+	// 					const chatHistory = history.map((msg) => ({
+	// 						message: msg,
+	// 						me: msg.sender.userID === u.userID,
+	// 					}));
+	// 					setMessages(chatHistory);
+	// 				}
+	// 			});
 
-				socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-					//an event that should be in response to the getChatHistory event
-					const u = userRef.current;
-					if (u) {
-						const chatHistory = history.map((msg) => ({
-							message: msg,
-							me: msg.sender.userID === u.userID,
-						}));
-						setMessages(chatHistory);
-					}
-				});
+	// 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+	// 				console.log("Received live message:", newMessage);
+	// 				const message = newMessage.body;
+	// 				const u = userRef.current;
+	// 				if (message && u) {
+	// 					const me: boolean = message.sender.userID === u.userID;
+	// 					if (me) {
+	// 						setMessage("");
+	// 					}
+	// 					setMessages((prevMessages) => [
+	// 						...prevMessages,
+	// 						{ message, me: message.sender.userID === u.userID },
+	// 					]);
+	// 				}
+	// 			});
 
-				socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-					console.log("Received live message:", newMessage);
-					const message = newMessage.body;
-					const u = userRef.current;
-					if (message && u) {
-						const me: boolean = message.sender.userID === u.userID;
-						if (me) {
-							//clear message only after it has been sent & confirmed as received
-							setMessage("");
-						}
-						setMessages((prevMessages) => [
-							...prevMessages,
-							{ message, me: message.sender.userID === u.userID },
-						]);
-					}
-				});
+	// 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+	// 				console.log("User left room:", response);
+	// 			});
 
-				socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-					//an event that should be in response to the leaveRoom event (could be self or other people)
-					console.log("User left room:", response);
-				});
+	// 			socket.current.on("error", (response: ChatEventDto) => {
+	// 				console.error("Error:", response.errorMessage);
+	// 			});
+	// 		}
 
-				socket.current.on("error", (response: ChatEventDto) => {
-					console.error("Error:", response.errorMessage);
-				});
-			}
+	// 		if (socket.current) {
+	// 			socket.current.on("connect", () => {
+	// 				if (userRef.current) {
+	// 					const input: ChatEventDto = {
+	// 						userID: userRef.current.userID,
+	// 					};
+	// 					if (socket.current)
+	// 						socket.current.emit("connectUser", JSON.stringify(input));
+	// 				}
+	// 			});
 
-			if (socket.current) {
-				socket.current.on("connect", () => {
-					if (userRef.current) {
-						const input: ChatEventDto = {
-							userID: userRef.current.userID,
-						};
-						if (socket.current)
-							socket.current.emit("connectUser", JSON.stringify(input));
-					}
-				});
+	// 			socket.current.on("connected", (response: ChatEventDto) => {
+	// 				if (!joined && readyToJoinRoom) {
+	// 					// joinRoom();
+	// 				}
+	// 			});
+	// 		}
+	// 	};
 
-				socket.current.on("connected", (response: ChatEventDto) => {
-					if (!joined && readyToJoinRoom) {
-						joinRoom();
-					}
-				});
+	// 	getTokenAndSelf();
+	// 	checkBookmark();
 
-				setupSocketEventHandlers();
+	// 	socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
+	// 		transports: ["websocket"],
+	// 	});
 
-				return () => {
-					if (socket.current) {
-						console.log("Disconnecting socket...");
-						socket.current.disconnect();
-					}
-				};
-			}
-		};
-	}, [checkBookmark, joinRoom, joined, readyToJoinRoom, roomID]);
+	// 	setupSocketEventHandlers();
+
+	// 	return () => {
+	// 		if (socket.current) {
+	// 			console.log("Disconnecting socket...");
+	// 			socket.current.disconnect();
+	// 		}
+	// 	};
+	// }, [checkBookmark, joined, readyToJoinRoom, roomID]);
 
 	const sendMessage = () => {
 		if (message.trim() && userRef.current && socket.current) {
@@ -394,7 +393,7 @@ const RoomPage = () => {
 	const handleJoinLeave = () => {
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
-			joinRoom();
+			// joinRoom();
 			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
@@ -463,9 +462,9 @@ const RoomPage = () => {
 		if (readyToJoinRoom && !joined) {
 			console.log("Joining room...");
 			console.log(readyToJoinRoom, joined);
-			joinRoom();
+			// joinRoom();
 		}
-	}, [readyToJoinRoom, joined, joinRoom]);
+	}, [readyToJoinRoom, joined]);
 
 	return (
 		<View style={styles.container}>
@@ -517,7 +516,7 @@ const RoomPage = () => {
 					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
-				<View style={styles.sideBySide}>
+				<View style={styles.sideBySideClose}>
 					<TouchableOpacity
 						onPress={handleBookmark}
 						style={styles.bookmarkButton}
@@ -527,30 +526,27 @@ const RoomPage = () => {
 							size={34}
 							color={isBookmarked ? "gold" : "black"}
 						/>
-						<Text style={styles.joinLeaveButtonText}>
-							{isBookmarked ? "Unbookmark" : "Bookmark"}
-						</Text>
 					</TouchableOpacity>
-					<View style={styles.trackDetails}>
-						<Image
-							source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
-							style={styles.nowPlayingAlbumArt}
-						/>
-						<DevicePicker />
-					</View>
-					<View style={styles.trackInfo}>
-						<Text style={styles.nowPlayingTrackName}>
-							{queue[currentTrackIndex]?.name}
-						</Text>
-						<Text>
-							{queue[currentTrackIndex]?.artists.map((artist, index) => (
-								<Text key={index}>
-									{artist.name}
-									{index < queue[currentTrackIndex].artists.length - 1 && ", "}
-								</Text>
-							))}
-						</Text>
-					</View>
+					<DevicePicker />
+				</View>
+				<View style={styles.trackDetails}>
+					<Image
+						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
+						style={styles.nowPlayingAlbumArt}
+					/>
+				</View>
+				<View style={styles.trackInfo}>
+					<Text style={styles.nowPlayingTrackName}>
+						{queue[currentTrackIndex]?.name}
+					</Text>
+					<Text>
+						{queue[currentTrackIndex]?.artists.map((artist, index) => (
+							<Text key={index}>
+								{artist.name}
+								{index < queue[currentTrackIndex].artists.length - 1 && ", "}
+							</Text>
+						))}
+					</Text>
 				</View>
 
 				{roomData.mine ? (
@@ -662,7 +658,7 @@ const RoomPage = () => {
 					<>
 						<ScrollView style={{ flex: 1, marginTop: 10 }}>
 							{messages.map((msg, index) => (
-								<CommentWidget
+								<MemoizedCommentWidget
 									key={index}
 									username={msg.message.sender.username}
 									message={msg.message.messageBody}
@@ -724,7 +720,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	bookmarkButton: {
-		marginTop: 20,
+		marginLeft: 10,
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
@@ -765,8 +761,8 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	userImage: {
-		width: 36,
-		height: 36,
+		width: 30,
+		height: 30,
 		borderRadius: 25,
 		marginRight: 10,
 		borderWidth: 2,
@@ -775,6 +771,7 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 18,
 		color: "white",
+		fontWeight: "bold",
 	},
 	roomDetails: {
 		alignItems: "center",
@@ -843,6 +840,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
+	},
+	sideBySideClose: {
+		marginTop: 15,
+		flexDirection: "row",
 	},
 	trackInfo: {
 		marginLeft: 20,

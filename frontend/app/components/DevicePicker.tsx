@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
 	View,
 	Text,
@@ -23,9 +23,7 @@ const DevicePicker = () => {
 	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [accessToken, setAccessToken] = useState<string>("");
-
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
@@ -40,78 +38,80 @@ const DevicePicker = () => {
 	}, [getToken]);
 
 	useEffect(() => {
-		const fetchDevices = async () => {
-			try {
-				const deviceList = await getDeviceIDs();
-				if (deviceList) {
-					setDevices(deviceList);
-					const activeDevice = deviceList.find((device) => device.is_active);
-					if (activeDevice) {
-						setSelectedDevice(activeDevice.id);
-					}
-				} else {
-					console.warn("Received null or undefined deviceList");
-				}
-			} catch (err) {
-				console.error("An error occurred while fetching devices", err);
-			}
-		};
+		// Declare intervalId using useRef to ensure it maintains its value across renders
 
 		if (isVisible) {
+			const fetchDevices = async () => {
+				try {
+					const deviceList = await getDeviceIDs();
+					if (deviceList) {
+						setDevices(deviceList);
+						const activeDevice = deviceList.find((device) => device.is_active);
+						if (activeDevice) {
+							setSelectedDevice(activeDevice.id);
+						}
+					} else {
+						console.warn("Received null or undefined deviceList");
+					}
+				} catch (err) {
+					console.error("An error occurred while fetching devices", err);
+				}
+			};
+
+			// Initial fetchDevices call
 			fetchDevices();
+
+			// Set interval to call fetchDevices every 4 seconds
 			intervalIdRef.current = setInterval(fetchDevices, 4000);
 
+			// Clean up interval on component unmount or dependency change
 			return () => {
 				if (intervalIdRef.current) {
 					clearInterval(intervalIdRef.current);
 				}
 			};
 		} else {
+			// Clear interval when isVisible becomes false
 			if (intervalIdRef.current) {
 				clearInterval(intervalIdRef.current);
 			}
 		}
 	}, [isVisible, getDeviceIDs]);
 
-	const handleOpenPopup = useCallback(() => {
+	const handleOpenPopup = () => {
 		setIsVisible(true);
-	}, []);
+	};
 
-	const handleClosePopup = useCallback(() => {
+	const handleClosePopup = () => {
 		setIsVisible(false);
-	}, []);
+	};
 
-	const handleDeviceSelect = useCallback(
-		async (deviceId: string) => {
-			setIsLoading(true);
-			setSelectedDevice(deviceId);
-			try {
-				const response = await fetch("https://api.spotify.com/v1/me/player", {
-					method: "PUT",
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						device_ids: [deviceId],
-					}),
-				});
-				if (!response.ok) {
-					throw new Error(
-						"Failed to transfer playback to the selected device.",
-					);
-				}
-			} catch (error) {
-				const errorMessage = (error as Error).message;
-				Alert.alert("Error", errorMessage);
-			} finally {
-				setIsLoading(false);
+	const handleDeviceSelect = async (deviceId: string) => {
+		setIsLoading(true);
+		setSelectedDevice(deviceId);
+		try {
+			const response = await fetch("https://api.spotify.com/v1/me/player", {
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					device_ids: [deviceId],
+				}),
+			});
+			if (!response.ok) {
+				throw new Error("Failed to transfer playback to the selected device.");
 			}
-		},
-		[accessToken],
-	);
+		} catch (error) {
+			const errorMessage = (error as Error).message;
+			Alert.alert("Error", errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-	const renderDeviceName = useCallback((device: Devices) => {
+	const renderDeviceName = (device: Devices) => {
 		let icon = null;
 		switch (device.type) {
 			case "Smartphone":
@@ -131,11 +131,11 @@ const DevicePicker = () => {
 				<Text style={styles.deviceName}>{device.name}</Text>
 			</View>
 		);
-	}, []);
+	};
 
 	return (
 		<>
-			<TouchableOpacity onPress={handleOpenPopup}>
+			<TouchableOpacity onPress={handleOpenPopup} style={{ marginLeft: 10 }}>
 				<SpeakerIcon />
 			</TouchableOpacity>
 			<View style={styles.container}>
@@ -196,19 +196,9 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	title: {
-		fontSize: 20,
-		fontWeight: "bold",
-		marginBottom: 20,
-	},
-	buttonText: {
-		color: "white",
-		fontSize: 16,
-		fontWeight: "bold",
-	},
 	modalBackground: {
 		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		backgroundColor: "rgba(0, 0, 0, 0.8)",
 		justifyContent: "center",
 		alignItems: "center",
 	},

@@ -10,8 +10,8 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import RoomCardWidget from "../components/RoomCardWidget";
+import { useRouter } from "expo-router";
+import RoomCardWidget from "../components/rooms/RoomCardWidget";
 import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
@@ -24,6 +24,7 @@ import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 
 const Home: React.FC = () => {
+	console.log("Home");
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -96,7 +97,6 @@ const Home: React.FC = () => {
 	const [token, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
-		console.log("Loading cached data");
 		try {
 			const cachedRecents = await StorageService.getItem("cachedRecents");
 			const cachedPicks = await StorageService.getItem("cachedPicks");
@@ -115,7 +115,6 @@ const Home: React.FC = () => {
 	};
 
 	const refreshData = useCallback(async () => {
-		console.log("Refreshing data");
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		setToken(storedToken);
@@ -188,24 +187,15 @@ const Home: React.FC = () => {
 	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
-		<Link
-			href={{
-				pathname: "/screens/rooms/RoomPage",
-				params: { room: JSON.stringify(item) },
-			}}
-		>
-			<RoomCardWidget roomCard={item} />
-		</Link>
+		<RoomCardWidget roomCard={item} />
 	);
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
-		console.log("Navigating to all friends");
 		router.navigate("/screens/AllFriends");
 	};
 
 	const navigateToCreateNew = () => {
-		console.log("Navigating to create new room");
 		router.navigate("/screens/CreateRoom");
 	};
 

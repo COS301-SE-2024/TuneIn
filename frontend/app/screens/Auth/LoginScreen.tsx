@@ -36,14 +36,12 @@ const LoginScreen: React.FC = () => {
 		};
 
 		const cognitoUser = new CognitoUser(userData);
-		console.log("cognitoUser: ", cognitoUser);
 		const authenticationData = {
 			Username: emailOrUsername,
 			Password: password,
 		};
 
 		const authenticationDetails = new AuthenticationDetails(authenticationData);
-		console.log("authenticationData", authenticationData);
 		cognitoUser.authenticateUser(authenticationDetails, {
 			onSuccess: function (result) {
 				// Store token in storage if remember me is checked
@@ -53,7 +51,6 @@ const LoginScreen: React.FC = () => {
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				Alert.alert(utils.API_BASE_URL);
 				// POST request to backend
 				fetch(`${utils.API_BASE_URL}/auth/login`, {
 					method: "POST",
@@ -68,7 +65,6 @@ const LoginScreen: React.FC = () => {
 					.then((data) => {
 						const token = data.token; // Extract the token from the response
 						auth.setToken(token); // Set the token in the AuthManagement service
-						console.log("jwt: ", token);
 						router.navigate("/screens/Home");
 					})
 					.finally(() => {
