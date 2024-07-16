@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	Query,
+	Redirect,
+	Request,
+	Res,
+	UseGuards,
+} from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
@@ -36,10 +44,14 @@ export class SpotifyAuthController {
 	async handleSpotifyAuthCallback(
 		@Request() req: Request,
 		@Query("code") code: string,
+		@Query("state") state: string,
+		@Query("redirect") redirectURI: string,
 	) {
 		//expecting "/auth/callback?code={code}&state={state}"
+		//`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}&redirect=${redirectURI}`,
+
 		const tokens: SpotifyTokenResponse =
-			await this.spotifyAuth.exchangeCodeForToken(code);
+			await this.spotifyAuth.exchangeCodeForToken(code, state, redirectURI);
 		const tp: SpotifyTokenPair = {
 			tokens: tokens,
 			epoch_expiry: new Date().getTime() + (tokens.expires_in - 300) * 1000,

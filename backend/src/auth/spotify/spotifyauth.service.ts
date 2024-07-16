@@ -110,24 +110,39 @@ export class SpotifyAuthService {
 		);
 	}
 
-	async exchangeCodeForToken(code: string): Promise<SpotifyTokenResponse> {
+	async exchangeCodeForToken(
+		code: string,
+		state: string,
+		redirectURI: string,
+	): Promise<SpotifyTokenResponse> {
 		try {
+			// Step 1: Create the request options object
+			const requestOptions = {
+				url: "https://accounts.spotify.com/api/token",
+				body: {
+					grant_type: "authorization_code",
+					code: code,
+					redirect_uri: decodeURIComponent(redirectURI),
+				},
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Basic ${this.authHeader}`,
+				},
+			};
+
+			// Step 2: Log or inspect the request options
+			console.log("Request options:", requestOptions);
+
+			// Step 3: Send the request
 			const response = await firstValueFrom(
 				this.httpService.post(
-					"https://accounts.spotify.com/api/token",
-					{
-						grant_type: "authorization_code",
-						code: code,
-						redirect_uri: this.redirectUri,
-					},
-					{
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded",
-							Authorization: `Basic ${this.authHeader}`,
-						},
-					},
+					requestOptions.url,
+					new URLSearchParams(requestOptions.body).toString(), // Convert the body to URL-encoded string
+					{ headers: requestOptions.headers },
 				),
 			);
+
+			console.log(response);
 
 			if (!response || !response.data) {
 				throw new Error("Failed to exchange code for token");
