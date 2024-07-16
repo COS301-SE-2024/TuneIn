@@ -1,17 +1,25 @@
+import axios from "axios";
+import * as StorageService from "./../services/StorageService";
+//import decode from "react-native-pure-jwt";
+import { jwtDecode } from "jwt-decode";
+import * as utils from "./Utils";
+import { JWT_SECRET_KEY } from "react-native-dotenv";
+import auth from "./AuthManagement";
+
 export type SpotifyTokenResponse = {
 	access_token: string;
 	token_type: string;
 	scope: string;
 	expires_in: number;
 	refresh_token: string;
-}
+};
 
 export type SpotifyTokenRefreshResponse = {
 	access_token: string;
 	token_type: string;
 	scope: string;
 	expires_in: number;
-}
+};
 
 export type SpotifyTokenPair = {
 	tokens: SpotifyTokenResponse;
@@ -21,32 +29,49 @@ export type SpotifyTokenPair = {
 export type SpotifyCallbackResponse = {
 	token: string;
 	spotifyTokens: SpotifyTokenResponse;
-}
+};
 
-class SpotifyAuthManagement {
-    function getTokens(): SpotifyTokenPair | null {
-        /*
-        //make post request to backend server get access token
-			fetch(
-				`${utils.API_BASE_URL}/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(redirectURI)}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
+export async function exchangeCodeWithBackend(
+	code: string,
+	state: string,
+	redirectURI: string,
+): Promise<SpotifyCallbackResponse> {
+	try {
+		const response = await axios.get(
+			`${utils.API_BASE_URL}/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(
+				redirectURI,
+			)}`,
+			{
+				headers: {
+					"Content-Type": "application/json",
 				},
-			)
-				.then((res) => res.json())
-				.then((data) => {
-					console.log("Data:", data);
-				})
-				.catch((err) => {
-					console.error("Error:", err);
-					return;
-				});
-        */
+			},
+		);
 
-
-    }
+		const r: SpotifyCallbackResponse = response.data;
+		return r;
+	} catch (error) {
+		console.error("Failed to exchange code with backend:", error);
+	}
+	throw new Error("Something went wrong while exchanging code with backend");
 }
-export default new SpotifyAuthManagement();
+
+export async function getTokens(): Promise<SpotifyTokenResponse> {
+	try {
+		const token = auth.getToken();
+		const response = await axios.get(
+			`${utils.API_BASE_URL}/auth/spotify/tokens`,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			},
+		);
+
+		const r: SpotifyTokenResponse = response.data;
+		return r;
+	} catch (error) {
+		console.error("Failed to get tokens:", error);
+	}
+	throw new Error("Something went wrong while getting Spotify tokens");
+}
