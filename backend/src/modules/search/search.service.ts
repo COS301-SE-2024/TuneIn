@@ -8,6 +8,7 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
+var sqlstring = require('sqlstring');
 
 export class CombinedSearchResults {
 	@ApiProperty({ type: [RoomDto], description: "List of rooms" })
@@ -158,16 +159,16 @@ export class SearchService {
         SELECT room.*,`;
 
 		if(params.creator_name === undefined && params.creator_username === undefined) {
-			query += ` levenshtein(name, '${params.q}') AS distance`;
+			query += ` levenshtein(name, ${sqlstring.escape(params.q)}) AS distance`;
 		}		
 		else if(params.creator_name !== undefined && params.creator_username !== undefined) {
-			query += ` LEAST(levenshtein(name, '${params.q}'), levenshtein(username, '${params.creator_username}'), levenshtein(full_name, '${params.creator_name}')) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
 		}
 		else if(params.creator_name !== undefined) {
-			query += ` LEAST(levenshtein(name, '${params.q}'), levenshtein(full_name, '${params.creator_name}')) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
 		}
 		else if(params.creator_username !== undefined) {
-			query += ` LEAST(levenshtein(name, '${params.q}'), levenshtein(username, '${params.creator_username}')) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
 		}
 		
 		if(params.description !== undefined){
@@ -188,22 +189,22 @@ export class SearchService {
 			query += ` INNER JOIN participate ON room.room_id = participate.room_id`;
 		}
 
-        query += ` WHERE (similarity(name, '${params.q}') > 0.2`;
+        query += ` WHERE (similarity(name, ${sqlstring.escape(params.q)}) > 0.2`;
 
 		if(params.creator_name !== undefined && params.creator_username !== undefined) {
-			query += ` OR similarity(username, '${params.creator_username}') > 0.2 OR similarity(full_name, '${params.creator_name}') > 0.2`;
+			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2 OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;
 		}
 		else if(params.creator_name !== undefined) {
-			query += ` OR similarity(full_name, '${params.creator_name}') > 0.2`;		}
+			query += ` OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;		}
 		else if(params.creator_username !== undefined) {
-			query += ` OR similarity(username, '${params.creator_username}') > 0.2`;
+			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2`;
 		}
 		query += ` )`;
 
 		// Handle optional parameters
 		
 		if (params.description !== undefined) {
-			query += ` AND levenshtein(description, '${params.description}') < 100`;
+			query += ` AND levenshtein(description, ${sqlstring.escape(params.description)}) < 100`;
 		}
 		if (params.is_temp !== undefined) {
 			query += ` AND is_temporary = ${params.is_temp}`;
@@ -226,10 +227,10 @@ export class SearchService {
 		}
 		
 		if (params.is_scheduled !== undefined && params.start_date !== undefined) {
-			query += ` AND scheduled_date AT TIME ZONE 'UTC' = '${params.start_date}'`;
+			query += ` AND scheduled_date AT TIME ZONE 'UTC' = ${sqlstring.escape(params.start_date)}`;
 		}
 		if (params.lang !== undefined) {
-			query += ` AND room_language = '${params.lang}'`;
+			query += ` AND room_language = ${sqlstring.escape(params.lang)}`;
 		}
 		if (params.explicit !== undefined) {
 			query += ` AND explicit = ${params.explicit}`;
@@ -241,7 +242,7 @@ export class SearchService {
 		if (params.tags && params.tags.length > 0) {
 			const tags = params.tags.split(',');
 			const tagsCondition = tags
-				.map((tag) => `tags @> ARRAY['${tag}']`)
+				.map((tag) => `tags @> ARRAY[${sqlstring.escape(tag)}]`)
 				.join(" OR ");
 			query += ` AND (${tagsCondition})`;
 		}
@@ -253,7 +254,7 @@ export class SearchService {
 		query += ` ORDER BY distance ASC LIMIT 10`;
 		console.log(query);
 
-		const result = await this.prisma.$queryRawUnsafe<PrismaTypes.room>(query);
+		const result = await this.prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
 
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
