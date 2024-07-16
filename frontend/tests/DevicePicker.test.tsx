@@ -1,18 +1,18 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import DevicePicker from "../app/components/DevicePicker";
-import { useSpotifyAuth } from "../app/hooks/useSpotifyAuth";
 import { useSpotifyDevices } from "../app/hooks/useSpotifyDevices";
+import { getTokens } from "../app/services/SpotifyAuth";
 
 // Mocking the custom hooks
-jest.mock("../app/hooks/useSpotifyAuth");
+jest.mock("../app/services/SpotifyAuth");
 jest.mock("../app/hooks/useSpotifyDevices");
 
 const mockGetToken = jest.fn();
 const mockGetDeviceIDs = jest.fn();
 
-(useSpotifyAuth as jest.Mock).mockReturnValue({
-	getToken: mockGetToken,
+(getTokens as jest.Mock).mockReturnValue({
+	getTokens: mockGetToken,
 });
 
 (useSpotifyDevices as jest.Mock).mockReturnValue({

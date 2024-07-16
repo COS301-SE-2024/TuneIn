@@ -10,10 +10,9 @@ import {
 } from "react-native";
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
-import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 const DevicePicker = () => {
-	const { getToken } = useSpotifyAuth();
 	const [isVisible, setIsVisible] = useState();
 	const [devices, setDevices] = useState([]);
 	const [setSelectedDevice] = useState([]);
@@ -24,7 +23,8 @@ const DevicePicker = () => {
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
-				const token = await getToken();
+				const allTokens = await spotifyAuth.getTokens();
+				const token = allTokens.access_token;
 				setAccessToken(token);
 			} catch (err) {
 				console.error("An error occurred while fetching the token", err);
@@ -32,7 +32,7 @@ const DevicePicker = () => {
 		};
 
 		fetchToken();
-	}, [getToken]);
+	}, []);
 
 	useEffect(() => {
 		let interval;
