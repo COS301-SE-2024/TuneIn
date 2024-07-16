@@ -1,9 +1,5 @@
 import axios from "axios";
-import * as StorageService from "./../services/StorageService";
-//import decode from "react-native-pure-jwt";
-import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
-import { JWT_SECRET_KEY } from "react-native-dotenv";
 import auth from "./AuthManagement";
 
 export type SpotifyTokenResponse = {

@@ -103,7 +103,7 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const refreshData = async () => {
+	const refreshData = useCallback(() => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 
@@ -154,7 +154,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	};
+	}, []);
 
 	useEffect(() => {
 		const initialize = async () => {
@@ -171,7 +171,7 @@ const Home: React.FC = () => {
 		return () => clearInterval(interval);
 		*/
 		return () => {};
-	}, []);
+	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
 		<Link

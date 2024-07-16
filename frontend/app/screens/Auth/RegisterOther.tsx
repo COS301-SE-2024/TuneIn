@@ -2,18 +2,10 @@ import * as React from "react";
 import {
 	makeRedirectUri,
 	useAuthRequest,
-	AuthRequestConfig,
 	DiscoveryDocument,
 	ResponseType,
 } from "expo-auth-session";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	Platform,
-	Button,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -22,13 +14,16 @@ import {
 	useFonts,
 } from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
-//import * as AuthSession from "expo-auth-session";
+import {
+	exchangeCodeWithBackend,
+	SpotifyCallbackResponse,
+} from "../../services/SpotifyAuth";
+import auth from "../../services/AuthManagement";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -100,25 +95,18 @@ const RegisterOtherScreen: React.FC = () => {
 			console.log("Code:", code);
 
 			//make post request to backend server get access token
-			fetch(
-				`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(redirectURI)}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				},
-			)
-				.then((res) => res.json())
-				.then((data) => {
-					console.log("Data:", data);
-				})
-				.catch((err) => {
-					console.error("Error:", err);
-					return;
-				});
+			async function doExchange() {
+				const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
+					code,
+					state,
+					redirectURI,
+				);
+				await auth.setToken(tokens.token);
+				router.navigate("screens/Home");
+			}
+			doExchange();
 		}
-	}, [response]);
+	}, [response, redirectURI, router]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,

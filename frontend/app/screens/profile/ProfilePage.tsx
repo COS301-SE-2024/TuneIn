@@ -24,16 +24,12 @@ const ProfileScreen: React.FC = () => {
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
-
-	const [token, setToken] = useState<string | null>(null);
 	const [profileData, setProfileData] = useState<any>(null);
 
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
 				const storedToken = await auth.getToken();
-				setToken(storedToken);
-
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
 					setProfileData(data);
@@ -45,7 +41,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	}, [setToken]);
+	}, []);
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
@@ -64,7 +60,6 @@ const ProfileScreen: React.FC = () => {
 	const handleJoinLeave = async () => {
 		try {
 			const t = await auth.getToken();
-			setToken(t);
 			const response = await axios.post(
 				`${utils.API_BASE_URL}/joinLeaveRoom`,
 				{

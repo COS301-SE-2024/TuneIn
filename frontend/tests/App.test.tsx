@@ -2,7 +2,6 @@ import React from "react";
 import renderer from "react-test-renderer";
 import App from "../app/index"; // Adjust the path as necessary to point to your index.tsx
 import * as StorageService from "../app/services/StorageService";
-import { useRouter } from "expo-router";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
