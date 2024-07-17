@@ -1,19 +1,12 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { TestingModule } from "@nestjs/testing";
 import { DbUtilsService } from "./db-utils.service";
-import { PrismaService } from "./../../../prisma/prisma.service";
-import { mockPrismaService } from "../../../jest-mocking";
+import { createDbUtilsTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("DbUtilsService", () => {
 	let service: DbUtilsService;
 
 	beforeEach(async () => {
-		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				DbUtilsService,
-				{ provide: PrismaService, useValue: mockPrismaService },
-			],
-		}).compile();
-
+		const module: TestingModule = await createDbUtilsTestingModule();
 		service = module.get<DbUtilsService>(DbUtilsService);
 	});
 

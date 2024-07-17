@@ -24,7 +24,6 @@ import { BullConfigModule } from "./bull-config/bull-config.module";
 import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 import { SearchService } from "./modules/search/search.service";
-import { SearchController } from "./modules/search/search.controller";
 import { SearchModule } from "./modules/search/search.module";
 
 @Module({

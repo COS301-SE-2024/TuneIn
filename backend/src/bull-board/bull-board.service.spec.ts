@@ -1,22 +1,12 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { TestingModule } from "@nestjs/testing";
 import { BullBoardService } from "./bull-board.service";
+import { createBullBoardTestingModule } from "../../jest_mocking/module-mocking";
 
 describe("BullBoardService", () => {
 	let service: BullBoardService;
 
 	beforeEach(async () => {
-		// Mock of BullQueue_task-queue
-		const mockBullQueue = {
-			// Mock methods and properties as needed by BullBoardService
-		};
-
-		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				BullBoardService,
-				{ provide: "BullQueue_task-queue", useValue: mockBullQueue }, // Provide the mock here
-			],
-		}).compile();
-
+		const module: TestingModule = await createBullBoardTestingModule();
 		service = module.get<BullBoardService>(BullBoardService);
 	});
 

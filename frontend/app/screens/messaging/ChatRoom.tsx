@@ -20,13 +20,11 @@ import {
 } from "@expo/vector-icons";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import io from "socket.io-client";
-import {
-	LiveChatMessageDto,
-	RoomDto,
-	UserProfileDto,
-} from "../../../api-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
 import axios from "axios";
 import { ChatEventDto } from "../../models/ChatEventDto";
+import * as utils from "../../services/Utils";
+import auth from "../../services/AuthManagement";
 
 type Message = {
 	message: LiveChatMessageDto;
@@ -60,14 +58,11 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 				setToken(storedToken);
 				const whoami = async (token: string | null, type?: string) => {
 					try {
-						const response = await axios.get(
-							`${utils.API_BASE_URL}/users`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
+						});
 						console.log("User's own info:", response.data);
 						return response.data as UserDto;
 					} catch (error) {
@@ -206,7 +201,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	};
 
 	const navigateToPlaylist = () => {
-		router.navigate("/screens/Playlist");
+		router.navigate("/screens/rooms/Playlist");
 	};
 
 	const navigateToLyrics = () => {
@@ -358,7 +353,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 								}}
 							>
 								<Text style={{ fontSize: 14, fontWeight: "bold" }}>
-									{msg.message.sender.name}
+									{msg.message.sender.profileName}
 								</Text>
 								<Text>{msg.message.messageBody}</Text>
 								<Text

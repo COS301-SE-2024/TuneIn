@@ -3,8 +3,9 @@ import * as StorageService from "./../services/StorageService";
 //import decode from "react-native-pure-jwt";
 import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
+import { JWT_SECRET_KEY } from "react-native-dotenv";
 
-const jwtSecretKey = process.env.JWT_SECRET_KEY;
+const jwtSecretKey = JWT_SECRET_KEY;
 if (!jwtSecretKey) {
 	throw new Error(
 		"No JWT Secret (JWT_SECRET_KEY) provided in environment variables",
@@ -20,7 +21,7 @@ class AuthManagement {
 	}
 
 	public async getToken(): Promise<string | null> {
-		if (this.checkTokenExpiry()) {
+		if (await this.checkTokenExpiry()) {
 			await this.refreshAccessToken();
 		}
 		return this.token;
@@ -46,12 +47,9 @@ class AuthManagement {
 	public async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
 		try {
-			const response = await axios.post(
-				`${utils.API_BASE_URL}/auth/refresh`,
-				{
-					refreshToken: this.token,
-				},
-			);
+			const response = await axios.post(`${utils.API_BASE_URL}/auth/refresh`, {
+				refreshToken: this.token,
+			});
 			const newToken = response.data.token;
 			if (newToken) {
 				this.setToken(newToken);
@@ -62,13 +60,15 @@ class AuthManagement {
 	}
 }
 
-function decodeToken(token: string): any {
-	try {
-		//return decode.decode(token, JWT_SECRET_KEY);
-		return jwtDecode(token);
-	} catch (error) {
-		console.error("Failed to decode token:", error);
-		return null;
+function decodeToken(token: string | null): any {
+	if (token) {
+		try {
+			//return decode.decode(token, JWT_SECRET_KEY);
+			return jwtDecode(token);
+		} catch (error) {
+			console.error("Failed to decode token:", error);
+			return null;
+		}
 	}
 }
 
