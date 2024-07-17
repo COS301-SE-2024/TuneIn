@@ -201,7 +201,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 	};
 
 	const navigateToPlaylist = () => {
-		router.navigate("/screens/Playlist");
+		router.navigate("/screens/rooms/Playlist");
 	};
 
 	const navigateToLyrics = () => {

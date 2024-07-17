@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
-import RoomCard from "../../components/RoomCard";
+import RoomCard from "../../components/rooms/RoomCard";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import MusicBottomSheet from "../../components/MusicBottomSheet";
@@ -24,12 +24,14 @@ const ProfileScreen: React.FC = () => {
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
+
 	const [profileData, setProfileData] = useState<any>(null);
 
 	useEffect(() => {
 		const getTokenAndData = async () => {
 			try {
 				const storedToken = await auth.getToken();
+
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
 					setProfileData(data);
@@ -41,7 +43,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	}, []);
+	});
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
@@ -59,7 +61,7 @@ const ProfileScreen: React.FC = () => {
 
 	const handleJoinLeave = async () => {
 		try {
-			const t = await auth.getToken();
+			const token = await auth.getToken();
 			const response = await axios.post(
 				`${utils.API_BASE_URL}/joinLeaveRoom`,
 				{
@@ -68,7 +70,7 @@ const ProfileScreen: React.FC = () => {
 				},
 				{
 					headers: {
-						Authorization: `Bearer ${t}`,
+						Authorization: `Bearer ${token}`,
 					},
 				},
 			);

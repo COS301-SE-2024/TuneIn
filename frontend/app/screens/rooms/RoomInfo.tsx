@@ -9,7 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import RoomDetails, {
 	RoomDetailsProps,
-} from "../../components/RoomDetailsComponent";
+} from "../../components/rooms/RoomDetailsComponent";
 import { useRouter } from "expo-router";
 
 const roomDetails: RoomDetailsProps = {

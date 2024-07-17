@@ -67,13 +67,15 @@ class AuthManagement {
 	}
 }
 
-function decodeToken(token: string): any {
-	try {
-		//return decode.decode(token, JWT_SECRET_KEY);
-		return jwtDecode(token);
-	} catch (error) {
-		console.error("Failed to decode token:", error);
-		return null;
+function decodeToken(token: string | null): any {
+	if (token) {
+		try {
+			//return decode.decode(token, JWT_SECRET_KEY);
+			return jwtDecode(token);
+		} catch (error) {
+			console.error("Failed to decode token:", error);
+			return null;
+		}
 	}
 }
 

@@ -7,9 +7,11 @@ import {
 	Animated,
 	StyleSheet,
 	ActivityIndicator,
+	NativeScrollEvent,
+	NativeSyntheticEvent,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import RoomCardWidget from "../components/RoomCardWidget";
+import { useRouter } from "expo-router";
+import RoomCardWidget from "../components/rooms/RoomCardWidget";
 import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
@@ -22,9 +24,11 @@ import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 
 const Home: React.FC = () => {
+	console.log("Home");
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [cache, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -61,7 +65,11 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const formatRoomData = (rooms: any[], mine: boolean = false) => {
+	const formatRoomData = (rooms: any, mine = false) => {
+		if (!Array.isArray(rooms)) {
+			return [];
+		}
+
 		return rooms.map((room) => ({
 			id: room.roomID,
 			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -75,7 +83,7 @@ const Home: React.FC = () => {
 			userID: room.creator.userID,
 			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
 			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: "50",
+			roomSize: 50,
 			tags: room.tags ? room.tags : [],
 			mine: mine,
 			isNsfw: room.has_nsfw_content,
@@ -139,12 +147,16 @@ const Home: React.FC = () => {
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
-			const formattedFriends = fetchedFriends.map((friend) => ({
-				profilePicture: friend.profile_picture_url
-					? friend.profile_picture_url
-					: ProfileIMG,
-				name: friend.profile_name,
-			}));
+
+			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
+				? fetchedFriends.map((friend: Friend) => ({
+						profilePicture: friend.profile_picture_url
+							? friend.profile_picture_url
+							: ProfileIMG,
+						profile_name: friend.profile_name, // Ensure you include the profile_name property
+					}))
+				: [];
+
 			setFriends(formattedFriends);
 
 			await StorageService.setItem(
@@ -163,40 +175,28 @@ const Home: React.FC = () => {
 		};
 		initialize();
 
-		/*
 		const interval = setInterval(() => {
 			refreshData();
-		}, 240000); // Refresh data every 60 seconds
+		}, 240000); // Refresh data every 240 seconds (4 minutes)
 
 		return () => clearInterval(interval);
-		*/
-		return () => {};
 	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
-		<Link
-			href={{
-				pathname: "/screens/rooms/RoomPage",
-				params: { room: JSON.stringify(item) },
-			}}
-		>
-			<RoomCardWidget roomCard={item} />
-		</Link>
+		<RoomCardWidget roomCard={item} />
 	);
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
-		console.log("Navigating to all friends");
 		router.navigate("/screens/AllFriends");
 	};
 
 	const navigateToCreateNew = () => {
-		console.log("Navigating to create new room");
 		router.navigate("/screens/CreateRoom");
 	};
 
 	const handleScroll = useCallback(
-		({ nativeEvent }) => {
+		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
 			const direction = currentOffset > previousScrollY.current ? "down" : "up";
 			previousScrollY.current = currentOffset;

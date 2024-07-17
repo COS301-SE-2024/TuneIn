@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import * as spotifyAuth from "../services/SpotifyAuth";
+import { Devices } from "../models/Devices"; // Ensure this path is correct
 
 export const useSpotifyDevices = () => {
 	const [accessToken, setAccessToken] = useState<string>("");
-	const [devices, setDevices] = useState<any[]>([]);
+	const [devices, setDevices] = useState<Devices[]>([]); // Update to use Devices type
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -46,7 +47,6 @@ export const useSpotifyDevices = () => {
 			}
 
 			const data = await response.json();
-
 			setDevices(data.devices);
 		} catch (err) {
 			setError("An error occurred while fetching devices");
@@ -69,7 +69,8 @@ export const useSpotifyDevices = () => {
 		}
 	};
 
-	const getDeviceIDs = async () => {
+	// Updated getDeviceIDs function to return an array of Devices
+	const getDeviceIDs = async (): Promise<Devices[] | null> => {
 		try {
 			const response = await fetch(
 				"https://api.spotify.com/v1/me/player/devices",
@@ -83,15 +84,18 @@ export const useSpotifyDevices = () => {
 			);
 
 			if (!response.ok) {
-				return null;
+				console.error(`Error fetching devices: ${response.statusText}`);
+				return null; // Return null if response is not ok
 			}
 
 			const data = await response.json();
-			console.log(data.devices);
-			return data.devices;
+
+			// Return the devices array or null if it's undefined
+			return Array.isArray(data.devices) ? data.devices : null;
 		} catch (err) {
 			setError("An error occurred while fetching devices");
 			console.error("An error occurred while fetching devices", err);
+			return null;
 		}
 	};
 
