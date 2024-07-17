@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
-import RoomCard from "../../components/RoomCard";
+import RoomCard from "../../components/rooms/RoomCard";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import MusicBottomSheet from "../../components/MusicBottomSheet";
