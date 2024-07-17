@@ -1,21 +1,32 @@
-import io from "socket.io-client";
-//frontend/api-client
-import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
-//frontend/app/models/ChatEventDto.ts
+import { io, Socket } from "socket.io-client";
+import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
 import { ChatEventDto } from "../models/ChatEventDto";
 import axios from "axios";
 import auth from "./AuthManagement";
 import * as utils from ".//Utils";
 
+type Message = {
+	message: LiveChatMessageDto;
+	me?: boolean;
+};
+
 class LiveChatService {
 	private static instance: LiveChatService;
-	private socket: any = null;
-	private userRef: UserDto | null = null;
+	private socket: Socket;
+	private currentUser: UserDto | null = null;
 	private roomObjRef: RoomDto | null = null;
 	private token: string | null = null;
 	private roomID: string | null = null;
 
-	private constructor() {}
+	private setMessages: React.Dispatch<React.SetStateAction<Message[]>> | null =
+		null;
+
+	private constructor() {
+		this.roomID = null;
+		this.socket = io(utils.API_BASE_URL + "/live", {
+			transports: ["websocket"],
+		});
+	}
 
 	public static getInstance(): LiveChatService {
 		if (!LiveChatService.instance) {
@@ -24,9 +35,7 @@ class LiveChatService {
 		return LiveChatService.instance;
 	}
 
-	//public async initializeSocket = async (roomID, setMessages, setMessage, setJoined) => {
 	public async initializeSocket(
-		roomID: string,
 		setMessages: Function,
 		setMessage: Function,
 		setJoined: Function,
@@ -38,11 +47,16 @@ class LiveChatService {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			userRef = response.data;
+			this.currentUser = response.data as UserDto;
 		} catch (error) {
 			console.error("Error fetching user's own info:", error);
 		}
 
+		if (!this.currentUser) {
+			throw new Error("Something went wrong while getting user's info");
+		}
+
+		/*
 		try {
 			const roomDto = await axios.get(`${utils.API_BASE_URL}/rooms/${roomID}`, {
 				headers: {
@@ -53,27 +67,43 @@ class LiveChatService {
 		} catch (error) {
 			console.error("Error fetching room:", error);
 		}
+        */
 
-		socket = io.io(utils.API_BASE_URL + "/live-chat", {
-			transports: ["websocket"],
-		});
+		this.socket.on("userJoinedRoom", (response: ChatEventDto) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
 
-		socket.on("userJoinedRoom", (response) => {
-			const u = userRef;
+			if (!this.roomID) {
+				throw new Error("Room ID not set");
+			}
+
+			if (
+				response.body &&
+				response.body.sender.userID === this.currentUser.userID
+			) {
+				setJoined(true);
+			}
+
+			const u: UserDto = this.currentUser;
 			const input = {
 				userID: u.userID,
 				body: {
 					messageBody: "",
 					sender: u,
-					roomID: roomID,
+					roomID: this.roomID,
 					dateCreated: new Date(),
 				},
 			};
-			socket.emit("getChatHistory", JSON.stringify(input));
+			this.socket.emit("getChatHistory", JSON.stringify(input));
 		});
 
-		socket.on("chatHistory", (history) => {
-			const u = userRef;
+		this.socket.on("chatHistory", (history: LiveChatMessageDto[]) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
+			const u = this.currentUser;
 			const chatHistory = history.map((msg) => ({
 				message: msg,
 				me: msg.sender.userID === u.userID,
@@ -81,43 +111,75 @@ class LiveChatService {
 			setMessages(chatHistory);
 		});
 
-		socket.on("liveMessage", (newMessage) => {
+		this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
+			if (!newMessage.body) {
+				throw new Error("Message body not found");
+			}
+
 			const message = newMessage.body;
-			const u = userRef;
+			const u = this.currentUser;
 			const me = message.sender.userID === u.userID;
 			if (me) {
 				setMessage("");
 			}
-			setMessages((prevMessages) => [
+			this.setMessages((prevMessages) => [
 				...prevMessages,
 				{ message, me: message.sender.userID === u.userID },
 			]);
 		});
 
-		socket.on("userLeftRoom", (response) => {
+		this.socket.on("userLeftRoom", (response: ChatEventDto) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
 			console.log("User left room:", response);
 		});
 
-		socket.on("error", (response) => {
+		this.socket.on("error", (response: ChatEventDto) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
 			console.error("Error:", response.errorMessage);
 		});
 
-		socket.on("connect", () => {
+		this.socket.on("connect", () => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
 			const input = {
-				userID: userRef.userID,
+				userID: this.currentUser.userID,
 			};
-			socket.emit("connectUser", JSON.stringify(input));
+			this.socket.emit("connectUser", JSON.stringify(input));
 		});
 
-		socket.on("connected", (response) => {
-			if (!setJoined && roomObjRef) {
-				joinRoom(roomID);
+		this.socket.on("connected", (response: ChatEventDto) => {
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
+			}
+
+			if (!this.roomID) {
+				throw new Error("Room ID not set");
+			}
+
+			if (!setJoined && this.roomObjRef) {
+				this.joinRoom(this.roomID);
 			}
 		});
 	}
 
 	public async joinRoom(roomID: string) {
-		const u = userRef;
+		if (!this.currentUser) {
+			throw new Error("Something went wrong while getting user's info");
+		}
+
+		const u = this.currentUser;
 		const input = {
 			userID: u.userID,
 			body: {
@@ -127,11 +189,15 @@ class LiveChatService {
 				dateCreated: new Date(),
 			},
 		};
-		socket.emit("joinRoom", JSON.stringify(input));
+		this.socket.emit("joinRoom", JSON.stringify(input));
 	}
 
 	public async leaveRoom(roomID: string) {
-		const u = userRef;
+		if (!this.currentUser) {
+			throw new Error("Something went wrong while getting user's info");
+		}
+
+		const u = this.currentUser;
 		const input = {
 			userID: u.userID,
 			body: {
@@ -141,12 +207,38 @@ class LiveChatService {
 				dateCreated: new Date(),
 			},
 		};
-		socket.emit("leaveRoom", JSON.stringify(input));
+		this.socket.emit("leaveRoom", JSON.stringify(input));
 	}
 
+	/*
+
+	const sendMessage = () => {
+		if (message.trim() && currentUser.current && socket.current) {
+			const u: UserDto = currentUser.current;
+			const newMessage: LiveChatMessageDto = {
+				messageBody: message,
+				sender: u,
+				roomID: roomID,
+				dateCreated: new Date(),
+			};
+			const input: ChatEventDto = {
+				userID: u.userID,
+				body: newMessage,
+			};
+			console.log("Sending message:", input);
+			socket.current.emit("liveMessage", JSON.stringify(input));
+			// do not add the message to the state here, wait for the server to send it back
+			//setMessages([...messages, { message: newMessage, me: true }]);
+		}
+	};
+	*/
 	public async sendMessage(message: string, roomID: string) {
+		if (!this.currentUser) {
+			throw new Error("Something went wrong while getting user's info");
+		}
+
 		if (message.trim()) {
-			const u = userRef;
+			const u = this.currentUser;
 			const newMessage = {
 				messageBody: message,
 				sender: u,
@@ -157,13 +249,13 @@ class LiveChatService {
 				userID: u.userID,
 				body: newMessage,
 			};
-			socket.emit("liveMessage", JSON.stringify(input));
+			this.socket.emit("liveMessage", JSON.stringify(input));
 		}
 	}
 
 	public async disconnectSocket() {
-		if (socket) {
-			socket.disconnect();
+		if (this.socket) {
+			this.socket.disconnect();
 		}
 	}
 }

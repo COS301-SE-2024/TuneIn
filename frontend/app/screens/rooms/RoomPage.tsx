@@ -31,11 +31,6 @@ import DevicePicker from "../../components/DevicePicker";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
-type Message = {
-	message: LiveChatMessageDto;
-	me?: boolean;
-};
-
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
 	console.log("here");
