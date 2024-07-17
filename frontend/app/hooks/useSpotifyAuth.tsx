@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
-const clientId = SPOTIFY_CLIENT_ID;
+import * as utils from "./../services/Utils";
+const clientId = SPOTIFY_CLIENT_ID; // Import Utils
 
 console.log("react-native-dotenv clientId: ", SPOTIFY_CLIENT_ID);
 console.log("clientId: ", clientId);
@@ -94,11 +95,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const getRefreshToken = async (): Promise<void> => {
+		console.log("local host 1", utils.LOCALHOST);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.118.63:4000/refresh_token",
+				`${utils.LOCALHOST}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},
@@ -123,11 +125,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const refreshAccessToken = async () => {
+		console.log("local host", utils.LOCALHOST);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.118.63:4000/refresh_token",
+				`${utils.LOCALHOST}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},

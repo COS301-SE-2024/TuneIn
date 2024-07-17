@@ -1,5 +1,5 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
 import { ConfigService } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
@@ -16,7 +16,7 @@ import { AuthModule } from "../auth.module";
 		DbUtilsModule,
 		SpotifyModule,
 		TasksModule,
-		AuthModule,
+		forwardRef(() => AuthModule),
 	],
 	controllers: [],
 	providers: [SpotifyAuthService, ConfigService, AuthService],

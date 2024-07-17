@@ -1,5 +1,4 @@
-// src/types/RoomCard.ts
 export interface Friend {
-	profilePicture: string;
-	name: string;
+	profile_picture_url?: string;
+	profile_name: string;
 }
