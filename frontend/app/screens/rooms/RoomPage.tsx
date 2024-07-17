@@ -421,11 +421,12 @@ const RoomPage = () => {
 			setCurrentRoom(roomID);
 		} else {
 			leaveRoom();
-			setJoined(false);
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			playbackManager.pause();
-			setIsPlaying(false);
+			// setJoined(false);
+			// setJoinedSongIndex(null);
+			// setJoinedSecondsPlayed(null);
+			// playbackManager.pause();
+			// setIsPlaying(false);
+			setCurrentRoom(null);
 		}
 	};
 

@@ -1,13 +1,22 @@
 import { Stack } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
+import TopNavBar from "../app/components/TopNavBar"; // Adjust the import path as needed
 
 const Layout = () => {
 	return (
 		<PlayerContextProvider>
-			<Stack>
-				<Stack.Screen name="index" options={{ title: "Welcome" }} />
-				<Stack.Screen name="auth/login" options={{ title: "Login" }} />
-				<Stack.Screen name="room" options={{ title: "Room" }} />
+			<Stack screenOptions={{ headerShown: false }}>
+				<Stack.Screen
+					name="screens/Home"
+					options={{
+						title: "Home",
+						header: () => <TopNavBar />,
+					}}
+				/>
+				<Stack.Screen
+					name="screens/rooms/RoomPage"
+					options={{ title: "Room", headerShown: false }}
+				/>
 			</Stack>
 		</PlayerContextProvider>
 	);

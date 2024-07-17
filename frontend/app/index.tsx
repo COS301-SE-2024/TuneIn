@@ -1,11 +1,12 @@
 import React from "react";
-import StackNavigator from "./StackNavigator";
+import { Slot } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
+import WelcomeScreen from "./screens/WelcomeScreen";
 
 const App: React.FC = () => {
 	return (
 		<PlayerContextProvider>
-			<StackNavigator />
+			<WelcomeScreen />
 		</PlayerContextProvider>
 	);
 };
