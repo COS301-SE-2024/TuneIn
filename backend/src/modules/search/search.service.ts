@@ -402,6 +402,28 @@ export class SearchService {
 		return [new UserDto()];
 	}
 
+	async searchGenres(q: string): Promise<string[]> {
+		console.log(q);
+
+		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
+		SELECT *,
+		LEVENSHTEIN(genre, ${sqlstring.escape(q)}) AS distance
+		FROM genre
+		WHERE similarity(genre, ${sqlstring.escape(q)}) > 0.2
+		ORDER BY distance ASC
+		LIMIT 10`;
+
+		// console.log(result);
+
+		if (Array.isArray(result)) {
+			return result;
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
+		return [];
+	}
+
 	async searchUsersHistory(userID: string): Promise<UserDto[]> {
 		console.log(userID);
 		return [new UserDto()];
