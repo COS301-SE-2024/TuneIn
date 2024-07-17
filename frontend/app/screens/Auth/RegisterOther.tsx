@@ -63,7 +63,9 @@ const RegisterOtherScreen: React.FC = () => {
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
 		path: "screens/Auth/SpotifyRedirect",
+		native: "tunein-app://screens/Auth/SpotifyRedirect", // Use the 'native' option for standalone or native contexts
 	});
+	console.log("Redirect URI:", redirectURI);
 
 	const [request, response, promptAsync] = useAuthRequest(
 		{

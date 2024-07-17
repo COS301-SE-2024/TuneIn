@@ -17,8 +17,6 @@ const App: React.FC = () => {
 				const authToken = await StorageService.getItem("backendToken");
 				if (authToken && authToken !== "undefined" && authToken !== "null") {
 					auth.setToken(authToken);
-				} else {
-					throw new Error("No token found");
 				}
 				// // Perform token validation if necessary
 				// if (token) {
