@@ -4,7 +4,7 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
-import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
+import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 
 // A service that will generate DTOs
 @Injectable()

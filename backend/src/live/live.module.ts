@@ -3,11 +3,11 @@ import { DbUtilsModule } from "../modules/db-utils/db-utils.module"; // Assuming
 import { DtoGenModule } from "../modules/dto-gen/dto-gen.module"; // Assuming this exists
 import { RoomsModule } from "../modules/rooms/rooms.module";
 import { ConnectedUsersModule } from "./connecteduser/connecteduser.module";
-import { ChatGateway } from "./chat.gateway";
+import { LiveGateway } from "./live.gateway";
 
 @Module({
 	imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
-	exports: [ConnectedUsersModule, ChatGateway],
-	providers: [ChatGateway],
+	exports: [ConnectedUsersModule, LiveGateway],
+	providers: [LiveGateway],
 })
-export class ChatModule {}
+export class LiveModule {}

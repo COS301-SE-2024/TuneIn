@@ -9,7 +9,7 @@ import { AuthModule } from "./auth/auth.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
-import { ChatModule } from "./chat/chat.module";
+import { LiveModule } from "./live/live.module";
 import { S3Module } from "./s3/s3.module";
 import { SpotifyModule } from "./spotify/spotify.module";
 import { HttpModule } from "@nestjs/axios";
@@ -28,7 +28,7 @@ import { SearchModule } from "./modules/search/search.module";
 		RoomsModule,
 		DtoGenModule,
 		DbUtilsModule,
-		ChatModule,
+		LiveModule,
 		S3Module,
 		MulterModule.register({
 			dest: "./uploads",

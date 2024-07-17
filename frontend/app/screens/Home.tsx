@@ -103,7 +103,7 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const refreshData = useCallback(() => {
+	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 

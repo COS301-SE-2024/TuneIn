@@ -28,10 +28,10 @@ import { SpotifyAuthService } from "../src/auth/spotify/spotifyauth.service";
 import { BullBoardModule } from "../src/bull-board/bull-board.module";
 import { BullBoardService } from "../src/bull-board/bull-board.service";
 import { BullConfigModule } from "../src/bull-config/bull-config.module";
-import { ChatGateway } from "../src/chat/chat.gateway";
-import { ChatModule } from "../src/chat/chat.module";
-import { ConnectedUsersService } from "../src/chat/connecteduser/connecteduser.service";
-import { ConnectedUsersModule } from "../src/chat/connecteduser/connecteduser.module";
+import { LiveGateway } from "../src/live/live.gateway";
+import { LiveModule } from "../src/live/live.module";
+import { ConnectedUsersService } from "../src/live/connecteduser/connecteduser.service";
+import { ConnectedUsersModule } from "../src/live/connecteduser/connecteduser.module";
 import { DbUtilsModule } from "../src/modules/db-utils/db-utils.module";
 import { DbUtilsService } from "../src/modules/db-utils/db-utils.service";
 import { DtoGenModule } from "../src/modules/dto-gen/dto-gen.module";
@@ -72,7 +72,7 @@ export async function createAppTestingModule(): Promise<TestingModule> {
 			RoomsModule,
 			DtoGenModule,
 			DbUtilsModule,
-			ChatModule,
+			LiveModule,
 			S3Module,
 			MulterModule.register({
 				dest: "./uploads",
@@ -148,11 +148,11 @@ export async function createBullBoardTestingModule(): Promise<TestingModule> {
 	}).compile();
 }
 
-//ChatModule
-export async function createChatTestingModule(): Promise<TestingModule> {
+//LiveModule
+export async function createLiveTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		providers: [
-			ChatGateway,
+			LiveGateway,
 			{ provide: ConfigService, useValue: mockConfigService },
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],

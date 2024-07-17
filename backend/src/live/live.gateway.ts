@@ -25,7 +25,7 @@ import { RoomsService } from "../modules/rooms/rooms.service";
 	},
 })
 //@UseFilters(new WsExceptionFilter())
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly connectedUsers: ConnectedUsersService,
 		private readonly dbUtils: DbUtilsService,

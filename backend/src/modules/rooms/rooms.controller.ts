@@ -27,7 +27,7 @@ import { RoomDto } from "./dto/room.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
-import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
+import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 
 @Controller("rooms")
