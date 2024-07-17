@@ -1,10 +1,4 @@
-import React, {
-	useState,
-	useRef,
-	useCallback,
-	useEffect,
-	useContext,
-} from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -28,19 +22,9 @@ import * as StorageService from "./../services/StorageService"; // Import Storag
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
-import { Player } from "../PlayerContext";
 
 const Home: React.FC = () => {
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
-	const { currentRoom } = playerContext;
-
-	console.log("currentRoom: " + currentRoom);
+	console.log("Home");
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
