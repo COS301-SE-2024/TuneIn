@@ -30,7 +30,7 @@ class PlaybackManager {
 	}
 
 	pause() {
-		this.handlePlayback("pause");
+		this.handlePlayback.handlePlayback("pause");
 	}
 
 	playPauseTrack(track: Track, index: number, offset: number | null = null) {

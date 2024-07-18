@@ -274,7 +274,7 @@ const RoomPage = () => {
 		if (readyToJoinRoom && !joined) {
 			console.log("Joining room...");
 			console.log(readyToJoinRoom, joined);
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
 	}, [readyToJoinRoom, joined, roomID]);
 
@@ -282,7 +282,7 @@ const RoomPage = () => {
 		if (isSending) return;
 
 		setIsSending(true);
-		live.sendMessage(message, setIsSending, setMessage);
+		live.sendMessage(message, setIsSending);
 	};
 
 	return (

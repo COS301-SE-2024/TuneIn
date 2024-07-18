@@ -316,7 +316,7 @@ class LiveChatService {
 
 		//request chat history
 		this.chatHistoryReceived = false;
-		this.socket.emit("getChatHistory", JSON.stringify(input));
+		this.requestChatHistory();
 		this.requestingChatHistory = true;
 	}
 
