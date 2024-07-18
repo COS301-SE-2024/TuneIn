@@ -2,23 +2,20 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Voting from "./Voting";
 import { Ionicons } from "@expo/vector-icons";
+import { Track } from "../models/Track";
 
-export interface SongListProps {
-	songName: string;
-	artist: string;
-	albumCoverUrl: string;
+interface SongListProps {
+	track: Track;
 	voteCount: number;
 	showVoting?: boolean;
-	songNumber: number; // Add this prop for the song number
+	songNumber: number;
 	index: number; // Index of the song in the list
 	isCurrent: boolean; // Indicates if this song is the currently playing song
 	swapSongs: (index: number, direction: "up" | "down") => void; // Function to swap songs
 }
 
 const SongList: React.FC<SongListProps> = ({
-	songName,
-	artist,
-	albumCoverUrl,
+	track,
 	voteCount,
 	showVoting = false,
 	songNumber,
@@ -41,9 +38,11 @@ const SongList: React.FC<SongListProps> = ({
 				<Text
 					style={[styles.songName, isCurrent ? styles.currentSongText : null]}
 				>
-					{songName}
+					{track.name}
 				</Text>
-				<Text style={styles.artist}>{artist}</Text>
+				<Text style={styles.artist}>
+					{track.artists.map((artist) => artist.name).join(", ")}
+				</Text>
 			</View>
 			{showVoting && (
 				<Voting

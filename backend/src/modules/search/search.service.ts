@@ -4,7 +4,7 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import { PrismaService } from "../../../prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+//import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
@@ -67,6 +67,7 @@ export class SearchService {
 		q: string;
 		creator?: string;
 	}): Promise<CombinedSearchResults> {
+		console.log(params);
 		return new CombinedSearchResults();
 	}
 
@@ -74,6 +75,7 @@ export class SearchService {
 		q: string;
 		creator?: string;
 	}): Promise<RoomDto[]> {
+		console.log(params);
 		return [new RoomDto()];
 	}
 
@@ -93,14 +95,17 @@ export class SearchService {
 		nsfw?: boolean;
 		tags?: string[];
 	}): Promise<RoomDto[]> {
+		console.log(params);
 		return [new RoomDto()];
 	}
 
 	async searchRoomsHistory(userID: string): Promise<RoomDto[]> {
+		console.log(userID);
 		return [new RoomDto()];
 	}
 
 	async searchUsers(q: string): Promise<UserDto[]> {
+		console.log(q);
 		return [new UserDto()];
 	}
 
@@ -111,10 +116,12 @@ export class SearchService {
 		following?: number;
 		followers?: number;
 	}): Promise<UserDto[]> {
+		console.log(params);
 		return [new UserDto()];
 	}
 
 	async searchUsersHistory(userID: string): Promise<UserDto[]> {
+		console.log(userID);
 		return [new UserDto()];
 	}
 }

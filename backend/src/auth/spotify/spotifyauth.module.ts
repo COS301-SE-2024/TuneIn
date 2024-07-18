@@ -1,5 +1,5 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
 import { ConfigService } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
@@ -7,6 +7,7 @@ import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
 import { TasksModule } from "../../tasks/tasks.module";
 import { AuthService } from "../auth.service";
+import { AuthModule } from "../auth.module";
 
 @Module({
 	imports: [
@@ -15,10 +16,10 @@ import { AuthService } from "../auth.service";
 		DbUtilsModule,
 		SpotifyModule,
 		TasksModule,
-		AuthService,
+		forwardRef(() => AuthModule),
 	],
 	controllers: [],
-	providers: [SpotifyAuthService, ConfigService],
+	providers: [SpotifyAuthService, ConfigService, AuthService],
 	exports: [SpotifyAuthService],
 })
 export class SpotifyAuthModule {}

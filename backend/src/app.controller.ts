@@ -14,7 +14,6 @@ import {
 	ApiConsumes,
 	ApiOkResponse,
 	ApiOperation,
-	ApiPayloadTooLargeResponse,
 } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { S3Service } from "./s3/s3.service";

@@ -11,7 +11,11 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-const clientId = process.env.SPOTIFY_CLIENT_ID;
+
+import {
+	SPOTIFY_CLIENT_ID,
+	SPOTIFY_REDIRECT_TARGET,
+} from "react-native-dotenv";
 
 if (!clientId) {
 	throw new Error(
@@ -19,7 +23,7 @@ if (!clientId) {
 	);
 }
 
-const redirectTarget = process.env.SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = SPOTIFY_REDIRECT_TARGET;
 if (!redirectTarget) {
 	throw new Error(
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
@@ -30,7 +34,7 @@ const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
 
 	useEffect(() => {
-		const handleRedirect = (event) => {
+		const handleRedirect = (event: any) => {
 			let { queryParams } = Linking.parse(event.url);
 			console.log("Redirect Data:", queryParams);
 			WebBrowser.dismissBrowser();
@@ -67,7 +71,7 @@ const RegisterOtherScreen: React.FC = () => {
 			"user-read-currently-playing",
 		].join(" ");
 
-		const rt = "http://localhost:5000";
+		const rt = redirectTarget;
 		const authUrl =
 			`https://accounts.spotify.com/authorize` +
 			`?client_id=${clientId}` +

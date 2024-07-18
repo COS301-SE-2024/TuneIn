@@ -1,27 +1,12 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { TestingModule } from "@nestjs/testing";
 import { ConnectedUsersService } from "./connecteduser.service";
-
-import { PrismaModule } from "../../../prisma/prisma.module";
-import { PrismaService } from "../../../prisma/prisma.service";
-import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
-import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
-
-import { mockPrismaService } from "../../../jest-mocking";
+import { createConnectedUsersTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("ConnectedUsersService", () => {
 	let service: ConnectedUsersService;
 
 	beforeEach(async () => {
-		const module: TestingModule = await Test.createTestingModule({
-			imports: [PrismaModule],
-			providers: [
-				{ provide: PrismaService, useValue: mockPrismaService },
-				DtoGenService,
-				DbUtilsService,
-				ConnectedUsersService,
-			],
-		}).compile();
-
+		const module: TestingModule = await createConnectedUsersTestingModule();
 		service = module.get<ConnectedUsersService>(ConnectedUsersService);
 	});
 

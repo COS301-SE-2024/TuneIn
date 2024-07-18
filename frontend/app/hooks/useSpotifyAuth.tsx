@@ -2,16 +2,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as StorageService from "../services/StorageService";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
+import * as utils from "./../services/Utils";
+const clientId = SPOTIFY_CLIENT_ID; // Import Utils
 
-const clientId = process.env;
-console.log("process.env", process.env.AWS_COGNITO_CLIENT_ID);
+console.log("react-native-dotenv clientId: ", SPOTIFY_CLIENT_ID);
+console.log("clientId: ", clientId);
+
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 1",
 	);
 }
 
-const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+const clientSecret = SPOTIFY_CLIENT_SECRET;
 if (!clientSecret) {
 	throw new Error(
 		"No Spotify client secret (SPOTIFY_CLIENT_SECRET) provided in environment variables",
@@ -91,11 +95,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const getRefreshToken = async (): Promise<void> => {
+		console.log("local host 1", utils.LOCALHOST);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.118.63:4000/refresh_token",
+				`${utils.LOCALHOST}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},
@@ -120,11 +125,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const refreshAccessToken = async () => {
+		console.log("local host", utils.LOCALHOST);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				"http://192.168.118.63:4000/refresh_token",
+				`${utils.LOCALHOST}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},

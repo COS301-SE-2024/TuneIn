@@ -41,7 +41,7 @@ const RoomOptions = () => {
 	};
 
 	const goToPlaylist = () => {
-		router.navigate("/screens/Playlist");
+		router.navigate("/screens/rooms/Playlist");
 	};
 
 	const goToHome = () => {

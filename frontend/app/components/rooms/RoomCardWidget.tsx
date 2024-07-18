@@ -6,8 +6,9 @@ import {
 	Image,
 	StyleSheet,
 	TouchableOpacity,
+	Animated,
 } from "react-native";
-import { Room } from "../models/Room";
+import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
 
 interface RoomCardWidgetProps {
@@ -18,11 +19,20 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const cardWidth = 290;
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
+
 	// console.log("roomCard", roomCard);
 	const navigateToEditRoom = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: room,
+			params: { room: JSON.stringify(room) },
+		});
+	};
+
+	const navigateToRoomPage = () => {
+		console.log("Room:", room);
+		router.navigate({
+			pathname: "/screens/rooms/RoomPage",
+			params: { room: JSON.stringify(room) },
 		});
 	};
 
@@ -53,47 +63,50 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	};
 
 	return (
-		<View style={[styles.container, { width: cardWidth }]}>
-			<ImageBackground
-				source={{ uri: roomCard.backgroundImage }}
-				style={styles.imageBackground}
-				imageStyle={styles.imageBackgroundStyle}
-				testID="room-card-background" // Add testID here
-			>
-				<View style={styles.overlay} />
-				<View style={styles.textContainer}>
-					<Text style={styles.roomName}>{truncateText(roomCard.name, 20)}</Text>
-					{renderSongInfo()}
-				</View>
-				<View style={styles.contentContainer}>
-					<Text style={styles.description}>
-						{truncateText(roomCard.description, 100)}
-					</Text>
-					{roomCard.mine ? (
-						<View style={styles.actionsContainer}>
-							<TouchableOpacity
-								style={styles.editButton}
-								onPress={navigateToEditRoom}
-							>
-								<Text style={styles.editButtonText}>✎</Text>
-							</TouchableOpacity>
-							<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
-						</View>
-					) : (
-						<View style={styles.userInfoContainer}>
-							<View style={styles.userAvatarContainer}>
-								<Image
-									source={{ uri: roomCard.userProfile }}
-									style={styles.userAvatar}
-								/>
-								<Text style={styles.username}>{roomCard.username}</Text>
+		<TouchableOpacity onPress={navigateToRoomPage}>
+			<Animated.View style={[styles.container, { width: cardWidth }]}>
+				<ImageBackground
+					source={{ uri: roomCard.backgroundImage }}
+					style={styles.imageBackground}
+					imageStyle={styles.imageBackgroundStyle}
+				>
+					<View style={styles.overlay} />
+					<View style={styles.textContainer}>
+						<Text style={styles.roomName}>
+							{truncateText(roomCard.name, 20)}
+						</Text>
+						{renderSongInfo()}
+					</View>
+					<View style={styles.contentContainer}>
+						<Text style={styles.description}>
+							{truncateText(roomCard.description, 100)}
+						</Text>
+						{roomCard.mine ? (
+							<View style={styles.actionsContainer}>
+								<TouchableOpacity
+									style={styles.editButton}
+									onPress={navigateToEditRoom}
+								>
+									<Text style={styles.editButtonText}>✎</Text>
+								</TouchableOpacity>
+								<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
 							</View>
-							<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
-						</View>
-					)}
-				</View>
-			</ImageBackground>
-		</View>
+						) : (
+							<View style={styles.userInfoContainer}>
+								<View style={styles.userAvatarContainer}>
+									<Image
+										source={{ uri: roomCard.userProfile }}
+										style={styles.userAvatar}
+									/>
+									<Text style={styles.username}>{roomCard.username}</Text>
+								</View>
+								<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
+							</View>
+						)}
+					</View>
+				</ImageBackground>
+			</Animated.View>
+		</TouchableOpacity>
 	);
 };
 
