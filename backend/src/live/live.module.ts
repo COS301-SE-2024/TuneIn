@@ -4,10 +4,11 @@ import { DtoGenModule } from "../modules/dto-gen/dto-gen.module"; // Assuming th
 import { RoomsModule } from "../modules/rooms/rooms.module";
 import { ConnectedUsersModule } from "./connecteduser/connecteduser.module";
 import { LiveGateway } from "./live.gateway";
+import { EventQueueService } from "./eventqueue/eventqueue.service";
 
 @Module({
 	imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
 	exports: [ConnectedUsersModule, LiveGateway],
-	providers: [LiveGateway],
+	providers: [LiveGateway, EventQueueService],
 })
 export class LiveModule {}
