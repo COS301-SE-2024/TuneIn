@@ -45,6 +45,7 @@ const ChatScreen = () => {
 			<View style={styles.header}>
 				<TouchableOpacity
 					onPress={() => router.back()}
+					testID="backButton"
 					style={styles.backButton}
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
@@ -67,7 +68,11 @@ const ChatScreen = () => {
 					value={message}
 					onChangeText={setMessage}
 				/>
-				<TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+				<TouchableOpacity
+					style={styles.sendButton}
+					testID="sendButton"
+					onPress={handleSend}
+				>
 					<Image
 						source={{
 							uri: "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",

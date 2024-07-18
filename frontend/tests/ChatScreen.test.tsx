@@ -44,7 +44,9 @@ describe("ChatScreen", () => {
 	it("sends a message correctly", () => {
 		const tree = renderer.create(<ChatScreen />);
 		const messageInput = tree.root.findByType(TextInput);
-		const sendButton = tree.root.findByType(TouchableOpacity);
+
+		// Assuming the send button has a specific testID
+		const sendButton = tree.root.findByProps({ testID: "sendButton" });
 
 		act(() => {
 			messageInput.props.onChangeText("Hello");
@@ -63,7 +65,9 @@ describe("ChatScreen", () => {
 
 	it("navigates back when back button is pressed", () => {
 		const tree = renderer.create(<ChatScreen />);
-		const backButton = tree.root.findAllByType(TouchableOpacity)[0];
+
+		// Assuming the back button has a specific testID
+		const backButton = tree.root.findByProps({ testID: "backButton" });
 
 		act(() => {
 			backButton.props.onPress();
