@@ -52,6 +52,8 @@ import { SpotifyService } from "../src/spotify/spotify.service";
 import { TasksModule } from "../src/tasks/tasks.module";
 //import { TasksProcessor } from "src/tasks/tasks.processor";
 import { TasksService } from "../src/tasks/tasks.service";
+import { GenresService } from "../src/modules/genres/genres.service";
+import { GenresController } from "../src/modules/genres/genres.controller";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -274,5 +276,14 @@ export async function createTasksTestingModule(): Promise<TestingModule> {
 			TasksService,
 			{ provide: "BullQueue_task-queue", useValue: mockBullQueue },
 		], // Provide the mock here
+	}).compile();
+}
+
+//GenresModule
+export async function createGenresTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule],
+		providers: [GenresService],
+		controllers: [GenresController],
 	}).compile();
 }
