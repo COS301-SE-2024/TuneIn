@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
-import RoomCardWidget from "../app/components/RoomCardWidget";
+import RoomCardWidget from "../app/components/rooms/RoomCardWidget";
 import { Room } from "../app/models/Room";
 
 describe("RoomCardWidget component", () => {
