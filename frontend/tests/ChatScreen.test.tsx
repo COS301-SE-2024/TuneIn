@@ -2,7 +2,7 @@ import React from "react";
 import renderer, { act } from "react-test-renderer";
 import ChatScreen from "../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { TextInput, TouchableOpacity } from "react-native";
+import { TextInput } from "react-native";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
