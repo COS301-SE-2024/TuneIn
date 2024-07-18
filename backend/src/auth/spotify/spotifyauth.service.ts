@@ -239,16 +239,6 @@ export class SpotifyAuthService {
 			tk.tokens,
 		);
 
-		//find largest profile picture
-		let largest = 0;
-		for (let i = 0; i < spotifyUser.images.length; i++) {
-			if (spotifyUser.images[i].height > largest) {
-				largest = i;
-			}
-		}
-
-		console.log("spotifyUser image : " + spotifyUser.images);
-		console.log("\nimage size: " + largest);
 		const existingUser: PrismaTypes.users[] | null =
 			await this.prisma.users.findMany({
 				where: { username: spotifyUser.id },
@@ -260,20 +250,32 @@ export class SpotifyAuthService {
 			return existingUser[0];
 		}
 
-		const profilePicture =
-			largest > 0
-				? spotifyUser.images[largest]?.url
-				: "https://example.com/default-profile-picture.png";
-
 		const user: Prisma.usersCreateInput = {
 			username: spotifyUser.id,
-			profile_picture: profilePicture,
 			full_name: spotifyUser.display_name,
 			external_links: {
 				spotify: spotifyUser.external_urls.spotify,
 			},
 			email: spotifyUser.email,
 		};
+
+		if (spotifyUser.images && spotifyUser.images.length > 0) {
+			//find largest profile picture
+			let largest = 0;
+			for (let i = 0; i < spotifyUser.images.length; i++) {
+				if (spotifyUser.images[i].height > largest) {
+					largest = i;
+				}
+			}
+
+			console.log("spotifyUser image : " + spotifyUser.images);
+			console.log("\nimage size: " + largest);
+
+			user.profile_picture =
+				largest > 0
+					? spotifyUser.images[largest]?.url
+					: "https://example.com/default-profile-picture.png";
+		}
 
 		try {
 			const response = await this.prisma.users.create({ data: user });
