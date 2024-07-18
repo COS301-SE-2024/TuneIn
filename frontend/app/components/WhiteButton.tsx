@@ -1,6 +1,6 @@
 // WhiteButton.tsx
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 interface WhiteButtonProps {
   title: string;

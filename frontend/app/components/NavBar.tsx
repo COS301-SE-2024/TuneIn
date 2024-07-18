@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors } from '../styles/colors';
-import { color } from "react-native-elements/dist/helpers";
 
 const NavBar: React.FC = () => {
 	const router = useRouter();
