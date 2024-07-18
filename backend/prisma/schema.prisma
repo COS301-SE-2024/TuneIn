@@ -140,6 +140,7 @@ model room {
   users          users           @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
   room_message   room_message[]
   scheduled_room scheduled_room?
+  table_state    table_state?
 }
 
 model room_message {
@@ -193,6 +194,7 @@ model users {
   playlist                        playlist[]
   private_message                 private_message[]
   room                            room[]
+  search_history                  search_history[]
 }
 
 model vote {
@@ -200,4 +202,26 @@ model vote {
   is_upvote Boolean @default(true)
   queue_id  String  @db.Uuid
   queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+}
+
+model genre {
+  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  genre    String?
+}
+
+model search_history {
+  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  search_term String
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  metadata    Json?    @db.Json
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+model table_state {
+  room_id   String    @id @db.Uuid
+  index     Int?
+  is_active Boolean?
+  time      DateTime? @default(now()) @db.Timestamptz(6)
+  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
 }
