@@ -177,6 +177,16 @@ response: return an array of UserDto
 #### GET: returns a list of recently searched users (users discovered from search)
 response: return an array of UserDto
 
+### `/search/genres`
+#### GET: gets a list of genres that match given string
+query params
+- q: string to match genres
+response: return an array of genre names (strings)
+## Genres
+### `/genres`
+#### GET: gets a list of all genres in our db
+response: return a string array of genre names
+
 # Data Transfer Objects (Dtos)
 
 ## UserDto (User Profile Info)
