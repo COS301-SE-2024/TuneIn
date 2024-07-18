@@ -124,4 +124,10 @@ export class SearchService {
 		console.log(userID);
 		return [new UserDto()];
 	}
+
+	/*
+	async searchGenres(q: string): Promise<string[]> {
+		
+	}
+	*/
 }

@@ -322,4 +322,25 @@ export class SearchController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchUsersHistory(userInfo.id);
 	}
+
+	/* ************************************************** */
+	/*
+	@Get("genres")
+	@ApiTags("search")
+	@ApiOperation({ summary: "Search for genres" })
+	@ApiOkResponse({
+		description: "Search results as an array of strings.",
+		type: [String],
+	})
+	@ApiBadRequestResponse({ description: "Invalid query parameters" })
+	@ApiQuery({
+		name: "q",
+		required: true,
+		description: "A genre name",
+		type: "string",
+	})
+	async searchGenres(@Query("q") q: string): Promise<string[]> {
+		return await this.searchService.searchGenres(q);
+	}
+		*/
 }
