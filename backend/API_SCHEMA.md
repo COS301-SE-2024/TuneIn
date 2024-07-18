@@ -44,6 +44,10 @@ response: an array of RoomDto
 no input
 response: an array of RoomDto
 
+### `/users/rooms/current`
+#### GET: get user's current room (room they're currently in)
+response: RoomDto or null
+
 ### `/users/friends`
 #### GET: get user's friends✅
 no input
@@ -75,7 +79,7 @@ response: RoomDto
 input: partial RoomDto
 response: updated RoomDto
 
-#### DELETE: deletes the room (only if it belongs to the user)
+#### DELETE: deletes the room (only if it belongs to the user)✅
 no input
 response: (2xx for success, 4xx for error)
 

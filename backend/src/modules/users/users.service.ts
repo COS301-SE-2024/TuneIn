@@ -402,6 +402,11 @@ export class UsersService {
 		return recommends;
 	}
 
+	async getCurrentRoom(userID: string): Promise<RoomDto | object> {
+		console.log("Getting current room for user " + userID);
+		return {};
+	}
+
 	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
 			where: { OR: [{ friend1: userID }, { friend2: userID }] },

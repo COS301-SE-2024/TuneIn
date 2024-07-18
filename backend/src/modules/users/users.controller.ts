@@ -187,6 +187,24 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
+	@Get("rooms/current")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get a user's current room (room that they are currently in)",
+	})
+	@ApiParam({ name: "none" })
+	@ApiOkResponse({
+		description:
+			"The user's current room as a RoomDto or {} if they are not in a room.",
+		type: RoomDto,
+	})
+	async getCurrentRoom(@Request() req: any): Promise<RoomDto | object> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getCurrentRoom(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's friends" })
