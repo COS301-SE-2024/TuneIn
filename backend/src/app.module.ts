@@ -18,6 +18,7 @@ import { BullConfigModule } from "./bull-config/bull-config.module";
 import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 import { SearchModule } from "./modules/search/search.module";
+import { GenresModule } from './modules/genres/genres.module';
 
 @Module({
 	imports: [
@@ -40,6 +41,7 @@ import { SearchModule } from "./modules/search/search.module";
 		TasksModule,
 		BullConfigModule,
 		SearchModule,
+		GenresModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
