@@ -297,17 +297,33 @@ export class SpotifyAuthService {
 			throw new Error("User not found");
 		}
 
-		const tokens: Prisma.authenticationCreateInput = {
-			token: JSON.stringify(tk),
-			users: {
-				connect: {
-					user_id: user.user_id,
-				},
-			},
-		};
-
 		try {
-			await this.prisma.authentication.create({ data: tokens });
+			const existingTokens: PrismaTypes.authentication | null =
+				await this.prisma.authentication.findFirst({
+					where: { user_id: user.user_id },
+				});
+
+			if (!existingTokens || existingTokens === null) {
+				throw new Error(
+					"A database error occurred while checking if the user's tokens exist",
+				);
+			}
+
+			if (existingTokens) {
+				await this.prisma.authentication.update({
+					where: { user_id: user.user_id },
+					data: {
+						token: JSON.stringify(tk),
+					},
+				});
+			} else {
+				await this.prisma.authentication.create({
+					data: {
+						token: JSON.stringify(tk),
+						user_id: user.user_id,
+					},
+				});
+			}
 		} catch (err) {
 			console.log(err);
 			throw new Error("Failed to save tokens");

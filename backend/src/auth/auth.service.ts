@@ -276,7 +276,6 @@ export class AuthService {
 	}
 	*/
 	getUserInfo(req: any): JWTPayload {
-		console.log("req", req);
 		const result = req.user as JWTPayload;
 		console.log(result);
 		if (!result) {

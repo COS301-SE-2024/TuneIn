@@ -54,7 +54,7 @@ export async function exchangeCodeWithBackend(
 
 export async function getTokens(): Promise<SpotifyTokenResponse> {
 	try {
-		const token = auth.getToken();
+		const token = await auth.getToken();
 		const response = await axios.get(
 			`${utils.API_BASE_URL}/auth/spotify/tokens`,
 			{
