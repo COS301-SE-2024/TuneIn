@@ -19,7 +19,7 @@ const App: React.FC = () => {
 				if (authToken && authToken !== "undefined" && authToken !== "null") {
 					auth.setToken(authToken);
 				}
-				live.initializeSocket();
+				live.initialiseSocket();
 				// // Perform token validation if necessary
 				// if (token) {
 				//   // Redirect to the HomeScreen or appropriate route

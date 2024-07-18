@@ -30,6 +30,7 @@ import { live, Message } from "../../services/Live";
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const RoomPage = () => {
+	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	console.log("here");
 	let roomData: any;
@@ -56,6 +57,7 @@ const RoomPage = () => {
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
 	);
+	const [isSending, setIsSending] = useState(false);
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
@@ -241,6 +243,7 @@ const RoomPage = () => {
 	};
 
 	const handleJoinLeave = () => {
+		console.log("joined", joined);
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
 			// joinRoom();
@@ -276,7 +279,10 @@ const RoomPage = () => {
 	}, [readyToJoinRoom, joined, roomID]);
 
 	const sendMessage = () => {
-		live.sendMessage(message);
+		if (isSending) return;
+
+		setIsSending(true);
+		live.sendMessage(message, setIsSending, setMessage);
 	};
 
 	return (

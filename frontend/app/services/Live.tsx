@@ -12,17 +12,22 @@ export type Message = {
 
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
-type setMessage = React.Dispatch<React.SetStateAction<string>>;
+type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
+type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 
 class LiveChatService {
 	private static instance: LiveChatService;
 	private socket: Socket;
 	private currentUser: UserDto | null = null;
 	private currentRoom: RoomDto | null = null;
+	private initialised = false;
+	private isConnecting = false;
+	private requestingChatHistory = false;
 
 	private setMessages: stateSetMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
-	private setMessage: setMessage | null = null;
+	private setMessage: stateSetMessage | null = null;
+	private setIsSending: stateSetIsSending | null = null;
 
 	private chatHistoryReceived = false;
 
@@ -41,6 +46,10 @@ class LiveChatService {
 	}
 
 	public requestChatHistory() {
+		if (this.requestingChatHistory) {
+			return;
+		}
+
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -55,6 +64,12 @@ class LiveChatService {
 			return;
 		}
 
+		if (this.chatHistoryReceived) {
+			return;
+		}
+
+		this.requestingChatHistory = true;
+
 		const u = this.currentUser;
 		const input = {
 			userID: u.userID,
@@ -65,173 +80,206 @@ class LiveChatService {
 				dateCreated: new Date(),
 			},
 		};
-		this.socket.emit("getChatHistory", JSON.stringify(input));
+		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
 	}
 
-	public async initializeSocket() {
-		const token = await auth.getToken();
-		try {
-			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			this.currentUser = response.data as UserDto;
-		} catch (error) {
-			console.error("Error fetching user's own info:", error);
-		}
+	public async initialiseSocket() {
+		console.log("Initialising socket");
+		console.log("initialised:", this.initialised);
+		if (!this.initialised && !this.isConnecting) {
+			this.isConnecting = true;
 
-		if (!this.currentUser) {
-			throw new Error("Something went wrong while getting user's info");
-		}
+			const token = await auth.getToken();
+			try {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				this.currentUser = response.data as UserDto;
+			} catch (error) {
+				console.error("Error fetching user's own info:", error);
+			}
 
-		this.socket.on("userJoinedRoom", (response: ChatEventDto) => {
+			console.log("Current user:", this.currentUser);
+
 			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
+				throw new Error("Something went wrong while getting user's info");
 			}
 
-			if (!this.setJoined) {
-				//throw new Error("setJoined not set");
-				return;
-			}
+			this.socket.on("userJoinedRoom", (response: ChatEventDto) => {
+				console.log("SOCKET EVENT: userJoinedRoom", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
 
-			if (!this.currentRoom) {
-				//throw new Error("Current room not set");
-				return;
-			}
+				if (!this.setJoined) {
+					//throw new Error("setJoined not set");
+					return;
+				}
 
-			if (
-				response.body &&
-				response.body.sender.userID === this.currentUser.userID
-			) {
-				this.setJoined(true);
-			}
+				if (!this.currentRoom) {
+					//throw new Error("Current room not set");
+					return;
+				}
 
-			this.requestChatHistory();
-		});
+				if (
+					response.body &&
+					response.body.sender.userID === this.currentUser.userID
+				) {
+					this.setJoined(true);
+				}
 
-		this.socket.on("chatHistory", (history: LiveChatMessageDto[]) => {
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
-
-			if (!this.setMessages) {
-				return;
-			}
-
-			this.chatHistoryReceived = true;
-
-			const u = this.currentUser;
-			const chatHistory = history.map((msg) => ({
-				message: msg,
-				me: msg.sender.userID === u.userID,
-			}));
-			this.setMessages(chatHistory);
-		});
-
-		this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
-			if (!this.chatHistoryReceived) {
 				this.requestChatHistory();
-			}
+			});
 
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
+			this.socket.on("chatHistory", (history: LiveChatMessageDto[]) => {
+				console.log("SOCKET EVENT: chatHistory", history);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
 
-			if (!this.setMessages) {
-				return;
-			}
+				if (!this.setMessages) {
+					return;
+				}
 
-			if (!this.setMessage) {
-				return;
-			}
+				this.chatHistoryReceived = true;
 
-			if (!newMessage.body) {
-				//throw new Error("Message body not found");
-				return;
-			}
+				const u = this.currentUser;
+				const chatHistory = history.map((msg) => ({
+					message: msg,
+					me: msg.sender.userID === u.userID,
+				}));
+				this.setMessages(chatHistory);
 
-			const message = newMessage.body;
-			const u = this.currentUser;
-			const me = message.sender.userID === u.userID;
-			if (me) {
-				this.setMessage("");
-			}
-			this.setMessages((prevMessages) => [
-				...prevMessages,
-				{ message, me: message.sender.userID === u.userID },
-			]);
-		});
+				this.requestingChatHistory = false;
+			});
 
-		this.socket.on("userLeftRoom", (response: ChatEventDto) => {
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
+			this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
+				console.log("SOCKET EVENT: liveMessage", newMessage);
+				if (!this.chatHistoryReceived) {
+					this.requestChatHistory();
+				}
 
-			console.log("User left room:", response);
-		});
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
 
-		this.socket.on("error", (response: ChatEventDto) => {
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
+				if (!this.setMessages) {
+					return;
+				}
 
-			console.error("Error:", response.errorMessage);
-		});
+				if (!this.setMessage) {
+					return;
+				}
 
-		this.socket.on("connect", () => {
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
+				if (!this.setIsSending) {
+					return;
+				}
 
-			const input = {
-				userID: this.currentUser.userID,
-			};
-			this.socket.emit("connectUser", JSON.stringify(input));
-		});
+				if (!newMessage.body) {
+					//throw new Error("Message body not found");
+					return;
+				}
 
-		this.socket.on("connected", (response: ChatEventDto) => {
-			if (!this.currentUser) {
-				//throw new Error("Something went wrong while getting user's info");
-				return;
-			}
+				const message = newMessage.body;
+				const u = this.currentUser;
+				const me = message.sender.userID === u.userID;
+				if (me) {
+					this.setMessage("");
+					this.setIsSending(false);
+					this.setIsSending = null;
+				}
+				this.setMessages((prevMessages) => [
+					...prevMessages,
+					{ message, me: message.sender.userID === u.userID },
+				]);
+			});
 
-			if (!this.currentRoom) {
-				//throw new Error("Current room not set");
-				return;
-			}
+			this.socket.on("userLeftRoom", (response: ChatEventDto) => {
+				console.log("SOCKET EVENT: userLeftRoom", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
 
-			if (!this.currentRoom.roomID) {
-				throw new Error("Room ID not set");
-			}
+				console.log("User left room:", response);
+			});
 
-			if (
-				this.setJoined &&
-				this.currentRoom &&
-				this.setMessages &&
-				this.setMessage
-			) {
-				this.joinRoom(
-					this.currentRoom.roomID,
-					this.setJoined,
-					this.setMessages,
-					this.setMessage,
-				);
-			}
-		});
+			this.socket.on("error", (response: ChatEventDto) => {
+				console.log("SOCKET EVENT: error", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				console.error("Error:", response.errorMessage);
+			});
+
+			this.socket.on("connect", () => {
+				console.log("SOCKET EVENT: connect");
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				const input = {
+					userID: this.currentUser.userID,
+				};
+				this.socket.emit("connectUser", JSON.stringify(input));
+			});
+
+			this.socket.on("connected", (response: ChatEventDto) => {
+				console.log("SOCKET EVENT: connected", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				if (!this.currentRoom) {
+					//throw new Error("Current room not set");
+					return;
+				}
+
+				if (!this.currentRoom.roomID) {
+					throw new Error("Room ID not set");
+				}
+
+				if (
+					this.setJoined &&
+					this.currentRoom &&
+					this.setMessages &&
+					this.setMessage
+				) {
+					this.joinRoom(
+						this.currentRoom.roomID,
+						this.setJoined,
+						this.setMessages,
+						this.setMessage,
+					);
+				}
+			});
+
+			console.log("socket connected?", this.socket.connected);
+			this.socket.connect();
+			this.socket.emit(
+				"connectUser",
+				JSON.stringify({ userID: this.currentUser.userID }),
+			);
+			console.log("Socket connected");
+			this.initialised = true;
+			this.isConnecting = false;
+		}
 	}
 
 	public async joinRoom(
 		roomID: string,
 		setJoined: stateSetJoined,
 		setMessages: stateSetMessages,
-		setMessage: setMessage,
+		setMessage: stateSetMessage,
 	) {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
@@ -267,7 +315,9 @@ class LiveChatService {
 		this.socket.emit("joinRoom", JSON.stringify(input));
 
 		//request chat history
+		this.chatHistoryReceived = false;
 		this.socket.emit("getChatHistory", JSON.stringify(input));
+		this.requestingChatHistory = true;
 	}
 
 	public async leaveRoom() {
@@ -299,9 +349,15 @@ class LiveChatService {
 			},
 		};
 		this.socket.emit("leaveRoom", JSON.stringify(input));
+
+		if (this.setMessages) {
+			this.setMessages([]);
+		}
+		this.chatHistoryReceived = false;
+		this.requestingChatHistory = false;
 	}
 
-	public async sendMessage(message: string) {
+	public async sendMessage(message: string, setIsSending: stateSetIsSending) {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -311,6 +367,8 @@ class LiveChatService {
 			//throw new Error("Current room not set");
 			return;
 		}
+
+		this.setIsSending = setIsSending;
 
 		if (message.trim()) {
 			const u = this.currentUser;
