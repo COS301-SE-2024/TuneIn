@@ -10,13 +10,11 @@ export class EventQueueService {
 	private readonly logger = new Logger(EventQueueService.name);
 
 	constructor() {
-		this.queue = async.queue(async (task: TaskFunction, done) => {
+		this.queue = async.queue(async (task: TaskFunction) => {
 			try {
 				await task();
-				done();
 			} catch (error) {
 				this.logger.error(`Task failed: ${error}`);
-				done(error);
 			}
 		}, 1); // Concurrency set to 1 to ensure FIFO processing
 
