@@ -2,7 +2,7 @@ import React from "react";
 import { render } from "@testing-library/react-native";
 import RoomDetails, {
 	RoomDetailsProps,
-} from "../app/components/RoomDetailsComponent";
+} from "../app/components/rooms/RoomDetailsComponent";
 
 describe("RoomDetails component", () => {
 	it("renders correctly with provided props", () => {

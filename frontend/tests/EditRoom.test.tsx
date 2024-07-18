@@ -22,6 +22,7 @@ jest.mock("expo-router", () => ({
 describe("EditRoom", () => {
 	it("renders correctly with valid room data", () => {
 		const room: Room = {
+			userID: "Test-userID",
 			backgroundImage: "url-to-background-image",
 			name: "Room Name",
 			songName: "Song Name",
@@ -46,6 +47,7 @@ describe("EditRoom", () => {
 
 	it("handles text input correctly", () => {
 		const room: Room = {
+			userID: "Test-userID",
 			backgroundImage: "url-to-background-image",
 			name: "Room Name",
 			songName: "Song Name",
