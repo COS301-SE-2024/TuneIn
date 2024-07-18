@@ -24,6 +24,8 @@ class LiveChatService {
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: setMessage | null = null;
 
+	private chatHistoryReceived = false;
+
 	private constructor() {
 		this.currentRoom = null;
 		this.socket = io(utils.API_BASE_URL + "/live", {
@@ -36,6 +38,34 @@ class LiveChatService {
 			LiveChatService.instance = new LiveChatService();
 		}
 		return LiveChatService.instance;
+	}
+
+	public requestChatHistory() {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		if (!this.setMessages) {
+			return;
+		}
+
+		const u = this.currentUser;
+		const input = {
+			userID: u.userID,
+			body: {
+				messageBody: "",
+				sender: u,
+				roomID: this.currentRoom.roomID,
+				dateCreated: new Date(),
+			},
+		};
+		this.socket.emit("getChatHistory", JSON.stringify(input));
 	}
 
 	public async initializeSocket() {
@@ -78,17 +108,7 @@ class LiveChatService {
 				this.setJoined(true);
 			}
 
-			const u: UserDto = this.currentUser;
-			const input = {
-				userID: u.userID,
-				body: {
-					messageBody: "",
-					sender: u,
-					roomID: this.currentRoom.roomID,
-					dateCreated: new Date(),
-				},
-			};
-			this.socket.emit("getChatHistory", JSON.stringify(input));
+			this.requestChatHistory();
 		});
 
 		this.socket.on("chatHistory", (history: LiveChatMessageDto[]) => {
@@ -101,6 +121,8 @@ class LiveChatService {
 				return;
 			}
 
+			this.chatHistoryReceived = true;
+
 			const u = this.currentUser;
 			const chatHistory = history.map((msg) => ({
 				message: msg,
@@ -110,6 +132,10 @@ class LiveChatService {
 		});
 
 		this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
+			if (!this.chatHistoryReceived) {
+				this.requestChatHistory();
+			}
+
 			if (!this.currentUser) {
 				//throw new Error("Something went wrong while getting user's info");
 				return;
@@ -185,19 +211,36 @@ class LiveChatService {
 				throw new Error("Room ID not set");
 			}
 
-			if (this.setJoined && this.currentRoom) {
-				this.joinRoom(this.currentRoom.roomID, this.setJoined);
+			if (
+				this.setJoined &&
+				this.currentRoom &&
+				this.setMessages &&
+				this.setMessage
+			) {
+				this.joinRoom(
+					this.currentRoom.roomID,
+					this.setJoined,
+					this.setMessages,
+					this.setMessage,
+				);
 			}
 		});
 	}
 
-	public async joinRoom(roomID: string, setJoined: stateSetJoined) {
+	public async joinRoom(
+		roomID: string,
+		setJoined: stateSetJoined,
+		setMessages: stateSetMessages,
+		setMessage: setMessage,
+	) {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
 		}
 
 		this.setJoined = setJoined;
+		this.setMessages = setMessages;
+		this.setMessage = setMessage;
 
 		try {
 			const token = await auth.getToken();
@@ -222,11 +265,19 @@ class LiveChatService {
 			},
 		};
 		this.socket.emit("joinRoom", JSON.stringify(input));
+
+		//request chat history
+		this.socket.emit("getChatHistory", JSON.stringify(input));
 	}
 
-	public async leaveRoom(roomID: string) {
+	public async leaveRoom() {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
 			return;
 		}
 
@@ -243,14 +294,14 @@ class LiveChatService {
 			body: {
 				messageBody: "",
 				sender: u,
-				roomID: roomID,
+				roomID: this.currentRoom.roomID,
 				dateCreated: new Date(),
 			},
 		};
 		this.socket.emit("leaveRoom", JSON.stringify(input));
 	}
 
-	public async sendMessage(message: string, setMessage: setMessage) {
+	public async sendMessage(message: string) {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -260,8 +311,6 @@ class LiveChatService {
 			//throw new Error("Current room not set");
 			return;
 		}
-
-		this.setMessage = setMessage;
 
 		if (message.trim()) {
 			const u = this.currentUser;
@@ -284,10 +333,11 @@ class LiveChatService {
 		this.currentRoom = null;
 		this.setMessages = null;
 		this.setJoined = null;
+		this.setMessage = null;
 		if (this.socket) {
 			this.socket.disconnect();
 		}
 	}
 }
 // Export the singleton instance
-export const liveChatService = LiveChatService.getInstance();
+export const live = LiveChatService.getInstance();
