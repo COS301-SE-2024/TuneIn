@@ -15,6 +15,7 @@ import { DbUtilsService } from "../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
+import { EventQueueService } from "./eventqueue/eventqueue.service";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -31,6 +32,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
+		private readonly eventQueueService: EventQueueService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -50,9 +52,11 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log(p);
-		//Hello World
-		this.server.emit("message", { response: "Hello World" });
+		this.eventQueueService.addToQueue(async () => {
+			console.log(p);
+			//Hello World
+			this.server.emit("message", { response: "Hello World" });
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.CONNECT)
@@ -60,35 +64,26 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.CONNECT);
-		try {
-			/*
-			if no token, return error
-			if token
-				if token is not valid
-					return error
-
-			get user info
-			add user to connected users
-			emit to socket: CONNECTION, { userId: user.id }
-			*/
-
-			//auth
-			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (!payload.userID) {
-				throw new Error("No userID provided");
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.CONNECT);
+			try {
+				//auth
+				const payload: ChatEventDto = await this.validateInputEvent(p);
+				if (!payload.userID) {
+					throw new Error("No userID provided");
+				}
+				await this.connectedUsers.addConnectedUser(client.id, payload.userID);
+				const response: ChatEventDto = {
+					userID: null,
+					date_created: new Date(),
+				};
+				this.server.emit(SOCKET_EVENTS.CONNECTED, response);
+				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
 			}
-			await this.connectedUsers.addConnectedUser(client.id, payload.userID);
-			const response: ChatEventDto = {
-				userID: null,
-				date_created: new Date(),
-			};
-			this.server.emit(SOCKET_EVENTS.CONNECTED, response);
-			console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		});
 	}
 
 	/*
@@ -111,56 +106,57 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
+			try {
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
+				get room id
+				if room does not exist
+					return error
 
-			create message
-			emit to room: LIVE_MESSAGE, { message: payload.message }
-			*/
+				create message
+				emit to room: LIVE_MESSAGE, { message: payload.message }
+				*/
 
-			//auth
+				//auth
 
-			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (!payload.userID) {
-				throw new Error("No userID provided");
+				const payload: ChatEventDto = await this.validateInputEvent(p);
+				if (!payload.userID) {
+					throw new Error("No userID provided");
+				}
+
+				if (!payload.body) {
+					throw new Error("No body provided");
+				}
+				const roomID: string = payload.body.roomID;
+				if (!roomID) {
+					throw new Error("No roomID provided");
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error("Room does not exist");
+				}
+
+				const message: LiveChatMessageDto = payload.body;
+				const messageID: string = await this.roomService.createLiveChatMessage(
+					message,
+					payload.userID,
+				);
+				const finalMessage: LiveChatMessageDto =
+					await this.dtogen.generateLiveChatMessageDto(messageID);
+				const response: ChatEventDto = {
+					userID: finalMessage.sender.userID,
+					date_created: new Date(),
+					body: finalMessage,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.LIVE_MESSAGE, response);
+				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
 			}
-
-			if (!payload.body) {
-				throw new Error("No body provided");
-			}
-			const roomID: string = payload.body.roomID;
-			if (!roomID) {
-				throw new Error("No roomID provided");
-			}
-			if (!this.dbUtils.roomExists(roomID)) {
-				throw new Error("Room does not exist");
-			}
-
-			const message: LiveChatMessageDto = payload.body;
-			const messageID: string = await this.roomService.createLiveChatMessage(
-				message,
-				payload.userID,
-			);
-			const finalMessage: LiveChatMessageDto =
-				await this.dtogen.generateLiveChatMessageDto(messageID);
-			const response: ChatEventDto = {
-				userID: finalMessage.sender.userID,
-				date_created: new Date(),
-				body: finalMessage,
-			};
-			this.server.to(roomID).emit(SOCKET_EVENTS.LIVE_MESSAGE, response);
-			console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
@@ -168,46 +164,48 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
+				get room id
+				if room does not exist
+					return error
 
-			get chat history
-			emit to socket: LIVE_MESSAGE, { message: chatHistory }
-			*/
+				get chat history
+				emit to socket: LIVE_MESSAGE, { message: chatHistory }
+				*/
 
-			//auth
+				//auth
 
-			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (!payload.userID) {
-				throw new Error("No userID provided");
+				const payload: ChatEventDto = await this.validateInputEvent(p);
+				if (!payload.userID) {
+					throw new Error("No userID provided");
+				}
+
+				if (!payload.body) {
+					throw new Error("No body provided");
+				}
+				const roomID: string = payload.body.roomID;
+				if (!roomID) {
+					throw new Error("No roomID provided");
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error("Room does not exist");
+				}
+
+				const messages: LiveChatMessageDto[] =
+					await this.roomService.getLiveChatHistoryDto(roomID);
+				this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.CHAT_HISTORY);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
 			}
-
-			if (!payload.body) {
-				throw new Error("No body provided");
-			}
-			const roomID: string = payload.body.roomID;
-			if (!roomID) {
-				throw new Error("No roomID provided");
-			}
-			if (!this.dbUtils.roomExists(roomID)) {
-				throw new Error("Room does not exist");
-			}
-
-			const messages: LiveChatMessageDto[] =
-				await this.roomService.getLiveChatHistoryDto(roomID);
-			this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
-			console.log("Response emitted: " + SOCKET_EVENTS.CHAT_HISTORY);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
@@ -215,14 +213,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
-		try {
-			//this.server.emit();
-			console.log(p);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
@@ -230,14 +230,18 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY);
-		try {
-			console.log(p);
-			//this.server.emit();
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		this.eventQueueService.addToQueue(async () => {
+			console.log(
+				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+			);
+			try {
+				console.log(p);
+				//this.server.emit();
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.TYPING)
@@ -245,23 +249,25 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.TYPING);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.TYPING);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
+				get room id
+				if room does not exist
+					return error
 
-			emit to room: TYPING, { userId: user.id }
-			*/
-			console.log(p);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+				emit to room: TYPING, { userId: user.id }
+				*/
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
@@ -269,23 +275,25 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
+				get room id
+				if room does not exist
+					return error
 
-			emit to room: STOP_TYPING, { userId: user.id }
-			*/
-			console.log(p);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+				emit to room: STOP_TYPING, { userId: user.id }
+				*/
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	/*
@@ -308,51 +316,53 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.JOIN_ROOM);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.JOIN_ROOM);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
-			
-			add user to room data structure
-			add user to socket room
-			emit to room: USER_JOINED, { userId: user.id }
-			*/
+				get room id
+				if room does not exist
+					return error
+				
+				add user to room data structure
+				add user to socket room
+				emit to room: USER_JOINED, { userId: user.id }
+				*/
 
-			//auth
+				//auth
 
-			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (!payload.userID) {
-				throw new Error("No userID provided");
+				const payload: ChatEventDto = await this.validateInputEvent(p);
+				if (!payload.userID) {
+					throw new Error("No userID provided");
+				}
+
+				if (!payload.body) {
+					throw new Error("No body provided");
+				}
+				const roomID: string = payload.body.roomID;
+				if (!roomID) {
+					throw new Error("No roomID provided");
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error("Room does not exist");
+				}
+
+				await this.connectedUsers.setRoomId(client.id, roomID);
+				client.join(roomID);
+				const response: ChatEventDto = {
+					userID: null,
+					date_created: new Date(),
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.USER_JOINED_ROOM, response);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
 			}
-
-			if (!payload.body) {
-				throw new Error("No body provided");
-			}
-			const roomID: string = payload.body.roomID;
-			if (!roomID) {
-				throw new Error("No roomID provided");
-			}
-			if (!this.dbUtils.roomExists(roomID)) {
-				throw new Error("Room does not exist");
-			}
-
-			await this.connectedUsers.setRoomId(client.id, roomID);
-			client.join(roomID);
-			const response: ChatEventDto = {
-				userID: null,
-				date_created: new Date(),
-			};
-			this.server.to(roomID).emit(SOCKET_EVENTS.USER_JOINED_ROOM, response);
-			console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)
@@ -360,48 +370,50 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.LEAVE_ROOM);
-		try {
-			//this.server.emit();
-			/*
-			validate auth
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.LEAVE_ROOM);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
 
-			get room id
-			if room does not exist
-				return error
+				get room id
+				if room does not exist
+					return error
 
-			remove user from room data structure
-			remove user from socket room
-			emit to room: USER_LEFT, { userId: user.id }
-			*/
+				remove user from room data structure
+				remove user from socket room
+				emit to room: USER_LEFT, { userId: user.id }
+				*/
 
-			//auth
+				//auth
 
-			const payload: ChatEventDto = await this.validateInputEvent(p);
-			if (!payload.userID) {
-				throw new Error("No userID provided");
+				const payload: ChatEventDto = await this.validateInputEvent(p);
+				if (!payload.userID) {
+					throw new Error("No userID provided");
+				}
+
+				const roomID = this.connectedUsers.getRoomId(client.id);
+				if (!roomID) {
+					throw new Error("User is not in a room");
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error("Room does not exist");
+				}
+
+				const response: ChatEventDto = {
+					userID: null,
+					date_created: new Date(),
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_LEFT_ROOM);
+				await this.connectedUsers.leaveRoom(client.id);
+				client.leave(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
 			}
-
-			const roomID = this.connectedUsers.getRoomId(client.id);
-			if (!roomID) {
-				throw new Error("User is not in a room");
-			}
-			if (!this.dbUtils.roomExists(roomID)) {
-				throw new Error("Room does not exist");
-			}
-
-			const response: ChatEventDto = {
-				userID: null,
-				date_created: new Date(),
-			};
-			this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
-			console.log("Response emitted: " + SOCKET_EVENTS.USER_LEFT_ROOM);
-			await this.connectedUsers.leaveRoom(client.id);
-			client.leave(roomID);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		});
 	}
 
 	async validateInputEvent(payload: string): Promise<ChatEventDto> {

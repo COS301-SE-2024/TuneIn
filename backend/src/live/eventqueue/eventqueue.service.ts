@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as async from "async";
 
+//custom type for task function (because it's more type-safe than the default 'Function')
 export type TaskFunction = () => Promise<void>;
 
 @Injectable()
