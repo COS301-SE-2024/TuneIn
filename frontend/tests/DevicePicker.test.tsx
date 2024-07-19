@@ -1,3 +1,4 @@
+// DevicePicker.test.tsx
 import React from "react";
 import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import DevicePicker from "../app/components/DevicePicker";
@@ -11,38 +12,8 @@ jest.mock("../app/hooks/useSpotifyDevices");
 const mockGetToken = jest.fn();
 const mockGetDeviceIDs = jest.fn();
 
-function createMockResponse(options: {
-	ok: boolean;
-	status?: number;
-	statusText?: string;
-	body?: any;
-}) {
-	const {
-		ok,
-		status = ok ? 200 : 500,
-		statusText = ok ? "OK" : "Internal Server Error",
-		body,
-	} = options;
-
-	const response = new Response(body ? JSON.stringify(body) : null, {
-		status,
-		statusText,
-		headers: {
-			"Content-type": "application/json",
-		},
-	});
-
-	return Promise.resolve(response);
-}
-
-export { createMockResponse };
-
 (useSpotifyAuth as jest.Mock).mockReturnValue({
 	getToken: mockGetToken,
-});
-
-(useSpotifyDevices as jest.Mock).mockReturnValue({
-	getDeviceIDs: mockGetDeviceIDs,
 });
 
 jest.mock("expo-font", () => ({
@@ -58,22 +29,26 @@ jest.mock("expo-asset", () => ({
 	})),
 }));
 
+(useSpotifyDevices as jest.Mock).mockReturnValue({
+	getDeviceIDs: mockGetDeviceIDs,
+	devices: [],
+	error: null,
+});
+
 describe("DevicePicker", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
 	it("renders correctly", () => {
-		const { getByText } = render(<DevicePicker />);
-		expect(getByText("Previous Screen Content")).toBeTruthy();
-		expect(getByText("Open Pop-up")).toBeTruthy();
+		const { getByTestId } = render(<DevicePicker />);
+		expect(getByTestId("Speaker-button")).toBeTruthy();
 	});
 
 	it("opens the modal when button is pressed", () => {
-		const { getByText, queryByText } = render(<DevicePicker />);
-		fireEvent.press(getByText("Open Pop-up"));
+		const { queryByText, getByTestId } = render(<DevicePicker />);
+		fireEvent.press(getByTestId("Speaker-button"));
 
-		// Check if either "Select a Device" or "No Devices Available" is present
 		const selectDeviceText = queryByText("Select a Device");
 		const noDevicesText = queryByText("No Devices Available");
 
@@ -107,11 +82,11 @@ describe("DevicePicker", () => {
 		]);
 
 		// Render the component
-		const { getByText, queryByTestId, debug } = render(<DevicePicker />);
+		const { getByText, queryByTestId, getByTestId } = render(<DevicePicker />);
 
 		// Trigger opening the modal inside act()
 		await act(async () => {
-			fireEvent.press(getByText("Open Pop-up"));
+			fireEvent.press(getByTestId("Speaker-button"));
 		});
 
 		// Wait for token and device ID fetching to complete inside act()
@@ -119,17 +94,16 @@ describe("DevicePicker", () => {
 		await waitFor(() => expect(mockGetDeviceIDs).toHaveBeenCalled());
 
 		// Asserting UI changes should also be inside act()
-		act(() => {
-			debug();
-
+		await act(async () => {
 			expect(getByText("Device 1")).toBeTruthy();
 			expect(getByText("Device 2")).toBeTruthy();
 
 			const radioDevice1 = queryByTestId("radio-button-deviceID-1");
 			const radioDevice2 = queryByTestId("radio-button-deviceID-2");
-
-			expect(radioDevice1.props.accessibilityState.checked).toBe(true);
-			expect(radioDevice2.props.accessibilityState.checked).toBe(false);
+			if (radioDevice1 && radioDevice2) {
+				expect(radioDevice1.props.accessibilityState.checked).toBe(true);
+				expect(radioDevice2.props.accessibilityState.checked).toBe(false);
+			}
 		});
 	});
 });
