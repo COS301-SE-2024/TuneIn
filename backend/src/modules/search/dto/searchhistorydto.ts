@@ -13,7 +13,6 @@ export class SearchHistoryDto {
 	search_time: Date;
 
     @ApiProperty()
-	@IsObject()
-	@ValidateNested()
-	search_result: UserDto | RoomDto;
+	@IsString()
+	url: string;
 }

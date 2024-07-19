@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import { PrismaService } from "../../../prisma/prisma.service";
@@ -271,9 +272,33 @@ export class SearchService {
 		return [new RoomDto()];
 	}
 
-	async searchRoomsHistory(userID: string): Promise<RoomDto[]> {
+	async searchRoomsHistory(userID: string): Promise<SearchHistoryDto[]> {
 		console.log(userID);
-		return [new RoomDto()];
+		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		SELECT *
+		FROM search_history
+		WHERE user_id::text = ${userID}
+		AND (url LIKE '/rooms/%'
+		OR url LIKE '/search/rooms/%')
+		ORDER BY timestamp DESC
+		LIMIT 10;`;
+		console.log(result);
+
+		if(Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url
+			}));
+			console.log("Called");
+			console.log(searchIds);
+
+			if(searchIds){
+				return searchIds;
+			}
+		}
+
+		return [new SearchHistoryDto()];
 	}
 
 	async searchUsers(q: string): Promise<UserDto[]> {
@@ -402,30 +427,29 @@ export class SearchService {
 		return [new UserDto()];
 	}
 
-	async searchGenres(q: string): Promise<string[]> {
-		console.log(q);
+	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
+		console.log(userID);
+		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		SELECT *
+		FROM search_history
+		WHERE user_id::text = ${userID}
+		AND (url LIKE '/user/%'
+		OR url LIKE '/search/user/%')
+		ORDER BY timestamp DESC
+		LIMIT 10;`;
 
-		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
-		SELECT *,
-		LEVENSHTEIN(genre, ${sqlstring.escape(q)}) AS distance
-		FROM genre
-		WHERE similarity(genre, ${sqlstring.escape(q)}) > 0.2
-		ORDER BY distance ASC
-		LIMIT 10`;
+		if(Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url
+			}));
 
-		// console.log(result);
-
-		if (Array.isArray(result)) {
-			return result;
-		} else {
-			console.error("Unexpected query result format, expected an array.");
+			if(searchIds){
+				return searchIds;
+			}
 		}
 
-		return [];
-	}
-
-	async searchUsersHistory(userID: string): Promise<UserDto[]> {
-		console.log(userID);
-		return [new UserDto()];
+		return [new SearchHistoryDto()];
 	}
 }

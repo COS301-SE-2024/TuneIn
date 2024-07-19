@@ -10,6 +10,7 @@ import {
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
 
@@ -220,11 +221,11 @@ export class SearchController {
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched rooms" })
 	@ApiOkResponse({
-		description: "Recently searched rooms as an array of RoomDto.",
-		type: [RoomDto],
+		description: "Recently searched rooms as an array of SearchHistoryDto.",
+		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchRoomsHistory(@Request() req: Request): Promise<RoomDto[]> {
+	async searchRoomsHistory(@Request() req: Request): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchRoomsHistory(userInfo.id);
 	}
@@ -314,32 +315,12 @@ export class SearchController {
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched users" })
 	@ApiOkResponse({
-		description: "Recently searched users as an array of UserDto.",
-		type: [UserDto],
+		description: "Recently searched users as an array of SearchHistoryDto.",
+		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchUsersHistory(@Request() req: Request): Promise<UserDto[]> {
+	async searchUsersHistory(@Request() req: Request): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchUsersHistory(userInfo.id);
-	}
-
-	/* ************************************************** */
-
-	@Get("genres")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Search for genres" })
-	@ApiOkResponse({
-		description: "Search results as an array of strings.",
-		type: [String],
-	})
-	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	@ApiQuery({
-		name: "q",
-		required: true,
-		description: "A genre name",
-		type: "string",
-	})
-	async searchGenres(@Query("q") q: string): Promise<string[]> {
-		return await this.searchService.searchGenres(q);
 	}
 }
