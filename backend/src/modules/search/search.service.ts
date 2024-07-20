@@ -65,6 +65,24 @@ export class SearchService {
 		console.log(result);
 	}
 
+	async insertSearchHistory(endpoint: string, params: any, user_id: string) {
+		let url = `${endpoint}?q=${params.q}`;
+
+		if(params.creator){
+			url += `&creator=${params.creator}`;
+		}
+
+		const result = await this.prisma.search_history.create({
+			data: {
+				user_id: user_id, 
+				search_term: params.q, 
+				url: url,
+			},
+		  });
+
+		//   console.log("Insertion result: " + result);
+	}
+
 	async combinedSearch(params: {
 		q: string;
 		creator?: string;
@@ -73,9 +91,7 @@ export class SearchService {
 		let users;
 
 		const rooms = await this.searchRooms(params);
-		if (params.creator) {
-			users = await this.searchUsers(params.creator);
-		}
+		users = await this.searchUsers(params.q);
 
 		console.log("Rooms: " + rooms);
 		console.log("Users: " + users);

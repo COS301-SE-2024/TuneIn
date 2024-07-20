@@ -21,6 +21,7 @@ export class SearchController {
 		private readonly auth: AuthService,
 	) {}
 
+	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms and users" })
@@ -43,17 +44,23 @@ export class SearchController {
 	})
 	async combinedSearch(
 		@Query("q") q: string,
+		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<CombinedSearchResults> {
 		const query_params = {
 			q,
 			creator,
 		};
-		return await this.searchService.combinedSearch(query_params);
+
+		const result = await this.searchService.combinedSearch(query_params);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		this.searchService.insertSearchHistory("/search" , query_params, userInfo.id);
+
+		return result;
 	}
 
 	/* ************************************************** */
-
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms" })
@@ -75,13 +82,21 @@ export class SearchController {
 	})
 	async searchRooms(
 		@Query("q") q: string,
+		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {
 			q,
 			creator,
 		};
-		return await this.searchService.searchRooms(query_params);
+		
+		const result = await this.searchService.searchRooms(query_params)
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		// console.log(req);
+
+		this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
+
+		return result;
 	}
 
 	/* ************************************************** */
@@ -232,6 +247,7 @@ export class SearchController {
 
 	/* ************************************************** */
 
+	@UseGuards(JwtAuthGuard)
 	@Get("users")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for users" })
@@ -246,8 +262,13 @@ export class SearchController {
 		description: "A username or profile name",
 		type: "string",
 	})
-	async searchUsers(@Query("q") q: string): Promise<UserDto[]> {
-		return await this.searchService.searchUsers(q);
+	async searchUsers(@Query("q") q: string, @Request() req: any): Promise<UserDto[]> {
+		const result = await this.searchService.searchUsers(q)
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+
+		this.searchService.insertSearchHistory("/search/users" , {q: q}, userInfo.id);
+
+		return result;
 	}
 
 	/* ************************************************** */
