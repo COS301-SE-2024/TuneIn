@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import CyanButton from "../../components/CyanButton";
+import { colors } from '../../styles/colors';
 
 const VerifyEmailScreen: React.FC = () => {
 	const router = useRouter();
@@ -40,18 +42,18 @@ const VerifyEmailScreen: React.FC = () => {
 	};
 
 	const navigateToIncorrectCode = () => {
-		router.navigate("/screens/IncorrectCode");
+		router.navigate("/screens/Auth/IncorrectCode");
 	};
 
 	const navigateToNewPassword = () => {
-		router.navigate("/screens/NewPassword");
+		router.navigate("/screens/Auth/NewPassword");
 	};
 
 	return (
 		<View style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<TouchableOpacity onPress={() => router.back()}>
-					<Ionicons name="chevron-back" size={24} color="black" />
+					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
 				<View style={styles.header}>
 					{/* <Text style={styles.logoText}>Logo</Text> */}
@@ -74,9 +76,7 @@ const VerifyEmailScreen: React.FC = () => {
 							/>
 						))}
 					</View>
-					<TouchableOpacity style={styles.verifyButton} onPress={verifyCode}>
-						<Text style={styles.verifyButtonText}>VERIFY</Text>
-					</TouchableOpacity>
+					<CyanButton title="VERIFY" onPress={verifyCode} />
 					<TouchableOpacity style={styles.registerContainer}>
 						<Text style={styles.registerText}>
 							Didn’t receive code?{" "}
@@ -108,9 +108,9 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	instructionText: {
-		fontSize: 14,
-		color: "#888",
-		fontWeight: "bold",
+		fontSize: 16,
+		color: colors.primary,
+		fontWeight: 500,
 		textAlign: "center",
 		marginBottom: 50,
 		paddingHorizontal: 30,
@@ -140,36 +140,17 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 		flex: 1,
 	},
-	verifyButton: {
-		backgroundColor: "#4B0082",
-		borderRadius: 25,
-		paddingVertical: 15,
-		alignItems: "center",
-		justifyContent: "center",
-		width: "90%",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-		elevation: 5,
-		marginBottom: 10,
-	},
-	verifyButtonText: {
-		color: "#fff",
-		fontSize: 18,
-		fontWeight: "bold",
-	},
 	registerContainer: {
 		alignItems: "center",
 	},
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		fontWeight: 500,
 	},
 	registerBoldText: {
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		color:  colors.primary,
 	},
 });
 

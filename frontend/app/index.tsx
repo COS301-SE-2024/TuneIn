@@ -5,46 +5,64 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Poppins-Black': require('../assets/fonts/Poppins-Black.ttf'),
+    'Poppins-BlackItalic': require('../assets/fonts/Poppins-BlackItalic.ttf'),
+    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-BoldItalic': require('../assets/fonts/Poppins-BoldItalic.ttf'),
+    'Poppins-ExtraBold': require('../assets/fonts/Poppins-ExtraBold.ttf'),
+    'Poppins-ExtraBoldItalic': require('../assets/fonts/Poppins-ExtraBoldItalic.ttf'),
+    'Poppins-ExtraLight': require('../assets/fonts/Poppins-ExtraLight.ttf'),
+    'Poppins-ExtraLightItalic': require('../assets/fonts/Poppins-ExtraLightItalic.ttf'),
+    'Poppins-Italic': require('../assets/fonts/Poppins-Italic.ttf'),
+    'Poppins-Light': require('../assets/fonts/Poppins-Light.ttf'),
+    'Poppins-LightItalic': require('../assets/fonts/Poppins-LightItalic.ttf'),
+    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-MediumItalic': require('../assets/fonts/Poppins-MediumItalic.ttf'),
+    'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-SemiBoldItalic': require('../assets/fonts/Poppins-SemiBoldItalic.ttf'),
+    'Poppins-Thin': require('../assets/fonts/Poppins-Thin.ttf'),
+    'Poppins-ThinItalic': require('../assets/fonts/Poppins-ThinItalic.ttf'),
+  });
+};
 
 const App: React.FC = () => {
-	const router = useRouter();
-	const [isCheckingToken, setIsCheckingToken] = useState(true);
-	console.log(API_BASE_URL);
+  const router = useRouter();
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
-	useEffect(() => {
-		const checkToken = async () => {
-			try {
-				const authToken = await StorageService.getItem("backendToken");
-				if (authToken && authToken !== "undefined" && authToken !== "null") {
-					auth.setToken(authToken);
-				}
-				// // Perform token validation if necessary
-				// if (token) {
-				//   // Redirect to the HomeScreen or appropriate route
-				//   router.push("/screens/Home");
-				// } else {
-				// Redirect to the WelcomeScreen or appropriate route
-				router.push("/screens/WelcomeScreen");
-				// }
-			} catch (error) {
-				console.error("Error checking token:", error);
-				// Redirect to the WelcomeScreen or appropriate route
-				router.push("/screens/WelcomeScreen");
-			} finally {
-				setIsCheckingToken(false);
-			}
-		};
+  console.log(API_BASE_URL);
 
-		checkToken();
-	});
+  useEffect(() => {
+    const checkTokenAndLoadFonts = async () => {
+      try {
+        await fetchFonts();
+        setFontLoaded(true);
 
-	if (isCheckingToken) {
-		// Render a loading indicator while checking the token
-		return <WelcomeScreen />;
-	}
+        const authToken = await StorageService.getItem("backendToken");
+        if (authToken && authToken !== "undefined" && authToken !== "null") {
+          auth.setToken(authToken);
+        }
+        router.push("/screens/WelcomeScreen");
+      } catch (error) {
+        console.error("Error checking token or loading fonts:", error);
+        router.push("/screens/WelcomeScreen");
+      } finally {
+        setIsCheckingToken(false);
+      }
+    };
 
-	// Wrap your App component with PlayerContextProvider to provide global state
-	return <LoginScreen />;
+    checkTokenAndLoadFonts();
+  }, [router]);
+
+
+
+  return <LoginScreen />;
 };
 
 export default App;

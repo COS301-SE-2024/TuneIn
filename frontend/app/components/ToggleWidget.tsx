@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
 		borderBottomRightRadius: 24,
 	},
 	selectedButton: {
-		backgroundColor: "#8B8FA8", // Darker grey-blue for the selected state
+		backgroundColor: "#08BDBD", // Darker grey-blue for the selected state
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.3,

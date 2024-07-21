@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { colors } from '../styles/colors';
 
 const NavBar: React.FC = () => {
 	const router = useRouter();
@@ -20,7 +21,7 @@ const NavBar: React.FC = () => {
 					<Ionicons
 						name={activeTab === "Home" ? "home-sharp" : "home-outline"}
 						size={24}
-						color={activeTab === "Home" ? "#0000ff" : "#333"}
+						color={activeTab === "Home" ? colors.primary : "#333"}
 					/>
 					<Text
 						style={[styles.text, activeTab === "Home" && styles.activeText]}
@@ -34,7 +35,7 @@ const NavBar: React.FC = () => {
 					<Ionicons
 						name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
 						size={24}
-						color={activeTab === "Sitemap" ? "#0000ff" : "#333"}
+						color={activeTab === "Sitemap" ? colors.primary : "#333"}
 					/>
 					<Text
 						style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
@@ -52,7 +53,7 @@ const NavBar: React.FC = () => {
 							activeTab === "Help" ? "help-circle-sharp" : "help-circle-outline"
 						}
 						size={24}
-						color={activeTab === "Help" ? "#0000ff" : "#333"}
+						color={activeTab === "Help" ? colors.primary : "#333"}
 					/>
 					<Text
 						style={[styles.text, activeTab === "Help" && styles.activeText]}
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 	activeText: {
-		color: "#0000ff",
+		color: colors.primary,
 		fontWeight: "bold", // Bold text for active tab
 	},
 });
