@@ -6,6 +6,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import { Prisma } from "@prisma/client";
+import prisma from '../../../client'
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
@@ -26,7 +27,7 @@ export class CombinedSearchResults {
 @Injectable()
 export class SearchService {
 	constructor(
-		private readonly prisma: PrismaService,
+		// private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 	) {}
@@ -60,7 +61,7 @@ export class SearchService {
 	```
 	*/
 	async demoSearch() {
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		const result = await prisma.$queryRaw<PrismaTypes.room>`
 		SELECT * FROM room WHERE SIMILARITY(name,'Conbrete') > 0.4;`;
 		console.log(result);
 	}
@@ -72,7 +73,7 @@ export class SearchService {
 			url += `&creator=${params.creator}`;
 		}
 
-		const result = await this.prisma.search_history.create({
+		const result = await prisma.search_history.create({
 			data: {
 				user_id: user_id, 
 				search_term: params.q, 
@@ -114,7 +115,7 @@ export class SearchService {
 		creator?: string;
 	}): Promise<RoomDto[]> {
 		// console.log(params);
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		const result = await prisma.$queryRaw<PrismaTypes.room>`
 		SELECT room_id, name, description, username,
        	LEAST(levenshtein(name, ${params.q}), levenshtein(username, ${params.creator})) AS distance
 		FROM room INNER JOIN users ON room_creator = user_id
@@ -271,7 +272,7 @@ export class SearchService {
 		query += ` ORDER BY distance ASC LIMIT 10`;
 		console.log(query);
 
-		const result = await this.prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
+		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
 
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
@@ -290,7 +291,7 @@ export class SearchService {
 
 	async searchRoomsHistory(userID: string): Promise<SearchHistoryDto[]> {
 		console.log(userID);
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		const result = await prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *
 		FROM search_history
 		WHERE user_id::text = ${userID}
@@ -320,7 +321,7 @@ export class SearchService {
 	async searchUsers(q: string): Promise<UserDto[]> {
 		// console.log(q);
 
-		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
+		const result = await prisma.$queryRaw<PrismaTypes.users>`
 		SELECT *,
 		LEVENSHTEIN(username, ${q}) AS distance
 		FROM users
@@ -328,13 +329,14 @@ export class SearchService {
 		ORDER BY distance ASC
 		LIMIT 5;`;
 
-		// console.log(result);
+		console.log("Result " + result);
 
 		if (Array.isArray(result)) {
 			console.log("Called");
+			console.log("Result " + result);
 			const userIds = result.map((row) => row.user_id.toString());
 			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
-			// console.log(userDtos);
+			console.log(userDtos);
 
 			if (userDtos) {
 				return userDtos;
@@ -427,7 +429,7 @@ export class SearchService {
 
 		console.log(query);
 
-		const result = await this.prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
+		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
 
 		if (Array.isArray(result)) {
 			const userIds = result.map((row) => row.user_id.toString());
@@ -446,7 +448,7 @@ export class SearchService {
 
 	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
 		console.log(userID);
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		const result = await prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *
 		FROM search_history
 		WHERE user_id::text = ${userID}

@@ -94,7 +94,7 @@ export class SearchController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result" + typeof(result));
 
-		// this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
+		this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
 
 		return result;
 	}
