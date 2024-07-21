@@ -1,13 +1,8 @@
 import React from "react";
-import {
-	View,
-	Text,
-	ScrollView,
-	StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import CyanButton from "../../components/CyanButton";
-import { colors } from '../../styles/colors';
+import { colors } from "../../styles/colors";
 
 const PasswordChangedScreen: React.FC = () => {
 	const router = useRouter();

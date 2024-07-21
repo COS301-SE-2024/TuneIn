@@ -15,7 +15,7 @@ import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import CyanButton from "../../components/CyanButton";
-import { colors } from '../../styles/colors';
+import { colors } from "../../styles/colors";
 
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
@@ -110,146 +110,146 @@ const CreateRoomScreen: React.FC = () => {
 	};
 
 	return (
-    <KeyboardAvoidingView
-      style={styles.keyboardAvoidingView}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.closeButton}>×</Text>
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Room Option</Text>
-            <View style={styles.headerSpacer} />
-          </View>
-          <View style={styles.optionsContainer}>
-            <View style={styles.option}>
-              <MyToggleWidget
-                firstOption="Permanent"
-                secondOption="Temporary"
-                onChanged={handleToggleChange}
-              />
-            </View>
-            <View style={styles.option}>
-              <MyToggleWidget
-                firstOption="Public"
-                secondOption="Private"
-                onChanged={handleToggleChange2}
-              />
-            </View>
-            <View style={styles.scheduleContainer}>
-              <Text style={styles.scheduleText}>Schedule for later</Text>
-              <Switch value={isSwitched} onValueChange={setIsSwitched} />
-            </View>
-            {isSwitched && (
-              <View style={styles.dateTimePickerContainer}>
-                <TouchableOpacity
-                  onPress={() => setShowDatePicker(true)}
-                  style={styles.dateTimePicker}
-                >
-                  <TextInput
-                    style={styles.dateTimePickerInput}
-                    placeholder="Select Day"
-                    value={moment(date).format("MM/DD/YYYY")}
-                    editable={false}
-                  />
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={handleDateChange}
-                  />
-                )}
-                <TouchableOpacity onPress={() => setShowTimePicker(true)}>
-                  <TextInput
-                    style={styles.dateTimePickerInput}
-                    placeholder="Select Time"
-                    value={moment(time).format("HH:mm")}
-                    editable={false}
-                  />
-                </TouchableOpacity>
-                {showTimePicker && (
-                  <DateTimePicker
-                    value={time}
-                    mode="time"
-                    display="default"
-                    onChange={handleTimeChange}
-                  />
-                )}
-              </View>
-            )}
-          </View>
-		  <CyanButton title="Let's go" onPress={navigateToRoomDetails} />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+		<KeyboardAvoidingView
+			style={styles.keyboardAvoidingView}
+			behavior={Platform.OS === "ios" ? "padding" : "height"}
+		>
+			<ScrollView contentContainerStyle={styles.scrollView}>
+				<View style={styles.container}>
+					<View style={styles.header}>
+						<TouchableOpacity onPress={() => router.back()}>
+							<Text style={styles.closeButton}>×</Text>
+						</TouchableOpacity>
+						<Text style={styles.headerTitle}>Room Option</Text>
+						<View style={styles.headerSpacer} />
+					</View>
+					<View style={styles.optionsContainer}>
+						<View style={styles.option}>
+							<MyToggleWidget
+								firstOption="Permanent"
+								secondOption="Temporary"
+								onChanged={handleToggleChange}
+							/>
+						</View>
+						<View style={styles.option}>
+							<MyToggleWidget
+								firstOption="Public"
+								secondOption="Private"
+								onChanged={handleToggleChange2}
+							/>
+						</View>
+						<View style={styles.scheduleContainer}>
+							<Text style={styles.scheduleText}>Schedule for later</Text>
+							<Switch value={isSwitched} onValueChange={setIsSwitched} />
+						</View>
+						{isSwitched && (
+							<View style={styles.dateTimePickerContainer}>
+								<TouchableOpacity
+									onPress={() => setShowDatePicker(true)}
+									style={styles.dateTimePicker}
+								>
+									<TextInput
+										style={styles.dateTimePickerInput}
+										placeholder="Select Day"
+										value={moment(date).format("MM/DD/YYYY")}
+										editable={false}
+									/>
+								</TouchableOpacity>
+								{showDatePicker && (
+									<DateTimePicker
+										value={date}
+										mode="date"
+										display="default"
+										onChange={handleDateChange}
+									/>
+								)}
+								<TouchableOpacity onPress={() => setShowTimePicker(true)}>
+									<TextInput
+										style={styles.dateTimePickerInput}
+										placeholder="Select Time"
+										value={moment(time).format("HH:mm")}
+										editable={false}
+									/>
+								</TouchableOpacity>
+								{showTimePicker && (
+									<DateTimePicker
+										value={time}
+										mode="time"
+										display="default"
+										onChange={handleTimeChange}
+									/>
+								)}
+							</View>
+						)}
+					</View>
+					<CyanButton title="Let's go" onPress={navigateToRoomDetails} />
+				</View>
+			</ScrollView>
+		</KeyboardAvoidingView>
+	);
 };
 
 const styles = {
-  keyboardAvoidingView: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  scrollView: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 10,
-  },
-  closeButton: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  headerSpacer: {
-    width: 20,
-  },
-  optionsContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    flexGrow: 1,
-  },
-  option: {
-    marginBottom: 20,
-  },
-  scheduleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  scheduleText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  dateTimePickerContainer: {
-    marginBottom: 20,
-  },
-  dateTimePicker: {
-    marginBottom: 20,
-  },
-  dateTimePickerInput: {
-    borderWidth: 1,
-    borderColor: "#70c6d8",
-    borderRadius: 10,
-    padding: 10,
-    backgroundColor: "#F9FAFB",
-  },
+	keyboardAvoidingView: {
+		flex: 1,
+		backgroundColor: "white",
+	},
+	scrollView: {
+		flexGrow: 1,
+	},
+	container: {
+		flex: 1,
+		paddingHorizontal: 20,
+		paddingTop: 20,
+	},
+	header: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: 10,
+	},
+	closeButton: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	headerTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	headerSpacer: {
+		width: 20,
+	},
+	optionsContainer: {
+		paddingHorizontal: 10,
+		paddingVertical: 20,
+		flexGrow: 1,
+	},
+	option: {
+		marginBottom: 20,
+	},
+	scheduleContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		marginBottom: 20,
+	},
+	scheduleText: {
+		fontSize: 16,
+		fontWeight: "bold",
+	},
+	dateTimePickerContainer: {
+		marginBottom: 20,
+	},
+	dateTimePicker: {
+		marginBottom: 20,
+	},
+	dateTimePickerInput: {
+		borderWidth: 1,
+		borderColor: "#70c6d8",
+		borderRadius: 10,
+		padding: 10,
+		backgroundColor: "#F9FAFB",
+	},
 };
 
 export default CreateRoomScreen;

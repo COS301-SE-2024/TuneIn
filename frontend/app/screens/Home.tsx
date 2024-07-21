@@ -22,7 +22,7 @@ import * as StorageService from "./../services/StorageService"; // Import Storag
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
-import { colors } from '../styles/colors';
+import { colors } from "../styles/colors";
 
 const Home: React.FC = () => {
 	console.log("Home");

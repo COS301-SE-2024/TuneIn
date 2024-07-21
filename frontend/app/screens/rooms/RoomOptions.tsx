@@ -123,7 +123,6 @@ const RoomOptions = () => {
 			>
 				<Text style={styles.closeButtonText}>Close</Text>
 			</TouchableOpacity>
-
 		</ScrollView>
 	);
 };

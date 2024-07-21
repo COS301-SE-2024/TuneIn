@@ -18,7 +18,7 @@ import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import CyanButton from "../../components/CyanButton";
-import { colors } from '../../styles/colors';
+import { colors } from "../../styles/colors";
 
 import {
 	AWS_ACCESS_KEY_ID,

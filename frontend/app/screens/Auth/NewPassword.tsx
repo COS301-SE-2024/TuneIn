@@ -12,7 +12,7 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import CyanButton from "../../components/CyanButton";
-import { colors } from '../../styles/colors';
+import { colors } from "../../styles/colors";
 
 const NewPasswordScreen: React.FC = () => {
 	const router = useRouter();

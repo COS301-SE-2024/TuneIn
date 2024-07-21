@@ -14,7 +14,7 @@ import { CheckBox } from "react-native-elements";
 import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 import CyanButton from "../../components/CyanButton";
-import { colors } from '../../styles/colors';
+import { colors } from "../../styles/colors";
 
 const RegisterScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -200,10 +200,7 @@ const RegisterScreen: React.FC = () => {
 				</View>
 				<CyanButton title="REGISTER" onPress={handleRegister} />
 			</View>
-			<TouchableOpacity 
-				style={styles.loginLink} 
-				onPress={navigateToLogin}
-			>
+			<TouchableOpacity style={styles.loginLink} onPress={navigateToLogin}>
 				<Text style={styles.loginLinkText}>
 					Already have an account?{" "}
 					<Text style={styles.loginLinkBold}>Login</Text>
@@ -275,7 +272,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "transparent",
 		borderWidth: 0,
 		padding: 0,
-	},		
+	},
 	loginLink: {
 		marginTop: 20,
 	},
