@@ -92,9 +92,9 @@ export class SearchController {
 		
 		const result = await this.searchService.searchRooms(query_params)
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		// console.log(req);
+		console.log("Result" + typeof(result));
 
-		this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
+		// this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
 
 		return result;
 	}
@@ -263,7 +263,7 @@ export class SearchController {
 		type: "string",
 	})
 	async searchUsers(@Query("q") q: string, @Request() req: any): Promise<UserDto[]> {
-		const result = await this.searchService.searchUsers(q)
+		const result = await this.searchService.searchUsers(q);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 
 		this.searchService.insertSearchHistory("/search/users" , {q: q}, userInfo.id);

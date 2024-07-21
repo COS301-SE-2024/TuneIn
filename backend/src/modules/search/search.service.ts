@@ -331,6 +331,7 @@ export class SearchService {
 		// console.log(result);
 
 		if (Array.isArray(result)) {
+			console.log("Called");
 			const userIds = result.map((row) => row.user_id.toString());
 			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
 			// console.log(userDtos);
