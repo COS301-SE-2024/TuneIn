@@ -109,12 +109,13 @@ model public_room {
 }
 
 model queue {
-  room_id         String  @db.Uuid
-  song_id         String  @db.Uuid
-  is_done_playing Boolean @default(false)
-  queue_id        String  @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  room            room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-  song            song    @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
+  room_id         String    @db.Uuid
+  song_id         String    @db.Uuid
+  is_done_playing Boolean   @default(false)
+  queue_id        String    @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  start_time      DateTime? @db.Timestamptz(6)
+  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  song            song      @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
   vote            vote[]
 
   @@index([song_id], map: "fki_song_id")
@@ -140,6 +141,8 @@ model room {
   users          users           @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
   room_message   room_message[]
   scheduled_room scheduled_room?
+  table_state    table_state?
+  user_activity  user_activity[] @ignore
 }
 
 model room_message {
@@ -193,6 +196,8 @@ model users {
   playlist                        playlist[]
   private_message                 private_message[]
   room                            room[]
+  search_history                  search_history[]
+  user_activity                   user_activity[]   @ignore
 }
 
 model vote {
@@ -200,4 +205,38 @@ model vote {
   is_upvote Boolean @default(true)
   queue_id  String  @db.Uuid
   queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+}
+
+model genre {
+  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  genre    String?
+}
+
+model search_history {
+  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  search_term String
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  url         String?
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+model table_state {
+  room_id   String    @id @db.Uuid
+  index     Int?
+  is_active Boolean?
+  time      DateTime? @default(now()) @db.Timestamptz(6)
+  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model user_activity {
+  user_id         String    @db.Uuid
+  room_id         String    @db.Uuid
+  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
+  room_leave_time DateTime? @db.Timestamptz(6)
+  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+
+  @@ignore
 }
