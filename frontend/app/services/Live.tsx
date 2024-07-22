@@ -5,6 +5,8 @@ import axios from "axios";
 import auth from "./AuthManagement";
 import * as utils from ".//Utils";
 
+const TIMEOUT = 5000;
+
 export type Message = {
 	message: LiveChatMessageDto;
 	me?: boolean;
@@ -30,6 +32,7 @@ class LiveChatService {
 	private setIsSending: stateSetIsSending | null = null;
 
 	private chatHistoryReceived = false;
+	private pingSent = false;
 
 	private constructor() {
 		this.currentRoom = null;
@@ -81,6 +84,49 @@ class LiveChatService {
 			},
 		};
 		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
+	}
+
+	// Method to send a ping and wait for a response or timeout
+	public async sendPingAndWaitForResponse(
+		timeout: number = TIMEOUT,
+	): Promise<void> {
+		if (this.pingSent) {
+			console.log("A ping is already waiting for a response. Please wait.");
+			return;
+		}
+
+		return new Promise<void>((resolve, reject) => {
+			const startTime = Date.now();
+			this.pingSent = true;
+
+			// Send the ping message
+			this.sendPing(); // Assuming sendPing is already implemented and sends a ping message
+
+			// Set up a timeout
+			const timeoutId = setTimeout(() => {
+				this.pingSent = false;
+				console.log("Ping timed out.");
+				reject(new Error("Ping timed out"));
+			}, timeout);
+
+			// Listen for the pong response
+			this.socket.once("pong", () => {
+				clearTimeout(timeoutId);
+				const roundTripTime = Date.now() - startTime;
+				console.log(`Ping round-trip time: ${roundTripTime}ms`);
+				this.pingSent = false;
+				resolve();
+			});
+		}).catch((error) => {
+			console.error("Ping failed:", error.message);
+			// Optionally, retry sending the ping here
+			throw error; // Re-throw the error to maintain the Promise<void> type
+		});
+	}
+
+	// Modify the sendPing method to emit a "ping" event instead of "liveMessage"
+	public async sendPing() {
+		this.socket.emit("ping");
 	}
 
 	public async initialiseSocket() {

@@ -6,6 +6,7 @@ export const SOCKET_EVENTS = {
 	JOIN_ROOM: "joinRoom",
 	LEAVE_ROOM: "leaveRoom",
 	ERROR: "error",
+	PING: "ping",
 
 	//for live chat
 	LIVE_MESSAGE: "liveMessage",

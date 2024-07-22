@@ -416,6 +416,22 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	@SubscribeMessage(SOCKET_EVENTS.PING)
+	async handlePing(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() payload: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: ping", payload);
+			try {
+				client.emit("ping");
+			} catch (error) {
+				console.error("Error handling ping:", error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
 	async validateInputEvent(payload: string): Promise<ChatEventDto> {
 		/*
 		if no token, return error
