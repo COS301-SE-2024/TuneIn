@@ -162,8 +162,7 @@ export class RoomsService {
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
 				where: {
-					room_id: room_id,
-					user_id: user_id,
+					user_id: user_id
 				},
 			});
 
@@ -177,10 +176,9 @@ export class RoomsService {
 					user_id: user_id,
 				},
 			});
-
 			return true;
 		} catch (error) {
-			console.error("Error joining room:");
+			console.error("Error joining room:", error);
 			return false;
 		}
 	}
@@ -205,9 +203,10 @@ export class RoomsService {
 			// Add the user to the room
 			await this.prisma.participate.delete({
 				where: {
-					participate_id: room.participate_id,
+					user_id: room.user_id,
 				},
 			});
+			
 
 			return true;
 		} catch (error) {
