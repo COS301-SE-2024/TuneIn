@@ -9,6 +9,7 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../chat/dto/livechatmessage.dto";
+import { PartialType } from '@nestjs/swagger';
 
 @Injectable()
 export class RoomsService {
@@ -156,8 +157,8 @@ export class RoomsService {
 		}
 	}
 
-	async joinRoom(room_id: string, user_id: string): Promise<boolean> {
-		console.log("user", user_id, "joining room", room_id);
+	async joinRoom(_room_id: string, user_id: string): Promise<boolean> {
+		console.log("user", user_id, "joining room", _room_id);
 		try {
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
@@ -172,8 +173,16 @@ export class RoomsService {
 			// Add the user to the room
 			await this.prisma.participate.create({
 				data: {
-					room_id: room_id,
+					room_id: _room_id,
 					user_id: user_id,
+				},
+			});
+			// add user to the user_activity table
+			await this.prisma.user_activity.create({
+				data: {
+					room_id: _room_id,
+					user_id: user_id,
+					room_join_time: new Date(),
 				},
 			});
 			return true;
@@ -203,14 +212,30 @@ export class RoomsService {
 			// Add the user to the room
 			await this.prisma.participate.delete({
 				where: {
-					user_id: room.user_id,
+					participate_id: room.participate_id,
 				},
 			});
-			
-
+			const user = await this.prisma.user_activity.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id,
+				},
+			});
+			if(user === null) {
+				return false;
+			}
+			// if the user has been successfully remove from the room, then update the room_leave_time to the user_activity table
+			await this.prisma.user_activity.update({
+				where: {
+					activity_id: user.activity_id,
+				},
+				data: {
+					room_leave_time: new Date(),
+				},
+			});
 			return true;
 		} catch (error) {
-			console.error("Error leaving room:");
+			console.error("Error leaving room:", error);
 			return false;
 		}
 	}
