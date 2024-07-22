@@ -13,6 +13,17 @@ model authentication {
   users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
 
+model banned {
+  banned_id String @id(map: "banned_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id   String @db.Uuid
+  room_id   String @db.Uuid
+  room      room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  users     users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+
+  @@index([room_id], map: "fki_room_id")
+  @@index([user_id], map: "fki_user_id")
+}
+
 model blocked {
   blocker                      String   @db.Uuid
   blockee                      String   @db.Uuid
@@ -58,6 +69,11 @@ model friends {
   @@index([friend2], map: "fki_friend2")
 }
 
+model genre {
+  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  genre    String?
+}
+
 model message {
   message_id      String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   contents        String
@@ -68,14 +84,13 @@ model message {
   room_message    room_message?
 }
 
+/// This table has subclasses and requires additional setup for migrations. Visit https://pris.ly/d/table-inheritance for more info.
 model participate {
-  user_id        String   @db.Uuid
-  room_id        String   @db.Uuid
-  date_joined    DateTime @default(now()) @db.Timestamptz(6)
-  participate_id String   @id(map: "participate_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  banned         Boolean? @default(false)
-  users          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
-  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  user_id        String @db.Uuid
+  room_id        String @db.Uuid
+  participate_id String @id(map: "participate_id") @unique(map: "user_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users          users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
+  room           room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 
   @@index([room_id], map: "fki_room")
 }
@@ -133,6 +148,7 @@ model room {
   room_language  String?         @default("English")
   explicit       Boolean?        @default(false)
   tags           String[]
+  banned         banned[]
   bookmark       bookmark[]
   participate    participate[]
   private_room   private_room?
@@ -142,7 +158,7 @@ model room {
   room_message   room_message[]
   scheduled_room scheduled_room?
   table_state    table_state?
-  user_activity  user_activity[] @ignore
+  user_activity  user_activity[]
 }
 
 model room_message {
@@ -160,6 +176,15 @@ model scheduled_room {
   @@index([room_id], map: "fki_scheduled_room ")
 }
 
+model search_history {
+  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  search_term String
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  url         String?
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
 model song {
   song_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
@@ -173,6 +198,26 @@ model song {
   queue       queue[]
 }
 
+model table_state {
+  room_id   String    @id @db.Uuid
+  index     Int?
+  is_active Boolean?
+  time      DateTime? @default(now()) @db.Timestamptz(6)
+  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+}
+
+model user_activity {
+  user_id         String    @db.Uuid
+  room_id         String    @db.Uuid
+  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
+  room_leave_time DateTime? @db.Timestamptz(6)
+  activity_id     String    @id(map: "activity_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+
+  @@index([user_id], map: "fki_user")
+}
+
 model users {
   user_id                         String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   username                        String
@@ -184,6 +229,7 @@ model users {
   external_links                  Json?             @db.Json
   email                           String?
   authentication                  authentication?
+  banned                          banned[]
   blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
@@ -197,7 +243,7 @@ model users {
   private_message                 private_message[]
   room                            room[]
   search_history                  search_history[]
-  user_activity                   user_activity[]   @ignore
+  user_activity                   user_activity[]
 }
 
 model vote {
@@ -205,38 +251,4 @@ model vote {
   is_upvote Boolean @default(true)
   queue_id  String  @db.Uuid
   queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
-}
-
-model genre {
-  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  genre    String?
-}
-
-model search_history {
-  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String   @db.Uuid
-  search_term String
-  timestamp   DateTime @default(now()) @db.Timestamptz(6)
-  url         String?
-  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-}
-
-model table_state {
-  room_id   String    @id @db.Uuid
-  index     Int?
-  is_active Boolean?
-  time      DateTime? @default(now()) @db.Timestamptz(6)
-  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model user_activity {
-  user_id         String    @db.Uuid
-  room_id         String    @db.Uuid
-  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
-  room_leave_time DateTime? @db.Timestamptz(6)
-  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-
-  @@ignore
 }
