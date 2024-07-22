@@ -5,6 +5,7 @@ import {
 	DiscoveryDocument,
 	ResponseType,
 } from "expo-auth-session";
+//import { generateRandom } from "expo-auth-session/build/PKCE";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -59,6 +60,15 @@ const discovery: DiscoveryDocument = {
 };
 
 const RegisterOtherScreen: React.FC = () => {
+	//state variable with be a json string
+	/*
+		{
+			expo-redirect: "",
+			ip-address: "",
+			unique-padding: ""
+		}
+	*/
+	//const r1 = generateRandom(10);
 	const router = useRouter();
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
