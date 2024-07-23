@@ -322,7 +322,7 @@ export class UsersController {
 	@Post(":username/unfollow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Unfollow the given user" })
-	@ApiParam({ 
+	@ApiParam({
 		name: "username",
 		description: "The username of the user to unfollow.",
 	})
@@ -457,5 +457,4 @@ export class UsersController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
-
 }

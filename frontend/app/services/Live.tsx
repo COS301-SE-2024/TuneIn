@@ -27,6 +27,7 @@ class LiveChatService {
 	private requestingChatHistory = false;
 
 	private backendLatency: number = 0;
+	private timeOffset: number = 0;
 
 	private setMessages: stateSetMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
@@ -120,6 +121,32 @@ class LiveChatService {
 			// Optionally, retry sending the ping here
 			throw error; // Re-throw the error to maintain the Promise<void> type
 		});
+	}
+
+	//function to find latency from NTP
+	public async getTimeOffset() {
+		let t0 = Date.now();
+
+		/* Note: (server code)
+			// for determining client and server clock latency
+			@SubscribeMessage("time_sync")
+			handleTimeSync(
+				@ConnectedSocket() client: Socket,
+				@MessageBody() data: { t0: number },
+			) {
+				const t1 = Date.now();
+				client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
+			}
+		*/
+
+		this.socket.on("time_sync_response", (data) => {
+			const t2 = Date.now();
+			const t1 = data.t1;
+			const offset = (t1 - t0 + (data.t2 - t2)) / 2;
+			this.timeOffset = offset;
+			console.log(`Time offset: ${this.timeOffset} ms`);
+		});
+		this.socket.emit("time_sync", { t0: Date.now() });
 	}
 
 	public async initialiseSocket() {

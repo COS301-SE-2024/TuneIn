@@ -435,6 +435,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	// for determining client and server clock latency
+	@SubscribeMessage("time_sync")
+	handleTimeSync(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { t0: number },
+	) {
+		const t1 = Date.now();
+		client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
+	}
+
 	async validateInputEvent(payload: string): Promise<ChatEventDto> {
 		/*
 		if no token, return error
