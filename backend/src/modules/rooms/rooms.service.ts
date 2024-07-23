@@ -607,7 +607,7 @@ export class RoomsService {
 		const playlists: any = await this.prisma.playlist.findMany({
 			where: {
 				user_id: userID,
-			},
+			}
 		});
 		// if there are no playlists, return false
 		console.log("Playlists: ", playlists);
@@ -618,4 +618,35 @@ export class RoomsService {
 
 		return playlists;
 	}
+
+	async deleteArchivedSongs(userID: string, playlistID: string): Promise<void> {
+		// delete the playlist created by the user
+		console.log("User ID: ", userID, " is deleting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlist: any = await this.prisma.playlist.findFirst({
+			where: {
+				user_id: userID,
+				playlist_id: playlistID,
+			}
+		});
+		// if the playlist does not exist, return false
+		if (!playlist || playlist === null) {
+			throw new HttpException("Playlist not found", HttpStatus.NOT_FOUND);
+		}
+		// delete the playlist
+		const result = await this.prisma.playlist.delete({
+			where: {
+				playlist_id: playlistID,
+			}
+		});
+		// if the playlist is deleted, return true
+		if (result) {
+			throw new HttpException("Playlist deleted", HttpStatus.OK);
+		}
+		throw new HttpException("Failed to delete playlist", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 }
