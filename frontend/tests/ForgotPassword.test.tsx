@@ -51,7 +51,7 @@ describe("ForgotPasswordScreen", () => {
 		// Assert useRouter push function is called with correct pathname
 		expect(require("expo-router").useRouter().push).toHaveBeenCalledTimes(1);
 		expect(require("expo-router").useRouter().push).toHaveBeenCalledWith(
-			"screens/OTP",
+			"screens/Auth/OTP",
 		);
 	});
 
@@ -63,10 +63,10 @@ describe("ForgotPasswordScreen", () => {
 		fireEvent.press(loginLink);
 
 		// Assert useRouter push function is called with correct pathname
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledTimes(2);
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledWith(
-			"screens/LoginScreen",
-		);
+		const pushMock = require("expo-router").useRouter().push;
+		expect(pushMock).toHaveBeenCalledTimes(2);
+		expect(pushMock).toHaveBeenNthCalledWith(1, "screens/Auth/OTP");
+		expect(pushMock).toHaveBeenNthCalledWith(2, "screens/Auth/LoginScreen");
 	});
 
 	it("navigates back when back button is pressed", () => {

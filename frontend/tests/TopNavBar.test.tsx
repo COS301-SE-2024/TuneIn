@@ -1,6 +1,5 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import { Image } from "react-native";
 import TopNavBar from "../app/components/TopNavBar";
 
 // Mock useRouter hook
@@ -21,17 +20,18 @@ jest.mock("../app/services/Utils", () => ({
 }));
 
 describe("TopNavBar component", () => {
-	it("renders correctly with default profile image", async () => {
+	it("renders correctly with default profile image", () => {
 		const { getByTestId } = render(<TopNavBar />);
 
 		// Assert profile image is rendered with the correct URI
-		const profileImage = getByTestId("profile-image") as Image;
-		expect(profileImage.props.source).toEqual({
-			uri: "https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
-		});
+		const profileImage = getByTestId("profile-image");
+		const imageSource = profileImage.props.source as { uri: string };
+		expect(imageSource.uri).toEqual(
+			"https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
+		);
 	});
 
-	it("navigates to ProfilePage when profile image is clicked", async () => {
+	it("navigates to ProfilePage when profile image is clicked", () => {
 		const { getByTestId } = render(<TopNavBar />);
 
 		// Simulate click on profile image
@@ -39,9 +39,10 @@ describe("TopNavBar component", () => {
 		fireEvent.press(profileImage);
 
 		// Assert useRouter push function is called
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledTimes(1);
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledWith({
-			pathname: "/screens/ProfilePage",
+		const { push } = require("expo-router").useRouter();
+		expect(push).toHaveBeenCalledTimes(1);
+		expect(push).toHaveBeenCalledWith({
+			pathname: "/screens/profile/ProfilePage",
 		});
 	});
 });

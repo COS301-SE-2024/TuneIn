@@ -45,7 +45,7 @@ describe("IncorrectCodeScreen", () => {
 			1,
 		);
 		expect(require("expo-router").useRouter().navigate).toHaveBeenCalledWith(
-			"/screens/OTP",
+			"/screens/Auth/OTP",
 		);
 	});
 
