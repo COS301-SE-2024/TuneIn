@@ -572,4 +572,47 @@ export class RoomsService {
 			);
 		}
 	}
+
+	// define a function that will archive all the songs in a room
+	async archiveRoomSongs(roomID: string, userID: string, archiveInfo: any): Promise<void> {
+		// get all the songs in the room from the queue table
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const songs: any = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		// if there are no songs in the room, return false
+		if (!songs || songs === null) {
+			throw new HttpException("No songs in the room", HttpStatus.NOT_FOUND);
+		}
+		// create a playlist as an array of song ids
+		const playlist: string[] = [];
+		for (const song of songs) {
+			playlist.push(song.song_id);
+		}
+
+		// add the songs to the playlist table
+		const result = await this.prisma.playlist.create({
+			data: {
+				name: archiveInfo.name,
+				description: archiveInfo.description,
+				user_id: userID,
+				playlist: playlist
+			},
+		});
+
+		// if the playlist is created, return true
+		if (result) {
+			throw new HttpException("Playlist created", HttpStatus.OK);
+		}
+		throw new HttpException("Failed to create playlist", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }
