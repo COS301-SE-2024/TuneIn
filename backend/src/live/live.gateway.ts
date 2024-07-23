@@ -419,12 +419,15 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage(SOCKET_EVENTS.PING)
 	async handlePing(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() payload: string,
+		@MessageBody() callback: () => void,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: ping", payload);
+			console.log("Received event: ping");
 			try {
-				client.emit("ping");
+				// Call the callback function to acknowledge the ping
+				if (typeof callback === "function") {
+					callback();
+				}
 			} catch (error) {
 				console.error("Error handling ping:", error);
 				this.handleThrownError(client, error);

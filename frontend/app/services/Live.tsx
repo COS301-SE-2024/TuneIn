@@ -26,6 +26,8 @@ class LiveChatService {
 	private isConnecting = false;
 	private requestingChatHistory = false;
 
+	private backendLatency: number = 0;
+
 	private setMessages: stateSetMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
@@ -87,9 +89,7 @@ class LiveChatService {
 	}
 
 	// Method to send a ping and wait for a response or timeout
-	public async sendPingAndWaitForResponse(
-		timeout: number = TIMEOUT,
-	): Promise<void> {
+	public async sendPing(timeout: number = TIMEOUT): Promise<void> {
 		if (this.pingSent) {
 			console.log("A ping is already waiting for a response. Please wait.");
 			return;
@@ -99,9 +99,6 @@ class LiveChatService {
 			const startTime = Date.now();
 			this.pingSent = true;
 
-			// Send the ping message
-			this.sendPing(); // Assuming sendPing is already implemented and sends a ping message
-
 			// Set up a timeout
 			const timeoutId = setTimeout(() => {
 				this.pingSent = false;
@@ -109,12 +106,13 @@ class LiveChatService {
 				reject(new Error("Ping timed out"));
 			}, timeout);
 
-			// Listen for the pong response
-			this.socket.once("pong", () => {
+			// Send the ping message with a callback
+			this.socket.volatile.emit("ping", () => {
 				clearTimeout(timeoutId);
 				const roundTripTime = Date.now() - startTime;
 				console.log(`Ping round-trip time: ${roundTripTime}ms`);
 				this.pingSent = false;
+				this.backendLatency = roundTripTime;
 				resolve();
 			});
 		}).catch((error) => {
@@ -122,11 +120,6 @@ class LiveChatService {
 			// Optionally, retry sending the ping here
 			throw error; // Re-throw the error to maintain the Promise<void> type
 		});
-	}
-
-	// Modify the sendPing method to emit a "ping" event instead of "liveMessage"
-	public async sendPing() {
-		this.socket.emit("ping");
 	}
 
 	public async initialiseSocket() {
