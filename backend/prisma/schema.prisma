@@ -37,11 +37,12 @@ model blocked {
 }
 
 model bookmark {
-  user_id     String @db.Uuid
-  room_id     String @db.Uuid
-  bookmark_id String @id(map: "bookmark_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  user_id     String    @db.Uuid
+  room_id     String    @db.Uuid
+  bookmark_id String    @id(map: "bookmark_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  users       users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  room        room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 }
 
 model follows {
@@ -96,11 +97,13 @@ model participate {
 }
 
 model playlist {
-  playlist_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String   @db.Uuid
-  name        String
-  playlist    String[]
-  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+  playlist_id  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id      String   @db.Uuid
+  name         String
+  playlist     String[]
+  date_created DateTime @default(now()) @db.Timestamptz(6)
+  description  String?
+  users        users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
 
 model private_message {
