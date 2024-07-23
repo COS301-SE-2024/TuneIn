@@ -188,12 +188,12 @@ const Search: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={30} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Search</Text>
-      </View>
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
+        <Ionicons name="chevron-back" size={30} color="black" />
+      </TouchableOpacity>
+      <Text style={styles.title}>Search</Text>
+    </View>
 
       <View style={styles.searchBarContainer}>
         <TextInput
@@ -202,7 +202,7 @@ const Search: React.FC = () => {
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
-        <TouchableOpacity style={styles.searchIcon} onPress={handleSearch}>
+        <TouchableOpacity style={styles.searchIcon} onPress={handleSearch}  testID="search-button">
           <Ionicons name="search-circle-sharp" size={40} color={colors.primary} />
         </TouchableOpacity>
       </View>
@@ -226,7 +226,7 @@ const Search: React.FC = () => {
         >
           <Text style={styles.filterText}>Users</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)} testID="filter-button">
           <Ionicons name="filter" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
@@ -265,6 +265,7 @@ const Search: React.FC = () => {
         contentContainerStyle={styles.scrollViewContent}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        testID="scroll-view"
       >
         <View style={styles.resultContainer}>
 		  <FlatList
@@ -286,6 +287,7 @@ const Search: React.FC = () => {
         transparent
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
+        testID="filter-modal"
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -297,6 +299,7 @@ const Search: React.FC = () => {
                 <TouchableOpacity
                   style={styles.modalItem}
                   onPress={() => handleFilterToggle(item.id)}
+                  testID={`filter-option-${item.id}`}
                 >
                   <Text style={styles.modalItemText}>{item.label}</Text>
                   {selectedFilters.includes(item.id) && (
@@ -308,6 +311,7 @@ const Search: React.FC = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
+              testID="close-button"
             >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
