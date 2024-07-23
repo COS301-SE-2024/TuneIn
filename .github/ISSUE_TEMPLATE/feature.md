@@ -7,14 +7,21 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Description**
+<!-- A clear and concise description of the feature. -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Acceptance Criteria**
+<!-- A clear and concise description of what you want to happen. -->
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- If frontend, show the design. If backend, show any related code snippets, documentation or pseudo code, etc. -->
+
+**Possible Dependencies**
+<!-- If there are any dependencies, please list them here. -->
+
+**Definition of Done**
+<!-- A clear and concise description of what you want to happen. -->
+
+**Related Issues**
+<!-- If there are any related issues, please link them here. -->
+```
