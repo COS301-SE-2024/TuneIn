@@ -1,41 +1,50 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import SongRoomWidget from "../app/components/SongRoomWidget";
+import { Track } from "../app/models/Track"; // Adjust the import path
 
-describe("SongRoomWidget component", () => {
-	const songRoomWidgetProps = {
-		songName: "Beautiful Day",
-		artist: "U2",
-		albumCoverUrl: "https://example.com/album-cover.jpg",
-		progress: 0.5,
-		time1: "1:30",
-		time2: "3:00",
-	};
+const mockTrack: Track = {
+	id: "1",
+	name: "Mock Song",
+	artists: [{ name: "Mock Artist" }],
+	album: {
+		images: [{ url: "https://example.com/mock-album-cover.jpg" }],
+	},
+	explicit: false,
+	preview_url: "https://example.com/mock-preview.mp3",
+	uri: "spotify:track:1",
+	duration_ms: 210000,
+};
 
-	it("renders correctly with provided props", () => {
+describe("SongRoomWidget", () => {
+	it("renders the song room widget correctly", () => {
 		const { getByText, getByTestId } = render(
-			<SongRoomWidget {...songRoomWidgetProps} />,
+			<SongRoomWidget
+				track={mockTrack}
+				progress={0.5}
+				time1="0:00"
+				time2="3:30"
+			/>,
 		);
 
-		// Assert song name
-		expect(getByText("Beautiful Day")).toBeTruthy();
+		// Check song name
+		expect(getByText("Mock Song")).toBeTruthy();
 
-		// Assert artist name
-		expect(getByText("U2")).toBeTruthy();
+		// Check artist name
+		expect(getByText("Mock Artist")).toBeTruthy();
 
-		// Assert album cover image
-		const albumCover = getByTestId("album-cover-image");
-		expect(albumCover.props.source.uri).toBe(songRoomWidgetProps.albumCoverUrl);
+		// Check album cover image source
+		const albumCoverImage = getByTestId("album-cover-image");
+		expect(albumCoverImage.props.source.uri).toBe(
+			"https://example.com/mock-album-cover.jpg",
+		);
 
-		// Assert slider value
+		// Check slider value
 		const slider = getByTestId("song-slider");
-		expect(slider.props.value).toBe(songRoomWidgetProps.progress);
+		expect(slider.props.value).toBe(0.5);
 
-		// Simulate slider value change
-		fireEvent(slider, "onValueChange", 0.7); // Example: change slider value to 0.7
-
-		// Add more assertions as needed for time1 and time2
+		// Check displayed times
+		expect(getByText("0:00")).toBeTruthy();
+		expect(getByText("3:30")).toBeTruthy();
 	});
-
-	// Add more specific tests for interactions with the slider and other components if needed
 });
