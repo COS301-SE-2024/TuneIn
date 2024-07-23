@@ -1,7 +1,8 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import SongList, { SongListProps } from "../app/components/SongList";
+import SongList from "../app/components/SongList";
 import { StyleSheet } from "react-native"; // Import StyleSheet to access styles
+import { Track } from "../app/models/Track";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -16,88 +17,101 @@ jest.mock("expo-asset", () => ({
 	})),
 }));
 
-// Mock or import styles from SongList.tsx
-const styles = StyleSheet.create({
-	container: {
-		flexDirection: "row",
-		alignItems: "center",
-		padding: 16,
-		backgroundColor: "#f9f9f9",
-		borderRadius: 8,
-		marginVertical: 8,
-	},
-	currentSong: {
-		backgroundColor: "#f0f0f0", // Highlight color for current song
-	},
-	songNumber: {
-		fontSize: 16,
-		fontWeight: "bold",
-		marginRight: 16,
-	},
-	albumCover: {
-		width: 60,
-		height: 60,
-		borderRadius: 4,
-		marginRight: 16,
-	},
-	infoContainer: {
-		flex: 1,
-		justifyContent: "center",
-	},
-	songName: {
-		fontSize: 16,
-		fontWeight: "bold",
-	},
-	currentSongText: {
-		color: "blue", // Text color for current song
-	},
-	artist: {
-		fontSize: 14,
-		color: "#666",
-	},
-	moreButton: {
-		marginLeft: 16,
-	},
+jest.mock("@expo/vector-icons", () => ({
+	Ionicons: "MockedIonicons",
+}));
+
+jest.mock("../app/components/Voting", () => {
+	return {
+		__esModule: true,
+		default: ({ voteCount }: { voteCount: number }) => {
+			return <div>Votes: {voteCount}</div>;
+		},
+	};
 });
 
-describe("SongList component", () => {
+describe("SongList", () => {
 	const mockSwapSongs = jest.fn();
 
-	const songListProps: SongListProps = {
-		songName: "Beautiful Day",
-		artist: "U2",
-		albumCoverUrl: "https://example.com/album-cover.jpg",
-		voteCount: 10,
-		showVoting: true,
-		songNumber: 1,
-		index: 0,
-		isCurrent: true,
-		swapSongs: mockSwapSongs,
+	const track: Track = {
+		id: "1",
+		name: "Test Song",
+		artists: [{ name: "Test Artist" }],
+		album: { images: [{ url: "https://example.com/test.jpg" }] },
+		explicit: false,
+		preview_url: "https://example.com/preview.mp3",
+		uri: "spotify:track:1",
+		duration_ms: 180000,
+		albumArtUrl: "https://example.com/test.jpg",
 	};
 
-	it("renders correctly with provided props", () => {
-		const { getByText, getByTestId } = render(<SongList {...songListProps} />);
+	it("renders correctly", () => {
+		const { getByText, getByTestId } = render(
+			<SongList
+				track={track}
+				voteCount={5}
+				showVoting={true}
+				songNumber={1}
+				index={0}
+				isCurrent={false}
+				swapSongs={mockSwapSongs}
+			/>,
+		);
 
-		// Assert song name
-		expect(getByText("Beautiful Day")).toBeTruthy();
-
-		// Assert artist name
-		expect(getByText("U2")).toBeTruthy();
-
-		// Assert album cover image
-		const albumCover = getByTestId("album-cover-image");
-		expect(albumCover.props.source.uri).toBe(songListProps.albumCoverUrl);
-
-		// Assert song number
 		expect(getByText("1")).toBeTruthy();
+		expect(getByTestId("album-cover-image").props.source.uri).toBe(
+			"https://example.com/test.jpg",
+		);
+		expect(getByText("Test Song")).toBeTruthy();
+		expect(getByText("Test Artist")).toBeTruthy();
+	});
 
-		// Assert current song highlight
-		const songcontainer = getByTestId("song-container");
-		expect(songcontainer.props.style).toContainEqual(styles.currentSong);
+	it("renders current song correctly", () => {
+		const { getByText } = render(
+			<SongList
+				track={track}
+				voteCount={5}
+				showVoting={true}
+				songNumber={1}
+				index={0}
+				isCurrent={true}
+				swapSongs={mockSwapSongs}
+			/>,
+		);
+		expect(getByText("Test Song").props.style[1].color).toBe("blue");
+	});
 
-		// Assert more button
-		const moreButton = getByTestId("more-button");
-		fireEvent.press(moreButton);
-		// Add assertions for the actions triggered by pressing the more button
+	// it("calls swapSongs function on up vote", () => {
+	// 	const { getByText } = render(
+	// 		<SongList
+	// 			track={track}
+	// 			voteCount={5}
+	// 			showVoting={true}
+	// 			songNumber={1}
+	// 			index={0}
+	// 			isCurrent={false}
+	// 			swapSongs={mockSwapSongs}
+	// 		/>,
+	// 	);
+
+	// 	fireEvent.press(getByText("Votes: 5"));
+	// 	expect(mockSwapSongs).toHaveBeenCalledWith(0, "up");
+	// });
+
+	it("handles more button press", () => {
+		const { getByTestId } = render(
+			<SongList
+				track={track}
+				voteCount={5}
+				showVoting={true}
+				songNumber={1}
+				index={0}
+				isCurrent={false}
+				swapSongs={mockSwapSongs}
+			/>,
+		);
+
+		fireEvent.press(getByTestId("more-button"));
+		// Add your expectation for the more button press here
 	});
 });

@@ -23,6 +23,8 @@ const SongList: React.FC<SongListProps> = ({
 	isCurrent,
 	swapSongs,
 }) => {
+	const albumCoverUrl = track.album.images[0]?.url;
+
 	return (
 		<View
 			style={[styles.container, isCurrent ? styles.currentSong : null]}
@@ -47,7 +49,7 @@ const SongList: React.FC<SongListProps> = ({
 			{showVoting && (
 				<Voting
 					voteCount={voteCount}
-					setVoteCount={(newVoteCount) => {}}
+					setVoteCount={(newVoteCount: number) => {}}
 					index={index}
 					swapSongs={swapSongs}
 				/>
