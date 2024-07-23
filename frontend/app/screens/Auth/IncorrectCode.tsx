@@ -8,19 +8,21 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import CyanButton from "../../components/CyanButton";
+import { colors } from "../../styles/colors";
 
 const IncorrectCodeScreen: React.FC = () => {
 	const router = useRouter();
 
 	const navigateToOTP = () => {
-		router.navigate("/screens/OTP");
+		router.navigate("/screens/Auth/OTP");
 	};
 
 	return (
 		<View style={styles.container}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<TouchableOpacity onPress={() => router.back()}>
-					<Ionicons name="chevron-back" size={24} color="black" />
+					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
 				<View style={styles.header}>
 					{/* <Text style={styles.logoText}>Logo</Text> */}
@@ -30,9 +32,7 @@ const IncorrectCodeScreen: React.FC = () => {
 					Would you like us to send you a new code?
 				</Text>
 				<View style={styles.buttonContainer}>
-					<TouchableOpacity style={styles.resendButton} onPress={navigateToOTP}>
-						<Text style={styles.resendButtonText}>RESEND CODE</Text>
-					</TouchableOpacity>
+					<CyanButton title="RESEND CODE" onPress={navigateToOTP} />
 				</View>
 			</ScrollView>
 		</View>
@@ -42,7 +42,7 @@ const IncorrectCodeScreen: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 16,
+		padding: 30,
 	},
 	scrollContent: {
 		flexGrow: 1,
@@ -62,31 +62,12 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	instructionText: {
-		fontSize: 15,
-		color: "#888",
-		fontWeight: "bold",
+		fontSize: 16,
+		color: colors.primary,
+		fontWeight: 500,
 		textAlign: "center",
 		marginBottom: 50,
 		paddingHorizontal: 30,
-	},
-	resendButton: {
-		backgroundColor: "#4B0082",
-		borderRadius: 25,
-		paddingVertical: 15,
-		alignItems: "center",
-		justifyContent: "center",
-		width: "90%",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-		elevation: 5,
-		marginBottom: 10,
-	},
-	resendButtonText: {
-		color: "#fff",
-		fontSize: 18,
-		fontWeight: "bold",
 	},
 });
 

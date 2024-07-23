@@ -123,12 +123,6 @@ const RoomOptions = () => {
 			>
 				<Text style={styles.closeButtonText}>Close</Text>
 			</TouchableOpacity>
-
-			{/* <SvgUri
-        width="100%"
-        height="100%"
-        source={require('./assets/images/rectangle252.svg')}
-      /> */}
 		</ScrollView>
 	);
 };
@@ -144,7 +138,6 @@ const styles = StyleSheet.create({
 	},
 	roomName: {
 		color: "black",
-		fontFamily: "Poppins",
 		fontSize: 32,
 		textAlign: "center",
 		marginVertical: 10,
@@ -152,7 +145,6 @@ const styles = StyleSheet.create({
 	},
 	host: {
 		color: "#8B8FA8",
-		fontFamily: "Poppins",
 		fontSize: 14,
 		textAlign: "center",
 	},
@@ -175,7 +167,6 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		color: "black",
-		fontFamily: "Poppins",
 		fontSize: 16,
 		marginLeft: 8,
 	},
@@ -188,7 +179,6 @@ const styles = StyleSheet.create({
 	},
 	playlistText: {
 		color: "black",
-		fontFamily: "Poppins",
 		fontSize: 16,
 		marginLeft: 8,
 	},
@@ -197,7 +187,6 @@ const styles = StyleSheet.create({
 	},
 	closeButtonText: {
 		color: "black",
-		fontFamily: "Poppins",
 		fontSize: 16,
 	},
 });

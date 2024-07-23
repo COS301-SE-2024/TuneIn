@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: "bold",
 		marginBottom: 20,
-		color: "#2c3e50",
+		color: "#000",
 		textAlign: "center",
 	},
 	card: {

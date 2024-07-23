@@ -17,6 +17,8 @@ import AWS from "aws-sdk";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
+import CyanButton from "../../components/CyanButton";
+import { colors } from "../../styles/colors";
 
 import {
 	AWS_ACCESS_KEY_ID,
@@ -264,23 +266,7 @@ const RoomDetails: React.FC = () => {
 							/>
 						)}
 					</View>
-
-					<TouchableOpacity
-						style={{
-							backgroundColor: "#8B8FA8",
-							borderRadius: 30,
-							height: 50,
-							alignItems: "center",
-							justifyContent: "center",
-							elevation: 5,
-							marginTop: 10,
-						}}
-						onPress={navigateToChatRoom}
-					>
-						<Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>
-							Share
-						</Text>
-					</TouchableOpacity>
+					<CyanButton title="Share" onPress={navigateToChatRoom} />
 				</View>
 			</View>
 		</ScrollView>
@@ -301,7 +287,7 @@ const _buildInputField = (
 			<TextInput
 				style={{
 					borderWidth: 1,
-					borderColor: "#D1D5DB",
+					borderColor: colors.primary,
 					borderRadius: 10,
 					padding: 10,
 					backgroundColor: "#F9FAFB",
