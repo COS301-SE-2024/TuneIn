@@ -268,7 +268,7 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
-	it("Builds a query with all search params", async () => {
+	it("builds a query with all search params", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
 
 		const result = await service.advancedUserSearchQueryBuilder({
@@ -296,4 +296,95 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	`),
 		);
 	});
+
+	it("it should build with just q", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
+	})
+
+	it("it should build with q and username", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+			creator_username: "test",
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
+	})
+
+	it("it should build with q and full_name", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+			creator_name: "t",
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
+	})
+
+	it("it should build with q and followers", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+			creator_name: "t",
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
+	})
+
+	it("it should build with q and following", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+			following: 0,
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f1.num_followers, 0) AS num_followers FROM users LEFT JOIN (
+				SELECT followee, COUNT(*) AS num_followers
+				FROM follows
+				GROUP BY followee
+		) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`));
+	})
+
+	it("it should build with q and followers", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedUserSearchQueryBuilder({
+			q: "testing",
+			followers: 2,
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f2.num_following, 0) AS num_following FROM users LEFT JOIN (
+				SELECT follower, COUNT(*) AS num_following
+				FROM follows
+				GROUP BY follower
+		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`));
+	})
 });

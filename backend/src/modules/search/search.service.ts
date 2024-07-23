@@ -440,10 +440,10 @@ export class SearchService {
 			AND COALESCE(f2.num_following, 0) >= ${params.following};`
 		}
 		else if(params.following !== undefined) {
-			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.followers};`
+			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.following};`
 		}
 		else if(params.followers !== undefined) {
-			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.following};`
+			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.followers};`
 		}
 
 		console.log(query);
