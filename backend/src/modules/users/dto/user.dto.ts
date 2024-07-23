@@ -84,4 +84,13 @@ export class UserDto {
 		count: number;
 		data: RoomDto[];
 	};
+
+	@ApiProperty()
+	@IsObject()
+	@ValidateNested()
+	friendship?: {
+		status: boolean;
+		accept_url: string;
+		reject_url: string;
+	};
 }

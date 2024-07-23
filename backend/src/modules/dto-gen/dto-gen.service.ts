@@ -2,7 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
-import * as Prisma from "@prisma/client";
+//import { Prisma } from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 
@@ -23,7 +24,7 @@ export class DtoGenService {
 		}
 
 		//check if userID exists
-		const user: Prisma.users | null = await this.prisma.users.findUnique({
+		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
 
@@ -62,7 +63,7 @@ export class DtoGenService {
 			}
 		}
 
-		const following: Prisma.users[] | null =
+		const following: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
 		if (following && following !== null) {
 			result.following.count = following.length;
@@ -77,7 +78,7 @@ export class DtoGenService {
 			}
 		}
 
-		const followers: Prisma.users[] | null =
+		const followers: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowers(userID);
 		if (followers && followers !== null) {
 			result.followers.count = followers.length;
@@ -98,7 +99,7 @@ export class DtoGenService {
 		//exclude fav songs
 
 		// if (fully_qualify) {
-		// 	const favRooms: Prisma.room[] | null =
+		// 	const favRooms: PrismaTypes.room[] | null =
 		// 		await this.dbUtils.getRandomRooms(5);
 		// 	if (favRooms && favRooms !== null) {
 		// 		result.fav_rooms.count = favRooms.length;
@@ -111,7 +112,7 @@ export class DtoGenService {
 		// }
 
 		// if (fully_qualify) {
-		// 	const recentRooms: Prisma.room[] | null =
+		// 	const recentRooms: PrismaTypes.room[] | null =
 		// 		await this.dbUtils.getRandomRooms(5);
 		// 	if (recentRooms && recentRooms !== null) {
 		// 		result.recent_rooms.count = recentRooms.length;
@@ -122,12 +123,51 @@ export class DtoGenService {
 		// 		}
 		// 	}
 		// }
-
 		return result;
 	}
 
-	generateBriefUserDto(user: Prisma.users): UserDto {
-		const result: UserDto = {
+	async generateFriendUserDto(selfID: string, friendUsername: string) {
+		const friend = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+
+		if (!friend || friend === null) {
+			throw new Error(
+				"User with username " + friendUsername + " does not exist",
+			);
+		}
+		const friendID = friend.user_id;
+		const friendship = await this.prisma.friends.findFirst({
+			where: {
+				OR: [
+					{ friend1: selfID, friend2: friendID },
+					{ friend1: friendID, friend2: selfID },
+				],
+			},
+		});
+
+		if (!friendship || friendship === null) {
+			throw new Error(
+				"Friendship between " + selfID + " and " + friendID + " does not exist",
+			);
+		}
+		const result: UserDto = this.generateBriefUserDto(friend);
+		const base: string = `/users/${result.username}`;
+		const usersAreFriends: boolean =
+			!friendship.is_pending && friendship.is_close_friend;
+		result.friendship = {
+			status: usersAreFriends,
+			accept_url: friendship.is_pending ? "" : base + "/accept",
+			reject_url: friendship.is_pending ? "" : base + "/reject",
+		};
+		return result;
+	}
+
+	generateBriefUserDto(
+		user: PrismaTypes.users,
+		add_friendship: boolean = false,
+	): UserDto {
+		let result: UserDto = {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
 			username: user.username,
@@ -168,11 +208,21 @@ export class DtoGenService {
 				data: [],
 			},
 		};
+		if (add_friendship) {
+			result = {
+				...result,
+				friendship: {
+					status: false,
+					accept_url: "",
+					reject_url: "",
+				},
+			};
+		}
 		return result;
 	}
 
 	async generateMultipleUserDto(user_ids: string[]): Promise<UserDto[]> {
-		const users: Prisma.users[] | null = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: user_ids } },
 		});
 
@@ -194,7 +244,7 @@ export class DtoGenService {
 	}
 
 	async generateRoomDto(roomID: string): Promise<RoomDto | null> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
 
@@ -251,7 +301,9 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateRoomDtoFromRoom(room: Prisma.room): Promise<RoomDto | null> {
+	async generateRoomDtoFromRoom(
+		room: PrismaTypes.room,
+	): Promise<RoomDto | null> {
 		if (!room || room === null) {
 			return null;
 		}
@@ -306,7 +358,7 @@ export class DtoGenService {
 	}
 
 	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[] | null> {
-		const rooms: Prisma.room[] | null = await this.prisma.room.findMany({
+		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: { room_id: { in: room_ids } },
 		});
 
@@ -317,7 +369,7 @@ export class DtoGenService {
 		const userIds: string[] = rooms.map((r) => r.room_creator);
 		//remove duplicate user ids
 		const uniqueUserIds: string[] = [...new Set(userIds)];
-		const users: Prisma.users[] | null = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: uniqueUserIds } },
 		});
 
@@ -374,7 +426,7 @@ export class DtoGenService {
 	async generateLiveChatMessageDto(
 		messageID: string,
 	): Promise<LiveChatMessageDto> {
-		const roomMessage: Prisma.room_message | null =
+		const roomMessage: PrismaTypes.room_message | null =
 			await this.prisma.room_message.findUnique({
 				where: { message_id: messageID },
 			});
@@ -387,11 +439,10 @@ export class DtoGenService {
 			);
 		}
 
-		const message: Prisma.message | null = await this.prisma.message.findUnique(
-			{
+		const message: PrismaTypes.message | null =
+			await this.prisma.message.findUnique({
 				where: { message_id: messageID },
-			},
-		);
+			});
 
 		if (!message || message === null) {
 			throw new Error(
@@ -414,7 +465,7 @@ export class DtoGenService {
 	}
 
 	async generateMultipleLiveChatMessageDto(
-		messages: Prisma.message[],
+		messages: PrismaTypes.message[],
 	): Promise<LiveChatMessageDto[]> {
 		const senderIDs: string[] = messages.map((m) => m.sender);
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
