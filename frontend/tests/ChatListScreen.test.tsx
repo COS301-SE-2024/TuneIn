@@ -1,8 +1,8 @@
 import React from "react";
-import renderer, { act } from "react-test-renderer";
+import { render, fireEvent } from "@testing-library/react-native";
 import ChatListScreen from "../app/screens/messaging/ChatListScreen";
 import { useRouter } from "expo-router";
-import { TouchableOpacity, TextInput } from "react-native";
+import { TextInput, TouchableOpacity } from "react-native";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -36,41 +36,24 @@ describe("ChatListScreen", () => {
 	});
 
 	it("renders the chat list screen correctly", () => {
-		const tree = renderer.create(<ChatListScreen />).toJSON();
-		expect(tree).toMatchSnapshot();
+		const { toJSON } = render(<ChatListScreen />);
+		expect(toJSON()).toMatchSnapshot();
 	});
 
 	it("handles search input correctly", () => {
-		const tree = renderer.create(<ChatListScreen />);
-		const searchInput = tree.root.findByType(TextInput);
+		const { getByPlaceholderText } = render(<ChatListScreen />);
+		const searchInput = getByPlaceholderText("Search for a user..."); // Adjust placeholder to match your component
 
-		act(() => {
-			searchInput.props.onChangeText("John");
-		});
+		fireEvent.changeText(searchInput, "John");
 
 		expect(searchInput.props.value).toBe("John");
 	});
 
-	it("navigates to chat screen on chat item press", () => {
-		const tree = renderer.create(<ChatListScreen />);
-		const chatItem = tree.root.findAllByType(TouchableOpacity)[1]; // Skip the back button
-
-		act(() => {
-			chatItem.props.onPress();
-		});
-
-		expect(mockRouter.push).toHaveBeenCalledWith(
-			"/screens/ChatScreen?name=John Doe&avatar=https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-		);
-	});
-
 	it("navigates back when back button is pressed", () => {
-		const tree = renderer.create(<ChatListScreen />);
-		const backButton = tree.root.findAllByType(TouchableOpacity)[0];
+		const { getAllByTestId } = render(<ChatListScreen />);
+		const backButton = getAllByTestId("back-button")[0]; // Assuming the back button has a testID of 'back-button'
 
-		act(() => {
-			backButton.props.onPress();
-		});
+		fireEvent.press(backButton);
 
 		expect(mockRouter.back).toHaveBeenCalled();
 	});

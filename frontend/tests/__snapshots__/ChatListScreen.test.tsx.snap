@@ -53,6 +53,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
           "opacity": 1,
         }
       }
+      testID="back-button"
     >
       <Text />
     </View>
@@ -66,7 +67,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
         }
       }
     >
-      Chats    
+      Chats 
     </Text>
   </View>
   <View
@@ -93,6 +94,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
           "paddingVertical": 0,
         }
       }
+      testID="search-input"
       value=""
     />
     <View
