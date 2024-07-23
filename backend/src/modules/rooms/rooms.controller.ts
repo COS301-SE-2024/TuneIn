@@ -375,7 +375,7 @@ export class RoomsController {
 	// define an endpoint for room song archival
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":roomID/archive")
+	@Post(":roomID/archive/playlist")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Archive a room's songs" })
 	@ApiParam({ name: "roomID" })
@@ -392,7 +392,10 @@ export class RoomsController {
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		// define the body of the request as a json with playlist name and description
-		@Body() archiveInfo: { name: string; description: string }
+		@Body() archiveInfo: {
+			name: string,
+			description: string
+		}
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
@@ -413,6 +416,30 @@ export class RoomsController {
 		console.log("getting archived songs");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.roomsService.getArchivedSongs(userInfo.id);
+	}
+
+	// define an endpoint for deleting a user's archived songs based on playlist id
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Delete("archive/playlist/:playlistID")
+	@ApiOperation({ summary: "Delete a user's archived songs" })
+	@ApiParam({ name: "playlistID" })
+	@ApiOkResponse({
+		description: "User's archived songs deleted successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Playlist not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async deleteArchivedSongs(
+		@Request() req: any,
+		@Param("playlistID") playlistID: string
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
 	}
 
 
