@@ -6,6 +6,7 @@ labels: ''
 assignees: ''
 
 ---
+<!-- Note: All text in these comment blocks will not be visible, see preview before creating -->
 
 **Description**
 <!-- A clear and concise description of the feature. -->
@@ -24,4 +25,3 @@ assignees: ''
 
 **Related Issues**
 <!-- If there are any related issues, please link them here. -->
-```
