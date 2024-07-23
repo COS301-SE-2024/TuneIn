@@ -61,15 +61,7 @@ export class RoomsService {
 	}
 
 	async getRoomInfo(roomID: string): Promise<RoomDto> {
-		// TODO: Implement logic to get room info
-		// an an example to generate a RoomDto
-		/*
-		const roomID = "xxxx"
-		const room = await this.dtogen.generateRoomDto(roomID);
-		if (room) {
-			return room;
-		}
-		*/
+		console.log("Getting room info for room", roomID);
 		try {
 			const room = await this.prisma.room.findFirst({
 				where: {
@@ -86,17 +78,6 @@ export class RoomsService {
 			console.error("Error getting room info:", error);
 			return new RoomDto();
 		}
-		// const room = await this.prisma.room.findFirst({
-		// 	where: {
-		// 		room_id: roomID
-		// 	}
-		// });
-		// if (!room) {
-		// 	return new RoomDto();
-		// }
-		// // filter out null values
-		// const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-		// return roomDto? roomDto : new RoomDto();
 	}
 
 	async updateRoomInfo(
@@ -614,5 +595,27 @@ export class RoomsService {
 			throw new HttpException("Playlist created", HttpStatus.OK);
 		}
 		throw new HttpException("Failed to create playlist", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	async getArchivedSongs(userID: string): Promise<any> {
+		// get all the playlists created by the user
+		console.log("User ID: ", userID, " is getting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlists: any = await this.prisma.playlist.findMany({
+			where: {
+				user_id: userID,
+			},
+		});
+		// if there are no playlists, return false
+		console.log("Playlists: ", playlists);
+		if (!playlists || playlists === null) {
+			throw new HttpException("No playlists found", HttpStatus.NOT_FOUND);
+		}
+		// return the playlists
+
+		return playlists;
 	}
 }
