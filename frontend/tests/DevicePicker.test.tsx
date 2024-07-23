@@ -1,4 +1,3 @@
-// DevicePicker.test.tsx
 import React from "react";
 import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import DevicePicker from "../app/components/DevicePicker";
@@ -45,9 +44,12 @@ describe("DevicePicker", () => {
 		expect(getByTestId("Speaker-button")).toBeTruthy();
 	});
 
-	it("opens the modal when button is pressed", () => {
+	it("opens the modal when button is pressed", async () => {
 		const { queryByText, getByTestId } = render(<DevicePicker />);
-		fireEvent.press(getByTestId("Speaker-button"));
+
+		await act(async () => {
+			fireEvent.press(getByTestId("Speaker-button"));
+		});
 
 		const selectDeviceText = queryByText("Select a Device");
 		const noDevicesText = queryByText("No Devices Available");
