@@ -50,6 +50,7 @@ export class RoomsController {
 	})
 	@ApiTags("rooms")
 	async getNewRooms(): Promise<RoomDto[]> {
+		console.log("getting new rooms");
 		return await this.roomsService.getNewRooms();
 	}
 
@@ -396,4 +397,23 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
 	}
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("archive/playlist")
+	@ApiOperation({ summary: "Get a user's archived songs" })
+	@ApiOkResponse({
+		description: "User's archived songs retrieved successfully",
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getArchivedSongs(@Request() req: any): Promise<any> {
+		console.log("getting archived songs");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.getArchivedSongs(userInfo.id);
+	}
+
+
 }
