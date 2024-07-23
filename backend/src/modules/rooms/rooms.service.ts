@@ -649,4 +649,16 @@ export class RoomsService {
 		throw new HttpException("Failed to delete playlist", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
+		const room: any = await this.prisma.participate.findFirst({
+			where: {
+				user_id: userID,
+			}, include: {
+				room: true
+			}
+		});
+		console.log("Current room: ", room);
+		return room;
+	}
+
 }
