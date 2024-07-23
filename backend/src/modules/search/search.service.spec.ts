@@ -388,3 +388,114 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`));
 	})
 });
+
+describe("advancedRoomsSearchQueryBuilder function", () => {
+	let service: SearchService;
+	let dbUtils: DbUtilsService;
+	let dtoGen: DtoGenService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+		dtoGen = module.get<DtoGenService>(DtoGenService);
+	});
+
+	it("it should build with all params", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedRoomSearchQueryBuilder({
+			q: "testing",
+			creator_username: "test",
+			creator_name: "t",
+			participant_count: 3,
+			description: "desc",
+			is_temp: false,
+			is_priv: false,
+			is_scheduled: false,
+			start_date: "2024-06-15 09:00:00",
+			end_date: "2024-06-15 09:00:00",
+			lang: "Language",
+			explicit: false,
+			nsfw: false,
+			tags: "1,2,3",
+		});
+
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name
+			HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`));
+	})
+
+	it("it should build with just q", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+
+		const result = await service.advancedRoomSearchQueryBuilder({
+			q: "testing",
+		});
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`));
+	});
+})
+
+describe("advancedSearchUsers function", () => {
+	let service: SearchService;
+	let dbUtils: DbUtilsService;
+	let dtoGen: DtoGenService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+		dtoGen = module.get<DtoGenService>(DtoGenService);
+	});
+
+	it("should return an empty UserDto array when query returns an empty array", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM users`);
+
+		const result = await service.advancedSearchUsers({q:"testing"});
+
+		expect(result).toMatchObject([new UserDto()]);
+		mock.mockRestore();
+	});
+
+	it("should return a UserDto array when query returns an array", async () => {
+		prismaMock.$queryRawUnsafe.mockResolvedValue(userMock);
+		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
+
+		const result = await service.searchUsers("testing");
+
+		expect(result).toMatchObject(uDtoMock);
+	});
+});
+
+describe("advancedSearchRooms function", () => {
+	let service: SearchService;
+	let dbUtils: DbUtilsService;
+	let dtoGen: DtoGenService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+		dtoGen = module.get<DtoGenService>(DtoGenService);
+	});
+
+	it("should return an empty RoomDto array when query returns an empty array", async () => {
+		prismaMock.$queryRaw.mockResolvedValue([]);
+
+		const result = await service.searchRooms({ q: "testing" });
+
+		expect(result).toMatchObject([new RoomDto()]);
+	});
+
+	it("should return a RoomDto array when query returns an array", async () => {
+		prismaMock.$queryRaw.mockResolvedValue(roomMock);
+		(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(rDtoMock);
+
+		const result = await service.searchRooms({ q: "testing" });
+
+		expect(result).toMatchObject(rDtoMock);
+	});
+});

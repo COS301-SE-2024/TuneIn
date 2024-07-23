@@ -263,7 +263,7 @@ export class SearchService {
 			query += ` AND (${tagsCondition})`;
 		}
 		if (params.participant_count !== undefined) {
-			query += ` GROUP BY room.room_id
+			query += ` GROUP BY room.room_id, users.username, users.full_name
 			HAVING COUNT(participate.room_id) >= ${params.participant_count}`;
 		}
 
