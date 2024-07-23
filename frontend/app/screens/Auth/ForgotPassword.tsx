@@ -8,16 +8,18 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import CyanButton from "../../components/CyanButton";
+import { colors } from "../../styles/colors";
 
 const ForgotPasswordScreen: React.FC = () => {
 	const router = useRouter();
 
 	const navigateToOTP = () => {
-		router.push("screens/OTP");
+		router.push("screens/Auth/OTP");
 	};
 
 	const navigateToLogin = () => {
-		router.push("screens/LoginScreen");
+		router.push("screens/Auth/LoginScreen");
 	};
 
 	return (
@@ -43,9 +45,7 @@ const ForgotPasswordScreen: React.FC = () => {
 			/>
 
 			<View style={styles.bottomContainer}>
-				<TouchableOpacity style={styles.sendCodeButton} onPress={navigateToOTP}>
-					<Text style={styles.sendCodeText}>Send Code</Text>
-				</TouchableOpacity>
+				<CyanButton title="Send Code" onPress={navigateToOTP} />
 
 				<TouchableOpacity
 					style={styles.registerContainer}
@@ -81,19 +81,18 @@ const styles = StyleSheet.create({
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
 		textAlign: "center",
 		marginTop: 50,
 		marginBottom: 20,
 		paddingHorizontal: 20,
 	},
 	instructionText: {
-		fontSize: 14,
-		color: "#888",
-		fontFamily: "Poppins_500Medium",
+		fontSize: 16,
+		color: colors.primary,
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
+		fontWeight: 500,
 	},
 	input: {
 		height: 50,
@@ -102,7 +101,6 @@ const styles = StyleSheet.create({
 		marginHorizontal: 30, // Add horizontal margin
 		fontSize: 16,
 		marginBottom: 10,
-		fontFamily: "Poppins_500Medium",
 	},
 	bottomContainer: {
 		position: "absolute",
@@ -112,36 +110,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		alignItems: "center",
 	},
-	sendCodeButton: {
-		backgroundColor: "#330066",
-		borderRadius: 30,
-		paddingVertical: 15,
-		width: "85%",
-		alignItems: "center",
-		justifyContent: "center",
-		marginBottom: 20,
-		elevation: 5,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-	},
-	sendCodeText: {
-		color: "#fff",
-		fontSize: 16,
-		fontFamily: "Poppins_700Bold",
-	},
 	registerContainer: {
 		alignItems: "center",
 	},
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		fontWeight: 500,
 	},
 	registerBoldText: {
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		color: colors.primary,
 	},
 });
 

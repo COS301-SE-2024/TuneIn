@@ -1,18 +1,14 @@
 import React from "react";
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	ScrollView,
-	StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import CyanButton from "../../components/CyanButton";
+import { colors } from "../../styles/colors";
 
 const PasswordChangedScreen: React.FC = () => {
 	const router = useRouter();
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/LoginScreen");
+		router.navigate("/screens/Auth/LoginScreen");
 	};
 
 	return (
@@ -26,12 +22,7 @@ const PasswordChangedScreen: React.FC = () => {
 					Your password has been changed successfully.
 				</Text>
 				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.resendButton}
-						onPress={navigateToLogin}
-					>
-						<Text style={styles.resendButtonText}>BACK TO LOGIN</Text>
-					</TouchableOpacity>
+					<CyanButton title="BACK TO LOGIN" onPress={navigateToLogin} />
 				</View>
 			</ScrollView>
 		</View>
@@ -61,31 +52,12 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	instructionText: {
-		fontSize: 15,
-		color: "#888",
-		fontWeight: "bold",
+		fontSize: 16,
+		color: colors.primary,
+		fontWeight: 500,
 		textAlign: "center",
 		marginBottom: 50,
 		paddingHorizontal: 30,
-	},
-	resendButton: {
-		backgroundColor: "#4B0082",
-		borderRadius: 25,
-		paddingVertical: 15,
-		alignItems: "center",
-		justifyContent: "center",
-		width: "90%",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-		elevation: 5,
-		marginBottom: 10,
-	},
-	resendButtonText: {
-		color: "#fff",
-		fontSize: 18,
-		fontWeight: "bold",
 	},
 });
 

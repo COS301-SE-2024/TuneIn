@@ -24,11 +24,11 @@ const LoginStreamingScreen: React.FC = () => {
 	}
 
 	const navigateToRegister = () => {
-		router.navigate("screens/RegisterStreaming");
+		router.navigate("screens/Auth/RegisterStreaming");
 	};
 
 	const navigateToOther = () => {
-		router.navigate("screens/LoginOther");
+		router.navigate("screens/Auth/LoginOther");
 	};
 
 	return (
