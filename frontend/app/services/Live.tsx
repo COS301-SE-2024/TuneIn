@@ -452,6 +452,26 @@ class LiveChatService {
 		}
 	}
 
+	public calculateSeekTime(
+		startTimeUtc: number,
+		mediaDurationMs: number,
+	): number {
+		// Get the current server time
+		const serverTime = Date.now() + this.timeOffset;
+
+		// Convert startTimeUtc to milliseconds since epoch
+		const startTimeMs = new Date(startTimeUtc).getTime();
+
+		// Calculate the elapsed time since media started
+		const elapsedTimeMs = serverTime - startTimeMs;
+
+		// Calculate the seek position within the media duration
+		let seekPosition = Math.max(0, Math.min(elapsedTimeMs, mediaDurationMs));
+
+		console.log(`Seek position: ${seekPosition} ms`);
+		return seekPosition;
+	}
+
 	public async disconnectSocket() {
 		this.currentUser = null;
 		this.currentRoom = null;
