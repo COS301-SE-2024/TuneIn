@@ -7,7 +7,7 @@ function getAPIBase(): string {
 		//do something
 	}
 	console.log("Local IP Address: ", localhost);
-	return `http://172.16.11.44:3000`;
+	return `http://${localhost}:3000`;
 }
 
 function getLocalhost(): string {
@@ -15,7 +15,7 @@ function getLocalhost(): string {
 		//do something
 	}
 	console.log("Local IP Address: ", localhost);
-	return `http://172.16.11.44`;
+	return `http://${localhost}`;
 }
 export const API_BASE_URL = getAPIBase();
 export const LOCALHOST = getLocalhost();
