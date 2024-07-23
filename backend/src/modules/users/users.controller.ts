@@ -269,10 +269,10 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/follow")
+	@Post(":userID/follow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Follow the given user" })
-	@ApiParam({ name: "username" })
+	@ApiParam({ name: "userID" })
 	@ApiOkResponse({
 		description: "Successfully followed the user.",
 		type: Boolean,
@@ -283,18 +283,18 @@ export class UsersController {
 	})
 	async followUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, username);
+		return await this.usersService.followUser(userInfo.id, userID);
 	}
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/unfollow")
+	@Post(":userID/unfollow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Unfollow the given user" })
-	@ApiParam({ name: "username" })
+	@ApiParam({ name: "userID" })
 	@ApiOkResponse({
 		description: "Successfully unfollowed the user.",
 		type: Boolean,
@@ -305,9 +305,9 @@ export class UsersController {
 	})
 	async unfollowUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, username);
+		return await this.usersService.unfollowUser(userInfo.id, userID);
 	}
 }
