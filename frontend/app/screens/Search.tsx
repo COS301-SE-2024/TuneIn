@@ -9,6 +9,8 @@ import {
   StyleSheet,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Modal,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,7 +19,7 @@ import UserItem from "../components/UserItem";
 import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
-import { User } from "../models/user"; 
+import { User } from "../models/user";
 
 type SearchResult = {
   id: string;
@@ -27,6 +29,31 @@ type SearchResult = {
   userData?: User;
 };
 
+const roomFilterCategories = [
+  { id: 'roomName', label: 'Room Name' },
+  { id: 'username', label: 'Host' },
+  { id: 'participationCount', label: 'Participation Count' },
+  { id: 'description', label: 'Description' },
+  { id: 'isTemporary', label: 'Temporary' },
+  { id: 'isPrivate', label: 'Private' },
+  { id: 'isScheduled', label: 'Scheduled' },
+//   { id: 'startDate', label: 'Start Date' },
+//   { id: 'endDate', label: 'End Date' },
+  { id: 'language', label: 'Language' },
+  { id: 'explicit', label: 'Explicit' },
+  { id: 'nsfw', label: 'NSFW' },
+  { id: 'tags', label: 'Tags' },
+];
+
+const userFilterCategories = [
+  { id: 'profileName', label: 'Profile Name' },
+  { id: 'username', label: 'Username' },
+//   { id: 'minFollowing', label: 'Minimum Number of Following' },
+//   { id: 'minFollowers', label: 'Minimum Number of Followers' },
+];
+
+const allFilterCategories = [...roomFilterCategories, ...userFilterCategories];
+
 const Search: React.FC = () => {
   const navigation = useNavigation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +62,8 @@ const Search: React.FC = () => {
   const [scrollY] = useState(new Animated.Value(0));
   const previousScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   const mockResults: SearchResult[] = [
     {
@@ -88,11 +117,18 @@ const Search: React.FC = () => {
   ];
 
   const handleSearch = () => {
-    const filteredResults = mockResults.filter(
-      (result) =>
-        (filter === "all" || result.type === filter) &&
+    const filteredResults = mockResults.filter((result) => {
+      if (filter === "all") {
+        return (
+          result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          selectedFilters.length === 0
+        );
+      }
+      return (
+        result.type === filter &&
         result.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      );
+    });
     setResults(filteredResults);
   };
 
@@ -142,6 +178,14 @@ const Search: React.FC = () => {
     return null;
   };
 
+  const handleFilterToggle = (id: string) => {
+    setSelectedFilters((prevSelectedFilters) =>
+      prevSelectedFilters.includes(id)
+        ? prevSelectedFilters.filter((filterId) => filterId !== id)
+        : [...prevSelectedFilters, id]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -182,6 +226,39 @@ const Search: React.FC = () => {
         >
           <Text style={styles.filterText}>Users</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)}>
+          <Ionicons name="filter" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.selectedFiltersContainer}>
+        {selectedFilters.map((filter) => (
+          <View key={filter} style={styles.selectedFilter}>
+            <Text style={styles.selectedFilterText}>
+              {filter === 'roomName' ? 'Room Name' :
+              filter === 'username' ? 'Username of Creator' :
+              filter === 'participationCount' ? 'Participation Count' :
+              filter === 'description' ? 'Description' :
+              filter === 'isTemporary' ? 'Is Temporary Room' :
+              filter === 'isPrivate' ? 'Is Private' :
+              filter === 'isScheduled' ? 'Is Scheduled' :
+              filter === 'startDate' ? 'Start Date' :
+              filter === 'endDate' ? 'End Date' :
+              filter === 'language' ? 'Language' :
+              filter === 'explicit' ? 'Explicit' :
+              filter === 'nsfw' ? 'NSFW' :
+              filter === 'tags' ? 'Tags' :
+              filter === 'profileName' ? 'Profile Name' :
+              filter === 'username' ? 'Username' :
+              filter === 'minFollowing' ? 'Minimum Number of Following' :
+              filter === 'minFollowers' ? 'Minimum Number of Followers' :
+              filter}
+            </Text>
+            <TouchableOpacity onPress={() => handleFilterToggle(filter)}>
+              <Ionicons name="close-circle" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
 
       <ScrollView
@@ -189,22 +266,54 @@ const Search: React.FC = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {results.map((result) => (
-          <View
-            key={result.id}
-            style={[
-              styles.resultContainer,
-              result.type === "room" && styles.roomBorder, // Add bottom border for room items
-            ]}
-          >
-            {renderResult({ item: result })}
-          </View>
-        ))}
+        <View style={styles.resultContainer}>
+		  <FlatList
+			data={results}
+			keyExtractor={(item) => item.id}
+			renderItem={renderResult}
+		  />
+		</View>
       </ScrollView>
 
-      <Animated.View style={[styles.navBar, { transform: [{ translateY: navBarTranslateY }] }]}>
+      <Animated.View
+        style={[styles.navBar, { transform: [{ translateY: navBarTranslateY }] }]}
+      >
         <NavBar />
       </Animated.View>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Filters</Text>
+            <FlatList
+              data={filter === "all" ? allFilterCategories : filter === "room" ? roomFilterCategories : userFilterCategories}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => handleFilterToggle(item.id)}
+                >
+                  <Text style={styles.modalItemText}>{item.label}</Text>
+                  {selectedFilters.includes(item.id) && (
+                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -268,6 +377,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     color: "#000",
+	fontWeight: "bold",
   },
   scrollViewContent: {
     paddingBottom: 100,
@@ -277,9 +387,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   roomBorder: {
-    borderBottomWidth: 1, 
-    borderBottomColor: "#ccc", 
-	paddingBottom: 20, 
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingBottom: 50,
   },
   navBar: {
     position: "absolute",
@@ -287,6 +397,63 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  modalItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  modalItemText: {
+    fontSize: 18,
+  },
+  closeButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  selectedFiltersContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  selectedFilter: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    margin: 5,
+  },
+  selectedFilterText: {
+    marginRight: 5,
   },
 });
 
