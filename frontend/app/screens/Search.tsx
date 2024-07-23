@@ -239,9 +239,9 @@ const Search: React.FC = () => {
               filter === 'username' ? 'Username of Creator' :
               filter === 'participationCount' ? 'Participation Count' :
               filter === 'description' ? 'Description' :
-              filter === 'isTemporary' ? 'Is Temporary Room' :
-              filter === 'isPrivate' ? 'Is Private' :
-              filter === 'isScheduled' ? 'Is Scheduled' :
+              filter === 'isTemporary' ? 'Temporary' :
+              filter === 'isPrivate' ? 'Private' :
+              filter === 'isScheduled' ? 'Scheduled' :
               filter === 'startDate' ? 'Start Date' :
               filter === 'endDate' ? 'End Date' :
               filter === 'language' ? 'Language' :
@@ -319,142 +319,150 @@ const Search: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingLeft: 30,
-    paddingRight: 30,
-    paddingTop: 30,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-    flex: 1,
-  },
-  searchBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 56,
-    paddingHorizontal: 10,
-  },
-  searchBar: {
-    flex: 1,
-    height: 40,
-  },
-  searchIcon: {
-    marginLeft: 10,
-  },
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  filterButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-  activeFilter: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5.84,
-    elevation: 5,
-  },
-  filterText: {
-    color: "#000",
-	fontWeight: "bold",
-  },
-  scrollViewContent: {
-    paddingBottom: 100,
-    paddingTop: 20,
-  },
-  resultContainer: {
-    marginBottom: 20,
-  },
-  roomBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingBottom: 50,
-  },
-  navBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  modalItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  modalItemText: {
-    fontSize: 18,
-  },
-  closeButton: {
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: colors.primary,
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-  },
-  selectedFiltersContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  selectedFilter: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e0e0e0",
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    margin: 5,
-  },
-  selectedFilterText: {
-    marginRight: 5,
-  },
-});
-
-export default Search;
+	container: {
+	  flex: 1,
+	  paddingLeft: 30,
+	  paddingRight: 30,
+	  paddingTop: 30,
+	},
+	header: {
+	  flexDirection: "row",
+	  alignItems: "center",
+	  justifyContent: "center",
+	  marginBottom: 20,
+	},
+	title: {
+	  fontSize: 24,
+	  fontWeight: "bold",
+	  color: "#333",
+	  textAlign: "center",
+	  flex: 1,
+	},
+	searchBarContainer: {
+	  flexDirection: "row",
+	  alignItems: "center",
+	  marginBottom: 20,
+	  borderColor: "#ccc",
+	  borderWidth: 1,
+	  borderRadius: 56,
+	  paddingHorizontal: 10,
+	},
+	searchBar: {
+	  flex: 1,
+	  height: 40,
+	},
+	searchIcon: {
+	  marginLeft: 10,
+	},
+	filterContainer: {
+	  flexDirection: "row",
+	  justifyContent: "space-between",
+	  marginBottom: 20,
+	},
+	filterButton: {
+	  paddingVertical: 10,
+	  paddingHorizontal: 20,
+	  borderRadius: 7,
+	  borderWidth: 1,
+	  borderColor: "#ccc",
+	},
+	activeFilter: {
+	  backgroundColor: colors.primary,
+	  borderColor: colors.primary,
+	  shadowColor: "#000",
+	  shadowOffset: { width: 0, height: 4 },
+	  shadowOpacity: 0.25,
+	  shadowRadius: 5.84,
+	  elevation: 5,
+	},
+	filterText: {
+	  color: "#000",
+	  fontWeight: "bold",
+	},
+	scrollViewContent: {
+	  paddingBottom: 100,
+	  paddingTop: 20,
+	},
+	resultContainer: {
+	  marginBottom: 20,
+	},
+	roomBorder: {
+	  borderBottomWidth: 1,
+	  borderBottomColor: "#ccc",
+	  paddingBottom: 50,
+	},
+	navBar: {
+	  position: "absolute",
+	  bottom: 0,
+	  left: 0,
+	  right: 0,
+	  zIndex: 10,
+	},
+	modalContainer: {
+	  flex: 1,
+	  justifyContent: "center",
+	  alignItems: "center",
+	  backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+	modalContent: {
+	  width: "80%",
+	  backgroundColor: "white",
+	  borderRadius: 10,
+	  padding: 20,
+	  alignItems: "center",
+	},
+	modalTitle: {
+	  fontSize: 20,
+	  marginBottom: 20,
+	},
+	modalItem: {
+	  flexDirection: "row",
+	  justifyContent: "space-between",
+	  width: "100%",
+	  paddingVertical: 10,
+	  borderBottomWidth: 1,
+	  borderBottomColor: "#ccc",
+	},
+	modalItemText: {
+	  fontSize: 18,
+	},
+	closeButton: {
+	  marginTop: 20,
+	  paddingVertical: 10,
+	  paddingHorizontal: 20,
+	  backgroundColor: colors.primary,
+	  borderRadius: 5,
+	},
+	closeButtonText: {
+	  color: "white",
+	  fontSize: 16,
+	},
+	selectedFiltersContainer: {
+	  flexDirection: "row",
+	  flexWrap: "wrap",
+	  alignItems: "center",
+	  marginBottom: 20,
+	},
+	selectedFilter: {
+	  flexDirection: "row",
+	  alignItems: "center",
+	  backgroundColor: "#fff",
+	  borderRadius: 20,
+	  paddingVertical: 5,
+	  paddingHorizontal: 10,
+	  margin: 5,
+	  borderWidth: 1,
+	  borderColor: "#ccc",
+	  shadowColor: "#000",
+	  shadowOffset: { width: 0, height: 4 },
+	  shadowOpacity: 0.25,
+	  shadowRadius: 5.84,
+	  elevation: 5,
+	},
+	selectedFilterText: {
+	  marginRight: 5,
+	},
+  });
+  
+  export default Search;
+  
