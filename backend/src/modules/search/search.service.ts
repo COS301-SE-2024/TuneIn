@@ -155,7 +155,7 @@ export class SearchService {
 		return false;
 	}
 
-	async advancedSearchRooms(params: {
+	advancedRoomSearchQueryBuilder(params: {
 		q: string;
 		creator_username?: string;
 		creator_name?: string;
@@ -170,9 +170,7 @@ export class SearchService {
 		explicit?: boolean;
 		nsfw?: boolean;
 		tags?: string;
-	}): Promise<RoomDto[]> {
-		console.log(params);
-
+	}):string {
 		let query = `
         SELECT room.*,`;
 
@@ -272,6 +270,29 @@ export class SearchService {
 		query += ` ORDER BY distance ASC LIMIT 10`;
 		console.log(query);
 
+		return query;
+	}
+
+	async advancedSearchRooms(params: {
+		q: string;
+		creator_username?: string;
+		creator_name?: string;
+		participant_count?: number;
+		description?: string;
+		is_temp?: boolean;
+		is_priv?: boolean;
+		is_scheduled?: boolean;
+		start_date?: string;
+		end_date?: string;
+		lang?: string;
+		explicit?: boolean;
+		nsfw?: boolean;
+		tags?: string;
+	}): Promise<RoomDto[]> {
+		console.log(params);
+
+		const query = this.advancedRoomSearchQueryBuilder(params);
+
 		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
 
 		if (Array.isArray(result)) {
@@ -348,15 +369,13 @@ export class SearchService {
 		return [new UserDto()];
 	}
 
-	async advancedSearchUsers(params: {
+	advancedUserSearchQueryBuilder(params: {
 		q: string;
 		creator_username?: string;
 		creator_name?: string;
 		following?: number;
 		followers?: number;
-	}): Promise<UserDto[]> {
-		console.log(params);
-
+	}):string {
 		let query = `
         SELECT user_id,`;
 		console.log(params.q);
@@ -364,15 +383,15 @@ export class SearchService {
 		if(params.creator_name === undefined && params.creator_username === undefined) {
 			query += ` LEAST(levenshtein(username, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance`;
 		}		
-		// else if(params.creator_name !== undefined && params.creator_username !== undefined) {
-		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		// }
-		// else if(params.creator_name !== undefined) {
-		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		// }
-		// else if(params.creator_username !== undefined) {
-		// 	query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
-		// }
+		else if(params.creator_name !== undefined && params.creator_username !== undefined) {
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+		}
+		else if(params.creator_name !== undefined) {
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+		}
+		else if(params.creator_username !== undefined) {
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
+		}
 
 		if(params.following !== undefined) {
 			query += `, COALESCE(f1.num_followers, 0) AS num_followers`;
@@ -427,7 +446,21 @@ export class SearchService {
 			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.following};`
 		}
 
-		console.log(query);
+		// console.log(query);
+
+		return query;
+	}
+
+	async advancedSearchUsers(params: {
+		q: string;
+		creator_username?: string;
+		creator_name?: string;
+		following?: number;
+		followers?: number;
+	}): Promise<UserDto[]> {
+		console.log(params);
+
+		const query = this.advancedUserSearchQueryBuilder(params);		
 
 		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
 
