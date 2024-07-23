@@ -370,4 +370,30 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.unbookmarkRoom(roomID, userInfo.id);
 	}
+
+	// define an endpoint for room song archival
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":roomID/archive")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Archive a room's songs" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "Room songs archived successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async archiveRoomSongs(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+		// define the body of the request as a json with playlist name and description
+		@Body() archiveInfo: { name: string; description: string }
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
+	}
 }
