@@ -446,7 +446,7 @@ export class SearchService {
 			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.following};`
 		}
 
-		// console.log(query);
+		console.log(query);
 
 		return query;
 	}
