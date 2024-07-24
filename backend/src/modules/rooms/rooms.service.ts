@@ -270,6 +270,19 @@ export class RoomsService {
 		}
 	}
 
+	async getRoomUserCount(room_id: string): Promise<number> {
+		try {
+			const count = await this.prisma.participate.count({
+				where: {
+					room_id: room_id,
+				},
+			});
+			return count;
+		} catch (error) {
+			return -1;
+		}
+	}
+
 	getRoomQueue(roomID: string): SongInfoDto[] {
 		// TODO: Implement logic to get room queue
 		console.log(roomID);

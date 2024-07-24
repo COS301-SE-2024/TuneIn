@@ -431,6 +431,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("Room does not exist");
 				}
 
+				if ((await this.roomService.getRoomUserCount(roomID)) === 1) {
+					await this.connectedUsers.stopSong(roomID);
+				}
+
 				const response: ChatEventDto = {
 					userID: null,
 					date_created: new Date(),
