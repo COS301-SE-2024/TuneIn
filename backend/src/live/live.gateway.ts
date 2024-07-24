@@ -530,7 +530,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	*/
 
 	@SubscribeMessage(SOCKET_EVENTS.INIT_PLAY)
-	async handlePlayMedia(
+	async handleInitPlayMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
@@ -538,7 +538,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
 				if (roomID === null) {
@@ -590,7 +589,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.INIT_PAUSE)
-	async handlePauseMedia(
+	async handleInitPauseMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
@@ -625,7 +624,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.INIT_STOP)
-	async handleStopMedia(
+	async handleInitStopMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {

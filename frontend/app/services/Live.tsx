@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
 import { ChatEventDto } from "../models/ChatEventDto";
+import { PlaybackEventDto } from "../models/PlaybackEventDto";
 import axios from "axios";
 import auth from "./AuthManagement";
 import * as utils from ".//Utils";
@@ -11,6 +12,17 @@ export type Message = {
 	message: LiveChatMessageDto;
 	me?: boolean;
 };
+
+/*
+export type PlaybackEventDto = {
+	date_created?: Date;
+	userID: string | null;
+	roomID: string;
+	songID: string | null;
+	UTC_time: number | null;
+	errorMessage?: string;
+};
+*/
 
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
@@ -77,7 +89,7 @@ class LiveChatService {
 		this.requestingChatHistory = true;
 
 		const u = this.currentUser;
-		const input = {
+		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
 				messageBody: "",
@@ -292,7 +304,7 @@ class LiveChatService {
 					return;
 				}
 
-				const input = {
+				const input: ChatEventDto = {
 					userID: this.currentUser.userID,
 				};
 				this.socket.emit("connectUser", JSON.stringify(input));
@@ -369,7 +381,7 @@ class LiveChatService {
 		}
 
 		const u = this.currentUser;
-		const input = {
+		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
 				messageBody: "",
@@ -405,7 +417,7 @@ class LiveChatService {
 		this.setJoined = null;
 
 		const u = this.currentUser;
-		const input = {
+		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
 				messageBody: "",
@@ -444,7 +456,7 @@ class LiveChatService {
 				roomID: this.currentRoom.roomID,
 				dateCreated: new Date(),
 			};
-			const input = {
+			const input: ChatEventDto = {
 				userID: u.userID,
 				body: newMessage,
 			};
@@ -470,6 +482,69 @@ class LiveChatService {
 
 		console.log(`Seek position: ${seekPosition} ms`);
 		return seekPosition;
+	}
+
+	public startPlayback(roomID: string) {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		const input: PlaybackEventDto = {
+			userID: u.userID,
+			roomID: roomID,
+			songID: null,
+			UTC_time: null,
+		};
+		this.socket.emit("initPlay", JSON.stringify(input));
+	}
+
+	public pausePlayback(roomID: string) {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		const input: PlaybackEventDto = {
+			userID: u.userID,
+			roomID: roomID,
+			songID: null,
+			UTC_time: null,
+		};
+		this.socket.emit("initPause", JSON.stringify(input));
+	}
+
+	public stopPlayback(roomID: string) {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		const input: PlaybackEventDto = {
+			userID: u.userID,
+			roomID: roomID,
+			songID: null,
+			UTC_time: null,
+		};
+		this.socket.emit("initStop", JSON.stringify(input));
 	}
 
 	public async disconnectSocket() {
