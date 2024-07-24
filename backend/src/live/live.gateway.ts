@@ -14,8 +14,38 @@ import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
 import { DbUtilsService } from "../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
+import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
+
+/*
+export class PlaybackEventDto {
+	@ApiProperty()
+	@IsDateString()
+	date_created?: Date;
+
+	@ApiProperty()
+	@IsString()
+	userID: string | null;
+
+	@ApiProperty()
+	@IsString()
+	roomID: string;
+
+	@ApiProperty()
+	@IsString()
+	songID: string | null;
+
+	@ApiProperty()
+	@IsString()
+	UTC_time: number;
+
+	@ApiProperty()
+	@IsString()
+	errorMessage?: string;
+}
+
+*/
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -456,19 +486,63 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	MEDIA_SYNC: "mediaSync",
 	*/
 
-	@SubscribeMessage(SOCKET_EVENTS.PLAY_MEDIA)
+	@SubscribeMessage(SOCKET_EVENTS.INIT_PLAY)
 	async handlePlayMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.PLAY_MEDIA);
-		try {
-			//this.server.emit();
-			console.log(p);
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
+			try {
+				//this.server.emit();
+				console.log(p);
+				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				if (roomID === null) {
+					throw new Error("User is not in a room");
+				}
+
+				//{check user permissions}
+				if (await this.connectedUsers.isPaused(roomID)) {
+					const startTime: Date = await this.connectedUsers.resumeSong(roomID);
+					const songID: string | null =
+						await this.connectedUsers.getCurrentSong(roomID);
+					if (songID === null) {
+						throw new Error("No song is queued somehow?");
+					}
+
+					const response: PlaybackEventDto = {
+						date_created: new Date(),
+						userID: null,
+						roomID: roomID,
+						songID: songID,
+						UTC_time: startTime.getTime(),
+					};
+					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				} else if (!(await this.connectedUsers.isPlaying(roomID))) {
+					const songID: string | null =
+						await this.connectedUsers.getQueueHead(roomID);
+					if (songID === null) {
+						throw new Error("No song is queued");
+					}
+					const startTime: Date = await this.connectedUsers.playSongNow(
+						roomID,
+						songID,
+					);
+
+					const response: PlaybackEventDto = {
+						date_created: new Date(),
+						userID: null,
+						roomID: roomID,
+						songID: songID,
+						UTC_time: startTime.getTime(),
+					};
+					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				}
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.PAUSE_MEDIA)
