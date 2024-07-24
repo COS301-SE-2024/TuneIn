@@ -302,4 +302,36 @@ export class ConnectedUsersService {
 		const result = songVotePairs.map(([songID, votes]) => ({ songID, votes }));
 		return result;
 	}
+
+	async getQueueHead(roomID: string): Promise<string | null> {
+		const queue: { songID: string; votes: number }[] =
+			await this.getUpcomingQueueInOrder(roomID);
+		if (queue.length === 0) {
+			return null;
+		}
+		return queue[0].songID;
+	}
+
+	async playSongNow(roomID: string, songID: string): Promise<Date> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				song_id: songID,
+				is_done_playing: false,
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("Song is not in the queue");
+		}
+		const startTime = new Date();
+		await this.prisma.queue.update({
+			where: {
+				queue_id: queue.queue_id,
+			},
+			data: {
+				start_time: startTime,
+			},
+		});
+		return startTime;
+	}
 }
