@@ -6,5 +6,5 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFilesAfterEnv": ["./singleton.ts"]
+  "setupFilesAfterEnv": ["../singleton.ts"]
 }

@@ -6,6 +6,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { SearchHistoryDto } from "./dto/searchhistorydto";
 
 jest.mock("../db-utils/db-utils.service");
 jest.mock("../dto-gen/dto-gen.service");
@@ -163,6 +164,24 @@ const rDtoMock = [
 		tags: ["explicit"],
 	},
 ];
+
+const uHistMock = [
+	{
+	  search_id: '4be25870-05c1-4623-8cb5-a912a6ae0030',
+	  user_id: '012c4238-e071-7031-cb6c-30881378722f',
+	  search_term: 'Abyss',
+	  timestamp: '2024-07-19T09:03:19.651Z',
+	  url: '/rooms/8f928675-5c95-497a-b8a7-917064cdb462'
+	}
+  ];
+
+const uHistDtoMock = [
+	{
+	  search_term: "Abyss",
+	  search_time: '2024-07-19T09:03:19.651Z',
+	  url: "/rooms/8f928675-5c95-497a-b8a7-917064cdb462"
+	}
+  ];
 
 describe("searchUsers function", () => {
 	let service: SearchService;
@@ -504,5 +523,53 @@ describe("advancedSearchRooms function", () => {
 
 		expect(result).toMatchObject(rDtoMock);
 		mock.mockRestore();
+	});
+});
+
+describe("searchRoomsHistory function", () => {
+	let service: SearchService;
+	let dbUtils: DbUtilsService;
+	let dtoGen: DtoGenService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+		dtoGen = module.get<DtoGenService>(DtoGenService);
+	});
+
+	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+		prismaMock.$queryRaw.mockResolvedValueOnce([]);
+
+		const result = await service.searchRoomsHistory("mockID");
+
+		expect(result).toMatchObject([]);
+	});
+
+	// it("should return a SearchHistoryDto array when query returns an array", async () => {
+	// 	prismaMock.$queryRaw.mockResolvedValueOnce(uHistMock);
+
+	// 	const result = await service.searchRoomsHistory('mockId');
+
+	// 	expect(result).toMatchObject(uHistDtoMock);
+	// });
+});
+
+describe("searchUsersHistory function", () => {
+	let service: SearchService;
+	let dbUtils: DbUtilsService;
+	let dtoGen: DtoGenService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+		dtoGen = module.get<DtoGenService>(DtoGenService);
+	});
+
+	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+		prismaMock.$queryRaw.mockResolvedValueOnce([]);
+
+		const result = await service.searchUsersHistory("mockID");
+
+		expect(result).toMatchObject([]);
 	});
 });

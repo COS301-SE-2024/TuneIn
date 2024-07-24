@@ -320,7 +320,7 @@ export class SearchService {
 		OR url LIKE '/search/rooms/%')
 		ORDER BY timestamp DESC
 		LIMIT 10;`;
-		console.log(result);
+		console.log("Result: " + JSON.stringify(result));
 
 		if(Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
@@ -328,12 +328,14 @@ export class SearchService {
 				search_time: row.timestamp,
 				url: row.url
 			}));
-			console.log("Called");
-			console.log(searchIds);
+			// console.log("Called");
+			// console.log(searchIds);
 
 			if(searchIds){
 				return searchIds;
 			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
 		}
 
 		return [new SearchHistoryDto()];
@@ -500,6 +502,8 @@ export class SearchService {
 			if(searchIds){
 				return searchIds;
 			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
 		}
 
 		return [new SearchHistoryDto()];
