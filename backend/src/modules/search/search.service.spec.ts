@@ -2,11 +2,11 @@ import { TestingModule } from "@nestjs/testing";
 import { SearchService } from "./search.service";
 import { createSearchTestingModule } from "../../../jest_mocking/module-mocking";
 import { prismaMock } from "../../../singleton";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+// import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import { SearchHistoryDto } from "./dto/searchhistorydto";
+// import { SearchHistoryDto } from "./dto/searchhistorydto";
 
 jest.mock("../db-utils/db-utils.service");
 jest.mock("../dto-gen/dto-gen.service");
@@ -165,27 +165,26 @@ const rDtoMock = [
 	},
 ];
 
-const uHistMock = [
-	{
-	  search_id: '4be25870-05c1-4623-8cb5-a912a6ae0030',
-	  user_id: '012c4238-e071-7031-cb6c-30881378722f',
-	  search_term: 'Abyss',
-	  timestamp: '2024-07-19T09:03:19.651Z',
-	  url: '/rooms/8f928675-5c95-497a-b8a7-917064cdb462'
-	}
-  ];
+// const uHistMock = [
+// 	{
+// 		search_id: "4be25870-05c1-4623-8cb5-a912a6ae0030",
+// 		user_id: "012c4238-e071-7031-cb6c-30881378722f",
+// 		search_term: "Abyss",
+// 		timestamp: "2024-07-19T09:03:19.651Z",
+// 		url: "/rooms/8f928675-5c95-497a-b8a7-917064cdb462",
+// 	},
+// ];
 
-const uHistDtoMock = [
-	{
-	  search_term: "Abyss",
-	  search_time: '2024-07-19T09:03:19.651Z',
-	  url: "/rooms/8f928675-5c95-497a-b8a7-917064cdb462"
-	}
-  ];
+// const uHistDtoMock = [
+// 	{
+// 		search_term: "Abyss",
+// 		search_time: "2024-07-19T09:03:19.651Z",
+// 		url: "/rooms/8f928675-5c95-497a-b8a7-917064cdb462",
+// 	},
+// ];
 
 describe("searchUsers function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
 	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
@@ -214,7 +213,6 @@ describe("searchUsers function", () => {
 
 describe("searchRooms function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
 	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
@@ -243,13 +241,10 @@ describe("searchRooms function", () => {
 
 describe("combinedSearch function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
-	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
 	it("should return an empty combined search array when query returns an empty array", async () => {
@@ -278,13 +273,10 @@ describe("combinedSearch function", () => {
 
 describe("advancedUserSearchQueryBuilder function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
-	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
 	it("builds a query with all search params", async () => {
@@ -326,8 +318,11 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
-	})
+			normalizeWhitespace(
+				`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+			),
+		);
+	});
 
 	it("it should build with q and username", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -340,8 +335,11 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
-	})
+			normalizeWhitespace(
+				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+			),
+		);
+	});
 
 	it("it should build with q and full_name", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -354,8 +352,11 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
-	})
+			normalizeWhitespace(
+				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+			),
+		);
+	});
 
 	it("it should build with q and followers", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -368,8 +369,11 @@ describe("advancedUserSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`));
-	})
+			normalizeWhitespace(
+				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+			),
+		);
+	});
 
 	it("it should build with q and following", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -386,8 +390,9 @@ describe("advancedUserSearchQueryBuilder function", () => {
 				SELECT followee, COUNT(*) AS num_followers
 				FROM follows
 				GROUP BY followee
-		) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`));
-	})
+		) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
+		);
+	});
 
 	it("it should build with q and followers", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -404,19 +409,17 @@ describe("advancedUserSearchQueryBuilder function", () => {
 				SELECT follower, COUNT(*) AS num_following
 				FROM follows
 				GROUP BY follower
-		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`));
-	})
+		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
+		);
+	});
 });
 
 describe("advancedRoomsSearchQueryBuilder function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
-	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
 	it("it should build with all params", async () => {
@@ -443,8 +446,9 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 
 		expect(normalizeWhitespace(result)).toBe(
 			normalizeWhitespace(`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name
-			HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`));
-	})
+			HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`),
+		);
+	});
 
 	it("it should build with just q", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
@@ -455,13 +459,15 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`));
+			normalizeWhitespace(
+				`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
+			),
+		);
 	});
-})
+});
 
 describe("advancedSearchUsers function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
 	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
@@ -472,9 +478,11 @@ describe("advancedSearchUsers function", () => {
 
 	it("should return an empty UserDto array when query returns an empty array", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
-		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM users`);
+		const mock = jest
+			.spyOn(service, "advancedUserSearchQueryBuilder")
+			.mockReturnValueOnce(`Select * FROM users`);
 
-		const result = await service.advancedSearchUsers({q:"testing"});
+		const result = await service.advancedSearchUsers({ q: "testing" });
 
 		expect(result).toMatchObject([new UserDto()]);
 		mock.mockRestore();
@@ -482,11 +490,13 @@ describe("advancedSearchUsers function", () => {
 
 	it("should return a UserDto array when query returns an array", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue(userMock);
-		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM users`);
+		const mock = jest
+			.spyOn(service, "advancedUserSearchQueryBuilder")
+			.mockReturnValueOnce(`Select * FROM users`);
 
 		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
 
-		const result = await service.advancedSearchUsers({q: "testing"});
+		const result = await service.advancedSearchUsers({ q: "testing" });
 
 		expect(result).toMatchObject(uDtoMock);
 		mock.mockRestore();
@@ -495,7 +505,6 @@ describe("advancedSearchUsers function", () => {
 
 describe("advancedSearchRooms function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
 	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
@@ -506,7 +515,9 @@ describe("advancedSearchRooms function", () => {
 
 	it("should return an empty RoomDto array when query returns an empty array", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
-		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM rooms`);
+		const mock = jest
+			.spyOn(service, "advancedUserSearchQueryBuilder")
+			.mockReturnValueOnce(`Select * FROM rooms`);
 
 		const result = await service.advancedSearchRooms({ q: "testing" });
 
@@ -517,7 +528,9 @@ describe("advancedSearchRooms function", () => {
 	it("should return a RoomDto array when query returns an array", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue(roomMock);
 		(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(rDtoMock);
-		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM rooms`);
+		const mock = jest
+			.spyOn(service, "advancedUserSearchQueryBuilder")
+			.mockReturnValueOnce(`Select * FROM rooms`);
 
 		const result = await service.advancedSearchRooms({ q: "testing" });
 
@@ -528,13 +541,10 @@ describe("advancedSearchRooms function", () => {
 
 describe("searchRoomsHistory function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
-	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
 	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
@@ -556,13 +566,10 @@ describe("searchRoomsHistory function", () => {
 
 describe("searchUsersHistory function", () => {
 	let service: SearchService;
-	let dbUtils: DbUtilsService;
-	let dtoGen: DtoGenService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
 	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {

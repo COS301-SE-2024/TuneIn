@@ -54,7 +54,11 @@ export class SearchController {
 
 		const result = await this.searchService.combinedSearch(query_params);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		this.searchService.insertSearchHistory("/search" , query_params, userInfo.id);
+		this.searchService.insertSearchHistory(
+			"/search",
+			query_params,
+			userInfo.id,
+		);
 
 		return result;
 	}
@@ -89,12 +93,16 @@ export class SearchController {
 			q,
 			creator,
 		};
-		
-		const result = await this.searchService.searchRooms(query_params)
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		console.log("Result" + typeof(result));
 
-		this.searchService.insertSearchHistory("/search/rooms" , query_params, userInfo.id);
+		const result = await this.searchService.searchRooms(query_params);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		console.log("Result" + typeof result);
+
+		this.searchService.insertSearchHistory(
+			"/search/rooms",
+			query_params,
+			userInfo.id,
+		);
 
 		return result;
 	}
@@ -240,7 +248,9 @@ export class SearchController {
 		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchRoomsHistory(@Request() req: Request): Promise<SearchHistoryDto[]> {
+	async searchRoomsHistory(
+		@Request() req: Request,
+	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchRoomsHistory(userInfo.id);
 	}
@@ -262,11 +272,18 @@ export class SearchController {
 		description: "A username or profile name",
 		type: "string",
 	})
-	async searchUsers(@Query("q") q: string, @Request() req: any): Promise<UserDto[]> {
+	async searchUsers(
+		@Query("q") q: string,
+		@Request() req: any,
+	): Promise<UserDto[]> {
 		const result = await this.searchService.searchUsers(q);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 
-		this.searchService.insertSearchHistory("/search/users" , {q: q}, userInfo.id);
+		this.searchService.insertSearchHistory(
+			"/search/users",
+			{ q: q },
+			userInfo.id,
+		);
 
 		return result;
 	}
@@ -340,7 +357,9 @@ export class SearchController {
 		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchUsersHistory(@Request() req: Request): Promise<SearchHistoryDto[]> {
+	async searchUsersHistory(
+		@Request() req: Request,
+	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchUsersHistory(userInfo.id);
 	}

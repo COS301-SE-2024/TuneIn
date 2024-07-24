@@ -30,7 +30,7 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
 		SpotifyModule,
-		forwardRef(() =>SpotifyAuthModule),
+		forwardRef(() => SpotifyAuthModule),
 	],
 	providers: [
 		AuthService,

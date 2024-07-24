@@ -1,18 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsDateString, IsObject, ValidateNested } from "class-validator";
-import { UserDto } from "../../users/dto/user.dto";
-import { RoomDto } from "../../rooms/dto/room.dto";
+import { IsString, IsDateString } from "class-validator";
 
 export class SearchHistoryDto {
-    @ApiProperty()
+	@ApiProperty()
 	@IsString()
 	search_term: string;
 
-    @ApiProperty()
+	@ApiProperty()
 	@IsDateString()
 	search_time: Date;
 
-    @ApiProperty()
+	@ApiProperty()
 	@IsString()
 	url: string;
 }

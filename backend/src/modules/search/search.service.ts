@@ -4,13 +4,13 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
-import { PrismaService } from "../../../prisma/prisma.service";
+// import { PrismaService } from "../../../prisma/prisma.service";
 //import { Prisma } from "@prisma/client";
-import prisma from '../../../client'
+import prisma from "../../../client";
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
-var sqlstring = require('sqlstring');
+import * as sqlstring from "sqlstring";
 
 export class CombinedSearchResults {
 	@ApiProperty({ type: [RoomDto], description: "List of rooms" })
@@ -69,17 +69,17 @@ export class SearchService {
 	async insertSearchHistory(endpoint: string, params: any, user_id: string) {
 		let url = `${endpoint}?q=${params.q}`;
 
-		if(params.creator){
+		if (params.creator) {
 			url += `&creator=${params.creator}`;
 		}
 
-		const result = await prisma.search_history.create({
+		prisma.search_history.create({
 			data: {
-				user_id: user_id, 
-				search_term: params.q, 
+				user_id: user_id,
+				search_term: params.q,
 				url: url,
 			},
-		  });
+		});
 
 		//   console.log("Insertion result: " + result);
 	}
@@ -89,10 +89,9 @@ export class SearchService {
 		creator?: string;
 	}): Promise<CombinedSearchResults> {
 		// console.log(params);
-		let users;
 
 		const rooms = await this.searchRooms(params);
-		users = await this.searchUsers(params.q);
+		const users = await this.searchUsers(params.q);
 
 		console.log("Rooms: " + rooms);
 		console.log("Users: " + users);
@@ -142,12 +141,12 @@ export class SearchService {
 	}
 
 	parseBoolean(value: any): boolean {
-		if (typeof value === 'string') {
+		if (typeof value === "string") {
 			// Convert string to lower case to handle variations in casing
 			value = value.toLowerCase();
-			if (value === 'true' || value === '1') {
+			if (value === "true" || value === "1") {
 				return true;
-			} else if (value === 'false' || value === '0') {
+			} else if (value === "false" || value === "0") {
 				return false;
 			}
 		}
@@ -170,24 +169,27 @@ export class SearchService {
 		explicit?: boolean;
 		nsfw?: boolean;
 		tags?: string;
-	}):string {
+	}): string {
 		let query = `
         SELECT room.*,`;
 
-		if(params.creator_name === undefined && params.creator_username === undefined) {
+		if (
+			params.creator_name === undefined &&
+			params.creator_username === undefined
+		) {
 			query += ` levenshtein(name, ${sqlstring.escape(params.q)}) AS distance`;
-		}		
-		else if(params.creator_name !== undefined && params.creator_username !== undefined) {
+		} else if (
+			params.creator_name !== undefined &&
+			params.creator_username !== undefined
+		) {
 			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		}
-		else if(params.creator_name !== undefined) {
+		} else if (params.creator_name !== undefined) {
 			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		}
-		else if(params.creator_username !== undefined) {
+		} else if (params.creator_username !== undefined) {
 			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
 		}
-		
-		if(params.description !== undefined){
+
+		if (params.description !== undefined) {
 			query += `, levenshtein(description, 'Get energized') AS desc_distance`;
 		}
 
@@ -205,20 +207,22 @@ export class SearchService {
 			query += ` INNER JOIN participate ON room.room_id = participate.room_id`;
 		}
 
-        query += ` WHERE (similarity(name, ${sqlstring.escape(params.q)}) > 0.2`;
+		query += ` WHERE (similarity(name, ${sqlstring.escape(params.q)}) > 0.2`;
 
-		if(params.creator_name !== undefined && params.creator_username !== undefined) {
+		if (
+			params.creator_name !== undefined &&
+			params.creator_username !== undefined
+		) {
 			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2 OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;
-		}
-		else if(params.creator_name !== undefined) {
-			query += ` OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;		}
-		else if(params.creator_username !== undefined) {
+		} else if (params.creator_name !== undefined) {
+			query += ` OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;
+		} else if (params.creator_username !== undefined) {
 			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2`;
 		}
 		query += ` )`;
 
 		// Handle optional parameters
-		
+
 		if (params.description !== undefined) {
 			query += ` AND levenshtein(description, ${sqlstring.escape(params.description)}) < 100`;
 		}
@@ -226,22 +230,20 @@ export class SearchService {
 			query += ` AND is_temporary = ${params.is_temp}`;
 		}
 		if (params.is_scheduled !== undefined) {
-			if(this.parseBoolean(params.is_scheduled)){
+			if (this.parseBoolean(params.is_scheduled)) {
 				query += ` AND scheduled_date IS NOT NULL`;
-			}
-			else{
+			} else {
 				query += ` AND scheduled_date IS NULL`;
 			}
 		}
 		if (params.is_priv !== undefined) {
-			if(this.parseBoolean(params.is_priv)){
+			if (this.parseBoolean(params.is_priv)) {
 				query += ` AND is_listed IS NOT NULL`;
-			}
-			else{
+			} else {
 				query += ` AND is_listed IS NULL`;
 			}
 		}
-		
+
 		if (params.is_scheduled !== undefined && params.start_date !== undefined) {
 			query += ` AND scheduled_date AT TIME ZONE 'UTC' = ${sqlstring.escape(params.start_date)}`;
 		}
@@ -254,9 +256,9 @@ export class SearchService {
 		if (params.nsfw !== undefined) {
 			query += ` AND nsfw = ${params.nsfw}`;
 		}
-		
+
 		if (params.tags && params.tags.length > 0) {
-			const tags = params.tags.split(',');
+			const tags = params.tags.split(",");
 			const tagsCondition = tags
 				.map((tag) => `tags @> ARRAY[${sqlstring.escape(tag)}]`)
 				.join(" OR ");
@@ -293,7 +295,9 @@ export class SearchService {
 
 		const query = this.advancedRoomSearchQueryBuilder(params);
 
-		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
+		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(
+			sqlstring.format(query),
+		);
 
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
@@ -322,16 +326,16 @@ export class SearchService {
 		LIMIT 10;`;
 		console.log("Result: " + JSON.stringify(result));
 
-		if(Array.isArray(result)) {
+		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url
+				url: row.url,
 			}));
 			// console.log("Called");
 			// console.log(searchIds);
 
-			if(searchIds){
+			if (searchIds) {
 				return searchIds;
 			}
 		} else {
@@ -377,37 +381,38 @@ export class SearchService {
 		creator_name?: string;
 		following?: number;
 		followers?: number;
-	}):string {
+	}): string {
 		let query = `
         SELECT user_id,`;
 		console.log(params.q);
 
-		if(params.creator_name === undefined && params.creator_username === undefined) {
+		if (
+			params.creator_name === undefined &&
+			params.creator_username === undefined
+		) {
 			query += ` LEAST(levenshtein(username, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance`;
-		}		
-		else if(params.creator_name !== undefined && params.creator_username !== undefined) {
+		} else if (
+			params.creator_name !== undefined &&
+			params.creator_username !== undefined
+		) {
 			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		}
-		else if(params.creator_name !== undefined) {
+		} else if (params.creator_name !== undefined) {
 			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
-		}
-		else if(params.creator_username !== undefined) {
+		} else if (params.creator_username !== undefined) {
 			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
 		}
 
-		if(params.following !== undefined) {
+		if (params.following !== undefined) {
 			query += `, COALESCE(f1.num_followers, 0) AS num_followers`;
 		}
 
-		if(params.followers !== undefined) {
+		if (params.followers !== undefined) {
 			query += `, COALESCE(f2.num_following, 0) AS num_following`;
 		}
 
 		query += ` FROM users`;
 
-		
-
-		if(params.following !== undefined) {
+		if (params.following !== undefined) {
 			query += ` LEFT JOIN (
 				SELECT followee, COUNT(*) AS num_followers
 				FROM follows
@@ -415,7 +420,7 @@ export class SearchService {
 			) f1 ON f1.followee = users.user_id`;
 		}
 
-		if(params.followers !== undefined) {
+		if (params.followers !== undefined) {
 			query += ` LEFT JOIN (
 				SELECT follower, COUNT(*) AS num_following
 				FROM follows
@@ -425,27 +430,25 @@ export class SearchService {
 
 		query += ` WHERE similarity(username, ${sqlstring.escape(params.q)}) > 0.2 AND similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
 
-		if(params.following !== undefined || params.followers !== undefined) {
+		if (params.following !== undefined || params.followers !== undefined) {
 			query += ` GROUP BY users.user_id`;
 
-			if(params.following !== undefined){
-				query += `, f1.num_followers`
+			if (params.following !== undefined) {
+				query += `, f1.num_followers`;
 			}
 
-			if(params.followers !== undefined){
-				query += `, f2.num_following`
+			if (params.followers !== undefined) {
+				query += `, f2.num_following`;
 			}
 		}
 
-		if(params.following !== undefined && params.followers !== undefined) {
+		if (params.following !== undefined && params.followers !== undefined) {
 			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.followers} 
-			AND COALESCE(f2.num_following, 0) >= ${params.following};`
-		}
-		else if(params.following !== undefined) {
-			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.following};`
-		}
-		else if(params.followers !== undefined) {
-			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.followers};`
+			AND COALESCE(f2.num_following, 0) >= ${params.following};`;
+		} else if (params.following !== undefined) {
+			query += ` HAVING COALESCE(f1.num_followers, 0) >= ${params.following};`;
+		} else if (params.followers !== undefined) {
+			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.followers};`;
 		}
 
 		console.log(query);
@@ -462,9 +465,11 @@ export class SearchService {
 	}): Promise<UserDto[]> {
 		console.log(params);
 
-		const query = this.advancedUserSearchQueryBuilder(params);		
+		const query = this.advancedUserSearchQueryBuilder(params);
 
-		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(sqlstring.format(query));
+		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(
+			sqlstring.format(query),
+		);
 
 		if (Array.isArray(result)) {
 			const userIds = result.map((row) => row.user_id.toString());
@@ -492,14 +497,14 @@ export class SearchService {
 		ORDER BY timestamp DESC
 		LIMIT 10;`;
 
-		if(Array.isArray(result)) {
+		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url
+				url: row.url,
 			}));
 
-			if(searchIds){
+			if (searchIds) {
 				return searchIds;
 			}
 		} else {
