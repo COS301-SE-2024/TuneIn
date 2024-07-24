@@ -20,6 +20,7 @@
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.1.1",
     "@react-native-community/slider": "^4.5.2",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "@testing-library/react-native": "^12.5.1",
     "@types/react-native-dotenv": "^0.2.2",
     "amazon-cognito-identity-js": "^6.3.12",
