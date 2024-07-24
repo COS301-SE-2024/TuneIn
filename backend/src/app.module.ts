@@ -19,7 +19,7 @@ import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
-
+import { ScheduleModule } from "@nestjs/schedule";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -42,6 +42,7 @@ import { GenresModule } from "./modules/genres/genres.module";
 		BullConfigModule,
 		SearchModule,
 		GenresModule,
+		ScheduleModule.forRoot(),
 	],
 	controllers: [AppController],
 	providers: [AppService],
