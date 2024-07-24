@@ -20,6 +20,7 @@ import { memoryStorage } from "multer";
 import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
+import { SongsModule } from "./modules/songs/songs.module";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -43,6 +44,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 		SearchModule,
 		GenresModule,
 		ScheduleModule.forRoot(),
+		SongsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
