@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
+import { PrismaService } from "prisma/prisma.service";
+import * as PrismaTypes from "@prisma/client";
 
 interface liveChatUser {
 	user: UserDto;
@@ -13,6 +15,7 @@ export class ConnectedUsersService {
 	constructor(
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private readonly prisma: PrismaService,
 	) {}
 
 	private connectedUsers = new Map<string, liveChatUser>();
@@ -111,5 +114,26 @@ export class ConnectedUsersService {
 			}
 		});
 		return users;
+	}
+
+	//is song playing
+	async isPlaying(roomID: string): Promise<boolean> {
+		//if queue is non-empty, return true
+		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There was an issue fetching the queue");
+		}
+		if (queue.length > 0) {
+			return true;
+		}
+		return false;
 	}
 }
