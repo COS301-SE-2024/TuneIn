@@ -20,8 +20,10 @@ const VerifyEmailScreen: React.FC = () => {
 	const [verificationCode, setVerificationCode] = useState("");
 
 	const verifyCode = () => {
-		const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-		const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
+		const cognitoUser = new CognitoUser({
+			Username: String(email),
+			Pool: UserPool,
+		});
 		cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
 			if (err) {
 				Alert.alert("Error", err.message, [{ text: "OK" }], {
