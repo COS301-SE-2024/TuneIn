@@ -463,11 +463,14 @@ describe("advancedSearchUsers function", () => {
 
 	it("should return a UserDto array when query returns an array", async () => {
 		prismaMock.$queryRawUnsafe.mockResolvedValue(userMock);
+		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM users`);
+
 		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
 
-		const result = await service.searchUsers("testing");
+		const result = await service.advancedSearchUsers({q: "testing"});
 
 		expect(result).toMatchObject(uDtoMock);
+		mock.mockRestore();
 	});
 });
 
@@ -483,19 +486,23 @@ describe("advancedSearchRooms function", () => {
 	});
 
 	it("should return an empty RoomDto array when query returns an empty array", async () => {
-		prismaMock.$queryRaw.mockResolvedValue([]);
+		prismaMock.$queryRawUnsafe.mockResolvedValue([]);
+		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM rooms`);
 
-		const result = await service.searchRooms({ q: "testing" });
+		const result = await service.advancedSearchRooms({ q: "testing" });
 
 		expect(result).toMatchObject([new RoomDto()]);
+		mock.mockRestore();
 	});
 
 	it("should return a RoomDto array when query returns an array", async () => {
-		prismaMock.$queryRaw.mockResolvedValue(roomMock);
+		prismaMock.$queryRawUnsafe.mockResolvedValue(roomMock);
 		(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(rDtoMock);
+		const mock = jest.spyOn(service, "advancedUserSearchQueryBuilder").mockReturnValueOnce(`Select * FROM rooms`);
 
-		const result = await service.searchRooms({ q: "testing" });
+		const result = await service.advancedSearchRooms({ q: "testing" });
 
 		expect(result).toMatchObject(rDtoMock);
+		mock.mockRestore();
 	});
 });
