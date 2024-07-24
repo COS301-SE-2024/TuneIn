@@ -17,6 +17,7 @@ import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
 import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
+import { LiveService } from "./live.service";
 
 /*
 export class PlaybackEventDto {
@@ -63,16 +64,19 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
 		private readonly eventQueueService: EventQueueService,
+		private readonly liveService: LiveService,
 	) {}
 
 	@WebSocketServer() server: Server;
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async handleConnection(client: Socket, ...args: any[]) {
+		this.handOverSocketServer(this.server);
 		console.log("Client connected with ID: " + client.id);
 	}
 
 	async handleDisconnect(client: Socket) {
+		this.handOverSocketServer(this.server);
 		console.log("Client (id: " + client.id + ") disconnected");
 		this.connectedUsers.removeConnectedUser(client.id);
 	}
@@ -83,6 +87,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log(p);
 			//Hello World
 			this.server.emit("message", { response: "Hello World" });
@@ -95,6 +100,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.CONNECT);
 			try {
 				//auth
@@ -137,6 +143,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
 			try {
 				/*
@@ -195,6 +202,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
 			try {
 				//this.server.emit();
@@ -244,6 +252,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
 			try {
 				//this.server.emit();
@@ -261,6 +270,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log(
 				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
 			);
@@ -280,6 +290,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.TYPING);
 			try {
 				//this.server.emit();
@@ -306,6 +317,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
 			try {
 				//this.server.emit();
@@ -347,6 +359,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.JOIN_ROOM);
 			try {
 				//this.server.emit();
@@ -425,6 +438,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.LEAVE_ROOM);
 			try {
 				//this.server.emit();
@@ -480,6 +494,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() callback: () => void,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: ping");
 			try {
 				// Call the callback function to acknowledge the ping
@@ -520,6 +535,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
 			try {
 				//this.server.emit();
@@ -579,6 +595,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		console.log("Received event: " + SOCKET_EVENTS.INIT_PAUSE);
+		this.handOverSocketServer(this.server);
 		try {
 			//this.server.emit();
 			console.log(p);
@@ -613,6 +630,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.INIT_STOP);
 			try {
 				//this.server.emit();
@@ -649,6 +667,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
 			try {
 				//this.server.emit();
@@ -666,6 +685,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.CURRENT_MEDIA);
 			try {
 				//this.server.emit();
@@ -683,6 +703,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
 				//this.server.emit();
@@ -700,6 +721,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
 			try {
 				//this.server.emit();
@@ -753,5 +775,11 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		};
 		this.server.emit(SOCKET_EVENTS.ERROR, errorResponse);
 		console.log("Error emitted: " + SOCKET_EVENTS.ERROR);
+	}
+
+	handOverSocketServer(s: Server): void {
+		if (!this.liveService.serverSet()) {
+			this.liveService.setServer(s);
+		}
 	}
 }
