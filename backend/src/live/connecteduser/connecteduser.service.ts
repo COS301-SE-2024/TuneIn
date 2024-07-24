@@ -234,6 +234,28 @@ export class ConnectedUsersService {
 		return queue[0].song_id;
 	}
 
+	async getCurrentSongStartTime(roomID: string): Promise<Date | null> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			return null;
+		}
+		if (!queue.start_time || queue.start_time === null) {
+			throw new Error("Song start time is null");
+		}
+		return queue.start_time;
+	}
+
 	//get queue in order
 	async getUpcomingQueueInOrder(
 		roomID: string,

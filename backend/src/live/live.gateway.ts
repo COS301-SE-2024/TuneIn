@@ -382,12 +382,36 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				await this.connectedUsers.setRoomId(client.id, roomID);
 				client.join(roomID);
-				const response: ChatEventDto = {
+				const joinAnnouncement: ChatEventDto = {
 					userID: null,
 					date_created: new Date(),
 				};
-				this.server.to(roomID).emit(SOCKET_EVENTS.USER_JOINED_ROOM, response);
+				this.server
+					.to(roomID)
+					.emit(SOCKET_EVENTS.USER_JOINED_ROOM, joinAnnouncement);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
+
+				//send current media state
+				if (await this.connectedUsers.isPlaying(roomID)) {
+					const songID: string | null =
+						await this.connectedUsers.getCurrentSong(roomID);
+					if (songID) {
+						const startTime: Date | null =
+							await this.connectedUsers.getCurrentSongStartTime(roomID);
+						if (!startTime) {
+							throw new Error("No song start time found somehow?");
+						}
+						const response: PlaybackEventDto = {
+							date_created: new Date(),
+							userID: null,
+							roomID: roomID,
+							songID: songID,
+							UTC_time: startTime.getTime(),
+						};
+						client.emit(SOCKET_EVENTS.CURRENT_MEDIA, response);
+						console.log("Response emitted: " + SOCKET_EVENTS.CURRENT_MEDIA);
+					}
+				}
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
