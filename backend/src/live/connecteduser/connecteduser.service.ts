@@ -221,8 +221,7 @@ export class ConnectedUsersService {
 					room_id: roomID,
 					is_done_playing: false,
 					start_time: {
-						gte: new Date(),
-						not: null,
+						equals: null,
 					},
 				},
 				orderBy: {
@@ -284,36 +283,23 @@ export class ConnectedUsersService {
 			}
 		}
 
-		//order songVotes by score
-		const songsInOrder: string[] = Array.from(songVotes.keys());
-		const songScores: number[] = Array.from(songVotes.values());
-		for (let i = 0; i < songScores.length; i++) {
-			for (let j = i; j < songScores.length; j++) {
-				if (songScores[i] < songScores[j]) {
-					const tempScore = songScores[i];
-					songScores[i] = songScores[j];
-					songScores[j] = tempScore;
+		const songVotePairs: [string, number][] = Array.from(
+			songVotes,
+			([songID, votes]) => [songID, votes],
+		);
 
-					const tempSong = songsInOrder[i];
-					songsInOrder[i] = songsInOrder[j];
-					songsInOrder[j] = tempSong;
-				}
+		// Sort the array by votes in descending order
+		songVotePairs.sort((a, b) => b[1] - a[1]);
+
+		// Insert songs with no votes at the end
+		queueItems.forEach((item) => {
+			if (!songVotes.has(item.song_id)) {
+				songVotePairs.push([item.song_id, 0]);
 			}
-		}
+		});
 
-		//insert songs with no votes at the end
-		for (let i = 0; i < queueItems.length; i++) {
-			const songID = queueItems[i].song_id;
-			if (!songVotes.has(songID)) {
-				songsInOrder.push(songID);
-				songScores.push(0);
-			}
-		}
-
-		const result: { songID: string; votes: number }[] = [];
-		for (let i = 0; i < songsInOrder.length; i++) {
-			result.push({ songID: songsInOrder[i], votes: songScores[i] });
-		}
+		// Convert to desired result format
+		const result = songVotePairs.map(([songID, votes]) => ({ songID, votes }));
 		return result;
 	}
 }
