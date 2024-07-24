@@ -136,4 +136,24 @@ export class ConnectedUsersService {
 		}
 		return false;
 	}
+
+	//get current song
+	async getCurrentSong(roomID: string): Promise<string | null> {
+		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There was an issue fetching the queue");
+		}
+		if (queue.length === 0) {
+			return null;
+		}
+		return queue[0].song_id;
+	}
 }
