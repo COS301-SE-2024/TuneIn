@@ -5,7 +5,6 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
-import { live } from "./services/Live";
 
 const App: React.FC = () => {
 	const router = useRouter();
@@ -18,8 +17,8 @@ const App: React.FC = () => {
 				const authToken = await StorageService.getItem("backendToken");
 				if (authToken && authToken !== "undefined" && authToken !== "null") {
 					auth.setToken(authToken);
+					auth.postAuthInit();
 				}
-				live.initialiseSocket();
 				// // Perform token validation if necessary
 				// if (token) {
 				//   // Redirect to the HomeScreen or appropriate route

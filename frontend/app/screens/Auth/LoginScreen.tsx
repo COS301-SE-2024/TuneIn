@@ -65,6 +65,7 @@ const LoginScreen: React.FC = () => {
 					.then((data) => {
 						const token = data.token; // Extract the token from the response
 						auth.setToken(token); // Set the token in the AuthManagement service
+						auth.postAuthInit();
 						router.navigate("/screens/Home");
 					})
 					.finally(() => {

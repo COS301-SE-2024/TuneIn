@@ -4,6 +4,7 @@ import * as StorageService from "./../services/StorageService";
 import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 import { JWT_SECRET_KEY } from "react-native-dotenv";
+import { live } from "./Live";
 
 const jwtSecretKey = JWT_SECRET_KEY;
 if (!jwtSecretKey) {
@@ -64,6 +65,10 @@ class AuthManagement {
 		} catch (error) {
 			console.error("Failed to refresh access token:", error);
 		}
+	}
+
+	public async postAuthInit(): Promise<void> {
+		live.initialiseSocket();
 	}
 }
 

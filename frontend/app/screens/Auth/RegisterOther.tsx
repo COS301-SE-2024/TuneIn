@@ -114,6 +114,7 @@ const RegisterOtherScreen: React.FC = () => {
 					redirectURI,
 				);
 				await auth.setToken(tokens.token);
+				auth.postAuthInit();
 				router.navigate("screens/Home");
 			}
 			doExchange();
