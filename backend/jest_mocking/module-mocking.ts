@@ -50,10 +50,12 @@ import { S3Service } from "../src/s3/s3.service";
 import { SpotifyModule } from "../src/spotify/spotify.module";
 import { SpotifyService } from "../src/spotify/spotify.service";
 import { TasksModule } from "../src/tasks/tasks.module";
-//import { TasksProcessor } from "src/tasks/tasks.processor";
+//import { TasksProcessor } from "../src/tasks/tasks.processor";
 import { TasksService } from "../src/tasks/tasks.service";
 import { GenresService } from "../src/modules/genres/genres.service";
 import { GenresController } from "../src/modules/genres/genres.controller";
+import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
+import { LiveService } from "../src/live/live.service";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -157,8 +159,11 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			LiveGateway,
 			{ provide: ConfigService, useValue: mockConfigService },
 			{ provide: PrismaService, useValue: mockPrismaService },
+			EventQueueService,
+			LiveService,
 		],
 		imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
+		exports: [ConnectedUsersModule, LiveGateway],
 	}).compile();
 }
 

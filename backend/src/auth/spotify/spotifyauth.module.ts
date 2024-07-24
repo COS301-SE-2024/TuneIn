@@ -1,5 +1,5 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
 import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
