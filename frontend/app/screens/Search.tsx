@@ -45,14 +45,14 @@ const roomFilterCategories = [
   { id: 'tags', label: 'Tags' },
 ];
 
-const userFilterCategories = [
-  { id: 'profileName', label: 'Profile Name' },
-  { id: 'username', label: 'Username' },
-//   { id: 'minFollowing', label: 'Minimum Number of Following' },
-//   { id: 'minFollowers', label: 'Minimum Number of Followers' },
-];
+// const userFilterCategories = [
+// 	{ id: "profileName", label: "Profile Name" },
+//   { id: 'username', label: 'Username' },
+// //   { id: 'minFollowing', label: 'Minimum Number of Following' },
+// //   { id: 'minFollowers', label: 'Minimum Number of Followers' },
+// ];
 
-const allFilterCategories = [...roomFilterCategories, ...userFilterCategories];
+const allFilterCategories = [...roomFilterCategories];
 
 const Search: React.FC = () => {
   const navigation = useNavigation();
@@ -85,7 +85,7 @@ const Search: React.FC = () => {
       name: "User 1",
       userData: {
         id: "1",
-        profile_picture_url: "https://wallpapers.com/images/high/pretty-profile-pictures-6x5bfef0mhb60qyl.webp",
+        profile_picture_url: "https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
         profile_name: "User 1",
         username: "user1",
       },
@@ -109,7 +109,7 @@ const Search: React.FC = () => {
       name: "User 2",
       userData: {
         id: "2",
-        profile_picture_url: "https://wallpapers.com/images/high/pretty-profile-pictures-6x5bfef0mhb60qyl.webp",
+        profile_picture_url: "https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
         profile_name: "User 2",
         username: "user2",
       },
@@ -170,7 +170,11 @@ const Search: React.FC = () => {
 
   const renderResult = ({ item }: { item: SearchResult }) => {
     if (item.type === "room" && item.roomData) {
-      return <RoomCardWidget roomCard={item.roomData} />;
+      return (
+        <View style={styles.roomCardPadding}>
+          <RoomCardWidget roomCard={item.roomData} />
+        </View>
+      );
     }
     if (item.type === "user" && item.userData) {
       return <UserItem user={item.userData} />;
@@ -188,12 +192,12 @@ const Search: React.FC = () => {
 
   return (
     <View style={styles.container}>
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-        <Ionicons name="chevron-back" size={30} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Search</Text>
-    </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
+          <Ionicons name="chevron-back" size={30} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Search  </Text>
+      </View>
 
       <View style={styles.searchBarContainer}>
         <TextInput
@@ -247,12 +251,7 @@ const Search: React.FC = () => {
               filter === 'language' ? 'Language' :
               filter === 'explicit' ? 'Explicit' :
               filter === 'nsfw' ? 'NSFW' :
-              filter === 'tags' ? 'Tags' :
-              filter === 'profileName' ? 'Profile Name' :
-              filter === 'username' ? 'Username' :
-              filter === 'minFollowing' ? 'Minimum Number of Following' :
-              filter === 'minFollowers' ? 'Minimum Number of Followers' :
-              filter}
+              filter === 'tags' ? 'Tags' : ''}
             </Text>
             <TouchableOpacity onPress={() => handleFilterToggle(filter)}>
               <Ionicons name="close-circle" size={20} color={colors.primary} />
@@ -261,212 +260,174 @@ const Search: React.FC = () => {
         ))}
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
+      <FlatList
+        data={results}
+        renderItem={renderResult}
+        keyExtractor={(item) => item.id}
         onScroll={handleScroll}
-        scrollEventThrottle={16}
-        testID="scroll-view"
-      >
-        <View style={styles.resultContainer}>
-		  <FlatList
-			data={results}
-			keyExtractor={(item) => item.id}
-			renderItem={renderResult}
-		  />
-		</View>
-      </ScrollView>
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
 
-      <Animated.View
-        style={[styles.navBar, { transform: [{ translateY: navBarTranslateY }] }]}
-      >
-        <NavBar />
-      </Animated.View>
-
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-        testID="filter-modal"
-      >
+      <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Filters</Text>
-            <FlatList
-              data={filter === "all" ? allFilterCategories : filter === "room" ? roomFilterCategories : userFilterCategories}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.modalItem}
-                  onPress={() => handleFilterToggle(item.id)}
-                  testID={`filter-option-${item.id}`}
+          <Text style={styles.modalTitle}>Filter Options</Text>
+          <ScrollView>
+            {allFilterCategories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.modalOption,
+                  selectedFilters.includes(category.id) &&
+                    styles.modalOptionSelected,
+                ]}
+                onPress={() => handleFilterToggle(category.id)}
+              >
+                <Text
+                  style={[
+                    styles.modalOptionText,
+                    selectedFilters.includes(category.id) &&
+                      styles.modalOptionTextSelected,
+                  ]}
                 >
-                  <Text style={styles.modalItemText}>{item.label}</Text>
-                  {selectedFilters.includes(item.id) && (
-                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                  )}
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-              testID="close-button"
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+                  {category.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.modalCloseButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
+
+      <Animated.View style={[styles.navBar, { transform: [{ translateY: navBarTranslateY }] }]}>
+        <NavBar />
+      </Animated.View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-	container: {
-	  flex: 1,
-	  paddingLeft: 30,
-	  paddingRight: 30,
-	  paddingTop: 30,
-	},
-	header: {
-	  flexDirection: "row",
-	  alignItems: "center",
-	  justifyContent: "center",
-	  marginBottom: 20,
-	},
-	title: {
-	  fontSize: 24,
-	  fontWeight: "bold",
-	  color: "#333",
-	  textAlign: "center",
-	  flex: 1,
-	},
-	searchBarContainer: {
-	  flexDirection: "row",
-	  alignItems: "center",
-	  marginBottom: 20,
-	  borderColor: "#ccc",
-	  borderWidth: 1,
-	  borderRadius: 56,
-	  paddingHorizontal: 10,
-	},
-	searchBar: {
-	  flex: 1,
-	  height: 40,
-	},
-	searchIcon: {
-	  marginLeft: 10,
-	},
-	filterContainer: {
-	  flexDirection: "row",
-	  justifyContent: "space-between",
-	  marginBottom: 20,
-	},
-	filterButton: {
-	  paddingVertical: 10,
-	  paddingHorizontal: 20,
-	  borderRadius: 7,
-	  borderWidth: 1,
-	  borderColor: "#ccc",
-	},
-	activeFilter: {
-	  backgroundColor: colors.primary,
-	  borderColor: colors.primary,
-	  shadowColor: "#000",
-	  shadowOffset: { width: 0, height: 4 },
-	  shadowOpacity: 0.25,
-	  shadowRadius: 5.84,
-	  elevation: 5,
-	},
-	filterText: {
-	  color: "#000",
-	  fontWeight: "bold",
-	},
-	scrollViewContent: {
-	  paddingBottom: 100,
-	  paddingTop: 20,
-	},
-	resultContainer: {
-	  marginBottom: 20,
-	},
-	roomBorder: {
-	  borderBottomWidth: 1,
-	  borderBottomColor: "#ccc",
-	  paddingBottom: 50,
-	},
-	navBar: {
-	  position: "absolute",
-	  bottom: 0,
-	  left: 0,
-	  right: 0,
-	  zIndex: 10,
-	},
-	modalContainer: {
-	  flex: 1,
-	  justifyContent: "center",
-	  alignItems: "center",
-	  backgroundColor: "rgba(0, 0, 0, 0.5)",
-	},
-	modalContent: {
-	  width: "80%",
-	  backgroundColor: "white",
-	  borderRadius: 10,
-	  padding: 20,
-	  alignItems: "center",
-	},
-	modalTitle: {
-	  fontSize: 20,
-	  marginBottom: 20,
-	},
-	modalItem: {
-	  flexDirection: "row",
-	  justifyContent: "space-between",
-	  width: "100%",
-	  paddingVertical: 10,
-	  borderBottomWidth: 1,
-	  borderBottomColor: "#ccc",
-	},
-	modalItemText: {
-	  fontSize: 18,
-	},
-	closeButton: {
-	  marginTop: 20,
-	  paddingVertical: 10,
-	  paddingHorizontal: 20,
-	  backgroundColor: colors.primary,
-	  borderRadius: 5,
-	},
-	closeButtonText: {
-	  color: "white",
-	  fontSize: 16,
-	},
-	selectedFiltersContainer: {
-	  flexDirection: "row",
-	  flexWrap: "wrap",
-	  alignItems: "center",
-	  marginBottom: 20,
-	},
-	selectedFilter: {
-	  flexDirection: "row",
-	  alignItems: "center",
-	  backgroundColor: "#fff",
-	  borderRadius: 20,
-	  paddingVertical: 5,
-	  paddingHorizontal: 10,
-	  margin: 5,
-	  borderWidth: 1,
-	  borderColor: "#ccc",
-	  shadowColor: "#000",
-	  shadowOffset: { width: 0, height: 4 },
-	  shadowOpacity: 0.25,
-	  shadowRadius: 5.84,
-	  elevation: 5,
-	},
-	selectedFilterText: {
-	  marginRight: 5,
-	},
-  });
-  
-  export default Search;
-  
+  container: {
+    flex: 1,
+    paddingHorizontal: 30,
+    paddingTop: 30,
+  },
+  roomCardPadding: {
+    marginTop: 20,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    flex: 1,
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 56,
+    paddingHorizontal: 10,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+  },
+  searchIcon: {
+    marginLeft: 10,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  filterButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  activeFilter: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterText: {
+    color: "#333",
+    fontWeight: "bold",
+  },
+  selectedFiltersContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+  selectedFilter: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#eee",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  selectedFilterText: {
+    marginRight: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalOption: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  modalOptionSelected: {
+    backgroundColor: "#ddd",
+  },
+  modalOptionText: {
+    fontSize: 18,
+  },
+  modalOptionTextSelected: {
+    fontWeight: "bold",
+  },
+  modalCloseButton: {
+    padding: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  modalCloseButtonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  navBar: {
+    position: "absolute",
+		bottom: 0,
+		left: 0,
+		right: 0,
+		zIndex: 10,
+  },
+});
+
+export default Search;
