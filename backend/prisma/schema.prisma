@@ -115,6 +115,7 @@ model queue {
   is_done_playing Boolean   @default(false)
   queue_id        String    @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   start_time      DateTime? @db.Timestamptz(6)
+  insert_time     DateTime  @default(now()) @db.Timestamptz(6)
   room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
   song            song      @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
   vote            vote[]

@@ -225,7 +225,7 @@ export class ConnectedUsersService {
 					},
 				},
 				orderBy: {
-					start_time: "asc",
+					insert_time: "asc",
 				},
 			});
 		if (!queueItems || queueItems === null) {
