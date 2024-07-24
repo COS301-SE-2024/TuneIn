@@ -1,4 +1,4 @@
-// `config/constants.ts`
+// `common/constants.ts`
 export const SOCKET_EVENTS = {
 	//shared
 	CONNECT: "connectUser",
@@ -20,6 +20,15 @@ export const SOCKET_EVENTS = {
 
 	//sync after getting chat history???
 
+	//synchronised media playback
+	INIT_PLAY: "initPlay",
+	INIT_PAUSE: "initPause",
+	INIT_STOP: "initStop",
+	SEEK_MEDIA: "seekMedia",
+	CURRENT_MEDIA: "currentMedia",
+	QUEUE_STATE: "queueState",
+	MEDIA_SYNC: "mediaSync",
+
 	//for server responses
 	CONNECTED: "connected",
 	DISONNECTED: "disconnected",
@@ -30,4 +39,8 @@ export const SOCKET_EVENTS = {
 	USER_JOINED_ROOM: "userJoinedRoom",
 	USER_LEFT_ROOM: "userLeftRoom",
 	CHAT_HISTORY: "chatHistory",
+
+	PLAY_MEDIA: "playMedia",
+	PAUSE_MEDIA: "pauseMedia",
+	STOP_MEDIA: "stopMedia",
 };

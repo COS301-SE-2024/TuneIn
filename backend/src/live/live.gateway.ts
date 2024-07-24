@@ -8,7 +8,7 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { SOCKET_EVENTS } from "../config/constants";
+import { SOCKET_EVENTS } from "../common/constants";
 import { ChatEventDto } from "./dto/chatevent.dto";
 import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
 import { DbUtilsService } from "../modules/db-utils/db-utils.service";
@@ -443,6 +443,132 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	) {
 		const t1 = Date.now();
 		client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
+	}
+
+	/*
+	//synchronised media playback
+	PLAY_MEDIA: "playMedia",
+	PAUSE_MEDIA: "pauseMedia",
+	STOP_MEDIA: "stopMedia",
+	SEEK_MEDIA: "seekMedia",
+	CURRENT_MEDIA: "currentMedia",
+	QUEUE_STATE: "queueState",
+	MEDIA_SYNC: "mediaSync",
+	*/
+
+	@SubscribeMessage(SOCKET_EVENTS.PLAY_MEDIA)
+	async handlePlayMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		console.log("Received event: " + SOCKET_EVENTS.PLAY_MEDIA);
+		try {
+			//this.server.emit();
+			console.log(p);
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error);
+		}
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.PAUSE_MEDIA)
+	async handlePauseMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		console.log("Received event: " + SOCKET_EVENTS.PAUSE_MEDIA);
+		try {
+			//this.server.emit();
+			console.log(p);
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error);
+		}
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.STOP_MEDIA)
+	async handleStopMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.STOP_MEDIA);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
+	async handleSeekMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)
+	async handleCurrentMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.CURRENT_MEDIA);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.QUEUE_STATE)
+	async handleQueueState(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
+	async handleMediaSync(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
 	}
 
 	async validateInputEvent(payload: string): Promise<ChatEventDto> {
