@@ -221,6 +221,12 @@ response: return an array of genre names (strings)
 #### GET: gets a list of all genres in our db
 response: return a string array of genre names
 
+## Songs
+### `/songs/{song_id}/spotify`
+#### GET: gets the spotify id for a song with given id
+input: song id as URL path param
+response: {id: string}
+
 # Data Transfer Objects (Dtos)
 
 ## UserDto (User Profile Info)
