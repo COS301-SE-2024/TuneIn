@@ -8,10 +8,10 @@ interface UserItemProps {
 }
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
   const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing);
+    setIsFollowing((prevState) => !prevState);
   };
 
   return (
@@ -20,13 +20,13 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
       <View style={styles.details}>
         <Text style={styles.profileName}>{user.profile_name}</Text>
         <Text style={styles.username}>{user.username}</Text>
-        <TouchableOpacity
-          style={[styles.followButton, isFollowing && styles.unfollowButton]}
-          onPress={handleFollowToggle}
-        >
-          <Text style={styles.followButtonText}>{isFollowing ? "Unfollow" : "Follow"}</Text>
-        </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        style={[styles.followButton, isFollowing && styles.unfollowButton]}
+        onPress={handleFollowToggle}
+      >
+        <Text style={styles.followButtonText}>{isFollowing ? "Unfollow" : "Follow"}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -40,10 +40,11 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
+    width: 70,
+    height: 70,
+    borderRadius: 40,
+    marginRight: 20,
+    marginTop: 20,
   },
   details: {
     flex: 1,
@@ -52,20 +53,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    marginTop: 20,
   },
   username: {
     fontSize: 16,
     color: colors.secondary,
-    fontWeight: 500,
+    fontWeight: "500",
   },
   followButton: {
-    marginTop: 5,
+    marginTop: 20,
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: 15,
     backgroundColor: colors.primary,
-    width: "30%",
     alignItems: "center",
+    marginRight: 35, // Adjust margin to move button more to the left
+    width: "30%",
   },
   unfollowButton: {
     backgroundColor: colors.secondary,
