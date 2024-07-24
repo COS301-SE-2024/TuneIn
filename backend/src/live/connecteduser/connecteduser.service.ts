@@ -191,6 +191,29 @@ export class ConnectedUsersService {
 		return false;
 	}
 
+	async isPaused(roomID: string): Promise<boolean> {
+		//if queue is non-empty, return true
+		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There was an issue fetching the queue");
+		}
+		if (queue.length > 0) {
+			return true;
+		}
+		return false;
+	}
+
 	//get current song
 	async getCurrentSong(roomID: string): Promise<string | null> {
 		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
@@ -304,6 +327,10 @@ export class ConnectedUsersService {
 	}
 
 	async getQueueHead(roomID: string): Promise<string | null> {
+		if (await this.isPaused(roomID)) {
+			return await this.getCurrentSong(roomID);
+		}
+
 		const queue: { songID: string; votes: number }[] =
 			await this.getUpcomingQueueInOrder(roomID);
 		if (queue.length === 0) {
@@ -322,6 +349,86 @@ export class ConnectedUsersService {
 		});
 		if (!queue || queue === null) {
 			throw new Error("Song is not in the queue");
+		}
+		const startTime = new Date();
+		await this.prisma.queue.update({
+			where: {
+				queue_id: queue.queue_id,
+			},
+			data: {
+				start_time: startTime,
+			},
+		});
+		return startTime;
+	}
+
+	async pauseSong(roomID: string): Promise<void> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There is no song playing");
+		}
+		await this.prisma.queue.update({
+			where: {
+				queue_id: queue.queue_id,
+			},
+			data: {
+				start_time: null,
+			},
+		});
+	}
+
+	async skipSong(roomID: string): Promise<void> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There is no song playing");
+		}
+		await this.prisma.queue.update({
+			where: {
+				queue_id: queue.queue_id,
+			},
+			data: {
+				is_done_playing: true,
+			},
+		});
+	}
+
+	async resumeSong(roomID: string): Promise<Date> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There is no song paused");
 		}
 		const startTime = new Date();
 		await this.prisma.queue.update({
