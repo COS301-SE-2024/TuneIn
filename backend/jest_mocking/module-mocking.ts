@@ -56,6 +56,8 @@ import { GenresService } from "../src/modules/genres/genres.service";
 import { GenresController } from "../src/modules/genres/genres.controller";
 import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
 import { LiveService } from "../src/live/live.service";
+import { SongsService } from "src/modules/songs/songs.service";
+import { SongsController } from "src/modules/songs/songs.controller";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -290,5 +292,15 @@ export async function createGenresTestingModule(): Promise<TestingModule> {
 		imports: [PrismaModule],
 		providers: [GenresService],
 		controllers: [GenresController],
+	}).compile();
+}
+
+//SongsModule
+export async function createSongsTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule, AuthModule],
+		providers: [SongsService],
+		controllers: [SongsController],
+		exports: [SongsService],
 	}).compile();
 }
