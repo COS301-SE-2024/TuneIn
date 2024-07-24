@@ -388,6 +388,32 @@ export class ConnectedUsersService {
 		});
 	}
 
+	async stopSong(roomID: string): Promise<void> {
+		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
+			where: {
+				room_id: roomID,
+				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+		});
+		if (!queue || queue === null) {
+			throw new Error("There is no song playing");
+		}
+		await this.prisma.queue.update({
+			where: {
+				queue_id: queue.queue_id,
+			},
+			data: {
+				is_done_playing: true,
+			},
+		});
+	}
+
 	async skipSong(roomID: string): Promise<void> {
 		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
 			where: {

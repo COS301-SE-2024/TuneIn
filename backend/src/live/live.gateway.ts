@@ -545,31 +545,69 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.PAUSE_MEDIA)
+	@SubscribeMessage(SOCKET_EVENTS.INIT_PAUSE)
 	async handlePauseMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		console.log("Received event: " + SOCKET_EVENTS.PAUSE_MEDIA);
+		console.log("Received event: " + SOCKET_EVENTS.INIT_PAUSE);
 		try {
 			//this.server.emit();
 			console.log(p);
+
+			const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+			if (roomID === null) {
+				throw new Error("User is not in a room");
+			}
+
+			//{check user permissions}
+
+			if (await this.connectedUsers.isPlaying(roomID)) {
+				await this.connectedUsers.pauseSong(roomID);
+				const response: PlaybackEventDto = {
+					date_created: new Date(),
+					userID: null,
+					roomID: roomID,
+					songID: null,
+					UTC_time: null,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
+			}
 		} catch (error) {
 			console.error(error);
 			this.handleThrownError(client, error);
 		}
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.STOP_MEDIA)
+	@SubscribeMessage(SOCKET_EVENTS.INIT_STOP)
 	async handleStopMedia(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.STOP_MEDIA);
+			console.log("Received event: " + SOCKET_EVENTS.INIT_STOP);
 			try {
 				//this.server.emit();
 				console.log(p);
+
+				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				if (roomID === null) {
+					throw new Error("User is not in a room");
+				}
+
+				//{check user permissions}
+
+				if (await this.connectedUsers.isPlaying(roomID)) {
+					await this.connectedUsers.stopSong(roomID);
+					const response: PlaybackEventDto = {
+						date_created: new Date(),
+						userID: null,
+						roomID: roomID,
+						songID: null,
+						UTC_time: null,
+					};
+					this.server.to(roomID).emit(SOCKET_EVENTS.STOP_MEDIA, response);
+				}
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

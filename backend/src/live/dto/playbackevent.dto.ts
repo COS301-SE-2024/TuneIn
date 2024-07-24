@@ -23,7 +23,7 @@ export class PlaybackEventDto {
 
 	@ApiProperty()
 	@IsString()
-	UTC_time: number;
+	UTC_time: number | null;
 
 	@ApiProperty()
 	@IsString()
