@@ -118,6 +118,11 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		overflow: "hidden",
 		height: 210, // Adjust height as needed
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	imageBackground: {
 		flex: 1,

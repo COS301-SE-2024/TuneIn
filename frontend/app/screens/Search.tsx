@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Animated,
   StyleSheet,
   NativeScrollEvent,
@@ -196,7 +195,7 @@ const Search: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
           <Ionicons name="chevron-back" size={30} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>Search  </Text>
+        <Text style={styles.title}>Search   </Text>
       </View>
 
       <View style={styles.searchBarContainer}>
@@ -268,38 +267,40 @@ const Search: React.FC = () => {
         contentContainerStyle={{ paddingBottom: 20 }}
       />
 
-      <Modal visible={modalVisible} animationType="slide">
+<Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+        testID="filter-modal"
+      >
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Filter Options</Text>
-          <ScrollView>
-            {allFilterCategories.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.modalOption,
-                  selectedFilters.includes(category.id) &&
-                    styles.modalOptionSelected,
-                ]}
-                onPress={() => handleFilterToggle(category.id)}
-              >
-                <Text
-                  style={[
-                    styles.modalOptionText,
-                    selectedFilters.includes(category.id) &&
-                      styles.modalOptionTextSelected,
-                  ]}
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Filters</Text>
+            <FlatList
+              data={filter === "all" ? allFilterCategories : filter === "room" ? roomFilterCategories : []}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => handleFilterToggle(item.id)}
+                  testID={`filter-option-${item.id}`}
                 >
-                  {category.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <TouchableOpacity
-            style={styles.modalCloseButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.modalCloseButtonText}>Close</Text>
-          </TouchableOpacity>
+                  <Text style={styles.modalItemText}>{item.label}</Text>
+                  {selectedFilters.includes(item.id) && (
+                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+              testID="close-button"
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
 
@@ -318,6 +319,7 @@ const styles = StyleSheet.create({
   },
   roomCardPadding: {
     marginTop: 20,
+    alignItems: "center",
   },
   header: {
     flexDirection: "row",
@@ -362,7 +364,12 @@ const styles = StyleSheet.create({
   },
   activeFilter: {
     backgroundColor: colors.primary,
-    borderColor: colors.primary,
+	  borderColor: colors.primary,
+	  shadowColor: "#000",
+	  shadowOffset: { width: 0, height: 4 },
+	  shadowOpacity: 0.25,
+	  shadowRadius: 5.84,
+	  elevation: 5,
   },
   filterText: {
     color: "#333",
@@ -375,52 +382,63 @@ const styles = StyleSheet.create({
   },
   selectedFilter: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#eee",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 10,
-    marginBottom: 10,
+	  alignItems: "center",
+	  backgroundColor: "#fff",
+	  borderRadius: 20,
+	  paddingVertical: 5,
+	  paddingHorizontal: 10,
+	  margin: 5,
+	  borderWidth: 1,
+	  borderColor: colors.lightGray,
+	  shadowColor: "#000",
+	  shadowOffset: { width: 0, height: 4 },
+	  shadowOpacity: 0.25,
+	  shadowRadius: 3.84,
+	  elevation: 5,
   },
   selectedFilterText: {
     marginRight: 5,
   },
   modalContainer: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  modalTitle: {
-    fontSize: 24,
+	  flex: 1,
+	  justifyContent: "center",
+	  alignItems: "center",
+	  backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+	modalContent: {
+	  width: "60%",
+	  backgroundColor: "white",
+	  borderRadius: 10,
+	  padding: 20,
+	  alignItems: "center",
+	},
+	modalTitle: {
+	  fontSize: 20,
+	  marginBottom: 20,
     fontWeight: "bold",
-    marginBottom: 20,
-  },
-  modalOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  modalOptionSelected: {
-    backgroundColor: "#ddd",
-  },
-  modalOptionText: {
-    fontSize: 18,
-  },
-  modalOptionTextSelected: {
-    fontWeight: "bold",
-  },
-  modalCloseButton: {
-    padding: 10,
-    backgroundColor: colors.primary,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  modalCloseButtonText: {
-    color: "#fff",
-    fontSize: 18,
-  },
+	},
+	modalItem: {
+	  flexDirection: "row",
+	  justifyContent: "space-between",
+	  width: "100%",
+	  paddingVertical: 10,
+	  borderBottomWidth: 1,
+	  borderBottomColor: "#ccc",
+	},
+	modalItemText: {
+	  fontSize: 18,
+	},
+	closeButton: {
+	  marginTop: 20,
+	  paddingVertical: 10,
+	  paddingHorizontal: 20,
+	  backgroundColor: colors.primary,
+	  borderRadius: 5,
+	},
+	closeButtonText: {
+	  color: "white",
+	  fontSize: 16,
+	},
   navBar: {
     position: "absolute",
 		bottom: 0,
