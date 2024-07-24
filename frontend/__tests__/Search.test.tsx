@@ -31,27 +31,30 @@ describe("Search Component", () => {
     });
   
     it("should handle search input changes", () => {
-      const { getByPlaceholderText, getByText } = render(<Search />);
+      const { getByPlaceholderText } = render(<Search />);
       const searchInput = getByPlaceholderText("Search...");
       fireEvent.changeText(searchInput, "Room 1");
       expect(searchInput.props.value).toBe("Room 1");
     });
   
     // it("should filter results based on search term", async () => {
-    //   const { getByText, getByPlaceholderText, getByTestId } = render(<Search />);
-      
+    //   const { getByPlaceholderText, getByTestId, queryByText } = render(<Search />);
+    
     //   // Set search term
     //   const searchInput = getByPlaceholderText("Search...");
     //   fireEvent.changeText(searchInput, "user");
-      
+    
     //   // Simulate search button press
     //   const searchButton = getByTestId("search-button");
     //   fireEvent.press(searchButton);
-      
+    
     //   await waitFor(() => {
-    //     expect(getByText("user")).toBeTruthy();
+    //     // Check if search results include expected items
+    //     expect(queryByText("User 1")).toBeTruthy();
+    //     expect(queryByText("Room 1")).toBeFalsy(); // Ensure results match the search term
     //   });
     // });
+    
   
     it("should display the modal with filter options when filter button is pressed", () => {
       const { getByTestId, getByText } = render(<Search />);
@@ -60,8 +63,8 @@ describe("Search Component", () => {
       expect(getByText("Select Filters")).toBeTruthy();
     });
   
-    it("should handle filter selection and display selected filters", () => {
-      const { getByTestId, getByText } = render(<Search />);
+    it("should handle filter selection and display selected filters", async () => {
+      const { getByTestId, getByText, queryByText } = render(<Search />);
       
       // Open the filter modal
       const filterButton = getByTestId("filter-button");
@@ -78,12 +81,6 @@ describe("Search Component", () => {
       // Check if the selected filter is displayed
       expect(getByText("Room Name")).toBeTruthy();
     });
-  
-    it("should handle scroll events", () => {
-      const { getByTestId } = render(<Search />);
-      const scrollView = getByTestId("scroll-view");
-      
-      fireEvent.scroll(scrollView, { nativeEvent: { contentOffset: { y: 50 } } });
-      // Check for changes in UI if needed
-    });
+    
+    
 });

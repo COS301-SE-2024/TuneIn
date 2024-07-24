@@ -5,8 +5,7 @@ exports[`Search Component should render correctly 1`] = `
   style={
     {
       "flex": 1,
-      "paddingLeft": 30,
-      "paddingRight": 30,
+      "paddingHorizontal": 30,
       "paddingTop": 30,
     }
   }
@@ -69,7 +68,7 @@ exports[`Search Component should render correctly 1`] = `
         }
       }
     >
-      Search
+      Search   
     </Text>
   </View>
   <View
@@ -195,7 +194,7 @@ exports[`Search Component should render correctly 1`] = `
       <Text
         style={
           {
-            "color": "#000",
+            "color": "#333",
             "fontWeight": "bold",
           }
         }
@@ -245,7 +244,7 @@ exports[`Search Component should render correctly 1`] = `
       <Text
         style={
           {
-            "color": "#000",
+            "color": "#333",
             "fontWeight": "bold",
           }
         }
@@ -295,7 +294,7 @@ exports[`Search Component should render correctly 1`] = `
       <Text
         style={
           {
-            "color": "#000",
+            "color": "#333",
             "fontWeight": "bold",
           }
         }
@@ -349,7 +348,6 @@ exports[`Search Component should render correctly 1`] = `
   <View
     style={
       {
-        "alignItems": "center",
         "flexDirection": "row",
         "flexWrap": "wrap",
         "marginBottom": 20,
@@ -359,44 +357,28 @@ exports[`Search Component should render correctly 1`] = `
   <RCTScrollView
     contentContainerStyle={
       {
-        "paddingBottom": 100,
-        "paddingTop": 20,
+        "paddingBottom": 20,
       }
     }
+    data={[]}
+    getItem={[Function]}
+    getItemCount={[Function]}
+    keyExtractor={[Function]}
+    onContentSizeChange={[Function]}
+    onLayout={[Function]}
+    onMomentumScrollBegin={[Function]}
+    onMomentumScrollEnd={[Function]}
     onScroll={[Function]}
-    scrollEventThrottle={16}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    removeClippedSubviews={false}
+    renderItem={[Function]}
+    scrollEventThrottle={0.0001}
+    stickyHeaderIndices={[]}
     testID="scroll-view"
+    viewabilityConfigCallbackPairs={[]}
   >
-    <View>
-      <View
-        style={
-          {
-            "marginBottom": 20,
-          }
-        }
-      >
-        <RCTScrollView
-          data={[]}
-          getItem={[Function]}
-          getItemCount={[Function]}
-          keyExtractor={[Function]}
-          onContentSizeChange={[Function]}
-          onLayout={[Function]}
-          onMomentumScrollBegin={[Function]}
-          onMomentumScrollEnd={[Function]}
-          onScroll={[Function]}
-          onScrollBeginDrag={[Function]}
-          onScrollEndDrag={[Function]}
-          removeClippedSubviews={false}
-          renderItem={[Function]}
-          scrollEventThrottle={0.0001}
-          stickyHeaderIndices={[]}
-          viewabilityConfigCallbackPairs={[]}
-        >
-          <View />
-        </RCTScrollView>
-      </View>
-    </View>
+    <View />
   </RCTScrollView>
   <View
     collapsable={false}
