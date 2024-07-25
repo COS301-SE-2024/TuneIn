@@ -68,6 +68,26 @@ class SimpleSpotifyPlayback {
 
 			console.log("(action, uri, offset):", action, uri, offset);
 
+			if (uri) {
+				if (uri.startsWith("spotify:album:")) {
+					throw new Error("Album URIs are not supported");
+				}
+
+				if (uri.startsWith("spotify:artist:")) {
+					throw new Error("Artist URIs are not supported");
+				}
+
+				if (!uri.startsWith("spotify:track:")) {
+					uri = `spotify:track:${uri}`;
+				}
+
+				//validate with regex
+				const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
+				if (!uriRegex.test(uri)) {
+					throw new Error("Invalid URI");
+				}
+			}
+
 			let url = "";
 			let method = "";
 			let body: any = null;
