@@ -78,6 +78,8 @@ const RoomPage = () => {
 	checkBookmark();
 
 	const handleBookmark = async () => {
+		live.startPlayback(roomID);
+
 		// make a request to the backend to check if the room is bookmarked
 		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
@@ -154,8 +156,9 @@ const RoomPage = () => {
 					const tracks: Track[] = data.map((item: any) => ({
 						id: item.id,
 						name: item.name,
-						artists: item.artists,
-						album: item.album,
+						//artists: [item.artistNames],
+						artists: [{ name: item.artistNames }],
+						album: { images: [{ url: item.albumArtUrl }] },
 						explicit: item.explicit,
 						preview_url: item.preview_url,
 						uri: item.uri,
