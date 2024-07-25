@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import * as spotifyAuth from "../services/SpotifyAuth";
-import { SpotifyApi, Devices, Device } from "@spotify/web-api-ts-sdk";
+import { SpotifyApi, Devices, Device, PlaybackState } from "@spotify/web-api-ts-sdk";
 import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 
 const clientId = SPOTIFY_CLIENT_ID;
@@ -16,6 +16,7 @@ class SimpleSpotifyPlayback {
 	private tokens: spotifyAuth.SpotifyTokenResponse | null = null;
 	private selectedTrackUri: string = "";
 	private spotifyDevices: Devices = { devices: [] };
+	private _isPlaying: boolean = false;
 
 	constructor() {
 		this.fetchToken();
@@ -30,19 +31,14 @@ class SimpleSpotifyPlayback {
 
 	private async fetchToken() {
 		try {
-			if (!this.accessToken || this.accessToken === "") {
-				this.tokens = await spotifyAuth.getTokens();
-				const token = this.tokens.access_token;
-				console.log("Access Token:", token);
-				this.accessToken = token;
+			this.tokens = await spotifyAuth.getTokens();
+			const token = this.tokens.access_token;
+			console.log("Access Token:", token);
+			this.accessToken = token;
 
-				const api: SpotifyApi = SpotifyApi.withAccessToken(
-					clientId,
-					this.tokens,
-				);
-				const me = await api.currentUser.profile();
-				console.log("me:", me);
-			}
+			const api: SpotifyApi = SpotifyApi.withAccessToken(clientId, this.tokens);
+			const me = await api.currentUser.profile();
+			console.log("me:", me);
 		} catch (err) {
 			console.error("An error occurred while fetching the token", err);
 		}
@@ -65,27 +61,14 @@ class SimpleSpotifyPlayback {
 				return;
 			}
 			console.log("active device:", activeDevice);
-
 			console.log("(action, uri, offset):", action, uri, offset);
 
-			if (uri) {
-				if (uri.startsWith("spotify:album:")) {
-					throw new Error("Album URIs are not supported");
-				}
+			if (uri && !uri.startsWith("spotify:track:")) {
+				uri = `spotify:track:${uri}`;
+			}
 
-				if (uri.startsWith("spotify:artist:")) {
-					throw new Error("Artist URIs are not supported");
-				}
-
-				if (!uri.startsWith("spotify:track:")) {
-					uri = `spotify:track:${uri}`;
-				}
-
-				//validate with regex
-				const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
-				if (!uriRegex.test(uri)) {
-					throw new Error("Invalid URI");
-				}
+			if (uri && !this.validTrackUri(uri)) {
+				throw new Error("Invalid track URI");
 			}
 
 			let url = "";
@@ -134,14 +117,21 @@ class SimpleSpotifyPlayback {
 				body: body ? JSON.stringify(body) : undefined,
 			});
 
-			if (!response.ok) {
+			if (response.ok) {
+				console.log("Playback action successful");
+				if (action === "play") {
+					this._isPlaying = true;
+				} else if (action === "pause") {
+					this._isPlaying = false;
+				}
+			} else {
 				throw new Error(`HTTP error! Status: ${response.status}`);
 			}
 
 			if (action === "play") {
 				this.selectedTrackUri = uri || "";
 			} else if (action === "pause") {
-				this.selectedTrackUri = "";
+				//this.selectedTrackUri = "";
 			}
 		} catch (err) {
 			console.error("An error occurred while controlling playback", err);
@@ -185,6 +175,51 @@ class SimpleSpotifyPlayback {
 			console.error("An error occurred while fetching devices", err);
 			throw err;
 		}
+	}
+
+	public isPlaying() {
+		return this._isPlaying;
+	}
+
+	public validTrackUri(uri: string): boolean {
+		if (uri) {
+			if (uri.startsWith("spotify:album:")) {
+				throw new Error("Album URIs are not supported");
+			}
+
+			if (uri.startsWith("spotify:artist:")) {
+				throw new Error("Artist URIs are not supported");
+			}
+
+			//validate with regex
+			const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
+			if (!uriRegex.test(uri)) {
+				throw new Error("Invalid URI");
+			}
+		}
+		return true;
+	}
+
+	public async userListeningToRoom(currentTrackUri: string): Promise<boolean> {
+		if (!this.validTrackUri(currentTrackUri)) {
+			throw new Error("Invalid track URI");
+		}
+
+		if (this.isPlaying()) {
+			await this.fetchToken();
+			if (!this.tokens) {
+				throw new Error("No tokens found");
+			}
+			const api = SpotifyApi.withAccessToken(clientId, this.tokens);
+			const playbackState: PlaybackState = await api.player.getPlaybackState();
+			if (!playbackState) {
+				return false;
+			}
+			if (playbackState.item.uri === currentTrackUri) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
