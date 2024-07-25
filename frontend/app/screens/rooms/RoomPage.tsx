@@ -26,6 +26,7 @@ import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { live, Message } from "../../services/Live";
+import { playback } from "../../services/SimpleSpotifyPlayback";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -204,23 +205,44 @@ const RoomPage = () => {
 	}, [isPlaying]);
 
 	const playPauseTrack = useCallback(
-		(index: number, offset: number) => {
+		async (index: number, offset: number) => {
+			/*
 			playbackManager.playPauseTrack(queue[index], index, offset);
 			setCurrentTrackIndex(index);
 			setIsPlaying(playbackManager.getIsPlaying());
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
+			*/
+			if (live.canControlRoom()) {
+				if (playback.isPlaying()) {
+					live.startPlayback(roomID);
+				} else {
+					live.stopPlayback(roomID);
+				}
+				setCurrentTrackIndex(index);
+				setIsPlaying(playback.isPlaying());
+				//setSecondsPlayed(playbackManager.getSecondsPlayed());
+			}
 		},
-		[queue, playbackManager],
+		//[queue, playbackManager],
+		[],
 	);
 
 	const playNextTrack = () => {
+		/*
 		playbackManager.playPreviousTrack();
 		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
+		*/
+		if (live.canControlRoom()) {
+		}
 	};
 
 	const playPreviousTrack = () => {
+		/*
 		playbackManager.playPreviousTrack();
 		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
+		*/
+		if (live.canControlRoom()) {
+		}
 	};
 
 	const toggleChat = () => {
@@ -263,7 +285,8 @@ const RoomPage = () => {
 			//setJoined(false);
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
-			playbackManager.pause();
+			//playbackManager.pause();
+			playback.handlePlayback("pause");
 			setIsPlaying(false);
 		}
 	};
@@ -283,7 +306,6 @@ const RoomPage = () => {
 
 	const sendMessage = () => {
 		if (isSending) return;
-
 		setIsSending(true);
 		live.sendMessage(message, setIsSending);
 	};
