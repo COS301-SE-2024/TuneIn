@@ -610,6 +610,22 @@ class LiveChatService {
 		this.socket.emit("initStop", JSON.stringify(input));
 	}
 
+	public canControlRoom(): boolean {
+		if (!this.currentRoom) {
+			return false;
+		}
+		if (!this.currentUser) {
+			return false;
+		}
+		if (!this.currentRoom.creator) {
+			return false;
+		}
+		if (this.currentRoom.creator.userID === this.currentUser.userID) {
+			return true;
+		}
+		return false;
+	}
+
 	public async disconnectSocket() {
 		this.currentUser = null;
 		this.currentRoom = null;
