@@ -298,8 +298,8 @@ export class SpotifyAuthService {
 		}
 
 		try {
-			const existingTokens: PrismaTypes.authentication | null =
-				await this.prisma.authentication.findFirst({
+			const existingTokens: PrismaTypes.authentication[] | null =
+				await this.prisma.authentication.findMany({
 					where: { user_id: user.user_id },
 				});
 
@@ -309,7 +309,7 @@ export class SpotifyAuthService {
 				);
 			}
 
-			if (existingTokens) {
+			if (existingTokens.length > 0) {
 				await this.prisma.authentication.update({
 					where: { user_id: user.user_id },
 					data: {

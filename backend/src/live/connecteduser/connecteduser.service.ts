@@ -177,6 +177,9 @@ export class ConnectedUsersService {
 			where: {
 				room_id: roomID,
 				is_done_playing: false,
+				start_time: {
+					not: null,
+				},
 			},
 			orderBy: {
 				start_time: "asc",
