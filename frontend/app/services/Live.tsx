@@ -4,7 +4,9 @@ import { ChatEventDto } from "../models/ChatEventDto";
 import { PlaybackEventDto } from "../models/PlaybackEventDto";
 import axios from "axios";
 import auth from "./AuthManagement";
-import * as utils from ".//Utils";
+import songService from "./SongService";
+import * as utils from "./Utils";
+import { playback } from "./SimpleSpotifyPlayback";
 
 const TIMEOUT = 5000;
 
@@ -341,6 +343,66 @@ class LiveChatService {
 				}
 			});
 
+			this.socket.on("playMedia", async (response: PlaybackEventDto) => {
+				console.log("SOCKET EVENT: playMedia", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				if (!this.currentRoom) {
+					//throw new Error("Current room not set");
+					return;
+				}
+
+				if (!response.UTC_time) {
+					//throw new Error("UTC time not found");
+					return;
+				}
+
+				if (!response.songID) {
+					throw new Error("Server did not return song ID");
+				}
+				const songID: string = response.songID;
+				const spotifyID: string = await songService.getSpotifyID(songID);
+
+				playback.handlePlayback(
+					"play",
+					spotifyID,
+					this.calculateSeekTime(response.UTC_time, 0),
+				);
+			});
+
+			this.socket.on("pauseMedia", (response: PlaybackEventDto) => {
+				console.log("SOCKET EVENT: pauseMedia", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				if (!this.currentRoom) {
+					//throw new Error("Current room not set");
+					return;
+				}
+
+				playback.handlePlayback("pause");
+			});
+
+			this.socket.on("stopMedia", (response: PlaybackEventDto) => {
+				console.log("SOCKET EVENT: stopMedia", response);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				if (!this.currentRoom) {
+					//throw new Error("Current room not set");
+					return;
+				}
+
+				playback.handlePlayback("pause");
+			});
+
 			console.log("socket connected?", this.socket.connected);
 			this.socket.connect();
 			this.socket.emit(
@@ -433,6 +495,7 @@ class LiveChatService {
 		}
 		this.chatHistoryReceived = false;
 		this.requestingChatHistory = false;
+		this.currentRoom = null;
 	}
 
 	public async sendMessage(message: string, setIsSending: stateSetIsSending) {
