@@ -12,7 +12,7 @@ import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 
 @Injectable()
 export class RoomsService {
-	DUMBroomQueues: Map<string, string[]> = new Map<string, string[]>();
+	DUMBroomQueues: Map<string, string> = new Map<string, string>();
 
 	constructor(
 		private readonly prisma: PrismaService,
@@ -289,9 +289,9 @@ export class RoomsService {
 		return [];
 	}
 
-	getRoomQueueDUMBVERSION(roomID: string): string[] {
+	getRoomQueueDUMBVERSION(roomID: string): string {
 		// TODO: Implement logic to get room queue
-		return this.DUMBroomQueues.get(roomID) || [];
+		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
 	clearRoomQueue(roomID: string): boolean {
@@ -307,11 +307,15 @@ export class RoomsService {
 		return [];
 	}
 
-	addSongToQueueDUMBVERSION(roomID: string, songID: string): string[] {
+	addSongToQueueDUMBVERSION(roomID: string, songID: string): string {
 		// Replace the old queue with a new queue containing only the new song
-		const newQueue = [songID];
-		this.DUMBroomQueues.set(roomID, newQueue);
-		return newQueue;
+		/*
+		console.log("input", songID);
+		const songObjects: { songID: string }[] = JSON.parse(songID);
+		const queue: string[] = songObjects.map((obj) => JSON.stringify(obj));
+		*/
+		this.DUMBroomQueues.set(roomID, songID);
+		return songID;
 	}
 
 	getCurrentSong(roomID: string): SongInfoDto {
