@@ -14,6 +14,7 @@ export const useSpotifyPlayback = () => {
 			try {
 				const allTokens = await spotifyAuth.getTokens();
 				const token = allTokens.access_token;
+				console.log("Access Token:", token);
 				setAccessToken(token);
 			} catch (err) {
 				setError("An error occurred while fetching the token");
@@ -30,6 +31,7 @@ export const useSpotifyPlayback = () => {
 		offset: number | null = null,
 	) => {
 		try {
+			console.log("accessToken:", accessToken);
 			if (!accessToken) {
 				throw new Error("Access token not found");
 			}
