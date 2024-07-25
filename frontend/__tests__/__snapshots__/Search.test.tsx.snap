@@ -68,7 +68,7 @@ exports[`Search Component should render correctly 1`] = `
         }
       }
     >
-      Search   
+      Search 
     </Text>
   </View>
   <View
