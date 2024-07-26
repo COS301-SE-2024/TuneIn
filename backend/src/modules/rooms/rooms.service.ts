@@ -200,6 +200,7 @@ export class RoomsService {
 				where: {
 					room_id: room_id,
 					user_id: user_id,
+					room_leave_time: null,
 				},
 			});
 			if(user === null) {
