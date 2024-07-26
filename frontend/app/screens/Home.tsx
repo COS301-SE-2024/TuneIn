@@ -96,8 +96,6 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	// const [token, setToken] = useState<string | null>(null);
-	const [, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {

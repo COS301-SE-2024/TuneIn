@@ -1,7 +1,7 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import SongList from "../app/components/SongList";
-import { StyleSheet } from "react-native"; // Import StyleSheet to access styles
+// import { StyleSheet } from "react-native"; // Import StyleSheet to access styles
 import { Track } from "../app/models/Track";
 
 jest.mock("expo-font", () => ({

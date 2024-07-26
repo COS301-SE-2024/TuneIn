@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import SongRoomWidget from "../app/components/SongRoomWidget";
 import { Track } from "../app/models/Track";
 

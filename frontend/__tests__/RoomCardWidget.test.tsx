@@ -57,7 +57,7 @@ describe("RoomCardWidget component", () => {
 			tags: ["personal", "private"],
 		};
 
-		const { getByText, queryByTestId, getAllByText } = render(
+		const { getByText, queryByTestId } = render(
 			<RoomCardWidget roomCard={roomCard} />,
 		);
 
@@ -92,7 +92,7 @@ describe("RoomCardWidget component", () => {
 			tags: ["music-free", "quiet"],
 		};
 
-		const { getByText, queryByTestId, getAllByText } = render(
+		const { getByText, queryByTestId } = render(
 			<RoomCardWidget roomCard={roomCard} />,
 		);
 

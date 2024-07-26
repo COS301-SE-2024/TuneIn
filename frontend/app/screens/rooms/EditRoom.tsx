@@ -105,7 +105,7 @@ const EditRoom: React.FC = () => {
 		}
 		const token = await auth.getToken();
 		try {
-			const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
+			// const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",

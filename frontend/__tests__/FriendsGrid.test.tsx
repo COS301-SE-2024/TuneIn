@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import FriendsGrid from "../app/components/FriendsGrid";
 import { Friend } from "../app/models/friend";
 

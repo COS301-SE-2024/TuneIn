@@ -31,8 +31,10 @@ const fetchFonts = () => {
 
 const App: React.FC = () => {
 	const router = useRouter();
-	const [isCheckingToken, setIsCheckingToken] = useState(true);
-	const [fontLoaded, setFontLoaded] = useState(false);
+	const [, setIsCheckingToken] = useState(true);
+	const [, setFontLoaded] = useState(false);
+	// const [isCheckingToken, setIsCheckingToken] = useState(true);
+	// const [fontLoaded, setFontLoaded] = useState(false);
 
 	console.log(API_BASE_URL);
 
