@@ -26,7 +26,7 @@ const Voting = ({ voteCount, setVoteCount, index, swapSongs }) => {
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity onPress={handleUpvote}>
+			<TouchableOpacity onPress={handleUpvote} testID="upvote-button">
 				<Foundation
 					name="arrow-up"
 					size={24}
@@ -41,7 +41,7 @@ const Voting = ({ voteCount, setVoteCount, index, swapSongs }) => {
 			>
 				{voteCount}
 			</Text>
-			<TouchableOpacity onPress={handleDownvote}>
+			<TouchableOpacity onPress={handleDownvote} testID="downvote-button">
 				<Foundation
 					name="arrow-down"
 					size={24}

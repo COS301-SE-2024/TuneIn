@@ -108,8 +108,6 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
-
-			setCacheLoaded(true);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
 		}
@@ -118,7 +116,6 @@ const Home: React.FC = () => {
 	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
-		setToken(storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms
