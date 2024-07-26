@@ -4,9 +4,6 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
-// import { PrismaService } from "../../../prisma/prisma.service";
-//import { Prisma } from "@prisma/client";
-import prisma from "../../../client";
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
@@ -92,7 +89,7 @@ export class SearchService {
 			},
 		});
 
-		  console.log("Insertion result: " + result);
+		console.log("Insertion result: " + result);
 	}
 
 	async combinedSearch(
@@ -171,23 +168,22 @@ export class SearchService {
 		return false;
 	}
 
-	advancedRoomSearchQueryBuilder(
-		params: {
-			q: string;
-			creator_username?: string;
-			creator_name?: string;
-			participant_count?: number;
-			description?: string;
-			is_temp?: boolean;
-			is_priv?: boolean;
-			is_scheduled?: boolean;
-			start_date?: string;
-			end_date?: string;
-			lang?: string;
-			explicit?: boolean;
-			nsfw?: boolean;
-			tags?: string;
-		}): string {
+	advancedRoomSearchQueryBuilder(params: {
+		q: string;
+		creator_username?: string;
+		creator_name?: string;
+		participant_count?: number;
+		description?: string;
+		is_temp?: boolean;
+		is_priv?: boolean;
+		is_scheduled?: boolean;
+		start_date?: string;
+		end_date?: string;
+		lang?: string;
+		explicit?: boolean;
+		nsfw?: boolean;
+		tags?: string;
+	}): string {
 		let query = `
         SELECT room.*,`;
 
@@ -335,7 +331,10 @@ export class SearchService {
 		return [new RoomDto()];
 	}
 
-	async searchRoomsHistory(userID: string, ctx: Context): Promise<SearchHistoryDto[]> {
+	async searchRoomsHistory(
+		userID: string,
+		ctx: Context,
+	): Promise<SearchHistoryDto[]> {
 		console.log(userID);
 		const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *
@@ -477,14 +476,16 @@ export class SearchService {
 		return query;
 	}
 
-	async advancedSearchUsers(params: {
-		q: string;
-		creator_username?: string;
-		creator_name?: string;
-		following?: number;
-		followers?: number;
-	},
-	ctx: Context): Promise<UserDto[]> {
+	async advancedSearchUsers(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			following?: number;
+			followers?: number;
+		},
+		ctx: Context,
+	): Promise<UserDto[]> {
 		console.log(params);
 
 		const query = this.advancedUserSearchQueryBuilder(params);
@@ -508,7 +509,10 @@ export class SearchService {
 		return [new UserDto()];
 	}
 
-	async searchUsersHistory(userID: string, ctx: Context): Promise<SearchHistoryDto[]> {
+	async searchUsersHistory(
+		userID: string,
+		ctx: Context,
+	): Promise<SearchHistoryDto[]> {
 		console.log(userID);
 		const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *

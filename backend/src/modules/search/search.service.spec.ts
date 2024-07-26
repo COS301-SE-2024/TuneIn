@@ -1,14 +1,10 @@
 import { TestingModule } from "@nestjs/testing";
 import { SearchService } from "./search.service";
 import { createSearchTestingModule } from "../../../jest_mocking/module-mocking";
-// import { mockCtx.prisma } from "../../../singleton";
-// import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import * as PrismaTypes from "@prisma/client";
 import { MockContext, Context, createMockContext } from "../../../context";
-// import { SearchHistoryDto } from "./dto/searchhistorydto";
 
 jest.mock("../db-utils/db-utils.service");
 jest.mock("../dto-gen/dto-gen.service");
@@ -651,7 +647,6 @@ describe("searchUsersHistory function", () => {
 		expect(result).toMatchObject(uHistDtoMock);
 	});
 });
-
 
 describe("parseBoolean function", () => {
 	let service: SearchService;

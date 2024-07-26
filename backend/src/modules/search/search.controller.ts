@@ -13,7 +13,7 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
-import { createRealContext } from '../../../context';
+import { createRealContext } from "../../../context";
 
 @Controller("search")
 export class SearchController {
@@ -59,7 +59,7 @@ export class SearchController {
 			"/search",
 			query_params,
 			userInfo.id,
-			ctx
+			ctx,
 		);
 
 		return result;
@@ -104,7 +104,7 @@ export class SearchController {
 			"/search/rooms",
 			query_params,
 			userInfo.id,
-			ctx
+			ctx,
 		);
 
 		return result;
@@ -257,7 +257,7 @@ export class SearchController {
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		const ctx = createRealContext();
-		return await this.searchService.searchRoomsHistory(userInfo.id,ctx);
+		return await this.searchService.searchRoomsHistory(userInfo.id, ctx);
 	}
 
 	/* ************************************************** */
@@ -289,7 +289,7 @@ export class SearchController {
 			"/search/users",
 			{ q: q },
 			userInfo.id,
-			ctx
+			ctx,
 		);
 
 		return result;
