@@ -163,6 +163,11 @@ class LiveChatService {
 		this.socket.emit("time_sync", { t0: Date.now() });
 	}
 
+	public async pollLatency() {
+		//await this.sendPing();
+		await this.getTimeOffset();
+	}
+
 	public async initialiseSocket() {
 		console.log("Initialising socket");
 		console.log("initialised:", this.initialised);
@@ -413,6 +418,7 @@ class LiveChatService {
 			this.initialised = true;
 			this.isConnecting = false;
 		}
+		this.pollLatency();
 	}
 
 	public async joinRoom(
@@ -421,6 +427,7 @@ class LiveChatService {
 		setMessages: stateSetMessages,
 		setMessage: stateSetMessage,
 	) {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -461,6 +468,7 @@ class LiveChatService {
 	}
 
 	public async leaveRoom() {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -499,6 +507,7 @@ class LiveChatService {
 	}
 
 	public async sendMessage(message: string, setIsSending: stateSetIsSending) {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -531,6 +540,8 @@ class LiveChatService {
 		startTimeUtc: number,
 		mediaDurationMs: number,
 	): number {
+		this.pollLatency();
+
 		// Get the current server time
 		const serverTime = Date.now() + this.timeOffset;
 
@@ -548,6 +559,7 @@ class LiveChatService {
 	}
 
 	public startPlayback(roomID: string) {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -569,6 +581,7 @@ class LiveChatService {
 	}
 
 	public pausePlayback(roomID: string) {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -590,6 +603,7 @@ class LiveChatService {
 	}
 
 	public stopPlayback(roomID: string) {
+		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;

@@ -1,6 +1,11 @@
 import { Alert } from "react-native";
 import * as spotifyAuth from "../services/SpotifyAuth";
-import { SpotifyApi, Devices, Device, PlaybackState } from "@spotify/web-api-ts-sdk";
+import {
+	SpotifyApi,
+	Devices,
+	Device,
+	PlaybackState,
+} from "@spotify/web-api-ts-sdk";
 import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 
 const clientId = SPOTIFY_CLIENT_ID;
