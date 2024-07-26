@@ -13,6 +13,7 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
+import { createRealContext } from '../../../context';
 
 @Controller("search")
 export class SearchController {
@@ -51,13 +52,14 @@ export class SearchController {
 			q,
 			creator,
 		};
-
-		const result = await this.searchService.combinedSearch(query_params);
+		const ctx = createRealContext();
+		const result = await this.searchService.combinedSearch(query_params, ctx);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		this.searchService.insertSearchHistory(
 			"/search",
 			query_params,
 			userInfo.id,
+			ctx
 		);
 
 		return result;
@@ -93,8 +95,8 @@ export class SearchController {
 			q,
 			creator,
 		};
-
-		const result = await this.searchService.searchRooms(query_params);
+		const ctx = createRealContext();
+		const result = await this.searchService.searchRooms(query_params, ctx);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result" + typeof result);
 
@@ -102,6 +104,7 @@ export class SearchController {
 			"/search/rooms",
 			query_params,
 			userInfo.id,
+			ctx
 		);
 
 		return result;
@@ -233,7 +236,8 @@ export class SearchController {
 			nsfw,
 			tags,
 		};
-		return await this.searchService.advancedSearchRooms(query_params);
+		const ctx = createRealContext();
+		return await this.searchService.advancedSearchRooms(query_params, ctx);
 	}
 
 	/* ************************************************** */
@@ -252,7 +256,8 @@ export class SearchController {
 		@Request() req: Request,
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.searchService.searchRoomsHistory(userInfo.id);
+		const ctx = createRealContext();
+		return await this.searchService.searchRoomsHistory(userInfo.id,ctx);
 	}
 
 	/* ************************************************** */
@@ -276,13 +281,15 @@ export class SearchController {
 		@Query("q") q: string,
 		@Request() req: any,
 	): Promise<UserDto[]> {
-		const result = await this.searchService.searchUsers(q);
+		const ctx = createRealContext();
+		const result = await this.searchService.searchUsers(q, ctx);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 
 		this.searchService.insertSearchHistory(
 			"/search/users",
 			{ q: q },
 			userInfo.id,
+			ctx
 		);
 
 		return result;
@@ -342,7 +349,8 @@ export class SearchController {
 			following,
 			followers,
 		};
-		return await this.searchService.advancedSearchUsers(query_params);
+		const ctx = createRealContext();
+		return await this.searchService.advancedSearchUsers(query_params, ctx);
 	}
 
 	/* ************************************************** */
@@ -361,6 +369,7 @@ export class SearchController {
 		@Request() req: Request,
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.searchService.searchUsersHistory(userInfo.id);
+		const ctx = createRealContext();
+		return await this.searchService.searchUsersHistory(userInfo.id, ctx);
 	}
 }

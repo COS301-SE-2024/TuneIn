@@ -11,6 +11,7 @@ import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import * as sqlstring from "sqlstring";
+import { Context } from "../../../context";
 
 export class CombinedSearchResults {
 	@ApiProperty({ type: [RoomDto], description: "List of rooms" })
@@ -60,20 +61,30 @@ export class SearchService {
 	LIMIT 5
 	```
 	*/
-	async demoSearch() {
-		const result = await prisma.$queryRaw<PrismaTypes.room>`
-		SELECT * FROM room WHERE SIMILARITY(name,'Conbrete') > 0.4;`;
-		console.log(result);
-	}
+	// async demoSearch(ctx: Context) {
+	// 	const result = await ctx.prisma.$queryRaw<PrismaTypes.users>`
+	// 	SELECT *,
+	// 	LEVENSHTEIN(username, 'farmer') AS distance
+	// 	FROM users
+	// 	WHERE similarity(username, 'farmer) > 0.2
+	// 	ORDER BY distance ASC
+	// 	LIMIT 5;`;
+	// 	console.log(result);
+	// }
 
-	async insertSearchHistory(endpoint: string, params: any, user_id: string) {
+	async insertSearchHistory(
+		endpoint: string,
+		params: any,
+		user_id: string,
+		ctx: Context,
+	) {
 		let url = `${endpoint}?q=${params.q}`;
 
 		if (params.creator) {
 			url += `&creator=${params.creator}`;
 		}
 
-		prisma.search_history.create({
+		ctx.prisma.search_history.create({
 			data: {
 				user_id: user_id,
 				search_term: params.q,
@@ -84,14 +95,17 @@ export class SearchService {
 		//   console.log("Insertion result: " + result);
 	}
 
-	async combinedSearch(params: {
-		q: string;
-		creator?: string;
-	}): Promise<CombinedSearchResults> {
+	async combinedSearch(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		ctx: Context,
+	): Promise<CombinedSearchResults> {
 		// console.log(params);
 
-		const rooms = await this.searchRooms(params);
-		const users = await this.searchUsers(params.q);
+		const rooms = await this.searchRooms(params, ctx);
+		const users = await this.searchUsers(params.q, ctx);
 
 		console.log("Rooms: " + rooms);
 		console.log("Users: " + users);
@@ -109,12 +123,15 @@ export class SearchService {
 		};
 	}
 
-	async searchRooms(params: {
-		q: string;
-		creator?: string;
-	}): Promise<RoomDto[]> {
+	async searchRooms(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		ctx: Context,
+	): Promise<RoomDto[]> {
 		// console.log(params);
-		const result = await prisma.$queryRaw<PrismaTypes.room>`
+		const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		SELECT room_id, name, description, username,
        	LEAST(levenshtein(name, ${params.q}), levenshtein(username, ${params.creator})) AS distance
 		FROM room INNER JOIN users ON room_creator = user_id
@@ -154,22 +171,23 @@ export class SearchService {
 		return false;
 	}
 
-	advancedRoomSearchQueryBuilder(params: {
-		q: string;
-		creator_username?: string;
-		creator_name?: string;
-		participant_count?: number;
-		description?: string;
-		is_temp?: boolean;
-		is_priv?: boolean;
-		is_scheduled?: boolean;
-		start_date?: string;
-		end_date?: string;
-		lang?: string;
-		explicit?: boolean;
-		nsfw?: boolean;
-		tags?: string;
-	}): string {
+	advancedRoomSearchQueryBuilder(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		}): string {
 		let query = `
         SELECT room.*,`;
 
@@ -275,27 +293,30 @@ export class SearchService {
 		return query;
 	}
 
-	async advancedSearchRooms(params: {
-		q: string;
-		creator_username?: string;
-		creator_name?: string;
-		participant_count?: number;
-		description?: string;
-		is_temp?: boolean;
-		is_priv?: boolean;
-		is_scheduled?: boolean;
-		start_date?: string;
-		end_date?: string;
-		lang?: string;
-		explicit?: boolean;
-		nsfw?: boolean;
-		tags?: string;
-	}): Promise<RoomDto[]> {
+	async advancedSearchRooms(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		},
+		ctx: Context,
+	): Promise<RoomDto[]> {
 		console.log(params);
 
 		const query = this.advancedRoomSearchQueryBuilder(params);
 
-		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(
+		const result = await ctx.prisma.$queryRawUnsafe<PrismaTypes.room>(
 			sqlstring.format(query),
 		);
 
@@ -314,9 +335,9 @@ export class SearchService {
 		return [new RoomDto()];
 	}
 
-	async searchRoomsHistory(userID: string): Promise<SearchHistoryDto[]> {
+	async searchRoomsHistory(userID: string, ctx: Context): Promise<SearchHistoryDto[]> {
 		console.log(userID);
-		const result = await prisma.$queryRaw<PrismaTypes.room>`
+		const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *
 		FROM search_history
 		WHERE user_id::text = ${userID}
@@ -345,10 +366,10 @@ export class SearchService {
 		return [new SearchHistoryDto()];
 	}
 
-	async searchUsers(q: string): Promise<UserDto[]> {
+	async searchUsers(q: string, ctx: Context): Promise<UserDto[]> {
 		// console.log(q);
 
-		const result = await prisma.$queryRaw<PrismaTypes.users>`
+		const result = await ctx.prisma.$queryRaw<PrismaTypes.users>`
 		SELECT *,
 		LEVENSHTEIN(username, ${q}) AS distance
 		FROM users
@@ -462,12 +483,13 @@ export class SearchService {
 		creator_name?: string;
 		following?: number;
 		followers?: number;
-	}): Promise<UserDto[]> {
+	},
+	ctx: Context): Promise<UserDto[]> {
 		console.log(params);
 
 		const query = this.advancedUserSearchQueryBuilder(params);
 
-		const result = await prisma.$queryRawUnsafe<PrismaTypes.room>(
+		const result = await ctx.prisma.$queryRawUnsafe<PrismaTypes.room>(
 			sqlstring.format(query),
 		);
 
@@ -486,9 +508,9 @@ export class SearchService {
 		return [new UserDto()];
 	}
 
-	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
+	async searchUsersHistory(userID: string, ctx: Context): Promise<SearchHistoryDto[]> {
 		console.log(userID);
-		const result = await prisma.$queryRaw<PrismaTypes.room>`
+		const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		SELECT *
 		FROM search_history
 		WHERE user_id::text = ${userID}
