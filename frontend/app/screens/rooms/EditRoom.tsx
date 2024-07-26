@@ -15,8 +15,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
 import uploadImage from "../../services/ImageUpload";
-import * as utils from "../../services/Utils";
-import auth from "../../services/AuthManagement"; // Import AuthManagement
+// import * as utils from "../../services/Utils";
+// import auth from "../../services/AuthManagement"; // Import AuthManagement
 
 const EditRoom: React.FC = () => {
 	const router = useRouter();
@@ -103,28 +103,28 @@ const EditRoom: React.FC = () => {
 				newRoom.backgroundImage = newImage;
 			}
 		}
-		const token = await auth.getToken();
-		try {
-			// const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
-				method: "PATCH",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: "Bearer " + token,
-				},
-				body: JSON.stringify(newRoom),
-			});
-			Alert.alert(
-				"Changes Saved",
-				"Your changes have been saved successfully.",
-				[{ text: "OK" }],
-				{ cancelable: false },
-			);
-			router.navigate({
-				pathname: "/screens/Home",
-			});
-		} catch (error) {
-			console.error("Error:", error);
-		}
+		// const token = await auth.getToken();
+		// try {
+		// 	const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
+		// 		method: "PATCH",
+		// 		headers: {
+		// 			"Content-Type": "application/json",
+		// 			Authorization: "Bearer " + token,
+		// 		},
+		// 		body: JSON.stringify(newRoom),
+		// 	});
+		// 	Alert.alert(
+		// 		"Changes Saved",
+		// 		"Your changes have been saved successfully.",
+		// 		[{ text: "OK" }],
+		// 		{ cancelable: false },
+		// 	);
+		// 	router.navigate({
+		// 		pathname: "/screens/Home",
+		// 	});
+		// } catch (error) {
+		// 	console.error("Error:", error);
+		// }
 	};
 
 	return (

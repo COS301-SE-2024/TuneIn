@@ -9,13 +9,25 @@ jest.mock("expo-router", () => ({
 	useNavigation: jest.fn(),
 }));
 
-jest.mock("../app/components/rooms/RoomCardWidget", () => (props: any) => (
-	<div {...props} />
-));
-jest.mock("../app/components/UserItem", () => (props: any) => (
-	<div {...props} />
-));
-jest.mock("../app/components/NavBar", () => () => <div />);
+jest.mock("../app/components/rooms/RoomCardWidget", () => {
+	const MockRoomCardWidget = (props: Record<string, unknown>) => (
+		<div {...props} />
+	);
+	MockRoomCardWidget.displayName = "MockRoomCardWidget";
+	return MockRoomCardWidget;
+});
+
+jest.mock("../app/components/UserItem", () => {
+	const MockUserItem = (props: Record<string, unknown>) => <div {...props} />;
+	MockUserItem.displayName = "MockUserItem";
+	return MockUserItem;
+});
+
+jest.mock("../app/components/NavBar", () => {
+	const MockNavBar = () => <div />;
+	MockNavBar.displayName = "MockNavBar";
+	return MockNavBar;
+});
 
 describe("Search Component", () => {
 	beforeEach(() => {
@@ -49,7 +61,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle filter selection and display selected filters", async () => {
-		const { getByTestId, getByText, queryByText } = render(<Search />);
+		const { getByTestId, getByText } = render(<Search />);
 
 		// Open the filter modal
 		const filterButton = getByTestId("filter-button");
