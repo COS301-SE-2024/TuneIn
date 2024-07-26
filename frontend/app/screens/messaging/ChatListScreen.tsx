@@ -48,13 +48,14 @@ const ChatListScreen = () => {
 			}}
 		>
 			<View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity testID="back-button" onPress={() => router.back()}>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.chatHeader}>Chats </Text>
 			</View>
 			<View style={styles.searchContainer}>
 				<TextInput
+					testID="search-input"
 					style={styles.searchInput}
 					placeholder="Search for a user..."
 					value={searchQuery}

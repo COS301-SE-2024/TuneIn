@@ -56,6 +56,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
           "opacity": 1,
         }
       }
+      testID="backButton"
     >
       <Text />
     </View>
@@ -163,13 +164,15 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
               [
                 {
                   "borderRadius": 25,
+                  "elevation": 2,
                   "maxWidth": "75%",
                   "paddingHorizontal": 15,
                   "paddingVertical": 10,
                 },
                 {
                   "alignSelf": "flex-start",
-                  "backgroundColor": "#ECECEC",
+                  "backgroundColor": "#FFFFFF",
+                  "borderColor": "#ECECEC",
                 },
               ]
             }
@@ -210,6 +213,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
               [
                 {
                   "borderRadius": 25,
+                  "elevation": 2,
                   "maxWidth": "75%",
                   "paddingHorizontal": 15,
                   "paddingVertical": 10,
@@ -300,6 +304,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
           "padding": 10,
         }
       }
+      testID="sendButton"
     >
       <Image
         source={
