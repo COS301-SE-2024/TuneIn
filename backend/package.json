@@ -58,7 +58,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "ioredis": "^5.4.1",
-    "jest-mock-extended": "^2.0.4",
+    "jest-mock-extended": "^3.0.7",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
