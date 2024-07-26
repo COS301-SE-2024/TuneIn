@@ -26,6 +26,7 @@ import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
+import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 
@@ -69,7 +70,27 @@ const RoomPage = () => {
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
+	const currentRoom = useRef(new CurrentRoom()).current;
 
+	const checkCurrentRoom = useCallback(async () => {
+		try{
+			const token = await auth.getToken();
+			const isCurrentRoom = await currentRoom.isCurrentRoom(
+				token as string,
+				String(roomID),
+			);
+			setJoined(isCurrentRoom ?? false);
+			if (joined) {
+				console.log("User is in the room", isCurrentRoom);
+			} else {
+				console.log("User is NOT in the room", isCurrentRoom);
+			}
+		} catch (error) {
+			console.error("Error checking current room:", error);
+		}
+	}, [roomID, currentRoom]);
+
+	checkCurrentRoom();
 	const checkBookmark = useCallback(async () => {
 		try {
 			const token = await auth.getToken();
@@ -390,10 +411,13 @@ const RoomPage = () => {
 		};
 	}, [isPlaying]);
 
-	const handleJoinLeave = () => {
+	const handleJoinLeave = async () => {
+		console.log("Joining/Leaving room...", joined);
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
-			// joinRoom();
+			joinRoom();
+			const token = await auth.getToken();
+			currentRoom.leaveJoinRoom(token as string, roomID, false);
 			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
@@ -401,6 +425,8 @@ const RoomPage = () => {
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
+			const token = await auth.getToken();
+			currentRoom.leaveJoinRoom(token as string, roomID, true);
 			leaveRoom();
 			setJoined(false);
 			setJoinedSongIndex(null);
