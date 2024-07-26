@@ -16,7 +16,6 @@ import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -51,26 +50,9 @@ const LoginScreen: React.FC = () => {
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				// POST request to backend
-				fetch(`${utils.API_BASE_URL}/auth/login`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						token: result.getAccessToken().getJwtToken(),
-					}),
-				})
-					.then((response) => response.json())
-					.then((data) => {
-						const token = data.token; // Extract the token from the response
-						auth.setToken(token); // Set the token in the AuthManagement service
-						auth.postAuthInit();
-						router.navigate("/screens/Home");
-					})
-					.finally(() => {
-						setIsLoading(false);
-					});
+				auth.exchangeCognitoToken(result.getIdToken().getJwtToken());
+				router.navigate("/screens/Home");
+				setIsLoading(false);
 			},
 			onFailure: function (err) {
 				console.error("Authentication failed:", err);

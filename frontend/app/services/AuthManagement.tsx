@@ -15,10 +15,54 @@ if (!jwtSecretKey) {
 
 class AuthManagement {
 	private token: string | null = null;
+	public tokenSet: boolean = false;
+
+	constructor() {
+		this.fetchToken();
+	}
+
+	private async fetchToken(): Promise<void> {
+		this.token = await StorageService.getItem("token");
+		this.tokenSet = true;
+	}
+
+	public authenticated(): boolean {
+		return this.token !== null;
+	}
+
+	public logout(): void {
+		this.token = null;
+		StorageService.removeItem("token");
+		this.tokenSet = false;
+	}
+
+	public exchangeCognitoToken(token: string): void {
+		// POST request to backend
+		fetch(`${utils.API_BASE_URL}/auth/login`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				token: token,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				const token = data.token; // Extract the token from the response
+				this.setToken(token); // Set the token in the AuthManagement service
+				this.postAuthInit();
+			})
+			.catch((error) => {
+				console.error("Failed to exchange Cognito token:", error);
+				throw new Error("Failed to exchange Cognito token");
+			});
+	}
 
 	public async setToken(token: string): Promise<void> {
 		this.token = token;
 		StorageService.setItem("token", token);
+		this.tokenSet = true;
 	}
 
 	public async getToken(): Promise<string | null> {
@@ -54,16 +98,21 @@ class AuthManagement {
 
 	public async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
-		try {
-			const response = await axios.post(`${utils.API_BASE_URL}/auth/refresh`, {
-				refreshToken: this.token,
-			});
-			const newToken = response.data.token;
-			if (newToken) {
-				this.setToken(newToken);
+		if (this.token && this.token !== null) {
+			try {
+				const response = await axios.post(
+					`${utils.API_BASE_URL}/auth/refresh`,
+					{
+						refreshToken: this.token,
+					},
+				);
+				const newToken = response.data.token;
+				if (newToken) {
+					this.setToken(newToken);
+				}
+			} catch (error) {
+				console.error("Failed to refresh access token:", error);
 			}
-		} catch (error) {
-			console.error("Failed to refresh access token:", error);
 		}
 	}
 
