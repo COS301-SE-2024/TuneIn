@@ -29,7 +29,8 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cache, setCacheLoaded] = useState(false);
+	// const [cache, setCacheLoaded] = useState(false);
+	const [, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -95,7 +96,8 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [token, setToken] = useState<string | null>(null);
+	// const [token, setToken] = useState<string | null>(null);
+	const [, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
