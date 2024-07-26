@@ -210,8 +210,6 @@ const uHistDtoMock = [
 	},
 ];
 
-
-
 // it("should work", async () => {
 
 // 	const module: TestingModule = await createSearchTestingModule();
@@ -333,7 +331,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("builds a query with all search params", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			creator_username: "test",
@@ -361,7 +358,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with just q", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 		});
@@ -376,7 +372,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with q and username", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			creator_username: "test",
@@ -392,7 +387,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with q and full_name", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			creator_name: "t",
@@ -408,7 +402,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with q and followers", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			creator_name: "t",
@@ -424,7 +417,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with q and following", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			following: 0,
@@ -442,7 +434,6 @@ describe("advancedUserSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with q and followers", async () => {
-
 		const result = await service.advancedUserSearchQueryBuilder({
 			q: "testing",
 			followers: 2,
@@ -469,7 +460,6 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with all params", async () => {
-
 		const result = await service.advancedRoomSearchQueryBuilder({
 			q: "testing",
 			creator_username: "test",
@@ -496,7 +486,6 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 	});
 
 	it("it should build with just q", async () => {
-
 		const result = await service.advancedRoomSearchQueryBuilder({
 			q: "testing",
 		});
@@ -505,6 +494,20 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 		expect(normalizeWhitespace(result)).toBe(
 			normalizeWhitespace(
 				`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
+			),
+		);
+	});
+
+	it("it should build with just q and username", async () => {
+		const result = await service.advancedRoomSearchQueryBuilder({
+			q: "testing",
+			creator_username: "test",
+		});
+		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+		expect(normalizeWhitespace(result)).toBe(
+			normalizeWhitespace(
+				`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test')) AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
 			),
 		);
 	});
@@ -614,7 +617,7 @@ describe("searchRoomsHistory function", () => {
 	it("should return a SearchHistoryDto array when query returns an array", async () => {
 		mockCtx.prisma.$queryRaw.mockResolvedValueOnce(rHistMock);
 
-		const result = await service.searchRoomsHistory('mockId', ctx);
+		const result = await service.searchRoomsHistory("mockId", ctx);
 
 		expect(result).toMatchObject(rHistDtoMock);
 	});
@@ -643,10 +646,43 @@ describe("searchUsersHistory function", () => {
 	it("should return a SearchHistoryDto array when query returns an array", async () => {
 		mockCtx.prisma.$queryRaw.mockResolvedValueOnce(uHistMock);
 
-		const result = await service.searchUsersHistory('mockId', ctx);
+		const result = await service.searchUsersHistory("mockId", ctx);
 
 		expect(result).toMatchObject(uHistDtoMock);
 	});
 });
 
 
+describe("parseBoolean function", () => {
+	let service: SearchService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await createSearchTestingModule();
+		service = module.get<SearchService>(SearchService);
+	});
+
+	it("should return true for string 'True'", () => {
+		const result = service.parseBoolean("True");
+		expect(result).toBe(true);
+	});
+
+	it("should return true for string '1'", () => {
+		const result = service.parseBoolean("1");
+		expect(result).toBe(true);
+	});
+
+	it("should return false for string 'False'", () => {
+		const result = service.parseBoolean("False");
+		expect(result).toBe(false);
+	});
+
+	it("should return false for string '0'", () => {
+		const result = service.parseBoolean("0");
+		expect(result).toBe(false);
+	});
+
+	it("should return false for string 'Unknown'", () => {
+		const result = service.parseBoolean("Unknown");
+		expect(result).toBe(false);
+	});
+});

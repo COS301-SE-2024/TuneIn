@@ -84,7 +84,7 @@ export class SearchService {
 			url += `&creator=${params.creator}`;
 		}
 
-		ctx.prisma.search_history.create({
+		const result = await ctx.prisma.search_history.create({
 			data: {
 				user_id: user_id,
 				search_term: params.q,
@@ -92,7 +92,7 @@ export class SearchService {
 			},
 		});
 
-		//   console.log("Insertion result: " + result);
+		  console.log("Insertion result: " + result);
 	}
 
 	async combinedSearch(
