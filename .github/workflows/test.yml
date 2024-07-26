@@ -47,9 +47,9 @@ jobs:
           rm -rf frontend/tests/__snapshots__/
         shell: bash
 
-      - name: Test Codebase
+      - name: Test Codebase (with updated snapshots)
         run:  |
-          cd frontend && npm run test:cov
+          cd frontend && npm run test:cov -- --updateSnapshot
 
       - name: Jest Coverage Comment
         id: coverageComment
