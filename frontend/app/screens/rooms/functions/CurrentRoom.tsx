@@ -23,7 +23,6 @@ class CurrentRoom {
 
     isCurrentRoom = async (token: string, roomID: string) => {
         try {
-            console.log("Room ID being passed around: ", roomID);
             const response = await fetch(`${utils.API_BASE_URL}/rooms/current/room`, {
                 method: "GET",
                 headers: {
@@ -36,7 +35,6 @@ class CurrentRoom {
             if (response.status === 404) {
                 return false;
             }
-            console.log("Current Room:", data.room.room_id);
             if (data.room.room_id === roomID) {
                 return true;
             }
@@ -59,7 +57,6 @@ class CurrentRoom {
                 },
             );
             const data = await response.json();
-            console.log("Data:", data + " " + response.status);
             if (response.status === 201) {
                 return true;
             }
