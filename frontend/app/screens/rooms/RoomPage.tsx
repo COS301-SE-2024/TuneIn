@@ -60,11 +60,13 @@ const RoomPage = () => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-		null,
-	);
+	const [messages] = useState<Message[]>([]);
+	const [, setJoinedSongIndex] = useState<number | null>(null);
+	const [, setJoinedSecondsPlayed] = useState<number | null>(null);
+	// const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
+	// const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
+	// 	null,
+	// );
 	const socket = useRef<io.Socket | null>(null);
 
 	const playbackManager = useRef(new PlaybackManager()).current;
@@ -114,23 +116,23 @@ const RoomPage = () => {
 		}
 	};
 
-	const joinRoom = useCallback(() => {
-		if (userRef.current && socket.current) {
-			const u: UserDto = userRef.current;
-			const input: ChatEventDto = {
-				userID: u.userID,
-				body: {
-					messageBody: "",
-					sender: u,
-					roomID: roomID,
-					dateCreated: new Date(),
-				},
-			};
-			console.log("Socket emit: joinRoom", input);
-			socket.current.emit("joinRoom", JSON.stringify(input));
-			setJoined(true);
-		}
-	}, [roomID]);
+	// const joinRoom = useCallback(() => {
+	// 	if (userRef.current && socket.current) {
+	// 		const u: UserDto = userRef.current;
+	// 		const input: ChatEventDto = {
+	// 			userID: u.userID,
+	// 			body: {
+	// 				messageBody: "",
+	// 				sender: u,
+	// 				roomID: roomID,
+	// 				dateCreated: new Date(),
+	// 			},
+	// 		};
+	// 		console.log("Socket emit: joinRoom", input);
+	// 		socket.current.emit("joinRoom", JSON.stringify(input));
+	// 		setJoined(true);
+	// 	}
+	// }, [roomID]);
 
 	const leaveRoom = () => {
 		if (userRef.current && socket.current) {
