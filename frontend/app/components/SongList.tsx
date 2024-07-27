@@ -23,12 +23,18 @@ const SongList: React.FC<SongListProps> = ({
 	isCurrent,
 	swapSongs,
 }) => {
+	const albumCoverUrl = track.album.images[0]?.url;
+
 	return (
-		<View style={[styles.container, isCurrent ? styles.currentSong : null]}>
+		<View
+			style={[styles.container, isCurrent ? styles.currentSong : null]}
+			testID="song-container"
+		>
 			<Text style={styles.songNumber}>{songNumber}</Text>
 			<Image
-				source={{ uri: track.album.images[0].url }}
+				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
+				testID="album-cover-image"
 			/>
 			<View style={styles.infoContainer}>
 				<Text
@@ -43,12 +49,12 @@ const SongList: React.FC<SongListProps> = ({
 			{showVoting && (
 				<Voting
 					voteCount={voteCount}
-					setVoteCount={(newVoteCount) => {}}
+					setVoteCount={(newVoteCount: number) => {}}
 					index={index}
 					swapSongs={swapSongs}
 				/>
 			)}
-			<TouchableOpacity style={styles.moreButton}>
+			<TouchableOpacity style={styles.moreButton} testID="more-button">
 				<Ionicons name="ellipsis-vertical" size={24} color="black" />
 			</TouchableOpacity>
 		</View>

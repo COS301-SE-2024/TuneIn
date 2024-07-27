@@ -3,8 +3,8 @@ export interface Room {
 	roomID?: string;
 	backgroundImage: string;
 	name: string;
-	songName?: string;
-	artistName?: string;
+	songName?: string | null;
+	artistName?: string | null;
 	description: string;
 	userProfile?: string;
 	userID: string;
