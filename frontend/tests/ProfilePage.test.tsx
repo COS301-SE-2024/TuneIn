@@ -5,6 +5,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
 
+jest.mock("expo-font", () => ({
+	...jest.requireActual("expo-font"),
+	loadAsync: jest.fn(),
+}));
+
+jest.mock("expo-asset", () => ({
+	...jest.requireActual("expo-asset"),
+	fromModule: jest.fn(() => ({
+		downloadAsync: jest.fn(),
+		uri: "mock-uri",
+	})),
+}));
+
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
 	getItem: jest.fn(),
@@ -37,7 +50,8 @@ describe("ProfileScreen", () => {
 
 	it("fetches profile data and renders profile information", async () => {
 		// Mock AsyncStorage.getItem to return a token
-		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		// (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		(auth.getToken as jest.Mock).mockResolvedValueOnce("token");
 
 		// Mock axios.get to return mock profile data
 		const mockProfileData = {
@@ -56,7 +70,7 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -76,9 +90,6 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
 				expect(getByTestId("fav-songs")).toBeTruthy();
-				// expect(getByTestId("fav-rooms")).toBeTruthy();
-				// expect(getByTestId("recent-rooms")).toBeTruthy();
-				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
 	});
@@ -116,7 +127,7 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(<ProfileScreen />);
@@ -154,7 +165,7 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(<ProfileScreen />);
@@ -222,7 +233,7 @@ describe("ProfileScreen", () => {
 				recent_rooms: { count: 0, data: [] },
 			};
 
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -315,7 +326,7 @@ describe("ProfileScreen", () => {
 				},
 			};
 
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -407,7 +418,7 @@ describe("ProfileScreen", () => {
 			},
 		};
 
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 		const { getByTestId, queryByTestId, getByText } = render(<ProfileScreen />);
 
 		// Wait for async operations to complete and profile data to be rendered

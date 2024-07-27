@@ -52,6 +52,8 @@ const ProfileScreen: React.FC = () => {
 					Authorization: `Bearer ${token}`,
 				},
 			});
+
+			// console.log("Response: " + response);
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching profile info:", error);
@@ -261,7 +263,7 @@ const ProfileScreen: React.FC = () => {
 						style={styles.button}
 						onPress={() =>
 							router.push({
-								pathname: "screens/EditProfilePage",
+								pathname: "screens/profile/EditProfilePage",
 								params: { profile: JSON.stringify(profileInfo) },
 							})
 						}
