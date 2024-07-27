@@ -1,8 +1,9 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ForgotPasswordScreen from "../app/screens/Auth/ForgotPassword"; // Adjust the path as needed
-import { Alert, AlertButton } from "react-native";
+import { Alert, AlertButton, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
@@ -10,7 +11,10 @@ jest.mock("expo-router", () => ({
 
 jest.mock("amazon-cognito-identity-js", () => ({
 	CognitoUser: jest.fn(() => ({
-		forgotPassword: jest.fn(({ onSuccess }) => onSuccess()),
+		forgotPassword: jest.fn(({ onSuccess, onFailure }) => {
+			if (onSuccess) onSuccess();
+			else if (onFailure) onFailure(new Error("Error sending reset code"));
+		}),
 	})),
 	CognitoUserPool: jest.fn(),
 }));
@@ -117,5 +121,42 @@ describe("ForgotPasswordScreen", () => {
 			pathname: "screens/Auth/ResetPassword",
 			params: { email: "test@example.com" },
 		});
+	});
+
+	it("should navigate to ResetPassword screen on confirmation", async () => {
+		const { getByPlaceholderText, getByText } = render(
+			<ForgotPasswordScreen />,
+		);
+
+		const emailInput = getByPlaceholderText("Enter your email");
+		const sendCodeButton = getByText("Send Code");
+
+		fireEvent.changeText(emailInput, "test@example.com");
+		fireEvent.press(sendCodeButton);
+
+		await waitFor(() => {
+			const alertCalls = mockAlert.mock.calls;
+			const confirmAlert = alertCalls.find(
+				(call: any) => call[0] === "Confirm Email",
+			);
+
+			const confirmButton = confirmAlert[2].find(
+				(button: AlertButton) => button.text === "OK",
+			);
+			confirmButton.onPress();
+		});
+
+		expect(mockRouterPush).toHaveBeenCalledWith({
+			pathname: "screens/Auth/ResetPassword",
+			params: { email: "test@example.com" },
+		});
+	});
+
+	it("should navigate back on back button press", () => {
+		const { getByTestId } = render(<ForgotPasswordScreen />);
+		const backButton = getByTestId("back-button");
+
+		fireEvent.press(backButton);
+		expect(mockRouterBack).toHaveBeenCalled();
 	});
 });
