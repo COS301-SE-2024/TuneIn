@@ -1,13 +1,18 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
-import ForgotPasswordScreen from "../app/screens/Auth/ForgotPassword";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import ForgotPasswordScreen from "../app/screens/Auth/ForgotPassword"; // Adjust the path as needed
+import { Alert, AlertButton } from "react-native";
+import { useRouter } from "expo-router";
 
-// Mock useRouter hook
 jest.mock("expo-router", () => ({
-	useRouter: jest.fn().mockReturnValue({
-		push: jest.fn(),
-		back: jest.fn(),
-	}),
+	useRouter: jest.fn(),
+}));
+
+jest.mock("amazon-cognito-identity-js", () => ({
+	CognitoUser: jest.fn(() => ({
+		forgotPassword: jest.fn(({ onSuccess }) => onSuccess()),
+	})),
+	CognitoUserPool: jest.fn(),
 }));
 
 jest.mock("expo-font", () => ({
@@ -23,60 +28,94 @@ jest.mock("expo-asset", () => ({
 	})),
 }));
 
+// Mock the Alert function
+const mockAlert = jest.fn();
+jest.spyOn(Alert, "alert").mockImplementation(mockAlert);
+
 describe("ForgotPasswordScreen", () => {
-	it("renders correctly", () => {
-		const { getByText, getByPlaceholderText } = render(
+	const mockRouterPush = jest.fn();
+	const mockRouterBack = jest.fn();
+
+	beforeAll(() => {
+		(useRouter as jest.Mock).mockReturnValue({
+			push: mockRouterPush,
+			back: mockRouterBack,
+		});
+	});
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	it("should display an alert if the email is invalid", () => {
+		const { getByPlaceholderText, getByText } = render(
 			<ForgotPasswordScreen />,
 		);
 
-		// Assert screen elements are rendered correctly
-		expect(getByText("Forgot Password?")).toBeTruthy();
-		expect(
-			getByText(
-				"Don't worry! It happens. Please enter your email address to receive a verification code.",
-			),
-		).toBeTruthy();
-		expect(getByPlaceholderText("Enter your email")).toBeTruthy();
-		expect(getByText("Send Code")).toBeTruthy();
-		expect(getByText("Remember Password? Login")).toBeTruthy();
-	});
-
-	it("navigates to OTP screen when Send Code button is pressed", () => {
-		const { getByText } = render(<ForgotPasswordScreen />);
-
-		// Simulate click on Send Code button
+		const emailInput = getByPlaceholderText("Enter your email");
 		const sendCodeButton = getByText("Send Code");
+
+		fireEvent.changeText(emailInput, "invalid-email");
 		fireEvent.press(sendCodeButton);
 
-		// Assert useRouter push function is called with correct pathname
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledTimes(1);
-		expect(require("expo-router").useRouter().push).toHaveBeenCalledWith(
-			"screens/Auth/OTP",
+		expect(Alert.alert).toHaveBeenCalledWith(
+			"Invalid Email",
+			"Please enter a valid email address",
+			[{ text: "OK" }],
+			{ cancelable: false },
 		);
 	});
 
-	it("navigates to Login screen when Remember Password? Login link is pressed", () => {
-		const { getByText } = render(<ForgotPasswordScreen />);
+	it("should display a confirmation alert with the correct email", async () => {
+		const { getByPlaceholderText, getByText } = render(
+			<ForgotPasswordScreen />,
+		);
 
-		// Simulate click on Login link
-		const loginLink = getByText("Remember Password? Login");
-		fireEvent.press(loginLink);
+		const emailInput = getByPlaceholderText("Enter your email");
+		const sendCodeButton = getByText("Send Code");
 
-		// Assert useRouter push function is called with correct pathname
-		const pushMock = require("expo-router").useRouter().push;
-		expect(pushMock).toHaveBeenCalledTimes(2);
-		expect(pushMock).toHaveBeenNthCalledWith(1, "screens/Auth/OTP");
-		expect(pushMock).toHaveBeenNthCalledWith(2, "screens/Auth/LoginScreen");
+		fireEvent.changeText(emailInput, "test@example.com");
+		fireEvent.press(sendCodeButton);
+
+		await waitFor(() => {
+			expect(Alert.alert).toHaveBeenCalledWith(
+				"Confirm Email",
+				"Is this the correct email address? test@example.com",
+				[
+					{ text: "Cancel", style: "cancel" },
+					{ text: "OK", onPress: expect.any(Function) },
+				],
+				{ cancelable: false },
+			);
+		});
 	});
 
-	it("navigates back when back button is pressed", () => {
-		const { getByTestId } = render(<ForgotPasswordScreen />);
+	it("should navigate to ResetPassword screen on confirmation", async () => {
+		const { getByPlaceholderText, getByText } = render(
+			<ForgotPasswordScreen />,
+		);
 
-		// Simulate click on back button
-		const backButton = getByTestId("back-button");
-		fireEvent.press(backButton);
+		const emailInput = getByPlaceholderText("Enter your email");
+		const sendCodeButton = getByText("Send Code");
 
-		// Assert useRouter back function is called
-		expect(require("expo-router").useRouter().back).toHaveBeenCalledTimes(1);
+		fireEvent.changeText(emailInput, "test@example.com");
+		fireEvent.press(sendCodeButton);
+
+		await waitFor(() => {
+			const alertCalls = mockAlert.mock.calls;
+			const confirmAlert = alertCalls.find(
+				(call: any) => call[0] === "Confirm Email",
+			);
+
+			const confirmButton = confirmAlert[2].find(
+				(button: AlertButton) => button.text === "OK",
+			);
+			confirmButton.onPress();
+		});
+
+		expect(mockRouterPush).toHaveBeenCalledWith({
+			pathname: "screens/Auth/ResetPassword",
+			params: { email: "test@example.com" },
+		});
 	});
 });

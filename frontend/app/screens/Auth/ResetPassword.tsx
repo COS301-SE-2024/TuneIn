@@ -50,7 +50,7 @@ const PasswordReset: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
 			</View>
@@ -69,6 +69,7 @@ const PasswordReset: React.FC = () => {
 							value={resetcode}
 							onChangeText={setResetcode}
 							placeholderTextColor="#888"
+							testID="verification-code-input"
 						/>
 					</View>
 				</View>
@@ -82,10 +83,12 @@ const PasswordReset: React.FC = () => {
 						onChangeText={setPassword}
 						placeholder="*********"
 						secureTextEntry={obscureText}
+						testID="new-password-input"
 					/>
 					<TouchableOpacity
 						style={styles.visibilityToggle}
 						onPress={() => setObscureText(!obscureText)}
+						testID="new-password-visibility-toggle"
 					>
 						<MaterialIcons
 							name={obscureText ? "visibility-off" : "visibility"}
@@ -104,10 +107,12 @@ const PasswordReset: React.FC = () => {
 						onChangeText={setConfirmPassword}
 						placeholder="*********"
 						secureTextEntry={obscureTextConfirm}
+						testID="confirm-password-input"
 					/>
 					<TouchableOpacity
 						style={styles.visibilityToggle}
 						onPress={() => setObscureTextConfirm(!obscureTextConfirm)}
+						testID="confirm-password-visibility-toggle"
 					>
 						<MaterialIcons
 							name={obscureTextConfirm ? "visibility-off" : "visibility"}
