@@ -55,7 +55,7 @@ describe("<EditProfileScreen />", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			profile: JSON.stringify(mockProfileInfo),
 		});
-		(auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
+		(auth.getToken as jest.Mock).mockReturnValue("token");
 
 		const { getByText } = render(<EditProfileScreen />);
 

@@ -18,7 +18,6 @@ jest.mock("expo-asset", () => ({
 	})),
 }));
 
-// Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
 	getItem: jest.fn(),
 }));
