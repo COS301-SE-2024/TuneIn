@@ -23,6 +23,7 @@ jest.mock("expo-asset", () => ({
 		uri: "mock-uri",
 	})),
 }));
+
 // Mock implementation for CognitoUser and CognitoUserPool classes
 jest.mock("amazon-cognito-identity-js", () => {
 	const confirmPasswordMock = jest.fn((code, password, callbacks) => {
@@ -108,16 +109,38 @@ describe("PasswordReset", () => {
 		});
 	});
 
-	it("toggles password visibility", () => {
+	it("toggles new password visibility", () => {
 		const { getByTestId } = render(<PasswordReset />);
 		const newPasswordInput = getByTestId("new-password-input");
 		const visibilityToggle = getByTestId("new-password-visibility-toggle");
 
+		// Check initial state
+		expect(newPasswordInput.props.secureTextEntry).toBe(true);
+
+		// Toggle visibility
 		fireEvent.press(visibilityToggle);
 		expect(newPasswordInput.props.secureTextEntry).toBe(false);
 
+		// Toggle visibility back
 		fireEvent.press(visibilityToggle);
 		expect(newPasswordInput.props.secureTextEntry).toBe(true);
+	});
+
+	it("toggles confirm password visibility", () => {
+		const { getByTestId } = render(<PasswordReset />);
+		const confirmPasswordInput = getByTestId("confirm-password-input");
+		const visibilityToggle = getByTestId("confirm-password-visibility-toggle");
+
+		// Check initial state
+		expect(confirmPasswordInput.props.secureTextEntry).toBe(true);
+
+		// Toggle visibility
+		fireEvent.press(visibilityToggle);
+		expect(confirmPasswordInput.props.secureTextEntry).toBe(false);
+
+		// Toggle visibility back
+		fireEvent.press(visibilityToggle);
+		expect(confirmPasswordInput.props.secureTextEntry).toBe(true);
 	});
 
 	it("navigates back on back button press", () => {
