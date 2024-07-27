@@ -13,7 +13,7 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
 import {
-	SPOTIFY_CLIENT_ID,
+	// SPOTIFY_CLIENT_ID,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
 

@@ -7,16 +7,18 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	Animated,
+	ViewStyle,
 } from "react-native";
 import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
 
 interface RoomCardWidgetProps {
 	roomCard: Room;
+	style?: ViewStyle; // Add this line
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-	const cardWidth = 290;
+	const cardWidth = 320;
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 
@@ -117,6 +119,11 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		overflow: "hidden",
 		height: 210, // Adjust height as needed
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	imageBackground: {
 		flex: 1,

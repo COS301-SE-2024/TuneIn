@@ -1,12 +1,12 @@
 // EditRoom.test.tsx
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import { Alert } from "react-native"; // Import Alert from 'react-native'
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { render } from "@testing-library/react-native";
+// import { Alert } from "react-native"; // Import Alert from 'react-native'
+import { useLocalSearchParams } from "expo-router";
 import EditRoom from "../app/screens/rooms/EditRoom";
 import { Room } from "../app/models/Room";
-import auth from "../app/services/AuthManagement";
-import uploadImage from "../app/services/ImageUpload";
+// import auth from "../app/services/AuthManagement";
+// import uploadImage from "../app/services/ImageUpload";
 
 // Mock the router and useLocalSearchParams hooks
 jest.mock("expo-router", () => ({
