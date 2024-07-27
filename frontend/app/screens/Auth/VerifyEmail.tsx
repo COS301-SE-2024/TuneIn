@@ -44,7 +44,11 @@ const VerifyEmailScreen: React.FC = () => {
 
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+			<TouchableOpacity
+				style={styles.backButton}
+				onPress={() => router.back()}
+				testID="back-button"
+			>
 				<MaterialIcons name="arrow-back" size={24} color="black" />
 			</TouchableOpacity>
 			<View style={styles.logoContainer}>
