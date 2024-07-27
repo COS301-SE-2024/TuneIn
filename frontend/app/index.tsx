@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import LoginScreen from "./screens/Auth/LoginScreen";
-import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
 import * as Font from "expo-font";
-import AppLoading from "expo-app-loading";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -33,8 +31,10 @@ const fetchFonts = () => {
 
 const App: React.FC = () => {
 	const router = useRouter();
-	const [isCheckingToken, setIsCheckingToken] = useState(true);
-	const [fontLoaded, setFontLoaded] = useState(false);
+	const [, setIsCheckingToken] = useState(true);
+	const [, setFontLoaded] = useState(false);
+	// const [isCheckingToken, setIsCheckingToken] = useState(true);
+	// const [fontLoaded, setFontLoaded] = useState(false);
 
 	console.log(API_BASE_URL);
 

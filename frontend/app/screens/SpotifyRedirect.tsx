@@ -18,7 +18,7 @@ import {
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);
 }
 
