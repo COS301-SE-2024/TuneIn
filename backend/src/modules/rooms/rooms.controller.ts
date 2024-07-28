@@ -238,7 +238,7 @@ export class RoomsController {
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		//): SongInfoDto[] {
-	): Promise<string[]> {
+	): Promise<string> {
 		//const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		//return this.roomsService.getRoomQueue(roomID);
 		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
@@ -286,7 +286,7 @@ export class RoomsController {
 		//@Body() songInfoDto: SongInfoDto,
 		@Body() songInfoDto: string,
 		//): SongInfoDto[] {
-	): string[] {
+	): string {
 		//return this.roomsService.addSongToQueue(roomID, songInfoDto);
 		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
 	}
