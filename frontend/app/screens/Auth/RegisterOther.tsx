@@ -25,6 +25,8 @@ import {
 	SpotifyCallbackResponse,
 } from "../../services/SpotifyAuth";
 import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import { generateRandom } from "expo-auth-session/build/PKCE";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -59,16 +61,22 @@ const discovery: DiscoveryDocument = {
 	authorizationEndpoint: "https://accounts.spotify.com/authorize",
 };
 
+//how state is defined in the expo-auth-session library
+//this.state = request.state ?? PKCE.generateRandom(10);
+
+const makeStateVariable = (redirectURI: string) => {
+	const state = {
+		"unique-pre-padding": generateRandom(10),
+		"expo-redirect": redirectURI,
+		"ip-address": utils.LOCALHOST,
+		"unique-post-padding": generateRandom(10),
+	};
+	const bytes = new TextEncoder().encode(JSON.stringify(state));
+	const b64 = utils.bytesToBase64(bytes);
+	return b64;
+};
+
 const RegisterOtherScreen: React.FC = () => {
-	//state variable with be a json string
-	/*
-		{
-			expo-redirect: "",
-			ip-address: "",
-			unique-padding: ""
-		}
-	*/
-	//const r1 = generateRandom(10);
 	const router = useRouter();
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
@@ -76,6 +84,12 @@ const RegisterOtherScreen: React.FC = () => {
 		native: "tunein-app://screens/Auth/SpotifyRedirect", // Use the 'native' option for standalone or native contexts
 	});
 	console.log("Redirect URI:", redirectURI);
+
+	const state = React.useMemo(
+		() => makeStateVariable(redirectURI),
+		[redirectURI],
+	);
+	console.log("State:", state);
 
 	const [request, response, promptAsync] = useAuthRequest(
 		{
@@ -88,6 +102,7 @@ const RegisterOtherScreen: React.FC = () => {
 				show_dialog: "true",
 			},
 			usePKCE: false,
+			state: state,
 		},
 		discovery,
 	);
@@ -107,7 +122,7 @@ const RegisterOtherScreen: React.FC = () => {
 			console.log("Code:", code);
 
 			//make post request to backend server get access token
-			async function doExchange() {
+			const doExchange = async () => {
 				const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
 					code,
 					state,
@@ -116,10 +131,10 @@ const RegisterOtherScreen: React.FC = () => {
 				await auth.setToken(tokens.token);
 				auth.postAuthInit();
 				router.navigate("screens/Home");
-			}
+			};
 			doExchange();
 		}
-	}, [response, redirectURI, router]);
+	}, [response]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
