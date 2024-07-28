@@ -323,6 +323,35 @@ export class UsersService {
 		return result;
 	}
 
+	async getRoomsRecent(userID: string): Promise<RoomDto[]> {
+		// check if user exists
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		if (!user) {
+			throw new Error("User does not exist");
+		}
+		// get rooms that the user has recently visited from the user_activity table
+		const rooms = await this.prisma.user_activity.findMany({
+			where: { user_id: userID },
+			// get unique entries by room id
+			distinct: ["room_id"],
+			include: { room: true },
+		});
+		if (!rooms) {
+			return [];
+		}
+		// generate RoomDto objects from the room data
+		const roomIDs: string[] = rooms.map((room) => room.room_id);
+		const r = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		if (!r || r === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for recent rooms. Received null.",
+			);
+		}
+		return r;
+	}
+
 	async getRecentRooms(userID: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:

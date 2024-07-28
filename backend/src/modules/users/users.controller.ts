@@ -166,7 +166,7 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRooms(userInfo.id);
+		return await this.usersService.getRoomsRecent(userInfo.id);
 	}
 
 	@ApiBearerAuth()
