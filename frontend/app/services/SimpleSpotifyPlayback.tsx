@@ -51,11 +51,11 @@ class SimpleSpotifyPlayback {
 
 	public async handlePlayback(
 		action: string,
+		deviceID: string,
 		uri: string | null = null,
 		offset: number | null = null,
 	) {
 		try {
-			await this.fetchToken();
 			console.log("accessToken:", this.accessToken);
 			if (!this.accessToken) {
 				throw new Error("Access token not found");
@@ -88,29 +88,23 @@ class SimpleSpotifyPlayback {
 							position_ms: offset || 0,
 						};
 					}
-					url = `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice}`;
+					url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
 					method = "PUT";
 					break;
 				case "pause":
-					url = `https://api.spotify.com/v1/me/player/pause?device_id=${activeDevice}`;
+					url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
 					method = "PUT";
 					break;
 				case "next":
-					url = `https://api.spotify.com/v1/me/player/next?device_id=${activeDevice}`;
+					url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
 					method = "POST";
 					break;
 				case "previous":
-					url = `https://api.spotify.com/v1/me/player/previous?device_id=${activeDevice}`;
+					url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
 					method = "POST";
 					break;
 				default:
 					throw new Error("Unknown action");
-			}
-
-			console.log("Request URL:", url);
-			console.log("Request Method:", method);
-			if (body) {
-				console.log("Request Body:", JSON.stringify(body, null, 2));
 			}
 
 			const response = await fetch(url, {
@@ -121,6 +115,12 @@ class SimpleSpotifyPlayback {
 				},
 				body: body ? JSON.stringify(body) : undefined,
 			});
+
+			console.log("Request URL:", url);
+			console.log("Request Method:", method);
+			if (body) {
+				console.log("Request Body:", JSON.stringify(body, null, 2));
+			}
 
 			if (response.ok) {
 				console.log("Playback action successful");
@@ -170,6 +170,7 @@ class SimpleSpotifyPlayback {
 
 	async getDeviceIDs(): Promise<Device[]> {
 		try {
+			await this.fetchToken();
 			if (!this.tokens) {
 				throw new Error("No tokens found");
 			}

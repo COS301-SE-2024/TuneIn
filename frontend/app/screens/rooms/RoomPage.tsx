@@ -267,7 +267,7 @@ const RoomPage = () => {
 		});
 	};
 
-	const handleJoinLeave = () => {
+	const handleJoinLeave = async () => {
 		console.log("joined", joined);
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
@@ -286,7 +286,10 @@ const RoomPage = () => {
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
 			//playbackManager.pause();
-			playback.handlePlayback("pause");
+			const deviceID = await playback.getFirstDevice();
+			if (deviceID && deviceID !== null) {
+				playback.handlePlayback(deviceID, "pause");
+			}
 			setIsPlaying(false);
 		}
 	};

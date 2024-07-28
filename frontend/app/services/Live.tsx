@@ -8,7 +8,7 @@ import songService from "./SongService";
 import * as utils from "./Utils";
 import { playback } from "./SimpleSpotifyPlayback";
 
-const TIMEOUT = 5000;
+const TIMEOUT = 5000000;
 
 export type Message = {
 	message: LiveChatMessageDto;
@@ -110,19 +110,34 @@ class LiveChatService {
 			return;
 		}
 
+		const startTime = Date.now();
+		this.pingSent = true;
+		this.socket.volatile.emit("ping", null, (hitTime: string) => {
+			console.log("Ping hit time:", hitTime);
+			console.log("Ping sent successfully.");
+			const roundTripTime = Date.now() - startTime;
+			console.log(`Ping round-trip time: ${roundTripTime}ms`);
+			this.pingSent = false;
+			this.backendLatency = roundTripTime;
+		});
+
 		return new Promise<void>((resolve, reject) => {
 			const startTime = Date.now();
 			this.pingSent = true;
 
 			// Set up a timeout
+			/*
 			const timeoutId = setTimeout(() => {
 				this.pingSent = false;
 				console.log("Ping timed out.");
 				reject(new Error("Ping timed out"));
 			}, timeout);
+			*/
 
 			// Send the ping message with a callback
-			this.socket.volatile.emit("ping", () => {
+			/*
+			this.socket.volatile.emit("ping", null, () => {
+				console.log("Ping sent successfully.");
 				clearTimeout(timeoutId);
 				const roundTripTime = Date.now() - startTime;
 				console.log(`Ping round-trip time: ${roundTripTime}ms`);
@@ -130,6 +145,7 @@ class LiveChatService {
 				this.backendLatency = roundTripTime;
 				resolve();
 			});
+			*/
 		}).catch((error) => {
 			console.error("Ping failed:", error.message);
 			// Optionally, retry sending the ping here
@@ -152,19 +168,11 @@ class LiveChatService {
 				client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
 			}
 		*/
-
-		this.socket.on("time_sync_response", (data) => {
-			const t2 = Date.now();
-			const t1 = data.t1;
-			const offset = (t1 - t0 + (data.t2 - t2)) / 2;
-			this.timeOffset = offset;
-			console.log(`Time offset: ${this.timeOffset} ms`);
-		});
 		this.socket.emit("time_sync", { t0: Date.now() });
 	}
 
 	public async pollLatency() {
-		//await this.sendPing();
+		await this.sendPing();
 		await this.getTimeOffset();
 	}
 
@@ -371,14 +379,18 @@ class LiveChatService {
 				const songID: string = response.songID;
 				const spotifyID: string = await songService.getSpotifyID(songID);
 
-				playback.handlePlayback(
-					"play",
-					spotifyID,
-					this.calculateSeekTime(response.UTC_time, 0),
-				);
+				const deviceID = await playback.getFirstDevice();
+				if (deviceID && deviceID !== null) {
+					playback.handlePlayback(
+						"play",
+						deviceID,
+						spotifyID,
+						this.calculateSeekTime(response.UTC_time, 0),
+					);
+				}
 			});
 
-			this.socket.on("pauseMedia", (response: PlaybackEventDto) => {
+			this.socket.on("pauseMedia", async (response: PlaybackEventDto) => {
 				console.log("SOCKET EVENT: pauseMedia", response);
 				if (!this.currentUser) {
 					//throw new Error("Something went wrong while getting user's info");
@@ -390,10 +402,13 @@ class LiveChatService {
 					return;
 				}
 
-				playback.handlePlayback("pause");
+				const deviceID = await playback.getFirstDevice();
+				if (deviceID && deviceID !== null) {
+					playback.handlePlayback("pause", deviceID);
+				}
 			});
 
-			this.socket.on("stopMedia", (response: PlaybackEventDto) => {
+			this.socket.on("stopMedia", async (response: PlaybackEventDto) => {
 				console.log("SOCKET EVENT: stopMedia", response);
 				if (!this.currentUser) {
 					//throw new Error("Something went wrong while getting user's info");
@@ -405,7 +420,19 @@ class LiveChatService {
 					return;
 				}
 
-				playback.handlePlayback("pause");
+				const deviceID = await playback.getFirstDevice();
+				if (deviceID && deviceID !== null) {
+					playback.handlePlayback("pause", deviceID);
+				}
+			});
+
+			this.socket.on("time_sync_response", (data) => {
+				console.log("SOCKET EVENT: time_sync_response", data);
+				const t2 = Date.now();
+				const t1 = data.t1;
+				const offset = (t1 - data.t0 + (data.t2 - t2)) / 2;
+				this.timeOffset = offset;
+				console.log(`Time offset: ${this.timeOffset} ms`);
 			});
 
 			console.log("socket connected?", this.socket.connected);
@@ -541,6 +568,9 @@ class LiveChatService {
 		mediaDurationMs: number,
 	): number {
 		this.pollLatency();
+		console.log(`Device is ${this.backendLatency} ms behind the server`);
+		console.log(`Device's clock is ${this.timeOffset} ms behind the server`);
+		console.log(`Media is supposed to start at ${startTimeUtc} ms since epoch`);
 
 		// Get the current server time
 		const serverTime = Date.now() + this.timeOffset;
