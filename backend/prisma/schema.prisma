@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
 }
 
 datasource db {
@@ -200,4 +200,10 @@ model vote {
   is_upvote Boolean @default(true)
   queue_id  String  @db.Uuid
   queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+}
+
+model search_suggestions {
+  suggestion_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  term          String
+  popularity    Int    @default(1)
 }

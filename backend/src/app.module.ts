@@ -25,6 +25,7 @@ import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
 import { SearchService } from "./modules/search/search.service";
 import { SearchModule } from "./modules/search/search.module";
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
 	imports: [
@@ -47,6 +48,7 @@ import { SearchModule } from "./modules/search/search.module";
 		TasksModule,
 		BullConfigModule,
 		SearchModule,
+		ActivityModule,
 	],
 	controllers: [AppController],
 	providers: [

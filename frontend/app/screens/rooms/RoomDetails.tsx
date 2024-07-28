@@ -153,6 +153,13 @@ const RoomDetails: React.FC = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
+				console.log("Success:", data);
+				Alert.alert(
+					"Room Created",
+					"Your room has been created successfully.",
+					[{ text: "OK" }],
+					{ cancelable: false },
+				);
 				router.navigate({
 					pathname: "/screens/Home",
 					params: data,
