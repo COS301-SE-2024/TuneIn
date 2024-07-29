@@ -10,13 +10,53 @@ const app = express()
 app.use(express.json())
 const port = 3000
 
+const handleRedirect = async (req: express.Request, res: express.Response) => {
+  const { code, state } = req.query
+  console.log("Code:", code)
+  console.log("State:", state)
+  if (!code || !state) {
+    res.status(400).send('Missing code or state')
+    return
+  }
+
+  //parse state
+  /*
+  const makeStateVariable = (redirectURI: string) => {
+		const state = {
+			"unique-pre-padding": generateRandom(10),
+			"expo-redirect": redirectURI,
+			"ip-address": utils.LOCALHOST,
+			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"unique-post-padding": generateRandom(10),
+		};
+		const bytes = new TextEncoder().encode(JSON.stringify(state));
+		const b64 = utils.bytesToBase64(bytes);
+		return b64;
+	};
+  */
+  const stateObj = JSON.parse(state);
+  if (!stateObj) {
+	res.status(400).send('Invalid state')
+	return
+  }
+
+  if (!stateObj['expo-redirect']) {
+	res.status(400).send('Invalid state. Missing expo-redirect')
+	return
+  }
+
+  //now, redirect to the expo-redirect
+  let redirectURI = stateObj['expo-redirect']
+  redirectURI += `?code=${code}&state=${state}`
+  res.redirect(redirectURI)
+}
+
 app.get('/spotify-auth-redirect', (req: express.Request, res: express.Response) => {
-  res.send('Hello World!')
+  handleRedirect(req, res)
 })
 
 app.post('/spotify-auth-redirect', (req: express.Request, res: express.Response) => {
-  const { name } = req.body
-  res.send(`Hello ${name}!`)
+  handleRedirect(req, res)
 })
 
 app.listen(port, () => {
