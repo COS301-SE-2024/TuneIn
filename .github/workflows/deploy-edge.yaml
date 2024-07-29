@@ -1,4 +1,4 @@
-name: Deploy Function
+name: Deploy Edge Function
 
 on:
   push:
@@ -21,4 +21,4 @@ jobs:
         with:
           version: latest
 
-      - run: supabase functions deploy --project-ref $PROJECT_ID
+      - run: supabase functions deploy --project-ref $PROJECT_ID --no-verify-jwt
