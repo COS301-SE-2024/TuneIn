@@ -3,7 +3,7 @@ name: Deploy Function
 on:
   push:
     branches:
-      - main
+      - "feature/spotify-redirect"
   workflow_dispatch:
 
 jobs:
