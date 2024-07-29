@@ -5,6 +5,7 @@
 console.log("Hello from Functions!")
 
 import express from 'npm:express@4.18.2'
+import { Base64 } from 'npm:js-base64'
 
 const app = express()
 app.use(express.json())
@@ -36,7 +37,7 @@ const handleRedirect = async (req: express.Request, res: express.Response) => {
   */
   const b64_str: string = state as string
   console.log("b64_str:", b64_str)
-  const decode: string = Buffer.from(b64_str, 'base64').toString('utf-8')
+  const decode: string = Base64.decode(b64_str)
   console.log("Decoded:", decode)
   const stateObj = JSON.parse(decode)
   console.log("State Object:", stateObj)
