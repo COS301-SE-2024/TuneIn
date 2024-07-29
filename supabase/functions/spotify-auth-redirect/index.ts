@@ -34,15 +34,20 @@ const handleRedirect = async (req: express.Request, res: express.Response) => {
 		return b64;
 	};
   */
-  const stateObj = JSON.parse(state);
+  const b64_str: string = state as string
+  console.log("b64_str:", b64_str)
+  const decode: string = Buffer.from(b64_str, 'base64').toString('utf-8')
+  console.log("Decoded:", decode)
+  const stateObj = JSON.parse(decode)
+  console.log("State Object:", stateObj)
   if (!stateObj) {
-	res.status(400).send('Invalid state')
-	return
+    res.status(400).send('Invalid state')
+    return
   }
 
   if (!stateObj['expo-redirect']) {
-	res.status(400).send('Invalid state. Missing expo-redirect')
-	return
+    res.status(400).send('Invalid state. Missing expo-redirect')
+    return
   }
 
   //now, redirect to the expo-redirect
