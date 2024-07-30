@@ -22,13 +22,14 @@ import * as StorageService from "./../services/StorageService"; // Import Storag
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
+import { colors } from "../styles/colors";
 
 const Home: React.FC = () => {
 	console.log("Home");
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cache, setCacheLoaded] = useState(false);
+	// const [cache, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -192,7 +193,7 @@ const Home: React.FC = () => {
 	};
 
 	const navigateToCreateNew = () => {
-		router.navigate("/screens/CreateRoom");
+		router.navigate("/screens/rooms/CreateRoom");
 	};
 
 	const handleScroll = useCallback(
@@ -343,13 +344,13 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonContainer: {
 		position: "absolute",
-		bottom: 9,
+		bottom: 15,
 		right: 15,
 		zIndex: 20,
 	},
 	createRoomButton: {
-		backgroundColor: "#1E90FF",
-		borderRadius: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 30,
 		width: 50,
 		height: 50,
 		justifyContent: "center",

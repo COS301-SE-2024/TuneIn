@@ -32,7 +32,7 @@ export const mockConfigService = {
 };
 
 export const mockPrismaService = {
-	// mock properties and methods as needed
+	$queryRaw: jest.fn()
 };
 
 export const mockAuthService = {

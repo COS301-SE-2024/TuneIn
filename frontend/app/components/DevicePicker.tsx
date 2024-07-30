@@ -135,7 +135,11 @@ const DevicePicker = () => {
 
 	return (
 		<>
-			<TouchableOpacity onPress={handleOpenPopup} style={{ marginLeft: 10 }}>
+			<TouchableOpacity
+				onPress={handleOpenPopup}
+				testID="Speaker-button"
+				style={{ marginLeft: 10 }}
+			>
 				<SpeakerIcon />
 			</TouchableOpacity>
 			<View style={styles.container}>
