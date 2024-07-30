@@ -41,7 +41,6 @@ const App: React.FC = () => {
 	useEffect(() => {
 		const checkTokenAndLoadFonts = async () => {
 			try {
-
 				await fetchFonts();
 				setFontLoaded(true);
 
