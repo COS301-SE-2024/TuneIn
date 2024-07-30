@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Cron } from "@nestjs/schedule";
-import { Server, Socket } from "socket.io";
+//import { Cron } from "@nestjs/schedule";
+import { Server } from "socket.io";
 
 @Injectable()
 export class LiveService {
