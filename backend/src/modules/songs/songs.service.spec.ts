@@ -1,6 +1,6 @@
 import { TestingModule } from "@nestjs/testing";
 import { SongsService } from "./songs.service";
-import { createSongsTestingModule } from "jest_mocking/module-mocking";
+import { createSongsTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("SongsService", () => {
 	let service: SongsService;

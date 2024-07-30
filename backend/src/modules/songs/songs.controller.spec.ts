@@ -1,6 +1,6 @@
 import { TestingModule } from "@nestjs/testing";
 import { SongsController } from "./songs.controller";
-import { createSongsTestingModule } from "jest_mocking/module-mocking";
+import { createSongsTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("SongsController", () => {
 	let controller: SongsController;

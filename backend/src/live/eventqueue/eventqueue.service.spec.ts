@@ -1,6 +1,6 @@
 import { TestingModule } from "@nestjs/testing";
 import { EventQueueService } from "./eventqueue.service";
-import { createLiveTestingModule } from "jest_mocking/module-mocking";
+import { createLiveTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("EventQueueService", () => {
 	let service: EventQueueService;

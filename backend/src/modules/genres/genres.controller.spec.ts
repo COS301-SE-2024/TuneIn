@@ -1,6 +1,6 @@
 import { TestingModule } from "@nestjs/testing";
 import { GenresController } from "./genres.controller";
-import { createGenresTestingModule } from "jest_mocking/module-mocking";
+import { createGenresTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("GenresController", () => {
 	let controller: GenresController;
