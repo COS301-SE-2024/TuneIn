@@ -1,4 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { PassportModule } from "@nestjs/passport";
@@ -26,7 +26,7 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
 		SpotifyModule,
-		forwardRef(() => SpotifyAuthModule),
+		SpotifyAuthModule,
 	],
 	providers: [AuthService, LocalStrategy, JwtStrategy],
 	controllers: [AuthController, SpotifyAuthController],

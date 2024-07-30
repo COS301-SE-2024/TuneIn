@@ -8,7 +8,7 @@ import * as utils from "./../services/Utils";
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 1",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
 	);
 }
 
