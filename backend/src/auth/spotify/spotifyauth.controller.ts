@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	Query,
+	Redirect,
+	Request,
+	UseGuards,
+} from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
@@ -24,6 +31,29 @@ export class SpotifyAuthController {
 		private readonly auth: AuthService,
 	) {}
 
+	@Get("redirect")
+	@Redirect()
+	@ApiTags("auth")
+	@ApiOperation({ summary: "Spotify OAuth Redirect" })
+	async performRedirect(
+		@Request() req: Request,
+		@Query("code") code: string,
+		@Query("state") state: string,
+	) {
+		//expecting "/auth/redirect?code={code}&state={state}" from Spotify OAuth
+		const stateObj: {
+			"expo-redirect": string;
+			"ip-address": string;
+			"redirect-used": string;
+		} = this.spotifyAuth.getStateObject(state);
+
+		//now, redirect to the expo-redirect
+		const redirectURI: string = stateObj["expo-redirect"];
+		return {
+			url: redirectURI,
+		};
+	}
+
 	@Get("callback")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Callback for Spotify Auth" })
@@ -37,13 +67,11 @@ export class SpotifyAuthController {
 		@Request() req: Request,
 		@Query("code") code: string,
 		@Query("state") state: string,
-		@Query("redirect") redirectURI: string,
 	) {
 		//expecting "/auth/callback?code={code}&state={state}"
-		//`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}&redirect=${redirectURI}`,
-
+		//`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}`,
 		const tokens: SpotifyTokenResponse =
-			await this.spotifyAuth.exchangeCodeForToken(code, state, redirectURI);
+			await this.spotifyAuth.exchangeCodeForToken(code, state);
 		const tp: SpotifyTokenPair = {
 			tokens: tokens,
 			epoch_expiry: new Date().getTime() + (tokens.expires_in - 300) * 1000,

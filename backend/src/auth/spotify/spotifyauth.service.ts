@@ -110,12 +110,53 @@ export class SpotifyAuthService {
 		);
 	}
 
+	//how state is constructed in frontend
+	/*
+	const makeStateVariable = (redirectURI: string) => {
+		const state = {
+			"unique-pre-padding": generateRandom(10),
+			"expo-redirect": redirectURI,
+			"ip-address": utils.LOCALHOST,
+			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"unique-post-padding": generateRandom(10),
+		};
+		const bytes = new TextEncoder().encode(JSON.stringify(state));
+		const b64 = utils.bytesToBase64(bytes);
+		return b64;
+	};
+	*/
+	getStateObject(state: string): {
+		"expo-redirect": string;
+		"ip-address": string;
+		"redirect-used": string;
+	} {
+		const decodedState = Buffer.from(state, "base64").toString("utf-8");
+		const obj = JSON.parse(decodedState);
+		if (!obj["expo-redirect"]) {
+			throw new Error(
+				"Invalid state parameter. Does not contain expo-redirect",
+			);
+		}
+		if (!obj["ip-address"]) {
+			throw new Error("Invalid state parameter. Does not contain ip-address");
+		}
+		if (!obj["redirect-used"]) {
+			throw new Error(
+				"Invalid state parameter. Does not contain redirect-used",
+			);
+		}
+		return obj;
+	}
+
 	async exchangeCodeForToken(
 		code: string,
 		state: string,
-		redirectURI: string,
 	): Promise<SpotifyTokenResponse> {
 		try {
+			//Step 0: Get the redirect URI
+			const stateObj = this.getStateObject(state);
+			const redirectURI = stateObj["expo-redirect"];
+
 			// Step 1: Create the request options object
 			const requestOptions = {
 				url: "https://accounts.spotify.com/api/token",
