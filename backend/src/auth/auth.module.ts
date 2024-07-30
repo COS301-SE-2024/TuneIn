@@ -1,3 +1,4 @@
+import * as dotenv  from 'dotenv';
 import { Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
@@ -15,6 +16,7 @@ import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
 import { SpotifyModule } from "../spotify/spotify.module";
 
+dotenv.config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 	throw new Error("Missing JWT_SECRET_KEY in environment variables");
