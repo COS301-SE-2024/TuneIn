@@ -1,6 +1,6 @@
 import { TestingModule } from "@nestjs/testing";
 import { GenresService } from "./genres.service";
-import { createGenresTestingModule } from "../../../jest_mocking/module-mocking"
+import { createGenresTestingModule } from "../../../jest_mocking/module-mocking";
 
 describe("GenresService", () => {
 	let service: GenresService;
