@@ -69,6 +69,7 @@ const makeStateVariable = (redirectURI: string) => {
 		"unique-pre-padding": generateRandom(10),
 		"expo-redirect": redirectURI,
 		"ip-address": utils.LOCALHOST,
+		"redirect-used": SPOTIFY_REDIRECT_TARGET,
 		"unique-post-padding": generateRandom(10),
 	};
 	const bytes = new TextEncoder().encode(JSON.stringify(state));
@@ -82,6 +83,7 @@ const RegisterOtherScreen: React.FC = () => {
 		scheme: "tunein-app",
 		path: "screens/Auth/SpotifyRedirect",
 		native: "tunein-app://screens/Auth/SpotifyRedirect", // Use the 'native' option for standalone or native contexts
+		preferLocalhost: true,
 	});
 	console.log("Redirect URI:", redirectURI);
 
