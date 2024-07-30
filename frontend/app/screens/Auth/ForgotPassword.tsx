@@ -1,21 +1,74 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
 	StyleSheet,
 	TouchableOpacity,
 	TextInput,
+	Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
+import { CognitoUser } from "amazon-cognito-identity-js";
+import UserPool from "../../services/UserPool";
 
 const ForgotPasswordScreen: React.FC = () => {
 	const router = useRouter();
+	const [email, setEmail] = useState("");
+	const [emailError, setEmailError] = useState(true);
 
-	const navigateToOTP = () => {
-		router.push("screens/Auth/OTP");
+	const userData = {
+		Username: email,
+		Pool: UserPool,
+	};
+
+	const cognitoUser = new CognitoUser(userData);
+
+	const validateEmail = (email: string) => {
+		const re: RegExp = /\S+@\S+\.\S+/;
+		return re.test(email);
+	};
+
+	const handleSendCode = () => {
+		if (emailError) {
+			Alert.alert(
+				"Invalid Email",
+				"Please enter a valid email address",
+				[{ text: "OK" }],
+				{ cancelable: false },
+			);
+			return;
+		}
+
+		Alert.alert(
+			"Confirm Email",
+			`Is this the correct email address? ${email}`,
+			[
+				{
+					text: "Cancel",
+					style: "cancel",
+				},
+				{
+					text: "OK",
+					onPress: () => {
+						cognitoUser.forgotPassword({
+							onSuccess: () => {
+								router.push({
+									pathname: "screens/Auth/ResetPassword",
+									params: { email: email },
+								});
+							},
+							onFailure: (err) => {
+								console.log("Error sending reset code:", err);
+							},
+						});
+					},
+				},
+			],
+			{ cancelable: false },
+		);
 	};
 
 	const navigateToLogin = () => {
@@ -39,13 +92,18 @@ const ForgotPasswordScreen: React.FC = () => {
 			<TextInput
 				style={styles.input}
 				placeholder="Enter your email"
+				value={email}
 				placeholderTextColor="#888"
 				keyboardType="email-address"
 				autoCapitalize="none"
+				onChangeText={(text) => {
+					setEmail(text);
+					setEmailError(!validateEmail(text));
+				}}
 			/>
 
 			<View style={styles.bottomContainer}>
-				<CyanButton title="Send Code" onPress={navigateToOTP} />
+				<CyanButton title="Send Code" onPress={handleSendCode} />
 
 				<TouchableOpacity
 					style={styles.registerContainer}
@@ -92,7 +150,7 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	input: {
 		height: 50,
@@ -116,7 +174,7 @@ const styles = StyleSheet.create({
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerBoldText: {
 		fontWeight: "bold",
