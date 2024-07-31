@@ -15,7 +15,6 @@ const AppCarousel = <T,>({ data, renderItem }: CarouselProps<T>) => {
 				keyExtractor={(_, index) => index.toString()}
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				pagingEnabled
 				contentContainerStyle={styles.contentContainer}
 				ItemSeparatorComponent={() => <View style={styles.separator} />} // Add space between items
 			/>
@@ -29,14 +28,14 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		marginBottom: 15,
-		marginRight: 25,
+		marginRight: 0,
 	},
 	contentContainer: {
 		paddingHorizontal: 20,
 		paddingRight: 20,
 	},
 	separator: {
-		width: 7,
+		width: 15,
 	},
 });
 
