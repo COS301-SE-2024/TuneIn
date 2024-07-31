@@ -2,6 +2,7 @@ import React from "react";
 import { Slot } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
 import * as Font from "expo-font";
+import WelcomeScreen from "../app/screens/WelcomeScreen";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
