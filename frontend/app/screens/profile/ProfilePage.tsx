@@ -23,14 +23,12 @@ const ProfileScreen: React.FC = () => {
 	const router = useRouter();
 	let params = useLocalSearchParams();
 	let ownsProfile = true;
-	const profile = Array.isArray(params.profile)
-		? params.profile[0]
-		: params.profile;
-	const username = JSON.parse(profile as string);
+	let friend = "";
 
 	// console.log("Params: " + JSON.stringify(params));
 
 	if (JSON.stringify(params) !== "{}") {
+		friend = JSON.parse(params.friend as string);
 		ownsProfile = false;
 	}
 
@@ -50,10 +48,11 @@ const ProfileScreen: React.FC = () => {
 					const data = await fetchProfileInfo(storedToken);
 					if (!ownsProfile) {
 						const isFollowing = data.followers.data.some(
-							(item: any) => item.username === username,
+							(item: any) => item.username === params.user,
 						);
 						// console.log(isFollowing);
 						setFollowing(isFollowing);
+						// console.log(isFollowing);
 					}
 
 					setProfileData(data);
@@ -79,7 +78,7 @@ const ProfileScreen: React.FC = () => {
 			}
 
 			const response = await axios.get(
-				`${utils.API_BASE_URL}/users/${params.username}`,
+				`${utils.API_BASE_URL}/users/${friend.username}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -100,7 +99,7 @@ const ProfileScreen: React.FC = () => {
 		if (storedToken) {
 			if (following) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/profile/${profileData.userID}/unfollow`,
+					`${utils.API_BASE_URL}/users/${profileData.userID}/unfollow`,
 					{},
 					{
 						headers: {
@@ -117,7 +116,7 @@ const ProfileScreen: React.FC = () => {
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/profile/${profileData.userID}/follow`,
+					`${utils.API_BASE_URL}/users/${profileData.userID}/follow`,
 					{},
 					{
 						headers: {

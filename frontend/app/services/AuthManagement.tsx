@@ -33,9 +33,9 @@ class AuthManagement {
 		}
 
 		// Check if token is expired
-		console.log("Token:", this.token);
+		// console.log("Token:", this.token);
 		const decodedToken = decodeToken(this.token);
-		console.log("Decoded token:", decodedToken);
+		// console.log("Decoded token:", decodedToken);
 		if (!decodedToken || !decodedToken.exp) {
 			throw new Error("Failed to decode token");
 		}

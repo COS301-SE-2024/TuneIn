@@ -21,7 +21,7 @@ import * as utils from "../../services/Utils"; // Import Utils
 
 const EditProfileScreen = () => {
 	const router = useRouter();
-	const params = useLocalSearchParams(); // Correct way to access query parameters
+	const params = useLocalSearchParams();
 	// console.log("Profile :", params);
 	const profile = Array.isArray(params.profile)
 		? params.profile[0]

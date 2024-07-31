@@ -5,17 +5,19 @@ import { Friend } from "../models/friend"; // Assume you have a Friend model
 
 interface FriendsGridProps {
 	friends: Friend[];
+	user: string;
 	maxVisible: number;
 }
 
-const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
+const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, user, maxVisible }) => {
+	// console.log("Friend: " + JSON.stringify(friends));
 	return (
 		<View style={styles.container}>
 			<View style={styles.gridContainer}>
 				{friends.slice(0, maxVisible).map((friend, index) => (
 					<Link
 						key={index}
-						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}`}
+						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
 						style={styles.link}
 					>
 						<View style={styles.friendContainer}>
@@ -25,7 +27,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, maxVisible }) => {
 									style={styles.profileImage}
 								/>
 							</View>
-							<Text style={styles.friendName}>{friend.name}</Text>
+							<Text style={styles.friendName}>{friend.username}</Text>
 						</View>
 					</Link>
 				))}
