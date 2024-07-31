@@ -11,7 +11,7 @@ console.log("clientId: ", clientId);
 
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 1",
 	);
 }
 
