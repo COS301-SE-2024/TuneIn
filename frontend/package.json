@@ -56,6 +56,7 @@
     "expo-status-bar": "~1.12.1",
     "expo-web-browser": "~13.0.3",
     "express": "^4.19.2",
+    "genius-lyrics-api": "^3.2.1",
     "isomorphic-fetch": "^3.0.0",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",
