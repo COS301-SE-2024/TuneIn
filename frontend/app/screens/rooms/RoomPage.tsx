@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback, memo } from "react";
+import React, {
+	useEffect,
+	useState,
+	useRef,
+	useCallback,
+	memo,
+	useContext,
+} from "react";
 import {
 	View,
 	Text,
@@ -28,6 +35,7 @@ import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+import { Player } from "../../PlayerContext";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -38,7 +46,6 @@ type Message = {
 
 const RoomPage = () => {
 	const { room } = useLocalSearchParams();
-	console.log("here");
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -46,7 +53,15 @@ const RoomPage = () => {
 		roomData = JSON.parse(room);
 	}
 	const roomID = roomData.id;
-	console.log("Room ID:", roomID);
+
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { currentRoom, setCurrentRoom } = playerContext;
 
 	const router = useRouter();
 	const userRef = useRef<UserDto | null>(null);
@@ -149,6 +164,7 @@ const RoomPage = () => {
 			console.log("Socket emit: leaveRoom", input);
 			socket.current.emit("leaveRoom", JSON.stringify(input));
 			setJoined(false);
+			setCurrentRoom(null);
 		}
 	};
 	//init & connect to socket
@@ -327,8 +343,8 @@ const RoomPage = () => {
 					},
 				);
 
-				console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
-				console.log("response: ", response);
+				// console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
+				// console.log("response: ", response);
 
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -340,7 +356,7 @@ const RoomPage = () => {
 				}
 
 				const data = await response.json();
-				console.log("Fetched queue data:", data);
+				// console.log("Fetched queue data:", data);
 
 				if (Array.isArray(data)) {
 					const tracks: Track[] = data.map((item: any) => ({
@@ -393,22 +409,25 @@ const RoomPage = () => {
 	}, [isPlaying]);
 
 	const handleJoinLeave = () => {
+		console.log("handleJoinLeave");
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
-			// joinRoom();
+			joinRoom();
 			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
+			setCurrentRoom(roomID);
 		} else {
 			leaveRoom();
-			setJoined(false);
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			playbackManager.pause();
-			setIsPlaying(false);
+			// setJoined(false);
+			// setJoinedSongIndex(null);
+			// setJoinedSecondsPlayed(null);
+			// playbackManager.pause();
+			// setIsPlaying(false);
+			setCurrentRoom(null);
 		}
 	};
 

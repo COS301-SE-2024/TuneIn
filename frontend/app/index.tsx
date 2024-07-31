@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import LoginScreen from "./screens/Auth/LoginScreen";
-import * as StorageService from "./services/StorageService";
-import auth from "./services/AuthManagement";
-import { API_BASE_URL } from "./services/Utils";
+import React from "react";
+import { Slot } from "expo-router";
+import { PlayerContextProvider } from "./PlayerContext";
 import * as Font from "expo-font";
 
 const fetchFonts = () => {
@@ -30,37 +27,11 @@ const fetchFonts = () => {
 };
 
 const App: React.FC = () => {
-	const router = useRouter();
-	const [, setIsCheckingToken] = useState(true);
-	const [, setFontLoaded] = useState(false);
-	// const [isCheckingToken, setIsCheckingToken] = useState(true);
-	// const [fontLoaded, setFontLoaded] = useState(false);
-
-	console.log(API_BASE_URL);
-
-	useEffect(() => {
-		const checkTokenAndLoadFonts = async () => {
-			try {
-				await fetchFonts();
-				setFontLoaded(true);
-
-				const authToken = await StorageService.getItem("backendToken");
-				if (authToken && authToken !== "undefined" && authToken !== "null") {
-					auth.setToken(authToken);
-				}
-				router.push("/screens/WelcomeScreen");
-			} catch (error) {
-				console.error("Error checking token or loading fonts:", error);
-				router.push("/screens/WelcomeScreen");
-			} finally {
-				setIsCheckingToken(false);
-			}
-		};
-
-		checkTokenAndLoadFonts();
-	}, [router]);
-
-	return <LoginScreen />;
+	return (
+		<PlayerContextProvider>
+			<WelcomeScreen />
+		</PlayerContextProvider>
+	);
 };
 
 export default App;
