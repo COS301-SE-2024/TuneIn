@@ -62,13 +62,19 @@ const RoomPage = () => {
 	}
 
 	const { currentRoom, setCurrentRoom } = playerContext;
+	const [joined, setJoined] = useState(false);
+
+	useEffect(() => {
+		if (currentRoom === roomID) {
+			setJoined(true);
+		}
+	}, [currentRoom, roomID]);
 
 	const router = useRouter();
 	const userRef = useRef<UserDto | null>(null);
 	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
-	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState<Track[]>([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -131,23 +137,22 @@ const RoomPage = () => {
 		}
 	};
 
-	// const joinRoom = useCallback(() => {
-	// 	if (userRef.current && socket.current) {
-	// 		const u: UserDto = userRef.current;
-	// 		const input: ChatEventDto = {
-	// 			userID: u.userID,
-	// 			body: {
-	// 				messageBody: "",
-	// 				sender: u,
-	// 				roomID: roomID,
-	// 				dateCreated: new Date(),
-	// 			},
-	// 		};
-	// 		console.log("Socket emit: joinRoom", input);
-	// 		socket.current.emit("joinRoom", JSON.stringify(input));
-	// 		setJoined(true);
-	// 	}
-	// }, [roomID]);
+	const joinRoom = useCallback(() => {
+		if (userRef.current && socket.current) {
+			const u: UserDto = userRef.current;
+			const input: ChatEventDto = {
+				userID: u.userID,
+				body: {
+					messageBody: "",
+					sender: u,
+					roomID: roomID,
+					dateCreated: new Date(),
+				},
+			};
+			socket.current.emit("joinRoom", JSON.stringify(input));
+			setJoined(true);
+		}
+	}, [roomID]);
 
 	const leaveRoom = () => {
 		if (userRef.current && socket.current) {
@@ -308,7 +313,6 @@ const RoomPage = () => {
 				userID: u.userID,
 				body: newMessage,
 			};
-			console.log("Sending message:", input);
 			socket.current.emit("liveMessage", JSON.stringify(input));
 			// do not add the message to the state here, wait for the server to send it back
 			//setMessages([...messages, { message: newMessage, me: true }]);
@@ -343,9 +347,6 @@ const RoomPage = () => {
 					},
 				);
 
-				// console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
-				// console.log("response: ", response);
-
 				if (!response.ok) {
 					const errorText = await response.text();
 					console.error(
@@ -356,8 +357,6 @@ const RoomPage = () => {
 				}
 
 				const data = await response.json();
-				// console.log("Fetched queue data:", data);
-
 				if (Array.isArray(data)) {
 					const tracks: Track[] = data.map((item: any) => ({
 						id: item.id,
@@ -409,16 +408,12 @@ const RoomPage = () => {
 	}, [isPlaying]);
 
 	const handleJoinLeave = () => {
-		console.log("handleJoinLeave");
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
 			joinRoom();
 			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
 			setCurrentRoom(roomID);
 		} else {
 			leaveRoom();
@@ -472,20 +467,6 @@ const RoomPage = () => {
 			},
 		});
 	};
-
-	if (userRef.current && roomObjRef.current) {
-		setReadyToJoinRoom(true);
-		console.log("Ready to join room...");
-		console.log(userRef.current, roomObjRef.current);
-	}
-
-	useEffect(() => {
-		if (readyToJoinRoom && !joined) {
-			console.log("Joining room...");
-			console.log(readyToJoinRoom, joined);
-			// joinRoom();
-		}
-	}, [readyToJoinRoom, joined]);
 
 	return (
 		<View style={styles.container}>
