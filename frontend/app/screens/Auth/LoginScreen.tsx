@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
 	registerLinkText: {
 		fontSize: 16,
 		textAlign: "center",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerLinkBold: {
 		fontWeight: "bold",
