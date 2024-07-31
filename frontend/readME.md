@@ -332,20 +332,41 @@ To ensure the maintainability and scalability of your project, follow these best
     ```tsx
     // styles/colors.ts
     export const colors = {
-      primary: '#3498db',
-      secondary: '#2ecc71',
+      primary: '#08BDBD',
+      secondary: '#8B8FA8',
       // Add other colors here
     };
 
+    // styles/fonts.ts
+    export const fonts = {
+      primary: 'Poppins_400Regular',
+      // Add other font styles here
+    };
+  
     // styles/themes.ts
     import { StyleSheet } from 'react-native';
     import { colors } from './colors';
+    import { fonts } from './fonts';
 
-    export const commonStyles = StyleSheet.create({
+    export const globalStyles = StyleSheet.create({
       container: {
         flex: 1,
         padding: 20,
         backgroundColor: colors.primary,
+      },
+      text: {
+        fontFamily: fonts.primary,
+        color: '#fff',
+      },
+      button: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 5,
+      },
+      buttonText: {
+        fontFamily: fonts.primary,
+        color: '#fff',
+        textAlign: 'center',
       },
       // Add other styles here
     });

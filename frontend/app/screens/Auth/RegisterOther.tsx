@@ -13,14 +13,13 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
 import {
-	SPOTIFY_CLIENT_ID,
+	// SPOTIFY_CLIENT_ID,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
 
-const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);
 }
 
@@ -114,11 +113,11 @@ const RegisterOtherScreen: React.FC = () => {
 	}
 
 	const navigateToLogin = () => {
-		router.navigate("screens/LoginStreaming");
+		router.navigate("screens/Auth/LoginStreaming");
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("screens/RegisterScreen");
+		router.navigate("screens/Auth/RegisterScreen");
 	};
 
 	return (

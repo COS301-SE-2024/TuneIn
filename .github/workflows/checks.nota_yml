@@ -1,0 +1,39 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  check-branch-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Ensure branch is up-to-date with develop
+        run: |
+          git fetch origin develop
+          BASE_BRANCH=develop
+          HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          git merge-base --is-ancestor origin/$BASE_BRANCH $HEAD_BRANCH
+          if [ $? -ne 0 ]; then
+            echo "Your branch is not up-to-date with $BASE_BRANCH."
+            exit 1
+          fi
+
+  prevent-self-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Ensure no self-approval
+        run: |
+          PR_AUTHOR=$(jq -r .pull_request.user.login "$GITHUB_EVENT_PATH")
+          REVIEWERS=$(jq -r '.reviews[] | select(.state == "APPROVED") | .user.login' "$GITHUB_EVENT_PATH")
+          if echo "$REVIEWERS" | grep -q "$PR_AUTHOR"; then
+            echo "You cannot approve your own PR."
+            exit 1
+          fi

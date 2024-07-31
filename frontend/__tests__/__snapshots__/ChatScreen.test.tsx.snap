@@ -1,0 +1,325 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChatScreen renders the chat screen correctly 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#FFFFFF",
+      "flex": 1,
+      "paddingHorizontal": 10,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "borderBottomColor": "#E0E0E0",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 10,
+        "paddingVertical": 15,
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "marginRight": 16,
+          "opacity": 1,
+        }
+      }
+      testID="backButton"
+    >
+      <Text />
+    </View>
+    <Image
+      source={
+        {
+          "uri": "https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
+        }
+      }
+      style={
+        {
+          "borderRadius": 20,
+          "height": 40,
+          "width": 40,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "fontSize": 18,
+          "fontWeight": "bold",
+          "marginLeft": 10,
+        }
+      }
+    >
+      John Doe
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      {
+        "paddingVertical": 10,
+      }
+    }
+    data={
+      [
+        {
+          "id": "1",
+          "me": false,
+          "sender": "John Doe",
+          "text": "Hey there!",
+        },
+        {
+          "id": "2",
+          "me": true,
+          "sender": "Me",
+          "text": "Hi! How are you?",
+        },
+      ]
+    }
+    getItem={[Function]}
+    getItemCount={[Function]}
+    keyExtractor={[Function]}
+    onContentSizeChange={[Function]}
+    onLayout={[Function]}
+    onMomentumScrollBegin={[Function]}
+    onMomentumScrollEnd={[Function]}
+    onScroll={[Function]}
+    onScrollBeginDrag={[Function]}
+    onScrollEndDrag={[Function]}
+    removeClippedSubviews={false}
+    renderItem={[Function]}
+    scrollEventThrottle={0.0001}
+    stickyHeaderIndices={[]}
+    viewabilityConfigCallbackPairs={[]}
+  >
+    <View>
+      <View
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "flex-end",
+                "flexDirection": "row",
+                "marginVertical": 4,
+              },
+              {
+                "justifyContent": "flex-start",
+              },
+            ]
+          }
+        >
+          <Image
+            source={
+              {
+                "uri": "https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
+              }
+            }
+            style={
+              {
+                "borderRadius": 15,
+                "height": 30,
+                "marginRight": 10,
+                "width": 30,
+              }
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "borderRadius": 25,
+                  "elevation": 2,
+                  "maxWidth": "75%",
+                  "paddingHorizontal": 15,
+                  "paddingVertical": 10,
+                },
+                {
+                  "alignSelf": "flex-start",
+                  "backgroundColor": "#FFFFFF",
+                  "borderColor": "#ECECEC",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                {
+                  "fontSize": 16,
+                }
+              }
+            >
+              Hey there!
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        onFocusCapture={[Function]}
+        onLayout={[Function]}
+        style={null}
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "flex-end",
+                "flexDirection": "row",
+                "marginVertical": 4,
+              },
+              {
+                "justifyContent": "flex-end",
+              },
+            ]
+          }
+        >
+          <View
+            style={
+              [
+                {
+                  "borderRadius": 25,
+                  "elevation": 2,
+                  "maxWidth": "75%",
+                  "paddingHorizontal": 15,
+                  "paddingVertical": 10,
+                },
+                {
+                  "alignSelf": "flex-end",
+                  "backgroundColor": "#08bdbd",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                {
+                  "fontSize": 16,
+                }
+              }
+            >
+              Hi! How are you?
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FFFFFF",
+        "borderTopColor": "#E0E0E0",
+        "borderTopWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 10,
+        "paddingVertical": 5,
+      }
+    }
+  >
+    <TextInput
+      onChangeText={[Function]}
+      placeholder="Message..."
+      style={
+        {
+          "backgroundColor": "#F0F0F0",
+          "borderRadius": 25,
+          "flex": 1,
+          "marginBottom": 10,
+          "marginLeft": 10,
+          "marginRight": 20,
+          "marginTop": 10,
+          "paddingHorizontal": 15,
+          "paddingVertical": 10,
+        }
+      }
+      value=""
+    />
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+          "padding": 10,
+        }
+      }
+      testID="sendButton"
+    >
+      <Image
+        source={
+          {
+            "uri": "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
+          }
+        }
+        style={
+          {
+            "height": 24,
+            "width": 24,
+          }
+        }
+      />
+    </View>
+  </View>
+</View>
+`;

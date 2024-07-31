@@ -29,6 +29,7 @@ import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
+import { colors } from "../styles/colors";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -44,7 +45,7 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cache, setCacheLoaded] = useState(false);
+	// const [cache, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -110,7 +111,6 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [token, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
@@ -123,8 +123,6 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
-
-			setCacheLoaded(true);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
 		}
@@ -133,7 +131,6 @@ const Home: React.FC = () => {
 	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
-		setToken(storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms
@@ -212,7 +209,7 @@ const Home: React.FC = () => {
 	};
 
 	const navigateToCreateNew = () => {
-		router.navigate("/screens/CreateRoom");
+		router.navigate("/screens/rooms/CreateRoom");
 	};
 
 	const handleScroll = useCallback(
@@ -363,13 +360,13 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonContainer: {
 		position: "absolute",
-		bottom: 9,
+		bottom: 15,
 		right: 15,
 		zIndex: 20,
 	},
 	createRoomButton: {
-		backgroundColor: "#1E90FF",
-		borderRadius: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 30,
 		width: 50,
 		height: 50,
 		justifyContent: "center",

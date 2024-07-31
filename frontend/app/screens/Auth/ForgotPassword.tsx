@@ -1,29 +1,84 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
 	StyleSheet,
 	TouchableOpacity,
 	TextInput,
+	Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import CyanButton from "../../components/CyanButton";
+import { colors } from "../../styles/colors";
+import { CognitoUser } from "amazon-cognito-identity-js";
+import UserPool from "../../services/UserPool";
 
 const ForgotPasswordScreen: React.FC = () => {
 	const router = useRouter();
+	const [email, setEmail] = useState("");
+	const [emailError, setEmailError] = useState(true);
 
-	const navigateToOTP = () => {
-		router.push("screens/OTP");
+	const userData = {
+		Username: email,
+		Pool: UserPool,
+	};
+
+	const cognitoUser = new CognitoUser(userData);
+
+	const validateEmail = (email: string) => {
+		const re: RegExp = /\S+@\S+\.\S+/;
+		return re.test(email);
+	};
+
+	const handleSendCode = () => {
+		if (emailError) {
+			Alert.alert(
+				"Invalid Email",
+				"Please enter a valid email address",
+				[{ text: "OK" }],
+				{ cancelable: false },
+			);
+			return;
+		}
+
+		Alert.alert(
+			"Confirm Email",
+			`Is this the correct email address? ${email}`,
+			[
+				{
+					text: "Cancel",
+					style: "cancel",
+				},
+				{
+					text: "OK",
+					onPress: () => {
+						cognitoUser.forgotPassword({
+							onSuccess: () => {
+								router.push({
+									pathname: "screens/Auth/ResetPassword",
+									params: { email: email },
+								});
+							},
+							onFailure: (err) => {
+								console.log("Error sending reset code:", err);
+							},
+						});
+					},
+				},
+			],
+			{ cancelable: false },
+		);
 	};
 
 	const navigateToLogin = () => {
-		router.push("screens/LoginScreen");
+		router.push("screens/Auth/LoginScreen");
 	};
 
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
@@ -37,15 +92,18 @@ const ForgotPasswordScreen: React.FC = () => {
 			<TextInput
 				style={styles.input}
 				placeholder="Enter your email"
+				value={email}
 				placeholderTextColor="#888"
 				keyboardType="email-address"
 				autoCapitalize="none"
+				onChangeText={(text) => {
+					setEmail(text);
+					setEmailError(!validateEmail(text));
+				}}
 			/>
 
 			<View style={styles.bottomContainer}>
-				<TouchableOpacity style={styles.sendCodeButton} onPress={navigateToOTP}>
-					<Text style={styles.sendCodeText}>Send Code</Text>
-				</TouchableOpacity>
+				<CyanButton title="Send Code" onPress={handleSendCode} />
 
 				<TouchableOpacity
 					style={styles.registerContainer}
@@ -81,19 +139,18 @@ const styles = StyleSheet.create({
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
 		textAlign: "center",
 		marginTop: 50,
 		marginBottom: 20,
 		paddingHorizontal: 20,
 	},
 	instructionText: {
-		fontSize: 14,
-		color: "#888",
-		fontFamily: "Poppins_500Medium",
+		fontSize: 16,
+		color: colors.primary,
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
+		fontWeight: "500",
 	},
 	input: {
 		height: 50,
@@ -102,7 +159,6 @@ const styles = StyleSheet.create({
 		marginHorizontal: 30, // Add horizontal margin
 		fontSize: 16,
 		marginBottom: 10,
-		fontFamily: "Poppins_500Medium",
 	},
 	bottomContainer: {
 		position: "absolute",
@@ -112,36 +168,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		alignItems: "center",
 	},
-	sendCodeButton: {
-		backgroundColor: "#330066",
-		borderRadius: 30,
-		paddingVertical: 15,
-		width: "85%",
-		alignItems: "center",
-		justifyContent: "center",
-		marginBottom: 20,
-		elevation: 5,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.3,
-		shadowRadius: 3.84,
-	},
-	sendCodeText: {
-		color: "#fff",
-		fontSize: 16,
-		fontFamily: "Poppins_700Bold",
-	},
 	registerContainer: {
 		alignItems: "center",
 	},
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		fontWeight: "500",
 	},
 	registerBoldText: {
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		color: colors.primary,
 	},
 });
 
