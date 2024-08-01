@@ -9,6 +9,15 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
+import {
+	RoomAnalyticsQueueDto,
+	RoomAnalyticsParticipationDto,
+	RoomAnalyticsInteractionsDto,
+	RoomAnalyticsVotesDto,
+	RoomAnalyticsSongsDto,
+	RoomAnalyticsContributorsDto,
+	RoomAnalyticsDto,
+} from "./dto/roomanalytics.dto";
 
 @Injectable()
 export class RoomsService {
@@ -564,5 +573,96 @@ export class RoomsService {
 				"Failed to unbookmark room. Database returned null after delete.",
 			);
 		}
+	}
+
+	async getRoomAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsDto();
+	}
+
+	async getRoomQueueAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsQueueDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsQueueDto();
+	}
+
+	async getRoomParticipationAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsParticipationDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsParticipationDto();
+	}
+
+	async getRoomInteractionAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsInteractionsDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsInteractionsDto();
+	}
+
+	async getRoomVotesAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsVotesDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsVotesDto();
+	}
+
+	async getRoomSongsAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsSongsDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsSongsDto();
+	}
+
+	async getRoomContributorsAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise<RoomAnalyticsContributorsDto> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+			" and given userID: ",
+			userID,
+		);
+		return new RoomAnalyticsContributorsDto();
 	}
 }
