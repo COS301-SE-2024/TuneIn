@@ -584,8 +584,8 @@ export class UsersService {
 		const result = await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
-					{ friend1: userID, friend2: friendUserID },
-					{ friend1: friendUserID, friend2: userID },
+						{ friend1: userID, friend2: friendUserID },
+						{ friend1: friendUserID, friend2: userID },
 				],
 			},
 		});
@@ -599,12 +599,50 @@ export class UsersService {
 
 	async acceptFriendRequest(
 		userID: string,
-		friendUsername: string,
+		friendUserID: string,
 	): Promise<boolean> {
 		//accept friend request
 		console.log(
-			"user (" + userID + ") accepted friend request from @" + friendUsername,
+			"user (" + userID + ") accepted friend request from @" + friendUserID,
 		);
+
+		// check if user is trying to accept themselves
+		if (userID === friendUserID) {
+			throw new HttpException(
+				"You cannot accept yourself",
+				HttpStatus.BAD_REQUEST
+			);
+		}
+		// check if users exist
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+		if (!(await this.dbUtils.userExists(friendUserID))) {
+			throw new HttpException(
+				"User (" + friendUserID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+		const result = await this.prisma.friends.updateMany({
+			where: {
+				friend1: friendUserID,
+				friend2: userID,
+				is_pending: true,
+			},
+			data: {
+				is_pending: false,
+			},
+		});
+		console.log("accepted friend request", result);
+		if (result.count === 0) {
+			throw new HttpException(
+				"User (" + friendUserID + ") has not sent a friend request to user (" + userID + ")",
+				HttpStatus.BAD_REQUEST
+			);
+		}
 		return true;
 	}
 
