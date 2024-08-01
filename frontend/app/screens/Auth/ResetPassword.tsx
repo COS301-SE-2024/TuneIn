@@ -13,8 +13,12 @@ import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import UserPool from "../../services/UserPool";
+import * as StorageService from "../../services/StorageService";
+
 
 const PasswordReset: React.FC = () => {
+	StorageService.clear();
+
 	const router = useRouter();
 	const [password, setPassword] = useState("");
 	const [resetcode, setResetcode] = useState("");

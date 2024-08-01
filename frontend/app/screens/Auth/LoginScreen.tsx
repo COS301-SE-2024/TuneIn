@@ -21,6 +21,8 @@ import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 
 const LoginScreen: React.FC = () => {
+	StorageService.clear();
+
 	const [obscureText, setObscureText] = useState(true);
 	const [rememberMe, setRememberMe] = useState(false);
 	const [emailOrUsername, setEmailOrUsername] = useState("");

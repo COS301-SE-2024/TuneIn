@@ -9,8 +9,10 @@ import {
 } from "@expo-google-fonts/poppins";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Ionicons } from "@expo/vector-icons";
+import * as StorageService from "../../services/StorageService";
 
 const LoginStreamingScreen: React.FC = () => {
+	StorageService.clear();
 	const router = useRouter();
 
 	let [fontsLoaded] = useFonts({

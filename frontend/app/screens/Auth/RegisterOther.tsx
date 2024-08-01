@@ -27,6 +27,7 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
+import * as StorageService from "../../services/StorageService";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -77,6 +78,7 @@ const makeStateVariable = (redirectURI: string) => {
 };
 
 const RegisterOtherScreen: React.FC = () => {
+	StorageService.clear();
 	const router = useRouter();
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
@@ -134,6 +136,10 @@ const RegisterOtherScreen: React.FC = () => {
 				router.navigate("screens/Home");
 			};
 			doExchange();
+		} else {
+			throw new Error(
+				"Received unsuccessful response from Spotify. Please try again.",
+			);
 		}
 	}, [response]);
 

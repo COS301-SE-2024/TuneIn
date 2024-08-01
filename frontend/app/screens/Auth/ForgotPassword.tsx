@@ -13,6 +13,7 @@ import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import UserPool from "../../services/UserPool";
+import * as StorageService from "../../services/StorageService";
 
 const ForgotPasswordScreen: React.FC = () => {
 	const router = useRouter();
@@ -53,6 +54,7 @@ const ForgotPasswordScreen: React.FC = () => {
 				{
 					text: "OK",
 					onPress: () => {
+						StorageService.clear();
 						cognitoUser.forgotPassword({
 							onSuccess: () => {
 								router.push({
@@ -72,6 +74,7 @@ const ForgotPasswordScreen: React.FC = () => {
 	};
 
 	const navigateToLogin = () => {
+		StorageService.clear();
 		router.push("screens/Auth/LoginScreen");
 	};
 
