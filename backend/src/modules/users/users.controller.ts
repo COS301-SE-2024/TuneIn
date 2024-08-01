@@ -385,9 +385,7 @@ export class UsersController {
 		@Request() req: any,
 		@Param("userID") userID: string,
 	): Promise<boolean> {
-		// console.log("req", req);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		// console.log("user info", userInfo);
 		return await this.usersService.befriendUser(userInfo.id, userID);
 	}
 
@@ -411,18 +409,17 @@ export class UsersController {
 		@Request() req: any,
 		@Param("userID") userID: string,
 	): Promise<boolean> {
-		// console.log("req", req.user);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		// console.log("user info", userInfo);
 		return await this.usersService.unfriendUser(userInfo.id, userID);
 	}
 
-	@Post(":username/accept")
+	@Post(":userID/accept")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Accept a friend request from the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user whose friend request to accept.",
+		name: "userID",
+		description: "The userID of the user whose friend request to accept.",
 	})
 	@ApiOkResponse({
 		description: "Successfully accepted friend request.",
@@ -434,10 +431,10 @@ export class UsersController {
 	})
 	async acceptFriendRequest(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.acceptFriendRequest(userInfo.id, username);
+		return await this.usersService.acceptFriendRequest(userInfo.id, userID);
 	}
 
 	@Post(":username/reject")
