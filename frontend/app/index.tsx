@@ -44,11 +44,27 @@ const App: React.FC = () => {
 				await fetchFonts();
 				setFontLoaded(true);
 
-				const authToken = await StorageService.getItem("backendToken");
-				if (authToken && authToken !== "undefined" && authToken !== "null") {
-					auth.setToken(authToken);
+				const cognitoToken = await StorageService.getItem("cognitoToken");
+				if (cognitoToken) {
+					auth.exchangeCognitoToken(cognitoToken);
 				}
-				router.push("/screens/WelcomeScreen");
+
+				if (!auth.tokenSet) {
+					const authToken = await StorageService.getItem("token");
+					if (authToken && authToken !== "undefined" && authToken !== "null") {
+						auth.setToken(authToken);
+						auth.postAuthInit();
+					}
+				}
+
+				// Perform token validation if necessary
+				if (auth.authenticated()) {
+					// Redirect to the HomeScreen or appropriate route
+					router.push("/screens/Home");
+				} else {
+					// Redirect to the WelcomeScreen or appropriate route
+					router.push("/screens/WelcomeScreen");
+				}
 			} catch (error) {
 				console.error("Error checking token or loading fonts:", error);
 				router.push("/screens/WelcomeScreen");

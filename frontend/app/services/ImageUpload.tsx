@@ -1,4 +1,5 @@
-import AWS from "aws-sdk";
+import { Upload } from "@aws-sdk/lib-storage";
+import { S3 } from "@aws-sdk/client-s3";
 
 import {
 	AWS_ACCESS_KEY_ID,
@@ -39,17 +40,14 @@ if (!AWS_S3_ENDPOINT) {
 	);
 }
 
-AWS.config.update({
-	accessKeyId: AWS_ACCESS_KEY_ID,
-	secretAccessKey: AWS_SECRET_ACCESS_KEY,
-	region: AWS_S3_REGION,
-});
-AWS.config.logger = console;
-
 // Create an S3 instance
-const s3 = new AWS.S3({
-	apiVersion: "2006-03-01",
-	signatureVersion: "v4",
+const s3 = new S3({
+	credentials: {
+		accessKeyId: AWS_ACCESS_KEY_ID,
+		secretAccessKey: AWS_SECRET_ACCESS_KEY,
+	},
+	region: AWS_S3_REGION,
+	logger: console,
 });
 
 const uploadImage = async (imageURI: string, roomName: string) => {
@@ -62,7 +60,10 @@ const uploadImage = async (imageURI: string, roomName: string) => {
 			Body: blob,
 			ContentType: blob.type,
 		};
-		const data = await s3.upload(params).promise();
+		const data = await new Upload({
+			client: s3,
+			params,
+		}).done();
 		console.log("Successfully uploaded image", data.Location);
 		return data.Location;
 	} catch (error) {

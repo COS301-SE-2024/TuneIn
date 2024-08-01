@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { useSpotifyAuth } from "./useSpotifyAuth";
+import * as spotifyAuth from "../services/SpotifyAuth";
 import { Devices } from "../models/Devices"; // Ensure this path is correct
 
 export const useSpotifyDevices = () => {
-	const { getToken } = useSpotifyAuth();
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [devices, setDevices] = useState<Devices[]>([]); // Update to use Devices type
 	const [error, setError] = useState<string | null>(null);
@@ -12,7 +11,8 @@ export const useSpotifyDevices = () => {
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
-				const token = await getToken();
+				const allTokens = await spotifyAuth.getTokens();
+				const token = allTokens.access_token;
 				setAccessToken(token);
 			} catch (err) {
 				setError("An error occurred while fetching the token");
@@ -21,7 +21,7 @@ export const useSpotifyDevices = () => {
 		};
 
 		fetchToken();
-	}, [getToken]);
+	}, []);
 
 	useEffect(() => {
 		if (accessToken) {

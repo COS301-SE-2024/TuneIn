@@ -13,70 +13,18 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../../models/roomdetails";
-import AWS from "aws-sdk";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 
-import {
-	AWS_ACCESS_KEY_ID,
-	AWS_SECRET_ACCESS_KEY,
-	AWS_S3_BUCKET_NAME,
-	AWS_S3_REGION,
-	AWS_S3_ENDPOINT,
-} from "react-native-dotenv";
-
-if (!AWS_ACCESS_KEY_ID) {
-	throw new Error(
-		"No AWS access key ID (AWS_ACCESS_KEY_ID) provided in environment variables",
-	);
-}
-
-const _AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY;
-if (!_AWS_SECRET_ACCESS_KEY) {
-	throw new Error(
-		"No AWS secret access key (AWS_SECRET_ACCESS_KEY) provided in environment variables",
-	);
-}
-
-if (!AWS_S3_BUCKET_NAME) {
-	throw new Error(
-		"No AWS bucket name (AWS_S3_BUCKET_NAME) provided in environment variables",
-	);
-}
-
-if (!AWS_S3_REGION) {
-	throw new Error(
-		"No AWS region (AWS_S3_REGION) provided in environment variables",
-	);
-}
-
-if (!AWS_S3_ENDPOINT) {
-	throw new Error(
-		"No AWS endpoint (AWS_S3_ENDPOINT) provided in environment variables",
-	);
-}
-
 const RoomDetails: React.FC = () => {
-	const AWS_SECRET_ACCESS_KEY: string = _AWS_SECRET_ACCESS_KEY.replace(
-		"+",
-		"+",
-	);
-
-	// console.log(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_NEST_BUCKET_NAME, AWS_S3_REGION, AWS_S3_ENDPOINT)
 	const router = useRouter();
 	const { room } = useLocalSearchParams();
 	// console.log('room', room)
 	const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
 	// console.log('room', newRoom);
-	AWS.config.update({
-		accessKeyId: AWS_ACCESS_KEY_ID,
-		secretAccessKey: AWS_SECRET_ACCESS_KEY,
-		region: AWS_S3_REGION,
-	});
-	AWS.config.logger = console;
 
 	const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
 		name: "",

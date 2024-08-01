@@ -10,13 +10,12 @@ import {
 } from "react-native";
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
-import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
 import { Devices } from "../models/Devices";
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 const DevicePicker = () => {
-	const { getToken } = useSpotifyAuth();
 	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
 	const [isVisible, setIsVisible] = useState(false);
 	const [devices, setDevices] = useState<Devices[]>(initialDevices);
@@ -27,7 +26,8 @@ const DevicePicker = () => {
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
-				const token = await getToken();
+				const allTokens = await spotifyAuth.getTokens();
+				const token = allTokens.access_token;
 				setAccessToken(token);
 			} catch (err) {
 				console.error("An error occurred while fetching the token", err);
@@ -35,7 +35,7 @@ const DevicePicker = () => {
 		};
 
 		fetchToken();
-	}, [getToken]);
+	}, []);
 
 	useEffect(() => {
 		// Declare intervalId using useRef to ensure it maintains its value across renders

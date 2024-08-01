@@ -12,7 +12,7 @@ const testMessage = {
 
 import io from "socket.io-client";
 
-const socket = io("http://localhost:3000/live-chat", {
+const socket = io("http://localhost:3000/live", {
 	transports: ["websocket"],
 });
 

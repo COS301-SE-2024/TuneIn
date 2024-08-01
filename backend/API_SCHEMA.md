@@ -13,6 +13,26 @@ output: updated UserDto
 no input
 response: UserDto
 
+### `/users/{username}/befriend`
+#### POST: sends a friend request to user with given username
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/unfriend`
+#### POST: ends friendship with user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/accept`
+#### POST: accepts friend request from user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/reject`
+#### POST: accepts user's friend request
+no input
+response: code (2xx for success, 4xx for error)
+
 ### `/users/{username}/follow`
 #### POST: follows the user with the username given✅
 no input
@@ -22,8 +42,6 @@ response: code (2xx for success, 4xx for error)
 #### POST: unfollows the user with the username given✅
 no input
 response: code (2xx for success, 4xx for error)
-
-# (Note: add stuff for friends later)
 
 ### `/users/rooms`
 related to a user's own rooms
@@ -44,10 +62,19 @@ response: an array of RoomDto
 no input
 response: an array of RoomDto
 
+### `/users/rooms/current`
+#### GET: get user's current room (room they're currently in)
+response: RoomDto or null
+
 ### `/users/friends`
 #### GET: get user's friends✅
 no input
 response: an array of UserDto
+
+### `/users/friends/requests`
+#### GET: get user's friend requests
+no input
+response: an array of UserDto (with friendship object attached)
 
 ### `/users/followers`
 #### GET: get list of followers✅
@@ -75,7 +102,7 @@ response: RoomDto
 input: partial RoomDto
 response: updated RoomDto
 
-#### DELETE: deletes the room (only if it belongs to the user)
+#### DELETE: deletes the room (only if it belongs to the user)✅
 no input
 response: (2xx for success, 4xx for error)
 
@@ -119,9 +146,15 @@ response: SongInfoDto (updated with new song playing)
 
 ## Search
 ### `/search`
-#### GET: combines results of both `/search/users` and `/search/rooms`✅
+#### GET: combines results of both `/search/users` and `/search/rooms`
 no input
 response: return an array of mixed data types of UserDto and RoomDto
+
+### `/search/history`
+#### GET: returns a list of recent searches & recent finds
+response: return an array of either string (for previous search strings), RoomDto or UserDto (for previously found objects)
+#### DELETE: clears all search history for user
+response: (2xx for success, 4xx for error)
 
 ### `/search/rooms`
 #### GET: gets a list of rooms that match given names
@@ -152,6 +185,8 @@ response: return an array of RoomDto
 ### `/search/rooms/history`
 #### GET: returns a list of recently searched rooms (rooms discovered from search)
 response: return an array of RoomDto
+#### DELETE: clears all room search history for user
+response: (2xx for success, 4xx for error)
 
 ### `/search/users`
 #### GET: gets a list of users that match given names
@@ -172,6 +207,25 @@ response: return an array of UserDto
 ### `/search/users/history`
 #### GET: returns a list of recently searched users (users discovered from search)
 response: return an array of UserDto
+#### DELETE: clears all user search history for user
+response: (2xx for success, 4xx for error)
+
+### `/search/genres`
+#### GET: gets a list of genres that match given string
+query params
+- q: string to match genres
+response: return an array of genre names (strings)
+
+## Genres
+### `/genres`
+#### GET: gets a list of all genres in our db
+response: return a string array of genre names
+
+## Songs
+### `/songs/{song_id}/spotify`
+#### GET: gets the spotify id for a song with given id
+input: song id as URL path param
+response: {id: string}
 
 # Data Transfer Objects (Dtos)
 
@@ -212,6 +266,12 @@ A object representing User Profile information.
 	recent_rooms: {
 		count: int,
 		data: [RoomDto]
+	},
+	friendship: {
+		status: boolean,
+		accept_url: string,
+		reject_url: string,
+		
 	}
 }
 ```

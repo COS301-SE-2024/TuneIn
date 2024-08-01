@@ -402,6 +402,11 @@ export class UsersService {
 		return recommends;
 	}
 
+	async getCurrentRoom(userID: string): Promise<RoomDto | object> {
+		console.log("Getting current room for user " + userID);
+		return {};
+	}
+
 	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
 			where: { OR: [{ friend1: userID }, { friend2: userID }] },
@@ -473,5 +478,59 @@ export class UsersService {
 			);
 		}
 		return rooms;
+	}
+
+	async befriendUser(
+		userID: string,
+		newPotentialFriendUsername: string,
+	): Promise<boolean> {
+		//add friend request for the user
+		console.log(
+			"user (" + userID + ") wants to befriend @" + newPotentialFriendUsername,
+		);
+		return true;
+	}
+
+	async unfriendUser(userID: string, friendUsername: string): Promise<boolean> {
+		//remove friend from the user's friend list
+		console.log(
+			"user (" + userID + ") is no longer friends with @" + friendUsername,
+		);
+		return true;
+	}
+
+	async acceptFriendRequest(
+		userID: string,
+		friendUsername: string,
+	): Promise<boolean> {
+		//accept friend request
+		console.log(
+			"user (" + userID + ") accepted friend request from @" + friendUsername,
+		);
+		return true;
+	}
+
+	async rejectFriendRequest(
+		userID: string,
+		friendUsername: string,
+	): Promise<boolean> {
+		//reject friend request
+		console.log(
+			"user (" + userID + ") rejected friend request from @" + friendUsername,
+		);
+		return true;
+	}
+
+	async getFriendRequests(userID: string): Promise<UserDto[]> {
+		//get all friend requests for the user
+		console.log("Getting friend requests for user " + userID);
+
+		/*
+			DONT IGNORE THIS
+
+			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
+			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
+		*/
+		return [];
 	}
 }
