@@ -113,8 +113,12 @@ const Home: React.FC = () => {
 	};
 
 	const refreshData = useCallback(async () => {
+		// await StorageService.clear();
+		// console.log("CLEARED STORAGE");
 		setLoading(true);
+		console.log("Refreshing data but kinda checking if token is actually being fetched...");
 		const storedToken = await auth.getToken();
+		console.log("Stored token:", storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms

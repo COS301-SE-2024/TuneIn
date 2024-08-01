@@ -323,32 +323,6 @@ const RoomPage = () => {
 		});
 	};
 
-	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined((prevJoined) => !prevJoined);
-		if (!joined) {
-			// joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
-			//setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			//leaveRoom();
-			live.leaveRoom();
-			//setJoined(false);
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			//playbackManager.pause();
-			const deviceID = await playback.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				playback.handlePlayback(deviceID, "pause");
-			}
-			setIsPlaying(false);
-		}
-	};
 
 	if (!readyToJoinRoom) {
 		setReadyToJoinRoom(true);
