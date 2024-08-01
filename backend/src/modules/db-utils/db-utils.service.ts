@@ -355,7 +355,7 @@ export class DbUtilsService {
 		// SELECT * FROM follows WHERE follower = accountFollowedId AND followee = userID
 		const follow1: Prisma.follows[] = await this.prisma.follows.findMany({
 			where: {
-				AND: [
+				OR: [
 					{
 						follower: userID,
 						followee: accountFollowedId,
@@ -367,6 +367,7 @@ export class DbUtilsService {
 				],
 			},
 		});
+		console.log("Follow1: ", follow1);
 
 		if (!follow1 || follow1 === null) {
 			return false;
@@ -382,7 +383,8 @@ export class DbUtilsService {
 
 	async isFriendsOrPending(
 		userID: string,
-		accountFriendId: string
+		accountFriendId: string,
+		isPending: boolean,
 	): Promise<boolean> {
 		// check if user is friends with accountFriendId
 		// userId can be friend1 or friend2, so check both
@@ -402,6 +404,7 @@ export class DbUtilsService {
 						friend2: userID,
 					},
 				],
+				is_pending: isPending,
 			},
 		});
 		if (!friends || friends === null) {
