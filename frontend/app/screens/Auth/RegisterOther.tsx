@@ -17,7 +17,7 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import {
-	// SPOTIFY_CLIENT_ID,
+	SPOTIFY_CLIENT_ID,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
 import {
@@ -31,6 +31,7 @@ import * as StorageService from "../../services/StorageService";
 
 WebBrowser.maybeCompleteAuthSession();
 
+const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",

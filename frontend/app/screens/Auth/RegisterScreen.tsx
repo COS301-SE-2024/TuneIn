@@ -17,7 +17,6 @@ import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import * as StorageService from "../../services/StorageService";
 
-
 const RegisterScreen: React.FC = () => {
 	StorageService.clear();
 	const [obscureText, setObscureText] = useState(true);

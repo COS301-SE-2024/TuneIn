@@ -16,7 +16,6 @@ import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 

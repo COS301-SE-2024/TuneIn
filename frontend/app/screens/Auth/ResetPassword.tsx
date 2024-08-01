@@ -15,7 +15,6 @@ import { CognitoUser } from "amazon-cognito-identity-js";
 import UserPool from "../../services/UserPool";
 import * as StorageService from "../../services/StorageService";
 
-
 const PasswordReset: React.FC = () => {
 	StorageService.clear();
 
