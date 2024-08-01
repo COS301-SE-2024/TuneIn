@@ -139,30 +139,65 @@ const Search: React.FC = () => {
 			const token = await auth.getToken();
 
 			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
+				if(filter === "all") {
+				}
+				else if(filter === "room") {
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
 						},
-					},
-				);
-				console.log("Search: " + JSON.stringify(response));
-				const results: SearchResult[] = response.data.map((item: any) => ({
-					id: item.id,
-					type: "user",
-					name: item.username,
-					userData: {
+					);
+					console.log("Search: " + JSON.stringify(response));
+					const results: SearchResult[] = response.data.map((item: any) => ({
+						id: item.roomID,
+						type: "room",
+						name: item.room_name,
+						roomData: {
+							roomID: item.roomID,
+							backgroundImage: item.room_image,
+                            name: item.room_name,
+                            description: item.description,
+                            userID: item.creator.userID,
+                            tags: item.tags,
+							language: item.language,
+							roomSize: item.participant_count,
+							isExplicit: item.has_explicit_content,
+							isNsfw: item.has_nsfw_content,
+						},
+					}));
+
+					console.log("Formatted results: " + JSON.stringify(results));
+					setResults(results);
+				}
+				else if(filter === "user"){
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						},
+					);
+					console.log("Search: " + JSON.stringify(response));
+					const results: SearchResult[] = response.data.map((item: any) => ({
 						id: item.id,
-						profile_picture_url: item.profile_picture_url,
-						profile_name: item.profile_name,
-						username: item.username,
-					},
-				}));
-				setResults(results);
+						type: "user",
+						name: item.username,
+						userData: {
+							id: item.id,
+							profile_picture_url: item.profile_picture_url,
+							profile_name: item.profile_name,
+							username: item.username,
+						},
+					}));
+					setResults(results);
+				}
 			}
 		} catch (error) {
-			console.error("Error fetching seacrh info:", error);
+			console.error("Error fetching search info:", error);
 			return null;
 		}
 	};
