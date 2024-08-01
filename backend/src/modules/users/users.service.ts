@@ -482,12 +482,62 @@ export class UsersService {
 
 	async befriendUser(
 		userID: string,
-		newPotentialFriendUsername: string,
+		newPotentialFriendID: string,
 	): Promise<boolean> {
 		//add friend request for the user
 		console.log(
-			"user (" + userID + ") wants to befriend @" + newPotentialFriendUsername,
+			"user (" + userID + ") wants to befriend (" + newPotentialFriendID + ")",
 		);
+
+		// check if user is trying to friend themselves
+		if (userID === newPotentialFriendID) {
+			throw new HttpException(
+				"You cannot friend yourself",
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		// check if users exist
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+		// check if friend exists as a user
+		if (!(await this.dbUtils.userExists(newPotentialFriendID))) {
+			throw new HttpException(
+				"User (" + newPotentialFriendID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+
+		// check if they are already friends
+		if (await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID)) {
+			throw new HttpException(
+				"User (" + userID + ") is already friends with (" + newPotentialFriendID + ") or has a pending request",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+
+		if (await this.dbUtils.isMutualFollow(userID, newPotentialFriendID)) {
+			throw new HttpException(
+				"User (" + userID + ") is already cannot befriend (" + newPotentialFriendID + ")",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		const result = await this.prisma.friends.create(
+			{
+				data: {
+					friend1: userID,
+					friend2: newPotentialFriendID,
+				},
+			},
+		);
+
+		if (!result || result === null) {
+			throw new Error("Failed to befriend user (" + newPotentialFriendID + ")");
+		}
 		return true;
 	}
 

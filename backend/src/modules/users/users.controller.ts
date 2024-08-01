@@ -366,12 +366,12 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/befriend")
+	@Post(":userID/befriend")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Send a friend request to the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user to send a friend request to.",
+		name: "userID",
+		description: "The userID of the user to send a friend request to.",
 	})
 	@ApiOkResponse({
 		description: "Successfully sent friend request.",
@@ -383,10 +383,10 @@ export class UsersController {
 	})
 	async befriendUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.befriendUser(userInfo.id, username);
+		return await this.usersService.befriendUser(userInfo.id, userID);
 	}
 
 	@Post(":username/unfriend")
