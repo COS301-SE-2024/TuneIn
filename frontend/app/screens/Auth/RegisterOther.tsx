@@ -17,7 +17,7 @@ import {
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
 
-if (!clientId) {
+if (!SPOTIFY_REDIRECT_TARGET) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);

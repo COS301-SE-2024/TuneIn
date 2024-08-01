@@ -19,6 +19,9 @@ import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
+import axios from "axios";
+import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 
 type SearchResult = {
 	id: string;
@@ -119,20 +122,49 @@ const Search: React.FC = () => {
 		},
 	];
 
-	const handleSearch = () => {
-		const filteredResults = mockResults.filter((result) => {
-			if (filter === "all") {
-				return (
-					result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-					selectedFilters.length === 0
+	const handleSearch = async () => {
+		// const filteredResults = mockResults.filter((result) => {
+		// 	if (filter === "all") {
+		// 		return (
+		// 			result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+		// 			selectedFilters.length === 0
+		// 		);
+		// 	}
+		// 	return (
+		// 		result.type === filter &&
+		// 		result.name.toLowerCase().includes(searchTerm.toLowerCase())
+		// 	);
+		// });
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
 				);
+				console.log("Search: " + JSON.stringify(response));
+				const results: SearchResult[] = response.data.map((item: any) => ({
+					id: item.id,
+					type: "user",
+					name: item.username,
+					userData: {
+						id: item.id,
+						profile_picture_url: item.profile_picture_url,
+						profile_name: item.profile_name,
+						username: item.username,
+					},
+				}));
+				setResults(results);
 			}
-			return (
-				result.type === filter &&
-				result.name.toLowerCase().includes(searchTerm.toLowerCase())
-			);
-		});
-		setResults(filteredResults);
+		} catch (error) {
+			console.error("Error fetching seacrh info:", error);
+			return null;
+		}
 	};
 
 	const handleScroll = useCallback(

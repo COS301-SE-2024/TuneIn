@@ -55,12 +55,12 @@ export class SearchController {
 		const ctx = createRealContext();
 		const result = await this.searchService.combinedSearch(query_params, ctx);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		this.searchService.insertSearchHistory(
-			"/search",
-			query_params,
-			userInfo.id,
-			ctx,
-		);
+		// this.searchService.insertSearchHistory(
+		// 	"/search",
+		// 	query_params,
+		// 	userInfo.id,
+		// 	ctx,
+		// );
 
 		return result;
 	}
@@ -100,12 +100,12 @@ export class SearchController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result" + typeof result);
 
-		this.searchService.insertSearchHistory(
-			"/search/rooms",
-			query_params,
-			userInfo.id,
-			ctx,
-		);
+		// this.searchService.insertSearchHistory(
+		// 	"/search/rooms",
+		// 	query_params,
+		// 	userInfo.id,
+		// 	ctx,
+		// );
 
 		return result;
 	}
@@ -285,12 +285,12 @@ export class SearchController {
 		const result = await this.searchService.searchUsers(q, ctx);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 
-		this.searchService.insertSearchHistory(
-			"/search/users",
-			{ q: q },
-			userInfo.id,
-			ctx,
-		);
+		// this.searchService.insertSearchHistory(
+		// 	"/search/users",
+		// 	{ q: q },
+		// 	userInfo.id,
+		// 	ctx,
+		// );
 
 		return result;
 	}

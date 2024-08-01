@@ -69,28 +69,28 @@ export class SearchService {
 	// 	console.log(result);
 	// }
 
-	async insertSearchHistory(
-		endpoint: string,
-		params: any,
-		user_id: string,
-		ctx: Context,
-	) {
-		let url = `${endpoint}?q=${params.q}`;
+	// async insertSearchHistory(
+	// 	endpoint: string,
+	// 	params: any,
+	// 	user_id: string,
+	// 	ctx: Context,
+	// ) {
+	// 	let url = `${endpoint}?q=${params.q}`;
 
-		if (params.creator) {
-			url += `&creator=${params.creator}`;
-		}
+	// 	if (params.creator) {
+	// 		url += `&creator=${params.creator}`;
+	// 	}
 
-		const result = await ctx.prisma.search_history.create({
-			data: {
-				user_id: user_id,
-				search_term: params.q,
-				url: url,
-			},
-		});
+	// 	const result = await ctx.prisma.search_history.create({
+	// 		data: {
+	// 			user_id: user_id,
+	// 			search_term: params.q,
+	// 			url: url,
+	// 		},
+	// 	});
 
-		console.log("Insertion result: " + result);
-	}
+	// 	console.log("Insertion result: " + result);
+	// }
 
 	async combinedSearch(
 		params: {
