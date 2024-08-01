@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import LoginScreen from "./screens/Auth/LoginScreen";
+import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
@@ -64,6 +64,7 @@ const App: React.FC = () => {
 				} else {
 					// Redirect to the WelcomeScreen or appropriate route
 					router.push("/screens/WelcomeScreen");
+					StorageService.clear();
 				}
 			} catch (error) {
 				console.error("Error checking token or loading fonts:", error);
@@ -76,7 +77,7 @@ const App: React.FC = () => {
 		checkTokenAndLoadFonts();
 	}, [router]);
 
-	return <LoginScreen />;
+	return <WelcomeScreen />;
 };
 
 export default App;

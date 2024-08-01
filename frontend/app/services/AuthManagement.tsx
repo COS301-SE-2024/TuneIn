@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 import { JWT_SECRET_KEY } from "react-native-dotenv";
 import { live } from "./Live";
+import { router } from "expo-router";
 
 const jwtSecretKey = JWT_SECRET_KEY;
 if (!jwtSecretKey) {
@@ -22,7 +23,15 @@ class AuthManagement {
 
 	private async fetchToken(): Promise<void> {
 		this.token = await StorageService.getItem("token");
-		this.tokenSet = true;
+		if (
+			this.token === null ||
+			this.token === "undefined" ||
+			this.token === "null"
+		) {
+			StorageService.clear();
+		} else {
+			this.tokenSet = true;
+		}
 	}
 
 	public authenticated(): boolean {
@@ -30,9 +39,13 @@ class AuthManagement {
 	}
 
 	public logout(): void {
+		// literally the safety cord of this service
+		// users will be logged out and redirected to the welcome screen if there is any issue with the token
+		alert("Something went wrong with the authentication. Please log in again.");
 		this.token = null;
-		StorageService.removeItem("token");
+		StorageService.clear();
 		this.tokenSet = false;
+		router.navigate("/screens/WelcomeScreen");
 	}
 
 	public exchangeCognitoToken(token: string): void {
@@ -65,16 +78,22 @@ class AuthManagement {
 	}
 
 	public async getToken(): Promise<string | null> {
-		if (await this.checkTokenExpiry()) {
-			await this.refreshAccessToken();
-		}
+		try {
+			if (await this.checkTokenExpiry()) {
+				await this.refreshAccessToken();
+			}
 
-		console.log("Token:", this.token);
-		console.log("Token expiry:", await this.checkTokenExpiry());
-		return this.token;
+			console.log("Token:", this.token);
+			console.log("Token expiry:", await this.checkTokenExpiry());
+			return this.token;
+		} catch (error) {
+			console.error("Failed to get token:", error);
+			this.logout();
+			return null;
+		}
 	}
 
-	public async checkTokenExpiry(): Promise<boolean> {
+	private async checkTokenExpiry(): Promise<boolean> {
 		if (!this.token || this.token === null) {
 			this.token = await StorageService.getItem("token");
 		}
@@ -95,7 +114,7 @@ class AuthManagement {
 		return currentTime >= decodedToken.exp;
 	}
 
-	public async refreshAccessToken(): Promise<void> {
+	private async refreshAccessToken(): Promise<void> {
 		// Make an API call to refresh the token
 		if (this.token && this.token !== null) {
 			try {
