@@ -262,7 +262,7 @@ response: RoomAnalyticsParticipationDto
 	},
 	return_visits: {
 		expected_return_count: number,
-		probability_of_return: double,
+		probability_of_return: number,
 	},
 	room_previews: number,
 }
@@ -294,13 +294,16 @@ response: RoomAnalyticsVotesDto
 {
 	total_upvotes: number,
 	total_downvotes: number,
-	daily_percentage_change_in_upvotes: double,
-	daily_percentage_change_in_downvotes: double,
+	daily_percentage_change_in_upvotes: number,
+	daily_percentage_change_in_downvotes: number,
 	songs: {
 		spotify_id: string,
 		song_id: string,
+		plays: number,
 		upvotes: number,
 		downvotes: number,
+		rank: number,
+		global_rank: number,
 	}[],
 }
 ```

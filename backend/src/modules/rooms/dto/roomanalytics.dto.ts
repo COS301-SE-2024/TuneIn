@@ -10,27 +10,38 @@ import {
 import { UserDto } from "src/modules/users/dto/user.dto";
 
 export class RoomAnalyticsQueueDto {
-	@ApiProperty()
+	@ApiProperty({ description: "Total number of songs ever queued in the room" })
 	@IsNumber()
 	total_songs_queued: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "Number of times the room's queue was exported as a playlist",
+	})
 	@IsNumber()
-	total_songs_exported: number;
+	total_queue_exports: number;
 }
 
 export class ParticipantsPerHourDto {
-	@ApiProperty()
+	@ApiProperty({
+		description: "The number of participants in the room at the given hour",
+	})
 	@IsNumber()
 	count: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The specific hour for participant count",
+		type: Date,
+	})
 	@IsDate()
 	instance: Date;
 }
 
 export class RoomAnalyticsParticipationDto {
-	@ApiProperty()
+	@ApiProperty({
+		description:
+			"Join statistics, including total and unique joins per day and all-time",
+		type: "object",
+	})
 	@IsObject()
 	@ValidateNested()
 	joins: {
@@ -44,12 +55,19 @@ export class RoomAnalyticsParticipationDto {
 		};
 	};
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "Participants per hour data",
+		type: [ParticipantsPerHourDto],
+	})
 	@IsObject()
 	@ValidateNested()
 	participants_per_hour: ParticipantsPerHourDto[];
 
-	@ApiProperty()
+	@ApiProperty({
+		description:
+			"Session data including average, minimum, and maximum duration all-time and per day",
+		type: "object",
+	})
 	@IsObject()
 	@ValidateNested()
 	session_data: {
@@ -66,7 +84,10 @@ export class RoomAnalyticsParticipationDto {
 		}[];
 	};
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "Expected return visits and probability of return",
+		type: "object",
+	})
 	@IsObject()
 	@ValidateNested()
 	return_visits: {
@@ -74,100 +95,124 @@ export class RoomAnalyticsParticipationDto {
 		probability_of_return: number;
 	};
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "Number of previews of the room, i.e. without joining",
+	})
 	@IsNumber()
 	room_previews: number;
 }
 
 export class RoomAnalyticsInteractionsDto {
-	@ApiProperty()
+	@ApiProperty({
+		description: "Total messages sent and messages sent per hour",
+		type: "object",
+	})
 	@IsObject()
 	@ValidateNested()
 	messages: {
 		total: number;
-		per_hour: ParticipantsPerHourDto[];
+		per_hour: {
+			count: number;
+			hour: Date;
+		}[];
 	};
 
-	@ApiProperty()
+	@ApiProperty({ description: "Total number of reactions sent in the room" })
 	@IsNumber()
 	reactions_sent: number;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Number of times the room was bookmarked" })
 	@IsNumber()
 	bookmarked_count: number;
 }
 
 export class RoomAnalyticsVotesDto {
-	@ApiProperty()
+	@ApiProperty({ description: "Total number of upvotes for songs in the room" })
 	@IsNumber()
 	total_upvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "Total number of downvotes for songs in the room",
+	})
 	@IsNumber()
 	total_downvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description:
+			"Daily percentage change in upvotes for songs in the room. (last 24 hours)",
+	})
 	@IsNumber()
 	daily_percentage_change_in_upvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description:
+			"Daily percentage change in downvotes for songs in the room. (last 24 hours)",
+	})
 	@IsNumber()
 	daily_percentage_change_in_downvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({
+		description:
+			"Details of songs including Spotify ID, song ID, upvotes, and downvotes",
+		type: "array",
+	})
 	@IsArray()
 	@ValidateNested()
-	songs: {
-		spotify_id: string;
-		song_id: string;
-		upvotes: number;
-		downvotes: number;
-	}[];
+	songs: SongAnalyticsDto[];
 }
 
 export class SongAnalyticsDto {
-	@ApiProperty()
+	@ApiProperty({ description: "Spotify ID of the song" })
 	@IsString()
 	spotify_id: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Internal song ID" })
 	song_id: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Number of times the song was played" })
 	@IsNumber()
 	plays: number;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Number of upvotes the song received" })
 	@IsNumber()
 	upvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Number of downvotes the song received" })
 	@IsNumber()
 	downvotes: number;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Rank of the song based on some criteria" })
 	@IsNumber()
 	rank: number;
 
-	@ApiProperty()
+	@ApiProperty({ description: "Global rank of the song across all rooms" })
 	@IsNumber()
 	global_rank: number;
 }
 
 export class RoomAnalyticsSongsDto {
-	@ApiProperty({ type: [SongAnalyticsDto] })
+	@ApiProperty({
+		description: "Most played songs in the room",
+		type: [SongAnalyticsDto],
+	})
 	@IsArray()
 	@ValidateNested()
 	most_played: SongAnalyticsDto[];
 
-	@ApiProperty({ type: [SongAnalyticsDto] })
+	@ApiProperty({
+		description: "Top voted songs in the room",
+		type: [SongAnalyticsDto],
+	})
 	@IsArray()
 	@ValidateNested()
 	top_voted: SongAnalyticsDto[];
 }
 
 export class RoomAnalyticsContributorsDto {
-	@ApiProperty()
+	@ApiProperty({
+		description: "Top contributors to the room's queue",
+		type: "object",
+	})
 	@IsObject()
 	@ValidateNested()
 	top_contributors: {
@@ -179,32 +224,41 @@ export class RoomAnalyticsContributorsDto {
 }
 
 export class RoomAnalyticsDto {
-	@ApiProperty({ type: RoomAnalyticsQueueDto })
+	@ApiProperty({ description: "Queue analytics", type: RoomAnalyticsQueueDto })
 	@IsObject()
 	@ValidateNested()
 	queue: RoomAnalyticsQueueDto;
 
-	@ApiProperty({ type: RoomAnalyticsParticipationDto })
+	@ApiProperty({
+		description: "Participation analytics",
+		type: RoomAnalyticsParticipationDto,
+	})
 	@IsObject()
 	@ValidateNested()
 	participation: RoomAnalyticsParticipationDto;
 
-	@ApiProperty({ type: RoomAnalyticsInteractionsDto })
+	@ApiProperty({
+		description: "Interactions analytics",
+		type: RoomAnalyticsInteractionsDto,
+	})
 	@IsObject()
 	@ValidateNested()
 	interactions: RoomAnalyticsInteractionsDto;
 
-	@ApiProperty({ type: RoomAnalyticsVotesDto })
+	@ApiProperty({ description: "Votes analytics", type: RoomAnalyticsVotesDto })
 	@IsObject()
 	@ValidateNested()
 	votes: RoomAnalyticsVotesDto;
 
-	@ApiProperty({ type: RoomAnalyticsSongsDto })
+	@ApiProperty({ description: "Songs analytics", type: RoomAnalyticsSongsDto })
 	@IsObject()
 	@ValidateNested()
 	songs: RoomAnalyticsSongsDto;
 
-	@ApiProperty({ type: RoomAnalyticsContributorsDto })
+	@ApiProperty({
+		description: "Contributors analytics",
+		type: RoomAnalyticsContributorsDto,
+	})
 	@IsObject()
 	@ValidateNested()
 	contributors: RoomAnalyticsContributorsDto;
