@@ -223,11 +223,11 @@ response: RoomAnalyticsParticipationDto
 		per_day: {
 			total_joins: {
 				count: number,
-				day: DateTime,
+				day: Date,
 			}[],
 			unique_joins: {
 				count: number,
-				day: DateTime,
+				day: Date,
 			}[],
 		},
 		all_time: {
@@ -237,7 +237,7 @@ response: RoomAnalyticsParticipationDto
 	},
 	participants_per_hour: {
 		count: number,
-		instance: DateTime,
+		instance: Date,
 	}[],
 	session_data: {
 		all_time: {
@@ -248,15 +248,15 @@ response: RoomAnalyticsParticipationDto
 		per_day: {
 			avg_duration: {
 				duration: number,
-				day: DateTime,
+				day: Date,
 			}[],
 			min_duration: {
 				duration: number,
-				day: DateTime,
+				day: Date,
 			}[],
 			min_duration: {
 				duration: number,
-				day: DateTime,
+				day: Date,
 			}[],
 		},
 	},
@@ -278,7 +278,7 @@ response: RoomAnalyticsInteractionsDto
 		total: number,
 		per_hour: {
 			count: number,
-			instance: DateTime,
+			instance: Date,
 		},
 	},
 	reactions_sent: number,
@@ -491,8 +491,8 @@ A object representing Room information.
 	is_temporary: boolean,
 	is_private: boolean,
 	is_scheduled: boolean,
-	start_date: DateTime,
-	end_date: DateTime,
+	start_date: Date,
+	end_date: Date,
 	language: string,
 	has_explicit_content: boolean,
 	has_nsfw_content: boolean,
