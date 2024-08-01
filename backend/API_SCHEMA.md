@@ -185,6 +185,22 @@ response: SongInfoDto
 no input
 response: SongInfoDto (updated with new song playing)
 
+### `/rooms/{room_id}/analytics`
+
+#### GET: returns all room analytics
+no input
+response: RoomAnalyticsDto
+```json
+{
+	queue: RoomAnalyticsQueueDto,
+	participation: RoomAnalyticsParticipationDto,
+	interactions: RoomAnalyticsInteractionsDto,
+	votes: RoomAnalyticsVotesDto,
+	songs: RoomAnalyticsSongsDto,
+	contributors: RoomAnalyticsContributorsDto,
+}
+```
+
 ### `/rooms/{room_id}/analytics/queue`
 #### GET: returns 'queue' related analytics
 no input
