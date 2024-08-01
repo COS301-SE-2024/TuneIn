@@ -344,4 +344,75 @@ export class DbUtilsService {
 		}
 		return true;
 	}
+
+	async isMutualFollow(
+		userID: string,
+		accountFollowedId: string,
+	): Promise<boolean> {
+		// check if user is following accountFollowedId and accountFollowedId is following user
+		// query must look like this
+		// SELECT * FROM follows WHERE follower = userID AND followee = accountFollowedId
+		// SELECT * FROM follows WHERE follower = accountFollowedId AND followee = userID
+		const follow1: Prisma.follows[] = await this.prisma.follows.findMany({
+			where: {
+				AND: [
+					{
+						follower: userID,
+						followee: accountFollowedId,
+					},
+					{
+						follower: accountFollowedId,
+						followee: userID,
+					},
+				],
+			},
+		});
+
+		if (!follow1 || follow1 === null) {
+			return false;
+		}
+		if (follow1.length === 0 || follow1.length === 1) {
+			return false;
+		}
+		if (follow1.length > 2) {
+			throw new Error("More than two follows found.");
+		}
+		return true;
+	}
+
+	async isFriendsOrPending(
+		userID: string,
+		accountFriendId: string
+	): Promise<boolean> {
+		// check if user is friends with accountFriendId
+		// userId can be friend1 or friend2, so check both
+		// additional condition, the is_pending field must be false
+
+		// query must look like this
+		// SELECT * FROM friends WHERE (friend1 = userID AND friend2 = accountFriendId) OR (friend1 = accountFriendId AND friend2 = userID) AND is_pending = false;
+		const friends: Prisma.friends[] = await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{
+						friend1: userID,
+						friend2: accountFriendId,
+					},
+					{
+						friend1: accountFriendId,
+						friend2: userID,
+					},
+				],
+			},
+		});
+		if (!friends || friends === null) {
+			return false;
+		}
+		if (friends.length === 0) {
+			return false;
+		}
+		if (friends.length > 1) {
+			throw new Error("More than one friend found.");
+		}
+		return true;
+	}
 }
