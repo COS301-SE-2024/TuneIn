@@ -185,6 +185,152 @@ response: SongInfoDto
 no input
 response: SongInfoDto (updated with new song playing)
 
+### `/rooms/{room_id}/analytics/queue`
+#### GET: returns 'queue' related analytics
+no input
+response: RoomAnalyticsQueueDto
+```json
+{
+	total_songs_queued: number,
+	total_songs_exported: number
+}
+```
+
+### `/rooms/{room_id}/analytics/participation`
+#### GET: returns 'participation' related analytics
+no input
+response: RoomAnalyticsParticipationDto
+
+```json
+{
+	joins: {
+		per_day: {
+			total_joins: {
+				count: number,
+				day: DateTime,
+			}[],
+			unique_joins: {
+				count: number,
+				day: DateTime,
+			}[],
+		},
+		all_time: {
+			total_joins: number,
+			unique_joins: number,
+		},
+	},
+	participants_per_hour: {
+		count: number,
+		instance: DateTime,
+	}[],
+	session_data: {
+		all_time: {
+			avg_duration: number,
+			min_duration: number,
+			max_duration: number,
+		},
+		per_day: {
+			avg_duration: {
+				duration: number,
+				day: DateTime,
+			}[],
+			min_duration: {
+				duration: number,
+				day: DateTime,
+			}[],
+			min_duration: {
+				duration: number,
+				day: DateTime,
+			}[],
+		},
+	},
+	return_visits: {
+		expected_return_count: number,
+		probability_of_return: double,
+	},
+	room_previews: number,
+}
+```
+
+### `/rooms/{room_id}/analytics/interactions`
+#### GET: returns interaction analytics
+no input
+response: RoomAnalyticsInteractionsDto
+```json
+{
+	messages: {
+		total: number,
+		per_hour: {
+			count: number,
+			instance: DateTime,
+		},
+	},
+	reactions_sent: number,
+	bookmarked_count: number,
+}
+```
+
+### `/rooms/{room_id}/analytics/votes
+#### GET: returns voting analytics
+no input
+response: RoomAnalyticsVotesDto
+```json
+{
+	total_upvotes: number,
+	total_downvotes: number,
+	daily_percentage_change_in_upvotes: double,
+	daily_percentage_change_in_downvotes: double,
+	songs: {
+		spotify_id: string,
+		song_id: string,
+		upvotes: number,
+		downvotes: number,
+	}[],
+}
+```
+
+### `/rooms/{room_id}/analytics/songs
+#### GET: returns song analytics
+no input
+response: RoomAnalyticsSongsDto
+```json
+{
+	most_played: {
+		spotify_id: string,
+		song_id: string,
+		plays: number,
+		upvotes: number,
+		downvotes: number,
+		rank: number,
+		global_rank: number,
+	}[],
+	top_voted: {
+		spotify_id: string,
+		song_id: string,
+		plays: number,
+		upvotes: number,
+		downvotes: number,
+		rank: number,
+		global_rank: number,
+	}[],
+}
+```
+
+### `/rooms/{room_id}/analytics/contributors
+#### GET: returns analytics related to room contributors
+no input
+response: RoomAnalyticsSongsDto
+```json
+{
+	top_contributors: {
+		user: UserDto,
+		rank: number,
+		num_songs: number,
+		num_upvotes: number,
+	}[],
+}
+```
+
 ## Search
 ### `/search`
 #### GET: combines results of both `/search/users` and `/search/rooms`
