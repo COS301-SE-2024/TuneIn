@@ -385,16 +385,19 @@ export class UsersController {
 		@Request() req: any,
 		@Param("userID") userID: string,
 	): Promise<boolean> {
+		// console.log("req", req);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		// console.log("user info", userInfo);
 		return await this.usersService.befriendUser(userInfo.id, userID);
 	}
 
-	@Post(":username/unfriend")
+	@Post(":userID/unfriend")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "End friendship with the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user to end friendship with.",
+		name: "userID",
+		description: "The userID of the user to end friendship with.",
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
@@ -406,10 +409,12 @@ export class UsersController {
 	})
 	async unfriendUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
+		// console.log("req", req.user);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfriendUser(userInfo.id, username);
+		// console.log("user info", userInfo);
+		return await this.usersService.unfriendUser(userInfo.id, userID);
 	}
 
 	@Post(":username/accept")
