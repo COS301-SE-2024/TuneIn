@@ -437,12 +437,13 @@ export class UsersController {
 		return await this.usersService.acceptFriendRequest(userInfo.id, userID);
 	}
 
-	@Post(":username/reject")
+	@Post(":userID/reject")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Reject a friend request from the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user whose friend request to reject.",
+		name: "userID",
+		description: "The userID of the user whose friend request to reject.",
 	})
 	@ApiOkResponse({
 		description: "Successfully rejected friend request.",
@@ -454,10 +455,10 @@ export class UsersController {
 	})
 	async rejectFriendRequest(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.rejectFriendRequest(userInfo.id, username);
+		return await this.usersService.rejectFriendRequest(userInfo.id, userID);
 	}
 
 	/*
