@@ -33,6 +33,21 @@ response: code (2xx for success, 4xx for error)
 no input
 response: code (2xx for success, 4xx for error)
 
+### `/users/{username}/block`
+#### POST: blocks a given user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/unblock`
+#### POST: unblocks a given user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/report`
+#### POST: report a given user
+no input
+response: code (2xx for success, 4xx for error)
+
 ### `/users/{username}/follow`
 #### POST: follows the user with the username given✅
 no input
@@ -116,8 +131,34 @@ response: (2xx for success, 4xx for error)
 no input
 response: (2xx for success, 4xx for error)
 
+### `/rooms/{room_id}/kick`
+#### POST: kick someone out of a room
+q={username}
+response: (2xx for success, 4xx for error)
+
+### `/rooms/{room_id}/ban`
+#### POST: ban someone from a room
+q={username}
+response: (2xx for success, 4xx for error)
+
+### `/rooms/{room_id}/save`
+#### POST: save room as a playlist
+response: (2xx for success, 4xx for error)
+
 ### `/rooms/{room_id}/users`
 #### GET: returns people currently (and previously in room)
+query params
+- active: boolean
+response: array of UserDto
+
+### `/rooms/{room_id}/kicked`
+#### GET: returns people kicked from room
+query params
+- active: boolean
+response: array of UserDto
+
+### `/rooms/{room_id}/banned`
+#### GET: returns people banned from room
 query params
 - active: boolean
 response: array of UserDto
@@ -143,6 +184,171 @@ response: SongInfoDto
 #### DELETE: skips the current song
 no input
 response: SongInfoDto (updated with new song playing)
+
+### `/rooms/{room_id}/analytics`
+
+#### GET: returns all room analytics
+no input
+response: RoomAnalyticsDto
+```json
+{
+	queue: RoomAnalyticsQueueDto,
+	participation: RoomAnalyticsParticipationDto,
+	interactions: RoomAnalyticsInteractionsDto,
+	votes: RoomAnalyticsVotesDto,
+	songs: RoomAnalyticsSongsDto,
+	contributors: RoomAnalyticsContributorsDto,
+}
+```
+
+### `/rooms/{room_id}/analytics/queue`
+#### GET: returns 'queue' related analytics
+no input
+response: RoomAnalyticsQueueDto
+```json
+{
+	total_songs_queued: number,
+	total_songs_exported: number
+}
+```
+
+### `/rooms/{room_id}/analytics/participation`
+#### GET: returns 'participation' related analytics
+no input
+response: RoomAnalyticsParticipationDto
+
+```json
+{
+	joins: {
+		per_day: {
+			total_joins: {
+				count: number,
+				day: Date,
+			}[],
+			unique_joins: {
+				count: number,
+				day: Date,
+			}[],
+		},
+		all_time: {
+			total_joins: number,
+			unique_joins: number,
+		},
+	},
+	participants_per_hour: {
+		count: number,
+		instance: Date,
+	}[],
+	session_data: {
+		all_time: {
+			avg_duration: number,
+			min_duration: number,
+			max_duration: number,
+		},
+		per_day: {
+			avg_duration: {
+				duration: number,
+				day: Date,
+			}[],
+			min_duration: {
+				duration: number,
+				day: Date,
+			}[],
+			min_duration: {
+				duration: number,
+				day: Date,
+			}[],
+		},
+	},
+	return_visits: {
+		expected_return_count: number,
+		probability_of_return: number,
+	},
+	room_previews: number,
+}
+```
+
+### `/rooms/{room_id}/analytics/interactions`
+#### GET: returns interaction analytics
+no input
+response: RoomAnalyticsInteractionsDto
+```json
+{
+	messages: {
+		total: number,
+		per_hour: {
+			count: number,
+			instance: Date,
+		},
+	},
+	reactions_sent: number,
+	bookmarked_count: number,
+}
+```
+
+### `/rooms/{room_id}/analytics/votes
+#### GET: returns voting analytics
+no input
+response: RoomAnalyticsVotesDto
+```json
+{
+	total_upvotes: number,
+	total_downvotes: number,
+	daily_percentage_change_in_upvotes: number,
+	daily_percentage_change_in_downvotes: number,
+	songs: {
+		spotify_id: string,
+		song_id: string,
+		plays: number,
+		upvotes: number,
+		downvotes: number,
+		rank: number,
+		global_rank: number,
+	}[],
+}
+```
+
+### `/rooms/{room_id}/analytics/songs
+#### GET: returns song analytics
+no input
+response: RoomAnalyticsSongsDto
+```json
+{
+	most_played: {
+		spotify_id: string,
+		song_id: string,
+		plays: number,
+		upvotes: number,
+		downvotes: number,
+		rank: number,
+		global_rank: number,
+	}[],
+	top_voted: {
+		spotify_id: string,
+		song_id: string,
+		plays: number,
+		upvotes: number,
+		downvotes: number,
+		rank: number,
+		global_rank: number,
+	}[],
+}
+```
+
+### `/rooms/{room_id}/analytics/contributors
+#### GET: returns analytics related to room contributors
+no input
+response: RoomAnalyticsSongsDto
+```json
+{
+	top_contributors: {
+		user: UserDto,
+		rank: number,
+		num_songs: number,
+		num_upvotes: number,
+	}[],
+}
+```
 
 ## Search
 ### `/search`
@@ -288,8 +494,8 @@ A object representing Room information.
 	is_temporary: boolean,
 	is_private: boolean,
 	is_scheduled: boolean,
-	start_date: DateTime,
-	end_date: DateTime,
+	start_date: Date,
+	end_date: Date,
 	language: string,
 	has_explicit_content: boolean,
 	has_nsfw_content: boolean,
