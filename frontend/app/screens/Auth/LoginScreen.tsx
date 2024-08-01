@@ -53,25 +53,9 @@ const LoginScreen: React.FC = () => {
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				// POST request to backend
-				fetch(`${utils.API_BASE_URL}/auth/login`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						token: result.getAccessToken().getJwtToken(),
-					}),
-				})
-					.then((response) => response.json())
-					.then((data) => {
-						const token = data.token; // Extract the token from the response
-						auth.setToken(token); // Set the token in the AuthManagement service
-						router.navigate("/screens/Home");
-					})
-					.finally(() => {
-						setIsLoading(false);
-					});
+				auth.exchangeCognitoToken(result.getIdToken().getJwtToken());
+				router.navigate("/screens/Home");
+				setIsLoading(false);
 			},
 			onFailure: function (err) {
 				console.error("Authentication failed:", err);

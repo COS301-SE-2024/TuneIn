@@ -11,6 +11,8 @@ import {
 import SongCard from "../../components/Spotify/SongCard";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 interface Track {
 	id: string;
@@ -139,6 +141,7 @@ const EditPlaylist: React.FC = () => {
 	const playPreview = (previewUrl: string) => {
 		const audio = new Audio(previewUrl);
 		audio.play();
+		console.log("Playing preview:", previewUrl);
 	};
 
 	return (

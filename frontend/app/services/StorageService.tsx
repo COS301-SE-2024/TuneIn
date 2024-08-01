@@ -35,3 +35,14 @@ export const removeItem = async (key: string) => {
 		await AsyncStorage.removeItem(key);
 	}
 };
+
+export const clear = async () => {
+	if (isWeb) {
+		localStorage.clear();
+	} else {
+		const AsyncStorage = (
+			await import("@react-native-async-storage/async-storage")
+		).default;
+		await AsyncStorage.clear();
+	}
+};

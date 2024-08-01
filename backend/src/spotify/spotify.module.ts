@@ -1,12 +1,11 @@
 import { Module } from "@nestjs/common";
 import { SpotifyService } from "./spotify.service";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { PrismaModule } from "./../../prisma/prisma.module";
-import { DbUtilsModule } from "../modules/db-utils/db-utils.module";
 
 @Module({
-	imports: [HttpModule, PrismaModule, DbUtilsModule],
+	imports: [HttpModule, PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
 	controllers: [],
 	providers: [SpotifyService, ConfigService],
 	exports: [SpotifyService],
