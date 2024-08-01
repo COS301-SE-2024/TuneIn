@@ -513,16 +513,19 @@ export class UsersService {
 		}
 
 		// check if they are already friends
-		if (await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID)) {
+		if (
+			(await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID, true)) ||
+			(await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID, false))
+		) {
 			throw new HttpException(
 				"User (" + userID + ") is already friends with (" + newPotentialFriendID + ") or has a pending request",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
 
-		if (await this.dbUtils.isMutualFollow(userID, newPotentialFriendID)) {
+		if (!(await this.dbUtils.isMutualFollow(userID, newPotentialFriendID))) {
 			throw new HttpException(
-				"User (" + userID + ") is already cannot befriend (" + newPotentialFriendID + ")",
+				"User (" + userID + ") cannot befriend (" + newPotentialFriendID + ")",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
@@ -541,11 +544,56 @@ export class UsersService {
 		return true;
 	}
 
-	async unfriendUser(userID: string, friendUsername: string): Promise<boolean> {
+	async unfriendUser(userID: string, friendUserID: string): Promise<boolean> {
 		//remove friend from the user's friend list
 		console.log(
-			"user (" + userID + ") is no longer friends with @" + friendUsername,
+			"user (" + userID + ") is no longer friends with (" + friendUserID + ")",
 		);
+
+		// check if user is trying to unfriend themselves
+		if (userID === friendUserID) {
+			throw new HttpException(
+				"You cannot unfriend yourself",
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		//check if the user exists
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+		if (!(await this.dbUtils.userExists(friendUserID))) {
+			throw new HttpException(
+				"User (" + friendUserID + ") does not exist",
+				HttpStatus.NOT_FOUND
+			);
+		}
+
+		//check if they are friends
+		if (!(await this.dbUtils.isFriendsOrPending(userID, friendUserID, false))) {
+			throw new HttpException(
+				"User (" + userID + ") is not friends with (" + friendUserID + ")",
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		//delete the friendship
+		const result = await this.prisma.friends.deleteMany({
+			where: {
+				OR: [
+					{ friend1: userID, friend2: friendUserID },
+					{ friend1: friendUserID, friend2: userID },
+				],
+			},
+		});
+
+		if (!result || result === null) {
+			throw new Error("Failed to unfriend user (" + friendUserID + ")");
+		}
+
 		return true;
 	}
 
