@@ -33,6 +33,21 @@ response: code (2xx for success, 4xx for error)
 no input
 response: code (2xx for success, 4xx for error)
 
+### `/users/{username}/block`
+#### POST: blocks a given user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/unblock`
+#### POST: unblocks a given user
+no input
+response: code (2xx for success, 4xx for error)
+
+### `/users/{username}/report`
+#### POST: report a given user
+no input
+response: code (2xx for success, 4xx for error)
+
 ### `/users/{username}/follow`
 #### POST: follows the user with the username given✅
 no input
@@ -116,8 +131,34 @@ response: (2xx for success, 4xx for error)
 no input
 response: (2xx for success, 4xx for error)
 
+### `/rooms/{room_id}/kick`
+#### POST: kick someone out of a room
+q={username}
+response: (2xx for success, 4xx for error)
+
+### `/rooms/{room_id}/ban`
+#### POST: ban someone from a room
+q={username}
+response: (2xx for success, 4xx for error)
+
+### `/rooms/{room_id}/save`
+#### POST: save room as a playlist
+response: (2xx for success, 4xx for error)
+
 ### `/rooms/{room_id}/users`
 #### GET: returns people currently (and previously in room)
+query params
+- active: boolean
+response: array of UserDto
+
+### `/rooms/{room_id}/kicked`
+#### GET: returns people kicked from room
+query params
+- active: boolean
+response: array of UserDto
+
+### `/rooms/{room_id}/banned`
+#### GET: returns people banned from room
 query params
 - active: boolean
 response: array of UserDto
