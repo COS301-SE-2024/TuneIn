@@ -229,10 +229,12 @@ const RoomPage = () => {
 		console.log("Joining/Leaving room...", joined);
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
-			joinRoom();
+			// joinRoom();
 			const token = await auth.getToken();
 			currentRoom.leaveJoinRoom(token as string, roomID, false);
 			setJoined(true);
+			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			//setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
@@ -241,11 +243,19 @@ const RoomPage = () => {
 		} else {
 			const token = await auth.getToken();
 			currentRoom.leaveJoinRoom(token as string, roomID, true);
-			leaveRoom();
+			// leaveRoom();
 			setJoined(false);
+			playbackManager.pause();
+			//leaveRoom();
+			live.leaveRoom();
+			//setJoined(false);
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
-			playbackManager.pause();
+			//playbackManager.pause();
+			const deviceID = await playback.getFirstDevice();
+			if (deviceID && deviceID !== null) {
+				playback.handlePlayback(deviceID, "pause");
+			}
 			setIsPlaying(false);
 		}
 	};
