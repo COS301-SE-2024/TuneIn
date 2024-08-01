@@ -85,7 +85,7 @@
     ],
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base)"
+      "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|@expo(nent)?/.*|react-clone-referenced-element|@unimodules/.*|unimodules|sentry-expo|native-base|@smithy/middleware-retry|@aws-sdk/client-s3|@aws-sdk/lib-storage|uuid)"
     ],
     "coverageDirectory": "coverage",
     "coverageReporters": [
