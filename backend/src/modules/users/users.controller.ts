@@ -123,7 +123,6 @@ export class UsersController {
 	@Get("rooms")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's rooms" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -140,7 +139,6 @@ export class UsersController {
 	@Post("rooms")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Create a new room" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The newly created room as a RoomDto.",
 		type: RoomDto,
@@ -158,7 +156,6 @@ export class UsersController {
 	@Get("rooms/recent")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's recent rooms" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's recent rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -174,7 +171,6 @@ export class UsersController {
 	@Get("rooms/foryou")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's recommended rooms" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's recommended rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -187,10 +183,26 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
+	@Get("rooms/current")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get a user's current room (room that they are currently in)",
+	})
+	@ApiOkResponse({
+		description:
+			"The user's current room as a RoomDto or {} if they are not in a room.",
+		type: RoomDto,
+	})
+	async getCurrentRoom(@Request() req: any): Promise<RoomDto | object> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getCurrentRoom(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Get("friends")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's friends" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's friends as an array of UserDto.",
 		type: UserDto,
@@ -199,6 +211,21 @@ export class UsersController {
 	async getUserFriends(@Request() req: any): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserFriends(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/requests")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get a user's friend requests" })
+	@ApiOkResponse({
+		description: "The user's friend requests as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getFriendRequests(@Request() req: any): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getFriendRequests(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -222,7 +249,6 @@ export class UsersController {
 	@Get("following")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's following" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's following as an array of UserDto.",
 		type: UserDto,
@@ -238,7 +264,6 @@ export class UsersController {
 	@Get("bookmarks")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's bookmarks as an array of RoomDto.",
 		type: RoomDto,
@@ -272,7 +297,10 @@ export class UsersController {
 	@Post(":userID/follow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Follow the given user" })
-	@ApiParam({ name: "userID" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to follow.",
+	})
 	@ApiOkResponse({
 		description: "Successfully followed the user.",
 		type: Boolean,
@@ -294,7 +322,10 @@ export class UsersController {
 	@Post(":userID/unfollow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Unfollow the given user" })
-	@ApiParam({ name: "userID" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to unfollow.",
+	})
 	@ApiOkResponse({
 		description: "Successfully unfollowed the user.",
 		type: Boolean,
@@ -310,4 +341,168 @@ export class UsersController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.unfollowUser(userInfo.id, userID);
 	}
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/befriend")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Send a friend request to the given user" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to send a friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully sent friend request.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error sending friend request.",
+		type: Boolean,
+	})
+	async befriendUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.befriendUser(userInfo.id, username);
+	}
+
+	@Post(":username/unfriend")
+	@ApiTags("users")
+	@ApiOperation({ summary: "End friendship with the given user" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to end friendship with.",
+	})
+	@ApiOkResponse({
+		description: "Successfully ended friendship.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error ending friendship.",
+		type: Boolean,
+	})
+	async unfriendUser(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.unfriendUser(userInfo.id, username);
+	}
+
+	@Post(":username/accept")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Accept a friend request from the given user" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user whose friend request to accept.",
+	})
+	@ApiOkResponse({
+		description: "Successfully accepted friend request.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error accepting friend request.",
+		type: Boolean,
+	})
+	async acceptFriendRequest(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.acceptFriendRequest(userInfo.id, username);
+	}
+
+	@Post(":username/reject")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Reject a friend request from the given user" })
+	@ApiParam({
+		name: "username",
+		description: "The username of the user whose friend request to reject.",
+	})
+	@ApiOkResponse({
+		description: "Successfully rejected friend request.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error rejecting friend request.",
+		type: Boolean,
+	})
+	async rejectFriendRequest(
+		@Request() req: any,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.rejectFriendRequest(userInfo.id, username);
+	}
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
+
+	
+
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
+
 }

@@ -1,16 +1,12 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { LocalStrategy } from "./local.strategy";
 import { JwtStrategy } from "./jwt.strategy";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { PrismaService } from "../../prisma/prisma.service";
+import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../prisma/prisma.module";
-import { UsersService } from "../modules/users/users.service";
-import { DbUtilsService } from "../modules/db-utils/db-utils.service";
-import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
 import { SpotifyModule } from "../spotify/spotify.module";
@@ -30,18 +26,9 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
 		SpotifyModule,
-		forwardRef(() => SpotifyAuthModule),
+		SpotifyAuthModule,
 	],
-	providers: [
-		AuthService,
-		LocalStrategy,
-		JwtStrategy,
-		PrismaService,
-		DtoGenService,
-		DbUtilsService,
-		UsersService,
-		ConfigService,
-	],
+	providers: [AuthService, LocalStrategy, JwtStrategy],
 	controllers: [AuthController, SpotifyAuthController],
 	exports: [AuthService],
 })

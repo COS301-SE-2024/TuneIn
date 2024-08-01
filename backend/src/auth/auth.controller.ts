@@ -14,15 +14,9 @@ import {
 	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { UsersService } from "../modules/users/users.service";
-import * as PrismaTypes from "@prisma/client";
-
 @Controller("auth")
 export class AuthController {
-	constructor(
-		private readonly authService: AuthService,
-		private readonly usersService: UsersService,
-	) {}
+	constructor(private readonly authService: AuthService) {}
 
 	@Post("login")
 	@ApiTags("auth")
@@ -52,27 +46,13 @@ export class AuthController {
 		const userID: string = authInfo.username;
 		console.log("authInfo", authInfo);
 
-		const user: PrismaTypes.users | null =
-			await this.usersService.findOne(userID);
-		if (!user || user === null) {
-			throw new HttpException(
-				"Invalid credentials. Could not create user. AuthControllerLoginError01",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-		if (!user.email || user.email === null) {
-			throw new HttpException(
-				"User (" +
-					user.username +
-					") does not have an email address. AuthControllerLoginError02",
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
+		const { username, email } =
+			await this.authService.getUsernameAndEmail(userID);
 
 		const payload: JWTPayload = {
 			id: authInfo.username,
-			username: user.username,
-			email: user.email,
+			username: username,
+			email: email,
 		};
 
 		console.log("payload", payload);

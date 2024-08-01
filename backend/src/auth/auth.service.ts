@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	UnauthorizedException,
+} from "@nestjs/common";
 import {
 	AdminInitiateAuthCommandInput,
 	CognitoIdentityProvider,
@@ -146,8 +151,7 @@ export class AuthService {
 		}
 	}
 
-	// eslint-disable-next-line prettier/prettier
-  	async listUsers(): Promise<ListUsersCommandOutput> {
+	async listUsers(): Promise<ListUsersCommandOutput> {
 		const params = {
 			UserPoolId: this.userPoolId,
 		};
@@ -272,7 +276,6 @@ export class AuthService {
 	}
 	*/
 	getUserInfo(req: any): JWTPayload {
-		console.log("req", req);
 		const result = req.user as JWTPayload;
 		console.log(result);
 		if (!result) {
@@ -286,6 +289,33 @@ export class AuthService {
 			);
 		}
 		return result;
+	}
+
+	async getUsernameAndEmail(userID: string): Promise<{
+		username: string;
+		email: string;
+	}> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. getUsernameAndEmailError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. getUsernameAndEmailError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		return { username: user.username, email: user.email };
 	}
 
 	async decodeAndVerifyCognitoJWT(

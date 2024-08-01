@@ -21,7 +21,7 @@ const WelcomeScreen: React.FC = () => {
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/Auth/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterOther");
 	};
 
 	const navigateToHelp = () => {

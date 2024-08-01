@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import { useSpotifyDevices } from "./useSpotifyDevices";
-import { useSpotifyAuth } from "./useSpotifyAuth";
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 export const useSpotifyPlayback = () => {
-	const { getToken } = useSpotifyAuth();
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [selectedTrackUri, setSelectedTrackUri] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
@@ -13,7 +12,9 @@ export const useSpotifyPlayback = () => {
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
-				const token = await getToken();
+				const allTokens = await spotifyAuth.getTokens();
+				const token = allTokens.access_token;
+				console.log("Access Token:", token);
 				setAccessToken(token);
 			} catch (err) {
 				setError("An error occurred while fetching the token");
@@ -22,7 +23,7 @@ export const useSpotifyPlayback = () => {
 		};
 
 		fetchToken();
-	}, [getToken]);
+	}, []);
 
 	const handlePlayback = async (
 		action: string,
@@ -30,6 +31,7 @@ export const useSpotifyPlayback = () => {
 		offset: number | null = null,
 	) => {
 		try {
+			console.log("accessToken:", accessToken);
 			if (!accessToken) {
 				throw new Error("Access token not found");
 			}

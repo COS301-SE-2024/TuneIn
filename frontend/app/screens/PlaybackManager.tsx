@@ -7,7 +7,7 @@ class PlaybackManager {
 	private isPlaying: boolean = false;
 	private secondsPlayed: number = 0;
 	private trackPositionIntervalRef: any = null;
-	private handlePlayback: any = useSpotifyPlayback();
+	private handlePlayback: any = useSpotifyPlayback().handlePlayback;
 
 	setQueue(queue: Track[]) {
 		this.queue = queue;
@@ -38,6 +38,7 @@ class PlaybackManager {
 			console.error("Invalid track:", track);
 			return;
 		}
+		console.log("Playing track:", track);
 
 		if (index === this.currentTrackIndex && this.isPlaying) {
 			this.handlePlayback("pause");

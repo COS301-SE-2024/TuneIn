@@ -132,6 +132,7 @@ model queue {
   is_done_playing Boolean   @default(false)
   queue_id        String    @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   start_time      DateTime? @db.Timestamptz(6)
+  insert_time     DateTime  @default(now()) @db.Timestamptz(6)
   room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
   song            song      @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
   vote            vote[]
@@ -264,7 +265,6 @@ model search_history {
   user_id     String   @db.Uuid
   search_term String
   timestamp   DateTime @default(now()) @db.Timestamptz(6)
-  metadata    Json?    @db.Json
   url         String?
   users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
@@ -276,3 +276,15 @@ model table_state {
   time      DateTime? @default(now()) @db.Timestamptz(6)
   room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
 }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model banned {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model search_suggestions {
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model user_activity {
+// }
