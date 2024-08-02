@@ -201,23 +201,19 @@ class LiveSocketService {
 					return;
 				}
 
-				if (!this.setJoined) {
-					//throw new Error("setJoined not set");
-					return;
+				if (this.setJoined) {
+					if (
+						response.body &&
+						response.body.sender.userID === this.currentUser.userID
+					) {
+						this.setJoined(true);
+					}
 				}
 
 				if (!this.currentRoom) {
 					//throw new Error("Current room not set");
 					return;
 				}
-
-				if (
-					response.body &&
-					response.body.sender.userID === this.currentUser.userID
-				) {
-					this.setJoined(true);
-				}
-
 				this.requestChatHistory();
 			});
 
@@ -228,19 +224,15 @@ class LiveSocketService {
 					return;
 				}
 
-				if (!this.setMessages) {
-					return;
-				}
-
 				this.chatHistoryReceived = true;
-
-				const u = this.currentUser;
-				const chatHistory = history.map((msg) => ({
-					message: msg,
-					me: msg.sender.userID === u.userID,
-				}));
-				this.setMessages(chatHistory);
-
+				if (this.setMessages) {
+					const u = this.currentUser;
+					const chatHistory = history.map((msg) => ({
+						message: msg,
+						me: msg.sender.userID === u.userID,
+					}));
+					this.setMessages(chatHistory);
+				}
 				this.requestingChatHistory = false;
 			});
 
@@ -255,18 +247,6 @@ class LiveSocketService {
 					return;
 				}
 
-				if (!this.setMessages) {
-					return;
-				}
-
-				if (!this.setMessage) {
-					return;
-				}
-
-				if (!this.setIsSending) {
-					return;
-				}
-
 				if (!newMessage.body) {
 					//throw new Error("Message body not found");
 					return;
@@ -276,14 +256,18 @@ class LiveSocketService {
 				const u = this.currentUser;
 				const me = message.sender.userID === u.userID;
 				if (me) {
-					this.setMessage("");
-					this.setIsSending(false);
-					this.setIsSending = null;
+					if (this.setMessage) this.setMessage("");
+					if (this.setIsSending) {
+						this.setIsSending(false);
+						this.setIsSending = null;
+					}
 				}
-				this.setMessages((prevMessages) => [
-					...prevMessages,
-					{ message, me: message.sender.userID === u.userID },
-				]);
+				if (this.setMessages) {
+					this.setMessages((prevMessages) => [
+						...prevMessages,
+						{ message, me: message.sender.userID === u.userID },
+					]);
+				}
 			});
 
 			this.socket.on("userLeftRoom", (response: ChatEventDto) => {
