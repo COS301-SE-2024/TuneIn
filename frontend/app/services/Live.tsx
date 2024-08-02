@@ -6,7 +6,7 @@ import axios from "axios";
 import auth from "./AuthManagement";
 import songService from "./SongService";
 import * as utils from "./Utils";
-import { playback } from "./SimpleSpotifyPlayback";
+import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
 
 const TIMEOUT = 5000000;
 
@@ -15,21 +15,12 @@ export type Message = {
 	me?: boolean;
 };
 
-/*
-export type PlaybackEventDto = {
-	date_created?: Date;
-	userID: string | null;
-	roomID: string;
-	songID: string | null;
-	UTC_time: number | null;
-	errorMessage?: string;
-};
-*/
-
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
+
+let playback: SimpleSpotifyPlayback | null = null;
 
 class LiveSocketService {
 	private static instance: LiveSocketService;
@@ -181,6 +172,9 @@ class LiveSocketService {
 		console.log("initialised:", this.initialised);
 		if (!this.initialised && !this.isConnecting) {
 			this.isConnecting = true;
+			if (!playback) {
+				playback = SimpleSpotifyPlayback.getInstance();
+			}
 
 			const token = await auth.getToken();
 			try {
@@ -379,6 +373,10 @@ class LiveSocketService {
 				const songID: string = response.songID;
 				const spotifyID: string = await songService.getSpotifyID(songID);
 
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
+				}
+
 				const deviceID = await playback.getFirstDevice();
 				if (deviceID && deviceID !== null) {
 					playback.handlePlayback(
@@ -402,6 +400,10 @@ class LiveSocketService {
 					return;
 				}
 
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
+				}
+
 				const deviceID = await playback.getFirstDevice();
 				if (deviceID && deviceID !== null) {
 					playback.handlePlayback("pause", deviceID);
@@ -418,6 +420,10 @@ class LiveSocketService {
 				if (!this.currentRoom) {
 					//throw new Error("Current room not set");
 					return;
+				}
+
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
 				}
 
 				const deviceID = await playback.getFirstDevice();
