@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	StyleSheet,
+	Platform,
+} from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
@@ -8,6 +14,10 @@ import {
 	Poppins_700Bold,
 	useFonts,
 } from "@expo-google-fonts/poppins";
+import * as WebBrowser from "expo-web-browser";
+if (Platform.OS === "web") {
+	console.log(WebBrowser.maybeCompleteAuthSession());
+}
 
 const RedirectSuccessScreen: React.FC = () => {
 	const router = useRouter();
@@ -16,6 +26,10 @@ const RedirectSuccessScreen: React.FC = () => {
 		Poppins_500Medium,
 		Poppins_700Bold,
 	});
+
+	if (Platform.OS === "web") {
+		console.log(WebBrowser.maybeCompleteAuthSession());
+	}
 
 	if (!fontsLoaded) {
 		return null;
