@@ -39,7 +39,7 @@ const roomFilterCategories = [
 	{ id: "isTemporary", label: "Temporary" },
 	{ id: "isPrivate", label: "Private" },
 	{ id: "isScheduled", label: "Scheduled" },
-	//   { id: 'startDate', label: 'Start Date' },
+	{ id: "startDate", label: "Start Date" },
 	//   { id: 'endDate', label: 'End Date' },
 	{ id: "language", label: "Language" },
 	{ id: "explicit", label: "Explicit" },
@@ -127,7 +127,7 @@ const Search: React.FC = () => {
 			const token = await auth.getToken();
 
 			if (token) {
-				if(filter === "all") {
+				if (filter === "all") {
 					const response = await axios.get(
 						`${utils.API_BASE_URL}/search?q=${searchTerm}`,
 						{
@@ -137,73 +137,122 @@ const Search: React.FC = () => {
 						},
 					);
 					console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.rooms.map((item: any) => ({
-						id: item.roomID,
-						type: "room",
-						name: item.room_name,
-						roomData: {
-							roomID: item.roomID,
-							backgroundImage: item.room_image,
-                            name: item.room_name,
-                            description: item.description,
-                            userID: item.creator.userID,
-                            tags: item.tags,
-							language: item.language,
-							roomSize: item.participant_count,
-							isExplicit: item.has_explicit_content,
-							isNsfw: item.has_nsfw_content,
-						},
-					}));
+					const results: SearchResult[] = response.data.rooms.map(
+						(item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+								language: item.language,
+								roomSize: item.participant_count,
+								isExplicit: item.has_explicit_content,
+								isNsfw: item.has_nsfw_content,
+							},
+						}),
+					);
 
-					const users: SearchResult[] = response.data.users.map((item: any) => ({
-						id: item.id,
-						type: "user",
-						name: item.username,
-						userData: {
+					const users: SearchResult[] = response.data.users.map(
+						(item: any) => ({
 							id: item.id,
-							profile_picture_url: item.profile_picture_url,
-							profile_name: item.profile_name,
-							username: item.username,
-						},
-					}));
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}),
+					);
 
 					const combinedResult = results.concat(users);
 
 					console.log("Formatted results: " + JSON.stringify(results));
 					setResults(combinedResult);
-				}
-				else if(filter === "room") {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
-						},
-					);
-					console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.map((item: any) => ({
-						id: item.roomID,
-						type: "room",
-						name: item.room_name,
-						roomData: {
-							roomID: item.roomID,
-							backgroundImage: item.room_image,
-                            name: item.room_name,
-                            description: item.description,
-                            userID: item.creator.userID,
-                            tags: item.tags,
-							language: item.language,
-							roomSize: item.participant_count,
-							isExplicit: item.has_explicit_content,
-							isNsfw: item.has_nsfw_content,
-						},
-					}));
+				} else if (filter === "room") {
+					if (selectedFilters.length !== 0) {
+						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
+						if(selectedFilters.includes("nsfw")){
+							request += `&nsfw=true`;
+						}
+						if(selectedFilters.includes("explicit")){
+                            request += `&explicit=true`;
+                        }
+						if(selectedFilters.includes("isScheduled")){
+							request += `&is_scheduled=true`;
+						}
+						if(selectedFilters.includes("isPrivate")){
+							request += `&is_priv=true`;
+						}
+						if(selectedFilters.includes("isTemporary")){
+							request += `&is_temporary=true`;
+						}
 
-					
-					setResults(results);
-				}
-				else if(filter === "user"){
+						const response = await axios.get(
+							request,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+								language: item.language,
+								roomSize: item.participant_count,
+								isExplicit: item.has_explicit_content,
+								isNsfw: item.has_nsfw_content,
+							},
+						}));
+
+						setResults(results);
+					} else {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+								language: item.language,
+								roomSize: item.participant_count,
+								isExplicit: item.has_explicit_content,
+								isNsfw: item.has_nsfw_content,
+							},
+						}));
+
+						setResults(results);
+					}
+				} else if (filter === "user") {
 					const response = await axios.get(
 						`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
 						{
