@@ -12,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as StorageService from "../../services/StorageService";
 
 const LoginStreamingScreen: React.FC = () => {
-	StorageService.clear();
 	const router = useRouter();
 
 	let [fontsLoaded] = useFonts({

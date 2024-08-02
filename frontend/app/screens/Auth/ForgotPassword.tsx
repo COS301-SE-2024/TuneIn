@@ -54,7 +54,6 @@ const ForgotPasswordScreen: React.FC = () => {
 				{
 					text: "OK",
 					onPress: () => {
-						StorageService.clear();
 						cognitoUser.forgotPassword({
 							onSuccess: () => {
 								router.push({
@@ -74,7 +73,6 @@ const ForgotPasswordScreen: React.FC = () => {
 	};
 
 	const navigateToLogin = () => {
-		StorageService.clear();
 		router.push("screens/Auth/LoginScreen");
 	};
 

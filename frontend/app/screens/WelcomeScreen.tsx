@@ -14,18 +14,14 @@ import WhiteButton from "../components//WhiteButton";
 import * as StorageService from "./../services/StorageService";
 
 const WelcomeScreen: React.FC = () => {
-	StorageService.clear();
-
 	const router = useRouter();
 	const { width, height } = Dimensions.get("window");
 
 	const navigateToLogin = () => {
-		StorageService.clear();
 		router.navigate("/screens/Auth/LoginScreen");
 	};
 
 	const navigateToRegister = () => {
-		StorageService.clear();
 		router.navigate("/screens/Auth/RegisterOther");
 	};
 

@@ -16,7 +16,6 @@ import {
 import * as StorageService from "./../../services/StorageService";
 
 const LoginOtherScreen: React.FC = () => {
-	StorageService.clear();
 	const router = useRouter();
 
 	let [fontsLoaded] = useFonts({
