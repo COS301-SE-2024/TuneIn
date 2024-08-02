@@ -1,5 +1,6 @@
 # TuneIn
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
+
 <a href="https://codecov.io/github/COS301-SE-2024/TuneIn" > 
  <img src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/> 
 </a> ![GitHub last commit](https://img.shields.io/github/last-commit/COS301-SE-2024/TuneIn) ![GitHub top language](https://img.shields.io/github/languages/top/COS301-SE-2024/TuneIn)
