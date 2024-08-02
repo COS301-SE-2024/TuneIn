@@ -669,13 +669,13 @@ export class RoomsService {
 
 	async saveReaction(
 		roomID: string,
-		userID: string,
 		emojiReactionDto: EmojiReactionDto,
 	): Promise<void> {
 		if (!(await this.roomExists(roomID))) {
 			throw new Error("Room with id '" + roomID + "' does not exist");
 		}
 
+		const userID = emojiReactionDto.userID;
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new Error("User with id '" + userID + "' does not exist");
 		}
