@@ -14,11 +14,19 @@ if (!jwtSecretKey) {
 }
 
 class AuthManagement {
+	private static instance: AuthManagement;
 	private token: string | null = null;
 	public tokenSet: boolean = false;
 
 	constructor() {
 		this.fetchToken();
+	}
+
+	public static getInstance(): AuthManagement {
+		if (!AuthManagement.instance) {
+			AuthManagement.instance = new AuthManagement();
+		}
+		return AuthManagement.instance;
 	}
 
 	private async fetchToken(): Promise<void> {
@@ -151,4 +159,4 @@ function decodeToken(token: string | null): any {
 	}
 }
 
-export default new AuthManagement();
+export default AuthManagement.getInstance();
