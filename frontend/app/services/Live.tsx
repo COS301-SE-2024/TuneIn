@@ -683,3 +683,4 @@ class LiveChatService {
 }
 // Export the singleton instance
 export const live = LiveChatService.getInstance();
+export const initialiseSocket = live.initialiseSocket;

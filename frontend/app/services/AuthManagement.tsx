@@ -3,7 +3,7 @@ import * as StorageService from "./../services/StorageService";
 import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 import { JWT_SECRET_KEY } from "react-native-dotenv";
-import { live } from "./Live";
+import { initialiseSocket } from "./Live";
 import { router } from "expo-router";
 
 const jwtSecretKey = JWT_SECRET_KEY;
@@ -135,7 +135,7 @@ class AuthManagement {
 	}
 
 	public async postAuthInit(): Promise<void> {
-		live.initialiseSocket();
+		initialiseSocket();
 	}
 }
 
