@@ -17,15 +17,18 @@ export type Message = {
 	me?: boolean;
 };
 
+// How to integrate Emoji Reactions
 /*
-export type PlaybackEventDto = {
-	date_created?: Date;
-	userID: string | null;
-	roomID: string;
-	songID: string | null;
-	UTC_time: number | null;
-	errorMessage?: string;
-};
+assuming there is a state variable for emojis,
+- add a type for the state variable (just before the LiveChatService class)
+- add a private variable in this class for the state variable
+- add the setState function to the joinRoom function and assign it when the user joins the room
+- in the initialiseSocket function, there is a socket.on("emojiReaction") event, add the new reaction to the state variable
+
+that's it
+then emojis received the from the server will be added to the state variable
+
+then whatever you do with the state variable will be reflected in the component
 */
 
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
@@ -435,6 +438,17 @@ class LiveChatService {
 				const offset = (t1 - data.t0 + (data.t2 - t2)) / 2;
 				this.timeOffset = offset;
 				console.log(`Time offset: ${this.timeOffset} ms`);
+			});
+
+			this.socket.on("emojiReaction", (reaction: EmojiReactionDto) => {
+				console.log("SOCKET EVENT: emojiReaction", reaction);
+
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				//add the new reaction to components
 			});
 
 			console.log("socket connected?", this.socket.connected);
