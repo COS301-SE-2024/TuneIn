@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
@@ -8,7 +8,6 @@ import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import WelcomeScreen from "../app/screens/WelcomeScreen";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -86,7 +85,11 @@ const App: React.FC = () => {
 		checkTokenAndLoadFonts();
 	}, [router]);
 
-	return <WelcomeScreen />;
+	return (
+		<PlayerContextProvider>
+			<WelcomeScreen />
+		</PlayerContextProvider>
+	);
 };
 
 export default App;
