@@ -104,7 +104,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.CONNECT);
 			try {
 				//auth
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -159,7 +159,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -219,7 +219,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -377,7 +377,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -456,7 +456,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -720,7 +720,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	async validateInputEvent(payload: string): Promise<ChatEventDto> {
+	async validateChatEvent(payload: string): Promise<ChatEventDto> {
 		/*
 		if no token, return error
 		if token
