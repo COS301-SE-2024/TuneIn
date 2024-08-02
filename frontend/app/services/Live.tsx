@@ -56,44 +56,6 @@ class LiveSocketService {
 		return LiveSocketService.instance;
 	}
 
-	public requestChatHistory() {
-		if (this.requestingChatHistory) {
-			return;
-		}
-
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
-			return;
-		}
-
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		if (!this.setMessages) {
-			return;
-		}
-
-		if (this.chatHistoryReceived) {
-			return;
-		}
-
-		this.requestingChatHistory = true;
-
-		const u = this.currentUser;
-		const input: ChatEventDto = {
-			userID: u.userID,
-			body: {
-				messageBody: "",
-				sender: u,
-				roomID: this.currentRoom.roomID,
-				dateCreated: new Date(),
-			},
-		};
-		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
-	}
-
 	// Method to send a ping and wait for a response or timeout
 	public async sendPing(timeout: number = TIMEOUT): Promise<void> {
 		if (this.pingSent) {
@@ -310,18 +272,10 @@ class LiveSocketService {
 					return;
 				}
 
-				if (!this.currentRoom) {
-					//throw new Error("Current room not set");
-					return;
-				}
-
-				if (!this.currentRoom.roomID) {
-					throw new Error("Room ID not set");
-				}
-
 				if (
 					this.setJoined &&
 					this.currentRoom &&
+					this.currentRoom.roomID &&
 					this.setMessages &&
 					this.setMessage
 				) {
@@ -642,6 +596,44 @@ class LiveSocketService {
 			UTC_time: null,
 		};
 		this.socket.emit("initStop", JSON.stringify(input));
+	}
+
+	public requestChatHistory() {
+		if (this.requestingChatHistory) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		if (!this.setMessages) {
+			return;
+		}
+
+		if (this.chatHistoryReceived) {
+			return;
+		}
+
+		this.requestingChatHistory = true;
+
+		const u = this.currentUser;
+		const input: ChatEventDto = {
+			userID: u.userID,
+			body: {
+				messageBody: "",
+				sender: u,
+				roomID: this.currentRoom.roomID,
+				dateCreated: new Date(),
+			},
+		};
+		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
 	}
 
 	public canControlRoom(): boolean {
