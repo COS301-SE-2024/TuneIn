@@ -31,8 +31,8 @@ type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 
-class LiveChatService {
-	private static instance: LiveChatService;
+class LiveSocketService {
+	private static instance: LiveSocketService;
 	private socket: Socket;
 	private currentUser: UserDto | null = null;
 	private currentRoom: RoomDto | null = null;
@@ -58,11 +58,11 @@ class LiveChatService {
 		});
 	}
 
-	public static getInstance(): LiveChatService {
-		if (!LiveChatService.instance) {
-			LiveChatService.instance = new LiveChatService();
+	public static getInstance(): LiveSocketService {
+		if (!LiveSocketService.instance) {
+			LiveSocketService.instance = new LiveSocketService();
 		}
-		return LiveChatService.instance;
+		return LiveSocketService.instance;
 	}
 
 	public requestChatHistory() {
@@ -682,5 +682,5 @@ class LiveChatService {
 	}
 }
 // Export the singleton instance
-export const live = LiveChatService.getInstance();
+export const live = LiveSocketService.getInstance();
 export const initialiseSocket = live.initialiseSocket;
