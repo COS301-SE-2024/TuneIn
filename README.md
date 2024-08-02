@@ -1,11 +1,22 @@
 # TuneIn
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
-<a href="https://codecov.io/github/COS301-SE-2024/TuneIn" > 
- <img src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/> 
-</a> ![GitHub last commit](https://img.shields.io/github/last-commit/COS301-SE-2024/TuneIn) ![GitHub top language](https://img.shields.io/github/languages/top/COS301-SE-2024/TuneIn)
-![GitHub repo size](https://img.shields.io/github/repo-size/COS301-SE-2024/TuneIn) ![GitHub language count](https://img.shields.io/github/languages/count/COS301-SE-2024/TuneIn) ![GitHub Repo stars](https://img.shields.io/github/stars/COS301-SE-2024/TuneIn)
+<div><a href="https://codecov.io/github/COS301-SE-2024/TuneIn" >
+ <img alt="Code Coverage Percentage" src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/>
+</a>
+<a href="https://github.com/COS301-SE-2024/TuneIn/commits/develop/" >
+ <img alt="Last Commit" src="https://img.shields.io/github/last-commit/COS301-SE-2024/TuneIn"/>
+</a>
+<img alt="Our top language" src="https://img.shields.io/github/languages/top/COS301-SE-2024/TuneIn"/>
+</div>
 
+<div>
+<img alt="Repo size" src="https://img.shields.io/github/repo-size/COS301-SE-2024/TuneIn"/>
+<img alt="Number of languages" src="https://img.shields.io/github/languages/count/COS301-SE-2024/TuneIn"/>
+<a href="https://github.com/COS301-SE-2024/TuneIn/stargazers" > 
+ <img alt="Last Commit" src="https://img.shields.io/github/stars/COS301-SE-2024/TuneIn"/>
+</a>
+</div>
 
 ## TuneIn - Apollo - Project Description
 
