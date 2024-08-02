@@ -7,6 +7,8 @@ import auth from "./AuthManagement";
 import songService from "./SongService";
 import * as utils from "./Utils";
 import { playback } from "./SimpleSpotifyPlayback";
+import { EmojiReactionDto } from "../models/EmojiReactionDto";
+import { Emoji } from "rn-emoji-picker/dist/interfaces";
 
 const TIMEOUT = 5000000;
 
@@ -561,6 +563,28 @@ class LiveChatService {
 			};
 			this.socket.emit("liveMessage", JSON.stringify(input));
 		}
+	}
+
+	public async sendReaction(emoji: Emoji) {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		const newReaction: EmojiReactionDto = {
+			date_created: new Date(),
+			body: emoji,
+			userID: u.userID,
+		};
+		//make it volatile so that it doesn't get queued up
+		//nothing will be lost if it doesn't get sent
+		this.socket.volatile.emit("emojiReaction", JSON.stringify(newReaction));
 	}
 
 	public calculateSeekTime(
