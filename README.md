@@ -30,7 +30,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 <table style="border-width: 1px; width: 100%; font-family: Arial, sans-serif; border-collapse: collapse;">
   <tr>
     <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/PHOTO-2024-04-25-10-42-58.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
     </td>
     <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
       <h2><b style="font-size: 18px;">Linda Masia</b></h2> 
@@ -50,7 +50,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
     <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-      <img src="" width="800" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/E93E475B-3518-4074-9CA7-06CD76D5E5A8 - square.png" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
     </td>
     <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
       <h2><b style="font-size: 18px;">Lesedi Kekana</b></h2>
@@ -70,7 +70,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/PHOTO-2024-04-25-10-41-21.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Nerina Borchard</h2></b>
@@ -90,7 +90,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/PHOTO-2024-04-25-10-41-45.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Thabiso Matau</b></h2>
@@ -110,7 +110,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/WhatsApp Image 2024-04-25 at 15.03.26-3 - square.png" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Jaden Moodley</b></h2>
