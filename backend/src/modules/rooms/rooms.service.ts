@@ -18,6 +18,7 @@ import {
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
 } from "./dto/roomanalytics.dto";
+import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
 
 @Injectable()
 export class RoomsService {
@@ -664,5 +665,33 @@ export class RoomsService {
 			userID,
 		);
 		return new RoomAnalyticsContributorsDto();
+	}
+
+	async saveReaction(
+		roomID: string,
+		userID: string,
+		emojiReactionDto: EmojiReactionDto,
+	): Promise<void> {
+		if (!(await this.roomExists(roomID))) {
+			throw new Error("Room with id '" + roomID + "' does not exist");
+		}
+
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new Error("User with id '" + userID + "' does not exist");
+		}
+
+		const newReaction: PrismaTypes.chat_reactions | null =
+			await this.prisma.chat_reactions.create({
+				data: {
+					user_id: userID,
+					room_id: roomID,
+					reaction: JSON.stringify(emojiReactionDto.body),
+				},
+			});
+		if (!newReaction || newReaction === null) {
+			throw new Error(
+				"Failed to save reaction. Database returned null after insert.",
+			);
+		}
 	}
 }

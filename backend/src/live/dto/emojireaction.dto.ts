@@ -9,6 +9,7 @@ import {
 	ValidateNested,
 } from "class-validator";
 
+//for Emoji and Category, see: https://github.com/woodybury/rn-emoji-picker
 export interface Emoji {
 	category: string;
 	keywords: string[];
