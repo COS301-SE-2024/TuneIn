@@ -17,7 +17,7 @@ const TopNavBar: React.FC = () => {
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					const response = await axios.get(`${utils.getAPIBaseURL()}/profile`, {
+					const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 						headers: {
 							Authorization: `Bearer ${token}`,
 						},
@@ -35,7 +35,7 @@ const TopNavBar: React.FC = () => {
 
 	const navigateToProfile = () => {
 		router.push({
-			pathname: "/screens/ProfilePage",
+			pathname: "/screens/profile/ProfilePage",
 		});
 	};
 
@@ -46,7 +46,11 @@ const TopNavBar: React.FC = () => {
 			<View style={styles.emptyView}></View>
 			<Text style={styles.appName}>{appName}</Text>
 			<TouchableOpacity onPress={navigateToProfile}>
-				<Image source={{ uri: profileImage }} style={styles.profileImage} />
+				<Image
+					source={{ uri: profileImage }}
+					style={styles.profileImage}
+					testID="profile-image"
+				/>
 			</TouchableOpacity>
 		</View>
 	);

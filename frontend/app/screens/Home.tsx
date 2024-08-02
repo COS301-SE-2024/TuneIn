@@ -7,9 +7,11 @@ import {
 	Animated,
 	StyleSheet,
 	ActivityIndicator,
+	NativeScrollEvent,
+	NativeSyntheticEvent,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import RoomCardWidget from "../components/RoomCardWidget";
+import { useRouter } from "expo-router";
+import RoomCardWidget from "../components/rooms/RoomCardWidget";
 import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
@@ -17,16 +19,17 @@ import FriendsGrid from "../components/FriendsGrid";
 import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
-import { Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
+import { colors } from "../styles/colors";
 
 const Home: React.FC = () => {
+	console.log("Home");
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cacheLoaded, setCacheLoaded] = useState(false);
+	// const [cache, setCacheLoaded] = useState(false);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -39,7 +42,7 @@ const Home: React.FC = () => {
 	const fetchRooms = async (token: string | null, type?: string) => {
 		try {
 			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/users/rooms${type ? type : ""}`,
+				`${utils.API_BASE_URL}/users/rooms${type ? type : ""}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -51,14 +54,11 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const getFriends = async (token) => {
+	const getFriends = async (token: string) => {
 		try {
-			const response = await axios.get(
-				`${utils.getAPIBaseURL()}/users/friends`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
+			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
@@ -66,7 +66,11 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const formatRoomData = (rooms: any[], mine: boolean = false) => {
+	const formatRoomData = (rooms: any, mine = false) => {
+		if (!Array.isArray(rooms)) {
+			return [];
+		}
+
 		return rooms.map((room) => ({
 			id: room.roomID,
 			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -80,7 +84,7 @@ const Home: React.FC = () => {
 			userID: room.creator.userID,
 			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
 			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: "50",
+			roomSize: 50,
 			tags: room.tags ? room.tags : [],
 			mine: mine,
 			isNsfw: room.has_nsfw_content,
@@ -91,7 +95,6 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
-	const [token, setToken] = useState<string | null>(null);
 
 	const loadCachedData = async () => {
 		try {
@@ -104,17 +107,14 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
-
-			setCacheLoaded(true);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
 		}
 	};
 
-	const refreshData = async () => {
+	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
-		setToken(storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms
@@ -148,12 +148,16 @@ const Home: React.FC = () => {
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
-			const formattedFriends = fetchedFriends.map((friend) => ({
-				profilePicture: friend.profile_picture_url
-					? friend.profile_picture_url
-					: ProfileIMG,
-				name: friend.profile_name,
-			}));
+
+			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
+				? fetchedFriends.map((friend: Friend) => ({
+						profilePicture: friend.profile_picture_url
+							? friend.profile_picture_url
+							: ProfileIMG,
+						profile_name: friend.profile_name, // Ensure you include the profile_name property
+					}))
+				: [];
+
 			setFriends(formattedFriends);
 
 			await StorageService.setItem(
@@ -163,7 +167,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	};
+	}, []);
 
 	useEffect(() => {
 		const initialize = async () => {
@@ -174,69 +178,53 @@ const Home: React.FC = () => {
 
 		const interval = setInterval(() => {
 			refreshData();
-		}, 240000); // Refresh data every 60 seconds
+		}, 240000); // Refresh data every 240 seconds (4 minutes)
 
 		return () => clearInterval(interval);
-	}, []);
+	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
-		<Link
-			href={{
-				pathname: "/screens/RoomPage",
-				params: { room: JSON.stringify(item) },
-			}}
-		>
-			<RoomCardWidget roomCard={item} />
-		</Link>
+		<RoomCardWidget roomCard={item} />
 	);
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
-		console.log("Navigating to all friends");
 		router.navigate("/screens/AllFriends");
 	};
 
 	const navigateToCreateNew = () => {
-		console.log("Navigating to create new room");
-		router.navigate("/screens/CreateRoom");
+		router.navigate("/screens/rooms/CreateRoom");
 	};
 
-	const navigateToChatList = () => {
-		console.log("Navigating to chat list");
-		router.navigate("/screens/ChatListScreen");
-	};
+	const handleScroll = useCallback(
+		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
+			const currentOffset = nativeEvent.contentOffset.y;
+			const direction = currentOffset > previousScrollY.current ? "down" : "up";
+			previousScrollY.current = currentOffset;
+			scrollY.setValue(currentOffset);
 
-	const navigateToEditRoom = () => {
-		console.log("Navigating to edit room");
-		router.navigate("/screens/EditRoom");
-	};
-
-	const handleScroll = useCallback(({ nativeEvent }) => {
-		const currentOffset = nativeEvent.contentOffset.y;
-		const direction = currentOffset > previousScrollY.current ? "down" : "up";
-		previousScrollY.current = currentOffset;
-		scrollY.setValue(currentOffset);
-
-		if (scrollTimeout.current) {
-			clearTimeout(scrollTimeout.current);
-		}
-
-		scrollTimeout.current = setTimeout(() => {
-			if (currentOffset <= 0 || direction === "up") {
-				Animated.timing(scrollY, {
-					toValue: 0,
-					duration: 150,
-					useNativeDriver: true,
-				}).start();
-			} else {
-				Animated.timing(scrollY, {
-					toValue: 100,
-					duration: 150,
-					useNativeDriver: true,
-				}).start();
+			if (scrollTimeout.current) {
+				clearTimeout(scrollTimeout.current);
 			}
-		}, 50); // Reduced debounce timeout to make it more responsive
-	}, []);
+
+			scrollTimeout.current = setTimeout(() => {
+				if (currentOffset <= 0 || direction === "up") {
+					Animated.timing(scrollY, {
+						toValue: 0,
+						duration: 150,
+						useNativeDriver: true,
+					}).start();
+				} else {
+					Animated.timing(scrollY, {
+						toValue: 100,
+						duration: 150,
+						useNativeDriver: true,
+					}).start();
+				}
+			}, 50); // Reduced debounce timeout to make it more responsive
+		},
+		[scrollY],
+	);
 
 	const topNavBarTranslateY = scrollY.interpolate({
 		inputRange: [0, 100],
@@ -356,13 +344,13 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonContainer: {
 		position: "absolute",
-		bottom: 9,
+		bottom: 15,
 		right: 15,
 		zIndex: 20,
 	},
 	createRoomButton: {
-		backgroundColor: "#1E90FF",
-		borderRadius: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 30,
 		width: 50,
 		height: 50,
 		justifyContent: "center",

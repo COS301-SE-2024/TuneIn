@@ -1,8 +1,8 @@
 import { LiveChatMessageDto } from "../../api-client";
 
-export class ChatEventDto {
+export type ChatEventDto = {
 	date_created?: Date;
 	body?: LiveChatMessageDto;
 	userID: string | null;
 	errorMessage?: string;
-}
+};

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
-import { UpdateUserProfileDto } from "../profile/dto/updateuserprofile.dto";
+import { UpdateUserDto } from "../users/dto/updateuser.dto";
 
 @Injectable()
 export class DbUtilsService {
@@ -212,10 +212,7 @@ export class DbUtilsService {
 	}
 
 	// Merge preferences if they exist in updateProfileDto
-	buildUpdateData(
-		user: Prisma.users,
-		updateProfileDto: UpdateUserProfileDto,
-	): any {
+	buildUpdateData(user: Prisma.users, updateProfileDto: UpdateUserDto): any {
 		const allowedFields = ["username", "bio", "email"];
 
 		const updateData: any = {};

@@ -7,24 +7,20 @@ import { PrismaModule } from "./../prisma/prisma.module";
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { RoomsModule } from "./modules/rooms/rooms.module";
-import { ProfileModule } from "./modules/profile/profile.module";
-import { DtoGenService } from "./modules/dto-gen/dto-gen.service";
 import { DtoGenModule } from "./modules/dto-gen/dto-gen.module";
-import { DbUtilsService } from "./modules/db-utils/db-utils.service";
 import { DbUtilsModule } from "./modules/db-utils/db-utils.module";
-import { ChatGateway } from "./chat/chat.gateway";
-import { ConnectedUsersService } from "./chat/connecteduser/connecteduser.service";
-import { ChatModule } from "./chat/chat.module";
-import { S3Service } from "./s3/s3.service";
+import { LiveModule } from "./live/live.module";
 import { S3Module } from "./s3/s3.module";
-import { SpotifyService } from "./spotify/spotify.service";
 import { SpotifyModule } from "./spotify/spotify.module";
 import { HttpModule } from "@nestjs/axios";
 import { TasksModule } from "./tasks/tasks.module";
 import { BullConfigModule } from "./bull-config/bull-config.module";
 import { BullBoardModule } from "./bull-board/bull-board.module";
 import { memoryStorage } from "multer";
-
+import { SearchModule } from "./modules/search/search.module";
+import { GenresModule } from "./modules/genres/genres.module";
+import { ScheduleModule } from "@nestjs/schedule";
+import { SongsModule } from "./modules/songs/songs.module";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -32,10 +28,9 @@ import { memoryStorage } from "multer";
 		UsersModule,
 		AuthModule,
 		RoomsModule,
-		ProfileModule,
 		DtoGenModule,
 		DbUtilsModule,
-		ChatModule,
+		LiveModule,
 		S3Module,
 		MulterModule.register({
 			dest: "./uploads",
@@ -46,16 +41,12 @@ import { memoryStorage } from "multer";
 		BullBoardModule,
 		TasksModule,
 		BullConfigModule,
+		SearchModule,
+		GenresModule,
+		ScheduleModule.forRoot(),
+		SongsModule,
 	],
 	controllers: [AppController],
-	providers: [
-		AppService,
-		DtoGenService,
-		DbUtilsService,
-		S3Service,
-		ChatGateway,
-		ConnectedUsersService,
-		SpotifyService,
-	],
+	providers: [AppService],
 })
 export class AppModule {}

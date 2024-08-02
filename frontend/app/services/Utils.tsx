@@ -1,13 +1,26 @@
-import Constants from "expo-constants";
+import localhost from "react-native-localhost";
+import { Buffer } from "buffer";
 
-export function getAPIBaseURL(): string {
-	/*
-	console.log("Constants:", Constants);
-	const uri = Constants?.expoConfig?.hostUri
-		? Constants.expoConfig.hostUri.split(`:`).shift().concat(`:3000`)
-		: `yourapi.com`;
-	console.log(`API Base URL: http://${uri}`);
-	return `http://${uri}`;
-	*/
-	return `http://localhost:3000`;
+const USE_LOCAL_BACKEND_SERVER = true;
+
+function getAPIBase(): string {
+	if (!USE_LOCAL_BACKEND_SERVER) {
+		//do something
+	}
+	console.log("Local IP Address: ", localhost);
+	return `http://${localhost}:3000`;
+}
+
+function getLocalhost(): string {
+	if (!USE_LOCAL_BACKEND_SERVER) {
+		//do something
+	}
+	console.log("Local IP Address: ", localhost);
+	return `http://${localhost}`;
+}
+export const API_BASE_URL = getAPIBase();
+export const LOCALHOST = getLocalhost();
+
+export function bytesToBase64(bytes: Uint8Array): string {
+	return Buffer.from(bytes).toString("base64");
 }

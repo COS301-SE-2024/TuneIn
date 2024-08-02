@@ -3,7 +3,7 @@
     "name": "TuneIn",
     "slug": "TuneIn",
     "owner": "Apollo",
-    "scheme": "TuneIn",
+    "scheme": "tunein-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

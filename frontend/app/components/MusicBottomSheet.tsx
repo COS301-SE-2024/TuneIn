@@ -12,8 +12,6 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 
 const MusicBottomSheet = ({ isVisible, onClose }) => {
-	const spotifyImg = "../assets/spotify.png";
-	const ytMusicImg = "../assets/ytMusic.png";
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 	const [visible, setVisible] = useState(isVisible); // State to manage visibility
 
@@ -83,14 +81,6 @@ const MusicBottomSheet = ({ isVisible, onClose }) => {
 				</Animated.View>
 			</View>
 		</Modal>
-	);
-};
-
-const Links = ({ mediaPlatform, link }) => {
-	return (
-		<View>
-			<Text style={styles.mediaHeader}>{mediaPlatform}</Text>
-		</View>
 	);
 };
 

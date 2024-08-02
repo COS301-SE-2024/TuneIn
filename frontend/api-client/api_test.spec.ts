@@ -1,6 +1,6 @@
 /**
- * My API
- * API description
+ * TuneIn API
+ * The API for the TuneIn application, handling all the backend logic and making it available to the frontend.
  *
  * OpenAPI spec version: 1.0
  * 
@@ -29,6 +29,13 @@ describe("AuthApi", () => {
     const body: api.RegisterBody = undefined
     return expect(instance.authControllerRegister(body, {})).resolves.toBe(null)
   })
+  test("spotifyAuthControllerHandleSpotifyAuthCallback", () => {
+    const code: string = "code_example"
+    return expect(instance.spotifyAuthControllerHandleSpotifyAuthCallback(code, {})).resolves.toBe(null)
+  })
+  test("spotifyAuthControllerHandleSpotifyRefresh", () => {
+    return expect(instance.spotifyAuthControllerHandleSpotifyRefresh({})).resolves.toBe(null)
+  })
 })
 
 describe("DefaultApi", () => {
@@ -45,34 +52,6 @@ describe("DefaultApi", () => {
   })
 })
 
-describe("ProfileApi", () => {
-  let instance: api.ProfileApi
-  beforeEach(function() {
-    instance = new api.ProfileApi(config)
-  });
-
-  test("profileControllerFollowUser", () => {
-    const username: string = "username_example"
-    return expect(instance.profileControllerFollowUser(username, {})).resolves.toBe(null)
-  })
-  test("profileControllerGetProfileByUsername", () => {
-    const username: string = "username_example"
-    return expect(instance.profileControllerGetProfileByUsername(username, {})).resolves.toBe(null)
-  })
-  test("profileControllerPatchProfile", () => {
-    const body: api.UpdateUserProfileDto = undefined
-    return expect(instance.profileControllerPatchProfile(body, {})).resolves.toBe(null)
-  })
-  test("profileControllerUnfollowUser", () => {
-    const username: string = "username_example"
-    return expect(instance.profileControllerUnfollowUser(username, {})).resolves.toBe(null)
-  })
-  test("profileControllerUpdateProfile", () => {
-    const body: api.UpdateUserProfileDto = undefined
-    return expect(instance.profileControllerUpdateProfile(body, {})).resolves.toBe(null)
-  })
-})
-
 describe("RoomsApi", () => {
   let instance: api.RoomsApi
   beforeEach(function() {
@@ -80,7 +59,7 @@ describe("RoomsApi", () => {
   });
 
   test("roomsControllerAddSongToQueue", () => {
-    const body: api.SongInfoDto = undefined
+    const body: string = undefined
     const roomID: string = "roomID_example"
     return expect(instance.roomsControllerAddSongToQueue(body, roomID, {})).resolves.toBe(null)
   })
@@ -160,6 +139,14 @@ describe("UsersApi", () => {
     const none: any = undefined
     return expect(instance.usersControllerCreateRoom_0(body, none, {})).resolves.toBe(null)
   })
+  test("usersControllerFollowUser", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerFollowUser(username, {})).resolves.toBe(null)
+  })
+  test("usersControllerFollowUser_0", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerFollowUser_0(username, {})).resolves.toBe(null)
+  })
   test("usersControllerGetBookmarks", () => {
     const none: any = undefined
     return expect(instance.usersControllerGetBookmarks(none, {})).resolves.toBe(null)
@@ -183,6 +170,14 @@ describe("UsersApi", () => {
   test("usersControllerGetFollowing_0", () => {
     const none: any = undefined
     return expect(instance.usersControllerGetFollowing_0(none, {})).resolves.toBe(null)
+  })
+  test("usersControllerGetProfileByUsername", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerGetProfileByUsername(username, {})).resolves.toBe(null)
+  })
+  test("usersControllerGetProfileByUsername_0", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerGetProfileByUsername_0(username, {})).resolves.toBe(null)
   })
   test("usersControllerGetRecentRooms", () => {
     const none: any = undefined
@@ -222,21 +217,29 @@ describe("UsersApi", () => {
     const none: any = undefined
     return expect(instance.usersControllerGetUserRooms_0(none, {})).resolves.toBe(null)
   })
-  test("usersControllerUpdateProfile", () => {
+  test("usersControllerPatchProfile", () => {
     const body: api.UpdateUserDto = undefined
-    return expect(instance.usersControllerUpdateProfile(body, {})).resolves.toBe(null)
+    return expect(instance.usersControllerPatchProfile(body, {})).resolves.toBe(null)
   })
-  test("usersControllerUpdateProfile_0", () => {
+  test("usersControllerPatchProfile_0", () => {
     const body: api.UpdateUserDto = undefined
-    return expect(instance.usersControllerUpdateProfile_0(body, {})).resolves.toBe(null)
+    return expect(instance.usersControllerPatchProfile_0(body, {})).resolves.toBe(null)
   })
-  test("usersControllerUpdateUserProfile", () => {
+  test("usersControllerPutProfile", () => {
     const body: api.UpdateUserDto = undefined
-    return expect(instance.usersControllerUpdateUserProfile(body, {})).resolves.toBe(null)
+    return expect(instance.usersControllerPutProfile(body, {})).resolves.toBe(null)
   })
-  test("usersControllerUpdateUserProfile_0", () => {
+  test("usersControllerPutProfile_0", () => {
     const body: api.UpdateUserDto = undefined
-    return expect(instance.usersControllerUpdateUserProfile_0(body, {})).resolves.toBe(null)
+    return expect(instance.usersControllerPutProfile_0(body, {})).resolves.toBe(null)
+  })
+  test("usersControllerUnfollowUser", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerUnfollowUser(username, {})).resolves.toBe(null)
+  })
+  test("usersControllerUnfollowUser_0", () => {
+    const username: string = "username_example"
+    return expect(instance.usersControllerUnfollowUser_0(username, {})).resolves.toBe(null)
   })
 })
 

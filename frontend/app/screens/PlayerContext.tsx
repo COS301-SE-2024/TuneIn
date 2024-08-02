@@ -1,5 +1,3 @@
-// PlayerContext.tsx
-
 import React, { createContext, useContext, useState } from "react";
 
 interface PlayerContextType {
@@ -9,6 +7,12 @@ interface PlayerContextType {
 	setCurrentRoom: React.Dispatch<React.SetStateAction<string>>;
 	roomId: string | null;
 	setRoomId: React.Dispatch<React.SetStateAction<string | null>>;
+	trackName: string;
+	setTrackName: React.Dispatch<React.SetStateAction<string>>;
+	artistName: string;
+	setArtistName: React.Dispatch<React.SetStateAction<string>>;
+	albumArt: string;
+	setAlbumArt: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -33,6 +37,9 @@ export const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [currentRoom, setCurrentRoom] = useState("defaultRoom");
 	const [roomId, setRoomId] = useState<string | null>(null);
+	const [trackName, setTrackName] = useState("");
+	const [artistName, setArtistName] = useState("");
+	const [albumArt, setAlbumArt] = useState("");
 
 	return (
 		<PlayerContext.Provider
@@ -43,6 +50,12 @@ export const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 				setCurrentRoom,
 				roomId,
 				setRoomId,
+				trackName,
+				setTrackName,
+				artistName,
+				setArtistName,
+				albumArt,
+				setAlbumArt,
 			}}
 		>
 			{children}

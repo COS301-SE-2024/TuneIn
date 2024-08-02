@@ -1,6 +1,17 @@
 const { execSync } = require("child_process");
 const { engines } = require("./package.json");
 
+const compareVersions = (currentVersion, requiredVersion) => {
+	const current = currentVersion.split(".").map(Number);
+	const required = requiredVersion.split(".").map(Number);
+
+	for (let i = 0; i < required.length; i++) {
+		if (current[i] < required[i]) return false;
+		if (current[i] > required[i]) return true;
+	}
+	return true;
+};
+
 const versionRequirements = [
 	{
 		name: "node",
@@ -15,11 +26,15 @@ const versionRequirements = [
 ];
 
 versionRequirements.forEach(({ name, currentVersion, requiredVersion }) => {
-	if (!currentVersion.includes(requiredVersion)) {
+	if (!compareVersions(currentVersion, requiredVersion)) {
 		console.error(
-			"Required ${name} version: ${requiredVersion}, but found: ${currentVersion}. Use `nvm use stable` to switch to the correct node version.",
+			`Required ${name} version: ${requiredVersion}, but found: ${currentVersion}. Use \`nvm use stable\` to switch to the correct version.`,
 		);
 		process.exit(1);
+	} else {
+		console.log(
+			`Current ${name} version: ${currentVersion} matches the required version: ${requiredVersion}`,
+		);
 	}
 });
 

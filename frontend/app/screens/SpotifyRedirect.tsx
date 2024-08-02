@@ -7,17 +7,17 @@ import {
 	ScrollView,
 } from "react-native";
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
+import * as StorageService from "../services/StorageService";
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET,
 	SPOTIFY_REDIRECT_TARGET,
-} from "@env";
+} from "react-native-dotenv";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);
 }
 
@@ -34,13 +34,11 @@ if (!redirectTarget) {
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
 	);
 }
-console.log(clientId);
 
 const SpotifyRedirect = () => {
 	const [tokenDetails, setTokenDetails] = useState(null);
 	const [error, setError] = useState(null);
 	const [success, setSuccess] = useState(false);
-	const router = useRouter();
 
 	useEffect(() => {
 		const extractToken = async () => {
@@ -68,14 +66,14 @@ const SpotifyRedirect = () => {
 		extractToken();
 	}, []);
 
-	const getCodeFromUrl = (url) => {
+	const getCodeFromUrl = (url: string) => {
 		const query = url.split("?")[1];
 		if (!query) return null;
 		const params = new URLSearchParams(query);
 		return params.get("code");
 	};
 
-	const exchangeCodeForToken = async (code) => {
+	const exchangeCodeForToken = async (code: string) => {
 		try {
 			const credentials = `${clientId}:${clientSecret}`;
 			const base64Credentials = btoa(credentials); // Encode credentials for Basic Auth

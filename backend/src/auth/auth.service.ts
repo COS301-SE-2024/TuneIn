@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	UnauthorizedException,
+} from "@nestjs/common";
 import {
 	AdminInitiateAuthCommandInput,
 	CognitoIdentityProvider,
@@ -12,7 +17,6 @@ import * as jwt from "jsonwebtoken";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-//import { CreateUserDto } from "../modules/users/dto/create-user.dto";
 
 export type CognitoDecodedToken = {
 	sub: string;
@@ -36,27 +40,27 @@ export type JWTPayload = {
 };
 
 export class RegisterBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The user's username" })
 	@IsString()
 	username: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's Cognito sub/ID" })
 	@IsString()
 	userCognitoSub: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: "The user's email address" })
 	@IsString()
 	email: string;
 }
 
 export class LoginBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The Cognito JWT token" })
 	@IsString()
 	token: string;
 }
 
 export class RefreshBody {
-	@ApiProperty()
+	@ApiProperty({ description: "The JWT token to be refreshed" })
 	@IsString()
 	refreshToken: string;
 }
@@ -147,8 +151,7 @@ export class AuthService {
 		}
 	}
 
-	// eslint-disable-next-line prettier/prettier
-  	async listUsers(): Promise<ListUsersCommandOutput> {
+	async listUsers(): Promise<ListUsersCommandOutput> {
 		const params = {
 			UserPoolId: this.userPoolId,
 		};
@@ -273,7 +276,6 @@ export class AuthService {
 	}
 	*/
 	getUserInfo(req: any): JWTPayload {
-		console.log("req", req);
 		const result = req.user as JWTPayload;
 		console.log(result);
 		if (!result) {
@@ -289,6 +291,33 @@ export class AuthService {
 		return result;
 	}
 
+	async getUsernameAndEmail(userID: string): Promise<{
+		username: string;
+		email: string;
+	}> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user || user === null) {
+			throw new HttpException(
+				"Invalid credentials. Could not create user. getUsernameAndEmailError01",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		if (!user.email || user.email === null) {
+			throw new HttpException(
+				"User (" +
+					user.username +
+					") does not have an email address. getUsernameAndEmailError02",
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		return { username: user.username, email: user.email };
+	}
+
 	async decodeAndVerifyCognitoJWT(
 		jwt_token: string,
 	): Promise<CognitoDecodedToken> {
@@ -300,9 +329,11 @@ export class AuthService {
 
 		try {
 			const payload = await verifier.verify(jwt_token);
+			console.log("Cognito Verification", payload);
 			const result: CognitoDecodedToken = payload as CognitoDecodedToken;
 			return result;
 		} catch (error) {
+			console.log(error);
 			throw new UnauthorizedException("Invalid JWT token");
 		}
 	}

@@ -10,11 +10,11 @@ import {
 	FontAwesome,
 	MaterialCommunityIcons,
 	Ionicons,
+	AntDesign,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { AntDesign } from "@expo/vector-icons";
 
-export default function GettingStarted({}) {
+export default function GettingStarted() {
 	const router = useRouter();
 	const navigateToLogin = () => {
 		router.navigate("../LoginScreen");
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: "bold",
 		marginBottom: 20,
-		color: "#2c3e50",
+		color: "#000",
 		textAlign: "center",
 	},
 	card: {

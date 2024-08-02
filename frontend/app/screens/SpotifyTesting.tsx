@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -6,26 +6,27 @@ import {
 	Button,
 	ScrollView,
 	StyleSheet,
-	Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
 import SongCard from "../components/Spotify/SongCard";
-import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
 import { useSpotifySearch } from "../hooks/useSpotifySearch";
 import { useSpotifyPlayback } from "../hooks/useSpotifyPlayback";
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 const SpotifyTestingPage: React.FC = () => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const router = useRouter();
+	const [accessToken, setAccessToken] = useState<string>("");
+	const [refreshToken, setRefreshToken] = useState<string>("");
 
-	const {
-		accessToken,
-		refreshToken,
-		error: authError,
-		handleTokenChange,
-		handleRefreshTokenChange,
-		getRefreshToken,
-	} = useSpotifyAuth();
+	// Fetch tokens on component mount
+	useEffect(() => {
+		const fetchTokens = async () => {
+			const allTokens = await spotifyAuth.getTokens();
+			setAccessToken(allTokens.access_token);
+			setRefreshToken(allTokens.refresh_token);
+		};
+
+		fetchTokens();
+	}, []); // Empty dependency array means this effect runs once on mount
 
 	const {
 		searchResults,
@@ -33,11 +34,7 @@ const SpotifyTestingPage: React.FC = () => {
 		error: searchError,
 	} = useSpotifySearch();
 
-	const {
-		handlePlayback,
-		selectedTrackUri,
-		error: playbackError,
-	} = useSpotifyPlayback();
+	const { handlePlayback, error: playbackError } = useSpotifyPlayback();
 
 	return (
 		<View style={styles.container}>
@@ -46,13 +43,11 @@ const SpotifyTestingPage: React.FC = () => {
 				style={styles.input}
 				placeholder="Enter access token..."
 				value={accessToken}
-				onChangeText={handleTokenChange}
 			/>
 			<TextInput
 				style={styles.input}
 				placeholder="Enter refresh token..."
 				value={refreshToken}
-				onChangeText={handleRefreshTokenChange}
 			/>
 			<TextInput
 				style={styles.input}
@@ -61,7 +56,6 @@ const SpotifyTestingPage: React.FC = () => {
 				onChangeText={setSearchQuery}
 			/>
 			<Button title="Search" onPress={() => handleSearch(searchQuery)} />
-			<Button title="Test Refresh Token" onPress={getRefreshToken} />
 			<ScrollView style={styles.resultsContainer}>
 				{searchResults.map((track, index) => (
 					<SongCard
@@ -77,7 +71,6 @@ const SpotifyTestingPage: React.FC = () => {
 				<Button title="Next" onPress={() => handlePlayback("next")} />
 				<Button title="Previous" onPress={() => handlePlayback("previous")} />
 			</View>
-			{authError && <Text style={styles.error}>Auth Error: {authError}</Text>}
 			{searchError && (
 				<Text style={styles.error}>Search Error: {searchError}</Text>
 			)}

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
@@ -8,27 +8,52 @@ import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
-import { IsObject, IsString } from "class-validator";
+import { IsNumber, IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
 
-export type SpotifyTokenResponse = {
+export class SpotifyTokenResponse {
+	@ApiProperty()
+	@IsString()
 	access_token: string;
-	token_type: string;
-	scope: string;
-	expires_in: number;
-	refresh_token: string;
-};
 
-export type SpotifyTokenRefreshResponse = {
-	access_token: string;
+	@ApiProperty()
+	@IsString()
 	token_type: string;
+
+	@ApiProperty()
+	@IsString()
 	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
 	expires_in: number;
-};
+
+	@ApiProperty()
+	@IsString()
+	refresh_token: string;
+}
+
+export class SpotifyTokenRefreshResponse {
+	@ApiProperty()
+	@IsString()
+	access_token: string;
+
+	@ApiProperty()
+	@IsString()
+	token_type: string;
+
+	@ApiProperty()
+	@IsString()
+	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
+	expires_in: number;
+}
 
 export type SpotifyTokenPair = {
 	tokens: SpotifyTokenResponse;
@@ -85,24 +110,80 @@ export class SpotifyAuthService {
 		);
 	}
 
-	async exchangeCodeForToken(code: string): Promise<SpotifyTokenResponse> {
+	//how state is constructed in frontend
+	/*
+	const makeStateVariable = (redirectURI: string) => {
+		const state = {
+			"unique-pre-padding": generateRandom(10),
+			"expo-redirect": redirectURI,
+			"ip-address": utils.LOCALHOST,
+			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"unique-post-padding": generateRandom(10),
+		};
+		const bytes = new TextEncoder().encode(JSON.stringify(state));
+		const b64 = utils.bytesToBase64(bytes);
+		return b64;
+	};
+	*/
+	getStateObject(state: string): {
+		"expo-redirect": string;
+		"ip-address": string;
+		"redirect-used": string;
+	} {
+		const decodedState = Buffer.from(state, "base64").toString("utf-8");
+		const obj = JSON.parse(decodedState);
+		if (!obj["expo-redirect"]) {
+			throw new Error(
+				"Invalid state parameter. Does not contain expo-redirect",
+			);
+		}
+		if (!obj["ip-address"]) {
+			throw new Error("Invalid state parameter. Does not contain ip-address");
+		}
+		if (!obj["redirect-used"]) {
+			throw new Error(
+				"Invalid state parameter. Does not contain redirect-used",
+			);
+		}
+		return obj;
+	}
+
+	async exchangeCodeForToken(
+		code: string,
+		state: string,
+	): Promise<SpotifyTokenResponse> {
 		try {
+			//Step 0: Get the redirect URI
+			const stateObj = this.getStateObject(state);
+			const redirectURI = stateObj["expo-redirect"];
+
+			// Step 1: Create the request options object
+			const requestOptions = {
+				url: "https://accounts.spotify.com/api/token",
+				body: {
+					grant_type: "authorization_code",
+					code: code,
+					redirect_uri: decodeURIComponent(redirectURI),
+				},
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Basic ${this.authHeader}`,
+				},
+			};
+
+			// Step 2: Log or inspect the request options
+			console.log("Request options:", requestOptions);
+
+			// Step 3: Send the request
 			const response = await firstValueFrom(
 				this.httpService.post(
-					"https://accounts.spotify.com/api/token",
-					{
-						grant_type: "authorization_code",
-						code: code,
-						redirect_uri: this.redirectUri,
-					},
-					{
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded",
-							Authorization: `Basic ${this.authHeader}`,
-						},
-					},
+					requestOptions.url,
+					new URLSearchParams(requestOptions.body).toString(), // Convert the body to URL-encoded string
+					{ headers: requestOptions.headers },
 				),
 			);
+
+			console.log(response);
 
 			if (!response || !response.data) {
 				throw new Error("Failed to exchange code for token");
@@ -199,14 +280,6 @@ export class SpotifyAuthService {
 			tk.tokens,
 		);
 
-		//find largest profile picture
-		let largest = 0;
-		for (let i = 0; i < spotifyUser.images.length; i++) {
-			if (spotifyUser.images[i].height > largest) {
-				largest = i;
-			}
-		}
-
 		const existingUser: PrismaTypes.users[] | null =
 			await this.prisma.users.findMany({
 				where: { username: spotifyUser.id },
@@ -220,13 +293,30 @@ export class SpotifyAuthService {
 
 		const user: Prisma.usersCreateInput = {
 			username: spotifyUser.id,
-			profile_picture: spotifyUser.images[largest].url,
 			full_name: spotifyUser.display_name,
 			external_links: {
 				spotify: spotifyUser.external_urls.spotify,
 			},
 			email: spotifyUser.email,
 		};
+
+		if (spotifyUser.images && spotifyUser.images.length > 0) {
+			//find largest profile picture
+			let largest = 0;
+			for (let i = 0; i < spotifyUser.images.length; i++) {
+				if (spotifyUser.images[i].height > largest) {
+					largest = i;
+				}
+			}
+
+			console.log("spotifyUser image : " + spotifyUser.images);
+			console.log("\nimage size: " + largest);
+
+			user.profile_picture =
+				largest > 0
+					? spotifyUser.images[largest]?.url
+					: "https://example.com/default-profile-picture.png";
+		}
 
 		try {
 			const response = await this.prisma.users.create({ data: user });
@@ -248,17 +338,33 @@ export class SpotifyAuthService {
 			throw new Error("User not found");
 		}
 
-		const tokens: Prisma.authenticationCreateInput = {
-			token: JSON.stringify(tk),
-			users: {
-				connect: {
-					user_id: user.user_id,
-				},
-			},
-		};
-
 		try {
-			await this.prisma.authentication.create({ data: tokens });
+			const existingTokens: PrismaTypes.authentication[] | null =
+				await this.prisma.authentication.findMany({
+					where: { user_id: user.user_id },
+				});
+
+			if (!existingTokens || existingTokens === null) {
+				throw new Error(
+					"A database error occurred while checking if the user's tokens exist",
+				);
+			}
+
+			if (existingTokens.length > 0) {
+				await this.prisma.authentication.update({
+					where: { user_id: user.user_id },
+					data: {
+						token: JSON.stringify(tk),
+					},
+				});
+			} else {
+				await this.prisma.authentication.create({
+					data: {
+						token: JSON.stringify(tk),
+						user_id: user.user_id,
+					},
+				});
+			}
 		} catch (err) {
 			console.log(err);
 			throw new Error("Failed to save tokens");
@@ -271,7 +377,7 @@ export class SpotifyAuthService {
 		});
 
 		if (!tokens) {
-			throw new Error("No tokens found");
+			throw new HttpException("User's Spotify tokens not found", 404);
 		}
 
 		const tk: SpotifyTokenPair = JSON.parse(tokens.token) as SpotifyTokenPair;

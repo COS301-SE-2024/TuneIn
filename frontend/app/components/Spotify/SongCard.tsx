@@ -35,7 +35,7 @@ const SongCard: React.FC<SongCardProps> = ({
 				sound.unloadAsync();
 			}
 		};
-	}, []);
+	}, [sound]);
 
 	const playAudio = async () => {
 		try {

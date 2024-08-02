@@ -1,7 +1,7 @@
 // tslint:disable
 /**
- * My API
- * API description
+ * TuneIn API
+ * The API for the TuneIn application, handling all the backend logic and making it available to the frontend.
  *
  * OpenAPI spec version: 1.0
  * 

@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-      "module": "esnext"
-},
-  "extends": "expo/tsconfig.base"
+    "module": "esnext",
+    "strict": true
+  },
+  "extends": "expo/tsconfig.base",
+  "typeRoots": ["./types"]
 }

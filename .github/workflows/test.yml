@@ -1,4 +1,3 @@
-
 name: Test Codebase
 on:
   push:
@@ -32,7 +31,7 @@ jobs:
         run: |
           touch frontend/.env
           echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
-          cat frontend/.env
+        shell: bash
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4
@@ -43,9 +42,14 @@ jobs:
         run:  |
           cd frontend && npm ci
 
-      - name: Test Codebase
+      - name: Delete old snapshots
+        run: |
+          rm -rf frontend/tests/__snapshots__/
+        shell: bash
+
+      - name: Test Codebase (with updated snapshots)
         run:  |
-          cd frontend && npm run test:cov
+          cd frontend && npm run test:cov -- --updateSnapshot
 
       - name: Jest Coverage Comment
         id: coverageComment
@@ -65,7 +69,6 @@ jobs:
           echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
           echo "Summary HTML - ${{ steps.coverageComment.outputs.summaryHtml }}"
 
-
   run_backend_tests:
     name: Test Backend
     needs: start
@@ -78,7 +81,7 @@ jobs:
         run: |
           touch backend/.env
           echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
-          cat backend/.env
+        shell: bash
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4
