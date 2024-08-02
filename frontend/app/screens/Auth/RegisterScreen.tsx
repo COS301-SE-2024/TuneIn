@@ -15,6 +15,7 @@ import UserPool from "../../services/UserPool";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
+import * as StorageService from "../../services/StorageService";
 
 const RegisterScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);

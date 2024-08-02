@@ -6,7 +6,13 @@ import {
 	ResponseType,
 } from "expo-auth-session";
 //import { generateRandom } from "expo-auth-session/build/PKCE";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Platform,
+} from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -27,8 +33,8 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-
-WebBrowser.maybeCompleteAuthSession();
+import * as StorageService from "../../services/StorageService";
+import { live } from "../../services/Live";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -79,6 +85,9 @@ const makeStateVariable = (redirectURI: string) => {
 
 const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
+	if (Platform.OS === "web") {
+		console.log(WebBrowser.maybeCompleteAuthSession());
+	}
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
 		path: "screens/Auth/SpotifyRedirect",
@@ -111,30 +120,37 @@ const RegisterOtherScreen: React.FC = () => {
 
 	console.log("Request:", request);
 	console.log("Response:", response);
-	console.log("PromptAsync:", promptAsync);
+	console.log("PromptAsync (below)");
+	console.log(promptAsync);
 
 	React.useEffect(() => {
 		console.log("Response:", response);
-		if (response?.type === "success") {
-			if (response.params.error) {
-				console.error("Error:", response.params.error);
-				return;
-			}
-			const { code, state } = response.params;
-			console.log("Code:", code);
+		if (response && response !== null) {
+			if (response?.type === "success") {
+				if (response.params.error) {
+					console.error("Error:", response.params.error);
+					return;
+				}
+				const { code, state } = response.params;
+				console.log("Code:", code);
 
-			//make post request to backend server get access token
-			const doExchange = async () => {
-				const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
-					code,
-					state,
-					redirectURI,
+				//make post request to backend server get access token
+				const doExchange = async () => {
+					const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
+						code,
+						state,
+						redirectURI,
+					);
+					await auth.setToken(tokens.token);
+					live.initialiseSocket();
+					router.navigate("screens/Home");
+				};
+				doExchange();
+			} else {
+				throw new Error(
+					"Received unsuccessful response from Spotify. Please try again.",
 				);
-				await auth.setToken(tokens.token);
-				auth.postAuthInit();
-				router.navigate("screens/Home");
-			};
-			doExchange();
+			}
 		}
 	}, [response]);
 

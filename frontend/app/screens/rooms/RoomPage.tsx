@@ -34,7 +34,7 @@ import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
-import { playback } from "../../services/SimpleSpotifyPlayback";
+import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -80,6 +80,7 @@ const RoomPage = () => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
+	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
@@ -452,7 +453,7 @@ const RoomPage = () => {
 			//playbackManager.pause();
 			const deviceID = await playback.getFirstDevice();
 			if (deviceID && deviceID !== null) {
-				playback.handlePlayback(deviceID, "pause");
+				playback.handlePlayback("pause", deviceID);
 			}
 			setIsPlaying(false);
 		}
