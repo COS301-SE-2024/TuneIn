@@ -53,21 +53,25 @@ export async function exchangeCodeWithBackend(
 }
 
 export async function getTokens(): Promise<SpotifyTokenResponse> {
-	try {
-		const token = await auth.getToken();
-		const response = await axios.get(
-			`${utils.API_BASE_URL}/auth/spotify/tokens`,
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
+	if (auth.authenticated()) {
+		try {
+			const token = await auth.getToken();
+			const response = await axios.get(
+				`${utils.API_BASE_URL}/auth/spotify/tokens`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			},
-		);
+			);
 
-		const r: SpotifyTokenResponse = response.data;
-		return r;
-	} catch (error) {
-		console.error("Failed to get tokens:", error);
+			const r: SpotifyTokenResponse = response.data;
+			return r;
+		} catch (error) {
+			console.error("Failed to get tokens:", error);
+		}
+		throw new Error("Something went wrong while getting Spotify tokens");
+	} else {
+		throw new Error("Not authenticated");
 	}
-	throw new Error("Something went wrong while getting Spotify tokens");
 }

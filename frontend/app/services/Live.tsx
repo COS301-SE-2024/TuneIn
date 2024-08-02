@@ -6,7 +6,7 @@ import axios from "axios";
 import auth from "./AuthManagement";
 import songService from "./SongService";
 import * as utils from "./Utils";
-import { playback } from "./SimpleSpotifyPlayback";
+import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
 
 const TIMEOUT = 5000000;
 
@@ -15,24 +15,15 @@ export type Message = {
 	me?: boolean;
 };
 
-/*
-export type PlaybackEventDto = {
-	date_created?: Date;
-	userID: string | null;
-	roomID: string;
-	songID: string | null;
-	UTC_time: number | null;
-	errorMessage?: string;
-};
-*/
-
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 
-class LiveChatService {
-	private static instance: LiveChatService;
+let playback: SimpleSpotifyPlayback | null = null;
+
+class LiveSocketService {
+	private static instance: LiveSocketService;
 	private socket: Socket;
 	private currentUser: UserDto | null = null;
 	private currentRoom: RoomDto | null = null;
@@ -58,49 +49,11 @@ class LiveChatService {
 		});
 	}
 
-	public static getInstance(): LiveChatService {
-		if (!LiveChatService.instance) {
-			LiveChatService.instance = new LiveChatService();
+	public static getInstance(): LiveSocketService {
+		if (!LiveSocketService.instance) {
+			LiveSocketService.instance = new LiveSocketService();
 		}
-		return LiveChatService.instance;
-	}
-
-	public requestChatHistory() {
-		if (this.requestingChatHistory) {
-			return;
-		}
-
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
-			return;
-		}
-
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		if (!this.setMessages) {
-			return;
-		}
-
-		if (this.chatHistoryReceived) {
-			return;
-		}
-
-		this.requestingChatHistory = true;
-
-		const u = this.currentUser;
-		const input: ChatEventDto = {
-			userID: u.userID,
-			body: {
-				messageBody: "",
-				sender: u,
-				roomID: this.currentRoom.roomID,
-				dateCreated: new Date(),
-			},
-		};
-		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
+		return LiveSocketService.instance;
 	}
 
 	// Method to send a ping and wait for a response or timeout
@@ -181,6 +134,9 @@ class LiveChatService {
 		console.log("initialised:", this.initialised);
 		if (!this.initialised && !this.isConnecting) {
 			this.isConnecting = true;
+			if (!playback) {
+				playback = SimpleSpotifyPlayback.getInstance();
+			}
 
 			const token = await auth.getToken();
 			try {
@@ -207,23 +163,19 @@ class LiveChatService {
 					return;
 				}
 
-				if (!this.setJoined) {
-					//throw new Error("setJoined not set");
-					return;
+				if (this.setJoined) {
+					if (
+						response.body &&
+						response.body.sender.userID === this.currentUser.userID
+					) {
+						this.setJoined(true);
+					}
 				}
 
 				if (!this.currentRoom) {
 					//throw new Error("Current room not set");
 					return;
 				}
-
-				if (
-					response.body &&
-					response.body.sender.userID === this.currentUser.userID
-				) {
-					this.setJoined(true);
-				}
-
 				this.requestChatHistory();
 			});
 
@@ -234,19 +186,15 @@ class LiveChatService {
 					return;
 				}
 
-				if (!this.setMessages) {
-					return;
-				}
-
 				this.chatHistoryReceived = true;
-
-				const u = this.currentUser;
-				const chatHistory = history.map((msg) => ({
-					message: msg,
-					me: msg.sender.userID === u.userID,
-				}));
-				this.setMessages(chatHistory);
-
+				if (this.setMessages) {
+					const u = this.currentUser;
+					const chatHistory = history.map((msg) => ({
+						message: msg,
+						me: msg.sender.userID === u.userID,
+					}));
+					this.setMessages(chatHistory);
+				}
 				this.requestingChatHistory = false;
 			});
 
@@ -261,18 +209,6 @@ class LiveChatService {
 					return;
 				}
 
-				if (!this.setMessages) {
-					return;
-				}
-
-				if (!this.setMessage) {
-					return;
-				}
-
-				if (!this.setIsSending) {
-					return;
-				}
-
 				if (!newMessage.body) {
 					//throw new Error("Message body not found");
 					return;
@@ -282,14 +218,18 @@ class LiveChatService {
 				const u = this.currentUser;
 				const me = message.sender.userID === u.userID;
 				if (me) {
-					this.setMessage("");
-					this.setIsSending(false);
-					this.setIsSending = null;
+					if (this.setMessage) this.setMessage("");
+					if (this.setIsSending) {
+						this.setIsSending(false);
+						this.setIsSending = null;
+					}
 				}
-				this.setMessages((prevMessages) => [
-					...prevMessages,
-					{ message, me: message.sender.userID === u.userID },
-				]);
+				if (this.setMessages) {
+					this.setMessages((prevMessages) => [
+						...prevMessages,
+						{ message, me: message.sender.userID === u.userID },
+					]);
+				}
 			});
 
 			this.socket.on("userLeftRoom", (response: ChatEventDto) => {
@@ -332,18 +272,10 @@ class LiveChatService {
 					return;
 				}
 
-				if (!this.currentRoom) {
-					//throw new Error("Current room not set");
-					return;
-				}
-
-				if (!this.currentRoom.roomID) {
-					throw new Error("Room ID not set");
-				}
-
 				if (
 					this.setJoined &&
 					this.currentRoom &&
+					this.currentRoom.roomID &&
 					this.setMessages &&
 					this.setMessage
 				) {
@@ -379,6 +311,10 @@ class LiveChatService {
 				const songID: string = response.songID;
 				const spotifyID: string = await songService.getSpotifyID(songID);
 
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
+				}
+
 				const deviceID = await playback.getFirstDevice();
 				if (deviceID && deviceID !== null) {
 					playback.handlePlayback(
@@ -402,6 +338,10 @@ class LiveChatService {
 					return;
 				}
 
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
+				}
+
 				const deviceID = await playback.getFirstDevice();
 				if (deviceID && deviceID !== null) {
 					playback.handlePlayback("pause", deviceID);
@@ -418,6 +358,10 @@ class LiveChatService {
 				if (!this.currentRoom) {
 					//throw new Error("Current room not set");
 					return;
+				}
+
+				if (!playback) {
+					playback = SimpleSpotifyPlayback.getInstance();
 				}
 
 				const deviceID = await playback.getFirstDevice();
@@ -654,6 +598,44 @@ class LiveChatService {
 		this.socket.emit("initStop", JSON.stringify(input));
 	}
 
+	public requestChatHistory() {
+		if (this.requestingChatHistory) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		if (!this.setMessages) {
+			return;
+		}
+
+		if (this.chatHistoryReceived) {
+			return;
+		}
+
+		this.requestingChatHistory = true;
+
+		const u = this.currentUser;
+		const input: ChatEventDto = {
+			userID: u.userID,
+			body: {
+				messageBody: "",
+				sender: u,
+				roomID: this.currentRoom.roomID,
+				dateCreated: new Date(),
+			},
+		};
+		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
+	}
+
 	public canControlRoom(): boolean {
 		if (!this.currentRoom) {
 			return false;
@@ -682,4 +664,5 @@ class LiveChatService {
 	}
 }
 // Export the singleton instance
-export const live = LiveChatService.getInstance();
+export const live = LiveSocketService.getInstance();
+export const initialiseSocket = live.initialiseSocket;
