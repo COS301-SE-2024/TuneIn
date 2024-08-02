@@ -30,31 +30,11 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 <table style="border-width: 1px; width: 100%; font-family: Arial, sans-serif; border-collapse: collapse;">
   <tr>
     <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-      <img src="" width="800" height="auto" style="display: block; margin: 0 auto;">
-    </td>
-    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
-      <h2><b style="font-size: 18px;">Lesedi Kekana</b></h2>
-      <b style="font-size: 16px;">Project Manager | DevOps Engineer (lead) | Integration Engineer (lead)<br>Designer (consultant) | Services Engineer<br></b><br>
-      Driven by a passion for computing and problem-solving, I am a final-year BSc Computer Science student with a robust portfolio of successful projects, both in my internship and in personal capacity, translating academic knowledge into real-world applications.<br><br> With this technical knowledge and a dedication to continuous learning, through leveraging my problem-solving skills and passion, I am poised to tackle complex challenges, drive innovation, and make impactful contributions to the field of software engineering.
-      <br><br>
-      <a href="https://github.com/lkekana" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
-        <img src="https://img.icons8.com/material-rounded/24/000000/github.png" width="30" height="30">
-      </a>
-      <a href="https://www.linkedin.com/in/lesedi-kekana-4b966728a/" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
-        <img src="https://img.icons8.com/fluency/24/000000/linkedin.png"  width="30" height="30">
-      </a>
-      <br><br>
-      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=lkekana&show_icons=true&hide_border=true"/>
-      <br>
-    </td>
-  </tr>
-  <tr>
-    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
       <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
     </td>
     <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
       <h2><b style="font-size: 18px;">Linda Masia</b></h2> 
-​      <b style="font-size: 16px;">System Architect | UI Engineer (co-lead) | Services Engineer<br></b><br>
+​      <b style="font-size: 16px;">Project Manager | System Architect | UI Engineer (co-lead)<br></b><br>
       I am a detail-oriented final year Computer Science student with a passion for coding and a knack for problem-solving. With a strong background in full-stack web development, database management, and a touch of machine learning expertise, I bring a diverse skill set to the table.<br><br>By day, I'm immersed in the world of algorithms and data structures, and by night, I'm conjuring up innovative solutions to real-world problems.
 ​      <br><br>
 ​      <a href="https://github.com/Linda-Masia" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
@@ -67,6 +47,26 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
       <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=Linda-Masia&show_icons=true&hide_border=true"/>
       <br>
 ​    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
+      <img src="" width="800" height="auto" style="display: block; margin: 0 auto;">
+    </td>
+    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
+      <h2><b style="font-size: 18px;">Lesedi Kekana</b></h2>
+      <b style="font-size: 16px;">DevOps Engineer (lead) | Integration Engineer (lead) | Former Project Manager<br>Designer (consultant) | Services Engineer<br></b><br>
+      Driven by a passion for computing and problem-solving, I am a final-year BSc Computer Science student with a robust portfolio of successful projects, both in my internship and in personal capacity, translating academic knowledge into real-world applications.<br><br> With this technical knowledge and a dedication to continuous learning, through leveraging my problem-solving skills and passion, I am poised to tackle complex challenges, drive innovation, and make impactful contributions to the field of software engineering.
+      <br><br>
+      <a href="https://github.com/lkekana" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
+        <img src="https://img.icons8.com/material-rounded/24/000000/github.png" width="30" height="30">
+      </a>
+      <a href="https://www.linkedin.com/in/lesedi-kekana-4b966728a/" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
+        <img src="https://img.icons8.com/fluency/24/000000/linkedin.png"  width="30" height="30">
+      </a>
+      <br><br>
+      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=lkekana&show_icons=true&hide_border=true"/>
+      <br>
+    </td>
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
@@ -94,7 +94,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Thabiso Matau</b></h2>
-​      <b style="font-size: 16px;">Business Analyst (co-lead) | Data Engineer (lead) | Services Engineer (lead)<br></b><br>
+​      <b style="font-size: 16px;">Business Analyst (co-lead) | Data Engineer (lead) | Services Engineer (lead) | Integration Engineer<br></b><br>
     Highly motivated and dedicated final-year Computer Science student with a focus on Data Science and Mathematical Statistics. I am seeking a position as a Software Engineer or Data Engineer, committed to leveraging my skills and passion for learning new technologies to contribute value to a dynamic workplace.<br><br>Organized and dependable, successful at managing multiple priorities with a positive attitude. I am willing to take on added responsibilities to meet team goals.
 ​      <br><br>
 ​      <a href="https://github.com/8xbbie" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
