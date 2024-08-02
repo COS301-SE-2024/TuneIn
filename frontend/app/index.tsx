@@ -4,7 +4,10 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
+import { live } from "./services/Live";
 import * as Font from "expo-font";
+import { Platform } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -29,6 +32,10 @@ const fetchFonts = () => {
 	});
 };
 
+if (Platform.OS === "web") {
+	console.log(WebBrowser.maybeCompleteAuthSession());
+}
+
 const App: React.FC = () => {
 	const router = useRouter();
 	const [, setIsCheckingToken] = useState(true);
@@ -46,14 +53,14 @@ const App: React.FC = () => {
 
 				const cognitoToken = await StorageService.getItem("cognitoToken");
 				if (cognitoToken) {
-					auth.exchangeCognitoToken(cognitoToken);
+					auth.exchangeCognitoToken(cognitoToken, live.initialiseSocket);
 				}
 
 				if (!auth.tokenSet) {
 					const authToken = await StorageService.getItem("token");
 					if (authToken && authToken !== "undefined" && authToken !== "null") {
 						auth.setToken(authToken);
-						auth.postAuthInit();
+						live.initialiseSocket();
 					}
 				}
 
@@ -63,8 +70,9 @@ const App: React.FC = () => {
 					router.push("/screens/Home");
 				} else {
 					// Redirect to the WelcomeScreen or appropriate route
-					router.push("/screens/WelcomeScreen");
+					console.log("clearing from index");
 					StorageService.clear();
+					router.push("/screens/WelcomeScreen");
 				}
 			} catch (error) {
 				console.error("Error checking token or loading fonts:", error);

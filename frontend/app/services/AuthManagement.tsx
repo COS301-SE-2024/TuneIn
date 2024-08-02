@@ -3,7 +3,6 @@ import * as StorageService from "./../services/StorageService";
 import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 import { JWT_SECRET_KEY } from "react-native-dotenv";
-import { initialiseSocket } from "./Live";
 import { router } from "expo-router";
 
 const jwtSecretKey = JWT_SECRET_KEY;
@@ -19,6 +18,8 @@ class AuthManagement {
 	public tokenSet: boolean = false;
 
 	constructor() {
+		console.log("AuthManagement constructor is calling fetchToken");
+		console.trace();
 		this.fetchToken();
 	}
 
@@ -32,12 +33,10 @@ class AuthManagement {
 	private async fetchToken(): Promise<void> {
 		this.token = await StorageService.getItem("token");
 		if (
-			this.token === null ||
-			this.token === "undefined" ||
-			this.token === "null"
+			this.token !== null &&
+			this.token !== "undefined" &&
+			this.token !== "null"
 		) {
-			StorageService.clear();
-		} else {
 			this.tokenSet = true;
 		}
 	}
@@ -51,12 +50,13 @@ class AuthManagement {
 		// users will be logged out and redirected to the welcome screen if there is any issue with the token
 		alert("Something went wrong with the authentication. Please log in again.");
 		this.token = null;
+		console.log("Clearing from logout");
 		StorageService.clear();
 		this.tokenSet = false;
 		router.navigate("/screens/WelcomeScreen");
 	}
 
-	public exchangeCognitoToken(token: string): void {
+	public exchangeCognitoToken(token: string, postLogin: Function): void {
 		// POST request to backend
 		fetch(`${utils.API_BASE_URL}/auth/login`, {
 			method: "POST",
@@ -71,7 +71,7 @@ class AuthManagement {
 			.then((data) => {
 				const token = data.token; // Extract the token from the response
 				this.setToken(token); // Set the token in the AuthManagement service
-				this.postAuthInit();
+				postLogin();
 			})
 			.catch((error) => {
 				console.error("Failed to exchange Cognito token:", error);
@@ -140,10 +140,6 @@ class AuthManagement {
 				console.error("Failed to refresh access token:", error);
 			}
 		}
-	}
-
-	public async postAuthInit(): Promise<void> {
-		initialiseSocket();
 	}
 }
 
