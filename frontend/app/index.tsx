@@ -8,6 +8,7 @@ import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { PlayerContextProvider } from "./PlayerContext";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
