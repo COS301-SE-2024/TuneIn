@@ -7,6 +7,7 @@ import auth from "./AuthManagement";
 import songService from "./SongService";
 import * as utils from "./Utils";
 import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
+import { DirectMessageDto } from "../models/DmDto";
 
 const TIMEOUT = 5000000;
 
@@ -39,7 +40,6 @@ class LiveSocketService {
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
-
 
 	private chatHistoryReceived = false;
 	private pingSent = false;
@@ -483,7 +483,10 @@ class LiveSocketService {
 		this.currentRoom = null;
 	}
 
-	public async sendMessage(message: string, setIsSending: stateSetIsSending) {
+	public async sendLiveChatMessage(
+		message: string,
+		setIsSending: stateSetIsSending,
+	) {
 		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
@@ -577,6 +580,36 @@ class LiveSocketService {
 			userID: u.userID,
 		};
 		this.socket.emit("leaveDirectMessage", JSON.stringify(input));
+	}
+
+	public async sendDM(message: Message, otherUser: UserDto) {
+		this.pollLatency();
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.setDMs) {
+			//throw new Error("setDMs not set");
+			return;
+		}
+
+		if (!message.message.messageBody.trim()) {
+			return;
+		}
+
+		const u = this.currentUser;
+		const m: DirectMessageDto = {
+			index: -1,
+			messageBody: message.message.messageBody,
+			sender: u,
+			recipient: otherUser,
+			dateSent: new Date(),
+			dateRead: new Date(0),
+			isRead: false,
+			pID: "",
+		};
+		this.socket.emit("directMessage", JSON.stringify(m));
 	}
 
 	public startPlayback(roomID: string) {

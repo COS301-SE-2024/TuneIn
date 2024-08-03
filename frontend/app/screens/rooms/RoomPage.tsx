@@ -311,7 +311,7 @@ const RoomPage = () => {
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
-		live.sendMessage(message, setIsSending);
+		live.sendLiveChatMessage(message, setIsSending);
 	};
 
 	return (
