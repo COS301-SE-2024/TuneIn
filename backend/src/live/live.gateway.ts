@@ -18,6 +18,11 @@ import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
+import { DmUsersService } from "./dmusers/dmusers.service";
+import { UserProfileDto } from "archive/modules/profile/dto/userprofile.dto";
+import { UserDto } from "src/modules/users/dto/user.dto";
+import { DirectMessageDto } from "src/modules/users/dto/dm.dto";
+import { UsersService } from "src/modules/users/users.service";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -30,12 +35,14 @@ import { LiveService } from "./live.service";
 //@UseFilters(new WsExceptionFilter())
 export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private readonly connectedUsers: RoomUsersService,
+		private readonly roomUsers: RoomUsersService,
+		private readonly dmUsers: DmUsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
 		private readonly eventQueueService: EventQueueService,
 		private readonly liveService: LiveService,
+		private readonly userService: UsersService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -49,7 +56,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleDisconnect(client: Socket) {
 		this.handOverSocketServer(this.server);
 		console.log("Client (id: " + client.id + ") disconnected");
-		this.connectedUsers.removeConnectedUser(client.id);
+		this.roomUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
@@ -79,7 +86,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
-				await this.connectedUsers.addConnectedUser(client.id, payload.userID);
+				await this.roomUsers.addConnectedUser(client.id, payload.userID);
+				await this.dmUsers.addConnectedUser(client.id, payload.userID);
 				const response: ChatEventDto = {
 					userID: null,
 					date_created: new Date(),
@@ -274,7 +282,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("Room does not exist");
 				}
 
-				await this.connectedUsers.setRoomId(client.id, roomID);
+				await this.roomUsers.setRoomId(client.id, roomID);
 				client.join(roomID);
 				const joinAnnouncement: ChatEventDto = {
 					userID: null,
@@ -286,12 +294,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
 
 				//send current media state
-				if (await this.connectedUsers.isPlaying(roomID)) {
+				if (await this.roomUsers.isPlaying(roomID)) {
 					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+						await this.roomUsers.getCurrentSong(roomID);
 					if (songID) {
 						const startTime: Date | null =
-							await this.connectedUsers.getCurrentSongStartTime(roomID);
+							await this.roomUsers.getCurrentSongStartTime(roomID);
 						if (!startTime) {
 							throw new Error("No song start time found somehow?");
 						}
@@ -342,7 +350,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("No userID provided");
 				}
 
-				const roomID = this.connectedUsers.getRoomId(client.id);
+				const roomID = this.roomUsers.getRoomId(client.id);
 				if (!roomID) {
 					throw new Error("User is not in a room");
 				}
@@ -351,7 +359,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				if ((await this.roomService.getRoomUserCount(roomID)) === 1) {
-					await this.connectedUsers.stopSong(roomID);
+					await this.roomUsers.stopSong(roomID);
 				}
 
 				const response: ChatEventDto = {
@@ -360,7 +368,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_LEFT_ROOM);
-				await this.connectedUsers.leaveRoom(client.id);
+				await this.roomUsers.leaveRoom(client.id);
 				client.leave(roomID);
 			} catch (error) {
 				console.error(error);
@@ -472,8 +480,37 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.ENTER_DM);
 			try {
-				//this.server.emit();
 				console.log(p);
+				let enterPayload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					enterPayload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				await this.dmUsers.setChatInfo(client.id, enterPayload.participantID);
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("Chat ID was not set for some reason");
+				}
+				client.join(chatID);
+				const onlineAnnouncement = {
+					userID: enterPayload.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_ONLINE, onlineAnnouncement);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_ONLINE);
+				const messages: DirectMessageDto[] = await this.userService.getMessages(
+					enterPayload.userID,
+					enterPayload.participantID,
+				);
+				client.emit(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY, messages);
+				console.log(
+					"Response emitted: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+				);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -490,8 +527,23 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.EXIT_DM);
 			try {
-				//this.server.emit();
 				console.log(p);
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+				const offlineAnnouncement = {
+					userID: user.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_OFFLINE, offlineAnnouncement);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_OFFLINE);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -542,16 +594,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
 			try {
 				console.log(p);
-				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
 					throw new Error("User is not in a room");
 				}
 
 				//{check user permissions}
-				if (await this.connectedUsers.isPaused(roomID)) {
-					const startTime: Date = await this.connectedUsers.resumeSong(roomID);
+				if (await this.roomUsers.isPaused(roomID)) {
+					const startTime: Date = await this.roomUsers.resumeSong(roomID);
 					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+						await this.roomUsers.getCurrentSong(roomID);
 					if (songID === null) {
 						throw new Error("No song is queued somehow?");
 					}
@@ -564,13 +616,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						UTC_time: startTime.getTime(),
 					};
 					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
-				} else if (!(await this.connectedUsers.isPlaying(roomID))) {
+				} else if (!(await this.roomUsers.isPlaying(roomID))) {
 					const songID: string | null =
-						await this.connectedUsers.getQueueHead(roomID);
+						await this.roomUsers.getQueueHead(roomID);
 					if (songID === null) {
 						throw new Error("No song is queued");
 					}
-					const startTime: Date = await this.connectedUsers.playSongNow(
+					const startTime: Date = await this.roomUsers.playSongNow(
 						roomID,
 						songID,
 					);
@@ -602,15 +654,15 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 			console.log(p);
 
-			const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+			const roomID: string | null = this.roomUsers.getRoomId(client.id);
 			if (roomID === null) {
 				throw new Error("User is not in a room");
 			}
 
 			//{check user permissions}
 
-			if (await this.connectedUsers.isPlaying(roomID)) {
-				await this.connectedUsers.pauseSong(roomID);
+			if (await this.roomUsers.isPlaying(roomID)) {
+				await this.roomUsers.pauseSong(roomID);
 				const response: PlaybackEventDto = {
 					date_created: new Date(),
 					userID: null,
@@ -638,15 +690,15 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				//this.server.emit();
 				console.log(p);
 
-				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
 					throw new Error("User is not in a room");
 				}
 
 				//{check user permissions}
 
-				if (await this.connectedUsers.isPlaying(roomID)) {
-					await this.connectedUsers.stopSong(roomID);
+				if (await this.roomUsers.isPlaying(roomID)) {
+					await this.roomUsers.stopSong(roomID);
 					const response: PlaybackEventDto = {
 						date_created: new Date(),
 						userID: null,

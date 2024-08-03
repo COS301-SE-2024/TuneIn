@@ -6,10 +6,18 @@ import { RoomUsersModule } from "./roomusers/roomuser.module";
 import { LiveGateway } from "./live.gateway";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
-import { DmUsersModule } from './dmusers/dmusers.module';
+import { DmUsersModule } from "./dmusers/dmusers.module";
+import { UsersModule } from "../modules/users/users.module";
 
 @Module({
-	imports: [RoomUsersModule, DmUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
+	imports: [
+		RoomUsersModule,
+		DmUsersModule,
+		DbUtilsModule,
+		DtoGenModule,
+		RoomsModule,
+		UsersModule,
+	],
 	exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	providers: [LiveGateway, EventQueueService, LiveService],
 })

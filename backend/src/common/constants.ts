@@ -45,4 +45,7 @@ export const SOCKET_EVENTS = {
 	PLAY_MEDIA: "playMedia",
 	PAUSE_MEDIA: "pauseMedia",
 	STOP_MEDIA: "stopMedia",
+
+	USER_ONLINE: "userOnline",
+	USER_OFFLINE: "userOffline",
 };
