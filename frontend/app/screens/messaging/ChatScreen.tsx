@@ -12,6 +12,11 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import { Message } from "../../models/message";
+import { UserDto, SongInfoDto } from "../../../api-client";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import { live } from "../../services/Live";
+import axios from "axios";
 
 const dummyMessages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
@@ -37,12 +42,78 @@ const dummyMessages: Message[] = [
 	// Add more messages here
 ];
 
+const defaultUser: UserDto = {
+	profileName: "John Doe",
+	userID: "1",
+	username: "johndoe",
+	profilePictureUrl:
+		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
+	followers: { count: 0, data: [] },
+	following: { count: 0, data: [] },
+	links: { count: 0, data: [] },
+	bio: "Hello, I'm John Doe",
+	currentSong: {
+		title: "Song Title",
+		artists: ["Artist 1", "Artist 2"],
+		cover: "https://via.placeholder.com/150",
+		startTime: new Date(),
+	},
+	favGenres: { count: 0, data: [] },
+	favSongs: { count: 0, data: [] },
+	favRooms: { count: 0, data: [] },
+	recentRooms: { count: 0, data: [] },
+};
+
+//path: http://localhost:8081/screens/messaging/ChatScreen?name=John%20Doe
 const ChatScreen = () => {
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<Message[]>(dummyMessages);
 	const router = useRouter();
-	const { name } = useLocalSearchParams();
-	console.log(name);
+	const { friend } = useLocalSearchParams();
+
+	let self: UserDto = defaultUser;
+	let otherUser: UserDto = defaultUser;
+	const getUsers = async () => {
+		try {
+			const token = await auth.getToken();
+			const userPromises = [];
+			try {
+				const p1 = axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				userPromises.push(p1);
+
+				const p2 = axios.get(`${utils.API_BASE_URL}/users/${friend}`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				userPromises.push(p2);
+
+				const responses = await Promise.all(userPromises);
+				const r1 = responses[0].data as UserDto;
+				const r2 = responses[1].data as UserDto;
+				return [r1, r2];
+			} catch (error) {
+				console.error("Error fetching users' information");
+				throw error;
+			}
+		} catch (error) {
+			console.error("Something went wrong while fetching user information");
+			throw error;
+		}
+	};
+
+	getUsers()
+		.then(([r1, r2]) => {
+			otherUser = r1;
+			self = r2;
+		})
+		.catch((error) => {
+			console.error("Failed to fetch users", error);
+		});
 
 	const avatarUrl =
 		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg";
@@ -70,7 +141,7 @@ const ChatScreen = () => {
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Image source={{ uri: avatarUrl }} style={styles.avatar} />
-				<Text style={styles.headerTitle}>{name}</Text>
+				<Text style={styles.headerTitle}>{otherUser.profileName}</Text>
 			</View>
 			<FlatList
 				data={messages}
