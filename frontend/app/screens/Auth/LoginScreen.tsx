@@ -48,6 +48,7 @@ const LoginScreen: React.FC = () => {
 			onSuccess: function (result) {
 				// Store token in storage if remember me is checked
 				if (rememberMe) {
+					console.log("cognitoToken", result.getAccessToken().getJwtToken());
 					StorageService.setItem(
 						"cognitoToken",
 						result.getAccessToken().getJwtToken(),
