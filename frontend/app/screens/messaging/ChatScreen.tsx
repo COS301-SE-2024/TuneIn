@@ -15,9 +15,10 @@ import { Message } from "../../models/message";
 import { UserDto, SongInfoDto } from "../../../api-client";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { live } from "../../services/Live";
+import { live, DirectMessage } from "../../services/Live";
 import axios from "axios";
 
+/*
 const dummyMessages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
 	{ id: "2", text: "Hi! How are you?", sender: "Me", me: true },
@@ -41,6 +42,7 @@ const dummyMessages: Message[] = [
 	{ id: "10", text: "Bye!", sender: "Me", me: true },
 	// Add more messages here
 ];
+*/
 
 const defaultUser: UserDto = {
 	profileName: "John Doe",
@@ -64,10 +66,166 @@ const defaultUser: UserDto = {
 	recentRooms: { count: 0, data: [] },
 };
 
+const defaultMe: UserDto = {
+	profileName: "Me",
+	userID: "0",
+	username: "me",
+	profilePictureUrl:
+		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
+	followers: { count: 0, data: [] },
+	following: { count: 0, data: [] },
+	links: { count: 0, data: [] },
+	bio: "Hello, I'm Me",
+	currentSong: {
+		title: "Song Title",
+		artists: ["Artist 1", "Artist 2"],
+		cover: "https://via.placeholder.com/150",
+		startTime: new Date(),
+	},
+	favGenres: { count: 0, data: [] },
+	favSongs: { count: 0, data: [] },
+	favRooms: { count: 0, data: [] },
+	recentRooms: { count: 0, data: [] },
+};
+
+const dummyMessages: DirectMessage[] = [
+	{
+		message: {
+			index: 1,
+			messageBody: "Hey there!",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p1",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 2,
+			messageBody: "Hi! How are you?",
+			sender: defaultMe,
+			recipient: defaultUser,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p2",
+		},
+		me: true,
+	},
+	{
+		message: {
+			index: 3,
+			messageBody: "I'm good, thanks!",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p3",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 4,
+			messageBody: "What are you up to?",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p4",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 5,
+			messageBody: "Just working on a new project",
+			sender: defaultMe,
+			recipient: defaultUser,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p5",
+		},
+		me: true,
+	},
+	{
+		message: {
+			index: 6,
+			messageBody: "That's great! I'd love to hear more about it",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p6",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 7,
+			messageBody: "Sure! I'll tell you more about it later",
+			sender: defaultMe,
+			recipient: defaultUser,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p7",
+		},
+		me: true,
+	},
+	{
+		message: {
+			index: 8,
+			messageBody: "Sounds good!",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p8",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 9,
+			messageBody: "Bye!",
+			sender: defaultUser,
+			recipient: defaultMe,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p9",
+		},
+		me: false,
+	},
+	{
+		message: {
+			index: 10,
+			messageBody: "Bye!",
+			sender: defaultMe,
+			recipient: defaultUser,
+			dateSent: new Date(),
+			dateRead: new Date(),
+			isRead: false,
+			pID: "p10",
+		},
+		me: true,
+	},
+	// Add more messages here if needed
+];
+
 //path: http://localhost:8081/screens/messaging/ChatScreen?name=John%20Doe
 const ChatScreen = () => {
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<Message[]>(dummyMessages);
+	const [messages, setMessages] = useState<DirectMessage[]>(dummyMessages);
 	const router = useRouter();
 	const { friend } = useLocalSearchParams();
 
@@ -119,6 +277,7 @@ const ChatScreen = () => {
 		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg";
 
 	const handleSend = () => {
+		/*
 		if (message.trim()) {
 			messages.push({
 				id: String(messages.length + 1),
@@ -128,6 +287,7 @@ const ChatScreen = () => {
 			});
 			setMessage("");
 		}
+			*/
 	};
 
 	return (
@@ -145,10 +305,8 @@ const ChatScreen = () => {
 			</View>
 			<FlatList
 				data={messages}
-				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => (
-					<MessageItem message={item} avatarUrl={avatarUrl} />
-				)}
+				keyExtractor={(item) => item.message.pID}
+				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
 			/>
 			<View style={styles.inputContainer}>
