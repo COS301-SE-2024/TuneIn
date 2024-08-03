@@ -567,6 +567,22 @@ export class UsersService {
 			throw new Error("Failed to send message");
 		}
 	}
+
+	async getMessages(
+		userID: string,
+		recipientID: string,
+	): Promise<DirectMessageDto[]> {
+		//get messages between two users
+		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
+	}
+
+	async getUnreadMessages(
+		userID: string,
+		recipientID: string,
+	): Promise<DirectMessageDto[]> {
+		//get unread messages between two users
+		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID, true);
+	}
 		//edit a message
 		console.log("Editing message");
 		return true;

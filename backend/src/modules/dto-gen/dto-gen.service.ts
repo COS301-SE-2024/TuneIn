@@ -563,6 +563,7 @@ export class DtoGenService {
 	async getChatAsDirectMessageDto(
 		participant1: string,
 		participant2: string,
+		unreadOnly: boolean = false,
 	): Promise<DirectMessageDto[]> {
 		/*
 		const user1: UserDto = await this.generateUserDto(participant1);
@@ -598,6 +599,11 @@ export class DtoGenService {
 			throw new Error(
 				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
 			);
+		}
+
+		//filter unread messages
+		if (unreadOnly) {
+			//a future feature
 		}
 
 		//sort messages by date
