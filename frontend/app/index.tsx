@@ -53,7 +53,7 @@ const App: React.FC = () => {
 
 				const cognitoToken = await StorageService.getItem("cognitoToken");
 				if (cognitoToken) {
-					auth.exchangeCognitoToken(cognitoToken, live.initialiseSocket);
+					auth.exchangeCognitoToken(cognitoToken, live.initialiseSocket, true);
 				}
 
 				if (!auth.tokenSet) {
