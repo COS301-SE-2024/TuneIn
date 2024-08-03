@@ -7,7 +7,7 @@ import {
 	IsString,
 	ValidateNested,
 } from "class-validator";
-import { UserDto } from "src/modules/users/dto/user.dto";
+import { UserDto } from "../../users/dto/user.dto";
 
 export class RoomAnalyticsQueueDto {
 	@ApiProperty({ description: "Total number of songs ever queued in the room" })

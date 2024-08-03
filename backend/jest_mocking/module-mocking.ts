@@ -58,7 +58,7 @@ import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
 import { LiveService } from "../src/live/live.service";
 import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
-import { DmUsersService } from "src/live/dmusers/dmusers.service";
+import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
