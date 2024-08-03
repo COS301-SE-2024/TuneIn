@@ -25,7 +25,7 @@ import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
-import { live, Message } from "../../services/Live";
+import { live, LiveMessage } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 
 const MemoizedCommentWidget = memo(CommentWidget);
@@ -53,7 +53,7 @@ const RoomPage = () => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [messages, setMessages] = useState<LiveMessage[]>([]);
 	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,

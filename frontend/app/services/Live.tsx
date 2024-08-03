@@ -11,12 +11,20 @@ import { DirectMessageDto } from "../models/DmDto";
 
 const TIMEOUT = 5000000;
 
-export type Message = {
+export type LiveMessage = {
 	message: LiveChatMessageDto;
 	me?: boolean;
 };
 
-type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
+export type DirectMessage = {
+	message: DirectMessageDto;
+	me?: boolean;
+};
+
+type stateSetLiveMessages = React.Dispatch<React.SetStateAction<LiveMessage[]>>;
+type stateSetDirectMessages = React.Dispatch<
+	React.SetStateAction<DirectMessage[]>
+>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,18 +38,20 @@ class LiveSocketService {
 	private currentRoom: RoomDto | null = null;
 	private initialised = false;
 	private isConnecting = false;
-	private requestingChatHistory = false;
+	private requestingLiveChatHistory = false;
+	private requestingDMHistory = false;
 
 	private backendLatency: number = 0;
 	private timeOffset: number = 0;
 
-	private setLiveChatMessages: stateSetMessages | null = null;
-	private setDMs: stateSetMessages | null = null;
+	private setLiveChatMessages: stateSetLiveMessages | null = null;
+	private setDMs: stateSetDirectMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
 
-	private chatHistoryReceived = false;
+	private liveChatHistoryReceived = false;
+	private dmHistoryReceived = false;
 	private pingSent = false;
 
 	private constructor() {
@@ -185,14 +195,14 @@ class LiveSocketService {
 				this.requestChatHistory();
 			});
 
-			this.socket.on("chatHistory", (history: LiveChatMessageDto[]) => {
-				console.log("SOCKET EVENT: chatHistory", history);
+			this.socket.on("liveChatHistory", (history: LiveChatMessageDto[]) => {
+				console.log("SOCKET EVENT: liveChatHistory", history);
 				if (!this.currentUser) {
 					//throw new Error("Something went wrong while getting user's info");
 					return;
 				}
 
-				this.chatHistoryReceived = true;
+				this.liveChatHistoryReceived = true;
 				if (this.setLiveChatMessages) {
 					const u = this.currentUser;
 					const chatHistory = history.map((msg) => ({
@@ -201,12 +211,12 @@ class LiveSocketService {
 					}));
 					this.setLiveChatMessages(chatHistory);
 				}
-				this.requestingChatHistory = false;
+				this.requestingLiveChatHistory = false;
 			});
 
 			this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
 				console.log("SOCKET EVENT: liveMessage", newMessage);
-				if (!this.chatHistoryReceived) {
+				if (!this.liveChatHistoryReceived) {
 					this.requestChatHistory();
 				}
 
@@ -401,7 +411,7 @@ class LiveSocketService {
 	public async joinRoom(
 		roomID: string,
 		setJoined: stateSetJoined,
-		setLiveChatMessages: stateSetMessages,
+		setLiveChatMessages: stateSetLiveMessages,
 		setMessage: stateSetMessage,
 	) {
 		this.pollLatency();
@@ -439,9 +449,9 @@ class LiveSocketService {
 		this.socket.emit("joinRoom", JSON.stringify(input));
 
 		//request chat history
-		this.chatHistoryReceived = false;
+		this.liveChatHistoryReceived = false;
 		this.requestChatHistory();
-		this.requestingChatHistory = true;
+		this.requestingLiveChatHistory = true;
 	}
 
 	public async leaveRoom() {
@@ -478,8 +488,8 @@ class LiveSocketService {
 		if (this.setLiveChatMessages) {
 			this.setLiveChatMessages([]);
 		}
-		this.chatHistoryReceived = false;
-		this.requestingChatHistory = false;
+		this.liveChatHistoryReceived = false;
+		this.requestingLiveChatHistory = false;
 		this.currentRoom = null;
 	}
 
@@ -544,7 +554,7 @@ class LiveSocketService {
 	public async enterDM(
 		userID: string,
 		participantID: string,
-		setDMs: stateSetMessages,
+		setDMs: stateSetDirectMessages,
 	) {
 		this.pollLatency();
 		if (!this.currentUser) {
@@ -582,7 +592,7 @@ class LiveSocketService {
 		this.socket.emit("leaveDirectMessage", JSON.stringify(input));
 	}
 
-	public async sendDM(message: Message, otherUser: UserDto) {
+	public async sendDM(message: LiveMessage, otherUser: UserDto) {
 		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
@@ -707,7 +717,7 @@ class LiveSocketService {
 	}
 
 	public requestChatHistory() {
-		if (this.requestingChatHistory) {
+		if (this.requestingLiveChatHistory) {
 			return;
 		}
 
@@ -725,11 +735,11 @@ class LiveSocketService {
 			return;
 		}
 
-		if (this.chatHistoryReceived) {
+		if (this.liveChatHistoryReceived) {
 			return;
 		}
 
-		this.requestingChatHistory = true;
+		this.requestingLiveChatHistory = true;
 
 		const u = this.currentUser;
 		const input: ChatEventDto = {
