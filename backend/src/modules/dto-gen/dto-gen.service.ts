@@ -6,6 +6,7 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
+import { DirectMessageDto } from "../users/dto/dm.dto";
 
 // A service that will generate DTOs
 @Injectable()
@@ -516,6 +517,72 @@ export class DtoGenService {
 					sender: s,
 					roomID: roomMessage.room_id,
 					dateCreated: m.date_sent,
+				};
+				result.push(message);
+			}
+		}
+		return result;
+	}
+
+	async generateDirectMessageDto(pmID: string): Promise<DirectMessageDto> {
+		const dm:
+			| ({ message: PrismaTypes.message } & PrismaTypes.private_message)
+			| null = await this.prisma.private_message.findUnique({
+			where: {
+				p_message_id: pmID,
+			},
+			include: {
+				message: true,
+			},
+		});
+
+		if (!dm || dm === null) {
+			throw new Error(
+				"Message with id " +
+					pmID +
+					" does not exist. DTOGenService.generateDirectMessageDto():ERROR01",
+			);
+		}
+
+		const sender: UserDto = await this.generateUserDto(dm.message.sender);
+		const recipient: UserDto = await this.generateUserDto(dm.recipient);
+
+		const result: DirectMessageDto = {
+			index: -1,
+			messageBody: dm.message.contents,
+			sender: sender,
+			recipient: recipient,
+			dateSent: dm.message.date_sent,
+			dateRead: new Date(0),
+			isRead: false,
+			pID: dm.p_message_id,
+		};
+		return result;
+	}
+
+		//sort messages by date
+		dms.sort((a, b) => {
+			return a.message.date_sent.getTime() - b.message.date_sent.getTime();
+		});
+
+		const result: DirectMessageDto[] = [];
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			if (dm && dm !== null) {
+				const sender: UserDto =
+					dm.message.sender === participant1 ? user1 : user2;
+				const recipient: UserDto =
+					dm.message.sender === participant1 ? user2 : user1;
+
+				const message: DirectMessageDto = {
+					index: i,
+					messageBody: dm.message.contents,
+					sender: sender,
+					recipient: recipient,
+					dateSent: dm.message.date_sent,
+					dateRead: new Date(0),
+					isRead: false,
+					pID: dm.p_message_id,
 				};
 				result.push(message);
 			}

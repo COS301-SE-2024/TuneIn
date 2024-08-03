@@ -26,10 +26,6 @@ export class DirectMessageDto {
 	recipient: UserDto;
 
 	@ApiProperty()
-	@IsString()
-	roomID: string;
-
-	@ApiProperty()
 	@IsDateString()
 	dateSent: Date;
 
@@ -40,4 +36,8 @@ export class DirectMessageDto {
 	@ApiProperty()
 	@IsBoolean()
 	isRead: boolean;
+
+	@ApiProperty()
+	@IsString()
+	pID: string;
 }
