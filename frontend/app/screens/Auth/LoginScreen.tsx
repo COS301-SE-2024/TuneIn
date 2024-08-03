@@ -54,7 +54,7 @@ const LoginScreen: React.FC = () => {
 					);
 				}
 				auth.exchangeCognitoToken(
-					result.getIdToken().getJwtToken(),
+					result.getAccessToken().getJwtToken(),
 					initialiseSocket,
 				);
 				router.navigate("/screens/Home");
