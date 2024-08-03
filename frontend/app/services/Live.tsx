@@ -56,6 +56,10 @@ class LiveSocketService {
 		return LiveSocketService.instance;
 	}
 
+	public static instanceExists(): boolean {
+		return Boolean(LiveSocketService.instance);
+	}
+
 	// Method to send a ping and wait for a response or timeout
 	public async sendPing(timeout: number = TIMEOUT): Promise<void> {
 		if (this.pingSent) {
@@ -666,3 +670,4 @@ class LiveSocketService {
 // Export the singleton instance
 export const live = LiveSocketService.getInstance();
 export const initialiseSocket = live.initialiseSocket;
+export const instanceExists = LiveSocketService.instanceExists;
