@@ -9,6 +9,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { DirectMessageDto } from "./dto/dm.dto";
 
 @Injectable()
 export class UsersService {
@@ -532,5 +533,42 @@ export class UsersService {
 			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
 		*/
 		return [];
+	}
+
+	async sendMessage(
+		userID: string,
+		message: DirectMessageDto,
+	): Promise<boolean> {
+		//send message to user
+		try {
+			const newMessage = await this.prisma.message.create({
+				data: {
+					contents: message.messageBody,
+					date_sent: message.dateSent,
+					sender: message.sender.userID,
+				},
+			});
+			await this.prisma.private_message.create({
+				data: {
+					users: {
+						connect: {
+							user_id: message.sender.userID,
+						},
+					},
+					message: {
+						connect: {
+							message_id: newMessage.message_id,
+						},
+					},
+				},
+			});
+			return true;
+		} catch (e) {
+			throw new Error("Failed to send message");
+		}
+	}
+		//edit a message
+		console.log("Editing message");
+		return true;
 	}
 }
