@@ -18,6 +18,7 @@ export const SOCKET_EVENTS = {
 	GET_DIRECT_MESSAGE_HISTORY: "getDirectMessageHistory",
 	TYPING: "typing",
 	STOP_TYPING: "stopTyping",
+	MODIFY_DM: "modifyDirectMessage",
 	EXIT_DM: "exitDirectMessage",
 
 	//sync after getting chat history???
@@ -48,4 +49,5 @@ export const SOCKET_EVENTS = {
 
 	USER_ONLINE: "userOnline",
 	USER_OFFLINE: "userOffline",
+	CHAT_MODIFIED: "chatModified",
 };

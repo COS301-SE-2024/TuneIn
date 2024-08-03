@@ -587,6 +587,90 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	@SubscribeMessage(SOCKET_EVENTS.MODIFY_DM)
+	async handleModifyDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.MODIFY_DM);
+			try {
+				console.log(p);
+				let payload: {
+					userID: string;
+					participantID: string;
+					action: string;
+					message: DirectMessageDto;
+				};
+				try {
+					const j = JSON.parse(p);
+					payload = j as {
+						userID: string;
+						participantID: string;
+						action: string;
+						message: DirectMessageDto;
+					};
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				if (payload.action === "edit") {
+					const edited: DirectMessageDto = await this.userService.editMessage(
+						user.userID,
+						payload.message,
+					);
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: "edit",
+						message: edited,
+					});
+				} else if (payload.action === "delete") {
+					let deletedMessage: DirectMessageDto;
+					try {
+						deletedMessage = await this.dtogen.generateDirectMessageDto(
+							payload.message.pID,
+						);
+					} catch (e) {
+						console.error(e);
+						throw new Error("Message does not exist");
+					}
+
+					const deleted = await this.userService.deleteMessage(
+						user.userID,
+						deletedMessage,
+					);
+					if (!deleted) {
+						throw new Error("Message could not be deleted");
+					}
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: "delete",
+						message: deletedMessage,
+					});
+				} else {
+					throw new Error("Invalid action");
+				}
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
 	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.PING)

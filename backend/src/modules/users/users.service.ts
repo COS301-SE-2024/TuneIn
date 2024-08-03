@@ -736,16 +736,34 @@ export class UsersService {
 	async editMessage(
 		userID: string,
 		message: DirectMessageDto,
-	): Promise<boolean> {
+	): Promise<DirectMessageDto> {
 		//edit a message
 		try {
-			await this.prisma.message.update({
-				where: { message_id: message.pID },
+			const updatedMessage:
+				| ({
+						message: PrismaTypes.message;
+				  } & PrismaTypes.private_message)
+				| null = await this.prisma.private_message.update({
+				where: {
+					p_message_id: message.pID,
+				},
 				data: {
-					contents: message.messageBody,
+					message: {
+						update: {
+							contents: message.messageBody,
+						},
+					},
+				},
+				include: {
+					message: true,
 				},
 			});
-			return true;
+			if (!updatedMessage || updatedMessage === null) {
+				throw new Error("Failed to update message");
+			}
+			return await this.dtogen.generateDirectMessageDto(
+				updatedMessage.p_message_id,
+			);
 		} catch (e) {
 			console.error(e);
 			throw e;
