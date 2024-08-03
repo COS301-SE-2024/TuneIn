@@ -56,7 +56,11 @@ class AuthManagement {
 		router.navigate("/screens/WelcomeScreen");
 	}
 
-	public exchangeCognitoToken(token: string, postLogin: Function): void {
+	public exchangeCognitoToken(
+		token: string,
+		postLogin: Function,
+		callPostLogin: boolean,
+	): void {
 		// POST request to backend
 		fetch(`${utils.API_BASE_URL}/auth/login`, {
 			method: "POST",
@@ -71,7 +75,9 @@ class AuthManagement {
 			.then((data) => {
 				const token = data.token; // Extract the token from the response
 				this.setToken(token); // Set the token in the AuthManagement service
-				postLogin();
+				if (callPostLogin) {
+					postLogin();
+				}
 			})
 			.catch((error) => {
 				console.error("Failed to exchange Cognito token:", error);
