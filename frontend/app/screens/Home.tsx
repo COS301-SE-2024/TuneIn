@@ -21,6 +21,7 @@ import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 import { colors } from "../styles/colors";
 
@@ -33,6 +34,9 @@ const Home: React.FC = () => {
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+	if (!instanceExists()) {
+		live.initialiseSocket();
+	}
 
 	const BackgroundIMG: string =
 		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
