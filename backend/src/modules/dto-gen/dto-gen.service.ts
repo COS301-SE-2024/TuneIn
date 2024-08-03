@@ -560,6 +560,46 @@ export class DtoGenService {
 		return result;
 	}
 
+	async getChatAsDirectMessageDto(
+		participant1: string,
+		participant2: string,
+	): Promise<DirectMessageDto[]> {
+		/*
+		const user1: UserDto = await this.generateUserDto(participant1);
+		const user2: UserDto = await this.generateUserDto(participant2);
+		*/
+		const { user1, user2 }: { user1: UserDto; user2: UserDto } =
+			await this.generateMultipleUserDto([participant1, participant2]).then(
+				(users) => {
+					if (users.length !== 2) {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
+						);
+					}
+					return { user1: users[0], user2: users[1] };
+				},
+			);
+
+		const dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] =
+			await this.prisma.private_message.findMany({
+				where: {
+					message: {
+						OR: [{ sender: participant1 }, { sender: participant2 }],
+					},
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
 		//sort messages by date
 		dms.sort((a, b) => {
 			return a.message.date_sent.getTime() - b.message.date_sent.getTime();
