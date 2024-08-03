@@ -192,7 +192,7 @@ class LiveSocketService {
 					//throw new Error("Current room not set");
 					return;
 				}
-				this.requestChatHistory();
+				this.requestLiveChatHistory();
 			});
 
 			this.socket.on("liveChatHistory", (history: LiveChatMessageDto[]) => {
@@ -217,7 +217,7 @@ class LiveSocketService {
 			this.socket.on("liveMessage", (newMessage: ChatEventDto) => {
 				console.log("SOCKET EVENT: liveMessage", newMessage);
 				if (!this.liveChatHistoryReceived) {
-					this.requestChatHistory();
+					this.requestLiveChatHistory();
 				}
 
 				if (!this.currentUser) {
@@ -450,7 +450,7 @@ class LiveSocketService {
 
 		//request chat history
 		this.liveChatHistoryReceived = false;
-		this.requestChatHistory();
+		this.requestLiveChatHistory();
 		this.requestingLiveChatHistory = true;
 	}
 
@@ -622,6 +622,54 @@ class LiveSocketService {
 		this.socket.emit("directMessage", JSON.stringify(m));
 	}
 
+	public async editDM(message: LiveMessage, otherUser: UserDto) {
+		this.pollLatency();
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.setDMs) {
+			//throw new Error("setDMs not set");
+			return;
+		}
+
+		if (!message.message.messageBody.trim()) {
+			return;
+		}
+
+		const u = this.currentUser;
+		let payload = {
+			userID: u.userID,
+			participantID: otherUser.userID,
+			action: "edit",
+			message: message.message,
+		};
+		this.socket.emit("modifyDirectMessage", JSON.stringify(payload));
+	}
+
+	public async deleteDM(message: LiveMessage, otherUser: UserDto) {
+		this.pollLatency();
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.setDMs) {
+			//throw new Error("setDMs not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		let payload = {
+			userID: u.userID,
+			participantID: otherUser.userID,
+			action: "delete",
+			message: message.message,
+		};
+		this.socket.emit("modifyDirectMessage", JSON.stringify(payload));
+	}
+
 	public requestDMHistory(participantID: string) {
 		if (this.requestingDMHistory) {
 			return;
@@ -716,7 +764,7 @@ class LiveSocketService {
 		this.socket.emit("initStop", JSON.stringify(input));
 	}
 
-	public requestChatHistory() {
+	public requestLiveChatHistory() {
 		if (this.requestingLiveChatHistory) {
 			return;
 		}
