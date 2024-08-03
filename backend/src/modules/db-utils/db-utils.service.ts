@@ -3,10 +3,23 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import * as Prisma from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { UpdateUserDto } from "../users/dto/updateuser.dto";
-
+import * as bcrypt from "bcrypt";
+import { ConfigService } from "@nestjs/config";
 @Injectable()
 export class DbUtilsService {
-	constructor(private readonly prisma: PrismaService) {}
+	private salt: string;
+
+	constructor(
+		private configService: ConfigService,
+		private prisma: PrismaService,
+	) {
+		// Set the salt for hashing
+		const salt = this.configService.get<string>("SALT");
+		if (!salt) {
+			throw new Error("Missing SALT");
+		}
+		this.salt = salt;
+	}
 
 	//get user following (people the user is following)
 	/*
@@ -343,5 +356,10 @@ export class DbUtilsService {
 			throw new Error("More than one follow found.");
 		}
 		return true;
+	}
+
+	async generateHash(input: string): Promise<string> {
+		const hash = await bcrypt.hash(input, this.salt);
+		return hash;
 	}
 }

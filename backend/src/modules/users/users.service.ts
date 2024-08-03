@@ -750,4 +750,16 @@ export class UsersService {
 			throw e;
 		}
 	}
+
+	async generateChatHash(
+		userID: string,
+		recipientID: string,
+	): Promise<string[]> {
+		//generate a unique chat hash
+		const chatStr1 = userID + recipientID;
+		const chatStr2 = recipientID + userID;
+		const a = this.dbUtils.generateHash(chatStr1);
+		const b = this.dbUtils.generateHash(chatStr2);
+		return Promise.all([a, b]);
+	}
 }
