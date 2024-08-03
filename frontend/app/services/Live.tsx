@@ -34,10 +34,12 @@ class LiveSocketService {
 	private backendLatency: number = 0;
 	private timeOffset: number = 0;
 
-	private setMessages: stateSetMessages | null = null;
+	private setLiveChatMessages: stateSetMessages | null = null;
+	private setDMs: stateSetMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
+
 
 	private chatHistoryReceived = false;
 	private pingSent = false;
@@ -191,13 +193,13 @@ class LiveSocketService {
 				}
 
 				this.chatHistoryReceived = true;
-				if (this.setMessages) {
+				if (this.setLiveChatMessages) {
 					const u = this.currentUser;
 					const chatHistory = history.map((msg) => ({
 						message: msg,
 						me: msg.sender.userID === u.userID,
 					}));
-					this.setMessages(chatHistory);
+					this.setLiveChatMessages(chatHistory);
 				}
 				this.requestingChatHistory = false;
 			});
@@ -228,8 +230,8 @@ class LiveSocketService {
 						this.setIsSending = null;
 					}
 				}
-				if (this.setMessages) {
-					this.setMessages((prevMessages) => [
+				if (this.setLiveChatMessages) {
+					this.setLiveChatMessages((prevMessages) => [
 						...prevMessages,
 						{ message, me: message.sender.userID === u.userID },
 					]);
@@ -280,13 +282,13 @@ class LiveSocketService {
 					this.setJoined &&
 					this.currentRoom &&
 					this.currentRoom.roomID &&
-					this.setMessages &&
+					this.setLiveChatMessages &&
 					this.setMessage
 				) {
 					this.joinRoom(
 						this.currentRoom.roomID,
 						this.setJoined,
-						this.setMessages,
+						this.setLiveChatMessages,
 						this.setMessage,
 					);
 				}
@@ -399,7 +401,7 @@ class LiveSocketService {
 	public async joinRoom(
 		roomID: string,
 		setJoined: stateSetJoined,
-		setMessages: stateSetMessages,
+		setLiveChatMessages: stateSetMessages,
 		setMessage: stateSetMessage,
 	) {
 		this.pollLatency();
@@ -409,7 +411,7 @@ class LiveSocketService {
 		}
 
 		this.setJoined = setJoined;
-		this.setMessages = setMessages;
+		this.setLiveChatMessages = setLiveChatMessages;
 		this.setMessage = setMessage;
 
 		try {
@@ -473,8 +475,8 @@ class LiveSocketService {
 		};
 		this.socket.emit("leaveRoom", JSON.stringify(input));
 
-		if (this.setMessages) {
-			this.setMessages([]);
+		if (this.setLiveChatMessages) {
+			this.setLiveChatMessages([]);
 		}
 		this.chatHistoryReceived = false;
 		this.requestingChatHistory = false;
@@ -617,7 +619,7 @@ class LiveSocketService {
 			return;
 		}
 
-		if (!this.setMessages) {
+		if (!this.setLiveChatMessages) {
 			return;
 		}
 
@@ -659,7 +661,7 @@ class LiveSocketService {
 	public async disconnectSocket() {
 		this.currentUser = null;
 		this.currentRoom = null;
-		this.setMessages = null;
+		this.setLiveChatMessages = null;
 		this.setJoined = null;
 		this.setMessage = null;
 		if (this.socket) {
