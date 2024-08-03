@@ -232,8 +232,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				const messages: LiveChatMessageDto[] =
 					await this.roomService.getLiveChatHistoryDto(roomID);
-				this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
-				console.log("Response emitted: " + SOCKET_EVENTS.CHAT_HISTORY);
+				this.server.emit(SOCKET_EVENTS.LIVE_CHAT_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -441,10 +441,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					payload.userID,
 					payload.participantID,
 				);
-				client.emit(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY, messages);
-				console.log(
-					"Response emitted: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-				);
+				client.emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

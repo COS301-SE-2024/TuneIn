@@ -41,7 +41,7 @@ export const SOCKET_EVENTS = {
 	MESSAGE_RECEIVED: "messageReceived",
 	USER_JOINED_ROOM: "userJoinedRoom",
 	USER_LEFT_ROOM: "userLeftRoom",
-	CHAT_HISTORY: "chatHistory",
+	LIVE_CHAT_HISTORY: "liveChatHistory",
 
 	PLAY_MEDIA: "playMedia",
 	PAUSE_MEDIA: "pauseMedia",
@@ -50,4 +50,5 @@ export const SOCKET_EVENTS = {
 	USER_ONLINE: "userOnline",
 	USER_OFFLINE: "userOffline",
 	CHAT_MODIFIED: "chatModified",
+	DM_HISTORY: "dmHistory",
 };

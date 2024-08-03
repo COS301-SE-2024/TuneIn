@@ -612,6 +612,34 @@ class LiveSocketService {
 		this.socket.emit("directMessage", JSON.stringify(m));
 	}
 
+	public requestDMHistory(participantID: string) {
+		if (this.requestingDMHistory) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.setDMs) {
+			return;
+		}
+
+		if (this.dmHistoryReceived) {
+			return;
+		}
+
+		this.requestingDMHistory = true;
+
+		const u = this.currentUser;
+		const input = {
+			userID: u.userID,
+			participantID: participantID,
+		};
+		this.socket.emit("getDirectMessageHistory", JSON.stringify(input));
+	}
+
 	public startPlayback(roomID: string) {
 		this.pollLatency();
 		if (!this.currentUser) {
