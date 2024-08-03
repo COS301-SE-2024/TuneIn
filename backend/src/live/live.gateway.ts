@@ -462,17 +462,32 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.TYPING);
 			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: TYPING, { userId: user.id }
-				*/
 				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+					*/
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				const typingAnnouncement = {
+					userID: user.userID,
+				};
+				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -489,17 +504,32 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
 			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: STOP_TYPING, { userId: user.id }
-				*/
 				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+					*/
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				const stopTypingAnnouncement = {
+					userID: user.userID,
+				};
+				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
