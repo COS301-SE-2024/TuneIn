@@ -409,7 +409,22 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			);
 			try {
 				console.log(p);
-				//this.server.emit();
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+				const messages: DirectMessageDto[] = await this.userService.getMessages(
+					payload.userID,
+					payload.participantID,
+				);
+				client.emit(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY, messages);
+				console.log(
+					"Response emitted: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+				);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
