@@ -683,8 +683,71 @@ export class UsersService {
 		const lastRead: Date = new Date(0);
 		return await this.getUserNewMessages(userID, lastRead);
 	}
+
+	async markMessagesAsRead(
+		userID: string,
+		messages: DirectMessageDto[],
+	): Promise<boolean> {
+		//mark multiple messages as read
+		try {
+			console.log(
+				`Marking ${messages.length} messages as read for user ` + userID,
+			);
+
+			/*
+			await this.prisma.private_message.updateMany({
+				where: {
+					recipient: userID,
+					message: {
+						message_id: {
+							in: messages.map((m) => m.pID),
+						},
+					},
+				},
+				data: {
+					is_read: true,
+				},
+			});
+			*/
+			return true;
+		} catch (e) {
+			console.error(e);
+			throw e;
+		}
+	}
+
+	async deleteMessage(
+		userID: string,
+		message: DirectMessageDto,
+	): Promise<boolean> {
+		//delete a message
+		try {
+			await this.prisma.message.delete({
+				where: { message_id: message.pID },
+			});
+			return true;
+		} catch (e) {
+			console.error(e);
+			throw e;
+		}
+	}
+
+	async editMessage(
+		userID: string,
+		message: DirectMessageDto,
+	): Promise<boolean> {
 		//edit a message
-		console.log("Editing message");
-		return true;
+		try {
+			await this.prisma.message.update({
+				where: { message_id: message.pID },
+				data: {
+					contents: message.messageBody,
+				},
+			});
+			return true;
+		} catch (e) {
+			console.error(e);
+			throw e;
+		}
 	}
 }
