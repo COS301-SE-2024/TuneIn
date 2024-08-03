@@ -13,10 +13,12 @@ export const SOCKET_EVENTS = {
 	GET_LIVE_CHAT_HISTORY: "getLiveChatHistory",
 
 	//for direct messages
+	ENTER_DM: "enterDirectMessage",
 	DIRECT_MESSAGE: "directMessage",
 	GET_DIRECT_MESSAGE_HISTORY: "getDirectMessageHistory",
 	TYPING: "typing",
 	STOP_TYPING: "stopTyping",
+	EXIT_DM: "exitDirectMessage",
 
 	//sync after getting chat history???
 

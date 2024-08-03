@@ -19,35 +19,6 @@ import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 
-/*
-export class PlaybackEventDto {
-	@ApiProperty()
-	@IsDateString()
-	date_created?: Date;
-
-	@ApiProperty()
-	@IsString()
-	userID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	roomID: string;
-
-	@ApiProperty()
-	@IsString()
-	songID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	UTC_time: number;
-
-	@ApiProperty()
-	@IsString()
-	errorMessage?: string;
-}
-
-*/
-
 @WebSocketGateway({
 	namespace: "/live",
 	transports: ["websocket"],
@@ -136,6 +107,23 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 	*/
+
+	/*
+	@SubscribeMessage(SOCKET_EVENTS.ERROR)
+	async handleError(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error);
+		}
+	}
+	*/
+
+	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
 	async handleLiveMessage(
@@ -246,113 +234,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
-	async handleDirectMessage(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
-			try {
-				//this.server.emit();
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
-	async handleGetDirectMessageHistory(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log(
-				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-			);
-			try {
-				console.log(p);
-				//this.server.emit();
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.TYPING)
-	async handleTyping(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.TYPING);
-			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: TYPING, { userId: user.id }
-				*/
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
-	async handleStopTyping(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
-			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: STOP_TYPING, { userId: user.id }
-				*/
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	/*
-	@SubscribeMessage(SOCKET_EVENTS.ERROR)
-	async handleError(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		try {
-			//this.server.emit();
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
-	}
-	*/
-
 	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
 	async handleJoinRoom(
 		@ConnectedSocket() client: Socket,
@@ -369,7 +250,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				get room id
 				if room does not exist
 					return error
-				
+
 				add user to room data structure
 				add user to socket room
 				emit to room: USER_JOINED, { userId: user.id }
@@ -488,6 +369,138 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	/* **************************************************************************************** */
+
+	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
+	async handleDirectMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
+	async handleGetDirectMessageHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log(
+				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+			);
+			try {
+				console.log(p);
+				//this.server.emit();
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.TYPING)
+	async handleTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.TYPING);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
+
+				get room id
+				if room does not exist
+					return error
+
+				emit to room: TYPING, { userId: user.id }
+				*/
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
+	async handleStopTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
+			try {
+				//this.server.emit();
+				/*
+				validate auth
+
+				get room id
+				if room does not exist
+					return error
+
+				emit to room: STOP_TYPING, { userId: user.id }
+				*/
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.ENTER_DM)
+	async handleEnterDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.ENTER_DM);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.EXIT_DM)
+	async handleExitDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.EXIT_DM);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	/* **************************************************************************************** */
+
 	@SubscribeMessage(SOCKET_EVENTS.PING)
 	async handlePing(@ConnectedSocket() client: Socket): Promise<Date> {
 		console.log("Received event: ping");
@@ -505,6 +518,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const t1 = Date.now();
 		client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
 	}
+
+	/* **************************************************************************************** */
 
 	/*
 	//synchronised media playback
@@ -719,6 +734,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 		});
 	}
+
+	/* **************************************************************************************** */
 
 	async validateInputEvent(payload: string): Promise<ChatEventDto> {
 		/*
