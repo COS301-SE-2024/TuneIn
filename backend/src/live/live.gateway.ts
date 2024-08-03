@@ -19,7 +19,6 @@ import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { DmUsersService } from "./dmusers/dmusers.service";
-import { UserProfileDto } from "archive/modules/profile/dto/userprofile.dto";
 import { UserDto } from "src/modules/users/dto/user.dto";
 import { DirectMessageDto } from "src/modules/users/dto/dm.dto";
 import { UsersService } from "src/modules/users/users.service";
@@ -529,7 +528,9 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				const stopTypingAnnouncement = {
 					userID: user.userID,
 				};
-				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

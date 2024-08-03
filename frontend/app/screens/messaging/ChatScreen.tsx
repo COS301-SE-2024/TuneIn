@@ -13,14 +13,33 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import { Message } from "../../models/message";
 
-const messages: Message[] = [
+const dummyMessages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
 	{ id: "2", text: "Hi! How are you?", sender: "Me", me: true },
-	// Add more dummy messages
+	{ id: "3", text: "I'm good, thanks!", sender: "John Doe", me: false },
+	{ id: "4", text: "What are you up to?", sender: "John Doe", me: false },
+	{ id: "5", text: "Just working on a new project", sender: "Me", me: true },
+	{
+		id: "6",
+		text: "That's great! I'd love to hear more about it",
+		sender: "John Doe",
+		me: false,
+	},
+	{
+		id: "7",
+		text: "Sure! I'll tell you more about it later",
+		sender: "Me",
+		me: true,
+	},
+	{ id: "8", text: "Sounds good!", sender: "John Doe", me: false },
+	{ id: "9", text: "Bye!", sender: "John Doe", me: false },
+	{ id: "10", text: "Bye!", sender: "Me", me: true },
+	// Add more messages here
 ];
 
 const ChatScreen = () => {
 	const [message, setMessage] = useState("");
+	const [messages, setMessages] = useState<Message[]>(dummyMessages);
 	const router = useRouter();
 	const { name } = useLocalSearchParams();
 	console.log(name);
