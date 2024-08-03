@@ -395,6 +395,53 @@ class LiveSocketService {
 				console.log(`Time offset: ${this.timeOffset} ms`);
 			});
 
+			this.socket.on("directMessage", (data: DirectMessageDto) => {
+				console.log("SOCKET EVENT: directMessage", data);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				if (!this.setDMs) {
+					//throw new Error("setDMs not set");
+					return;
+				}
+
+				const u = this.currentUser;
+				const dm = {
+					message: data,
+					me: data.sender.userID === u.userID,
+				};
+				this.setDMs((prevMessages) => {
+					const newMessages = [...prevMessages, dm];
+					newMessages.sort((a, b) => a.message.index - b.message.index);
+					return newMessages;
+				});
+			});
+
+			this.socket.on("userOnline", (data) => {
+				console.log("SOCKET EVENT: userOnline", data);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				//we can use this to update the user's status
+			});
+
+			this.socket.on("userOffline", (data) => {
+				console.log("SOCKET EVENT: userOffline", data);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				//we can use this to update the user's status
+			});
+
+			// (unused) for edits and deletes
+			this.socket.on("chatModified", (data) => {});
+
 			this.socket.on("dmHistory", (data: DirectMessageDto[]) => {
 				console.log("SOCKET EVENT: dmHistory", data);
 				if (!this.currentUser) {
@@ -409,6 +456,7 @@ class LiveSocketService {
 						message: msg,
 						me: msg.sender.userID === u.userID,
 					}));
+					dmHistory.sort((a, b) => a.message.index - b.message.index);
 					this.setDMs(dmHistory);
 				}
 				if (this.requestingDMHistory) {
