@@ -538,6 +538,47 @@ class LiveSocketService {
 		return seekPosition;
 	}
 
+	public async enterDM(
+		userID: string,
+		participantID: string,
+		setDMs: stateSetMessages,
+	) {
+		this.pollLatency();
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		this.setDMs = setDMs;
+		const u = this.currentUser;
+		const input = {
+			userID: u.userID,
+			participantID: participantID,
+		};
+		this.socket.emit("enterDirectMessage", JSON.stringify(input));
+	}
+
+	public async leaveDM() {
+		this.pollLatency();
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.setDMs) {
+			//throw new Error("setDMs not set");
+			return;
+		}
+		this.setDMs([]);
+		this.setDMs = null;
+
+		const u = this.currentUser;
+		const input = {
+			userID: u.userID,
+		};
+		this.socket.emit("leaveDirectMessage", JSON.stringify(input));
+	}
+
 	public startPlayback(roomID: string) {
 		this.pollLatency();
 		if (!this.currentUser) {
