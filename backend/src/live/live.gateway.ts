@@ -388,8 +388,29 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
 			try {
-				//this.server.emit();
 				console.log(p);
+				let payload: DirectMessageDto;
+				try {
+					const j = JSON.parse(p);
+					payload = j as DirectMessageDto;
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				const finalMessage: DirectMessageDto =
+					await this.userService.sendMessage(user.userID, payload);
+				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

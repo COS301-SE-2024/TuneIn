@@ -538,7 +538,7 @@ export class UsersService {
 	async sendMessage(
 		userID: string,
 		message: DirectMessageDto,
-	): Promise<boolean> {
+	): Promise<DirectMessageDto> {
 		//send message to user
 		try {
 			const newMessage = await this.prisma.message.create({
@@ -548,21 +548,22 @@ export class UsersService {
 					sender: message.sender.userID,
 				},
 			});
-			await this.prisma.private_message.create({
-				data: {
-					users: {
-						connect: {
-							user_id: message.sender.userID,
+			const m: PrismaTypes.private_message =
+				await this.prisma.private_message.create({
+					data: {
+						users: {
+							connect: {
+								user_id: message.sender.userID,
+							},
+						},
+						message: {
+							connect: {
+								message_id: newMessage.message_id,
+							},
 						},
 					},
-					message: {
-						connect: {
-							message_id: newMessage.message_id,
-						},
-					},
-				},
-			});
-			return true;
+				});
+			return await this.dtogen.generateDirectMessageDto(m.p_message_id);
 		} catch (e) {
 			throw new Error("Failed to send message");
 		}
