@@ -207,9 +207,14 @@ export async function createDbUtilsTestingModule(): Promise<TestingModule> {
 //DtoGenModule
 export async function createDtoGenTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule],
+		imports: [
+			PrismaModule,
+			DbUtilsModule,
+			ConfigModule.forRoot({ isGlobal: true }),
+		],
 		providers: [
 			{ provide: PrismaService, useValue: mockPrismaService },
+			{ provide: ConfigService, useValue: mockConfigService },
 			DtoGenService,
 		],
 	}).compile();
