@@ -30,6 +30,7 @@
     "amazon-cognito-identity-js": "^6.3.12",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
+    "events": "^3.3.0",
     "expo": "~51.0.19",
     "expo-app-loading": "^2.1.1",
     "expo-auth-session": "~5.5.2",
@@ -60,6 +61,7 @@
     "react-native-webview": "^13.8.6",
     "react-router-dom": "^6.23.1",
     "socket.io-client": "^4.7.5",
+    "stream-browserify": "^3.0.0",
     "url": "^0.11.3"
   },
   "devDependencies": {
@@ -69,6 +71,7 @@
     "@types/react": "~18.2.45",
     "@types/react-native": "^0.73.0",
     "@types/react-test-renderer": "^18.3.0",
+    "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^8.57.0",
     "eslint-config-expo": "^7.0.0",
     "eslint-config-prettier": "^9.1.0",

@@ -9,6 +9,8 @@ import * as Font from "expo-font";
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
+import "../polyfills";
+import { registerRootComponent } from "expo";
 
 const fetchFonts = () => {
 	return Font.loadAsync({

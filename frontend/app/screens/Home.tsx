@@ -15,6 +15,7 @@ import {
 	ActivityIndicator,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
+	RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";
@@ -39,6 +40,15 @@ const Home: React.FC = () => {
 			"PlayerContext must be used within a PlayerContextProvider",
 		);
 	}
+
+	const [refreshing, setRefreshing] = React.useState(false);
+
+	const onRefresh = React.useCallback(() => {
+		setRefreshing(true);
+		setTimeout(() => {
+			setRefreshing(false);
+		}, 2000);
+	}, []);
 
 	const { currentRoom } = playerContext;
 
@@ -283,6 +293,9 @@ const Home: React.FC = () => {
 				onScroll={handleScroll}
 				scrollEventThrottle={16}
 				contentContainerStyle={styles.scrollViewContent}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			>
 				{loading ? (
 					<ActivityIndicator
