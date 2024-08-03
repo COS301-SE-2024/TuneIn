@@ -395,6 +395,27 @@ class LiveSocketService {
 				console.log(`Time offset: ${this.timeOffset} ms`);
 			});
 
+			this.socket.on("dmHistory", (data: DirectMessageDto[]) => {
+				console.log("SOCKET EVENT: dmHistory", data);
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				this.dmHistoryReceived = true;
+				if (this.setDMs) {
+					const u = this.currentUser;
+					const dmHistory = data.map((msg) => ({
+						message: msg,
+						me: msg.sender.userID === u.userID,
+					}));
+					this.setDMs(dmHistory);
+				}
+				if (this.requestingDMHistory) {
+					this.requestingDMHistory = false;
+				}
+			});
+
 			console.log("socket connected?", this.socket.connected);
 			this.socket.connect();
 			this.socket.emit(
