@@ -583,6 +583,106 @@ export class UsersService {
 		//get unread messages between two users
 		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID, true);
 	}
+
+	//count the number of chats with new messages
+	async getNewMessageCount(userID: string, min: Date): Promise<number> {
+		const dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] =
+			await this.prisma.private_message.findMany({
+				where: {
+					recipient: userID,
+					message: {
+						date_sent: {
+							gte: min,
+						},
+					},
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
+		//count number of unique senders
+		const senders: string[] = [];
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			if (dm && dm !== null) {
+				if (!senders.includes(dm.message.sender)) {
+					senders.push(dm.message.sender);
+				}
+			}
+		}
+		return senders.length;
+	}
+
+	async getUserNewMessages(
+		userID: string,
+		min: Date,
+	): Promise<DirectMessageDto[]> {
+		const self: UserDto = await this.dtogen.generateUserDto(userID);
+		const dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] =
+			await this.prisma.private_message.findMany({
+				where: {
+					recipient: userID,
+					message: {
+						date_sent: {
+							gt: min,
+						},
+					},
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
+		//sort messages by date
+		dms.sort((a, b) => {
+			return a.message.date_sent.getTime() - b.message.date_sent.getTime();
+		});
+
+		const result: DirectMessageDto[] = [];
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			if (dm && dm !== null) {
+				const sender: UserDto = await this.dtogen.generateUserDto(
+					dm.message.sender,
+				);
+				const message: DirectMessageDto = {
+					index: -1,
+					messageBody: dm.message.contents,
+					sender: sender,
+					recipient: self,
+					dateSent: dm.message.date_sent,
+					dateRead: new Date(0),
+					isRead: false,
+					pID: dm.p_message_id,
+				};
+				result.push(message);
+			}
+		}
+		return result;
+	}
+
+	async getNewMessages(userID: string): Promise<DirectMessageDto[]> {
+		//get new messages for the user
+		const lastRead: Date = new Date(0);
+		return await this.getUserNewMessages(userID, lastRead);
+	}
 		//edit a message
 		console.log("Editing message");
 		return true;
