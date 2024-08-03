@@ -30,8 +30,8 @@ import { BullBoardService } from "../src/bull-board/bull-board.service";
 import { BullConfigModule } from "../src/bull-config/bull-config.module";
 import { LiveGateway } from "../src/live/live.gateway";
 import { LiveModule } from "../src/live/live.module";
-import { ConnectedUsersService } from "../src/live/connecteduser/connecteduser.service";
-import { ConnectedUsersModule } from "../src/live/connecteduser/connecteduser.module";
+import { RoomUsersService } from "../src/live/roomusers/roomuser.service";
+import { RoomUsersModule } from "../src/live/roomusers/roomuser.module";
 import { DbUtilsModule } from "../src/modules/db-utils/db-utils.module";
 import { DbUtilsService } from "../src/modules/db-utils/db-utils.service";
 import { DtoGenModule } from "../src/modules/dto-gen/dto-gen.module";
@@ -164,20 +164,20 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			EventQueueService,
 			LiveService,
 		],
-		imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
-		exports: [ConnectedUsersModule, LiveGateway],
+		imports: [RoomUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
+		exports: [RoomUsersModule, LiveGateway],
 	}).compile();
 }
 
-//ConnectedUsersModule
-export async function createConnectedUsersTestingModule(): Promise<TestingModule> {
+//RoomUsersModule
+export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [PrismaModule],
 		providers: [
 			{ provide: PrismaService, useValue: mockPrismaService },
 			DtoGenService,
 			DbUtilsService,
-			ConnectedUsersService,
+			RoomUsersService,
 		],
 	}).compile();
 }

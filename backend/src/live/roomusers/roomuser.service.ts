@@ -5,67 +5,13 @@ import { UserDto } from "../../modules/users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 
-// Postgres tables:
-/*
-CREATE TABLE IF NOT EXISTS public.vote
-(
-    vote_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    is_upvote boolean NOT NULL DEFAULT true,
-    queue_id uuid NOT NULL,
-    CONSTRAINT vote_pkey PRIMARY KEY (vote_id),
-    CONSTRAINT queue_id FOREIGN KEY (queue_id)
-        REFERENCES public.queue (queue_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-
-CREATE TABLE IF NOT EXISTS public.queue
-(
-    room_id uuid NOT NULL,
-    song_id uuid NOT NULL,
-    is_done_playing boolean NOT NULL DEFAULT false,
-    queue_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    start_time timestamp with time zone,
-    CONSTRAINT queue_id PRIMARY KEY (queue_id),
-    CONSTRAINT room_id FOREIGN KEY (room_id)
-        REFERENCES public.room (room_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT song_id FOREIGN KEY (song_id)
-        REFERENCES public.song (song_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-        NOT VALID
-)
-
-CREATE TABLE IF NOT EXISTS public.room
-(
-    room_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    room_creator uuid NOT NULL,
-    playlist_photo text COLLATE pg_catalog."default",
-    description text COLLATE pg_catalog."default" DEFAULT 'This room has no description'::text,
-    date_created timestamp with time zone NOT NULL DEFAULT now(),
-    nsfw boolean NOT NULL DEFAULT false,
-    is_temporary boolean DEFAULT false,
-    room_language text COLLATE pg_catalog."default" DEFAULT 'English'::text,
-    explicit boolean DEFAULT false,
-    tags text[] COLLATE pg_catalog."default",
-    CONSTRAINT room_pkey PRIMARY KEY (room_id),
-    CONSTRAINT room_creator FOREIGN KEY (room_creator)
-        REFERENCES public.users (user_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-*/
-
 interface liveChatUser {
 	user: UserDto;
 	roomID?: string;
 }
 
 @Injectable()
-export class ConnectedUsersService {
+export class RoomUsersService {
 	constructor(
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,

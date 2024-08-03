@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { SOCKET_EVENTS } from "../common/constants";
 import { ChatEventDto } from "./dto/chatevent.dto";
-import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
+import { RoomUsersService } from "./roomusers/roomuser.service";
 import { DbUtilsService } from "../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
@@ -59,7 +59,7 @@ export class PlaybackEventDto {
 //@UseFilters(new WsExceptionFilter())
 export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private readonly connectedUsers: ConnectedUsersService,
+		private readonly connectedUsers: RoomUsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
