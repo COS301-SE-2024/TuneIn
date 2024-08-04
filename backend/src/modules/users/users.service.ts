@@ -553,7 +553,7 @@ export class UsersService {
 					data: {
 						users: {
 							connect: {
-								user_id: message.sender.userID,
+								user_id: message.recipient.userID,
 							},
 						},
 						message: {
@@ -563,6 +563,8 @@ export class UsersService {
 						},
 					},
 				});
+			console.log("new DM: ");
+			console.log(m);
 			return await this.dtogen.generateDirectMessageDto(m.p_message_id);
 		} catch (e) {
 			throw new Error("Failed to send message");

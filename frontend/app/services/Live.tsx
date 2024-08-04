@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserDto } from "../../api-client";
+import { UserDto } from "../models/UserDto";
+import { RoomDto } from "../models/RoomDto";
 import { ChatEventDto } from "../models/ChatEventDto";
 import { PlaybackEventDto } from "../models/PlaybackEventDto";
 import axios from "axios";
@@ -8,6 +9,7 @@ import songService from "./SongService";
 import * as utils from "./Utils";
 import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
 import { DirectMessageDto } from "../models/DmDto";
+import { LiveChatMessageDto } from "../models/LiveChatMessageDto";
 
 const TIMEOUT = 5000000;
 
@@ -26,6 +28,7 @@ type stateSetDirectMessages = React.Dispatch<
 	React.SetStateAction<DirectMessage[]>
 >;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
+type stateSetConnected = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -40,6 +43,7 @@ class LiveSocketService {
 	private isConnecting = false;
 	private requestingLiveChatHistory = false;
 	private requestingDMHistory = false;
+	private dmsConnected = false;
 
 	private backendLatency: number = 0;
 	private timeOffset: number = 0;
@@ -47,12 +51,16 @@ class LiveSocketService {
 	private setLiveChatMessages: stateSetLiveMessages | null = null;
 	private setDMs: stateSetDirectMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
-	private setMessage: stateSetMessage | null = null;
+	private setConnected: stateSetConnected | null = null;
+	private setLiveMessageTextBox: stateSetMessage | null = null;
+	private setDMTextBox: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
 
 	private liveChatHistoryReceived = false;
 	private dmHistoryReceived = false;
 	private pingSent = false;
+
+	private fetchedHistory: DirectMessage[] = [];
 
 	private constructor() {
 		this.currentRoom = null;
@@ -70,6 +78,14 @@ class LiveSocketService {
 
 	public static instanceExists(): boolean {
 		return Boolean(LiveSocketService.instance);
+	}
+
+	public dmsAreConnected(): boolean {
+		return this.dmsConnected;
+	}
+
+	public getFetchedDMs(): DirectMessage[] {
+		return this.fetchedHistory;
 	}
 
 	// Method to send a ping and wait for a response or timeout
@@ -143,6 +159,10 @@ class LiveSocketService {
 	public async pollLatency() {
 		await this.sendPing();
 		await this.getTimeOffset();
+	}
+
+	public getSelf(): UserDto | null {
+		return this.currentUser;
 	}
 
 	public async initialiseSocket() {
@@ -234,7 +254,7 @@ class LiveSocketService {
 				const u = this.currentUser;
 				const me = message.sender.userID === u.userID;
 				if (me) {
-					if (this.setMessage) this.setMessage("");
+					if (this.setLiveMessageTextBox) this.setLiveMessageTextBox("");
 					if (this.setIsSending) {
 						this.setIsSending(false);
 						this.setIsSending = null;
@@ -293,13 +313,13 @@ class LiveSocketService {
 					this.currentRoom &&
 					this.currentRoom.roomID &&
 					this.setLiveChatMessages &&
-					this.setMessage
+					this.setLiveMessageTextBox
 				) {
 					this.joinRoom(
 						this.currentRoom.roomID,
 						this.setJoined,
 						this.setLiveChatMessages,
-						this.setMessage,
+						this.setLiveMessageTextBox,
 					);
 				}
 			});
@@ -408,15 +428,22 @@ class LiveSocketService {
 				}
 
 				const u = this.currentUser;
+				const me = data.sender.userID === u.userID;
 				const dm = {
 					message: data,
 					me: data.sender.userID === u.userID,
 				};
-				this.setDMs((prevMessages) => {
-					const newMessages = [...prevMessages, dm];
-					newMessages.sort((a, b) => a.message.index - b.message.index);
-					return newMessages;
-				});
+				if (me) {
+					if (this.setDMTextBox) this.setDMTextBox("");
+				}
+				if (this.setDMs) {
+					this.setDMs((prevMessages) => {
+						const newMessages = [...prevMessages, dm];
+						newMessages.sort((a, b) => a.message.index - b.message.index);
+						this.fetchedHistory = newMessages;
+						return newMessages;
+					});
+				}
 			});
 
 			this.socket.on("userOnline", (data) => {
@@ -424,6 +451,13 @@ class LiveSocketService {
 				if (!this.currentUser) {
 					//throw new Error("Something went wrong while getting user's info");
 					return;
+				}
+
+				const onlineUser = data;
+				if (data.userID === this.currentUser.userID) {
+					if (this.setConnected) {
+						this.setConnected(true);
+					}
 				}
 
 				//we can use this to update the user's status
@@ -445,18 +479,23 @@ class LiveSocketService {
 			this.socket.on("dmHistory", (data: DirectMessageDto[]) => {
 				console.log("SOCKET EVENT: dmHistory", data);
 				if (!this.currentUser) {
+					console.log("a");
 					//throw new Error("Something went wrong while getting user's info");
 					return;
 				}
 
+				console.log("b");
 				this.dmHistoryReceived = true;
+				console.log("c");
 				if (this.setDMs) {
+					console.log("Setting DMs");
 					const u = this.currentUser;
 					const dmHistory = data.map((msg) => ({
 						message: msg,
 						me: msg.sender.userID === u.userID,
 					}));
 					dmHistory.sort((a, b) => a.message.index - b.message.index);
+					this.fetchedHistory = dmHistory;
 					this.setDMs(dmHistory);
 				}
 				if (this.requestingDMHistory) {
@@ -481,7 +520,7 @@ class LiveSocketService {
 		roomID: string,
 		setJoined: stateSetJoined,
 		setLiveChatMessages: stateSetLiveMessages,
-		setMessage: stateSetMessage,
+		setMessageBox: stateSetMessage,
 	) {
 		this.pollLatency();
 		if (!this.currentUser) {
@@ -491,7 +530,7 @@ class LiveSocketService {
 
 		this.setJoined = setJoined;
 		this.setLiveChatMessages = setLiveChatMessages;
-		this.setMessage = setMessage;
+		this.setLiveMessageTextBox = setMessageBox;
 
 		try {
 			const token = await auth.getToken();
@@ -624,6 +663,8 @@ class LiveSocketService {
 		userID: string,
 		participantID: string,
 		setDMs: stateSetDirectMessages,
+		setMessageBox: stateSetMessage,
+		setConnected: stateSetJoined,
 	) {
 		this.pollLatency();
 		if (!this.currentUser) {
@@ -632,6 +673,8 @@ class LiveSocketService {
 		}
 
 		this.setDMs = setDMs;
+		this.setDMTextBox = setMessageBox;
+		this.setConnected = setConnected;
 		const u = this.currentUser;
 		const input = {
 			userID: u.userID,
@@ -647,12 +690,25 @@ class LiveSocketService {
 			return;
 		}
 
-		if (!this.setDMs) {
-			//throw new Error("setDMs not set");
+		if (this.setDMs) {
+			this.setDMs([]);
+			this.setDMs = null;
 			return;
 		}
-		this.setDMs([]);
-		this.setDMs = null;
+
+		if (this.setDMTextBox) {
+			this.setDMTextBox("");
+			this.setDMTextBox = null;
+		}
+
+		if (this.setConnected) {
+			this.setConnected(false);
+			this.setConnected = null;
+		}
+
+		this.fetchedHistory = [];
+		this.dmHistoryReceived = false;
+		this.requestingDMHistory = false;
 
 		const u = this.currentUser;
 		const input = {
@@ -661,7 +717,7 @@ class LiveSocketService {
 		this.socket.emit("leaveDirectMessage", JSON.stringify(input));
 	}
 
-	public async sendDM(message: LiveMessage, otherUser: UserDto) {
+	public async sendDM(message: DirectMessage, otherUser: UserDto) {
 		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
@@ -673,22 +729,11 @@ class LiveSocketService {
 			return;
 		}
 
-		if (!message.message.messageBody.trim()) {
-			return;
+		if (message.message.messageBody.trim()) {
+			message.message.sender = this.currentUser;
+			message.message.recipient = otherUser;
+			this.socket.emit("directMessage", JSON.stringify(message.message));
 		}
-
-		const u = this.currentUser;
-		const m: DirectMessageDto = {
-			index: -1,
-			messageBody: message.message.messageBody,
-			sender: u,
-			recipient: otherUser,
-			dateSent: new Date(),
-			dateRead: new Date(0),
-			isRead: false,
-			pID: "",
-		};
-		this.socket.emit("directMessage", JSON.stringify(m));
 	}
 
 	public async editDM(message: LiveMessage, otherUser: UserDto) {
@@ -765,6 +810,10 @@ class LiveSocketService {
 			participantID: participantID,
 		};
 		this.socket.emit("getDirectMessageHistory", JSON.stringify(input));
+	}
+
+	public receivedDMHistory() {
+		return this.dmHistoryReceived;
 	}
 
 	public startPlayback(roomID: string) {
@@ -892,7 +941,7 @@ class LiveSocketService {
 		this.currentRoom = null;
 		this.setLiveChatMessages = null;
 		this.setJoined = null;
-		this.setMessage = null;
+		this.setLiveMessageTextBox = null;
 		if (this.socket) {
 			this.socket.disconnect();
 		}

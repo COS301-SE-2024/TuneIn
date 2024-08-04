@@ -221,72 +221,103 @@ const dummyMessages: DirectMessage[] = [
 	// Add more messages here if needed
 ];
 
-//path: http://localhost:8081/screens/messaging/ChatScreen?name=John%20Doe
+//path: http://localhost:8081/screens/messaging/ChatScreen?friend=8xbbie
 const ChatScreen = () => {
+	const [self, setSelf] = useState<UserDto | null>(null);
+	const [otherUser, setOtherUser] = useState<UserDto | null>(null);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<DirectMessage[]>(dummyMessages);
+	const [messages, setMessages] = useState<DirectMessage[]>([]);
+	const [connected, setConnected] = useState(false);
+	const [isSending, setIsSending] = useState(false);
 	const router = useRouter();
 	const { friend } = useLocalSearchParams();
 
-	let self: UserDto = defaultUser;
-	let otherUser: UserDto = defaultUser;
 	const getUsers = async () => {
 		try {
 			const token = await auth.getToken();
-			const userPromises = [];
-			try {
-				const p1 = axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				userPromises.push(p1);
-
-				const p2 = axios.get(`${utils.API_BASE_URL}/users/${friend}`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				userPromises.push(p2);
-
-				const responses = await Promise.all(userPromises);
-				const r1 = responses[0].data as UserDto;
-				const r2 = responses[1].data as UserDto;
-				return [r1, r2];
-			} catch (error) {
-				console.error("Error fetching users' information");
-				throw error;
-			}
+			const userPromises = [
+				axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+				axios.get(`${utils.API_BASE_URL}/users/${friend}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			];
+			const [selfResponse, otherUserResponse] = await Promise.all(userPromises);
+			return [selfResponse.data as UserDto, otherUserResponse.data as UserDto];
 		} catch (error) {
-			console.error("Something went wrong while fetching user information");
+			console.error("Error fetching users' information", error);
 			throw error;
 		}
 	};
 
-	getUsers()
-		.then(([r1, r2]) => {
-			otherUser = r1;
-			self = r2;
-		})
-		.catch((error) => {
-			console.error("Failed to fetch users", error);
-		});
+	useEffect(() => {
+		if (instanceExists()) {
+			if (!messages || messages.length === 0) {
+				if (live.receivedDMHistory()) {
+					setMessages(live.getFetchedDMs());
+				}
+				live.requestDMHistory(Array.isArray(friend) ? friend[0] : friend);
+			}
+		}
+	}, [messages, friend]);
 
-	const avatarUrl =
-		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg";
+	useEffect(() => {
+		const initialize = async () => {
+			try {
+				if (instanceExists()) {
+					await live.initialiseSocket();
+				}
+				const [fetchedSelf, fetchedOtherUser] = await getUsers();
+				setSelf(fetchedSelf);
+				setOtherUser(fetchedOtherUser);
+				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
+				console.log(self);
+				console.log(otherUser);
+				await live.enterDM(
+					fetchedSelf.userID,
+					fetchedOtherUser.userID,
+					setMessages,
+					setMessage,
+					setConnected,
+				);
+				if (!live.receivedDMHistory()) {
+					live.requestDMHistory(fetchedOtherUser.userID);
+				}
+			} catch (error) {
+				console.error("Failed to setup DM", error);
+			}
+		};
+		initialize();
+		return () => {
+			const cleanup = async () => {
+				if (connected) {
+					await live.leaveDM();
+				}
+			};
+			cleanup();
+		};
+	}, [friend]);
 
 	const handleSend = () => {
-		/*
-		if (message.trim()) {
-			messages.push({
-				id: String(messages.length + 1),
-				text: message,
-				sender: "Me",
-				me: true,
-			});
-			setMessage("");
-		}
-			*/
+		if (!self || !otherUser || isSending) return;
+		const newMessage: DirectMessage = {
+			message: {
+				index: messages.length,
+				messageBody: message,
+				sender: self,
+				recipient: otherUser,
+				dateSent: new Date(),
+				dateRead: new Date(0),
+				isRead: false,
+				pID: "",
+			},
+			me: true,
+		};
+		setIsSending(true);
+		live.sendDM(newMessage, otherUser).finally(() => {
+			setIsSending(false);
+		});
 	};
 
 	return (
@@ -313,7 +344,7 @@ const ChatScreen = () => {
 			</View>
 			<FlatList
 				data={messages}
-				keyExtractor={(item) => item.message.pID}
+				keyExtractor={(item) => item.message.index.toString()}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
 			/>
@@ -323,6 +354,7 @@ const ChatScreen = () => {
 					style={styles.input}
 					value={message}
 					onChangeText={setMessage}
+					onSubmitEditing={handleSend}
 				/>
 				<TouchableOpacity
 					style={styles.sendButton}

@@ -407,6 +407,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("User not found in DM chat");
 				}
 
+				console.log("user: " + user);
+				console.log("chatID: " + chatID);
 				const finalMessage: DirectMessageDto =
 					await this.userService.sendMessage(user.userID, payload);
 				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
@@ -572,10 +574,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					enterPayload.userID,
 					enterPayload.participantID,
 				);
-				client.emit(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY, messages);
-				console.log(
-					"Response emitted: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-				);
+				client.emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
