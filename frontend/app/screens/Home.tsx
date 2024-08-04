@@ -1,10 +1,4 @@
-import React, {
-	useState,
-	useRef,
-	useCallback,
-	useEffect,
-	useContext,
-} from "react";
+import React, { useState, useRef, useCallback, useContext } from "react";
 import {
 	View,
 	Text,
@@ -23,7 +17,6 @@ import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
-import TopNavBar from "../components/TopNavBar";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
@@ -200,20 +193,6 @@ const Home: React.FC = () => {
 		}, 2000);
 	}, [refreshData]);
 
-	useEffect(() => {
-		const initialize = async () => {
-			await loadCachedData();
-			await refreshData();
-		};
-		initialize();
-
-		const interval = setInterval(() => {
-			refreshData();
-		}, 240000); // Refresh data every 240 seconds (4 minutes)
-
-		return () => clearInterval(interval);
-	}, [refreshData]);
-
 	const renderItem = ({ item }: { item: Room }) => (
 		<RoomCardWidget roomCard={item} />
 	);
@@ -257,12 +236,6 @@ const Home: React.FC = () => {
 		[scrollY],
 	);
 
-	const topNavBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, -100],
-		extrapolate: "clamp",
-	});
-
 	const navBarTranslateY = scrollY.interpolate({
 		inputRange: [0, 100],
 		outputRange: [0, 100],
@@ -277,18 +250,6 @@ const Home: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<Animated.View
-				style={{
-					transform: [{ translateY: topNavBarTranslateY }],
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					zIndex: 10,
-				}}
-			>
-				<TopNavBar />
-			</Animated.View>
 			<ScrollView
 				ref={scrollViewRef}
 				onScroll={handleScroll}
@@ -350,14 +311,6 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		marginTop: 56,
-	},
-	topNavBar: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 	scrollViewContent: {
 		paddingTop: 40,

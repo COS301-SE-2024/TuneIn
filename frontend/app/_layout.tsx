@@ -16,7 +16,7 @@ const Layout = () => {
 					name="screens/Home"
 					options={{
 						title: "Home",
-						headerShown: false,
+						header: () => <TopNavBar />,
 					}}
 				/>
 				<Stack.Screen
