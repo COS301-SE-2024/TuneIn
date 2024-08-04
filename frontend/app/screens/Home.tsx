@@ -41,15 +41,6 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const [refreshing, setRefreshing] = React.useState(false);
-
-	const onRefresh = React.useCallback(() => {
-		setRefreshing(true);
-		setTimeout(() => {
-			setRefreshing(false);
-		}, 2000);
-	}, []);
-
 	const { currentRoom } = playerContext;
 
 	console.log("currentRoom: " + currentRoom);
@@ -198,6 +189,16 @@ const Home: React.FC = () => {
 
 		setLoading(false);
 	}, []);
+
+	const [refreshing] = React.useState(false);
+
+	const onRefresh = React.useCallback(() => {
+		setLoading(true);
+		refreshData();
+		setTimeout(() => {
+			setLoading(false);
+		}, 2000);
+	}, [refreshData]);
 
 	useEffect(() => {
 		const initialize = async () => {
@@ -349,6 +350,7 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		marginTop: 56,
 	},
 	topNavBar: {
 		position: "absolute",

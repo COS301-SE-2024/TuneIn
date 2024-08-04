@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
+import { colors } from "../styles/colors";
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
@@ -64,9 +65,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "space-between",
 		paddingHorizontal: 16,
-		backgroundColor: "#FFF",
-		borderBottomWidth: 1,
-		borderBottomColor: "#E5E5E5",
+		backgroundColor: colors.backgroundColor,
 	},
 	emptyView: {
 		width: 40, // Adjust as needed

@@ -1,16 +1,22 @@
 import { Stack } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
-import TopNavBar from "../app/components/TopNavBar"; // Adjust the import path as needed
+import { StatusBar } from "react-native";
+import TopNavBar from "../app/components/TopNavBar";
+import { colors } from "../app/styles/colors";
 
 const Layout = () => {
 	return (
 		<PlayerContextProvider>
-			<Stack screenOptions={{ headerShown: false }}>
+			<StatusBar
+				barStyle="light-content"
+				backgroundColor={colors.backgroundColor}
+			/>
+			<Stack>
 				<Stack.Screen
 					name="screens/Home"
 					options={{
 						title: "Home",
-						header: () => <TopNavBar />,
+						headerShown: false,
 					}}
 				/>
 				<Stack.Screen
