@@ -1,5 +1,5 @@
 import { SongInfoDto } from "./SongInfoDto";
-import { RoomDto } from "./room.dto";
+import { RoomDto } from "./RoomDto";
 
 export type UserDto = {
 	profile_name: string;
