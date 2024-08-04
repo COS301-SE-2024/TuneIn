@@ -35,6 +35,7 @@ import DevicePicker from "../../components/DevicePicker";
 import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
+import { formatRoomData, Room } from "../../models/Room";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -132,39 +133,42 @@ const RoomPage = () => {
 	};
 
 	const joinRoom = useCallback(() => {
-		if (userRef.current && socket.current) {
-			const u: UserDto = userRef.current;
-			const input: ChatEventDto = {
-				userID: u.userID,
-				body: {
-					messageBody: "",
-					sender: u,
-					roomID: roomID,
-					dateCreated: new Date(),
-				},
-			};
-			socket.current.emit("joinRoom", JSON.stringify(input));
-			setJoined(true);
-		}
+		const formattedRoom = formatRoomData(roomData);
+		setCurrentRoom(formattedRoom);
+		// if (userRef.current && socket.current) {
+		// 	const u: UserDto = userRef.current;
+		// 	const input: ChatEventDto = {
+		// 		userID: u.userID,
+		// 		body: {
+		// 			messageBody: "",
+		// 			sender: u,
+		// 			roomID: roomID,
+		// 			dateCreated: new Date(),
+		// 		},
+		// 	};
+		// 	socket.current.emit("joinRoom", JSON.stringify(input));
+		// 	setJoined(true);
+		// }
 	}, [roomID]);
 
 	const leaveRoom = () => {
-		if (userRef.current && socket.current) {
-			const u: UserDto = userRef.current;
-			const input: ChatEventDto = {
-				userID: u.userID,
-				body: {
-					messageBody: "",
-					sender: u,
-					roomID: roomID,
-					dateCreated: new Date(),
-				},
-			};
-			console.log("Socket emit: leaveRoom", input);
-			socket.current.emit("leaveRoom", JSON.stringify(input));
-			setJoined(false);
-			setCurrentRoom(null);
-		}
+		// if (userRef.current && socket.current) {
+		// 	const u: UserDto = userRef.current;
+		// 	const input: ChatEventDto = {
+		// 		userID: u.userID,
+		// 		body: {
+		// 			messageBody: "",
+		// 			sender: u,
+		// 			roomID: roomID,
+		// 			dateCreated: new Date(),
+		// 		},
+		// 	};
+		// 	console.log("Socket emit: leaveRoom", input);
+		// 	socket.current.emit("leaveRoom", JSON.stringify(input));
+		// 	setJoined(false);
+
+		// }
+		setCurrentRoom(null);
 	};
 	//init & connect to socket
 	// useEffect(() => {
@@ -436,7 +440,7 @@ const RoomPage = () => {
 		console.log("joined", joined);
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
-			// joinRoom();
+			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages, setMessage);
 			//setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
@@ -445,7 +449,7 @@ const RoomPage = () => {
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
-			//leaveRoom();
+			leaveRoom();
 			live.leaveRoom();
 			//setJoined(false);
 			setJoinedSongIndex(null);

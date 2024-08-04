@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { Room } from "../app/models/Room";
+import { Track } from "../app/models/Track";
 
 interface PlayerContextType {
+	setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
+	currentTrack: Track | null;
 	currentTrackIndex: number | null;
 	setCurrentTrackIndex: React.Dispatch<React.SetStateAction<number | null>>;
-	currentRoom: string | null;
-	setCurrentRoom: React.Dispatch<React.SetStateAction<string | null>>;
+	currentRoom: Room | null;
+	setCurrentRoom: React.Dispatch<React.SetStateAction<Room | null>>;
 	trackName: string | null;
 	setTrackName: React.Dispatch<React.SetStateAction<string | null>>;
 	artistName: string | null;
@@ -23,26 +27,20 @@ interface PlayerContextProviderProps {
 const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	children,
 }) => {
+	const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
 		null,
 	);
-	const [currentRoom, setCurrentRoom] = useState<string | null>(null);
+	const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
 	const [trackName, setTrackName] = useState<string | null>(null);
 	const [artistName, setArtistName] = useState<string | null>(null);
 	const [albumArt, setAlbumArt] = useState<string | null>(null);
 
-	// Log the current room whenever it changes
-	useEffect(() => {
-		if (currentRoom !== null) {
-			console.log(`Current room is set to: ${currentRoom}`);
-		} else {
-			console.log("No current room set");
-		}
-	}, [currentRoom]);
-
 	return (
 		<Player.Provider
 			value={{
+				currentTrack,
+				setCurrentTrack,
 				currentTrackIndex,
 				setCurrentTrackIndex,
 				currentRoom,

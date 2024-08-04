@@ -26,7 +26,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const navigateToEditRoom = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: { room: JSON.stringify(room) },
+			params: { Room: JSON.stringify(room) },
 		});
 	};
 

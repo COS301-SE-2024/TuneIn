@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useContext } from "react";
+import React, {
+	useState,
+	useRef,
+	useCallback,
+	useContext,
+	useEffect,
+} from "react";
 import {
 	View,
 	Text,
@@ -17,6 +23,7 @@ import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
+import Miniplayer from "../components/home/miniplayer";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
@@ -202,6 +209,15 @@ const Home: React.FC = () => {
 		router.navigate("/screens/AllFriends");
 	};
 
+	useEffect(() => {
+		const initialize = async () => {
+			await loadCachedData();
+			await refreshData();
+		};
+		initialize();
+		return;
+	}, [refreshData]);
+
 	const navigateToCreateNew = () => {
 		router.navigate("/screens/rooms/CreateRoom");
 	};
@@ -283,6 +299,7 @@ const Home: React.FC = () => {
 					</View>
 				)}
 			</ScrollView>
+
 			<Animated.View
 				style={[
 					styles.createRoomButtonContainer,
@@ -302,6 +319,8 @@ const Home: React.FC = () => {
 					{ transform: [{ translateY: navBarTranslateY }] },
 				]}
 			>
+				{" "}
+				<Miniplayer />
 				<NavBar />
 			</Animated.View>
 		</View>
