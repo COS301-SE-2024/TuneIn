@@ -61,7 +61,7 @@ const RoomPage = () => {
 	const [joined, setJoined] = useState(false);
 
 	useEffect(() => {
-		if (currentRoom === roomID) {
+		if (currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
 	}, [currentRoom, roomID]);
@@ -134,6 +134,7 @@ const RoomPage = () => {
 
 	const joinRoom = useCallback(() => {
 		const formattedRoom = formatRoomData(roomData);
+		setJoined(true);
 		setCurrentRoom(formattedRoom);
 		// if (userRef.current && socket.current) {
 		// 	const u: UserDto = userRef.current;
@@ -147,7 +148,7 @@ const RoomPage = () => {
 		// 		},
 		// 	};
 		// 	socket.current.emit("joinRoom", JSON.stringify(input));
-		// 	setJoined(true);
+		//
 		// }
 	}, [roomID]);
 
@@ -438,11 +439,10 @@ const RoomPage = () => {
 
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
-		setJoined((prevJoined) => !prevJoined);
+		setJoined(!joined);
 		if (!joined) {
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages, setMessage);
-			//setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
@@ -451,7 +451,6 @@ const RoomPage = () => {
 		} else {
 			leaveRoom();
 			live.leaveRoom();
-			//setJoined(false);
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
 			//playbackManager.pause();
