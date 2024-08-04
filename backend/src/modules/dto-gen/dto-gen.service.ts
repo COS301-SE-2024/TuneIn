@@ -535,6 +535,7 @@ export class DtoGenService {
 				message: true,
 			},
 		});
+		console.log("dm: " + JSON.stringify(dm));
 
 		if (!dm || dm === null) {
 			throw new Error(
@@ -557,6 +558,7 @@ export class DtoGenService {
 			isRead: false,
 			pID: dm.p_message_id,
 		};
+		console.log("result: " + JSON.stringify(result));
 		return result;
 	}
 
@@ -586,14 +588,29 @@ export class DtoGenService {
 		} & PrismaTypes.private_message)[] =
 			await this.prisma.private_message.findMany({
 				where: {
-					message: {
-						OR: [{ sender: participant1 }, { sender: participant2 }],
-					},
+					OR: [
+						{
+							AND: [
+								{ message: { sender: user1.userID } },
+								{ recipient: user2.userID },
+							],
+						},
+						{
+							AND: [
+								{ message: { sender: user2.userID } },
+								{ recipient: user1.userID },
+							],
+						},
+					],
 				},
 				include: {
 					message: true,
 				},
 			});
+		console.log(
+			" direct messages between " + user1.username + " and " + user2.username,
+		);
+		console.log(dms);
 
 		if (!dms || dms === null) {
 			throw new Error(
@@ -616,9 +633,9 @@ export class DtoGenService {
 			const dm = dms[i];
 			if (dm && dm !== null) {
 				const sender: UserDto =
-					dm.message.sender === participant1 ? user1 : user2;
+					dm.message.sender === user1.userID ? user1 : user2;
 				const recipient: UserDto =
-					dm.message.sender === participant1 ? user2 : user1;
+					dm.recipient === user1.userID ? user1 : user2;
 
 				const message: DirectMessageDto = {
 					index: i,

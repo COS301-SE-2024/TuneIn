@@ -20,11 +20,13 @@ import {
 } from "@expo/vector-icons";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
 import axios from "axios";
-import { ChatEventDto } from "../../models/ChatEventDto";
 import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
+import { UserDto } from "../../models/UserDto";
+import { ChatEventDto } from "../../models/ChatEventDto";
+import { RoomDto } from "../../models/RoomDto";
+import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
 
 type Message = {
 	message: LiveChatMessageDto;

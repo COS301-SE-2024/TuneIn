@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -11,11 +11,10 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
-import { Message } from "../../models/message";
-import { UserDto, SongInfoDto } from "../../../api-client";
+import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { live, DirectMessage } from "../../services/Live";
+import { live, DirectMessage, instanceExists } from "../../services/Live";
 import axios from "axios";
 
 /*
@@ -45,47 +44,47 @@ const dummyMessages: Message[] = [
 */
 
 const defaultUser: UserDto = {
-	profileName: "John Doe",
+	profile_name: "John Doe",
 	userID: "1",
 	username: "johndoe",
-	profilePictureUrl:
+	profile_picture_url:
 		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
 	followers: { count: 0, data: [] },
 	following: { count: 0, data: [] },
 	links: { count: 0, data: [] },
 	bio: "Hello, I'm John Doe",
-	currentSong: {
+	current_song: {
 		title: "Song Title",
 		artists: ["Artist 1", "Artist 2"],
 		cover: "https://via.placeholder.com/150",
-		startTime: new Date(),
+		start_time: new Date(),
 	},
-	favGenres: { count: 0, data: [] },
-	favSongs: { count: 0, data: [] },
-	favRooms: { count: 0, data: [] },
-	recentRooms: { count: 0, data: [] },
+	fav_genres: { count: 0, data: [] },
+	fav_songs: { count: 0, data: [] },
+	fav_rooms: { count: 0, data: [] },
+	recent_rooms: { count: 0, data: [] },
 };
 
 const defaultMe: UserDto = {
-	profileName: "Me",
+	profile_name: "Me",
 	userID: "0",
 	username: "me",
-	profilePictureUrl:
+	profile_picture_url:
 		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
 	followers: { count: 0, data: [] },
 	following: { count: 0, data: [] },
 	links: { count: 0, data: [] },
 	bio: "Hello, I'm Me",
-	currentSong: {
+	current_song: {
 		title: "Song Title",
 		artists: ["Artist 1", "Artist 2"],
 		cover: "https://via.placeholder.com/150",
-		startTime: new Date(),
+		start_time: new Date(),
 	},
-	favGenres: { count: 0, data: [] },
-	favSongs: { count: 0, data: [] },
-	favRooms: { count: 0, data: [] },
-	recentRooms: { count: 0, data: [] },
+	fav_genres: { count: 0, data: [] },
+	fav_songs: { count: 0, data: [] },
+	fav_rooms: { count: 0, data: [] },
+	recent_rooms: { count: 0, data: [] },
 };
 
 const dummyMessages: DirectMessage[] = [
@@ -300,8 +299,17 @@ const ChatScreen = () => {
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Image source={{ uri: avatarUrl }} style={styles.avatar} />
-				<Text style={styles.headerTitle}>{otherUser.profileName}</Text>
+				{otherUser && otherUser.profile_picture_url && (
+					<Image
+						source={{
+							uri: otherUser.profile_picture_url,
+						}}
+						style={styles.avatar}
+					/>
+				)}
+				<Text style={styles.headerTitle}>
+					{otherUser?.profile_name || "Loading..."}
+				</Text>
 			</View>
 			<FlatList
 				data={messages}

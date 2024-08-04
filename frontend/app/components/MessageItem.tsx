@@ -16,7 +16,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 		>
 			{!message.me && (
 				<Image
-					source={{ uri: message.message.sender.profilePictureUrl }}
+					source={{ uri: message.message.sender.profile_picture_url }}
 					style={styles.avatar}
 				/>
 			)}
