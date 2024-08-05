@@ -9,6 +9,7 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
+import { subHours, addHours, isBefore } from 'date-fns';
 import {
 	RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
@@ -616,11 +617,85 @@ export class RoomsService {
 			userID,
 		);
 		const roomQueueAnalytics: RoomAnalyticsQueueDto = new RoomAnalyticsQueueDto();
-		const roomQueue: SongInfoDto[] = this.getRoomQueue(roomID);
+		const roomQueue: SongInfoDto[] = await this.getRoomQueue(roomID);
 		roomQueueAnalytics.total_songs_queued = roomQueue.length;
-		roomQueueAnalytics.total_queue_exports = 0;
-
+		roomQueueAnalytics.total_queue_exports = 0; // TODO: Implement logic to get total queue exports
 		return roomQueueAnalytics;
+	}
+
+	async getRoomJoinAnalytics(roomID: string): Promise<RoomAnalyticsParticipationDto["joins"]> {
+		let total_joins: number = 0;
+		let unique_joins: number = 0;
+		const joins: RoomAnalyticsParticipationDto["joins"] = {
+			per_day: {
+				total_joins: [],
+				unique_joins: [],
+			},
+			all_time: {
+				total_joins: 0,
+				unique_joins: 0,
+			},
+		};
+		const userActivityPerDay: any = await this.prisma.$executeRaw`
+			SELECT DATE_TRUNC('day', "room_join_time") AS day,
+				COUNT("user_id") as count
+			FROM "user_activity"
+			WHERE room_id = ${roomID}
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		`;
+		const uniqueUserActivityPerDay: any = await this.prisma.$executeRaw`
+			SELECT DATE_TRUNC('day', "room_join_time") AS day,
+				COUNT(DISTINCT "user_id") as count
+			FROM "user_activity"
+			WHERE room_id = ${roomID}
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		`;
+
+		for (const day of userActivityPerDay) {
+			total_joins += day.count;
+		}
+		for (const day of uniqueUserActivityPerDay) {
+			unique_joins += day.count;
+		}
+		const allDays: Date[] = [];
+		const today: Date = new Date();
+		let day: Date = subHours(today, 24);
+		while (isBefore(day, today)) {
+			allDays.push(day);
+			day = addHours(day, 24);
+		}
+		// add the missing days
+		for (const d of allDays) {
+			const dayExists: boolean = userActivityPerDay.find(
+				(u: any) => u.day === d,
+			);
+			if (!dayExists) {
+				userActivityPerDay.push({ day: d, count: 0 });
+			}
+		}
+		// add the missing days
+		for (const d of allDays) {
+			const dayExists: boolean = uniqueUserActivityPerDay.find(
+				(u: any) => u.day === d,
+			);
+			if (!dayExists) {
+				uniqueUserActivityPerDay.push({ day: d, count: 0 });
+			}
+		}
+		// sort the arrays
+		userActivityPerDay.sort((a: any, b: any) => a.day - b.day);
+		uniqueUserActivityPerDay.sort((a: any, b: any) => a.day - b.day);
+		joins.per_day = {
+			total_joins: userActivityPerDay,
+			unique_joins: uniqueUserActivityPerDay,
+		};
+		joins.all_time = {
+			total_joins: total_joins,
+			unique_joins: unique_joins,
+		};
+		return joins;
 	}
 
 	async getRoomParticipationAnalytics(
@@ -633,7 +708,10 @@ export class RoomsService {
 			" and given userID: ",
 			userID,
 		);
-		return new RoomAnalyticsParticipationDto();
+
+		const roomAnalyticsParticipation: RoomAnalyticsParticipationDto = new RoomAnalyticsParticipationDto();
+		// find the total and unique joins for all tim
+		return roomAnalyticsParticipation;
 	}
 
 	async getRoomInteractionAnalytics(
