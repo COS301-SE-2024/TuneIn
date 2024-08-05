@@ -20,6 +20,7 @@ import {
 	RoomAnalyticsDto,
 } from "./dto/roomanalytics.dto";
 import { join } from "path";
+import { throws } from "assert";
 
 @Injectable()
 export class RoomsService {
@@ -722,7 +723,6 @@ export class RoomsService {
 			},
 			per_day: [],
 		};
-		console.log("Getting room session analytics for room", roomID);
 		const sessionDurations: any = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', room_join_time) AS day,
 				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS avg_duration,
@@ -769,7 +769,6 @@ export class RoomsService {
 			session.avg_duration = Number(session.avg_duration);
 			session.min_duration = Number(session.min_duration);
 			session.max_duration = Number(session.max_duration);
-			console.log("Session", session);
 			avg_duration += Number(session.avg_duration);
 			min_duration = Math.min(min_duration, Number(session.min_duration));
 			max_duration = Math.max(max_duration, Number(session.max_duration));
@@ -779,7 +778,6 @@ export class RoomsService {
 		sessionData.all_time.min_duration = min_duration;
 		sessionData.all_time.max_duration = max_duration;
 		sessionData.per_day = sessionDurations;
-		console.log("Session data", sessionData);
 		return sessionData;
 	}
 	async getHourlyParticipantAnalytics(
@@ -833,6 +831,18 @@ export class RoomsService {
 		}
 		return participantsPerHour;
 	}
+
+	async getRoomPreviews(
+		roomID: string
+	): Promise<number> {
+		const previews: any = await this.prisma.room_previews.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		return previews.length;
+	}
+
 	async getRoomParticipationAnalytics(
 		roomID: string,
 		userID: string,
@@ -848,6 +858,7 @@ export class RoomsService {
 		roomAnalyticsParticipation.joins = await this.getRoomJoinAnalytics(roomID);
 		roomAnalyticsParticipation.session_data = await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour = await this.getHourlyParticipantAnalytics(roomID);
+		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(roomID); // TODO: Implement logic to get total queue exports
 		return roomAnalyticsParticipation;
 	}
 
