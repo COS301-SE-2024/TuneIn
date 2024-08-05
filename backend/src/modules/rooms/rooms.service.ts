@@ -19,8 +19,6 @@ import {
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
 } from "./dto/roomanalytics.dto";
-import { join } from "path";
-import { throws } from "assert";
 
 @Injectable()
 export class RoomsService {
@@ -858,8 +856,42 @@ export class RoomsService {
 		roomAnalyticsParticipation.joins = await this.getRoomJoinAnalytics(roomID);
 		roomAnalyticsParticipation.session_data = await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour = await this.getHourlyParticipantAnalytics(roomID);
-		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(roomID); // TODO: Implement logic to get total queue exports
+		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(roomID);
+		roomAnalyticsParticipation.return_visits = await this.getReturnVisitsAnalytics(roomID, roomAnalyticsParticipation.joins.all_time.total_joins);
 		return roomAnalyticsParticipation;
+	}
+
+	async getReturnVisitsAnalytics(
+		roomID: string,
+		totalVisits: number,
+	): Promise<RoomAnalyticsParticipationDto["return_visits"]> {
+		const returnVisits: RoomAnalyticsParticipationDto["return_visits"] = {
+			expected_return_count: 0,
+			probability_of_return: 0
+		};
+		console.log("Getting room return visits analytics for room", roomID);
+		const result: any = await this.prisma.$queryRaw`
+		SELECT
+			COUNT(user_id) as user_count,
+			user_id
+		FROM
+			user_activity
+		WHERE
+			room_id = ${roomID}::UUID
+		GROUP BY
+			user_id
+		HAVING
+			COUNT(user_id) > 1;
+		`;
+		if (result.length === 0) {
+			return returnVisits;
+		}
+		console.log("Return visits", result);
+		const returnCount: number = result.length;
+		const averageVisits: number = result.map((r: any) => Number(r.user_count)).reduce((a: number, b: number) => a + b, 0) / result.length;
+		returnVisits.probability_of_return = returnCount/totalVisits;
+		returnVisits.expected_return_count = averageVisits;
+		return returnVisits;
 	}
 
 	async getRoomInteractionAnalytics(
