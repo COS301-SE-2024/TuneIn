@@ -655,7 +655,6 @@ export class RoomsService {
 			ORDER BY day ASC;
 		`;
 
-		console.log("userActivityPerDay", userActivityPerDay.length);
 		if (userActivityPerDay.length === 0) {
 			return joins;
 		}
@@ -705,13 +704,79 @@ export class RoomsService {
 			total_joins: total_joins,
 			unique_joins: unique_joins,
 		};
-		console.log("joins", joins);
-		for (const day of joins.per_day.total_joins) {
-			console.log("day", day.day, "count", day.count);
-		}
+
 		return joins;
 	}
 
+	async getRoomSessionAnalytics(
+		roomID: string
+	): Promise<RoomAnalyticsParticipationDto["session_data"]> {
+		let avg_duration: number = 0,
+			min_duration: number = 0,
+			max_duration: number = 0;
+		const sessionData: RoomAnalyticsParticipationDto["session_data"] = {
+			all_time: {
+				avg_duration: 0,
+				min_duration: 0,
+				max_duration: 0,
+			},
+			per_day: [],
+		};
+		console.log("Getting room session analytics for room", roomID);
+		const sessionDurations: any = await this.prisma.$queryRaw`
+			SELECT DATE_TRUNC('day', room_join_time) AS day,
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS avg_duration,
+				MIN(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS min_duration,
+				MAX(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS max_duration
+			FROM "user_activity"
+			WHERE room_id = ${roomID}::UUID
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		`;
+
+		if (sessionDurations.length === 0) {
+			return sessionData;
+		}
+
+		// fill in the missing days
+		const allDays: Date[] = [];
+		const today: Date = new Date();
+		const firstDay: Date = sessionDurations[0].day;
+		let day: Date = firstDay;
+		while (isBefore(day, today)) {
+			allDays.push(day);
+			day = addHours(day, 24);
+		}
+		// add the missing days
+		for (const d of allDays) {
+			const dayExists: boolean = sessionDurations.find(
+				(u: any) => u.day === d,
+			);
+			if (!dayExists) {
+				sessionDurations.push({
+					day: d,
+					avg_duration: 0,
+					min_duration: 0,
+					max_duration: 0,
+				});
+			}
+		}
+		// sort the array
+		sessionDurations.sort((a: any, b: any) => a.day - b.day);
+		// find the all time min, max, and avg
+		for (const session of sessionDurations) {
+			avg_duration += session.avg_duration;
+			min_duration = Math.min(min_duration, session.min_duration);
+			max_duration = Math.max(max_duration, session.max_duration);
+		}
+		avg_duration = avg_duration / sessionDurations.length;
+		sessionData.all_time.avg_duration = avg_duration;
+		sessionData.all_time.min_duration = min_duration;
+		sessionData.all_time.max_duration = max_duration;
+		sessionData.per_day = sessionDurations;
+		console.log("Session data", sessionData);
+		return sessionData;
+	}
 	async getRoomParticipationAnalytics(
 		roomID: string,
 		userID: string,
@@ -725,6 +790,7 @@ export class RoomsService {
 
 		const roomAnalyticsParticipation: RoomAnalyticsParticipationDto = new RoomAnalyticsParticipationDto();
 		roomAnalyticsParticipation.joins = await this.getRoomJoinAnalytics(roomID);
+		roomAnalyticsParticipation.session_data = await this.getRoomSessionAnalytics(roomID);
 		return roomAnalyticsParticipation;
 	}
 
