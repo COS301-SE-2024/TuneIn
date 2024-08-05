@@ -1,4 +1,3 @@
-// Dropdown.tsx
 import React, { useState } from "react";
 import {
 	View,
@@ -70,6 +69,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 						/>
 						<ScrollView style={styles.scrollView}>
 							<FlatList
+								testID="flat-list"
 								data={filteredOptions}
 								keyExtractor={(item) => item}
 								renderItem={({ item }) => (
