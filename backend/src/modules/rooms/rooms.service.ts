@@ -764,10 +764,15 @@ export class RoomsService {
 		// sort the array
 		sessionDurations.sort((a: any, b: any) => a.day - b.day);
 		// find the all time min, max, and avg
-		for (const session of sessionDurations) {
-			avg_duration += session.avg_duration;
-			min_duration = Math.min(min_duration, session.min_duration);
-			max_duration = Math.max(max_duration, session.max_duration);
+		for (let i = 0; i < sessionDurations.length; i++) {
+			const session = sessionDurations[i];
+			session.avg_duration = Number(session.avg_duration);
+			session.min_duration = Number(session.min_duration);
+			session.max_duration = Number(session.max_duration);
+			console.log("Session", session);
+			avg_duration += Number(session.avg_duration);
+			min_duration = Math.min(min_duration, Number(session.min_duration));
+			max_duration = Math.max(max_duration, Number(session.max_duration));
 		}
 		avg_duration = avg_duration / sessionDurations.length;
 		sessionData.all_time.avg_duration = avg_duration;
@@ -776,6 +781,57 @@ export class RoomsService {
 		sessionData.per_day = sessionDurations;
 		console.log("Session data", sessionData);
 		return sessionData;
+	}
+	async getHourlyParticipantAnalytics(
+		roomID: string
+	): Promise<RoomAnalyticsParticipationDto["participants_per_hour"]> {
+		const participantsPerHour: RoomAnalyticsParticipationDto["participants_per_hour"] = [];
+		const today: Date = new Date();
+		const yesterday: Date = subHours(today, 24);
+		console.log("Today", today, "Yesterday", yesterday);
+		const userActivityPerHour: any = await this.prisma.$queryRaw`
+			SELECT DATE_TRUNC('hour', room_join_time) AS hour,
+				COUNT("user_id") as count
+			FROM "user_activity"
+			WHERE room_id = ${roomID}::UUID
+			AND room_join_time > ${yesterday}
+			GROUP BY hour, room_id
+			ORDER BY hour ASC;
+		`;
+		console.log("Getting room hourly participant analytics for room", roomID, "and user activity", userActivityPerHour);
+		if (userActivityPerHour.length === 0) {
+			return participantsPerHour;
+		}
+
+		const allHours: Date[] = [];
+		let hour: Date = userActivityPerHour[0].hour;
+		while (isBefore(hour, today)) {
+			allHours.push(hour);
+			hour = addHours(hour, 1);
+		}
+		// add the missing hours
+		for (const h of allHours) {
+			const hourExists: boolean = userActivityPerHour.find(
+				(u: any) => u.hour === h,
+			);
+			if (!hourExists) {
+				userActivityPerHour.push({ hour: h, count: 0 });
+			}
+		}
+		// sort the array
+		userActivityPerHour.sort((a: any, b: any) => a.hour - b.hour);
+		console.log("User activity per hour", userActivityPerHour);
+		for (const hour of userActivityPerHour) {
+			const pph = {
+				count: 0,
+				instance: new Date(),
+			};
+			pph.count = Number(hour.count);
+			pph.instance = hour.hour;
+			console.log("Adding", pph);
+			participantsPerHour.push(pph);
+		}
+		return participantsPerHour;
 	}
 	async getRoomParticipationAnalytics(
 		roomID: string,
@@ -791,6 +847,7 @@ export class RoomsService {
 		const roomAnalyticsParticipation: RoomAnalyticsParticipationDto = new RoomAnalyticsParticipationDto();
 		roomAnalyticsParticipation.joins = await this.getRoomJoinAnalytics(roomID);
 		roomAnalyticsParticipation.session_data = await this.getRoomSessionAnalytics(roomID);
+		roomAnalyticsParticipation.participants_per_hour = await this.getHourlyParticipantAnalytics(roomID);
 		return roomAnalyticsParticipation;
 	}
 
