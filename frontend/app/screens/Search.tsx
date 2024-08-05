@@ -10,6 +10,7 @@ import {
 	NativeSyntheticEvent,
 	Modal,
 	FlatList,
+	Switch,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,6 +20,8 @@ import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import Dropdown from "../components/Dropdown";
 
 type SearchResult = {
 	id: string;
@@ -28,30 +31,81 @@ type SearchResult = {
 	userData?: User;
 };
 
+// Sample genre data with additional genres
+const genres = [
+	"Rock",
+	"Pop",
+	"Jazz",
+	"Classical",
+	"Hip Hop",
+	"Country",
+	"Electronic",
+	"Reggae",
+	"Blues",
+	"Folk",
+	"Metal",
+	"Punk",
+	"Soul",
+	"R&B",
+	"Funk",
+	"Alternative",
+	"Indie",
+	"Dance",
+	"Techno",
+	"Ambient",
+	"Gospel",
+	"Latin",
+	"Reggaeton",
+	"Ska",
+	"Opera",
+];
+
+// Sample language data
+const languages = [
+	"English",
+	"Spanish",
+	"French",
+	"German",
+	"Chinese",
+	"Japanese",
+	"Korean",
+	"Portuguese",
+	"Russian",
+	"Arabic",
+	"Italian",
+	"Turkish",
+	"Swedish",
+];
+
 const roomFilterCategories = [
-	{ id: "roomName", label: "Room Name" },
 	{ id: "username", label: "Host" },
-	{ id: "participationCount", label: "Participation Count" },
 	{ id: "description", label: "Description" },
 	{ id: "isTemporary", label: "Temporary" },
 	{ id: "isPrivate", label: "Private" },
 	{ id: "isScheduled", label: "Scheduled" },
-	//   { id: 'startDate', label: 'Start Date' },
-	//   { id: 'endDate', label: 'End Date' },
 	{ id: "language", label: "Language" },
+	{ id: "genre", label: "Genres" },
+	{ id: "startDate", label: "Start Date" },
+	{ id: "endDate", label: "End Date" },
+];
+
+const additionalFilterCategories = [
+	{ id: "participationCount", label: "Participation Count" },
 	{ id: "explicit", label: "Explicit" },
 	{ id: "nsfw", label: "NSFW" },
-	{ id: "tags", label: "Tags" },
 ];
 
 // const userFilterCategories = [
 // 	{ id: "profileName", label: "Profile Name" },
 //   { id: 'username', label: 'Username' },
-// //   { id: 'minFollowing', label: 'Minimum Number of Following' },
-// //   { id: 'minFollowers', label: 'Minimum Number of Followers' },
+//    { id: 'minFollowing', label: 'Minimum Number of Following' },
+//   { id: 'minFollowers', label: 'Minimum Number of Followers' },
 // ];
 
-const allFilterCategories = [...roomFilterCategories];
+const allFilterCategories = [
+	...roomFilterCategories,
+	...additionalFilterCategories,
+];
 
 const Search: React.FC = () => {
 	const navigation = useNavigation();
@@ -63,6 +117,11 @@ const Search: React.FC = () => {
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	const [showMoreFilters, setShowMoreFilters] = useState(false);
+	const [explicit, setExplicit] = useState(false);
+	const [nsfw, setNsfw] = useState(false);
+	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -185,6 +244,21 @@ const Search: React.FC = () => {
 		);
 	};
 
+	const handleToggleMoreFilters = () => {
+		setShowMoreFilters(!showMoreFilters);
+	};
+
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+
+	const handleSelectGenre = (genre: string) => {
+		setSelectedGenre(genre);
+	};
+
+	const handleSelectLanguage = (language: string) => {
+		setSelectedLanguage(language);
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -251,6 +325,71 @@ const Search: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
+			<View style={styles.filterContainer}>
+				<TouchableOpacity
+					style={styles.filterButton}
+					onPress={handleToggleMoreFilters}
+				>
+					<Text style={styles.filterText}>
+						{showMoreFilters ? "View Less Filters" : "View More Filters"}
+					</Text>
+				</TouchableOpacity>
+			</View>
+
+			{showMoreFilters && (
+				<View style={styles.additionalFilters}>
+					<View style={styles.includeSection}>
+						<Text style={styles.includeHeader}>Include:</Text>
+						<View style={styles.switchContainer}>
+							<Text style={styles.switchLabel}>Explicit</Text>
+							<Switch value={explicit} onValueChange={setExplicit} />
+						</View>
+						<View style={styles.switchContainer}>
+							<Text style={styles.switchLabel}>NSFW</Text>
+							<Switch value={nsfw} onValueChange={setNsfw} />
+						</View>
+					</View>
+					<View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>Start Date:</Text>
+						<DateTimePicker
+							value={startDate || new Date()}
+							mode="date"
+							display="default"
+							onChange={(event, selectedDate) =>
+								setStartDate(selectedDate || undefined)
+							}
+						/>
+					</View>
+					<View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>End Date:</Text>
+						<DateTimePicker
+							value={endDate || new Date()}
+							mode="date"
+							display="default"
+							onChange={(event, selectedDate) =>
+								setEndDate(selectedDate || undefined)
+							}
+						/>
+					</View>
+					<View style={styles.dropContainer}>
+						<Dropdown
+							options={genres}
+							placeholder="Select Genre"
+							onSelect={handleSelectGenre}
+							selectedOption={selectedGenre}
+							setSelectedOption={setSelectedGenre}
+						/>
+						<Dropdown
+							options={languages}
+							placeholder="Select Language"
+							onSelect={handleSelectLanguage}
+							selectedOption={selectedLanguage}
+							setSelectedOption={setSelectedLanguage}
+						/>
+					</View>
+				</View>
+			)}
+
 			<View style={styles.selectedFiltersContainer}>
 				{selectedFilters.map((filter) => (
 					<View key={filter} style={styles.selectedFilter}>
@@ -279,8 +418,8 @@ const Search: React.FC = () => {
 																		? "Explicit"
 																		: filter === "nsfw"
 																			? "NSFW"
-																			: filter === "tags"
-																				? "Tags"
+																			: filter === "genre"
+																				? "Genres"
 																				: ""}
 						</Text>
 						<TouchableOpacity onPress={() => handleFilterToggle(filter)}>
@@ -291,12 +430,11 @@ const Search: React.FC = () => {
 			</View>
 
 			<FlatList
-				testID="scroll-view"
 				data={results}
-				renderItem={renderResult}
 				keyExtractor={(item) => item.id}
+				renderItem={renderResult}
+				contentContainerStyle={styles.resultsContainer}
 				onScroll={handleScroll}
-				contentContainerStyle={{ paddingBottom: 20 }}
 			/>
 
 			<Modal
@@ -492,6 +630,56 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		zIndex: 10,
+	},
+	resultsContainer: {
+		paddingVertical: 10,
+	},
+	additionalFilters: {
+		paddingHorizontal: 20,
+		marginTop: 10,
+	},
+	includeSection: {
+		paddingVertical: 10,
+	},
+	includeHeader: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 5,
+	},
+	switchContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingVertical: 5,
+	},
+	switchLabel: {
+		fontSize: 16,
+	},
+	datePickerContainer: {
+		paddingVertical: 10,
+	},
+	datePickerLabel: {
+		fontSize: 16,
+	},
+	participantCountContainer: {
+		paddingVertical: 10,
+	},
+	participantCountLabel: {
+		fontSize: 16,
+	},
+	participantCountInput: {
+		height: 40,
+		borderColor: "gray",
+		borderWidth: 1,
+		borderRadius: 10,
+		paddingHorizontal: 10,
+	},
+	dropContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		// marginRight: -40,
+		// marginLeft: -50,
+		// padding: 20,
 	},
 });
 
