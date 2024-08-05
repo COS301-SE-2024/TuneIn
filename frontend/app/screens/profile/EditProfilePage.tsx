@@ -52,7 +52,7 @@ const EditProfileScreen = () => {
 	}, []);
 
 	const updateProfile = async (changed) => {
-		console.log("Changed: " + JSON.stringify(profileData));
+		// console.log("Changed: " + JSON.stringify(profileData));
 		if (changed) {
 			try {
 				const response = await axios.patch(
@@ -65,7 +65,7 @@ const EditProfileScreen = () => {
 					},
 				);
 
-				console.log(response.data);
+				// console.log(response.data);
 				return response.data;
 			} catch (error) {
 				console.error("Error updating profile info:", error);
@@ -75,7 +75,7 @@ const EditProfileScreen = () => {
 	};
 
 	const handleImageUpload = async (uri) => {
-		console.log(uri);
+		// console.log(uri);
 		try {
 			// Fetch the file from the URI
 			// const response = await fetch(uri);
@@ -94,10 +94,10 @@ const EditProfileScreen = () => {
 				{ headers },
 			);
 			*/
-			console.log(profileData);
-			console.log("Uploading image...", uri);
+			// console.log(profileData);
+			// console.log("Uploading image...", uri);
 			const imageLink = await uploadImage(uri, "image");
-			console.log("image link:", imageLink);
+			// console.log("image link:", imageLink);
 			// console.log("File uploaded successfully", uploadResponse.data);
 			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
@@ -109,13 +109,13 @@ const EditProfileScreen = () => {
 	const updateImage = async (uri) => {
 		try {
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
-			console.log("image:", image);
+			// console.log("image:", image);
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
 			setChanged(true);
-			console.log("\n\nUpdated profile data:", profileData);
+			// console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
 		}
@@ -133,7 +133,7 @@ const EditProfileScreen = () => {
 	const [changed, setChanged] = useState(false);
 
 	const handleSave = (text, value) => {
-		console.log("Saved:", text);
+		// console.log("Saved:", text);
 		if (dialogs[value]) {
 			dialogs[value](false);
 		} else {
@@ -151,7 +151,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				profile_name: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "username") {
 			setProfileData((prevProfileData) => ({
@@ -163,7 +163,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				username: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "bio") {
 			setProfileData((prevProfileData) => ({
@@ -176,7 +176,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				bio: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			// } else if (value === "instagramLink") {
 			// 	setProfileData((prevProfileData) => ({
 			// 		...prevProfileData,
@@ -200,7 +200,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				fav_genres: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "favoriteSongs") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -212,7 +212,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				fav_songs: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 		}
 	};
 
@@ -242,7 +242,7 @@ const EditProfileScreen = () => {
 					),
 				},
 			}));
-			console.log(profileData.links);
+			// console.log(profileData.links);
 			setChanged(true);
 		}
 	};
@@ -267,7 +267,7 @@ const EditProfileScreen = () => {
 					),
 				},
 			}));
-			console.log(profileData.links);
+			// console.log(profileData.links);
 			setLinkEditDialogVisible(false);
 			setChanged(true);
 		}
@@ -357,6 +357,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setPhotoDialogVisible(true)}
 						style={styles.changePhotoButton}
+						testID="photo-button"
 					>
 						<Text>Change Photo</Text>
 					</TouchableOpacity>
@@ -372,6 +373,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setNameDialogVisible(true)}
 						style={styles.editButton}
+						testID="name-button"
 					>
 						<Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text>
 					</TouchableOpacity>
@@ -389,6 +391,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setUsernameDialogVisible(true)}
 						style={styles.editButton}
+						testID="username-button"
 					>
 						<Text style={{ marginLeft: 15 }}>@{profileData.username}</Text>
 					</TouchableOpacity>
@@ -407,6 +410,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setBioDialogVisible(true)}
 						style={styles.editButton}
+						testID="bio-button"
 					>
 						<Text style={{ marginLeft: 60 }}>{profileData.bio}</Text>
 					</TouchableOpacity>
@@ -432,6 +436,7 @@ const EditProfileScreen = () => {
 							<TouchableOpacity
 								onPress={() => openEditDialog(index, link.links)}
 								style={styles.editButton}
+								testID="link-edit-button"
 							>
 								<Text>{link.links}</Text>
 							</TouchableOpacity>
