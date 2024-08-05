@@ -283,8 +283,12 @@ const Home: React.FC = () => {
 					/>
 				) : (
 					<View style={styles.contentContainer}>
-						<Text style={styles.sectionTitle}>Recent Rooms</Text>
-						<AppCarousel data={myRecents} renderItem={renderItem} />
+						{myRecents.length > 0 && (
+							<>
+								<Text style={styles.sectionTitle}>Recent Rooms</Text>
+								<AppCarousel data={myRecents} renderItem={renderItem} />
+							</>
+						)}
 						<Text style={styles.sectionTitle}>Picks for you</Text>
 						<AppCarousel data={myPicks} renderItem={renderItem} />
 						<TouchableOpacity

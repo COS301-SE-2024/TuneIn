@@ -83,7 +83,7 @@ const Miniplayer: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		borderRadius: 10,
-		height: 56,
+		height: 65,
 		flexDirection: "row",
 		justifyContent: "space-around",
 		alignItems: "center",
@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	backgroundImage: {
-		width: 56,
-		height: 56,
+		width: 65,
+		height: 55,
 		borderRadius: 10,
 	},
 	textContainer: {
