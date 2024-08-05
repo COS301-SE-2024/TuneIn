@@ -26,8 +26,21 @@ export const SOCKET_EVENTS = {
 	INIT_STOP: "initStop",
 	SEEK_MEDIA: "seekMedia",
 	CURRENT_MEDIA: "currentMedia",
-	QUEUE_STATE: "queueState",
 	MEDIA_SYNC: "mediaSync",
+
+	//for queue & voting
+	UPVOTE_SONG: "upvoteSong",
+	UNDO_UPVOTE_SONG: "undoUpvoteSong",
+	DOWNVOTE_SONG: "downvoteSong",
+	UNDO_DOWNVOTE_SONG: "undoDownvoteSong",
+	ENQUEUE_SONG: "enqueueSong",
+	DEQUEUE_SONG: "dequeueSong",
+
+	SONG_ADDED: "songAdded",
+	SONG_REMOVED: "songRemoved",
+	VOTE_UPDATED: "voteUpdated",
+	QUEUE_STATE: "queueState",
+	ROOM_SETTINGS_CHANGED: "roomSettingsChanged",
 
 	//for server responses
 	CONNECTED: "connected",
