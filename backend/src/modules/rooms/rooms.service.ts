@@ -655,7 +655,10 @@ export class RoomsService {
 			ORDER BY day ASC;
 		`;
 
-		console.log("userActivityPerDay", typeof userActivityPerDay[0]["count"]);
+		console.log("userActivityPerDay", userActivityPerDay.length);
+		if (userActivityPerDay.length === 0) {
+			return joins;
+		}
 
 		for (let i = 0; i < userActivityPerDay.length; i++) {
 			userActivityPerDay[i].count = Number(userActivityPerDay[i].count);
