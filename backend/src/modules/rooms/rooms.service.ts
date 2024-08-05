@@ -955,6 +955,19 @@ export class RoomsService {
 		return messages;
 	}
 
+	async getNumberOfReactions(roomID: string): Promise<number> {
+		const reactions: any = await this.prisma.chat_reactions.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		console.log("Getting number of reactions for room", roomID, "and reactions", reactions);
+		if (!reactions || reactions === null) {
+			return 0;
+		}
+		return reactions.length;
+	}
+
 	async getNumberOfBookmarks(roomID: string): Promise<number> {
 		const bookmarks: PrismaTypes.bookmark[] | null = await this.prisma.bookmark.findMany({
 			where: {
@@ -981,6 +994,7 @@ export class RoomsService {
 		const roomInteractionAnalytics: RoomAnalyticsInteractionsDto = new RoomAnalyticsInteractionsDto();
 		roomInteractionAnalytics.messages = await this.getMessageInteractionsAnalytics(roomID);
 		roomInteractionAnalytics.bookmarked_count = await this.getNumberOfBookmarks(roomID);
+		roomInteractionAnalytics.reactions_sent = await this.getNumberOfReactions(roomID);
 		return roomInteractionAnalytics;
 	}
 
