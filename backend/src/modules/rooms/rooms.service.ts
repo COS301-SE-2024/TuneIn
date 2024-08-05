@@ -894,6 +894,67 @@ export class RoomsService {
 		return returnVisits;
 	}
 
+	async getMessageInteractionsAnalytics(
+		roomID: string
+	): Promise<RoomAnalyticsInteractionsDto["messages"]> {
+		console.log(
+			"Getting room analytics for room",
+			roomID,
+		);
+		const messages: RoomAnalyticsInteractionsDto["messages"] = {
+			per_hour: [],
+			total: 0,
+		};
+		const today: Date = new Date();
+		const yesterday: Date = subHours(today, 24);
+		console.log("Today", today, "Yesterday", yesterday);
+		const messageActivityPerHour: any = await this.prisma.$queryRaw`
+			SELECT DATE_TRUNC('hour', date_sent) AS hour,
+				COUNT(message.message_id) as count
+			FROM "message"
+			INNER JOIN room_message ON room_message.message_id = message.message_id
+			WHERE room_id = ${roomID}::UUID
+				AND date_sent > ${yesterday}
+			GROUP BY hour, room_id
+			ORDER BY hour ASC;
+		`;
+		console.log("Getting room message interactions analytics for room", roomID, "and message activity", messageActivityPerHour);
+		if (messageActivityPerHour.length === 0) {
+			return messages;
+		}
+		// fill in the missing hours
+		const allHours: Date[] = [];
+		let hour: Date = messageActivityPerHour[0].hour;
+		while (isBefore(hour, today)) {
+			allHours.push(hour);
+			hour = addHours(hour, 1);
+		}
+		// add the missing hours
+		for (const h of allHours) {
+			const hourExists: boolean = messageActivityPerHour.find(
+				(u: any) => u.hour === h,
+			);
+			if (!hourExists) {
+				messageActivityPerHour.push({ hour: h, count: 0 });
+			}
+		}
+		// sort the array
+		messageActivityPerHour.sort((a: any, b: any) => a.hour - b.hour);
+		console.log("Message activity per hour", messageActivityPerHour);
+		for (const hour of messageActivityPerHour) {
+			const m = {
+				count: 0,
+				hour: new Date(),
+			};
+			m.count = Number(hour.count);
+			m.hour = hour.hour;
+			console.log("Adding", m);
+			messages.per_hour.push(m);
+		}
+		messages.total = messages.per_hour.map((m) => m.count).reduce((a, b) => a + b, 0);
+		return messages;
+	}
+
 	async getRoomInteractionAnalytics(
 		roomID: string,
 		userID: string,
@@ -904,7 +965,10 @@ export class RoomsService {
 			" and given userID: ",
 			userID,
 		);
-		return new RoomAnalyticsInteractionsDto();
+
+		const roomInteractionAnalytics: RoomAnalyticsInteractionsDto = new RoomAnalyticsInteractionsDto();
+		roomInteractionAnalytics.messages = await this.getMessageInteractionsAnalytics(roomID);
+		return roomInteractionAnalytics;
 	}
 
 	async getRoomVotesAnalytics(
