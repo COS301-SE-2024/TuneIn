@@ -61,7 +61,8 @@ const RoomPage = () => {
 	const [joined, setJoined] = useState(false);
 
 	useEffect(() => {
-		if (currentRoom?.roomID === roomID) {
+		console.log("Room ID: " + currentRoom?.roomID);
+		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
 	}, [currentRoom, roomID]);

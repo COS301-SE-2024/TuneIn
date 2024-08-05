@@ -319,7 +319,6 @@ const Home: React.FC = () => {
 					{ transform: [{ translateY: navBarTranslateY }] },
 				]}
 			>
-				{" "}
 				<Miniplayer />
 				<NavBar />
 			</Animated.View>
