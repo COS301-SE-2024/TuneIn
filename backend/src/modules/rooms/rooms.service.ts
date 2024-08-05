@@ -19,6 +19,7 @@ import {
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
 } from "./dto/roomanalytics.dto";
+import { join } from "path";
 
 @Injectable()
 export class RoomsService {
@@ -636,33 +637,39 @@ export class RoomsService {
 				unique_joins: 0,
 			},
 		};
-		const userActivityPerDay: any = await this.prisma.$executeRaw`
+		console.log("Getting room join analytics for room", roomID);
+		const userActivityPerDay: any = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
 				COUNT("user_id") as count
 			FROM "user_activity"
-			WHERE room_id = ${roomID}
+			WHERE room_id = ${roomID}::UUID
 			GROUP BY day, room_id
 			ORDER BY day ASC;
 		`;
-		const uniqueUserActivityPerDay: any = await this.prisma.$executeRaw`
+		const uniqueUserActivityPerDay: any = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
 				COUNT(DISTINCT "user_id") as count
 			FROM "user_activity"
-			WHERE room_id = ${roomID}
+			WHERE room_id = ${roomID}::UUID
 			GROUP BY day, room_id
 			ORDER BY day ASC;
 		`;
 
-		for (const day of userActivityPerDay) {
-			total_joins += day.count;
+		console.log("userActivityPerDay", typeof userActivityPerDay[0]["count"]);
+
+		for (let i = 0; i < userActivityPerDay.length; i++) {
+			userActivityPerDay[i].count = Number(userActivityPerDay[i].count);
+			total_joins += userActivityPerDay[i].count;
 		}
-		for (const day of uniqueUserActivityPerDay) {
-			unique_joins += day.count;
+		for (let i = 0; i < uniqueUserActivityPerDay.length; i++) {
+			uniqueUserActivityPerDay[i].count = Number(uniqueUserActivityPerDay[i].count);
+			unique_joins += uniqueUserActivityPerDay[i].count;
 		}
 		const allDays: Date[] = [];
 		const today: Date = new Date();
-		let day: Date = subHours(today, 24);
+		let day: Date = userActivityPerDay[0].day;
 		while (isBefore(day, today)) {
+			console.log("adding day", day);
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
@@ -695,6 +702,10 @@ export class RoomsService {
 			total_joins: total_joins,
 			unique_joins: unique_joins,
 		};
+		console.log("joins", joins);
+		for (const day of joins.per_day.total_joins) {
+			console.log("day", day.day, "count", day.count);
+		}
 		return joins;
 	}
 
@@ -710,7 +721,7 @@ export class RoomsService {
 		);
 
 		const roomAnalyticsParticipation: RoomAnalyticsParticipationDto = new RoomAnalyticsParticipationDto();
-		// find the total and unique joins for all tim
+		roomAnalyticsParticipation.joins = await this.getRoomJoinAnalytics(roomID);
 		return roomAnalyticsParticipation;
 	}
 
