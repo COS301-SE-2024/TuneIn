@@ -12,13 +12,12 @@ interface TopNavBarProps {
 
 const TopNavBar: React.FC<TopNavBarProps> = ({ profileInfo }) => {
 	const router = useRouter();
-	
+
 	let profileImage = "";
 
-	if(profileInfo){
+	if (profileInfo) {
 		profileImage = profileInfo.userData.profile_picture_url;
-	}
-	else{
+	} else {
 		profileImage = "https://cdn-.jk.-png.freepik.com/512/3135/3135715.png";
 	}
 

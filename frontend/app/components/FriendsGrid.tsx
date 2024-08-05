@@ -9,7 +9,11 @@ interface FriendsGridProps {
 	maxVisible: number;
 }
 
-const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, user, maxVisible }) => {
+const FriendsGrid: React.FC<FriendsGridProps> = ({
+	friends,
+	user,
+	maxVisible,
+}) => {
 	// console.log("Friend: " + JSON.stringify(friends));
 	return (
 		<View style={styles.container}>
