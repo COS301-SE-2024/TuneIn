@@ -11,6 +11,7 @@ import {
 	Modal,
 	FlatList,
 	Switch,
+	ScrollView,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +23,7 @@ import { Room } from "../models/Room";
 import { User } from "../models/user";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Dropdown from "../components/Dropdown";
+import CheckBox from "@react-native-community/checkbox";
 
 type SearchResult = {
 	id: string;
@@ -79,7 +81,7 @@ const languages = [
 
 const roomFilterCategories = [
 	{ id: "username", label: "Host" },
-	{ id: "description", label: "Description" },
+	// { id: "description", label: "Description" },
 	{ id: "isTemporary", label: "Temporary" },
 	{ id: "isPrivate", label: "Private" },
 	{ id: "isScheduled", label: "Scheduled" },
@@ -120,6 +122,9 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
+	const [temporary, setTemporary] = useState(false);
+	const [isPrivate, setIsPrivate] = useState(false);
+	const [scheduled, setScheduled] = useState(false);
 	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
 	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
@@ -337,7 +342,7 @@ const Search: React.FC = () => {
 			</View>
 
 			{showMoreFilters && (
-				<View style={styles.additionalFilters}>
+				<ScrollView style={styles.additionalFilters}>
 					<View style={styles.includeSection}>
 						<Text style={styles.includeHeader}>Include:</Text>
 						<View style={styles.switchContainer}>
@@ -349,6 +354,23 @@ const Search: React.FC = () => {
 							<Switch value={nsfw} onValueChange={setNsfw} />
 						</View>
 					</View>
+					<View style={styles.dropContainer}>
+						<Dropdown
+							options={genres}
+							placeholder="Select Genre"
+							onSelect={handleSelectGenre}
+							selectedOption={selectedGenre}
+							setSelectedOption={setSelectedGenre}
+						/>
+						<Dropdown
+							options={languages}
+							placeholder="Select Language"
+							onSelect={handleSelectLanguage}
+							selectedOption={selectedLanguage}
+							setSelectedOption={setSelectedLanguage}
+						/>
+					</View>
+					<Text style={styles.includeHeader}>Room Availibity:</Text>
 					<View style={styles.datePickerContainer}>
 						<Text style={styles.datePickerLabel}>Start Date:</Text>
 						<DateTimePicker
@@ -371,56 +393,53 @@ const Search: React.FC = () => {
 							}
 						/>
 					</View>
-					<View style={styles.dropContainer}>
-						<Dropdown
-							options={genres}
-							placeholder="Select Genre"
-							onSelect={handleSelectGenre}
-							selectedOption={selectedGenre}
-							setSelectedOption={setSelectedGenre}
-						/>
-						<Dropdown
-							options={languages}
-							placeholder="Select Language"
-							onSelect={handleSelectLanguage}
-							selectedOption={selectedLanguage}
-							setSelectedOption={setSelectedLanguage}
-						/>
+					<View style={styles.includeSection}>
+						<Text style={styles.includeHeader}>Other:</Text>
+						<View style={styles.switchContainer}>
+							<Text style={styles.switchLabel}>Temporary</Text>
+							<Switch value={temporary} onValueChange={setTemporary} />
+						</View>
+						<View style={styles.switchContainer}>
+							<Text style={styles.switchLabel}>Private</Text>
+							<Switch value={isPrivate} onValueChange={setIsPrivate} />
+						</View>
+						<View style={styles.switchContainer}>
+							<Text style={styles.switchLabel}>Scheduled</Text>
+							<Switch value={scheduled} onValueChange={setScheduled} />
+						</View>
 					</View>
-				</View>
+				</ScrollView>
 			)}
 
 			<View style={styles.selectedFiltersContainer}>
 				{selectedFilters.map((filter) => (
 					<View key={filter} style={styles.selectedFilter}>
 						<Text style={styles.selectedFilterText}>
-							{filter === "roomName"
-								? "Room Name"
-								: filter === "username"
-									? "Username of Creator"
-									: filter === "participationCount"
-										? "Participation Count"
-										: filter === "description"
-											? "Description"
-											: filter === "isTemporary"
-												? "Temporary"
-												: filter === "isPrivate"
-													? "Private"
-													: filter === "isScheduled"
-														? "Scheduled"
-														: filter === "startDate"
-															? "Start Date"
-															: filter === "endDate"
-																? "End Date"
-																: filter === "language"
-																	? "Language"
-																	: filter === "explicit"
-																		? "Explicit"
-																		: filter === "nsfw"
-																			? "NSFW"
-																			: filter === "genre"
-																				? "Genres"
-																				: ""}
+							{filter === "username"
+								? "Username of Creator"
+								: filter === "participationCount"
+									? "Participation Count"
+									: filter === "description"
+										? "Description"
+										: filter === "isTemporary"
+											? "Temporary"
+											: filter === "isPrivate"
+												? "Private"
+												: filter === "isScheduled"
+													? "Scheduled"
+													: filter === "startDate"
+														? "Start Date"
+														: filter === "endDate"
+															? "End Date"
+															: filter === "language"
+																? "Language"
+																: filter === "explicit"
+																	? "Explicit"
+																	: filter === "nsfw"
+																		? "NSFW"
+																		: filter === "genre"
+																			? "Genres"
+																			: ""}
 						</Text>
 						<TouchableOpacity onPress={() => handleFilterToggle(filter)}>
 							<Ionicons name="close-circle" size={20} color={colors.primary} />
@@ -637,6 +656,8 @@ const styles = StyleSheet.create({
 	additionalFilters: {
 		paddingHorizontal: 20,
 		marginTop: 10,
+		marginBottom: 40,
+		height: "100%",
 	},
 	includeSection: {
 		paddingVertical: 10,
@@ -677,9 +698,7 @@ const styles = StyleSheet.create({
 	dropContainer: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		// marginRight: -40,
-		// marginLeft: -50,
-		// padding: 20,
+		paddingBottom: 10,
 	},
 });
 

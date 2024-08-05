@@ -39,7 +39,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 	};
 
 	const filteredOptions = options.filter((option) =>
-		option.toLowerCase().includes(searchQuery.toLowerCase())
+		option.toLowerCase().includes(searchQuery.toLowerCase()),
 	);
 
 	return (
