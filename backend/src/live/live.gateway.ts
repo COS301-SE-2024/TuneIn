@@ -56,6 +56,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.handOverSocketServer(this.server);
 		console.log("Client (id: " + client.id + ") disconnected");
 		this.roomUsers.removeConnectedUser(client.id);
+		this.dmUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
@@ -443,7 +444,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					payload.userID,
 					payload.participantID,
 				);
-				client.emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				let chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					await this.dmUsers.setChatInfo(client.id, payload.participantID);
+					chatID = await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						throw new Error("Chat ID was not set for some reason");
+					}
+					client.join(chatID);
+				}
+				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
@@ -574,7 +584,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					enterPayload.userID,
 					enterPayload.participantID,
 				);
-				client.emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
@@ -609,6 +619,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.to(chatID)
 					.emit(SOCKET_EVENTS.USER_OFFLINE, offlineAnnouncement);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_OFFLINE);
+				client.leave(chatID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
