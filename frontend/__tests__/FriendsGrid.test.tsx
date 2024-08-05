@@ -23,7 +23,6 @@ describe("FriendsGrid component", () => {
 		// const { getByText } = render(
 		// 	<FriendsGrid friends={mockFriends} maxVisible={3} />,
 		// );
-
 		// // Check if friend names are rendered
 		// // expect(getByText("John Doe")).toBeTruthy();
 		// expect(getByText("Jane Smith")).toBeTruthy();
