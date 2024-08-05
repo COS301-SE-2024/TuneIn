@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useSpotifyAuth } from "./useSpotifyAuth";
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 export const useSpotifySearch = () => {
 	const [searchResults, setSearchResults] = useState<any[]>([]);
 	const [error, setError] = useState<string | null>(null);
-	const { getToken } = useSpotifyAuth();
 	const handleSearch = async (query: string) => {
 		try {
 			console.log("handleSearch: ", query);
-			const accessToken = await getToken(); // Get a valid access token
+			const allTokens = await spotifyAuth.getTokens();
+			const accessToken = allTokens.access_token;
 
 			if (!accessToken) {
 				throw new Error("Access token not found");

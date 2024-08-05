@@ -1,5 +1,16 @@
-import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
-import { SearchService, CombinedSearchResults } from "./search.service";
+import {
+	Controller,
+	Delete,
+	Get,
+	Query,
+	Request,
+	UseGuards,
+} from "@nestjs/common";
+import {
+	SearchService,
+	CombinedSearchResults,
+	CombinedSearchHistory,
+} from "./search.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -10,8 +21,10 @@ import {
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
+import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
+import { createRealContext } from "../../../context";
 
 @Controller("search")
 export class SearchController {
@@ -20,6 +33,7 @@ export class SearchController {
 		private readonly auth: AuthService,
 	) {}
 
+	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms and users" })
@@ -42,17 +56,28 @@ export class SearchController {
 	})
 	async combinedSearch(
 		@Query("q") q: string,
+		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<CombinedSearchResults> {
 		const query_params = {
 			q,
 			creator,
 		};
-		return await this.searchService.combinedSearch(query_params);
+		const ctx = createRealContext();
+		const result = await this.searchService.combinedSearch(query_params, ctx);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		this.searchService.insertSearchHistory(
+			"/search",
+			query_params,
+			userInfo.id,
+			ctx,
+		);
+
+		return result;
 	}
 
 	/* ************************************************** */
-
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms" })
@@ -74,13 +99,60 @@ export class SearchController {
 	})
 	async searchRooms(
 		@Query("q") q: string,
+		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {
 			q,
 			creator,
 		};
-		return await this.searchService.searchRooms(query_params);
+		const ctx = createRealContext();
+		const result = await this.searchService.searchRooms(query_params, ctx);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		console.log("Result" + typeof result);
+
+		this.searchService.insertSearchHistory(
+			"/search/rooms",
+			query_params,
+			userInfo.id,
+			ctx,
+		);
+
+		return result;
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("history")
+	@ApiTags("search")
+	@ApiOperation({
+		summary: "Get search history (including objects discovered from search)",
+	})
+	@ApiOkResponse({
+		description:
+			"Search history as an array of strings or RoomDto, or UserDto.",
+		type: [CombinedSearchHistory],
+	})
+	async searchHistory(
+		@Request() req: Request,
+	): Promise<CombinedSearchHistory[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.searchService.searchHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Delete("history")
+	@ApiTags("search")
+	@ApiOperation({ summary: "Clear search history" })
+	@ApiOkResponse({ description: "Search history cleared" })
+	async clearSearchHistory(@Request() req: Request): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.searchService.clearSearchHistory(userInfo.id);
 	}
 
 	/* ************************************************** */
@@ -191,7 +263,7 @@ export class SearchController {
 		@Query("lang") lang?: string,
 		@Query("explicit") explicit?: boolean,
 		@Query("nsfw") nsfw?: boolean,
-		@Query("tags") tags?: string[],
+		@Query("tags") tags?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {
 			q,
@@ -209,7 +281,8 @@ export class SearchController {
 			nsfw,
 			tags,
 		};
-		return await this.searchService.advancedSearchRooms(query_params);
+		const ctx = createRealContext();
+		return await this.searchService.advancedSearchRooms(query_params, ctx);
 	}
 
 	/* ************************************************** */
@@ -220,17 +293,34 @@ export class SearchController {
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched rooms" })
 	@ApiOkResponse({
-		description: "Recently searched rooms as an array of RoomDto.",
-		type: [RoomDto],
+		description: "Recently searched rooms as an array of SearchHistoryDto.",
+		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchRoomsHistory(@Request() req: Request): Promise<RoomDto[]> {
+	async searchRoomsHistory(
+		@Request() req: Request,
+	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.searchService.searchRoomsHistory(userInfo.id);
+		const ctx = createRealContext();
+		return await this.searchService.searchRoomsHistory(userInfo.id, ctx);
 	}
 
 	/* ************************************************** */
 
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Delete("rooms/history")
+	@ApiTags("search")
+	@ApiOperation({ summary: "Clear room search history" })
+	@ApiOkResponse({ description: "Room search history cleared" })
+	async clearRoomsHistory(@Request() req: Request): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.searchService.clearRoomsHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@UseGuards(JwtAuthGuard)
 	@Get("users")
 	@ApiTags("search")
 	@ApiOperation({ summary: "Search for users" })
@@ -245,8 +335,22 @@ export class SearchController {
 		description: "A username or profile name",
 		type: "string",
 	})
-	async searchUsers(@Query("q") q: string): Promise<UserDto[]> {
-		return await this.searchService.searchUsers(q);
+	async searchUsers(
+		@Query("q") q: string,
+		@Request() req: any,
+	): Promise<UserDto[]> {
+		const ctx = createRealContext();
+		const result = await this.searchService.searchUsers(q, ctx);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+
+		this.searchService.insertSearchHistory(
+			"/search/users",
+			{ q: q },
+			userInfo.id,
+			ctx,
+		);
+
+		return result;
 	}
 
 	/* ************************************************** */
@@ -303,7 +407,8 @@ export class SearchController {
 			following,
 			followers,
 		};
-		return await this.searchService.advancedSearchUsers(query_params);
+		const ctx = createRealContext();
+		return await this.searchService.advancedSearchUsers(query_params, ctx);
 	}
 
 	/* ************************************************** */
@@ -314,12 +419,49 @@ export class SearchController {
 	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched users" })
 	@ApiOkResponse({
-		description: "Recently searched users as an array of UserDto.",
-		type: [UserDto],
+		description: "Recently searched users as an array of SearchHistoryDto.",
+		type: [SearchHistoryDto],
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
-	async searchUsersHistory(@Request() req: Request): Promise<UserDto[]> {
+	async searchUsersHistory(
+		@Request() req: Request,
+	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.searchService.searchUsersHistory(userInfo.id);
+		const ctx = createRealContext();
+		return await this.searchService.searchUsersHistory(userInfo.id, ctx);
 	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Delete("users/history")
+	@ApiTags("search")
+	@ApiOperation({ summary: "Clear user search history" })
+	@ApiOkResponse({ description: "User search history cleared" })
+	async clearUsersHistory(@Request() req: Request): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.searchService.clearUsersHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+	/*
+	@Get("genres")
+	@ApiTags("search")
+	@ApiOperation({ summary: "Search for genres" })
+	@ApiOkResponse({
+		description: "Search results as an array of strings.",
+		type: [String],
+	})
+	@ApiBadRequestResponse({ description: "Invalid query parameters" })
+	@ApiQuery({
+		name: "q",
+		required: true,
+		description: "A genre name",
+		type: "string",
+	})
+	async searchGenres(@Query("q") q: string): Promise<string[]> {
+		return await this.searchService.searchGenres(q);
+	}
+		*/
 }

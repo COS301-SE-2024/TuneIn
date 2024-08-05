@@ -13,6 +13,7 @@ import {
 	MaterialIcons,
 	AntDesign,
 } from "@expo/vector-icons";
+import * as StorageService from "./../../services/StorageService";
 
 const LoginOtherScreen: React.FC = () => {
 	const router = useRouter();

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React, { useEffect, useState } from "react";
 import {
 	View,
@@ -8,7 +7,7 @@ import {
 	ScrollView,
 } from "react-native";
 import * as Linking from "expo-linking";
-
+import * as StorageService from "../services/StorageService";
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET,
@@ -18,7 +17,7 @@ import {
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
-		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables 2",
 	);
 }
 
@@ -35,7 +34,6 @@ if (!redirectTarget) {
 		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
 	);
 }
-console.log(clientId);
 
 const SpotifyRedirect = () => {
 	const [tokenDetails, setTokenDetails] = useState(null);
@@ -68,14 +66,14 @@ const SpotifyRedirect = () => {
 		extractToken();
 	}, []);
 
-	const getCodeFromUrl = (url) => {
+	const getCodeFromUrl = (url: string) => {
 		const query = url.split("?")[1];
 		if (!query) return null;
 		const params = new URLSearchParams(query);
 		return params.get("code");
 	};
 
-	const exchangeCodeForToken = async (code) => {
+	const exchangeCodeForToken = async (code: string) => {
 		try {
 			const credentials = `${clientId}:${clientSecret}`;
 			const base64Credentials = btoa(credentials); // Encode credentials for Basic Auth

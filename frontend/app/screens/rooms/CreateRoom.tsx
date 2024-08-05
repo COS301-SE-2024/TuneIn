@@ -15,7 +15,6 @@ import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import CyanButton from "../../components/CyanButton";
-import { colors } from "../../styles/colors";
 
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();

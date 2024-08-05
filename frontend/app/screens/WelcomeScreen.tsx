@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CyanButton from "../components/CyanButton";
 import WhiteButton from "../components//WhiteButton";
+import * as StorageService from "./../services/StorageService";
 
 const WelcomeScreen: React.FC = () => {
 	const router = useRouter();
@@ -21,7 +22,7 @@ const WelcomeScreen: React.FC = () => {
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/Auth/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterOther");
 	};
 
 	const navigateToHelp = () => {

@@ -4,11 +4,8 @@ import axios from "axios";
 import * as StorageService from "../services/StorageService";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
 import * as utils from "./../services/Utils";
-const clientId = SPOTIFY_CLIENT_ID; // Import Utils
 
-console.log("react-native-dotenv clientId: ", SPOTIFY_CLIENT_ID);
-console.log("clientId: ", clientId);
-
+const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
 		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",

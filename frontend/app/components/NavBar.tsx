@@ -40,7 +40,21 @@ const NavBar: React.FC = () => {
 					<Text
 						style={[styles.text, activeTab === "Sitemap" && styles.activeText]}
 					>
-						Test
+						Sitemap
+					</Text>
+				</View>
+			</TouchableOpacity>
+			<TouchableOpacity onPress={() => navigate("/screens/Search", "Search")}>
+				<View style={styles.tabItem}>
+					<Ionicons
+						name={activeTab === "Search" ? "search-sharp" : "search-outline"}
+						size={24}
+						color={activeTab === "Search" ? colors.primary : "#333"}
+					/>
+					<Text
+						style={[styles.text, activeTab === "Search" && styles.activeText]}
+					>
+						Search
 					</Text>
 				</View>
 			</TouchableOpacity>

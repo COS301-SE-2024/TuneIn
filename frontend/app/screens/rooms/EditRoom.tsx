@@ -15,11 +15,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
 import uploadImage from "../../services/ImageUpload";
+// import * as utils from "../../services/Utils";
+// import auth from "../../services/AuthManagement"; // Import AuthManagement
 
 const EditRoom: React.FC = () => {
 	const router = useRouter();
 	const roomData = useLocalSearchParams();
-	console.log("Room data:", roomData);
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -38,9 +39,8 @@ const EditRoom: React.FC = () => {
 
 	useEffect(() => {
 		const loadRoomDetails = async () => {
-			setRoomDetails(roomData);
+			setRoomDetails(roomData as unknown as Room);
 			setImage(roomData.backgroundImage as string);
-			console.log("Room details:", roomDetails);
 		};
 
 		loadRoomDetails();
@@ -75,22 +75,19 @@ const EditRoom: React.FC = () => {
 	};
 
 	const handleToggleChange = (value: boolean) => {
-		console.log(value);
 		setRoomDetails({ ...roomDetails, isExplicit: value });
 	};
 
 	const saveChanges = async () => {
-		// Add logic to save changes
-		console.log("Changes saved", { ...roomDetails, backgroundImage: image });
-		const newRoom = {};
-		newRoom["description"] = roomDetails.description;
-		newRoom["has_explicit_content"] = roomDetails.isExplicit;
-		newRoom["room_language"] = roomDetails.language;
-		newRoom["has_nsfw_content"] = roomDetails.isNsfw;
-		newRoom["room_name"] = roomDetails.name;
-		let imageURL = "";
-		if (newRoom["room_name"] === "" || newRoom["room_name"] === undefined) {
-			// alert user to enter room name
+		const newRoom: Partial<Room> = {
+			description: roomDetails.description,
+			isExplicit: roomDetails.isExplicit,
+			language: roomDetails.language,
+			isNsfw: roomDetails.isNsfw,
+			name: roomDetails.name,
+		};
+
+		if (!newRoom.name) {
 			Alert.alert(
 				"Room Name Required",
 				"Please enter a room name.",
@@ -99,42 +96,35 @@ const EditRoom: React.FC = () => {
 			);
 			return;
 		}
-		if (changedImage) {
-			imageURL = await uploadImage(image, roomDetails.name);
-			console.log("Image URL:", imageURL);
-			newRoom["room_image"] = imageURL;
+
+		if (changedImage && image) {
+			let newImage = await uploadImage(image, roomDetails.name);
+			if (newImage) {
+				newRoom.backgroundImage = newImage;
+			}
 		}
-		const token = await auth.getToken();
-		console.log("Token:", token);
-		try {
-			console.log("Room ID:", roomData.id);
-			console.log("New Room:", newRoom);
-			// const data = await axios.patch(`${BASE_URL}rooms/${roomDetails.roomID}`, newRoom, {
-			//   headers: {
-			//     'Content-Type': 'application/json',
-			//     'Authorization': 'Bearer ' + token
-			//   }});
-			const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
-				method: "PATCH",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: "Bearer " + token,
-				},
-				body: JSON.stringify(newRoom),
-			});
-			console.log(data);
-			Alert.alert(
-				"Changes Saved",
-				"Your changes have been saved successfully.",
-				[{ text: "OK" }],
-				{ cancelable: false },
-			);
-			router.navigate({
-				pathname: "/screens/Home",
-			});
-		} catch (error) {
-			console.error("Error:", error);
-		}
+		// const token = await auth.getToken();
+		// try {
+		// 	const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
+		// 		method: "PATCH",
+		// 		headers: {
+		// 			"Content-Type": "application/json",
+		// 			Authorization: "Bearer " + token,
+		// 		},
+		// 		body: JSON.stringify(newRoom),
+		// 	});
+		// 	Alert.alert(
+		// 		"Changes Saved",
+		// 		"Your changes have been saved successfully.",
+		// 		[{ text: "OK" }],
+		// 		{ cancelable: false },
+		// 	);
+		// 	router.navigate({
+		// 		pathname: "/screens/Home",
+		// 	});
+		// } catch (error) {
+		// 	console.error("Error:", error);
+		// }
 	};
 
 	return (
@@ -157,17 +147,21 @@ const EditRoom: React.FC = () => {
 						(value) => handleInputChange("description", value),
 						4,
 					)}
-					{buildInputField("Genre", roomDetails.genre, (value) =>
+					{buildInputField("Genre", roomDetails.genre ?? "", (value) =>
 						handleInputChange("genre", value),
 					)}
-					{buildInputField("Language", roomDetails.language, (value) =>
+					{buildInputField("Language", roomDetails.language ?? "", (value) =>
 						handleInputChange("language", value),
 					)}
 					{buildInputField("Room Size", "50".toString(), (value) =>
 						handleInputChange("roomSize", value),
 					)}
-					{buildToggle("Explicit", roomDetails.isExplicit, handleToggleChange)}
-					{buildToggle("NSFW", roomDetails.isNsfw, handleToggleChange)}
+					{buildToggle(
+						"Explicit",
+						roomDetails.isExplicit ?? false,
+						handleToggleChange,
+					)}
+					{buildToggle("NSFW", roomDetails.isNsfw ?? false, handleToggleChange)}
 
 					<View style={styles.imagePickerContainer}>
 						<Text style={styles.imagePickerLabel}>Change Photo</Text>
