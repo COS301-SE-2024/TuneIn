@@ -5,9 +5,16 @@ import { PrismaModule } from "../../../prisma/prisma.module";
 import { DtoGenModule } from "../dto-gen/dto-gen.module";
 import { DbUtilsModule } from "../db-utils/db-utils.module";
 import { AuthModule } from "../../auth/auth.module";
+import { RoomQueueModule } from "./roomqueue/roomqueue.module";
 
 @Module({
-	imports: [PrismaModule, DtoGenModule, DbUtilsModule, AuthModule],
+	imports: [
+		PrismaModule,
+		DtoGenModule,
+		DbUtilsModule,
+		AuthModule,
+		RoomQueueModule,
+	],
 	controllers: [RoomsController],
 	providers: [RoomsService],
 	exports: [RoomsService],
