@@ -6,9 +6,16 @@ import { ConnectedUsersModule } from "./connecteduser/connecteduser.module";
 import { LiveGateway } from "./live.gateway";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
+import { RoomQueueModule } from "../modules/rooms/roomqueue/roomqueue.module";
 
 @Module({
-	imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
+	imports: [
+		ConnectedUsersModule,
+		DbUtilsModule,
+		DtoGenModule,
+		RoomsModule,
+		RoomQueueModule,
+	],
 	exports: [ConnectedUsersModule, LiveGateway],
 	providers: [LiveGateway, EventQueueService, LiveService],
 })

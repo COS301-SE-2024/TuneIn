@@ -18,35 +18,7 @@ import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
-
-/*
-export class PlaybackEventDto {
-	@ApiProperty()
-	@IsDateString()
-	date_created?: Date;
-
-	@ApiProperty()
-	@IsString()
-	userID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	roomID: string;
-
-	@ApiProperty()
-	@IsString()
-	songID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	UTC_time: number;
-
-	@ApiProperty()
-	@IsString()
-	errorMessage?: string;
-}
-
-*/
+import { RoomQueueService } from "../modules/rooms/roomqueue/roomqueue.service";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -65,6 +37,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly roomService: RoomsService,
 		private readonly eventQueueService: EventQueueService,
 		private readonly liveService: LiveService,
+		private readonly roomQueue: RoomQueueService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -405,12 +378,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
 
 				//send current media state
-				if (await this.connectedUsers.isPlaying(roomID)) {
+				if (await this.roomQueue.isPlaying(roomID)) {
 					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+						await this.roomQueue.getCurrentSong(roomID);
 					if (songID) {
 						const startTime: Date | null =
-							await this.connectedUsers.getCurrentSongStartTime(roomID);
+							await this.roomQueue.getCurrentSongStartTime(roomID);
 						if (!startTime) {
 							throw new Error("No song start time found somehow?");
 						}
@@ -470,7 +443,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				if ((await this.roomService.getRoomUserCount(roomID)) === 1) {
-					await this.connectedUsers.stopSong(roomID);
+					await this.roomQueue.stopSong(roomID);
 				}
 
 				const response: ChatEventDto = {
@@ -533,10 +506,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				//{check user permissions}
-				if (await this.connectedUsers.isPaused(roomID)) {
-					const startTime: Date = await this.connectedUsers.resumeSong(roomID);
+				if (await this.roomQueue.isPaused(roomID)) {
+					const startTime: Date = await this.roomQueue.resumeSong(roomID);
 					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+						await this.roomQueue.getCurrentSong(roomID);
 					if (songID === null) {
 						throw new Error("No song is queued somehow?");
 					}
@@ -549,13 +522,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						UTC_time: startTime.getTime(),
 					};
 					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
-				} else if (!(await this.connectedUsers.isPlaying(roomID))) {
+				} else if (!(await this.roomQueue.isPlaying(roomID))) {
 					const songID: string | null =
-						await this.connectedUsers.getQueueHead(roomID);
+						await this.roomQueue.getQueueHead(roomID);
 					if (songID === null) {
 						throw new Error("No song is queued");
 					}
-					const startTime: Date = await this.connectedUsers.playSongNow(
+					const startTime: Date = await this.roomQueue.playSongNow(
 						roomID,
 						songID,
 					);
@@ -594,8 +567,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			//{check user permissions}
 
-			if (await this.connectedUsers.isPlaying(roomID)) {
-				await this.connectedUsers.pauseSong(roomID);
+			if (await this.roomQueue.isPlaying(roomID)) {
+				await this.roomQueue.pauseSong(roomID);
 				const response: PlaybackEventDto = {
 					date_created: new Date(),
 					userID: null,
@@ -630,8 +603,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//{check user permissions}
 
-				if (await this.connectedUsers.isPlaying(roomID)) {
-					await this.connectedUsers.stopSong(roomID);
+				if (await this.roomQueue.isPlaying(roomID)) {
+					await this.roomQueue.stopSong(roomID);
 					const response: PlaybackEventDto = {
 						date_created: new Date(),
 						userID: null,
