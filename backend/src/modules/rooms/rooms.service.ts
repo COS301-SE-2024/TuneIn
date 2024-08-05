@@ -998,6 +998,32 @@ export class RoomsService {
 		return roomInteractionAnalytics;
 	}
 
+	async getTotalVotes(roomID: string): Promise<any> {
+		const votes: any = await this.prisma.$queryRaw`
+			select
+				count(*) as count,
+				room_id,
+				is_upvote,
+				queue.room_id
+			from
+				vote
+			inner join queue on queue.queue_id = vote.queue_id
+			group by
+				is_upvote,
+				room_id
+			having
+				room_id = ${roomID}::UUID;
+
+		`;
+		console.log("Getting total votes for room", roomID, "and votes", votes);
+		const numOfUpvotes: number = Number(votes.filter((v: any) => v.is_upvote)[0].count);
+		const numOfDownvotes: number = Number(votes.filter((v: any) => !v.is_upvote)[0].count);
+		return {
+			upvotes: numOfUpvotes,
+			downvotes: numOfDownvotes,
+		};
+	}
+
 	async getRoomVotesAnalytics(
 		roomID: string,
 		userID: string,
@@ -1008,7 +1034,11 @@ export class RoomsService {
 			" and given userID: ",
 			userID,
 		);
-		return new RoomAnalyticsVotesDto();
+		const roomVotesAnalytics: RoomAnalyticsVotesDto = new RoomAnalyticsVotesDto();
+		const votes: any = await this.getTotalVotes(roomID);
+		roomVotesAnalytics.total_upvotes = votes.upvotes;
+		roomVotesAnalytics.total_downvotes = votes.downvotes;
+		return roomVotesAnalytics;
 	}
 
 	async getRoomSongsAnalytics(
