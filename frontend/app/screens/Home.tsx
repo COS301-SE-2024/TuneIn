@@ -171,9 +171,6 @@ const Home: React.FC = () => {
 
 			const userInfo = await fetchProfileInfo(storedToken);
 			setUserData(userInfo);
-			if (userData) {
-				console.log("Taste " + userData.username);
-			}
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);

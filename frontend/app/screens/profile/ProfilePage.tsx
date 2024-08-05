@@ -46,6 +46,7 @@ const ProfileScreen: React.FC = () => {
 
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
+					// console.log(data);
 					if (!ownsProfile) {
 						const isFollowing = data.followers.data.some(
 							(item: any) => item.username === params.user,
@@ -213,7 +214,7 @@ const ProfileScreen: React.FC = () => {
 
 		return (
 			<View style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}>
-				<TouchableOpacity style={styles.button} onPress={() => followHandler()}>
+				<TouchableOpacity style={styles.button} onPress={() => followHandler()}  testID="follow-button">
 					<Text style={styles.buttonText}>
 						{following ? "Unfollow" : "Follow"}
 					</Text>

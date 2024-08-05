@@ -65,20 +65,4 @@ describe("<EditProfileScreen />", () => {
 		expect(getByText("This is a bio")).toBeTruthy();
 		expect(getByText("@johndoe")).toBeTruthy();
 	});
-
-	// it("calls goBack when Back button is pressed", () => {
-	// 	const goBack = jest.fn();
-	// 	(useNavigation as jest.Mock).mockReturnValue({ goBack });
-	// 	(useLocalSearchParams as jest.Mock).mockReturnValue({
-	// 		profile: JSON.stringify(mockProfileInfo),
-	// 	});
-	// 	(auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
-
-	// 	const { getByText } = render(<EditProfileScreen />);
-
-	// 	const backButton = getByText("Cancel");
-	// 	fireEvent.press(backButton);
-
-	// 	expect(goBack).toHaveBeenCalled();
-	// });
 });

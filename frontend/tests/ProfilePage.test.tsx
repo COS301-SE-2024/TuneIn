@@ -4,6 +4,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
+import { useNavigation, useLocalSearchParams } from "expo-router";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -19,6 +20,15 @@ jest.mock("../app/services/AuthManagement", () => ({
 	},
 }));
 
+jest.mock("expo-router", () => {
+	const actualModule = jest.requireActual("expo-router");
+	return {
+		...actualModule,
+		useNavigation: jest.fn(),
+		useLocalSearchParams: jest.fn(),
+	};
+});
+
 describe("ProfileScreen", () => {
 	beforeEach(() => {
 		// Clear mocks and set initial states
@@ -29,6 +39,7 @@ describe("ProfileScreen", () => {
 	});
 
 	it("renders loading indicator initially", async () => {
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 		const { getByTestId } = render(<ProfileScreen />);
 
 		const loadingIndicator = getByTestId("loading-indicator");
@@ -56,7 +67,8 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -79,6 +91,200 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+	});
+
+	it("fetches profile data for other page where user is already following person", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 10, data: [{ username: "Jaden" }] },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(<ProfileScreen />);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("Unfollow")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+	});
+
+	it("fetches profile data for other page where user is not following person", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 10, data: [] },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(<ProfileScreen />);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("Follow")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+	});
+
+	it("handles a unfollow request", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 10, data: [{ username: "Jaden" }] },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(axios.post as jest.Mock).mockResolvedValue(true);
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(<ProfileScreen />);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(async () => {
+				const touchableOpacity = getByTestId("follow-button");
+				fireEvent.press(touchableOpacity);
+
+				await waitFor(() => {
+					expect(getByText("Follow")).toBeTruthy();
+				});
+			});
+		});
+	});
+
+	it("handles a follow request", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 10, data: [] },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(axios.post as jest.Mock).mockResolvedValue(true);
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(<ProfileScreen />);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(async () => {
+				const touchableOpacity = getByTestId("follow-button");
+				fireEvent.press(touchableOpacity);
+
+				await waitFor(() => {
+					expect(getByText("Unfollow")).toBeTruthy();
+				});
 			});
 		});
 	});
@@ -116,7 +322,8 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(<ProfileScreen />);
@@ -154,7 +361,8 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(<ProfileScreen />);
@@ -175,6 +383,7 @@ describe("ProfileScreen", () => {
 					data: [],
 				},
 			};
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			const { queryByTestId } = render(
 				<ProfileScreen profileData={profileData} />,
@@ -222,7 +431,8 @@ describe("ProfileScreen", () => {
 				recent_rooms: { count: 0, data: [] },
 			};
 
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -254,6 +464,7 @@ describe("ProfileScreen", () => {
 					data: [],
 				},
 			};
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			const { queryByText, queryByTestId } = render(
 				<ProfileScreen profileData={profileData} />,
@@ -315,7 +526,8 @@ describe("ProfileScreen", () => {
 				},
 			};
 
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(<ProfileScreen />);
@@ -348,6 +560,8 @@ describe("ProfileScreen", () => {
 				},
 			};
 
+			(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
 			const { queryByText, queryByTestId } = render(
 				<ProfileScreen profileData={profileData} />,
 			);
@@ -370,7 +584,7 @@ describe("ProfileScreen", () => {
 	});
 
 	it("should toggle LinkBottomSheet visibility", async () => {
-		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValue("mock-token");
 		const mockProfileData = {
 			profile_picture_url: "https://example.com/profile-pic.jpg",
 			profile_name: "John Doe",
@@ -407,7 +621,8 @@ describe("ProfileScreen", () => {
 			},
 		};
 
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 		const { getByTestId, queryByTestId, getByText } = render(<ProfileScreen />);
 
 		// Wait for async operations to complete and profile data to be rendered
