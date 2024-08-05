@@ -349,6 +349,66 @@ exports[`Search Component should render correctly 1`] = `
     style={
       {
         "flexDirection": "row",
+        "justifyContent": "space-between",
+        "marginBottom": 20,
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "borderColor": "#ccc",
+          "borderRadius": 7,
+          "borderWidth": 1,
+          "opacity": 1,
+          "paddingHorizontal": 20,
+          "paddingVertical": 10,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#333",
+            "fontWeight": "bold",
+          }
+        }
+      >
+        View More Filters
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
         "flexWrap": "wrap",
         "marginBottom": 20,
       }
@@ -357,7 +417,7 @@ exports[`Search Component should render correctly 1`] = `
   <RCTScrollView
     contentContainerStyle={
       {
-        "paddingBottom": 20,
+        "paddingVertical": 10,
       }
     }
     data={[]}
@@ -375,7 +435,6 @@ exports[`Search Component should render correctly 1`] = `
     renderItem={[Function]}
     scrollEventThrottle={0.0001}
     stickyHeaderIndices={[]}
-    testID="scroll-view"
     viewabilityConfigCallbackPairs={[]}
   >
     <View />

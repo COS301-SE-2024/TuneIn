@@ -21,9 +21,8 @@ import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Dropdown from "../components/Dropdown";
-import CheckBox from "@react-native-community/checkbox";
+import DatePickerModal from "../components/DatePickerModal";
 
 type SearchResult = {
 	id: string;
@@ -93,8 +92,6 @@ const roomFilterCategories = [
 
 const additionalFilterCategories = [
 	{ id: "participationCount", label: "Participation Count" },
-	{ id: "explicit", label: "Explicit" },
-	{ id: "nsfw", label: "NSFW" },
 ];
 
 // const userFilterCategories = [
@@ -125,8 +122,10 @@ const Search: React.FC = () => {
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
-	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+	const [startDate, setStartDate] = useState<Date | null>(null);
+	const [endDate, setEndDate] = useState<Date | null>(null);
+	const [showStartDateModal, setShowStartDateModal] = useState(false);
+	const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -371,7 +370,7 @@ const Search: React.FC = () => {
 						/>
 					</View>
 					<Text style={styles.includeHeader}>Room Availibity:</Text>
-					<View style={styles.datePickerContainer}>
+					{/* <View style={styles.datePickerContainer}>
 						<Text style={styles.datePickerLabel}>Start Date:</Text>
 						<DateTimePicker
 							value={startDate || new Date()}
@@ -381,8 +380,8 @@ const Search: React.FC = () => {
 								setStartDate(selectedDate || undefined)
 							}
 						/>
-					</View>
-					<View style={styles.datePickerContainer}>
+					</View> */}
+					{/* <View style={styles.datePickerContainer}>
 						<Text style={styles.datePickerLabel}>End Date:</Text>
 						<DateTimePicker
 							value={endDate || new Date()}
@@ -391,6 +390,41 @@ const Search: React.FC = () => {
 							onChange={(event, selectedDate) =>
 								setEndDate(selectedDate || undefined)
 							}
+						/>
+					</View> */}
+					<View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>Start Date:</Text>
+						<TouchableOpacity
+							style={styles.button}
+							onPress={() => setShowStartDateModal(true)}
+						>
+							<Text style={styles.buttonText}>
+								{startDate ? startDate.toDateString() : "Select Start Date"}
+							</Text>
+						</TouchableOpacity>
+						<DatePickerModal
+							selectedDate={startDate}
+							onDateChange={setStartDate}
+							isVisible={showStartDateModal}
+							onClose={() => setShowStartDateModal(false)}
+						/>
+					</View>
+
+					<View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>End Date:</Text>
+						<TouchableOpacity
+							style={styles.button}
+							onPress={() => setShowEndDateModal(true)}
+						>
+							<Text style={styles.buttonText}>
+								{endDate ? endDate.toDateString() : "Select End Date"}
+							</Text>
+						</TouchableOpacity>
+						<DatePickerModal
+							selectedDate={endDate}
+							onDateChange={setEndDate}
+							isVisible={showEndDateModal}
+							onClose={() => setShowEndDateModal(false)}
 						/>
 					</View>
 					<View style={styles.includeSection}>
@@ -699,6 +733,22 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
+	},
+	heading: {
+		fontSize: 24,
+		marginBottom: 20,
+	},
+	button: {
+		backgroundColor: "#08BDBD",
+		padding: 10,
+		borderRadius: 5,
+		marginTop: 10,
+	},
+	buttonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 });
 
