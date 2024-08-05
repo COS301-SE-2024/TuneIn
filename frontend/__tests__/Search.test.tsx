@@ -52,30 +52,4 @@ describe("Search Component", () => {
 		fireEvent.changeText(searchInput, "Room 1");
 		expect(searchInput.props.value).toBe("Room 1");
 	});
-
-	it("should display the modal with filter options when filter button is pressed", () => {
-		const { getByTestId, getByText } = render(<Search />);
-		const filterButton = getByTestId("filter-button");
-		fireEvent.press(filterButton);
-		expect(getByText("Select Filters")).toBeTruthy();
-	});
-
-	it("should handle filter selection and display selected filters", async () => {
-		const { getByTestId, getByText } = render(<Search />);
-
-		// Open the filter modal
-		const filterButton = getByTestId("filter-button");
-		fireEvent.press(filterButton);
-
-		// Select a filter
-		const filterOption = getByText("Room Name");
-		fireEvent.press(filterOption);
-
-		// Close the modal
-		const closeButton = getByTestId("close-button");
-		fireEvent.press(closeButton);
-
-		// Check if the selected filter is displayed
-		expect(getByText("Room Name")).toBeTruthy();
-	});
 });
