@@ -292,10 +292,27 @@ export class RoomsService {
 		}
 	}
 
-	getRoomQueue(roomID: string): SongInfoDto[] {
+	async getRoomQueue(roomID: string): Promise<SongInfoDto[]> {
 		// TODO: Implement logic to get room queue
-		console.log(roomID);
-		return [];
+		const songInfoDto: SongInfoDto = new SongInfoDto();
+		// get queue from db
+		const queue = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+			include: {
+				song: true,
+			}
+		});
+		const songInfoDtos: SongInfoDto[] = [];
+		for (const song of queue) {
+			songInfoDto.title = song.song.name;
+			songInfoDto.cover = song.song.artwork_url!;
+			songInfoDto.artists = song.song.artist.split(",");
+			songInfoDto.start_time = song.start_time;
+			songInfoDtos.push(songInfoDto);
+		}
+		return songInfoDtos;
 	}
 
 	getRoomQueueDUMBVERSION(roomID: string): string {
@@ -598,7 +615,12 @@ export class RoomsService {
 			" and given userID: ",
 			userID,
 		);
-		return new RoomAnalyticsQueueDto();
+		const roomQueueAnalytics: RoomAnalyticsQueueDto = new RoomAnalyticsQueueDto();
+		const roomQueue: SongInfoDto[] = this.getRoomQueue(roomID);
+		roomQueueAnalytics.total_songs_queued = roomQueue.length;
+		roomQueueAnalytics.total_queue_exports = 0;
+
+		return roomQueueAnalytics;
 	}
 
 	async getRoomParticipationAnalytics(
