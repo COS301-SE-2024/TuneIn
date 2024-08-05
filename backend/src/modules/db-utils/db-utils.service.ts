@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
-import * as Prisma from "@prisma/client";
+//import Prisma from "@prisma/client";
+import * as PrismaTypes from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { UpdateUserDto } from "../users/dto/updateuser.dto";
 import * as bcrypt from "bcrypt";
@@ -26,8 +27,8 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowing(userID: string): Promise<Prisma.users[] | null> {
-		const following: Prisma.follows[] | null =
+	async getUserFollowing(userID: string): Promise<PrismaTypes.users[] | null> {
+		const following: PrismaTypes.follows[] | null =
 			await this.prisma.follows.findMany({
 				where: { follower: userID },
 			});
@@ -36,7 +37,7 @@ export class DbUtilsService {
 			return null;
 		}
 
-		const result: Prisma.users[] = [];
+		const result: PrismaTypes.users[] = [];
 		const ids: string[] = [];
 		for (let i = 0; i < following.length; i++) {
 			const f = following[i];
@@ -47,7 +48,7 @@ export class DbUtilsService {
 			}
 		}
 
-		const users: Prisma.users[] = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: ids } },
 		});
 
@@ -65,8 +66,8 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowers(userID: string): Promise<Prisma.users[] | null> {
-		const followers: Prisma.follows[] | null =
+	async getUserFollowers(userID: string): Promise<PrismaTypes.users[] | null> {
+		const followers: PrismaTypes.follows[] | null =
 			await this.prisma.follows.findMany({
 				where: { followee: userID },
 			});
@@ -75,7 +76,7 @@ export class DbUtilsService {
 			return null;
 		}
 
-		const result: Prisma.users[] = [];
+		const result: PrismaTypes.users[] = [];
 		const ids: string[] = [];
 		for (let i = 0; i < followers.length; i++) {
 			const f = followers[i];
@@ -86,7 +87,7 @@ export class DbUtilsService {
 			}
 		}
 
-		const users: Prisma.users[] = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: ids } },
 		});
 
@@ -100,7 +101,7 @@ export class DbUtilsService {
 	}
 
 	async getLinks(
-		user: Prisma.users,
+		user: PrismaTypes.users,
 	): Promise<{ count: number; data: string[] }> {
 		if (!user.external_links) {
 			return { count: 0, data: [] };
@@ -126,7 +127,7 @@ export class DbUtilsService {
 		}
 	}
 
-	async getPreferences(user: Prisma.users): Promise<{
+	async getPreferences(user: PrismaTypes.users): Promise<{
 		fav_genres: { count: number; data: string[] };
 		fav_songs: { count: number; data: SongInfoDto[] };
 	}> {
@@ -172,7 +173,7 @@ export class DbUtilsService {
 	}
 
 	async getActivity(
-		user: Prisma.users,
+		user: PrismaTypes.users,
 	): Promise<{ count: number; data: string[] }> {
 		if (!user.activity) {
 			return {
@@ -203,8 +204,8 @@ export class DbUtilsService {
 		}
 	}
 
-	async getRandomRooms(count: number): Promise<Prisma.room[] | null> {
-		const rooms: Prisma.room[] | null = await this.prisma.room.findMany();
+	async getRandomRooms(count: number): Promise<PrismaTypes.room[] | null> {
+		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany();
 
 		if (!rooms || rooms === null) {
 			return null;
@@ -214,7 +215,7 @@ export class DbUtilsService {
 			return rooms;
 		}
 
-		const result: Prisma.room[] = [];
+		const result: PrismaTypes.room[] = [];
 		while (result.length < count) {
 			const random = Math.floor(Math.random() * rooms.length);
 			if (!result.includes(rooms[random])) {
@@ -225,7 +226,10 @@ export class DbUtilsService {
 	}
 
 	// Merge preferences if they exist in updateProfileDto
-	buildUpdateData(user: Prisma.users, updateProfileDto: UpdateUserDto): any {
+	buildUpdateData(
+		user: PrismaTypes.users,
+		updateProfileDto: UpdateUserDto,
+	): any {
 		const allowedFields = ["username", "bio", "email"];
 
 		const updateData: any = {};
@@ -273,14 +277,14 @@ export class DbUtilsService {
 	}
 
 	async isRoomPublic(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
 		}
 
-		const publicRoom: Prisma.public_room | null =
+		const publicRoom: PrismaTypes.public_room | null =
 			await this.prisma.public_room.findUnique({
 				where: { room_id: roomID },
 			});
@@ -293,14 +297,14 @@ export class DbUtilsService {
 	}
 
 	async isRoomPrivate(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
 		}
 
-		const privateRoom: Prisma.private_room | null =
+		const privateRoom: PrismaTypes.private_room | null =
 			await this.prisma.private_room.findUnique({
 				where: { room_id: roomID },
 			});
@@ -313,7 +317,7 @@ export class DbUtilsService {
 	}
 
 	async userExists(userID: string): Promise<boolean> {
-		const user: Prisma.users | null = await this.prisma.users.findUnique({
+		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
 		if (!user || user === null) {
@@ -323,7 +327,7 @@ export class DbUtilsService {
 	}
 
 	async roomExists(roomID: string): Promise<boolean> {
-		const room: Prisma.room | null = await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
 		if (!room || room === null) {
@@ -340,7 +344,7 @@ export class DbUtilsService {
 		userID: string,
 		accountFollowedId: string,
 	): Promise<boolean> {
-		const follow: Prisma.follows[] = await this.prisma.follows.findMany({
+		const follow: PrismaTypes.follows[] = await this.prisma.follows.findMany({
 			where: {
 				follower: userID,
 				followee: accountFollowedId,
@@ -361,5 +365,55 @@ export class DbUtilsService {
 	async generateHash(input: string): Promise<string> {
 		const hash = await bcrypt.hash(input, this.salt);
 		return hash;
+	}
+
+	async getDMIndex(
+		participant1: string,
+		participant2: string,
+		messageID: string,
+	): Promise<number> {
+		const dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] =
+			await this.prisma.private_message.findMany({
+				where: {
+					OR: [
+						{
+							AND: [
+								{ message: { sender: participant1 } },
+								{ recipient: participant2 },
+							],
+						},
+						{
+							AND: [
+								{ message: { sender: participant2 } },
+								{ recipient: participant1 },
+							],
+						},
+					],
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
+		const index = dms.findIndex(
+			(dm) =>
+				dm.p_message_id === messageID || dm.message.message_id === messageID,
+		);
+		if (index === -1) {
+			throw new Error(
+				"Message with id " +
+					messageID +
+					" does not exist. DTOGenService.getDMIndex():ERROR01",
+			);
+		}
+		return index;
 	}
 }

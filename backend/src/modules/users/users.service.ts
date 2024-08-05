@@ -665,8 +665,13 @@ export class UsersService {
 				const sender: UserDto = await this.dtogen.generateUserDto(
 					dm.message.sender,
 				);
+				const index: number = await this.dbUtils.getDMIndex(
+					userID,
+					dm.message.sender,
+					dm.p_message_id,
+				);
 				const message: DirectMessageDto = {
-					index: -1,
+					index: index,
 					messageBody: dm.message.contents,
 					sender: sender,
 					recipient: self,

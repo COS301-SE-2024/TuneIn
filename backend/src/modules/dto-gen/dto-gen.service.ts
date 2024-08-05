@@ -547,9 +547,13 @@ export class DtoGenService {
 
 		const sender: UserDto = await this.generateUserDto(dm.message.sender);
 		const recipient: UserDto = await this.generateUserDto(dm.recipient);
-
+		const index: number = await this.dbUtils.getDMIndex(
+			sender.userID,
+			recipient.userID,
+			pmID,
+		);
 		const result: DirectMessageDto = {
-			index: -1,
+			index: index,
 			messageBody: dm.message.contents,
 			sender: sender,
 			recipient: recipient,
