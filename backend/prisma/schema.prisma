@@ -125,7 +125,9 @@ model queue {
 
 model room {
   room_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name           String
+  room_creator   String           @db.Uuid
   room_creator   String           @db.Uuid
   playlist_photo String?
   description    String?          @default("This room has no description")
@@ -134,18 +136,28 @@ model room {
   is_temporary   Boolean?         @default(false)
   room_language  String?          @default("English")
   explicit       Boolean?         @default(false)
+  description    String?          @default("This room has no description")
+  date_created   DateTime         @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean          @default(false)
+  is_temporary   Boolean?         @default(false)
+  room_language  String?          @default("English")
+  explicit       Boolean?         @default(false)
   tags           String[]
   banned         banned[]
+  banned         banned[]
   bookmark       bookmark[]
+  chat_reactions chat_reactions[]
   chat_reactions chat_reactions[]
   participate    participate[]
   private_room   private_room?
   public_room    public_room?
   queue          queue[]
   users          users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  users          users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
   room_message   room_message[]
   scheduled_room scheduled_room?
   table_state    table_state?
+  user_activity  user_activity[]
   user_activity  user_activity[]
 }
 
@@ -189,9 +201,11 @@ model users {
   email                           String?
   authentication                  authentication?
   banned                          banned[]
+  banned                          banned[]
   blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
+  chat_reactions                  chat_reactions[]
   chat_reactions                  chat_reactions[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
@@ -203,6 +217,7 @@ model users {
   private_message                 private_message[]
   room                            room[]
   search_history                  search_history[]
+  user_activity                   user_activity[]
   user_activity                   user_activity[]
 }
 

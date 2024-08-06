@@ -58,6 +58,7 @@
     "react-native-web": "~0.19.10",
     "react-native-webview": "^13.8.6",
     "react-router-dom": "^6.23.1",
+    "rn-emoji-picker": "^1.1.6",
     "socket.io-client": "^4.7.5",
     "url": "^0.11.3"
   },

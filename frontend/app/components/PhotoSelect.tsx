@@ -40,7 +40,7 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
 			visible={visibility}
 			onRequestClose={onClose}
 		>
-			<View style={styles.modalContainer}>
+			<View style={styles.modalContainer} testID="change-photo">
 				<View style={styles.modal}>
 					<View style={styles.headerContainer}>
 						<Text style={styles.modalTitle}>Add Image</Text>
