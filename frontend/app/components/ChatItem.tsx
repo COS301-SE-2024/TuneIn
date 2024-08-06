@@ -30,6 +30,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		margin: 10,
 		flexDirection: "row",
 		alignItems: "center",
 		padding: 10,

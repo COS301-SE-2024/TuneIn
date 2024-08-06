@@ -14,8 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import { Message } from "../../models/message";
 import { colors } from "../../styles/colors";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 
 const messages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
@@ -77,17 +76,6 @@ const ChatScreen = () => {
 					testID="sendButton"
 					onPress={handleSend}
 				>
-					{/* <Image
-						source={{
-							uri: "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
-						}}
-						style={styles.sendIcon}
-					/> */}
-					{/* <MaterialCommunityIcons
-						name="send-circle-outline"
-						size={30}
-						color="black"
-					/> */}
 					<Feather name="send" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
@@ -182,10 +170,6 @@ const styles = StyleSheet.create({
 	},
 	sendButton: {
 		padding: 10,
-	},
-	sendIcon: {
-		width: 24,
-		height: 24,
 	},
 });
 

@@ -1,11 +1,11 @@
 // TopNavBar.tsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
-import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
+// import axios from "axios";
+// import auth from "./../services/AuthManagement"; // Import AuthManagement
+// import * as utils from "./../services/Utils"; // Import Utils
 
 interface TopNavBarProps {
 	profileInfo: any;

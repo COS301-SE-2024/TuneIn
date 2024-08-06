@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
 		maxWidth: "75%",
 	},
 	bubbleMe: {
-		backgroundColor: "#08bdbd",
+		backgroundColor: colors.primary,
 		alignSelf: "flex-end",
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 4 },
