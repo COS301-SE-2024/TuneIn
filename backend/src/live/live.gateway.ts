@@ -19,6 +19,7 @@ import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { RoomQueueService } from "../modules/rooms/roomqueue/roomqueue.service";
+import { EmojiReactionDto } from "./dto/emojireaction.dto";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -77,7 +78,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.CONNECT);
 			try {
 				//auth
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -132,7 +133,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -192,7 +193,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -350,7 +351,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -429,7 +430,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -454,6 +455,37 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_LEFT_ROOM);
 				await this.connectedUsers.leaveRoom(client.id);
 				client.leave(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.EMOJI_REACTION)
+	async handleEmojiReaction(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.EMOJI_REACTION);
+			try {
+				console.log(p);
+				let r: EmojiReactionDto;
+				try {
+					const j = JSON.parse(p);
+					r = j as EmojiReactionDto;
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+				const roomID = this.connectedUsers.getRoomId(client.id);
+				if (!roomID) {
+					throw new Error("User is not in a room");
+				}
+				await this.roomService.saveReaction(roomID, r);
+				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -693,7 +725,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	async validateInputEvent(payload: string): Promise<ChatEventDto> {
+	async validateChatEvent(payload: string): Promise<ChatEventDto> {
 		/*
 		if no token, return error
 		if token
