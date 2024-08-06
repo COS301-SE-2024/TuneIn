@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors } from "../../styles/colors";
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
@@ -222,7 +221,11 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 		<View style={styles.screenContainer}>
 			<View style={styles.headerContainer}>
 				<Text style={styles.headerText}>New Chat</Text>
-				<TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+				<TouchableOpacity
+					onPress={closeModal}
+					style={styles.closeButton}
+					testID="close-button"
+				>
 					<Text style={styles.closeButtonText}>
 						<Octicons name="x" size={24} color="black" />
 					</Text>

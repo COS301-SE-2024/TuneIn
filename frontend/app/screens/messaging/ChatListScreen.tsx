@@ -13,6 +13,7 @@ import { Chat } from "../../models/chat";
 import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
+import { useRouter } from "expo-router";
 
 const initialChats: Chat[] = [
 	{
@@ -36,6 +37,7 @@ const ChatListScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredChats, setFilteredChats] = useState<Chat[]>(initialChats);
 	const [isModalVisible, setModalVisible] = useState(false);
+	const router = useRouter();
 
 	useEffect(() => {
 		if (searchQuery === "") {
@@ -55,11 +57,7 @@ const ChatListScreen = () => {
 	return (
 		<View style={styles.screenContainer}>
 			<View style={styles.headerContainer}>
-				<TouchableOpacity
-					onPress={() => {
-						/* Handle back press */
-					}}
-				>
+				<TouchableOpacity testID="back-button" onPress={() => router.back()}>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.chatHeader}>Chats</Text>
