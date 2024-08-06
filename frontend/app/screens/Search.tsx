@@ -156,7 +156,7 @@ const Search: React.FC = () => {
 
 	const handleSearch = () => {
 		const filteredResults = mockResults.filter((result) => {
-			if (filter === "room") {
+			if (filter === "all") {
 				return (
 					result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
 					selectedFilters.length === 0
