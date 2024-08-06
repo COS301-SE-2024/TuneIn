@@ -21,7 +21,7 @@ import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
 import Dropdown from "../components/Dropdown";
-import DatePickerModal from "../components/DatePickerModal";
+// import DatePickerModal from "../components/DatePickerModal";
 import ToggleButton from "../components/ToggleButton";
 
 type SearchResult = {
@@ -91,13 +91,13 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
-	const [startDate, setStartDate] = useState(null);
-	const [endDate, setEndDate] = useState(null);
+	// const [startDate, setStartDate] = useState(null);
+	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
-	const [showStartDateModal, setShowStartDateModal] = useState(false);
-	const [showEndDateModal, setShowEndDateModal] = useState(false);
+	// const [showStartDateModal, setShowStartDateModal] = useState(false);
+	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -156,7 +156,7 @@ const Search: React.FC = () => {
 
 	const handleSearch = () => {
 		const filteredResults = mockResults.filter((result) => {
-			if (filter === "all") {
+			if (filter === "room") {
 				return (
 					result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
 					selectedFilters.length === 0
@@ -212,14 +212,6 @@ const Search: React.FC = () => {
 		return null;
 	};
 
-	const handleFilterToggle = (id: string) => {
-		setSelectedFilters((prevSelectedFilters) =>
-			prevSelectedFilters.includes(id)
-				? prevSelectedFilters.filter((filterId) => filterId !== id)
-				: [...prevSelectedFilters, id],
-		);
-	};
-
 	const handleToggleMoreFilters = () => {
 		setShowMoreFilters(!showMoreFilters);
 	};
@@ -252,6 +244,7 @@ const Search: React.FC = () => {
 			</View>
 			<View style={styles.searchBarContainer}>
 				<TextInput
+					testID="search-input"
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
@@ -291,6 +284,7 @@ const Search: React.FC = () => {
 				<TouchableOpacity
 					style={styles.filterButton}
 					onPress={handleToggleMoreFilters}
+					testID="toggle-filters-button"
 				>
 					<Text style={styles.filterText}>
 						{showMoreFilters ? "View Less Filters" : "View More Filters"}
@@ -321,19 +315,27 @@ const Search: React.FC = () => {
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Search by:</Text>
 								<View style={styles.searchBy}>
-									<ToggleButton label="Host" />
-									<ToggleButton label="Room Count" />
+									<ToggleButton label="Host" testID="host-toggle" />
+									<ToggleButton label="Room Count" testID="room-count-toggle" />
 								</View>
 							</View>
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Include:</Text>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Explicit</Text>
-									<Switch value={explicit} onValueChange={setExplicit} />
+									<Switch
+										testID="explicit-switch"
+										value={explicit}
+										onValueChange={(value) => setExplicit(value)}
+									/>
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>NSFW</Text>
-									<Switch value={nsfw} onValueChange={setNsfw} />
+									<Switch
+										testID="nsfw-switch"
+										value={nsfw}
+										onValueChange={(value) => setNsfw(value)}
+									/>
 								</View>
 							</View>
 							<View style={styles.dropContainer}>
@@ -352,7 +354,7 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
-							<Text style={styles.includeHeader}>Room Availability:</Text>
+							{/* <Text style={styles.includeHeader}>Room Availability:</Text> */}
 							{/* <View style={styles.datePickerContainer}>
 						<Text style={styles.datePickerLabel}>Start Date:</Text>
 						<DateTimePicker
@@ -375,7 +377,7 @@ const Search: React.FC = () => {
 							}
 						/>
 					</View> */}
-							<View style={styles.datePickerContainer}>
+							{/* <View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>Start Date:</Text>
 								<TouchableOpacity
 									style={styles.button}
@@ -391,9 +393,9 @@ const Search: React.FC = () => {
 									isVisible={showStartDateModal}
 									onClose={() => setShowStartDateModal(false)}
 								/>
-							</View>
+							</View> */}
 
-							<View style={styles.datePickerContainer}>
+							{/* <View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>End Date:</Text>
 								<TouchableOpacity
 									style={styles.button}
@@ -409,7 +411,7 @@ const Search: React.FC = () => {
 									isVisible={showEndDateModal}
 									onClose={() => setShowEndDateModal(false)}
 								/>
-							</View>
+							</View> */}
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
@@ -429,43 +431,6 @@ const Search: React.FC = () => {
 					)}
 				</>
 			)}
-
-			<View style={styles.selectedFiltersContainer}>
-				{selectedFilters.map((filter) => (
-					<View key={filter} style={styles.selectedFilter}>
-						<Text style={styles.selectedFilterText}>
-							{filter === "username"
-								? "Username of Creator"
-								: filter === "participationCount"
-									? "Participation Count"
-									: filter === "description"
-										? "Description"
-										: filter === "isTemporary"
-											? "Temporary"
-											: filter === "isPrivate"
-												? "Private"
-												: filter === "isScheduled"
-													? "Scheduled"
-													: filter === "startDate"
-														? "Start Date"
-														: filter === "endDate"
-															? "End Date"
-															: filter === "language"
-																? "Language"
-																: filter === "explicit"
-																	? "Explicit"
-																	: filter === "nsfw"
-																		? "NSFW"
-																		: filter === "genre"
-																			? "Genres"
-																			: ""}
-						</Text>
-						<TouchableOpacity onPress={() => handleFilterToggle(filter)}>
-							<Ionicons name="close-circle" size={20} color={colors.primary} />
-						</TouchableOpacity>
-					</View>
-				))}
-			</View>
 
 			<FlatList
 				data={results}

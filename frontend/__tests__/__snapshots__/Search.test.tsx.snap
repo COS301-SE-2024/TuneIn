@@ -93,6 +93,7 @@ exports[`Search Component should render correctly 1`] = `
           "height": 40,
         }
       }
+      testID="search-input"
       value=""
     />
     <View
@@ -292,6 +293,7 @@ exports[`Search Component should render correctly 1`] = `
           "paddingVertical": 10,
         }
       }
+      testID="toggle-filters-button"
     >
       <Text
         style={
@@ -306,15 +308,6 @@ exports[`Search Component should render correctly 1`] = `
       </Text>
     </View>
   </View>
-  <View
-    style={
-      {
-        "flexDirection": "row",
-        "flexWrap": "wrap",
-        "marginBottom": 20,
-      }
-    }
-  />
   <RCTScrollView
     contentContainerStyle={
       {
