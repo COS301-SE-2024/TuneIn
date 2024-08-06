@@ -11,6 +11,7 @@ export const SOCKET_EVENTS = {
 	//for live chat
 	LIVE_MESSAGE: "liveMessage",
 	GET_LIVE_CHAT_HISTORY: "getLiveChatHistory",
+	EMOJI_REACTION: "emojiReaction",
 
 	//for direct messages
 	DIRECT_MESSAGE: "directMessage",

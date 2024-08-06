@@ -7,6 +7,8 @@ import auth from "./AuthManagement";
 import songService from "./SongService";
 import * as utils from "./Utils";
 import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
+import { EmojiReactionDto } from "../models/EmojiReactionDto";
+import { Emoji } from "rn-emoji-picker/dist/interfaces";
 
 const TIMEOUT = 5000000;
 
@@ -14,6 +16,20 @@ export type Message = {
 	message: LiveChatMessageDto;
 	me?: boolean;
 };
+
+// How to integrate Emoji Reactions
+/*
+assuming there is a state variable for emojis,
+- add a type for the state variable (just before the LiveChatService class)
+- add a private variable in this class for the state variable
+- add the setState function to the joinRoom function and assign it when the user joins the room
+- in the initialiseSocket function, there is a socket.on("emojiReaction") event, add the new reaction to the state variable
+
+that's it
+then emojis received the from the server will be added to the state variable
+
+then whatever you do with the state variable will be reflected in the component
+*/
 
 type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
@@ -383,6 +399,17 @@ class LiveSocketService {
 				console.log(`Time offset: ${this.timeOffset} ms`);
 			});
 
+			this.socket.on("emojiReaction", (reaction: EmojiReactionDto) => {
+				console.log("SOCKET EVENT: emojiReaction", reaction);
+
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				//add the new reaction to components
+			});
+
 			console.log("socket connected?", this.socket.connected);
 			this.socket.connect();
 			this.socket.emit(
@@ -509,6 +536,28 @@ class LiveSocketService {
 			};
 			this.socket.emit("liveMessage", JSON.stringify(input));
 		}
+	}
+
+	public async sendReaction(emoji: Emoji) {
+		if (!this.currentUser) {
+			//throw new Error("Something went wrong while getting user's info");
+			return;
+		}
+
+		if (!this.currentRoom) {
+			//throw new Error("Current room not set");
+			return;
+		}
+
+		const u = this.currentUser;
+		const newReaction: EmojiReactionDto = {
+			date_created: new Date(),
+			body: emoji,
+			userID: u.userID,
+		};
+		//make it volatile so that it doesn't get queued up
+		//nothing will be lost if it doesn't get sent
+		this.socket.volatile.emit("emojiReaction", JSON.stringify(newReaction));
 	}
 
 	public calculateSeekTime(
