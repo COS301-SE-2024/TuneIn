@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Message } from "../models/message";
+import { colors } from "../styles/colors";
 
 interface MessageItemProps {
 	message: Message;
@@ -47,6 +48,7 @@ const styles = StyleSheet.create({
 		height: 30,
 		borderRadius: 15,
 		marginRight: 10,
+		marginBottom: 5,
 	},
 	bubble: {
 		paddingVertical: 10,
@@ -58,11 +60,22 @@ const styles = StyleSheet.create({
 	bubbleMe: {
 		backgroundColor: "#08bdbd",
 		alignSelf: "flex-end",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	bubbleOther: {
 		backgroundColor: "#FFFFFF",
-		borderColor: "#ECECEC",
+		borderWidth: 1,
+		borderColor: "#E0E0E0",
 		alignSelf: "flex-start",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	text: {
 		fontSize: 16,

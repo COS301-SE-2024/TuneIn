@@ -1,3 +1,4 @@
+// ChatScreen.tsx
 import React, { useState } from "react";
 import {
 	View,
@@ -12,6 +13,9 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import { Message } from "../../models/message";
+import { colors } from "../../styles/colors";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Feather from '@expo/vector-icons/Feather';
 
 const messages: Message[] = [
 	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
@@ -73,12 +77,18 @@ const ChatScreen = () => {
 					testID="sendButton"
 					onPress={handleSend}
 				>
-					<Image
+					{/* <Image
 						source={{
 							uri: "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
 						}}
 						style={styles.sendIcon}
-					/>
+					/> */}
+					{/* <MaterialCommunityIcons
+						name="send-circle-outline"
+						size={30}
+						color="black"
+					/> */}
+					<Feather name="send" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
 		</View>
@@ -114,6 +124,7 @@ const styles = StyleSheet.create({
 	},
 	messagesContainer: {
 		paddingVertical: 10,
+		marginHorizontal: 20,
 	},
 	messageContainer: {
 		flexDirection: "row",
@@ -139,7 +150,7 @@ const styles = StyleSheet.create({
 		maxWidth: "75%",
 	},
 	messageBubbleMe: {
-		backgroundColor: "#08bdbd", // Updated to verdigris color
+		backgroundColor: colors.primary,
 		alignSelf: "flex-end",
 	},
 	messageBubbleOther: {
