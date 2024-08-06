@@ -1055,8 +1055,7 @@ export class RoomsService {
 				vote
 			inner join queue on queue.queue_id = vote.queue_id
 			where
-				vote_time < ${yesterday} and
-				vote_time > ${subHours(yesterday, 24)}
+				vote_time < ${yesterday}
 			group by
 				is_upvote,
 				room_id
