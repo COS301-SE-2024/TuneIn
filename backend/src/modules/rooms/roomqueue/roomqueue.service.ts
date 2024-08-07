@@ -12,6 +12,7 @@ import {
 } from "@datastructures-js/priority-queue";
 import { RoomDto } from "../dto/room.dto";
 import { VoteDto } from "../dto/vote.dto";
+import { RoomSongDto } from "../dto/roomsong.dto";
 
 // Postgres tables:
 /*
@@ -133,11 +134,23 @@ class RoomSong {
 	get voteCount(): number {
 		return this.votes.length;
 	}
+
+	asRoomSongDto(): RoomSongDto {
+		return {
+			spotifyID: this.spotifyID,
+			userID: this.userID,
+			score: this._score,
+		};
+	}
+
+	getVotes(): VoteDto[] {
+		return this.votes;
+	}
 }
 
 class ActiveRoom {
-	room: RoomDto;
-	queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
+	public readonly room: RoomDto;
+	private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
 
 	constructor(room: RoomDto) {
 		this.room = room;
@@ -193,6 +206,19 @@ class ActiveRoom {
 		}
 		songs.splice(index, 1);
 		this.queue = MaxPriorityQueue.fromArray(songs);
+	}
+
+	queueAsRoomSongDto(): RoomSongDto[] {
+		return this.queue.toArray().map((s) => s.asRoomSongDto());
+	}
+
+	allVotes(): VoteDto[] {
+		const songs: RoomSong[] = this.queue.toArray();
+		const votes: VoteDto[] = [];
+		for (const song of songs) {
+			votes.push(...song.getVotes());
+		}
+		return votes;
 	}
 }
 
@@ -279,6 +305,25 @@ export class RoomQueueService {
 			throw new Error("Room does not exist");
 		}
 		this.roomQueues.get(roomID)?.swapVote(spotifyID, userID);
+	}
+
+	getQueueState(roomID: string): {
+		room: RoomDto;
+		songs: RoomSongDto[];
+		votes: VoteDto[];
+	} {
+		if (!this.roomQueues.has(roomID)) {
+			throw new Error("Room does not exist");
+		}
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return {
+			room: activeRoom.room,
+			songs: activeRoom.queueAsRoomSongDto(),
+			votes: activeRoom.allVotes(),
+		};
 	}
 
 	//is song playing
