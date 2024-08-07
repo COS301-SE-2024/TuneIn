@@ -879,6 +879,28 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const somethingChanged: boolean = await this.roomQueue.addSong(
+					payload.roomID,
+					payload.song.spotifyID,
+					payload.song.userID,
+				);
+				if (somethingChanged) {
+					const song = this.roomQueue.getSongAsRoomSongDto(
+						payload.roomID,
+						payload.song.spotifyID,
+					);
+					if (song) {
+						const response: QueueEventDto = {
+							roomID: payload.roomID,
+							song: song,
+						};
+						this.server
+							.to(payload.roomID)
+							.emit(SOCKET_EVENTS.SONG_ADDED, response);
+						console.log("Response emitted: " + SOCKET_EVENTS.SONG_ADDED);
+					}
+				}
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -897,6 +919,28 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const somethingChanged: boolean = await this.roomQueue.removeSong(
+					payload.roomID,
+					payload.song.spotifyID,
+					payload.song.userID,
+				);
+				if (somethingChanged) {
+					const song = this.roomQueue.getSongAsRoomSongDto(
+						payload.roomID,
+						payload.song.spotifyID,
+					);
+					if (song) {
+						const response: QueueEventDto = {
+							roomID: payload.roomID,
+							song: song,
+						};
+						this.server
+							.to(payload.roomID)
+							.emit(SOCKET_EVENTS.SONG_REMOVED, response);
+						console.log("Response emitted: " + SOCKET_EVENTS.SONG_REMOVED);
+					}
+				}
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
