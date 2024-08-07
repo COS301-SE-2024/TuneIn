@@ -304,7 +304,7 @@ const Home: React.FC = () => {
 				)}
 			</ScrollView>
 
-			<Animated.View
+			{/* <Animated.View
 				style={[
 					styles.createRoomButtonContainer,
 					{ transform: [{ translateY: buttonTranslateY }] },
@@ -316,7 +316,7 @@ const Home: React.FC = () => {
 				>
 					<Text style={styles.createRoomButtonText}>+</Text>
 				</TouchableOpacity>
-			</Animated.View>
+			</Animated.View> */}
 			<Animated.View
 				style={[
 					styles.navBar,

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState } from "react";
 import { Room } from "../app/models/Room";
 import { Track } from "../app/models/Track";
 
@@ -8,6 +8,8 @@ interface PlayerContextType {
 	currentTrackIndex: number | null;
 	setCurrentTrackIndex: React.Dispatch<React.SetStateAction<number | null>>;
 	currentRoom: Room | null;
+	NumberOfPeople: number | null;
+	setNumberOfPeople: React.Dispatch<React.SetStateAction<number | null>>;
 	setCurrentRoom: React.Dispatch<React.SetStateAction<Room | null>>;
 	trackName: string | null;
 	setTrackName: React.Dispatch<React.SetStateAction<string | null>>;
@@ -31,6 +33,7 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
 		null,
 	);
+	const [NumberOfPeople, setNumberOfPeople] = useState<number | null>(null);
 	const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
 	const [trackName, setTrackName] = useState<string | null>(null);
 	const [artistName, setArtistName] = useState<string | null>(null);
@@ -39,6 +42,8 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	return (
 		<Player.Provider
 			value={{
+				setNumberOfPeople,
+				NumberOfPeople,
 				currentTrack,
 				setCurrentTrack,
 				currentTrackIndex,
