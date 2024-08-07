@@ -11,6 +11,7 @@ import {
 	IGetCompareValue,
 } from "@datastructures-js/priority-queue";
 import { RoomDto } from "../dto/room.dto";
+import { VoteDto } from "../dto/vote.dto";
 
 // Postgres tables:
 /*
@@ -66,17 +67,11 @@ CREATE TABLE IF NOT EXISTS public.room
 )
 */
 
-type Vote = {
-	isUpvote: boolean;
-	userID: string;
-	spotifyID: string;
-};
-
 class RoomSong {
 	private _score: number;
 	public readonly userID: string;
 	public readonly spotifyID: string;
-	private votes: Vote[];
+	private votes: VoteDto[];
 	public readonly insertTime: Date;
 
 	constructor(spotifyID: string, userID: string) {
@@ -99,12 +94,12 @@ class RoomSong {
 		return result;
 	}
 
-	addVote(vote: Vote): void {
+	addVote(vote: VoteDto): void {
 		this.votes.push(vote);
 		this._score = this.calculateScore();
 	}
 
-	removeVote(vote: Vote): void {
+	removeVote(vote: VoteDto): void {
 		const index = this.votes.findIndex(
 			(v) => v.userID === vote.userID && v.spotifyID === vote.spotifyID,
 		);
@@ -123,7 +118,7 @@ class RoomSong {
 		this.votes[index].isUpvote = !this.votes[index].isUpvote;
 	}
 
-	getUserVote(userID: string): Vote | null {
+	getUserVote(userID: string): VoteDto | null {
 		const vote = this.votes.find((v) => v.userID === userID);
 		if (!vote || vote === null) {
 			return null;
@@ -150,9 +145,9 @@ class ActiveRoom {
 		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
 	}
 
-	addVote(spotifyID: string, vote: Vote): void {
+	addVote(vote: VoteDto): void {
 		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 		if (index === -1) {
 			return;
 		}
@@ -160,9 +155,9 @@ class ActiveRoom {
 		this.queue = MaxPriorityQueue.fromArray(songs);
 	}
 
-	removeVote(spotifyID: string, vote: Vote): void {
+	removeVote(vote: VoteDto): void {
 		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 		if (index === -1) {
 			return;
 		}
@@ -247,36 +242,36 @@ export class RoomQueueService {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
-		const vote: Vote = {
+		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.addVote(spotifyID, vote);
+		this.roomQueues.get(roomID)?.addVote(vote);
 	}
 
 	downvoteSong(roomID: string, spotifyID: string, userID: string): void {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
-		const vote: Vote = {
+		const vote: VoteDto = {
 			isUpvote: false,
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.addVote(spotifyID, vote);
+		this.roomQueues.get(roomID)?.addVote(vote);
 	}
 
 	undoSongVote(roomID: string, spotifyID: string, userID: string): void {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
-		const vote: Vote = {
+		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.removeVote(spotifyID, vote);
+		this.roomQueues.get(roomID)?.removeVote(vote);
 	}
 
 	swapSongVote(roomID: string, spotifyID: string, userID: string): void {
