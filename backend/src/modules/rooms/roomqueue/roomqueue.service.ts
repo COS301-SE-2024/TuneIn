@@ -3,6 +3,14 @@ import { PrismaService } from "../../../../prisma/prisma.service";
 import { DtoGenService } from "../../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../../db-utils/db-utils.service";
 import * as PrismaTypes from "@prisma/client";
+import {
+	PriorityQueue,
+	MinPriorityQueue,
+	MaxPriorityQueue,
+	ICompare,
+	IGetCompareValue,
+} from "@datastructures-js/priority-queue";
+import { RoomDto } from "../dto/room.dto";
 
 // Postgres tables:
 /*
@@ -58,13 +66,126 @@ CREATE TABLE IF NOT EXISTS public.room
 )
 */
 
+type Vote = {
+	isUpvote: boolean;
+	userID: string;
+	spotifyID: string;
+};
+
+class RoomSong {
+	private _score: number;
+	public readonly userID: string;
+	public readonly songID: string;
+	private votes: Vote[];
+	public readonly insertTime: Date;
+
+	constructor(songID: string, userID: string) {
+		this._score = 0;
+		this.userID = userID;
+		this.songID = songID;
+		this.votes = [];
+		this.insertTime = new Date();
+	}
+
+	private calculateScore(): number {
+		let result = 0;
+		for (const vote of this.votes) {
+			if (vote.isUpvote) {
+				result++;
+			} else {
+				result--;
+			}
+		}
+		return result;
+	}
+
+	addVote(vote: Vote): void {
+		this.votes.push(vote);
+		this._score = this.calculateScore();
+	}
+
+	removeVote(vote: Vote): void {
+		const index = this.votes.findIndex(
+			(v) =>
+				v.userID === vote.userID &&
+				v.spotifyID === vote.spotifyID &&
+				v.isUpvote === vote.isUpvote,
+		);
+		if (index === -1) {
+			return;
+		}
+		this.votes.splice(index, 1);
+		this._score = this.calculateScore();
+	}
+
+	get score(): number {
+		return this._score;
+	}
+
+	get voteCount(): number {
+		return this.votes.length;
+	}
+}
+
+class ActiveRoom {
+	room: RoomDto;
+	queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
+
+	constructor(room: RoomDto) {
+		this.room = room;
+		const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
+		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
+	}
+
+	addVote(songID: string, vote: Vote): void {
+		const songs: RoomSong[] = this.queue.toArray();
+		const index = songs.findIndex((s) => s.songID === songID);
+		if (index === -1) {
+			return;
+		}
+		songs[index].addVote(vote);
+		this.queue = MaxPriorityQueue.fromArray(songs);
+	}
+
+	removeVote(songID: string, vote: Vote): void {
+		const songs: RoomSong[] = this.queue.toArray();
+		const index = songs.findIndex((s) => s.songID === songID);
+		if (index === -1) {
+			return;
+		}
+		songs[index].removeVote(vote);
+		this.queue = MaxPriorityQueue.fromArray(songs);
+	}
+
+	addSong(songID: string, userID: string): void {
+		const songs: RoomSong[] = this.queue.toArray();
+		if (!songs.find((s) => s.songID === songID)) {
+			this.queue.enqueue(new RoomSong(songID, userID));
+		}
+	}
+
+	removeSong(songID: string): void {
+		const songs: RoomSong[] = this.queue.toArray();
+		const index = songs.findIndex((s) => s.songID === songID);
+		if (index === -1) {
+			return;
+		}
+		songs.splice(index, 1);
+		this.queue = MaxPriorityQueue.fromArray(songs);
+	}
+}
+
 @Injectable()
 export class RoomQueueService {
+	roomQueues: Map<string, ActiveRoom>; //map roomID to room data structure
+
 	constructor(
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly prisma: PrismaService,
-	) {}
+	) {
+		this.roomQueues = new Map<string, ActiveRoom>();
+	}
 
 	//is song playing
 	async isPlaying(roomID: string): Promise<boolean> {

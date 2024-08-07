@@ -35,6 +35,7 @@
     "@bull-board/api": "^5.20.2",
     "@bull-board/express": "^5.20.2",
     "@bull-board/ui": "^5.20.2",
+    "@datastructures-js/priority-queue": "^6.3.1",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/bull": "^10.1.1",
     "@nestjs/common": "^10.3.9",
