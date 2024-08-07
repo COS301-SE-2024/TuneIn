@@ -31,9 +31,9 @@ export const SOCKET_EVENTS = {
 
 	//for queue & voting
 	UPVOTE_SONG: "upvoteSong",
-	UNDO_UPVOTE_SONG: "undoUpvoteSong",
 	DOWNVOTE_SONG: "downvoteSong",
-	UNDO_DOWNVOTE_SONG: "undoDownvoteSong",
+	UNDO_SONG_VOTE: "undoSongVote",
+	SWAP_SONG_VOTE: "swapSongVote",
 	ENQUEUE_SONG: "enqueueSong",
 	DEQUEUE_SONG: "dequeueSong",
 

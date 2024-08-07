@@ -689,8 +689,26 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.QUEUE_STATE)
-	async handleQueueState(
+	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
+	async handleMediaSync(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.UPVOTE_SONG)
+	async handleSongUpvote(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
@@ -707,14 +725,104 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
-	async handleMediaSync(
+	@SubscribeMessage(SOCKET_EVENTS.DOWNVOTE_SONG)
+	async handleSongDownvote(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.UNDO_SONG_VOTE)
+	async handleVoteUndo(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.SWAP_SONG_VOTE)
+	async handleVoteUndo(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.ENQUEUE_SONG)
+	async handleSongEnqueue(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.DEQUEUE_SONG)
+	async handleSongDequeue(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			try {
+				//this.server.emit();
+				console.log(p);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.QUEUE_STATE)
+	async handleQueueState(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
 				//this.server.emit();
 				console.log(p);
