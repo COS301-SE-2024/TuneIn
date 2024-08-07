@@ -225,6 +225,14 @@ class ActiveRoom {
 		return this.queue.toArray().map((s) => s.asRoomSongDto());
 	}
 
+	songAsRoomSongDto(spotifyID: string): RoomSongDto | null {
+		const song = this.queue.toArray().find((s) => s.spotifyID === spotifyID);
+		if (!song || song === null) {
+			return null;
+		}
+		return song.asRoomSongDto();
+	}
+
 	allVotes(): VoteDto[] {
 		const songs: RoomSong[] = this.queue.toArray();
 		const votes: VoteDto[] = [];
@@ -309,7 +317,7 @@ export class RoomQueueService {
 		return activeRoom.addVote(vote);
 	}
 
-	undoSongVote(roomID: string, spotifyID: string, userID: string): void {
+	undoSongVote(roomID: string, spotifyID: string, userID: string): boolean {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -322,7 +330,7 @@ export class RoomQueueService {
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error("Weird error. HashMap is broken");
 		}
-		activeRoom.removeVote(vote);
+		return activeRoom.removeVote(vote);
 	}
 
 	swapSongVote(roomID: string, spotifyID: string, userID: string): boolean {
@@ -353,6 +361,17 @@ export class RoomQueueService {
 			songs: activeRoom.queueAsRoomSongDto(),
 			votes: activeRoom.allVotes(),
 		};
+	}
+
+	getSongAsRoomSongDto(roomID: string, spotifyID: string): RoomSongDto | null {
+		if (!this.roomQueues.has(roomID)) {
+			throw new Error("Room does not exist");
+		}
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return activeRoom.songAsRoomSongDto(spotifyID);
 	}
 
 	//is song playing

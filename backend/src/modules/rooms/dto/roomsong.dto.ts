@@ -12,5 +12,5 @@ export class RoomSongDto {
 
 	@ApiProperty()
 	@IsNumber()
-	score: number;
+	score?: number;
 }
