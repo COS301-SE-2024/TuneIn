@@ -164,10 +164,13 @@ class ActiveRoom {
 		}
 	}
 
-	removeSong(songID: string): void {
+	removeSong(songID: string, userID: string): void {
 		const songs: RoomSong[] = this.queue.toArray();
 		const index = songs.findIndex((s) => s.songID === songID);
 		if (index === -1) {
+			return;
+		}
+		if (songs[index].userID !== userID) {
 			return;
 		}
 		songs.splice(index, 1);
@@ -185,6 +188,32 @@ export class RoomQueueService {
 		private readonly prisma: PrismaService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
+	}
+
+	async addSong(roomID: string, songID: string, userID: string): Promise<void> {
+		if (!this.roomQueues.has(roomID)) {
+			const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
+			if (!room || room === null) {
+				throw new Error("Room does not exist");
+			}
+			this.roomQueues.set(roomID, new ActiveRoom(room));
+		}
+		this.roomQueues.get(roomID)?.addSong(songID, userID);
+	}
+
+	async removeSong(
+		roomID: string,
+		songID: string,
+		userID: string,
+	): Promise<void> {
+		if (!this.roomQueues.has(roomID)) {
+			throw new Error("Room does not exist");
+		}
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		activeRoom.removeSong(songID, userID);
 	}
 
 	//is song playing
