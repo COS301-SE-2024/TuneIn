@@ -10,7 +10,7 @@ import { colors } from "../styles/colors";
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
 	const [profileImage, setProfileImage] = useState<string>(
-		"https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
+		"https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
 	);
 
 	useEffect(() => {

@@ -81,11 +81,13 @@ const Miniplayer: React.FC = () => {
 			<TouchableOpacity
 				style={[styles.container, { width: playerWidth }]}
 				onPress={navigateToRoomPage}
+				testID="player-touchable"
 			>
 				<Animated.View style={[styles.imageContainer, animatedStyle]}>
 					<Image
 						source={{ uri: currentRoom.backgroundImage }}
 						style={styles.backgroundImage}
+						testID="background-image"
 					/>
 				</Animated.View>
 				<View style={styles.textContainer}>
