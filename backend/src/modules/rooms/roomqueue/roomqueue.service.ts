@@ -95,28 +95,35 @@ class RoomSong {
 		return result;
 	}
 
-	addVote(vote: VoteDto): void {
+	addVote(vote: VoteDto): boolean {
+		if (this.votes.find((v) => v.userID === vote.userID)) {
+			return false;
+		}
 		this.votes.push(vote);
 		this._score = this.calculateScore();
+		return true;
 	}
 
-	removeVote(vote: VoteDto): void {
+	removeVote(vote: VoteDto): boolean {
 		const index = this.votes.findIndex(
 			(v) => v.userID === vote.userID && v.spotifyID === vote.spotifyID,
 		);
 		if (index === -1) {
-			return;
+			return false;
 		}
 		this.votes.splice(index, 1);
 		this._score = this.calculateScore();
+		return true;
 	}
 
-	swapVote(userID: string): void {
+	swapVote(userID: string): boolean {
 		const index = this.votes.findIndex((v) => v.userID === userID);
 		if (index === -1) {
-			return;
+			return false;
 		}
 		this.votes[index].isUpvote = !this.votes[index].isUpvote;
+		this._score = this.calculateScore();
+		return true;
 	}
 
 	getUserVote(userID: string): VoteDto | null {
@@ -158,54 +165,60 @@ class ActiveRoom {
 		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
 	}
 
-	addVote(vote: VoteDto): void {
+	addVote(vote: VoteDto): boolean {
 		const songs: RoomSong[] = this.queue.toArray();
 		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 		if (index === -1) {
-			return;
+			return false;
 		}
-		songs[index].addVote(vote);
+		const result = songs[index].addVote(vote);
 		this.queue = MaxPriorityQueue.fromArray(songs);
+		return result;
 	}
 
-	removeVote(vote: VoteDto): void {
+	removeVote(vote: VoteDto): boolean {
 		const songs: RoomSong[] = this.queue.toArray();
 		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 		if (index === -1) {
-			return;
+			return false;
 		}
-		songs[index].removeVote(vote);
+		const result = songs[index].removeVote(vote);
 		this.queue = MaxPriorityQueue.fromArray(songs);
+		return result;
 	}
 
-	swapVote(spotifyID: string, userID: string): void {
+	swapVote(spotifyID: string, userID: string): boolean {
 		const songs: RoomSong[] = this.queue.toArray();
 		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
 		if (index === -1) {
-			return;
+			return false;
 		}
-		songs[index].swapVote(userID);
+		const result = songs[index].swapVote(userID);
 		this.queue = MaxPriorityQueue.fromArray(songs);
+		return result;
 	}
 
-	addSong(spotifyID: string, userID: string): void {
+	addSong(spotifyID: string, userID: string): boolean {
 		const songs: RoomSong[] = this.queue.toArray();
 		if (!songs.find((s) => s.spotifyID === spotifyID)) {
 			this.queue.enqueue(new RoomSong(spotifyID, userID));
+			return true;
 		}
+		return false;
 	}
 
-	removeSong(spotifyID: string, userID: string): void {
+	removeSong(spotifyID: string, userID: string): boolean {
 		const songs: RoomSong[] = this.queue.toArray();
 		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
 		if (index === -1) {
-			return;
+			return false;
 		}
 		if (songs[index].userID !== userID) {
-			return;
+			return false;
 		}
 		songs.splice(index, 1);
 		this.queue = MaxPriorityQueue.fromArray(songs);
+		return true;
 	}
 
 	queueAsRoomSongDto(): RoomSongDto[] {
@@ -238,7 +251,7 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 		userID: string,
-	): Promise<void> {
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
 			if (!room || room === null) {
@@ -246,14 +259,14 @@ export class RoomQueueService {
 			}
 			this.roomQueues.set(roomID, new ActiveRoom(room));
 		}
-		this.roomQueues.get(roomID)?.addSong(spotifyID, userID);
+		const activeRoom = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return activeRoom.addSong(spotifyID, userID);
 	}
 
-	async removeSong(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-	): Promise<void> {
+	removeSong(roomID: string, spotifyID: string, userID: string): boolean {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -261,10 +274,10 @@ export class RoomQueueService {
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error("Weird error. HashMap is broken");
 		}
-		activeRoom.removeSong(spotifyID, userID);
+		return activeRoom.removeSong(spotifyID, userID);
 	}
 
-	upvoteSong(roomID: string, spotifyID: string, userID: string): void {
+	upvoteSong(roomID: string, spotifyID: string, userID: string): boolean {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -273,10 +286,14 @@ export class RoomQueueService {
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.addVote(vote);
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return activeRoom.addVote(vote);
 	}
 
-	downvoteSong(roomID: string, spotifyID: string, userID: string): void {
+	downvoteSong(roomID: string, spotifyID: string, userID: string): boolean {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -285,7 +302,11 @@ export class RoomQueueService {
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.addVote(vote);
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return activeRoom.addVote(vote);
 	}
 
 	undoSongVote(roomID: string, spotifyID: string, userID: string): void {
@@ -297,14 +318,22 @@ export class RoomQueueService {
 			userID: userID,
 			spotifyID: spotifyID,
 		};
-		this.roomQueues.get(roomID)?.removeVote(vote);
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		activeRoom.removeVote(vote);
 	}
 
-	swapSongVote(roomID: string, spotifyID: string, userID: string): void {
+	swapSongVote(roomID: string, spotifyID: string, userID: string): boolean {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
-		this.roomQueues.get(roomID)?.swapVote(spotifyID, userID);
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom === undefined) {
+			throw new Error("Weird error. HashMap is broken");
+		}
+		return activeRoom.swapVote(spotifyID, userID);
 	}
 
 	getQueueState(roomID: string): {
