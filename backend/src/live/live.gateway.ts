@@ -20,6 +20,7 @@ import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { RoomQueueService } from "../modules/rooms/roomqueue/roomqueue.service";
 import { EmojiReactionDto } from "./dto/emojireaction.dto";
+import { QueueEventDto } from "./dto/queueevent.dto";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -865,6 +866,27 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			throw new Error("errorMessage is not a valid field for input events.");
 		}
 		return result;
+	}
+
+	async validateQueueEvent(payload: string): Promise<QueueEventDto> {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		let q: QueueEventDto;
+		try {
+			const j = JSON.parse(payload);
+			q = j as QueueEventDto;
+		} catch (e) {
+			console.error(e);
+			throw new Error("Invalid JSON received");
+		}
+		if (!q.roomID) {
+			throw new Error("No userID provided");
+		}
+		return q;
 	}
 
 	async handleThrownError(client: Socket, error: Error): Promise<void> {
