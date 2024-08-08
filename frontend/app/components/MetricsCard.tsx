@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
 		elevation: 5,
 	},
 	cardTitle: {
-		fontSize: 18,
+		fontSize: 17,
 		color: "black",
 		fontWeight: "500",
 	},
