@@ -31,7 +31,7 @@ const EditDialog = ({
 			visible={visible}
 			onRequestClose={onClose}
 		>
-			<View style={styles.modalContainer}>
+			<View style={styles.modalContainer} testID="edit-dialog">
 				<View style={styles.dialogContainer}>
 					<Text style={styles.dialogTitle}>{title}</Text>
 					<TextInput

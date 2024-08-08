@@ -219,7 +219,7 @@ export class RoomUsersService {
 					},
 				},
 				orderBy: {
-					insert_time: "asc",
+					insert_time: "asc", // this line break things
 				},
 			});
 		if (!queueItems || queueItems === null) {

@@ -8,7 +8,7 @@ import {
 	ScrollView,
 	ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
 import RoomCard from "../../components/rooms/RoomCard";
@@ -21,9 +21,21 @@ import * as utils from "../../services/Utils";
 
 const ProfileScreen: React.FC = () => {
 	const router = useRouter();
+	let params = useLocalSearchParams();
+	let ownsProfile = true;
+	let friend = "";
+
+	// console.log("Params: " + JSON.stringify(params));
+
+	if (JSON.stringify(params) !== "{}") {
+		friend = JSON.parse(params.friend as string);
+		ownsProfile = false;
+	}
+
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [following, setFollowing] = useState<boolean>(false);
 
 	const [profileData, setProfileData] = useState<any>(null);
 
@@ -34,6 +46,16 @@ const ProfileScreen: React.FC = () => {
 
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
+					// console.log(data);
+					if (!ownsProfile) {
+						const isFollowing = data.followers.data.some(
+							(item: any) => item.username === params.user,
+						);
+						// console.log(isFollowing);
+						setFollowing(isFollowing);
+						// console.log(isFollowing);
+					}
+
 					setProfileData(data);
 					setLoading(false);
 				}
@@ -47,15 +69,70 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
+			if (ownsProfile) {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				return response.data;
+			}
+
+			const response = await axios.get(
+				`${utils.API_BASE_URL}/users/${friend.username}`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			});
+			);
+
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching profile info:", error);
 			return null;
+		}
+	};
+
+	const followHandler = async () => {
+		const storedToken = await auth.getToken();
+
+		if (storedToken) {
+			if (following) {
+				const response = await axios.post(
+					`${utils.API_BASE_URL}/users/${profileData.userID}/unfollow`,
+					{},
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (response) {
+					setFollowing(false);
+					profileData.followers.count--;
+				} else {
+					console.error("Issue unfollowing user");
+				}
+			} else {
+				const response = await axios.post(
+					`${utils.API_BASE_URL}/users/${profileData.userID}/follow`,
+					{},
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (response) {
+					setFollowing(true);
+					profileData.followers.count++;
+				} else {
+					console.error("Issue unfollowing user");
+				}
+			}
 		}
 	};
 
@@ -114,6 +191,42 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
+	const renderFollowOrEdit = () => {
+		if (ownsProfile) {
+			return (
+				<View
+					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
+				>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={() =>
+							router.push({
+								pathname: "screens/EditProfilePage",
+								params: { profile: JSON.stringify(profileInfo) },
+							})
+						}
+					>
+						<Text style={styles.buttonText}>Edit</Text>
+					</TouchableOpacity>
+				</View>
+			);
+		}
+
+		return (
+			<View style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={() => followHandler()}
+					testID="follow-button"
+				>
+					<Text style={styles.buttonText}>
+						{following ? "Unfollow" : "Follow"}
+					</Text>
+				</TouchableOpacity>
+			</View>
+		);
+	};
+
 	const renderFavRooms = () => {
 		if (profileData.fav_rooms.count > 0) {
 			return (
@@ -141,7 +254,7 @@ const ProfileScreen: React.FC = () => {
 
 	const renderRecentRooms = () => {
 		if (profileData.recent_rooms.count > 0) {
-			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
+			// console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
 				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
 					<Text style={styles.title}>Recently Visited</Text>
@@ -254,21 +367,7 @@ const ProfileScreen: React.FC = () => {
 					}}
 					links={profileData.links.data}
 				/>
-				<View
-					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
-				>
-					<TouchableOpacity
-						style={styles.button}
-						onPress={() =>
-							router.push({
-								pathname: "screens/profile/EditProfilePage",
-								params: { profile: JSON.stringify(profileInfo) },
-							})
-						}
-					>
-						<Text style={styles.buttonText}>Edit</Text>
-					</TouchableOpacity>
-				</View>
+				{renderFollowOrEdit()}
 				{/* <View style={{ paddingHorizontal: 20 }}>
           <NowPlaying
             title={favoriteSongsData[0].songTitle}

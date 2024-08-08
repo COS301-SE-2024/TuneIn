@@ -22,6 +22,7 @@ import { DmUsersService } from "./dmusers/dmusers.service";
 import { UserDto } from "src/modules/users/dto/user.dto";
 import { DirectMessageDto } from "src/modules/users/dto/dm.dto";
 import { UsersService } from "src/modules/users/users.service";
+import { EmojiReactionDto } from "./dto/emojireaction.dto";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -82,7 +83,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.CONNECT);
 			try {
 				//auth
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -155,7 +156,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -215,7 +216,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -266,7 +267,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -345,7 +346,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//auth
 
-				const payload: ChatEventDto = await this.validateInputEvent(p);
+				const payload: ChatEventDto = await this.validateChatEvent(p);
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
@@ -377,6 +378,36 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	@SubscribeMessage(SOCKET_EVENTS.EMOJI_REACTION)
+	async handleEmojiReaction(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.EMOJI_REACTION);
+			try {
+				console.log(p);
+				let r: EmojiReactionDto;
+				try {
+					const j = JSON.parse(p);
+					r = j as EmojiReactionDto;
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+				const roomID = this.connectedUsers.getRoomId(client.id);
+				if (!roomID) {
+					throw new Error("User is not in a room");
+				}
+				await this.roomService.saveReaction(roomID, r);
+				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
 	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
