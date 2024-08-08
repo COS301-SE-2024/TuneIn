@@ -511,7 +511,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (!roomID) {
 					throw new Error("User is not in a room");
 				}
-				await this.roomService.saveReaction(roomID, r);
+				// await this.roomService.saveReaction(roomID, r);
 				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);

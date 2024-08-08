@@ -273,7 +273,7 @@ export class ConnectedUsersService {
 					},
 				},
 				orderBy: {
-					insert_time: "asc", // this line break things
+					// insert_time: "asc", // this line break things
 				},
 			});
 		if (!queueItems || queueItems === null) {
