@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -28,6 +28,11 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [items, setItems] = useState(options);
+
+	useEffect(() => {
+        setItems(options);
+    }, [options]);
 
 	const toggleModal = () => setModalVisible(!modalVisible);
 
@@ -37,7 +42,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 		toggleModal();
 	};
 
-	const filteredOptions = options.filter((option) =>
+	const filteredOptions = items.filter((option) =>
 		option.toLowerCase().includes(searchQuery.toLowerCase()),
 	);
 

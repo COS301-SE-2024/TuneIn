@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -51,7 +51,7 @@ const roomFilterCategories = [
 	{ id: "tags", label: "Tags" },
 ];
 // Sample genre data with additional genres
-const genres = [
+let genres: string[] = [
 	"Rock",
 	"Pop",
 	"Jazz",
@@ -114,6 +114,7 @@ const Search: React.FC = () => {
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
+	const [loadingGenres, setLoadingGenres] = useState(true);
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
@@ -228,30 +229,27 @@ const Search: React.FC = () => {
 				} else if (filter === "room") {
 					if (selectedFilters.length !== 0) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
-						if(selectedFilters.includes("nsfw")){
+						if (selectedFilters.includes("nsfw")) {
 							request += `&nsfw=true`;
 						}
-						if(selectedFilters.includes("explicit")){
-                            request += `&explicit=true`;
-                        }
-						if(selectedFilters.includes("isScheduled")){
+						if (selectedFilters.includes("explicit")) {
+							request += `&explicit=true`;
+						}
+						if (selectedFilters.includes("isScheduled")) {
 							request += `&is_scheduled=true`;
 						}
-						if(selectedFilters.includes("isPrivate")){
+						if (selectedFilters.includes("isPrivate")) {
 							request += `&is_priv=true`;
 						}
-						if(selectedFilters.includes("isTemporary")){
+						if (selectedFilters.includes("isTemporary")) {
 							request += `&is_temporary=true`;
 						}
 
-						const response = await axios.get(
-							request,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						const response = await axios.get(request, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
+						});
 						console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
@@ -381,6 +379,32 @@ const Search: React.FC = () => {
 	const handleSelection = (selectedFilter) => {
 		setFilter(selectedFilter);
 	};
+	
+	const getGenres = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/genres`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				// console.log("Genre data" + response.data);
+				genres = response.data;
+			}
+		} catch (error) {
+			console.error("Error fetching genres:", error);
+		}
+	};
+
+	useEffect(() => {
+        getGenres();
+		console.log(genres[0]);
+    }, []);
 
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -503,6 +527,7 @@ const Search: React.FC = () => {
 							<View style={styles.dropContainer}>
 								<Dropdown
 									options={genres}
+									// loading={loadingGenres}
 									placeholder="Select Genre"
 									onSelect={handleSelectGenre}
 									selectedOption={selectedGenre}
