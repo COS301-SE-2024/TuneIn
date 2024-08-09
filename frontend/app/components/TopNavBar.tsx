@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
+import { colors } from "../styles/colors";
 
 interface TopNavBarProps {
 	profileInfo: any;
