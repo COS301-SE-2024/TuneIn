@@ -41,6 +41,7 @@
     "expo-router": "~3.5.18",
     "expo-status-bar": "~1.12.1",
     "expo-web-browser": "~13.0.3",
+    "fuse.js": "^7.0.0",
     "isomorphic-fetch": "^3.0.0",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",

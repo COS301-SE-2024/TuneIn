@@ -10,6 +10,7 @@ import {
 	ScrollView,
 } from "react-native";
 import { colors } from "../styles/colors";
+import Fuse from "fuse.js";
 
 interface DropdownProps {
 	options: string[];
@@ -31,8 +32,8 @@ const Dropdown: React.FC<DropdownProps> = ({
 	const [items, setItems] = useState(options);
 
 	useEffect(() => {
-        setItems(options);
-    }, [options]);
+		setItems(options);
+	}, [options]);
 
 	const toggleModal = () => setModalVisible(!modalVisible);
 
@@ -42,9 +43,18 @@ const Dropdown: React.FC<DropdownProps> = ({
 		toggleModal();
 	};
 
-	const filteredOptions = items.filter((option) =>
-		option.toLowerCase().includes(searchQuery.toLowerCase()),
-	);
+	const fuseOptions = {
+		includeScore: true,
+	};
+
+	const fuse = new Fuse(options, fuseOptions);
+
+	const result = fuse.search(searchQuery, {limit: 20});
+	const filteredOptions: string[] = result.map((item) => item.item);
+
+	// const filteredOptions = items.filter((option) =>
+	// 	option.toLowerCase().includes(searchQuery.toLowerCase()),
+	// );
 
 	return (
 		<View style={styles.container}>
