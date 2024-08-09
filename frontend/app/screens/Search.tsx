@@ -115,6 +115,10 @@ const Search: React.FC = () => {
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
 	const [loadingGenres, setLoadingGenres] = useState(true);
+	const [host, setHost] = useState<string>("");
+	const [roomCount, setRoomCount] = useState("");
+	const [maxFollowers, setMaxFollowers] = useState("");
+	const [minFollowers, setMinFollowers] = useState("");
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
@@ -250,6 +254,12 @@ const Search: React.FC = () => {
 						if(selectedLanguage){
 							request += `&lang=${selectedLanguage}`;
 						}
+						if(host !== ""){
+							request += `&creator_username=${host}`;
+						}
+						if(roomCount !== ""){
+							request += `&participant_count=${roomCount}`;
+						}
 
 						const response = await axios.get(request, {
 							headers: {
@@ -310,27 +320,64 @@ const Search: React.FC = () => {
 						setResults(results);
 					}
 				} else if (filter === "user") {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
+					if (showMoreFilters) {
+						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
+
+						if(minFollowers !== ""){
+							request += `&following=${minFollowers}`;
+						}
+						if(maxFollowers !== ""){
+							request += `&followers=${maxFollowers}`;
+						}
+
+						console.log("Request: " + request);
+
+						const response = await axios.get(
+							request,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						},
-					);
-					console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.map((item: any) => ({
-						id: item.id,
-						type: "user",
-						name: item.username,
-						userData: {
+						);
+						console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.id,
-							profile_picture_url: item.profile_picture_url,
-							profile_name: item.profile_name,
-							username: item.username,
-						},
-					}));
-					setResults(results);
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}));
+						setResults(results);
+						setShowMoreFilters(false);
+					}
+					else {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.id,
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}));
+						setResults(results);
+					}
 				}
 			}
 		} catch (error) {
@@ -494,8 +541,8 @@ const Search: React.FC = () => {
 								<View style={styles.includeSection}>
 									<Text style={styles.includeHeader}>Search by:</Text>
 									<View style={styles.searchBy}>
-										<ToggleButton label="Minimum Followers" />
-										<ToggleButton label="Maximum Followers" />
+										<ToggleButton label="Minimum Followers" onValueChange={setMinFollowers} />
+										<ToggleButton label="Minimum Following" onValueChange={setMaxFollowers} />
 									</View>
 								</View>
 							)}
@@ -507,8 +554,8 @@ const Search: React.FC = () => {
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Search by:</Text>
 								<View style={styles.searchBy}>
-									<ToggleButton label="Host" testID="host-toggle" />
-									<ToggleButton label="Room Count" testID="room-count-toggle" />
+									<ToggleButton label="Host" testID="host-toggle" onValueChange={setHost} />
+									<ToggleButton label="Room Count" testID="room-count-toggle" onValueChange={setRoomCount} />
 								</View>
 							</View>
 							<View style={styles.includeSection}>

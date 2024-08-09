@@ -4,9 +4,10 @@ import { Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 type ToggleButtonProps = {
 	label: string;
 	testID?: string;
+	onValueChange: (value: string) => void;
 };
 
-const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID }) => {
+const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID, onValueChange }) => {
 	const [isSelected, setIsSelected] = useState(false);
 	const [text, setText] = useState("");
 	const inputRef = useRef<TextInput>(null);
@@ -14,6 +15,11 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID }) => {
 	const handleClick = () => {
 		setIsSelected(!isSelected);
 	};
+
+	const changeText = (val: any) => {
+		setText(val);
+		onValueChange(val);
+	}
 
 	useEffect(() => {
 		if (isSelected && inputRef.current) {
@@ -35,7 +41,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID }) => {
 					ref={inputRef}
 					style={styles.input}
 					value={text}
-					onChangeText={setText}
+					onChangeText={changeText}
 					placeholder={`Enter ${label}`}
 					placeholderTextColor="#fff"
 				/>
