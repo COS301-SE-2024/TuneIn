@@ -276,6 +276,9 @@ export class SearchService {
 		if (params.nsfw !== undefined) {
 			query += ` AND nsfw = ${params.nsfw}`;
 		}
+		if(params.lang !== undefined) {
+			query += ` AND room_language = ${sqlstring.escape(params.lang)}`;
+		}
 
 		if (params.tags && params.tags.length > 0) {
 			const tags = params.tags.split(",");

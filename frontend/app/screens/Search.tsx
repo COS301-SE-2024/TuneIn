@@ -227,22 +227,28 @@ const Search: React.FC = () => {
 					console.log("Formatted results: " + JSON.stringify(results));
 					setResults(combinedResult);
 				} else if (filter === "room") {
-					if (selectedFilters.length !== 0) {
+					if (showMoreFilters) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
-						if (selectedFilters.includes("nsfw")) {
-							request += `&nsfw=true`;
+						if(nsfw){
+							request += `&nsfw=${nsfw}`;
 						}
-						if (selectedFilters.includes("explicit")) {
-							request += `&explicit=true`;
+						if(explicit){
+							request += `&explicit=${explicit}`;
 						}
-						if (selectedFilters.includes("isScheduled")) {
-							request += `&is_scheduled=true`;
+						if(scheduled){
+							request += `&is_scheduled=${scheduled}`;
 						}
-						if (selectedFilters.includes("isPrivate")) {
-							request += `&is_priv=true`;
+						if(isPrivate){
+							request += `&is_priv=${isPrivate}`;
 						}
-						if (selectedFilters.includes("isTemporary")) {
-							request += `&is_temporary=true`;
+						if(temporary){
+							request += `&is_temporary=${temporary}`;
+						}					
+						if(selectedGenre){
+							request += `&tags=${selectedGenre}`;
+						}
+						if(selectedLanguage){
+							request += `&lang=${selectedLanguage}`;
 						}
 
 						const response = await axios.get(request, {
@@ -250,6 +256,8 @@ const Search: React.FC = () => {
 								Authorization: `Bearer ${token}`,
 							},
 						});
+
+						console.log("Request: " + request);
 						console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
@@ -270,6 +278,7 @@ const Search: React.FC = () => {
 						}));
 
 						setResults(results);
+						setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
@@ -379,20 +388,17 @@ const Search: React.FC = () => {
 	const handleSelection = (selectedFilter) => {
 		setFilter(selectedFilter);
 	};
-	
+
 	const getGenres = async () => {
 		try {
 			const token = await auth.getToken();
 
 			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/genres`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
 					},
-				);
+				});
 				// console.log("Genre data" + response.data);
 				genres = response.data;
 			}
@@ -402,9 +408,9 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-        getGenres();
+		getGenres();
 		console.log(genres[0]);
-    }, []);
+	}, []);
 
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -527,7 +533,6 @@ const Search: React.FC = () => {
 							<View style={styles.dropContainer}>
 								<Dropdown
 									options={genres}
-									// loading={loadingGenres}
 									placeholder="Select Genre"
 									onSelect={handleSelectGenre}
 									selectedOption={selectedGenre}

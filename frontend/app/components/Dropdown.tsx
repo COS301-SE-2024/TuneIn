@@ -52,10 +52,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 	const result = fuse.search(searchQuery, {limit: 20});
 	const filteredOptions: string[] = result.map((item) => item.item);
 
-	// const filteredOptions = items.filter((option) =>
-	// 	option.toLowerCase().includes(searchQuery.toLowerCase()),
-	// );
-
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
