@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 
 interface TopSongProps {
-	albumImage: string; // URL or local path to the album image
-	songName: string; // Name of the song
+	albumImage: string;
+	songName: string;
 	plays: number; // Number of plays
-	songNumber: number; // Song number (1, 2, 3, ...)
+	songNumber: number;
 }
 
 const TopSong: React.FC<TopSongProps> = ({
@@ -18,7 +18,11 @@ const TopSong: React.FC<TopSongProps> = ({
 		<View style={styles.container}>
 			<View style={styles.textsContainer}>
 				<Text style={styles.songNumber}>{songNumber}. </Text>
-				<Image source={{ uri: albumImage }} style={styles.albumImage} />
+				<Image
+					source={{ uri: albumImage }}
+					style={styles.albumImage}
+					testID="album-image"
+				/>
 				<View style={styles.textContainer}>
 					<Text style={styles.songName}>{songName}</Text>
 					<Text style={styles.plays}>{plays} plays</Text>
@@ -45,8 +49,8 @@ const styles = StyleSheet.create({
 	},
 	textsContainer: {
 		flex: 1,
-		flexDirection: "row", // Align text horizontally
-		alignItems: "center", // Align text vertically
+		flexDirection: "row",
+		alignItems: "center",
 	},
 	songNumber: {
 		fontSize: 16,
