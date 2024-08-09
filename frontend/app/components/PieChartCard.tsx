@@ -31,7 +31,9 @@ const PieChartCard: React.FC<PieChartCardProps> = ({
 
 	return (
 		<View style={styles.card}>
-			<Text style={styles.cardTitle}>Visitors Breakdown</Text>
+			<Text style={styles.cardTitle} testID="cardTitle">
+				Visitors Breakdown
+			</Text>
 			<View style={styles.chartContainer}>
 				<PieChart
 					data={data}
@@ -52,13 +54,13 @@ const PieChartCard: React.FC<PieChartCardProps> = ({
 				/>
 			</View>
 			<View style={styles.legend}>
-				<View style={styles.legendItem}>
+				<View style={styles.legendItem} testID="returningLegend">
 					<View
 						style={[styles.legendColor, { backgroundColor: colors.primary }]}
 					/>
 					<Text style={styles.legendText}>Returning Visitors</Text>
 				</View>
-				<View style={styles.legendItem}>
+				<View style={styles.legendItem} testID="newLegend">
 					<View style={[styles.legendColor, { backgroundColor: "black" }]} />
 					<Text style={styles.legendText}>New Visitors</Text>
 				</View>
