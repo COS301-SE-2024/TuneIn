@@ -30,6 +30,7 @@
     "@testing-library/react-native": "^12.5.1",
     "@types/react-native-dotenv": "^0.2.2",
     "amazon-cognito-identity-js": "^6.3.12",
+    "apexcharts": "^3.52.0",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "expo": "~51.0.19",

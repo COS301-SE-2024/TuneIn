@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		padding: 10,
 		marginVertical: 10,
-		elevation: 2, // Shadow for Android
-		shadowColor: "#000", // Shadow for iOS
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	cardTitle: {
 		fontSize: 20,
