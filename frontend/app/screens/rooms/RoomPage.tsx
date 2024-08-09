@@ -36,18 +36,18 @@ import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData, Room } from "../../models/Room";
+import { useRoute, RouteProp } from "@react-navigation/native";
 
 const MemoizedCommentWidget = memo(CommentWidget);
-
+type RoomPageRouteProp = RouteProp<{ params: { room: string } }, "params">;
 const RoomPage = () => {
-	live.initialiseSocket();
-	const { room } = useLocalSearchParams();
+	// live.initialiseSocket();
+	const route = useRoute<RoomPageRouteProp>();
+	const { params } = route;
+
+	console.log("parsed params: " + params.room);
 	let roomData: any;
-	if (Array.isArray(room)) {
-		roomData = JSON.parse(room[0]);
-	} else if (room) {
-		roomData = JSON.parse(room);
-	}
+	roomData = params.room;
 	const roomID = roomData.id;
 
 	const playerContext = useContext(Player);

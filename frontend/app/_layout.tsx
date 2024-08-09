@@ -4,10 +4,23 @@ import { StatusBar } from "react-native";
 import TopNavBar from "../app/components/TopNavBar";
 import { colors } from "../app/styles/colors";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../app/screens/Home";
+import RoomPage from "../app/screens/rooms/RoomPage";
 import Search from "../app/screens/Search";
 import Help from "../app/screens/help/HelpScreen";
 import { Ionicons } from "@expo/vector-icons";
+
+const HomeStack = createNativeStackNavigator();
+
+function HomeStackGroup() {
+	return (
+		<HomeStack.Navigator>
+			<HomeStack.Screen name="Home" component={Home} />
+			<HomeStack.Screen name="RoomPage" component={RoomPage} />
+		</HomeStack.Navigator>
+	);
+}
 
 const Tab = createBottomTabNavigator();
 
@@ -51,8 +64,8 @@ function TabGroup() {
 		>
 			<Tab.Screen
 				name="screens/Home"
-				component={Home}
-				options={{ title: "Home" }}
+				component={HomeStackGroup}
+				options={{ title: "Home", headerShown: false }}
 			/>
 			<Tab.Screen
 				name="screens/Search"
