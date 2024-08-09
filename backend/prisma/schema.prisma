@@ -26,11 +26,12 @@ model blocked {
 }
 
 model bookmark {
-  user_id     String @db.Uuid
-  room_id     String @db.Uuid
-  bookmark_id String @id(map: "bookmark_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  user_id     String    @db.Uuid
+  room_id     String    @db.Uuid
+  bookmark_id String    @id(map: "bookmark_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  users       users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  room        room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 }
 
 model follows {
@@ -69,23 +70,23 @@ model message {
 }
 
 model participate {
-  user_id        String   @db.Uuid
-  room_id        String   @db.Uuid
-  date_joined    DateTime @default(now()) @db.Timestamptz(6)
-  participate_id String   @id(map: "participate_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  banned         Boolean? @default(false)
-  users          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
-  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  user_id        String @db.Uuid
+  room_id        String @db.Uuid
+  participate_id String @id(map: "participate_id") @unique(map: "user_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  users          users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "participate")
+  room           room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 
   @@index([room_id], map: "fki_room")
 }
 
 model playlist {
-  playlist_id String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String   @db.Uuid
-  name        String
-  playlist    String[]
-  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+  playlist_id  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id      String   @db.Uuid
+  name         String
+  playlist     String[]
+  date_created DateTime @default(now()) @db.Timestamptz(6)
+  description  String?
+  users        users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
 
 model private_message {
@@ -114,6 +115,7 @@ model queue {
   is_done_playing Boolean   @default(false)
   queue_id        String    @id(map: "queue_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   start_time      DateTime? @db.Timestamptz(6)
+  insert_time     DateTime  @default(now()) @db.Timestamptz(6)
   room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
   song            song      @relation(fields: [song_id], references: [song_id], onDelete: Cascade, map: "song_id")
   vote            vote[]
@@ -122,26 +124,29 @@ model queue {
 }
 
 model room {
-  room_id        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name           String
-  room_creator   String          @db.Uuid
+  room_creator   String           @db.Uuid
   playlist_photo String?
-  description    String?         @default("This room has no description")
-  date_created   DateTime        @default(now()) @db.Timestamptz(6)
-  nsfw           Boolean         @default(false)
-  is_temporary   Boolean?        @default(false)
-  room_language  String?         @default("English")
-  explicit       Boolean?        @default(false)
+  description    String?          @default("This room has no description")
+  date_created   DateTime         @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean          @default(false)
+  is_temporary   Boolean?         @default(false)
+  room_language  String?          @default("English")
+  explicit       Boolean?         @default(false)
   tags           String[]
+  banned         banned[]
   bookmark       bookmark[]
+  chat_reactions chat_reactions[]
   participate    participate[]
   private_room   private_room?
   public_room    public_room?
   queue          queue[]
-  users          users           @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  users          users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
   room_message   room_message[]
   scheduled_room scheduled_room?
   table_state    table_state?
+  user_activity  user_activity[]
 }
 
 model room_message {
@@ -183,9 +188,11 @@ model users {
   external_links                  Json?             @db.Json
   email                           String?
   authentication                  authentication?
+  banned                          banned[]
   blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
+  chat_reactions                  chat_reactions[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
   friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
@@ -196,6 +203,7 @@ model users {
   private_message                 private_message[]
   room                            room[]
   search_history                  search_history[]
+  user_activity                   user_activity[]
 }
 
 model vote {
@@ -215,7 +223,6 @@ model search_history {
   user_id     String   @db.Uuid
   search_term String
   timestamp   DateTime @default(now()) @db.Timestamptz(6)
-  metadata    Json?    @db.Json
   url         String?
   users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
@@ -226,4 +233,42 @@ model table_state {
   is_active Boolean?
   time      DateTime? @default(now()) @db.Timestamptz(6)
   room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+}
+
+model banned {
+  banned_id String @id(map: "banned_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id   String @db.Uuid
+  room_id   String @db.Uuid
+  room      room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  users     users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+
+  @@index([room_id], map: "fki_room_id")
+  @@index([user_id], map: "fki_user_id")
+}
+
+model chat_reactions {
+  reaction_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String @db.Uuid
+  room_id     String @db.Uuid
+  reaction    String
+  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+}
+
+model search_suggestions {
+  suggestion_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  term          String
+  popularity    Int    @default(1)
+}
+
+model user_activity {
+  user_id         String    @db.Uuid
+  room_id         String    @db.Uuid
+  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
+  room_leave_time DateTime? @db.Timestamptz(6)
+  activity_id     String    @id(map: "activity_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+
+  @@index([user_id], map: "fki_user")
 }

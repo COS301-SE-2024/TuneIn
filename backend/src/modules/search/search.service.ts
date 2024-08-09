@@ -22,6 +22,12 @@ export class CombinedSearchResults {
 	users: UserDto[];
 }
 
+export class CombinedSearchHistory {
+	@ApiProperty({ description: "Mixed list of rooms, users, or strings" })
+	@IsArray({ message: "Results must be an array" })
+	results: (RoomDto | UserDto | string)[];
+}
+
 @Injectable()
 export class SearchService {
 	constructor(
@@ -538,5 +544,28 @@ export class SearchService {
 		}
 
 		return [new SearchHistoryDto()];
+	}
+
+	/*
+	async searchGenres(q: string): Promise<string[]> {
+		
+	}
+	*/
+
+	async searchHistory(userID: string): Promise<CombinedSearchHistory[]> {
+		console.log(userID);
+		return [];
+	}
+
+	async clearSearchHistory(userID: string): Promise<void> {
+		console.log(userID);
+	}
+
+	async clearRoomsHistory(userID: string): Promise<void> {
+		console.log(userID);
+	}
+
+	async clearUsersHistory(userID: string): Promise<void> {
+		console.log(userID);
 	}
 }

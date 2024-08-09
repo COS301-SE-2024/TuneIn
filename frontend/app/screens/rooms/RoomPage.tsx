@@ -18,25 +18,20 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
-import * as io from "socket.io-client";
-import { LiveChatMessageDto, RoomDto, UserDto } from "../../../api-client";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { ChatEventDto } from "../../models/ChatEventDto";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+import { live, Message } from "../../services/Live";
+import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
-type Message = {
-	message: LiveChatMessageDto;
-	me?: boolean;
-};
-
 const RoomPage = () => {
+	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	console.log("here");
 	let roomData: any;
@@ -49,8 +44,6 @@ const RoomPage = () => {
 	console.log("Room ID:", roomID);
 
 	const router = useRouter();
-	const userRef = useRef<UserDto | null>(null);
-	const roomObjRef = useRef<RoomDto | null>(null);
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [joined, setJoined] = useState(false);
@@ -60,14 +53,13 @@ const RoomPage = () => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages] = useState<Message[]>([]);
-	const [, setJoinedSongIndex] = useState<number | null>(null);
-	const [, setJoinedSecondsPlayed] = useState<number | null>(null);
-	// const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	// const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-	// 	null,
-	// );
-	const socket = useRef<io.Socket | null>(null);
+	const [messages, setMessages] = useState<Message[]>([]);
+	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
+	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
+		null,
+	);
+	const [isSending, setIsSending] = useState(false);
+	const playback = useRef(SimpleSpotifyPlayback.getInstance()).current;
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
@@ -88,6 +80,8 @@ const RoomPage = () => {
 	checkBookmark();
 
 	const handleBookmark = async () => {
+		live.startPlayback(roomID);
+
 		// make a request to the backend to check if the room is bookmarked
 		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
@@ -115,189 +109,7 @@ const RoomPage = () => {
 			console.error("Error:", error);
 		}
 	};
-
-	// const joinRoom = useCallback(() => {
-	// 	if (userRef.current && socket.current) {
-	// 		const u: UserDto = userRef.current;
-	// 		const input: ChatEventDto = {
-	// 			userID: u.userID,
-	// 			body: {
-	// 				messageBody: "",
-	// 				sender: u,
-	// 				roomID: roomID,
-	// 				dateCreated: new Date(),
-	// 			},
-	// 		};
-	// 		console.log("Socket emit: joinRoom", input);
-	// 		socket.current.emit("joinRoom", JSON.stringify(input));
-	// 		setJoined(true);
-	// 	}
-	// }, [roomID]);
-
-	const leaveRoom = () => {
-		if (userRef.current && socket.current) {
-			const u: UserDto = userRef.current;
-			const input: ChatEventDto = {
-				userID: u.userID,
-				body: {
-					messageBody: "",
-					sender: u,
-					roomID: roomID,
-					dateCreated: new Date(),
-				},
-			};
-			console.log("Socket emit: leaveRoom", input);
-			socket.current.emit("leaveRoom", JSON.stringify(input));
-			setJoined(false);
-		}
-	};
-	//init & connect to socket
-	// useEffect(() => {
-	// 	const getTokenAndSelf = async () => {
-	// 		const storedToken = await auth.getToken();
-	// 		console.log("token:", token);
-	// 		token.current = storedToken;
-	// 		console.log("Stored token:", token.current);
-	// 		try {
-	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-	// 				headers: {
-	// 					Authorization: `Bearer ${storedToken}`,
-	// 				},
-	// 			});
-	// 			userRef.current = response.data as UserDto;
-	// 		} catch (error) {
-	// 			console.error("Error fetching user's own info:", error);
-	// 		}
-
-	// 		try {
-	// 			const roomDto = await axios.get(
-	// 				`${utils.API_BASE_URL}/rooms/${roomID}`,
-	// 				{
-	// 					headers: {
-	// 						Authorization: `Bearer ${storedToken}`,
-	// 					},
-	// 				},
-	// 			);
-	// 			roomObjRef.current = roomDto.data;
-	// 		} catch (error) {
-	// 			console.error("Error fetching room:", error);
-	// 		}
-	// 	};
-
-	// 	const setupSocketEventHandlers = () => {
-	// 		console.log("Setting up socket event handlers...");
-	// 		if (socket.current) {
-	// 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					console.log("User joined room:", response);
-	// 					const input: ChatEventDto = {
-	// 						userID: u.userID,
-	// 						body: {
-	// 							messageBody: "",
-	// 							sender: u,
-	// 							roomID: roomID,
-	// 							dateCreated: new Date(),
-	// 						},
-	// 					};
-
-	// 					console.log("Socket emit: getChatHistory", input);
-	// 					if (socket.current)
-	// 						socket.current.emit("getChatHistory", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					const chatHistory = history.map((msg) => ({
-	// 						message: msg,
-	// 						me: msg.sender.userID === u.userID,
-	// 					}));
-	// 					setMessages(chatHistory);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-	// 				console.log("Received live message:", newMessage);
-	// 				const message = newMessage.body;
-	// 				const u = userRef.current;
-	// 				if (message && u) {
-	// 					const me: boolean = message.sender.userID === u.userID;
-	// 					if (me) {
-	// 						setMessage("");
-	// 					}
-	// 					setMessages((prevMessages) => [
-	// 						...prevMessages,
-	// 						{ message, me: message.sender.userID === u.userID },
-	// 					]);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-	// 				console.log("User left room:", response);
-	// 			});
-
-	// 			socket.current.on("error", (response: ChatEventDto) => {
-	// 				console.error("Error:", response.errorMessage);
-	// 			});
-	// 		}
-
-	// 		if (socket.current) {
-	// 			socket.current.on("connect", () => {
-	// 				if (userRef.current) {
-	// 					const input: ChatEventDto = {
-	// 						userID: userRef.current.userID,
-	// 					};
-	// 					if (socket.current)
-	// 						socket.current.emit("connectUser", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("connected", (response: ChatEventDto) => {
-	// 				if (!joined && readyToJoinRoom) {
-	// 					// joinRoom();
-	// 				}
-	// 			});
-	// 		}
-	// 	};
-
-	// 	getTokenAndSelf();
 	// 	checkBookmark();
-
-	// 	socket.current = io.io(utils.API_BASE_URL + "/live-chat", {
-	// 		transports: ["websocket"],
-	// 	});
-
-	// 	setupSocketEventHandlers();
-
-	// 	return () => {
-	// 		if (socket.current) {
-	// 			console.log("Disconnecting socket...");
-	// 			socket.current.disconnect();
-	// 		}
-	// 	};
-	// }, [checkBookmark, joined, readyToJoinRoom, roomID]);
-
-	const sendMessage = () => {
-		if (message.trim() && userRef.current && socket.current) {
-			const u: UserDto = userRef.current;
-			const newMessage: LiveChatMessageDto = {
-				messageBody: message,
-				sender: u,
-				roomID: roomID,
-				dateCreated: new Date(),
-			};
-			const input: ChatEventDto = {
-				userID: u.userID,
-				body: newMessage,
-			};
-			console.log("Sending message:", input);
-			socket.current.emit("liveMessage", JSON.stringify(input));
-			// do not add the message to the state here, wait for the server to send it back
-			//setMessages([...messages, { message: newMessage, me: true }]);
-		}
-	};
 
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
@@ -346,8 +158,9 @@ const RoomPage = () => {
 					const tracks: Track[] = data.map((item: any) => ({
 						id: item.id,
 						name: item.name,
-						artists: item.artists,
-						album: item.album,
+						//artists: [item.artistNames],
+						artists: [{ name: item.artistNames }],
+						album: { images: [{ url: item.albumArtUrl }] },
 						explicit: item.explicit,
 						preview_url: item.preview_url,
 						uri: item.uri,
@@ -392,44 +205,45 @@ const RoomPage = () => {
 		};
 	}, [isPlaying]);
 
-	const handleJoinLeave = () => {
-		setJoined((prevJoined) => !prevJoined);
-		if (!joined) {
-			// joinRoom();
-			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			leaveRoom();
-			setJoined(false);
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			playbackManager.pause();
-			setIsPlaying(false);
-		}
-	};
-
 	const playPauseTrack = useCallback(
-		(index: number, offset: number) => {
+		async (index: number, offset: number) => {
+			/*
 			playbackManager.playPauseTrack(queue[index], index, offset);
 			setCurrentTrackIndex(index);
 			setIsPlaying(playbackManager.getIsPlaying());
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
+			*/
+			if (live.canControlRoom()) {
+				if (playback.isPlaying()) {
+					live.startPlayback(roomID);
+				} else {
+					live.stopPlayback(roomID);
+				}
+				setCurrentTrackIndex(index);
+				setIsPlaying(playback.isPlaying());
+				//setSecondsPlayed(playbackManager.getSecondsPlayed());
+			}
 		},
-		[queue, playbackManager],
+		//[queue, playbackManager],
+		[],
 	);
 
 	const playNextTrack = () => {
+		/*
 		playbackManager.playPreviousTrack();
 		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
+		*/
+		if (live.canControlRoom()) {
+		}
 	};
 
 	const playPreviousTrack = () => {
+		/*
 		playbackManager.playPreviousTrack();
 		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
+		*/
+		if (live.canControlRoom()) {
+		}
 	};
 
 	const toggleChat = () => {
@@ -454,19 +268,51 @@ const RoomPage = () => {
 		});
 	};
 
-	if (userRef.current && roomObjRef.current) {
+	const handleJoinLeave = async () => {
+		console.log("joined", joined);
+		setJoined((prevJoined) => !prevJoined);
+		if (!joined) {
+			// joinRoom();
+			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			//setJoined(true);
+			setJoinedSongIndex(currentTrackIndex);
+			setJoinedSecondsPlayed(secondsPlayed);
+			console.log(
+				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+			);
+		} else {
+			//leaveRoom();
+			live.leaveRoom();
+			//setJoined(false);
+			setJoinedSongIndex(null);
+			setJoinedSecondsPlayed(null);
+			//playbackManager.pause();
+			const deviceID = await playback.getFirstDevice();
+			if (deviceID && deviceID !== null) {
+				playback.handlePlayback("pause", deviceID);
+			}
+			setIsPlaying(false);
+		}
+	};
+
+	if (!readyToJoinRoom) {
 		setReadyToJoinRoom(true);
 		console.log("Ready to join room...");
-		console.log(userRef.current, roomObjRef.current);
 	}
 
 	useEffect(() => {
 		if (readyToJoinRoom && !joined) {
 			console.log("Joining room...");
 			console.log(readyToJoinRoom, joined);
-			// joinRoom();
+			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
-	}, [readyToJoinRoom, joined]);
+	}, [readyToJoinRoom, joined, roomID]);
+
+	const sendMessage = () => {
+		if (isSending) return;
+		setIsSending(true);
+		live.sendMessage(message, setIsSending);
+	};
 
 	return (
 		<View style={styles.container}>

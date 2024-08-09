@@ -20,8 +20,10 @@ const VerifyEmailScreen: React.FC = () => {
 	const [verificationCode, setVerificationCode] = useState("");
 
 	const verifyCode = () => {
-		const username = Array.isArray(email) ? email[0] : email; // Handle the case where email might be an array
-		const cognitoUser = new CognitoUser({ Username: username, Pool: UserPool });
+		const cognitoUser = new CognitoUser({
+			Username: String(email),
+			Pool: UserPool,
+		});
 		cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
 			if (err) {
 				Alert.alert("Error", err.message, [{ text: "OK" }], {
@@ -42,7 +44,11 @@ const VerifyEmailScreen: React.FC = () => {
 
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+			<TouchableOpacity
+				style={styles.backButton}
+				onPress={() => router.back()}
+				testID="back-button"
+			>
 				<MaterialIcons name="arrow-back" size={24} color="black" />
 			</TouchableOpacity>
 			<View style={styles.logoContainer}>
