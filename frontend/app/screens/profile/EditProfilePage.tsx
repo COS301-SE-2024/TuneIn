@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
+import Dropdown from "../../components/Dropdown";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -29,6 +30,8 @@ const EditProfileScreen = () => {
 	const profileInfo = JSON.parse(profile as string);
 
 	const [profileData, setProfileData] = useState(profileInfo);
+	let genres: string[] = [];
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
@@ -247,6 +250,29 @@ const EditProfileScreen = () => {
 		}
 	};
 
+	const getGenres = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Genre data" + response.data);
+				genres = response.data;
+			}
+		} catch (error) {
+			console.error("Error fetching genres:", error);
+		}
+	};
+
+	useEffect(() => {
+		getGenres();
+		console.log(genres[0]);
+	}, []);
+
 	const [currentLinkIndex, setCurrentLinkIndex] = useState(null);
 	const [currentLinkEditText, setCurrentLinkEditText] = useState("");
 
@@ -287,6 +313,23 @@ const EditProfileScreen = () => {
 			setChanged(true);
 		}
 	};
+
+	const addGenre = (genreToAdd) => {
+		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
+			// Check if the genre already exists
+			if (!profileData.fav_genres.data.includes(genreToAdd)) {
+				setProfileData((prevProfileData) => ({
+					...prevProfileData,
+					fav_genres: {
+						...prevProfileData.fav_genres,
+						data: [...prevProfileData.fav_genres.data, genreToAdd],
+					},
+				}));
+				setChanged(true);
+			}
+		}
+	};
+	
 
 	const removeSong = (index) => {
 		setProfileData((prevProfileData) => {
@@ -484,6 +527,13 @@ const EditProfileScreen = () => {
 							Add +
 						</Text>
 					</TouchableOpacity>
+					<Dropdown
+									options={genres}
+									placeholder="Select Genre"
+									onSelect={setSelectedGenre}
+									selectedOption={selectedGenre}
+									setSelectedOption={setSelectedGenre}
+								/>
 				</View>
 				{/* Favorite Songs */}
 				<View style={styles.divider} />
