@@ -21,7 +21,7 @@ import {
 	Easing,
 	Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
