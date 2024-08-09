@@ -63,11 +63,14 @@ const AnalyticsPage: React.FC = () => {
 			<ScrollView contentContainerStyle={styles.scrollView}>
 				<View style={styles.container}>
 					<View style={styles.header}>
-						<TouchableOpacity onPress={() => router.back()}>
+						<TouchableOpacity
+							onPress={() => router.back()}
+							testID="back-button"
+						>
 							<Ionicons name="chevron-back" size={24} color="black" />
 						</TouchableOpacity>
 						<Text style={styles.headerTitle}>Key Metrics Summary</Text>
-						<TouchableOpacity onPress={toggleDrawer}>
+						<TouchableOpacity onPress={toggleDrawer} testID="menu-button">
 							<Ionicons name="menu" size={24} color="black" />
 						</TouchableOpacity>
 					</View>
