@@ -15,12 +15,14 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
 import uploadImage from "../../services/ImageUpload";
-// import * as utils from "../../services/Utils";
-// import auth from "../../services/AuthManagement"; // Import AuthManagement
+import { useRoute, RouteProp } from "@react-navigation/native";
+type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
 const EditRoom: React.FC = () => {
-	const router = useRouter();
-	const roomData = useLocalSearchParams();
+	const route = useRoute<EditRoomRouteProp>();
+	const { params } = route;
+	let roomData: any;
+	roomData = params.room;
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -49,7 +51,7 @@ const EditRoom: React.FC = () => {
 	const screenWidth = Dimensions.get("window").width;
 
 	const navigateToEditPlaylist = () => {
-		router.navigate("/screens/rooms/EditPlaylist");
+		// router.navigate("/screens/rooms/EditPlaylist");
 	};
 
 	const pickImage = async () => {
@@ -131,9 +133,9 @@ const EditRoom: React.FC = () => {
 		<ScrollView contentContainerStyle={styles.scrollView}>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<TouchableOpacity onPress={() => router.back()}>
+					{/* <TouchableOpacity onPress={() => router.back()}>
 						<Text style={styles.closeButton}>×</Text>
-					</TouchableOpacity>
+					</TouchableOpacity> */}
 					<Text style={styles.headerTitle}>Edit Room Details</Text>
 					<View style={styles.headerPlaceholder} />
 				</View>

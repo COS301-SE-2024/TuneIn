@@ -7,6 +7,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../app/screens/Home";
 import RoomPage from "../app/screens/rooms/RoomPage";
+import EditRoom from "../app/screens/rooms/EditRoom";
 import Search from "../app/screens/Search";
 import Help from "../app/screens/help/HelpScreen";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ function HomeStackGroup() {
 		<HomeStack.Navigator>
 			<HomeStack.Screen name="Home" component={Home} />
 			<HomeStack.Screen name="RoomPage" component={RoomPage} />
+			<HomeStack.Screen name="EditRoom" component={EditRoom} />
 		</HomeStack.Navigator>
 	);
 }
