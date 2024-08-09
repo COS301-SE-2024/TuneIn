@@ -81,6 +81,7 @@ const AnalyticsPage: React.FC = () => {
 								activeButton === "Day" && styles.activeButton,
 							]}
 							onPress={() => handleButtonPress("Day")}
+							testID="day-button"
 						>
 							<Text
 								style={[
@@ -97,6 +98,7 @@ const AnalyticsPage: React.FC = () => {
 								activeButton === "Week" && styles.activeButton,
 							]}
 							onPress={() => handleButtonPress("Week")}
+							testID="week-button"
 						>
 							<Text
 								style={[
@@ -113,6 +115,7 @@ const AnalyticsPage: React.FC = () => {
 								activeButton === "Month" && styles.activeButton,
 							]}
 							onPress={() => handleButtonPress("Month")}
+							testID="month-button"
 						>
 							<Text
 								style={[

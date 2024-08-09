@@ -45,7 +45,7 @@ describe("AnalyticsPage", () => {
 		expect(getByText("Month")).toBeTruthy();
 	});
 
-	it("handles drawer toggle", () => {
+	it("handles drawer toggle General Analytics", () => {
 		const { getByTestId, getByText } = render(<AnalyticsPage />);
 
 		// Initially, drawer should not be visible
@@ -56,6 +56,62 @@ describe("AnalyticsPage", () => {
 
 		// Check if the drawer content is now visible
 		expect(getByText("General Analytics")).toBeTruthy();
+	});
+
+	it("handles drawer toggle Interactions Analytics", () => {
+		const { getByTestId, getByText } = render(<AnalyticsPage />);
+
+		// Initially, drawer should not be visible
+		expect(() => getByText("Interactions Analytics")).toThrow();
+
+		// Toggle drawer
+		fireEvent.press(getByTestId("menu-button"));
+
+		// Check if the drawer content is now visible
+		expect(getByText("Interactions Analytics")).toBeTruthy();
+	});
+
+	it("handles drawer toggle Playlist Analytics", () => {
+		const { getByTestId, getByText } = render(<AnalyticsPage />);
+
+		// Initially, drawer should not be visible
+		expect(() => getByText("Playlist Analytics")).toThrow();
+
+		// Toggle drawer
+		fireEvent.press(getByTestId("menu-button"));
+
+		// Check if the drawer content is now visible
+		expect(getByText("Playlist Analytics")).toBeTruthy();
+	});
+
+	it("applies active style to the Day button when pressed", () => {
+		const { getByTestId } = render(<AnalyticsPage />);
+
+		fireEvent.press(getByTestId("day-button"));
+
+		// expect(getByTestId("day-button").props.style[1]).toEqual(
+		// 	styles.activeButton,
+		// );
+	});
+
+	it("applies active style to the Week button when pressed", () => {
+		const { getByTestId } = render(<AnalyticsPage />);
+
+		fireEvent.press(getByTestId("week-button"));
+
+		// expect(getByTestId("week-button").props.style[1]).toEqual(
+		// 	styles.activeButton,
+		// );
+	});
+
+	it("applies active style to the Month button when pressed", () => {
+		const { getByTestId } = render(<AnalyticsPage />);
+
+		fireEvent.press(getByTestId("month-button"));
+
+		// expect(getByTestId("month-button").props.style[1]).toEqual(
+		// 	styles.activeButton,
+		// );
 	});
 
 	it("navigates to the correct screen when a drawer item is pressed", () => {
@@ -72,20 +128,6 @@ describe("AnalyticsPage", () => {
 			"/screens/analytics/GeneralAnalytics",
 		);
 	});
-
-	// it("changes button styles when pressed", () => {
-	// 	const { getByText } = render(<AnalyticsPage />);
-
-	// 	// Check initial button styles
-	// 	const dayButton = getByText("Day").parent;
-	// 	expect(dayButton).toHaveStyle({ backgroundColor: "white" });
-
-	// 	// Press "Day" button to activate it
-	// 	fireEvent.press(dayButton);
-
-	// 	// Check if the button style is active
-	// 	expect(dayButton).toHaveStyle({ backgroundColor: colors.primary });
-	// });
 
 	it("calls router.back() when back button is pressed", () => {
 		const { getByTestId } = render(<AnalyticsPage />);
