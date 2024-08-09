@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 
 interface MostDownvotedCardProps {
-	albumImage: string; // URL or local path to the album image
-	songName: string; // Name of the song
-	artistName: string; // Name of the artist
+	albumImage: string;
+	songName: string;
+	artistName: string;
 }
 
 const MostDownvotedCard: React.FC<MostDownvotedCardProps> = ({
@@ -16,7 +16,11 @@ const MostDownvotedCard: React.FC<MostDownvotedCardProps> = ({
 		<View style={styles.cardContainer}>
 			<Text style={styles.headerSong}>Most Downvoted Song</Text>
 			<View style={styles.contentContainer}>
-				<Image source={{ uri: albumImage }} style={styles.albumImage} />
+				<Image
+					source={{ uri: albumImage }}
+					style={styles.albumImage}
+					testID="album-image"
+				/>
 				<View style={styles.textContainer}>
 					<Text style={styles.songName}>{songName}</Text>
 					<Text style={styles.artistName}>{artistName}</Text>
