@@ -1,5 +1,5 @@
-// DrawerNavigator.tsx
 import React from "react";
+import { View } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import AnalyticsPage from "../screens/analytics/AnalyticsPage";
@@ -11,17 +11,32 @@ const Drawer = createDrawerNavigator();
 
 const DrawerNavigator: React.FC = () => {
 	return (
-		<NavigationContainer>
-			<Drawer.Navigator>
-				<Drawer.Screen name="AnalyticsPage" component={AnalyticsPage} />
-				<Drawer.Screen
-					name="InteractionsAnalytics"
-					component={InteractionsAnalytics}
-				/>
-				<Drawer.Screen name="GeneralAnalytics" component={GeneralAnalytics} />
-				<Drawer.Screen name="PlaylistAnalytics" component={PlaylistAnalytics} />
-			</Drawer.Navigator>
-		</NavigationContainer>
+		<View testID="drawer-navigator-container">
+			<NavigationContainer>
+				<Drawer.Navigator>
+					<Drawer.Screen
+						name="AnalyticsPage"
+						component={AnalyticsPage}
+						options={{ title: "AnalyticsPage" }}
+					/>
+					<Drawer.Screen
+						name="InteractionsAnalytics"
+						component={InteractionsAnalytics}
+						options={{ title: "InteractionsAnalytics" }}
+					/>
+					<Drawer.Screen
+						name="GeneralAnalytics"
+						component={GeneralAnalytics}
+						options={{ title: "GeneralAnalytics" }}
+					/>
+					<Drawer.Screen
+						name="PlaylistAnalytics"
+						component={PlaylistAnalytics}
+						options={{ title: "PlaylistAnalytics" }}
+					/>
+				</Drawer.Navigator>
+			</NavigationContainer>
+		</View>
 	);
 };
 
