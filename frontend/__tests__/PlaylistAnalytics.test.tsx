@@ -2,11 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import PlaylistAnalytics from "../app/screens/analytics/PlaylistAnalytics"; // Adjust the import path as necessary
 import { useRouter } from "expo-router";
-// import MetricsCard from "../../components/MetricsCard";
-// import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
-// import TableCard from "../../components/TableCard";
-// import TopSong from "../../components/TopSong";
-// import MostDownvotedCard from "../../components/MostDownvotedCard";
 
 // Mock the useRouter hook
 jest.mock("expo-router", () => ({

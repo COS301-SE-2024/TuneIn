@@ -46,7 +46,7 @@ const InteractionsAnalytics: React.FC = () => {
 		<ScrollView contentContainerStyle={styles.scrollView}>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<TouchableOpacity onPress={() => router.back()}>
+					<TouchableOpacity onPress={() => router.back()} testID="back-button">
 						<Ionicons name="chevron-back" size={24} color="black" />
 					</TouchableOpacity>
 					<Text style={styles.headerTitle}>User Interactions in Room</Text>
