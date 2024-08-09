@@ -47,7 +47,8 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	// const [cache, setCacheLoaded] = useState(false);
+	const [cache, setCacheLoaded] = useState(false);
+	const [userData, setUserData] = useState();
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -80,10 +81,28 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
+
+			// console.log("Friends: " + JSON.stringify(response.data));
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
 			return [];
+		}
+	};
+
+	const fetchProfileInfo = async (token: string) => {
+		try {
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Home Response Data: " + JSON.stringify(response));
+				return response.data;
+			}
+		} catch (error) {
+			console.error("Error fetching profile info:", error);
 		}
 	};
 
@@ -167,6 +186,9 @@ const Home: React.FC = () => {
 				JSON.stringify(formattedMyRooms),
 			);
 
+			const userInfo = await fetchProfileInfo(storedToken);
+			setUserData(userInfo);
+
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
 
@@ -175,11 +197,13 @@ const Home: React.FC = () => {
 						profilePicture: friend.profile_picture_url
 							? friend.profile_picture_url
 							: ProfileIMG,
-						profile_name: friend.profile_name, // Ensure you include the profile_name property
+						username: friend.username, // Ensure you include the profile_name property
 					}))
 				: [];
 
 			setFriends(formattedFriends);
+
+			console.log("Friends after format: " + JSON.stringify(formattedFriends));
 
 			await StorageService.setItem(
 				"cachedFriends",
@@ -297,7 +321,13 @@ const Home: React.FC = () => {
 						>
 							<Text style={styles.sectionTitle}>Friends</Text>
 						</TouchableOpacity>
-						<FriendsGrid friends={friends} maxVisible={8} />
+						{userData && userData.username ? (
+							<FriendsGrid
+								friends={friends}
+								user={userData.username}
+								maxVisible={8}
+							/>
+						) : null}
 						<Text style={styles.sectionTitle}>My Rooms</Text>
 						<AppCarousel data={myRooms} renderItem={renderItem} />
 					</View>

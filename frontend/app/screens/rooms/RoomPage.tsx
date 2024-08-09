@@ -82,7 +82,7 @@ const RoomPage = () => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
-	const playback = useRef(new SimpleSpotifyPlayback()).current;
+	const playback = useRef(SimpleSpotifyPlayback.getInstance()).current;
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;

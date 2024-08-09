@@ -8,7 +8,8 @@ import {
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
-	Modal,
+	Switch,
+	ScrollView,
 	FlatList,
 } from "react-native";
 import { useNavigation } from "expo-router";
@@ -19,6 +20,9 @@ import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
+import Dropdown from "../components/Dropdown";
+// import DatePickerModal from "../components/DatePickerModal";
+import ToggleButton from "../components/ToggleButton";
 
 type SearchResult = {
 	id: string;
@@ -28,41 +32,72 @@ type SearchResult = {
 	userData?: User;
 };
 
-const roomFilterCategories = [
-	{ id: "roomName", label: "Room Name" },
-	{ id: "username", label: "Host" },
-	{ id: "participationCount", label: "Participation Count" },
-	{ id: "description", label: "Description" },
-	{ id: "isTemporary", label: "Temporary" },
-	{ id: "isPrivate", label: "Private" },
-	{ id: "isScheduled", label: "Scheduled" },
-	//   { id: 'startDate', label: 'Start Date' },
-	//   { id: 'endDate', label: 'End Date' },
-	{ id: "language", label: "Language" },
-	{ id: "explicit", label: "Explicit" },
-	{ id: "nsfw", label: "NSFW" },
-	{ id: "tags", label: "Tags" },
+// Sample genre data with additional genres
+const genres = [
+	"Rock",
+	"Pop",
+	"Jazz",
+	"Classical",
+	"Hip Hop",
+	"Country",
+	"Electronic",
+	"Reggae",
+	"Blues",
+	"Folk",
+	"Metal",
+	"Punk",
+	"Soul",
+	"R&B",
+	"Funk",
+	"Alternative",
+	"Indie",
+	"Dance",
+	"Techno",
+	"Ambient",
+	"Gospel",
+	"Latin",
+	"Reggaeton",
+	"Ska",
+	"Opera",
 ];
 
-// const userFilterCategories = [
-// 	{ id: "profileName", label: "Profile Name" },
-//   { id: 'username', label: 'Username' },
-// //   { id: 'minFollowing', label: 'Minimum Number of Following' },
-// //   { id: 'minFollowers', label: 'Minimum Number of Followers' },
-// ];
-
-const allFilterCategories = [...roomFilterCategories];
+// Sample language data
+const languages = [
+	"English",
+	"Spanish",
+	"French",
+	"German",
+	"Chinese",
+	"Japanese",
+	"Korean",
+	"Portuguese",
+	"Russian",
+	"Arabic",
+	"Italian",
+	"Turkish",
+	"Swedish",
+];
 
 const Search: React.FC = () => {
 	const navigation = useNavigation();
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filter, setFilter] = useState<"all" | "room" | "user">("all");
+	// const [filter, setFilter] = useState<"all" | "room" | "user">("all");
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	const [filter, setFilter] = useState("room"); // Default to "room"
+	const [showMoreFilters, setShowMoreFilters] = useState(false);
+	const [explicit, setExplicit] = useState(false);
+	const [nsfw, setNsfw] = useState(false);
+	// const [startDate, setStartDate] = useState(null);
+	// const [endDate, setEndDate] = useState(null);
+	const [temporary, setTemporary] = useState(false);
+	const [isPrivate, setIsPrivate] = useState(false);
+	const [scheduled, setScheduled] = useState(false);
+	// const [showStartDateModal, setShowStartDateModal] = useState(false);
+	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -177,12 +212,23 @@ const Search: React.FC = () => {
 		return null;
 	};
 
-	const handleFilterToggle = (id: string) => {
-		setSelectedFilters((prevSelectedFilters) =>
-			prevSelectedFilters.includes(id)
-				? prevSelectedFilters.filter((filterId) => filterId !== id)
-				: [...prevSelectedFilters, id],
-		);
+	const handleToggleMoreFilters = () => {
+		setShowMoreFilters(!showMoreFilters);
+	};
+
+	const handleSelection = (selectedFilter) => {
+		setFilter(selectedFilter);
+	};
+
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+
+	const handleSelectGenre = (genre: string) => {
+		setSelectedGenre(genre);
+	};
+
+	const handleSelectLanguage = (language: string) => {
+		setSelectedLanguage(language);
 	};
 
 	return (
@@ -196,9 +242,9 @@ const Search: React.FC = () => {
 				</TouchableOpacity>
 				<Text style={styles.title}>Search </Text>
 			</View>
-
 			<View style={styles.searchBarContainer}>
 				<TextInput
+					testID="search-input"
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
@@ -216,20 +262,13 @@ const Search: React.FC = () => {
 					/>
 				</TouchableOpacity>
 			</View>
-
 			<View style={styles.filterContainer}>
-				<TouchableOpacity
-					style={[styles.filterButton, filter === "all" && styles.activeFilter]}
-					onPress={() => setFilter("all")}
-				>
-					<Text style={styles.filterText}>All</Text>
-				</TouchableOpacity>
 				<TouchableOpacity
 					style={[
 						styles.filterButton,
 						filter === "room" && styles.activeFilter,
 					]}
-					onPress={() => setFilter("room")}
+					onPress={() => handleSelection("room")}
 				>
 					<Text style={styles.filterText}>Rooms</Text>
 				</TouchableOpacity>
@@ -238,113 +277,168 @@ const Search: React.FC = () => {
 						styles.filterButton,
 						filter === "user" && styles.activeFilter,
 					]}
-					onPress={() => setFilter("user")}
+					onPress={() => handleSelection("user")}
 				>
 					<Text style={styles.filterText}>Users</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={styles.filterButton}
-					onPress={() => setModalVisible(true)}
-					testID="filter-button"
+					onPress={handleToggleMoreFilters}
+					testID="toggle-filters-button"
 				>
-					<Ionicons name="filter" size={24} color={colors.primary} />
+					<Text style={styles.filterText}>
+						{showMoreFilters ? "View Less Filters" : "View More Filters"}
+					</Text>
 				</TouchableOpacity>
 			</View>
 
-			<View style={styles.selectedFiltersContainer}>
-				{selectedFilters.map((filter) => (
-					<View key={filter} style={styles.selectedFilter}>
-						<Text style={styles.selectedFilterText}>
-							{filter === "roomName"
-								? "Room Name"
-								: filter === "username"
-									? "Username of Creator"
-									: filter === "participationCount"
-										? "Participation Count"
-										: filter === "description"
-											? "Description"
-											: filter === "isTemporary"
-												? "Temporary"
-												: filter === "isPrivate"
-													? "Private"
-													: filter === "isScheduled"
-														? "Scheduled"
-														: filter === "startDate"
-															? "Start Date"
-															: filter === "endDate"
-																? "End Date"
-																: filter === "language"
-																	? "Language"
-																	: filter === "explicit"
-																		? "Explicit"
-																		: filter === "nsfw"
-																			? "NSFW"
-																			: filter === "tags"
-																				? "Tags"
-																				: ""}
-						</Text>
-						<TouchableOpacity onPress={() => handleFilterToggle(filter)}>
-							<Ionicons name="close-circle" size={20} color={colors.primary} />
-						</TouchableOpacity>
-					</View>
-				))}
-			</View>
+			{(!filter ||
+				(filter === "user" && showMoreFilters) ||
+				(filter === "room" && showMoreFilters)) && (
+				<>
+					{(filter === "user" || !filter) && (
+						<View style={styles.additionalFilters}>
+							{showMoreFilters && (
+								<View style={styles.includeSection}>
+									<Text style={styles.includeHeader}>Search by:</Text>
+									<View style={styles.searchBy}>
+										<ToggleButton label="Minimum Followers" />
+										<ToggleButton label="Maximum Followers" />
+									</View>
+								</View>
+							)}
+						</View>
+					)}
+
+					{(filter === "room" || !filter) && (
+						<ScrollView style={styles.additionalFilters}>
+							<View style={styles.includeSection}>
+								<Text style={styles.includeHeader}>Search by:</Text>
+								<View style={styles.searchBy}>
+									<ToggleButton label="Host" testID="host-toggle" />
+									<ToggleButton label="Room Count" testID="room-count-toggle" />
+								</View>
+							</View>
+							<View style={styles.includeSection}>
+								<Text style={styles.includeHeader}>Include:</Text>
+								<View style={styles.switchContainer}>
+									<Text style={styles.switchLabel}>Explicit</Text>
+									<Switch
+										testID="explicit-switch"
+										value={explicit}
+										onValueChange={(value) => setExplicit(value)}
+									/>
+								</View>
+								<View style={styles.switchContainer}>
+									<Text style={styles.switchLabel}>NSFW</Text>
+									<Switch
+										testID="nsfw-switch"
+										value={nsfw}
+										onValueChange={(value) => setNsfw(value)}
+									/>
+								</View>
+							</View>
+							<View style={styles.dropContainer}>
+								<Dropdown
+									options={genres}
+									placeholder="Select Genre"
+									onSelect={handleSelectGenre}
+									selectedOption={selectedGenre}
+									setSelectedOption={setSelectedGenre}
+								/>
+								<Dropdown
+									options={languages}
+									placeholder="Select Language"
+									onSelect={handleSelectLanguage}
+									selectedOption={selectedLanguage}
+									setSelectedOption={setSelectedLanguage}
+								/>
+							</View>
+							{/* <Text style={styles.includeHeader}>Room Availability:</Text> */}
+							{/* <View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>Start Date:</Text>
+						<DateTimePicker
+							value={startDate || new Date()}
+							mode="date"
+							display="default"
+							onChange={(event, selectedDate) =>
+								setStartDate(selectedDate || undefined)
+							}
+						/>
+					</View> */}
+							{/* <View style={styles.datePickerContainer}>
+						<Text style={styles.datePickerLabel}>End Date:</Text>
+						<DateTimePicker
+							value={endDate || new Date()}
+							mode="date"
+							display="default"
+							onChange={(event, selectedDate) =>
+								setEndDate(selectedDate || undefined)
+							}
+						/>
+					</View> */}
+							{/* <View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>Start Date:</Text>
+								<TouchableOpacity
+									style={styles.button}
+									onPress={() => setShowStartDateModal(true)}
+								>
+									<Text style={styles.buttonText}>
+										{startDate ? startDate.toDateString() : "Select Start Date"}
+									</Text>
+								</TouchableOpacity>
+								<DatePickerModal
+									selectedDate={startDate}
+									onDateChange={setStartDate}
+									isVisible={showStartDateModal}
+									onClose={() => setShowStartDateModal(false)}
+								/>
+							</View> */}
+
+							{/* <View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>End Date:</Text>
+								<TouchableOpacity
+									style={styles.button}
+									onPress={() => setShowEndDateModal(true)}
+								>
+									<Text style={styles.buttonText}>
+										{endDate ? endDate.toDateString() : "Select End Date"}
+									</Text>
+								</TouchableOpacity>
+								<DatePickerModal
+									selectedDate={endDate}
+									onDateChange={setEndDate}
+									isVisible={showEndDateModal}
+									onClose={() => setShowEndDateModal(false)}
+								/>
+							</View> */}
+							<View style={styles.includeSection}>
+								<Text style={styles.includeHeader}>Other:</Text>
+								<View style={styles.switchContainer}>
+									<Text style={styles.switchLabel}>Temporary</Text>
+									<Switch value={temporary} onValueChange={setTemporary} />
+								</View>
+								<View style={styles.switchContainer}>
+									<Text style={styles.switchLabel}>Private</Text>
+									<Switch value={isPrivate} onValueChange={setIsPrivate} />
+								</View>
+								<View style={styles.switchContainer}>
+									<Text style={styles.switchLabel}>Scheduled</Text>
+									<Switch value={scheduled} onValueChange={setScheduled} />
+								</View>
+							</View>
+						</ScrollView>
+					)}
+				</>
+			)}
 
 			<FlatList
-				testID="scroll-view"
 				data={results}
-				renderItem={renderResult}
 				keyExtractor={(item) => item.id}
+				renderItem={renderResult}
+				contentContainerStyle={styles.resultsContainer}
 				onScroll={handleScroll}
-				contentContainerStyle={{ paddingBottom: 20 }}
 			/>
-
-			<Modal
-				visible={modalVisible}
-				transparent
-				animationType="slide"
-				onRequestClose={() => setModalVisible(false)}
-				testID="filter-modal"
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalContent}>
-						<Text style={styles.modalTitle}>Select Filters</Text>
-						<FlatList
-							data={
-								filter === "all"
-									? allFilterCategories
-									: filter === "room"
-										? roomFilterCategories
-										: []
-							}
-							keyExtractor={(item) => item.id}
-							renderItem={({ item }) => (
-								<TouchableOpacity
-									style={styles.modalItem}
-									onPress={() => handleFilterToggle(item.id)}
-									testID={`filter-option-${item.id}`}
-								>
-									<Text style={styles.modalItemText}>{item.label}</Text>
-									{selectedFilters.includes(item.id) && (
-										<Ionicons
-											name="checkmark-circle"
-											size={24}
-											color={colors.primary}
-										/>
-									)}
-								</TouchableOpacity>
-							)}
-						/>
-						<TouchableOpacity
-							style={styles.closeButton}
-							onPress={() => setModalVisible(false)}
-							testID="close-button"
-						>
-							<Text style={styles.closeButtonText}>Close</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</Modal>
 
 			<Animated.View
 				style={[
@@ -409,7 +503,23 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: "#ccc",
 	},
+	filterMore: {
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 7,
+		borderWidth: 1,
+		borderColor: "#ccc",
+	},
 	activeFilter: {
+		backgroundColor: colors.primary,
+		borderColor: colors.primary,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 5.84,
+		elevation: 5,
+	},
+	activeFilterMore: {
 		backgroundColor: colors.primary,
 		borderColor: colors.primary,
 		shadowColor: "#000",
@@ -421,6 +531,7 @@ const styles = StyleSheet.create({
 	filterText: {
 		color: "#333",
 		fontWeight: "bold",
+		textAlign: "center",
 	},
 	selectedFiltersContainer: {
 		flexDirection: "row",
@@ -492,6 +603,78 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		zIndex: 10,
+	},
+	resultsContainer: {
+		paddingVertical: 10,
+	},
+	additionalFilters: {
+		paddingHorizontal: 20,
+		marginTop: 10,
+		marginBottom: 40,
+		height: "100%",
+	},
+	includeSection: {
+		paddingVertical: 10,
+	},
+	includeHeader: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 5,
+	},
+	switchContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingVertical: 5,
+	},
+	switchLabel: {
+		fontSize: 16,
+	},
+	datePickerContainer: {
+		paddingVertical: 10,
+	},
+	datePickerLabel: {
+		fontSize: 16,
+	},
+	participantCountContainer: {
+		paddingVertical: 10,
+	},
+	participantCountLabel: {
+		fontSize: 16,
+	},
+	participantCountInput: {
+		height: 40,
+		borderColor: "gray",
+		borderWidth: 1,
+		borderRadius: 10,
+		paddingHorizontal: 10,
+	},
+	dropContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingBottom: 10,
+	},
+	heading: {
+		fontSize: 24,
+		marginBottom: 20,
+	},
+	button: {
+		backgroundColor: "#08BDBD",
+		padding: 10,
+		borderRadius: 5,
+		marginTop: 10,
+	},
+	buttonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "bold",
+		textAlign: "center",
+	},
+	searchBy: {
+		flex: 1,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingBottom: 10,
 	},
 });
 

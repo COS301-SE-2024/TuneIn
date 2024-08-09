@@ -5,38 +5,26 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
-import { colors } from "../styles/colors";
 
-const TopNavBar: React.FC = () => {
+interface TopNavBarProps {
+	profileInfo: any;
+}
+
+const TopNavBar: React.FC<TopNavBarProps> = ({ profileInfo }) => {
 	const router = useRouter();
-	const [profileImage, setProfileImage] = useState<string>(
-		"https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
-	);
 
-	useEffect(() => {
-		const fetchProfilePicture = async () => {
-			try {
-				const token = await auth.getToken();
-				if (token) {
-					const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					});
-					console.log(response);
-					setProfileImage(response.data.profile_picture_url);
-				}
-			} catch (error) {
-				console.error("Error fetching profile info:", error);
-			}
-		};
+	let profileImage = "";
 
-		fetchProfilePicture();
-	}, []);
+	if (profileInfo) {
+		profileImage = profileInfo.userData.profile_picture_url;
+	} else {
+		profileImage = "https://cdn-.jk.-png.freepik.com/512/3135/3135715.png";
+	}
 
 	const navigateToProfile = () => {
 		router.push({
 			pathname: "/screens/profile/ProfilePage",
+			// params: { profile: username },
 		});
 	};
 
