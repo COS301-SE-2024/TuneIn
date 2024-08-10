@@ -730,23 +730,26 @@ class LiveSocketService {
 		this.pollLatency();
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
+			console.log("end of: if (!this.currentUser)");
 			return;
 		}
 
 		if (this.setDMs) {
 			this.setDMs([]);
 			this.setDMs = null;
-			return;
+			console.log("end of: if (this.setDMs)");
 		}
 
 		if (this.setDMTextBox) {
 			this.setDMTextBox("");
 			this.setDMTextBox = null;
+			console.log("end of: if (this.setDMTextBox)");
 		}
 
 		if (this.setConnected) {
 			this.setConnected(false);
 			this.setConnected = null;
+			console.log("end of: if (this.setConnected)");
 		}
 
 		this.fetchedHistory = [];
@@ -757,7 +760,8 @@ class LiveSocketService {
 		const input = {
 			userID: u.userID,
 		};
-		this.socket.emit("leaveDirectMessage", JSON.stringify(input));
+		this.socket.emit("exitDirectMessage", JSON.stringify(input));
+		console.log("emit exitDirectMessage with body:", input);
 	}
 
 	public async sendDM(message: DirectMessage, otherUser: UserDto) {

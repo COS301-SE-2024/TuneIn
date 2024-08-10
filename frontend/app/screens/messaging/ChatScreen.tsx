@@ -232,7 +232,9 @@ const ChatScreen = () => {
 	const [connected, setConnected] = useState(false);
 	const [isSending, setIsSending] = useState(false);
 	const router = useRouter();
-	const { friend } = useLocalSearchParams();
+	let { username } = useLocalSearchParams();
+	const u: string = Array.isArray(username) ? username[0] : username;
+	console.log("Username:", u);
 
 	const getUsers = async () => {
 		try {
@@ -241,7 +243,7 @@ const ChatScreen = () => {
 				axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: { Authorization: `Bearer ${token}` },
 				}),
-				axios.get(`${utils.API_BASE_URL}/users/${friend}`, {
+				axios.get(`${utils.API_BASE_URL}/users/${u}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				}),
 			];
@@ -253,17 +255,26 @@ const ChatScreen = () => {
 		}
 	};
 
+	const cleanup = async () => {
+		console.log("Cleaning up DM");
+		if (connected) {
+			console.log("Leaving DM");
+			await live.leaveDM();
+		}
+	};
+
 	useEffect(() => {
 		if (instanceExists()) {
 			if (!messages || messages.length === 0) {
 				if (live.receivedDMHistory()) {
 					setMessages(live.getFetchedDMs());
 				}
-				live.requestDMHistory(Array.isArray(friend) ? friend[0] : friend);
+				live.requestDMHistory(u);
 			}
 		}
-	}, [messages, friend]);
+	}, [messages]);
 
+	//on component mount
 	useEffect(() => {
 		const initialize = async () => {
 			try {
@@ -292,14 +303,15 @@ const ChatScreen = () => {
 		};
 		initialize();
 		return () => {
-			const cleanup = async () => {
-				if (connected) {
-					await live.leaveDM();
-				}
-			};
-			cleanup();
+			cleanup()
+				.then(() => {
+					console.log("Cleaned up DM");
+				})
+				.catch((error) => {
+					console.error("Failed to clean up DM", error);
+				});
 		};
-	}, [friend]);
+	}, []);
 
 	const handleSend = () => {
 		if (!self || !otherUser || isSending) return;
@@ -326,7 +338,16 @@ const ChatScreen = () => {
 		<View style={styles.container}>
 			<View style={styles.header}>
 				<TouchableOpacity
-					onPress={() => router.back()}
+					onPress={() => {
+						router.back();
+						cleanup()
+							.then(() => {
+								console.log("Cleaned up DM");
+							})
+							.catch((error) => {
+								console.error("Failed to clean up DM", error);
+							});
+					}}
 					testID="backButton"
 					style={styles.backButton}
 				>

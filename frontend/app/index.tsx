@@ -63,21 +63,16 @@ const App: React.FC = () => {
 						live.initialiseSocket();
 					}
 				}
-				router.push({
-					pathname: "screens/messaging/ChatScreen",
-					params: { friend: "8xbbie" },
-				});
-
-				// // Perform token validation if necessary
-				// if (auth.authenticated()) {
-				// 	// Redirect to the HomeScreen or appropriate route
-				// 	router.push("/screens/Home");
-				// } else {
-				// 	// Redirect to the WelcomeScreen or appropriate route
-				// 	console.log("clearing from index");
-				// 	StorageService.clear();
-				// 	router.push("/screens/WelcomeScreen");
-				// }
+				// Perform token validation if necessary
+				if (auth.authenticated()) {
+					// Redirect to the HomeScreen or appropriate route
+					router.push("/screens/Home");
+				} else {
+					// Redirect to the WelcomeScreen or appropriate route
+					console.log("clearing from index");
+					StorageService.clear();
+					router.push("/screens/WelcomeScreen");
+				}
 			} catch (error) {
 				console.error("Error checking token or loading fonts:", error);
 				router.push("/screens/WelcomeScreen");
