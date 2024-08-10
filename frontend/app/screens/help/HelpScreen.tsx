@@ -15,6 +15,7 @@ const menuItems = [
 		icon: "🚀",
 		subcategories: [
 			{ title: "Introduction", screen: "screens/help/GettingStarted" },
+			{ title: "About", screen: "screens/help/GettingStarted" },
 			{ title: "Creating an Account", screen: "screens/help/GettingStarted" },
 			{ title: "Logging In", screen: "screens/help/GettingStarted" },
 		],
@@ -46,6 +47,31 @@ const menuItems = [
 			{ title: "Managing Rooms", screen: "screens/help/RoomInteraction" },
 		],
 		route: "screens/help/RoomInteraction",
+	},
+	{
+		title: "Room Collaboration",
+		icon: "🤝",
+		subcategories: [
+			{ title: "Chat", screen: "screens/help/RoomCollaboration" },
+			{ title: "Reactions", screen: "screens/help/RoomCollaboration" },
+			{
+				title: "Add To The Playlist",
+				screen: "screens/help/RoomCollaboration",
+			},
+			{ title: "Voting", screen: "screens/help/RoomCollaboration" },
+		],
+		route: "screens/help/RoomCollaboration",
+	},
+	{
+		title: "Friends and Followering",
+		icon: "👥",
+		subcategories: [
+			{ title: "Following", screen: "screens/help/FriendsFollowering" },
+			{ title: "Friends", screen: "screens/help/FriendsFollowering" },
+			// { title: "Joining Rooms", screen: "screens/help/FriendsFollowering" },
+			// { title: "Managing Rooms", screen: "screens/help/FriendsFollowering" },
+		],
+		route: "screens/help/FriendsFollowering",
 	},
 	// ... (Add more sections here)
 ];
