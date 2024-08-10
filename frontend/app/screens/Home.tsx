@@ -24,6 +24,7 @@ import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
 import Miniplayer from "../components/home/miniplayer";
+import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
@@ -353,6 +354,7 @@ const Home: React.FC = () => {
 				]}
 			>
 				<Miniplayer />
+				<NavBar />
 			</Animated.View>
 		</View>
 	);

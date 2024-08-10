@@ -9,48 +9,33 @@ import {
 	Animated,
 	ViewStyle,
 } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { Room } from "../../models/Room";
+import { useRouter } from "expo-router";
 
-// Define the Room model interface
-interface Room {
-	id: string;
-	name: string;
-	description: string;
-	songName?: string;
-	artistName?: string;
-	backgroundImage: string;
-	tags: string[];
-	mine: boolean;
-	userProfile: string;
-	username: string;
-}
-
-// Define the navigation routes and parameters
-type RootStackParamList = {
-	RoomPage: { room: string };
-	EditRoom: { room: string };
-};
-
-// Define the props for the RoomCardWidget component
 interface RoomCardWidgetProps {
 	roomCard: Room;
-	style?: ViewStyle;
+	style?: ViewStyle; // Add this line
 }
 
-// The RoomCardWidget component
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-	const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Use the defined types
+	const cardWidth = 320;
+	const router = useRouter();
+	const room = JSON.parse(JSON.stringify(roomCard));
 
-	const room = JSON.parse(JSON.stringify(roomCard)); // Clone the room object
-
-	const navigateToRoomPage = () => {
-		console.log("navigateToRoomPage");
-		navigation.navigate("RoomPage", { room }); // Pass the room data as a string
+	// console.log("roomCard", roomCard);
+	const navigateToEditRoom = () => {
+		router.navigate({
+			pathname: "/screens/rooms/EditRoom",
+			params: { Room: JSON.stringify(room) },
+		});
 	};
 
-	const navigateToEditRoom = () => {
-		console.log("navigateToEditRoom");
-		navigation.navigate("EditRoom", { room }); // Pass the room data as a string
+	const navigateToRoomPage = () => {
+		console.log("Room:", room);
+		router.navigate({
+			pathname: "/screens/rooms/RoomPage",
+			params: { room: JSON.stringify(room) },
+		});
 	};
 
 	const renderSongInfo = () => {
@@ -81,7 +66,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 
 	return (
 		<TouchableOpacity onPress={navigateToRoomPage}>
-			<Animated.View style={[styles.container, { width: 320 }]}>
+			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
 					source={{ uri: roomCard.backgroundImage }}
 					style={styles.imageBackground}
@@ -128,13 +113,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	);
 };
 
-// Styles for the component
 const styles = StyleSheet.create({
 	container: {
 		margin: 8,
 		borderRadius: 15,
 		overflow: "hidden",
-		height: 210,
+		height: 210, // Adjust height as needed
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.25,
@@ -145,7 +129,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	imageBackgroundStyle: {
-		borderRadius: 15,
+		borderRadius: 15, // Adjust border radius as needed
 	},
 	overlay: {
 		position: "absolute",

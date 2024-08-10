@@ -21,7 +21,7 @@ import {
 	Easing,
 	Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
@@ -36,18 +36,18 @@ import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData, Room } from "../../models/Room";
-import { useRoute, RouteProp } from "@react-navigation/native";
 
 const MemoizedCommentWidget = memo(CommentWidget);
-type RoomPageRouteProp = RouteProp<{ params: { room: string } }, "params">;
-const RoomPage = () => {
-	// live.initialiseSocket();
-	const route = useRoute<RoomPageRouteProp>();
-	const { params } = route;
 
-	console.log("parsed params: " + params.room);
+const RoomPage = () => {
+	live.initialiseSocket();
+	const { room } = useLocalSearchParams();
 	let roomData: any;
-	roomData = params.room;
+	if (Array.isArray(room)) {
+		roomData = JSON.parse(room[0]);
+	} else if (room) {
+		roomData = JSON.parse(room);
+	}
 	const roomID = roomData.id;
 
 	const playerContext = useContext(Player);
@@ -82,7 +82,7 @@ const RoomPage = () => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
-	const playback = useRef(SimpleSpotifyPlayback.getInstance()).current;
+	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;

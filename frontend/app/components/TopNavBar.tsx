@@ -1,31 +1,55 @@
 // TopNavBar.tsx
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useEffect, useState, Suspense } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 import { colors } from "../styles/colors";
+import profileIcon from "../../assets/profile-icon.png";
 
-interface TopNavBarProps {
-	profileInfo: any;
-}
+// Lazy load the Image component
+const LazyImage = React.lazy(() =>
+	import("react-native").then((module) => ({ default: module.Image })),
+);
 
-const TopNavBar: React.FC<TopNavBarProps> = ({ profileInfo }) => {
+const TopNavBar: React.FC = () => {
 	const router = useRouter();
+	const [profileImage, setProfileImage] = useState<string>("");
 
-	let profileImage = "";
+	useEffect(() => {
+		const fetchProfilePicture = async () => {
+			try {
+				const token = await auth.getToken();
+				if (token) {
+					const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					});
+					const imageUrl = response.data.profile_picture_url;
 
-	if (profileInfo) {
-		profileImage = profileInfo.userData.profile_picture_url;
-	} else {
-		profileImage = "https://cdn-.jk.-png.freepik.com/512/3135/3135715.png";
-	}
+					if (
+						!imageUrl ||
+						imageUrl === "https://example.com/default-profile-picture.png"
+					) {
+						setProfileImage(profileIcon);
+					} else {
+						setProfileImage(imageUrl);
+					}
+				}
+			} catch (error) {
+				console.error("Error fetching profile info:", error);
+				setProfileImage(profileIcon); // Fallback in case of error
+			}
+		};
+
+		fetchProfilePicture();
+	}, []);
 
 	const navigateToProfile = () => {
 		router.push({
 			pathname: "/screens/profile/ProfilePage",
-			// params: { profile: username },
 		});
 	};
 
@@ -36,8 +60,12 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ profileInfo }) => {
 			<View style={styles.emptyView}></View>
 			<Text style={styles.appName}>{appName}</Text>
 			<TouchableOpacity onPress={navigateToProfile}>
-				<Image
-					source={{ uri: profileImage }}
+				<LazyImage
+					source={
+						typeof profileImage === "string"
+							? { uri: profileImage }
+							: profileImage
+					}
 					style={styles.profileImage}
 					testID="profile-image"
 				/>
@@ -69,6 +97,8 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderRadius: 20,
 		marginRight: 16,
+		borderWidth: 1, // Add a border
+		borderColor: "grey", // Set the border color to grey
 	},
 });
 

@@ -9,6 +9,7 @@ const NavBar: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<string>("Home");
 
 	const navigate = (route: string, tab: string) => {
+		console.log("active tab: " + tab);
 		setActiveTab(tab);
 		router.navigate(route);
 	};
