@@ -230,9 +230,8 @@ const Home: React.FC = () => {
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
-		router.navigate("/screens/AllFriends");
 		router.navigate({
-			pathname: "/screens/AllFriends",
+			pathname: "/screens/followers/FollowerStack",
 			params: { username: userData.username },
 		});
 	};

@@ -7,7 +7,7 @@ interface FriendCardProps {
 	profilePicture: string;
 	username: string;
 	friend: Friend;
-	user: string;
+	user: string | string[];
 }
 
 const FriendCard: React.FC<FriendCardProps> = ({

@@ -7,10 +7,10 @@ import {
 	FlatList,
 } from "react-native";
 import { useNavigation, useLocalSearchParams } from "expo-router";
-import FriendCard from "../components/FriendCard";
-import auth from "./../services/AuthManagement";
+import FriendCard from "../../components/FriendCard";
+import auth from "../../services/AuthManagement";
 import axios from "axios";
-import * as utils from "./../services/Utils";
+import * as utils from "../../services/Utils";
 
 interface Friend {
 	profile_picture_url: string;
@@ -50,10 +50,6 @@ const AllFriends: React.FC = () => {
 		}
 	};
 
-	const goBack = () => {
-		navigation.goBack();
-	};
-
 	const renderFriend = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
@@ -65,7 +61,6 @@ const AllFriends: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Your Friends</Text>
 			{friends.length > 0 ? (
 				<FlatList
 					data={friends}
@@ -76,9 +71,6 @@ const AllFriends: React.FC = () => {
 			) : (
 				<Text style={styles.noFriendsText}>You have no friends added yet.</Text>
 			)}
-			<TouchableOpacity onPress={goBack} style={styles.goBackButton}>
-				<Text style={styles.goBackText}>Go Back</Text>
-			</TouchableOpacity>
 		</View>
 	);
 };
@@ -90,13 +82,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		backgroundColor: "#fff",
 	},
-	title: {
-		fontSize: 24,
-		fontWeight: "bold",
-		color: "#4A4A4A",
-		marginBottom: 16,
-		textAlign: "center",
-	},
 	friendsList: {
 		paddingBottom: 16,
 	},
@@ -105,14 +90,6 @@ const styles = StyleSheet.create({
 		color: "#888",
 		textAlign: "center",
 		marginTop: 32,
-	},
-	goBackButton: {
-		marginTop: 20,
-		alignSelf: "center",
-	},
-	goBackText: {
-		fontSize: 16,
-		color: "#1E90FF",
 	},
 });
 
