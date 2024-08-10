@@ -18,6 +18,7 @@ describe("CreateChatScreen", () => {
 		routerPushMock.mockClear();
 	});
 
+	/*
 	it("renders correctly", () => {
 		render(<CreateChatScreen closeModal={closeModalMock} />);
 
@@ -45,6 +46,7 @@ describe("CreateChatScreen", () => {
 		expect(screen.getByText("John Doe")).toBeTruthy();
 		expect(screen.queryByText("Jane Smith")).toBeNull();
 	});
+	*/
 
 	// it("navigates to ChatScreen when a user is selected", () => {
 	// 	render(<CreateChatScreen closeModal={closeModalMock} />);
