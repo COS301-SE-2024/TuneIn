@@ -16,6 +16,8 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { live, DirectMessage, instanceExists } from "../../services/Live";
 import axios from "axios";
+import { colors } from "../../styles/colors";
+import Feather from "@expo/vector-icons/Feather";
 
 /*
 const dummyMessages: Message[] = [
@@ -361,12 +363,7 @@ const ChatScreen = () => {
 					testID="sendButton"
 					onPress={handleSend}
 				>
-					<Image
-						source={{
-							uri: "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
-						}}
-						style={styles.sendIcon}
-					/>
+					<Feather name="send" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
 		</View>
@@ -402,6 +399,7 @@ const styles = StyleSheet.create({
 	},
 	messagesContainer: {
 		paddingVertical: 10,
+		marginHorizontal: 20,
 	},
 	messageContainer: {
 		flexDirection: "row",
@@ -427,7 +425,7 @@ const styles = StyleSheet.create({
 		maxWidth: "75%",
 	},
 	messageBubbleMe: {
-		backgroundColor: "#08bdbd", // Updated to verdigris color
+		backgroundColor: colors.primary,
 		alignSelf: "flex-end",
 	},
 	messageBubbleOther: {
@@ -459,10 +457,6 @@ const styles = StyleSheet.create({
 	},
 	sendButton: {
 		padding: 10,
-	},
-	sendIcon: {
-		width: 24,
-		height: 24,
 	},
 });
 

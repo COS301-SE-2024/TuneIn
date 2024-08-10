@@ -15,7 +15,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 			style={styles.container}
 			onPress={() =>
 				router.push(
-					`/screens/ChatScreen?name=${chat.name}&avatar=${chat.avatar}`,
+					`/screens/messaging/ChatScreen?name=${chat.name}&avatar=${chat.avatar}`,
 				)
 			}
 		>
@@ -30,6 +30,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		margin: 10,
 		flexDirection: "row",
 		alignItems: "center",
 		padding: 10,
