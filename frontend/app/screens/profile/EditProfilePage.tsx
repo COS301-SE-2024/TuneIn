@@ -19,6 +19,7 @@ import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import Selector from "../../components/Selector";
+import AddFavSong from "../../components/AddFavSong";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -40,6 +41,7 @@ const EditProfileScreen = () => {
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
+	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -357,6 +359,28 @@ const EditProfileScreen = () => {
 		}));
 	};
 
+	const addSong = (newSongs: any) => {
+		setProfileData((prevProfileData: any) => {
+			const updatedSongs = [...prevProfileData.fav_songs.data, ...newSongs];
+			return {
+				...prevProfileData,
+				fav_songs: {
+					...prevProfileData.fav_songs,
+					data: updatedSongs,
+				},
+			};
+		});
+		setChanged(true);
+		setChangedFields((prevChangedFields) => ({
+			...prevChangedFields,
+		}));
+
+		console.log("Fav Songs: " + JSON.stringify(profileData.fav_songs));
+
+		setIsSongDialogVisible(false);
+	};
+	
+
 	const renderAddLink = () => {
 		if (profileData.links.count < 3) {
 			return (
@@ -568,12 +592,13 @@ const EditProfileScreen = () => {
 						justifyContent: "center",
 					}}
 				>
-					<View style={styles.container2}>
+					<TouchableOpacity onPress={() => setIsSongDialogVisible(true)} style={styles.container2}>
 						<Text style={styles.text}>
 							Add Song <Icons name="plus" size={14} color="black" />
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
+				<AddFavSong visible={isSongDialogVisible} handleSave={addSong}></AddFavSong>
 			</ScrollView>
 		</View>
 	);
