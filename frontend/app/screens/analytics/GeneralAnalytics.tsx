@@ -11,9 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 import LineGraphCard from "../../components/LineGraphCard"; // Import the LineGraphCard
 import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
 import TableCard from "../../components/TableCard";
+import RoomDropdown from "../../components/RoomDropdown";
 
 const GeneralAnalytics: React.FC = () => {
 	const router = useRouter();
+
+	const rooms = ["Room A", "Room B", "Room C", "Room D", "Room E"];
 
 	// Sample data for the past seven days
 	const data = [50, 60, 70, 65, 80, 90, 85];
@@ -25,6 +28,7 @@ const GeneralAnalytics: React.FC = () => {
 		{ label: "Room C", value: 191 },
 		{ label: "Room D", value: 435 },
 		{ label: "Room E", value: 85 },
+		{ label: "Room F", value: 241 },
 	];
 
 	const headers = ["Room", "Longest", "Shortest"];
@@ -44,7 +48,7 @@ const GeneralAnalytics: React.FC = () => {
 					<Text style={styles.headerTitle}>General and Room Analytics</Text>
 					<View style={styles.headerSpacer} />
 				</View>
-				{/* Reusable LineGraphCard component */}
+				<RoomDropdown initialRooms={rooms} />
 				<LineGraphCard data={data} title="Weekly Participants" />
 				<HorizontalBarGraphCard
 					data={datah}
@@ -54,9 +58,9 @@ const GeneralAnalytics: React.FC = () => {
 					data={[
 						{ label: "Task 1", value: 253 },
 						{ label: "Task 2", value: 343 },
-						{ label: "Task 2", value: 55 },
-						{ label: "Task 2", value: 221 },
-						{ label: "Task 2", value: 15 },
+						{ label: "Task 3", value: 55 },
+						{ label: "Task 4", value: 221 },
+						{ label: "Task 5", value: 15 },
 					]}
 					title="Average Session Duration"
 					unit="minutes" // Pass "minutes" to format the total as hours and minutes

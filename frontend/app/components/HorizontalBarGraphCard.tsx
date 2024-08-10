@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { BarChart } from "react-native-chart-kit";
 
 interface HorizontalBarGraphCardProps {
@@ -26,39 +26,51 @@ const HorizontalBarGraphCard: React.FC<HorizontalBarGraphCardProps> = ({
 		return totalValue.toString();
 	};
 
+	// Determine if scrolling is needed
+	const needsScrolling = data.length > 5;
+
 	return (
 		<View style={styles.card}>
 			<Text style={styles.cardTitle}>{title}</Text>
 			<Text style={styles.subheader}>{formatTotal()}</Text>
-			<BarChart
-				data={{
-					labels: data.map((item) => item.label),
-					datasets: [
-						{
-							data: data.map((item) => item.value),
+			<ScrollView
+				horizontal={needsScrolling}
+				showsHorizontalScrollIndicator={needsScrolling}
+			>
+				<BarChart
+					data={{
+						labels: data.map((item) => item.label),
+						datasets: [
+							{
+								data: data.map((item) => item.value),
+							},
+						],
+					}}
+					width={
+						needsScrolling
+							? data.length * 100
+							: Dimensions.get("window").width - 40
+					} // Adjust width based on number of labels
+					height={220}
+					chartConfig={{
+						backgroundColor: "#fff",
+						backgroundGradientFrom: "#fff",
+						backgroundGradientTo: "#fff",
+						decimalPlaces: 2,
+						color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the bars
+						style: {
+							borderRadius: 16,
 						},
-					],
-				}}
-				width={Dimensions.get("window").width - 40} // From StyleSheet
-				height={220}
-				chartConfig={{
-					backgroundColor: "#fff",
-					backgroundGradientFrom: "#fff",
-					backgroundGradientTo: "#fff",
-					decimalPlaces: 2,
-					color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the bars
-					style: {
-						borderRadius: 16,
-					},
-					propsForLabels: {
-						fontFamily: "System", // Use system font for labels
-						fontSize: 12,
-						color: "#000", // Set label color to black
-					},
-				}}
-				// horizontal={true} // Uncomment to make the bar chart horizontal
-				style={styles.chart}
-			/>
+						propsForLabels: {
+							fontFamily: "System", // Use system font for labels
+							fontSize: 12,
+							color: "#000", // Set label color to black
+						},
+					}}
+					// horizontal={true} // Uncomment to make the bar chart horizontal
+					style={styles.chart}
+				/>
+			</ScrollView>
 		</View>
 	);
 };

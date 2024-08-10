@@ -13,9 +13,12 @@ import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
 import TableCard from "../../components/TableCard";
 import TopSong from "../../components/TopSong";
 import MostDownvotedCard from "../../components/MostDownvotedCard";
+import RoomDropdown from "../../components/RoomDropdown";
 
 const PlaylistAnalytics: React.FC = () => {
 	const router = useRouter();
+
+	const rooms = ["Room A", "Room B", "Room C", "Room D", "Room E"];
 
 	const datah = [
 		{ label: "Room A", value: 57 },
@@ -88,6 +91,7 @@ const PlaylistAnalytics: React.FC = () => {
 						/>
 					))}
 				</View>
+				<RoomDropdown initialRooms={rooms} />
 				<View style={styles.cardsContainer}>
 					<MetricsCard
 						title="Total Upvotes"

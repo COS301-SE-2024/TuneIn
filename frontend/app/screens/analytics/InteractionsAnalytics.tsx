@@ -12,9 +12,12 @@ import LineGraphCard from "../../components/LineGraphCard";
 import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
 import TableCard from "../../components/TableCard";
 import IconProgressCard from "../../components/IconProgressCard";
+import RoomDropdown from "../../components/RoomDropdown";
 
 const InteractionsAnalytics: React.FC = () => {
 	const router = useRouter();
+
+	const rooms = ["Room A", "Room B", "Room C", "Room D", "Room E"];
 
 	// Sample data for the past seven days
 	const data = [47, 75, 57, 65, 80, 47, 85];
@@ -52,6 +55,7 @@ const InteractionsAnalytics: React.FC = () => {
 					<Text style={styles.headerTitle}>User Interactions in Room</Text>
 					<View style={styles.headerSpacer} />
 				</View>
+				<RoomDropdown initialRooms={rooms} />
 				<LineGraphCard data={data} title="Daily Messages" />
 				<IconProgressCard
 					icon="message"
