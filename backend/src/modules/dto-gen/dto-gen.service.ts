@@ -656,4 +656,51 @@ export class DtoGenService {
 		}
 		return result;
 	}
+
+	async generateMultipleDirectMessageDto(
+		dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[],
+	): Promise<DirectMessageDto[]> {
+		const result: DirectMessageDto[] = [];
+
+		let uniqueUserIDs: string[] = [
+			...new Set(dms.map((dm) => dm.message.sender)),
+		];
+		uniqueUserIDs = [
+			...uniqueUserIDs,
+			...new Set(dms.map((dm) => dm.recipient)),
+		];
+		const users: UserDto[] = await this.generateMultipleUserDto(uniqueUserIDs);
+
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			if (dm && dm !== null) {
+				const sender: UserDto | undefined = users.find(
+					(u) => u.userID === dm.message.sender,
+				);
+				const recipient: UserDto | undefined = users.find(
+					(u) => u.userID === dm.recipient,
+				);
+				if (!sender || sender === null || !recipient || recipient === null) {
+					throw new Error(
+						"Weird error. Got messages from DMs table but user not found in Users table",
+					);
+				}
+
+				const message: DirectMessageDto = {
+					index: i,
+					messageBody: dm.message.contents,
+					sender: sender,
+					recipient: recipient,
+					dateSent: dm.message.date_sent,
+					dateRead: new Date(0),
+					isRead: false,
+					pID: dm.p_message_id,
+				};
+				result.push(message);
+			}
+		}
+		return result;
+	}
 }

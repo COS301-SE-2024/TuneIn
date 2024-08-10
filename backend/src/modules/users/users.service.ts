@@ -788,4 +788,74 @@ export class UsersService {
 		const b = this.dbUtils.generateHash(chatStr2);
 		return Promise.all([a, b]);
 	}
+
+	async getLastDMs(userID: string): Promise<DirectMessageDto[]> {
+		//get the last few messages for the user
+		const dms: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] =
+			await this.prisma.private_message.findMany({
+				where: {
+					OR: [
+						{
+							recipient: userID,
+						},
+						{
+							message: {
+								sender: userID,
+							},
+						},
+					],
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
+		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			if (dm.message.sender !== userID) {
+				if (!uniqueUserIDs.has(dm.message.sender)) {
+					uniqueUserIDs.set(dm.message.sender, false);
+				}
+			} else if (dm.recipient !== userID) {
+				if (!uniqueUserIDs.has(dm.recipient)) {
+					uniqueUserIDs.set(dm.recipient, false);
+				}
+			}
+		}
+
+		//sort messages by date (newest first)
+		dms.sort((a, b) => {
+			return b.message.date_sent.getTime() - a.message.date_sent.getTime();
+		});
+
+		const chats: ({
+			message: PrismaTypes.message;
+		} & PrismaTypes.private_message)[] = [];
+		for (let i = 0; i < dms.length; i++) {
+			const dm = dms[i];
+			const recipient: string = dm.recipient;
+			const sender: string = dm.message.sender;
+			const r = uniqueUserIDs.get(recipient);
+			const s = uniqueUserIDs.get(sender);
+			if (r !== undefined && r === false) {
+				uniqueUserIDs.set(recipient, true);
+				chats.push(dm);
+			} else if (s !== undefined && s === false) {
+				uniqueUserIDs.set(sender, true);
+				chats.push(dm);
+			}
+		}
+		const result: DirectMessageDto[] =
+			await this.dtogen.generateMultipleDirectMessageDto(chats);
+		return result;
+	}
 }
