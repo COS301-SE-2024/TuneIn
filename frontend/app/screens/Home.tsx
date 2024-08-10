@@ -332,7 +332,11 @@ const Home: React.FC = () => {
 							/>
 						) : null}
 						<Text style={styles.sectionTitle}>My Rooms</Text>
-						<AppCarousel data={myRooms} renderItem={renderItem} />
+						<AppCarousel
+							data={myRooms}
+							renderItem={renderItem}
+							showAddRoomCard={true} // Conditionally show the AddRoomCard
+						/>
 					</View>
 				)}
 			</ScrollView>
