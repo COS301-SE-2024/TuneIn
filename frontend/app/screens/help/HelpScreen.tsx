@@ -63,15 +63,13 @@ const menuItems = [
 		route: "screens/help/RoomCollaboration",
 	},
 	{
-		title: "Friends and Followering",
+		title: "Friends and Following",
 		icon: "👥",
 		subcategories: [
-			{ title: "Following", screen: "screens/help/FriendsFollowering" },
-			{ title: "Friends", screen: "screens/help/FriendsFollowering" },
-			// { title: "Joining Rooms", screen: "screens/help/FriendsFollowering" },
-			// { title: "Managing Rooms", screen: "screens/help/FriendsFollowering" },
+			{ title: "Following", screen: "screens/help/FriendsFollowing" },
+			{ title: "Friends", screen: "screens/help/FriendsFollowing" },
 		],
-		route: "screens/help/FriendsFollowering",
+		route: "screens/help/FriendsFollowing",
 	},
 	// ... (Add more sections here)
 ];
