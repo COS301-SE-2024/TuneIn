@@ -19,9 +19,9 @@ import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { DmUsersService } from "./dmusers/dmusers.service";
-import { UserDto } from "src/modules/users/dto/user.dto";
-import { DirectMessageDto } from "src/modules/users/dto/dm.dto";
-import { UsersService } from "src/modules/users/users.service";
+import { UserDto } from "../modules/users/dto/user.dto";
+import { DirectMessageDto } from "../modules/users/dto/dm.dto";
+import { UsersService } from "../modules/users/users.service";
 import { EmojiReactionDto } from "./dto/emojireaction.dto";
 
 @WebSocketGateway({
@@ -396,7 +396,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					console.error(e);
 					throw new Error("Invalid JSON received");
 				}
-				const roomID = this.connectedUsers.getRoomId(client.id);
+				const roomID = this.roomUsers.getRoomId(client.id);
 				if (!roomID) {
 					throw new Error("User is not in a room");
 				}
@@ -980,7 +980,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	/* **************************************************************************************** */
 
-	async validateInputEvent(payload: string): Promise<ChatEventDto> {
+	async validateChatEvent(payload: string): Promise<ChatEventDto> {
 		/*
 		if no token, return error
 		if token

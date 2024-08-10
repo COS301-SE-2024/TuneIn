@@ -59,6 +59,7 @@ import { LiveService } from "../src/live/live.service";
 import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
+import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -165,8 +166,15 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			EventQueueService,
 			LiveService,
 		],
-		imports: [RoomUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
-		exports: [RoomUsersModule, LiveGateway],
+		imports: [
+			RoomUsersModule,
+			DmUsersModule,
+			DbUtilsModule,
+			DtoGenModule,
+			RoomsModule,
+			UsersModule,
+		],
+		exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	}).compile();
 }
 
@@ -185,7 +193,7 @@ export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 //DmUsersModule
 export async function createDMUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, DtoGenModule, DbUtilsModule],
+		imports: [PrismaModule, DtoGenModule, DbUtilsModule, UsersModule],
 		providers: [
 			DmUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -197,10 +205,12 @@ export async function createDMUsersTestingModule(): Promise<TestingModule> {
 //DbUtilsModule
 export async function createDbUtilsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
+		imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
 		providers: [
 			DbUtilsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
+		exports: [DbUtilsService],
 	}).compile();
 }
 
