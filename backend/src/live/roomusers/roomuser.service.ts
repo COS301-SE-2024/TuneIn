@@ -90,7 +90,7 @@ export class RoomUsersService {
 			throw new Error("Connected user does not exist");
 		}
 		if (!u.roomID || u.roomID === undefined) {
-			throw new Error("Connected user does not have a roomID");
+			//throw new Error("Connected user does not have a roomID");
 		}
 		u.roomID = undefined;
 	}

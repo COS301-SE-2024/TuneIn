@@ -87,6 +87,15 @@ export class DmUsersService {
 		return user;
 	}
 
+	getSocketId(userId: string): string | null {
+		for (const [socketId, u] of this.connectedUsers) {
+			if (u.user.userID === userId) {
+				return socketId;
+			}
+		}
+		return null;
+	}
+
 	getParticipant(socketId: string): UserDto | null {
 		const u = this.connectedUsers.get(socketId);
 		if (!u || u === undefined) {
@@ -112,11 +121,17 @@ export class DmUsersService {
 		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
+		/*
 		if (!(u.participant === null)) {
 			throw new Error("Connected user already has a participant");
 		}
 		if (!(u.chatID === null)) {
 			throw new Error("Connected user already has a chatID");
+		}
+			*/
+		if (!(u.participant === null) || !(u.chatID === null)) {
+			//disconnect & reconnect
+			this.disconnectChat(socketId);
 		}
 		const participant: UserDto =
 			await this.dtogen.generateUserDto(participantId);
@@ -140,6 +155,18 @@ export class DmUsersService {
 			user: u.user,
 			participant: participant,
 			chatID: chatID,
+		});
+	}
+
+	disconnectChat(socketId: string) {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
+			throw new Error("Connected user does not exist");
+		}
+		this.connectedUsers.set(socketId, {
+			user: u.user,
+			participant: null,
+			chatID: null,
 		});
 	}
 }
