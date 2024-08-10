@@ -14,7 +14,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 	user,
 	maxVisible,
 }) => {
-	// console.log("Friend: " + JSON.stringify(friends));
+	console.log("Friend: " + JSON.stringify(friends) + "user: " + user);
 	return (
 		<View style={styles.container}>
 			<View style={styles.gridContainer}>
@@ -27,7 +27,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 						<View style={styles.friendContainer}>
 							<View style={styles.imageBorder}>
 								<Image
-									source={{ uri: friend.profilePicture }}
+									source={{ uri: friend.profile_picture_url }}
 									style={styles.profileImage}
 								/>
 							</View>

@@ -194,7 +194,7 @@ const Home: React.FC = () => {
 
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profilePicture: friend.profile_picture_url
+						profile_picture_url: friend.profile_picture_url
 							? friend.profile_picture_url
 							: ProfileIMG,
 						username: friend.username, // Ensure you include the profile_name property
@@ -231,6 +231,10 @@ const Home: React.FC = () => {
 	const router = useRouter();
 	const navigateToAllFriends = () => {
 		router.navigate("/screens/AllFriends");
+		router.navigate({
+			pathname: "/screens/AllFriends",
+			params: { username: userData.username },
+		});
 	};
 
 	useEffect(() => {
