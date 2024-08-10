@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
-import Dropdown from "../../components/Dropdown";
+import Selector from "../../components/Selector";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -30,7 +30,7 @@ const EditProfileScreen = () => {
 	const profileInfo = JSON.parse(profile as string);
 
 	const [profileData, setProfileData] = useState(profileInfo);
-	let genres: string[] = [];
+	const [genres, setGenres] = useState<string[]>([]);
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
@@ -39,6 +39,7 @@ const EditProfileScreen = () => {
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
+	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -121,6 +122,14 @@ const EditProfileScreen = () => {
 			// console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
+		}
+	};
+
+	const toggleGenreSelector = () => {
+		if (isGenreDialogVisible) {
+			setIsGenreDialogVisible(false);
+		} else {
+			setIsGenreDialogVisible(true);
 		}
 	};
 
@@ -261,7 +270,7 @@ const EditProfileScreen = () => {
 					},
 				});
 				// console.log("Genre data" + response.data);
-				genres = response.data;
+				setGenres(response.data);
 			}
 		} catch (error) {
 			console.error("Error fetching genres:", error);
@@ -270,7 +279,7 @@ const EditProfileScreen = () => {
 
 	useEffect(() => {
 		getGenres();
-		console.log(genres[0]);
+		console.log("Genres: " + genres[0]);
 	}, []);
 
 	const [currentLinkIndex, setCurrentLinkIndex] = useState(null);
@@ -329,7 +338,6 @@ const EditProfileScreen = () => {
 			}
 		}
 	};
-	
 
 	const removeSong = (index) => {
 		setProfileData((prevProfileData) => {
@@ -376,7 +384,7 @@ const EditProfileScreen = () => {
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
 					<TouchableOpacity
-						onPress={() => router.navigate("screens/ProfilePage")}
+						onPress={() => router.navigate("./ProfilePage")}
 					>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
@@ -384,7 +392,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => {
 							updateProfile(changed);
-							router.navigate("screens/ProfilePage");
+							router.navigate("./ProfilePage");
 						}}
 						style={styles.saveButton}
 					>
@@ -516,7 +524,7 @@ const EditProfileScreen = () => {
 						/>
 					))}
 					{/* Render add genre button */}
-					<TouchableOpacity onPress={() => {}} style={styles.addGenreButton}>
+					<TouchableOpacity onPress={toggleGenreSelector} style={styles.addGenreButton}>
 						<Text
 							style={{
 								color: "black",
@@ -527,13 +535,13 @@ const EditProfileScreen = () => {
 							Add +
 						</Text>
 					</TouchableOpacity>
-					<Dropdown
-									options={genres}
-									placeholder="Select Genre"
-									onSelect={setSelectedGenre}
-									selectedOption={selectedGenre}
-									setSelectedOption={setSelectedGenre}
-								/>
+					<Selector
+						options={genres}
+						placeholder={"Search Genres"}
+						visible={isGenreDialogVisible}
+						onSelect={addGenre}
+						onClose={toggleGenreSelector}
+					/>
 				</View>
 				{/* Favorite Songs */}
 				<View style={styles.divider} />

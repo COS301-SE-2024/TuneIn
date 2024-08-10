@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
+import Selector from "./Selector";
 
 interface DropdownProps {
 	options: string[];
@@ -43,15 +44,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 		toggleModal();
 	};
 
-	const fuseOptions = {
-		includeScore: true,
-	};
-
-	const fuse = new Fuse(options, fuseOptions);
-
-	const result = fuse.search(searchQuery, {limit: 20});
-	const filteredOptions: string[] = result.map((item) => item.item);
-
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
@@ -64,41 +56,13 @@ const Dropdown: React.FC<DropdownProps> = ({
 				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
 			</TouchableOpacity>
 
-			<Modal
+			<Selector
+				options={options}
+				placeholder={placeholder}
 				visible={modalVisible}
-				transparent={true}
-				animationType="slide"
-				onRequestClose={toggleModal}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalContent}>
-						<TextInput
-							style={styles.searchInput}
-							placeholder={`Search ${placeholder.toLowerCase()}...`}
-							value={searchQuery}
-							onChangeText={setSearchQuery}
-						/>
-						<ScrollView style={styles.scrollView}>
-							<FlatList
-								testID="flat-list"
-								data={filteredOptions}
-								keyExtractor={(item) => item}
-								renderItem={({ item }) => (
-									<TouchableOpacity
-										style={styles.filterOption}
-										onPress={() => handleSelectOption(item)}
-									>
-										<Text style={styles.filterText}>{item}</Text>
-									</TouchableOpacity>
-								)}
-							/>
-						</ScrollView>
-						<TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-							<Text style={styles.filterText}>Close</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</Modal>
+				onSelect={handleSelectOption}
+				onClose={toggleModal}
+			/>
 		</View>
 	);
 };
