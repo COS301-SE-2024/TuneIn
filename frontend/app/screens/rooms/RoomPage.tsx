@@ -36,7 +36,10 @@ import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData, Room } from "../../models/Room";
-
+import { FlyingView, ObjectConfig } from "react-native-flying-objects";
+import EmojiPicker, {
+	EmojiPickerRef,
+} from "../../components/rooms/emojiPicker"; // Adjust the path as per your file structure
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const RoomPage = () => {
@@ -86,6 +89,21 @@ const RoomPage = () => {
 
 	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
+
+	//Emoji picker
+	const [object, setObject] = useState<ObjectConfig[]>([]);
+	const emojiPickerRef = useRef<EmojiPickerRef>(null);
+
+	const handleSelectEmoji = (emoji: string) => {
+		setObject((prev) => [
+			...prev,
+			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
+		]);
+	};
+
+	const passEmojiToTextField = (emoji: string) => {
+		emojiPickerRef.current?.passEmojiToTextField(emoji);
+	};
 
 	const checkBookmark = useCallback(async () => {
 		try {
@@ -672,17 +690,25 @@ const RoomPage = () => {
 				</TouchableOpacity>
 				{isChatExpanded && (
 					<>
-						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{messages.map((msg, index) => (
-								<MemoizedCommentWidget
-									key={index}
-									username={msg.message.sender.username}
-									message={msg.message.messageBody}
-									profilePictureUrl={msg.message.sender.profilePictureUrl}
-									me={msg.me}
-								/>
-							))}
-						</ScrollView>
+						<View style={styles.container}>
+							<ScrollView style={styles.scrollView}>
+								{messages.map((msg, index) => (
+									<MemoizedCommentWidget
+										key={index}
+										username={msg.message.sender.username}
+										message={msg.message.messageBody}
+										profilePictureUrl={msg.message.sender.profilePictureUrl}
+										me={msg.me}
+									/>
+								))}
+							</ScrollView>
+							<FlyingView
+								object={object}
+								containerProps={{
+									style: styles.flyingView,
+								}}
+							/>
+						</View>
 						<KeyboardAvoidingView
 							behavior={Platform.OS === "ios" ? "padding" : "height"}
 							keyboardVerticalOffset={90}
@@ -708,6 +734,11 @@ const RoomPage = () => {
 									onChangeText={setMessage}
 									onSubmitEditing={sendMessage}
 								/>
+
+								<EmojiPicker
+									ref={emojiPickerRef}
+									onSelectEmoji={handleSelectEmoji}
+								/>
 								<TouchableOpacity
 									onPress={sendMessage}
 									style={{ marginLeft: 10 }}
@@ -726,8 +757,18 @@ const RoomPage = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "white",
 		position: "relative",
+	},
+	scrollView: {
+		flex: 1,
+		marginTop: 10,
+	},
+	flyingView: {
+		position: "absolute",
+		top: 10, // Adjust this value as needed
+		right: 10, // Adjust this value as needed
+		width: 150,
+		height: 200,
 	},
 	backButton: {
 		position: "absolute",

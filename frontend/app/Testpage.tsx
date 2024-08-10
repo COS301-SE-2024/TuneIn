@@ -1,29 +1,51 @@
-import React, { useContext } from "react";
-import { Player } from "./PlayerContext"; // Adjust the path as per your file structure
+import React, { useState, useRef } from "react";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { FlyingView, ObjectConfig } from "react-native-flying-objects";
+import EmojiPicker, {
+	EmojiPickerRef,
+} from "../app/components/rooms/emojiPicker"; // Adjust the path as per your file structure
 
 const TestPage = () => {
-	const playerContext = useContext(Player);
+	const [object, setObject] = useState<ObjectConfig[]>([]);
+	const emojiPickerRef = useRef<EmojiPickerRef>(null);
 
-	// Validate if PlayerContext is available
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
+	const handleSelectEmoji = (emoji: string) => {
+		setObject((prev) => [...prev, { object: <Text>{emoji}</Text> }]);
+	};
 
-	// Destructure the needed values from playerContext
-	const { currentRoom } = playerContext;
-
-	// Log the current room to the console
-	console.log("currentRoom: " + currentRoom);
+	const passEmojiToTextField = (emoji: string) => {
+		emojiPickerRef.current?.passEmojiToTextField(emoji);
+	};
 
 	return (
-		<div>
-			<h1>Test Page</h1>
-			<p>Current Room: {currentRoom}</p>
-			{/* Add more components and logic here */}
-		</div>
+		<View style={styles.container}>
+			<FlyingView object={object} />
+			<EmojiPicker ref={emojiPickerRef} onSelectEmoji={handleSelectEmoji} />
+			<FlyingView object={object} />
+			{/* Example button to demonstrate passEmojiToTextField */}
+			<TouchableOpacity
+				onPress={() => passEmojiToTextField("😎")}
+				style={styles.button}
+			>
+				<Text style={styles.buttonText}>Add 😎 Emoji Programmatically</Text>
+			</TouchableOpacity>
+		</View>
 	);
 };
+
+const styles = StyleSheet.create({
+	container: {
+		padding: 20,
+	},
+	button: {
+		padding: 10,
+		backgroundColor: "#ccc",
+		borderRadius: 5,
+		marginTop: 20,
+	},
+	buttonText: {
+		fontSize: 16,
+	},
+});
 
 export default TestPage;
