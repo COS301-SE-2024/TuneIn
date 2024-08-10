@@ -233,14 +233,19 @@ export class DtoGenService {
 			);
 		}
 
-		const result: UserDto[] = [];
+		//const result: UserDto[] = [];
+		const promises: Promise<UserDto>[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
+				/*
 				const user: UserDto = await this.generateUserDto(u.user_id, false);
 				result.push(user);
+				*/
+				promises.push(this.generateUserDto(u.user_id, false));
 			}
 		}
+		const result: UserDto[] = await Promise.all(promises);
 		return result;
 	}
 
