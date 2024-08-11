@@ -22,6 +22,8 @@ import { RoomQueueService } from "../modules/rooms/roomqueue/roomqueue.service";
 import { EmojiReactionDto } from "./dto/emojireaction.dto";
 import { QueueEventDto } from "./dto/queueevent.dto";
 import { RoomSongDto } from "src/modules/rooms/dto/roomsong.dto";
+import { RoomDto } from "src/modules/rooms/dto/room.dto";
+import { VoteDto } from "src/modules/rooms/dto/vote.dto";
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -954,17 +956,27 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.QUEUE_STATE)
-	async handleQueueState(
+	@SubscribeMessage(SOCKET_EVENTS.REQUEST_QUEUE)
+	async handleRequestQueueState(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+			console.log("Received event: " + SOCKET_EVENTS.REQUEST_QUEUE);
 			try {
 				//this.server.emit();
 				console.log(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const queueState: {
+					room: RoomDto;
+					songs: RoomSongDto[];
+					votes: VoteDto[];
+				} = await this.roomQueue.getQueueState(payload.roomID);
+				this.server
+					.to(payload.roomID)
+					.emit(SOCKET_EVENTS.QUEUE_STATE, queueState);
+				console.log("Response emitted: " + SOCKET_EVENTS.QUEUE_STATE);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

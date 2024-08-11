@@ -180,6 +180,9 @@ export class RoomSong {
 		if (this.playbackStartTime) {
 			result.startTime = this.playbackStartTime;
 		}
+		if (this.spotifyDetails) {
+			result.track = this.spotifyDetails;
+		}
 		return result;
 	}
 
