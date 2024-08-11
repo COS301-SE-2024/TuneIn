@@ -89,6 +89,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
   <RCTScrollView
     contentContainerStyle={
       {
+        "marginHorizontal": 20,
         "paddingVertical": 10,
       }
     }
@@ -154,6 +155,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
               {
                 "borderRadius": 15,
                 "height": 30,
+                "marginBottom": 5,
                 "marginRight": 10,
                 "width": 30,
               }
@@ -172,7 +174,16 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
                 {
                   "alignSelf": "flex-start",
                   "backgroundColor": "#FFFFFF",
-                  "borderColor": "#ECECEC",
+                  "borderColor": "#E0E0E0",
+                  "borderWidth": 1,
+                  "elevation": 5,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 4,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.25,
+                  "shadowRadius": 3.84,
                 },
               ]
             }
@@ -220,7 +231,15 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
                 },
                 {
                   "alignSelf": "flex-end",
-                  "backgroundColor": "#08bdbd",
+                  "backgroundColor": "#08BDBD",
+                  "elevation": 5,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 4,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.25,
+                  "shadowRadius": 3.84,
                 },
               ]
             }
@@ -306,19 +325,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
       }
       testID="sendButton"
     >
-      <Image
-        source={
-          {
-            "uri": "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
-          }
-        }
-        style={
-          {
-            "height": 24,
-            "width": 24,
-          }
-        }
-      />
+      <Text />
     </View>
   </View>
 </View>

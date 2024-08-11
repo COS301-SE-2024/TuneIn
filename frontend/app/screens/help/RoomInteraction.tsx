@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function InteractiveSessions() {
 	const router = useRouter();
@@ -18,19 +19,22 @@ export default function InteractiveSessions() {
 
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-			<Text style={styles.header}>Interactive Sessions/Rooms</Text>
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+				<Text style={styles.headerTitle}>Interactive Sessions/Rooms</Text>
+				<View style={styles.headerSpacer} />
+			</View>
 
 			<TouchableOpacity
 				style={styles.card}
-				onPress={() => navigateToScreen("../CreateRoom")}
+				onPress={() => navigateToScreen("../rooms/CreateRoom")}
 			>
 				<View style={styles.cardContent}>
 					<FontAwesome5
 						name="door-open"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -44,14 +48,11 @@ export default function InteractiveSessions() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("")}
-			>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<Ionicons
 						name="settings"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -66,6 +67,26 @@ export default function InteractiveSessions() {
 				</View>
 			</TouchableOpacity>
 
+			<TouchableOpacity style={styles.card}>
+				<View style={styles.cardContent}>
+					<FontAwesome5
+						name="tools"
+						size={28}
+						color="#08bdbd"
+						style={styles.icon}
+					/>
+					<View style={styles.textContainer}>
+						<Text style={styles.cardTitle}>Managing Rooms</Text>
+						<Text style={styles.cardText}>
+							Room owners can manage participants, edit the playlist, moderate
+							content, delete the room and control what other users are allowed
+							to do in room such as enabling chat, voting and if they may add to
+							the queue.
+						</Text>
+					</View>
+				</View>
+			</TouchableOpacity>
+
 			<TouchableOpacity
 				style={styles.card}
 				onPress={() => navigateToScreen("../Home")}
@@ -73,7 +94,7 @@ export default function InteractiveSessions() {
 				<View style={styles.cardContent}>
 					<Ionicons
 						name="enter-outline"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -87,23 +108,19 @@ export default function InteractiveSessions() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("ManagingRooms")}
-			>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<FontAwesome5
-						name="tools"
-						size={24}
+					<MaterialIcons
+						name="bookmarks"
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Managing Rooms</Text>
+						<Text style={styles.cardTitle}>Bookmarking Rooms</Text>
 						<Text style={styles.cardText}>
-							Room owners can manage participants, moderate content, delete the
-							room and control what other users are allowed to do in room such
-							as enabling chat, voting and if they may add to queue.
+							Users can bookmark rooms they like to easily find them later.
+							Bookmarked rooms are displayed in the user's profile.
 						</Text>
 					</View>
 				</View>
@@ -119,18 +136,23 @@ const styles = StyleSheet.create({
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},
-	backButton: {
-		position: "absolute",
-		top: 10,
-		left: 10,
-		zIndex: 1,
-	},
 	header: {
-		fontSize: 28,
-		fontWeight: "bold",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: 10,
 		marginBottom: 20,
-		color: "#2c3e50",
-		textAlign: "center",
+	},
+	closeButton: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	headerTitle: {
+		fontSize: 24,
+		fontWeight: "bold",
+	},
+	headerSpacer: {
+		width: 0,
 	},
 	card: {
 		marginBottom: 20,

@@ -7,7 +7,8 @@ import {
 	ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 const menuItems = [
 	{
@@ -15,6 +16,7 @@ const menuItems = [
 		icon: "🚀",
 		subcategories: [
 			{ title: "Introduction", screen: "screens/help/GettingStarted" },
+			{ title: "About", screen: "screens/help/GettingStarted" },
 			{ title: "Creating an Account", screen: "screens/help/GettingStarted" },
 			{ title: "Logging In", screen: "screens/help/GettingStarted" },
 		],
@@ -33,6 +35,7 @@ const menuItems = [
 				title: "Personalized Recommendations",
 				screen: "screens/help/ProfileManagement",
 			},
+			{ title: "Analytics", screen: "screens/help/ProfileManagement" },
 		],
 		route: "screens/help/ProfileManagement",
 	},
@@ -42,10 +45,34 @@ const menuItems = [
 		subcategories: [
 			{ title: "Creating Rooms", screen: "screens/help/RoomInteraction" },
 			{ title: "Room Settings", screen: "screens/help/RoomInteraction" },
-			{ title: "Joining Rooms", screen: "screens/help/RoomInteraction" },
 			{ title: "Managing Rooms", screen: "screens/help/RoomInteraction" },
+			{ title: "Joining Rooms", screen: "screens/help/RoomInteraction" },
+			{ title: "Bookmarking Rooms", screen: "screens/help/RoomInteraction" },
 		],
 		route: "screens/help/RoomInteraction",
+	},
+	{
+		title: "Room Collaboration",
+		icon: "🤝",
+		subcategories: [
+			{ title: "Chat", screen: "screens/help/RoomCollaboration" },
+			{ title: "Reactions", screen: "screens/help/RoomCollaboration" },
+			{
+				title: "Add To The Playlist",
+				screen: "screens/help/RoomCollaboration",
+			},
+			{ title: "Voting", screen: "screens/help/RoomCollaboration" },
+		],
+		route: "screens/help/RoomCollaboration",
+	},
+	{
+		title: "Friends and Following",
+		icon: "👥",
+		subcategories: [
+			{ title: "Following", screen: "screens/help/FriendsFollowing" },
+			{ title: "Friends", screen: "screens/help/FriendsFollowing" },
+		],
+		route: "screens/help/FriendsFollowing",
 	},
 	// ... (Add more sections here)
 ];
@@ -59,15 +86,22 @@ export default function HelpMenu() {
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
-			<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+			<TouchableOpacity
+				onPress={() => router.back()}
+				style={styles.backButton}
+				testID="backButton"
+			>
 				<Ionicons name="chevron-back" size={24} color="black" />
 			</TouchableOpacity>
-			<Text style={styles.title}>Help Center</Text>
+			<Text style={styles.title} testID="title">
+				Help Center
+			</Text>
 			{menuItems.map((item, index) => (
-				<View key={index} style={styles.section}>
+				<View key={index} style={styles.section} testID={`section-${index}`}>
 					<TouchableOpacity
 						style={styles.header}
 						onPress={() => navigateToScreen(item.route)}
+						testID={`menuItem-${index}`}
 					>
 						<Text style={styles.headerText}>
 							{item.icon} {item.title}
@@ -78,6 +112,7 @@ export default function HelpMenu() {
 							key={subIndex}
 							style={styles.subcategory}
 							onPress={() => navigateToScreen(subcategory.screen)}
+							// testID={`subcategory-${index}-${subIndex}`}
 						>
 							<Text style={styles.subcategoryText}>{subcategory.title}</Text>
 						</TouchableOpacity>
@@ -131,6 +166,6 @@ const styles = StyleSheet.create({
 	},
 	subcategoryText: {
 		fontSize: 16,
-		color: "#08bdbd",
+		color: colors.primary,
 	},
 });

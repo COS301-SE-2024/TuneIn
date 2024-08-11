@@ -2,9 +2,10 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
+import Entypo from "@expo/vector-icons/Entypo";
+// import axios from "axios";
+// import auth from "./../services/AuthManagement"; // Import AuthManagement
+// import * as utils from "./../services/Utils"; // Import Utils
 import { colors } from "../styles/colors";
 import profileIcon from "../../assets/profile-icon.png";
 
@@ -50,6 +51,13 @@ const TopNavBar: React.FC = () => {
 	const navigateToProfile = () => {
 		router.push({
 			pathname: "/screens/profile/ProfilePage",
+			// params: { profile: username },
+		});
+	};
+
+	const navigateToDMs = () => {
+		router.push({
+			pathname: "/screens/messaging/ChatListScreen",
 		});
 	};
 
@@ -57,8 +65,7 @@ const TopNavBar: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<View style={styles.emptyView}></View>
-			<Text style={styles.appName}>{appName}</Text>
+			{/* <View style={styles.emptyView}></View> */}
 			<TouchableOpacity onPress={navigateToProfile}>
 				<LazyImage
 					source={
@@ -69,6 +76,12 @@ const TopNavBar: React.FC = () => {
 					style={styles.profileImage}
 					testID="profile-image"
 				/>
+			</TouchableOpacity>
+			<View style={styles.appNameContainer}>
+				<Text style={styles.appName}>{appName}</Text>
+			</View>
+			<TouchableOpacity onPress={navigateToDMs}>
+				<Entypo name="direction" size={24} color="black" />
 			</TouchableOpacity>
 		</View>
 	);
@@ -84,21 +97,26 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		backgroundColor: colors.backgroundColor,
 	},
-	emptyView: {
-		width: 40, // Adjust as needed
-	},
+	// emptyView: {
+	// 	width: 40, // Adjust as needed
+	// },
 	appName: {
 		color: "black",
 		fontSize: 20,
 		fontWeight: "bold",
+		// alignItems: "center",
 	},
 	profileImage: {
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		marginRight: 16,
+		// marginRight: 16,
 		borderWidth: 1, // Add a border
 		borderColor: "grey", // Set the border color to grey
+	},
+	appNameContainer: {
+		flex: 1,
+		alignItems: "center",
 	},
 });
 

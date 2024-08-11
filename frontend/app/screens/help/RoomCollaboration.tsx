@@ -6,23 +6,13 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from "react-native";
-import {
-	FontAwesome,
-	MaterialCommunityIcons,
-	Ionicons,
-	AntDesign,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export default function GettingStarted() {
+export default function RoomCollaboration() {
 	const router = useRouter();
-	const navigateToLogin = () => {
-		router.navigate("../Auth/LoginScreen");
-	};
-
-	const navigateToRegister = () => {
-		router.navigate("../Auth/RegisterOther");
-	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -30,24 +20,22 @@ export default function GettingStarted() {
 				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>Getting Started</Text>
+				<Text style={styles.headerTitle}>Room Collaboration</Text>
 				<View style={styles.headerSpacer} />
 			</View>
 
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<FontAwesome
-						name="music"
-						size={24}
-						color="#08bdbd"
-						style={styles.icon}
-					/>
+					<Entypo name="chat" size={30} color="#08bdbd" style={styles.icon} />
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Introduction</Text>
+						<Text style={styles.cardTitle}>Chat</Text>
 						<Text style={styles.cardText}>
-							Welcome to TuneIn, where music becomes a shared experience that
-							connects people, transcending distances and creating lasting bonds
-							through the power of music.
+							As a user, you can interact and collaborate with others in the
+							same room by sending messages in the chat section. Simply click
+							the 'Show Chat' or 'Up Arrow' to reveal the chat section. To hide
+							the chat after opening it, click the 'Hide Chat' or 'Down Arrow'.
+							This interaction is only available if the host has enabled chat
+							functionality in the room.
 						</Text>
 					</View>
 				</View>
@@ -55,55 +43,64 @@ export default function GettingStarted() {
 
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<AntDesign
-						name="infocirlceo"
-						size={24}
+					<MaterialIcons
+						name="emoji-emotions"
+						size={30}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>About</Text>
+						<Text style={styles.cardTitle}>Reactions</Text>
 						<Text style={styles.cardText}>
-							Discover and share music with friends and make new ones around the
-							world. With TuneIn you can create rooms, join rooms, and listen to
-							music together with others.
+							When in a room, you can react to the currently playing songs by
+							clicking on the emoji icon between the text box and the send
+							button. This will display the available reactions, and you can
+							choose one to send. This interaction is only available if the host
+							has enabled chat functionality in the room.
 						</Text>
 					</View>
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.card} onPress={navigateToRegister}>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<MaterialCommunityIcons
-						name="account"
-						size={24}
+					<MaterialIcons
+						name="playlist-add"
+						size={34}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Creating an Account</Text>
+						<Text style={styles.cardTitle}>Add To The Playlist</Text>
 						<Text style={styles.cardText}>
-							Sign up using your premium Spotify account or your email but don't
-							forget to link your Spotify account to seamlessly sync your music
-							library into the app.
+							As a user, you can add your own songs to the playlist by clicking
+							on the queue button. This will open the queue, where you can add
+							songs by clicking the 'Add Song' button and searching for tracks
+							to include. This interaction is only available if the host has
+							enabled users to add tracks in the room.
 						</Text>
 					</View>
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.card} onPress={navigateToLogin}>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<Ionicons
-						name="log-in-outline"
-						size={24}
+					<MaterialIcons
+						name="how-to-vote"
+						size={34}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Logging In</Text>
+						<Text style={styles.cardTitle}>Voting</Text>
 						<Text style={styles.cardText}>
-							Log in with your registered credentials to access personalized
-							content.
+							As a user, you can vote on the order of the songs in the playlist
+							by clicking on the queue button. This will open the queue, where
+							you can upvote or downvote any song currently in the
+							queue/playlist. The more upvotes a song receives, the higher it
+							will move in the queue, and vice versa for downvotes. This
+							interaction is only available if the host has enabled voting in
+							the room.
 						</Text>
 					</View>
 				</View>
@@ -145,7 +142,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.2,
 		shadowRadius: 5,
-		elevation: 3,
+		elevation: 3, // for Android
 	},
 	cardContent: {
 		flexDirection: "row",
