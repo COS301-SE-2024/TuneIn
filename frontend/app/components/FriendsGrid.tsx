@@ -16,22 +16,35 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 }) => {
 	console.log("Friend: " + JSON.stringify(friends) + "user: " + user);
 	return (
-		<View style={styles.container}>
-			<View style={styles.gridContainer}>
+		<View style={styles.container} testID="friends-grid-container">
+			<View style={styles.gridContainer} testID="friends-grid">
 				{friends.slice(0, maxVisible).map((friend, index) => (
 					<Link
 						key={index}
 						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
 						style={styles.link}
+						testID={`friend-link-${friend.username}`}
 					>
-						<View style={styles.friendContainer}>
-							<View style={styles.imageBorder}>
+						<View
+							style={styles.friendContainer}
+							testID={`friend-container-${friend.username}`}
+						>
+							<View
+								style={styles.imageBorder}
+								testID={`friend-image-border-${friend.username}`}
+							>
 								<Image
 									source={{ uri: friend.profile_picture_url }}
 									style={styles.profileImage}
+									testID={`friend-profile-image-${friend.username}`}
 								/>
 							</View>
-							<Text style={styles.friendName}>{friend.username}</Text>
+							<Text
+								style={styles.friendName}
+								testID={`friend-name-${friend.username}`}
+							>
+								{friend.username}
+							</Text>
 						</View>
 					</Link>
 				))}
