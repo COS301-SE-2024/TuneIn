@@ -1,10 +1,8 @@
 // PlayerContextProvider.test.tsx
 
 import React from "react";
-import { render, screen, act } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import { PlayerContextProvider, Player } from "../app/PlayerContext";
-import { Room } from "../app/models/Room";
-import { Track } from "../app/models/Track";
 import { Text } from "react-native";
 
 // Helper component to consume the context values

@@ -4,7 +4,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
-import { useNavigation, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({

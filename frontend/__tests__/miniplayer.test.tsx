@@ -77,5 +77,4 @@ describe("Miniplayer", () => {
 
 		expect(queryByTestId("player-touchable")).toBeNull();
 	});
-
 });

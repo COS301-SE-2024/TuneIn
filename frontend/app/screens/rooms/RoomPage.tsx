@@ -167,7 +167,7 @@ const RoomPage = () => {
 		// 	socket.current.emit("joinRoom", JSON.stringify(input));
 		//
 		// }
-	}, [roomID]);
+	}, [roomData, setCurrentRoom]);
 
 	const leaveRoom = () => {
 		// if (userRef.current && socket.current) {
@@ -411,7 +411,7 @@ const RoomPage = () => {
 			}
 		},
 		//[queue, playbackManager],
-		[],
+		[playback, roomID],
 	);
 
 	const playNextTrack = () => {

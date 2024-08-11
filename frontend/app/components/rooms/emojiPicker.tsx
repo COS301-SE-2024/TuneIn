@@ -58,6 +58,9 @@ const EmojiPicker = forwardRef<EmojiPickerRef, EmojiPickerProps>(
 	},
 );
 
+// Set the display name for the component
+EmojiPicker.displayName = "EmojiPicker";
+
 const styles = StyleSheet.create({
 	container: {
 		position: "relative", // Ensure the container is positioned relative to its parent
