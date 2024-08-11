@@ -25,6 +25,7 @@ import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
 // import DatePickerModal from "../components/DatePickerModal";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
 
 type SearchResult = {
@@ -109,8 +110,8 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
-	// const [startDate, setStartDate] = useState(null);
-	// const [endDate, setEndDate] = useState(null);
+	const [startDate, setStartDate] = useState(null);
+	const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
@@ -119,8 +120,8 @@ const Search: React.FC = () => {
 	const [roomCount, setRoomCount] = useState("");
 	const [maxFollowers, setMaxFollowers] = useState("");
 	const [minFollowers, setMinFollowers] = useState("");
-	// const [showStartDateModal, setShowStartDateModal] = useState(false);
-	// const [showEndDateModal, setShowEndDateModal] = useState(false);
+	const [showStartDateModal, setShowStartDateModal] = useState(false);
+	const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -233,31 +234,31 @@ const Search: React.FC = () => {
 				} else if (filter === "room") {
 					if (showMoreFilters) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
-						if(nsfw){
+						if (nsfw) {
 							request += `&nsfw=${nsfw}`;
 						}
-						if(explicit){
+						if (explicit) {
 							request += `&explicit=${explicit}`;
 						}
-						if(scheduled){
+						if (scheduled) {
 							request += `&is_scheduled=${scheduled}`;
 						}
-						if(isPrivate){
+						if (isPrivate) {
 							request += `&is_priv=${isPrivate}`;
 						}
-						if(temporary){
+						if (temporary) {
 							request += `&is_temporary=${temporary}`;
-						}					
-						if(selectedGenre){
+						}
+						if (selectedGenre) {
 							request += `&tags=${selectedGenre}`;
 						}
-						if(selectedLanguage){
+						if (selectedLanguage) {
 							request += `&lang=${selectedLanguage}`;
 						}
-						if(host !== ""){
+						if (host !== "") {
 							request += `&creator_username=${host}`;
 						}
-						if(roomCount !== ""){
+						if (roomCount !== "") {
 							request += `&participant_count=${roomCount}`;
 						}
 
@@ -323,23 +324,20 @@ const Search: React.FC = () => {
 					if (showMoreFilters) {
 						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
 
-						if(minFollowers !== ""){
+						if (minFollowers !== "") {
 							request += `&following=${minFollowers}`;
 						}
-						if(maxFollowers !== ""){
+						if (maxFollowers !== "") {
 							request += `&followers=${maxFollowers}`;
 						}
 
 						console.log("Request: " + request);
 
-						const response = await axios.get(
-							request,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						const response = await axios.get(request, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
+						});
 						console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.id,
@@ -354,8 +352,7 @@ const Search: React.FC = () => {
 						}));
 						setResults(results);
 						setShowMoreFilters(false);
-					}
-					else {
+					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
 							{
@@ -541,8 +538,14 @@ const Search: React.FC = () => {
 								<View style={styles.includeSection}>
 									<Text style={styles.includeHeader}>Search by:</Text>
 									<View style={styles.searchBy}>
-										<ToggleButton label="Minimum Followers" onValueChange={setMinFollowers} />
-										<ToggleButton label="Minimum Following" onValueChange={setMaxFollowers} />
+										<ToggleButton
+											label="Minimum Followers"
+											onValueChange={setMinFollowers}
+										/>
+										<ToggleButton
+											label="Minimum Following"
+											onValueChange={setMaxFollowers}
+										/>
 									</View>
 								</View>
 							)}
@@ -554,8 +557,16 @@ const Search: React.FC = () => {
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Search by:</Text>
 								<View style={styles.searchBy}>
-									<ToggleButton label="Host" testID="host-toggle" onValueChange={setHost} />
-									<ToggleButton label="Room Count" testID="room-count-toggle" onValueChange={setRoomCount} />
+									<ToggleButton
+										label="Host"
+										testID="host-toggle"
+										onValueChange={setHost}
+									/>
+									<ToggleButton
+										label="Room Count"
+										testID="room-count-toggle"
+										onValueChange={setRoomCount}
+									/>
 								</View>
 							</View>
 							<View style={styles.includeSection}>
@@ -593,29 +604,30 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
-							{/* <Text style={styles.includeHeader}>Room Availability:</Text> */}
-							{/* <View style={styles.datePickerContainer}>
-						<Text style={styles.datePickerLabel}>Start Date:</Text>
-						<DateTimePicker
-							value={startDate || new Date()}
-							mode="date"
-							display="default"
-							onChange={(event, selectedDate) =>
-								setStartDate(selectedDate || undefined)
-							}
-						/>
-					</View> */}
-							{/* <View style={styles.datePickerContainer}>
-						<Text style={styles.datePickerLabel}>End Date:</Text>
-						<DateTimePicker
-							value={endDate || new Date()}
-							mode="date"
-							display="default"
-							onChange={(event, selectedDate) =>
-								setEndDate(selectedDate || undefined)
-							}
-						/>
-					</View> */}
+							<Text style={styles.includeHeader}>Room Availability:</Text>
+							<View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>Start Date:</Text>
+								
+								{showStartDateModal && <DateTimePicker
+									value={startDate || new Date()}
+									mode="date"
+									display="default"
+									onChange={(event, selectedDate) =>
+										setStartDate(selectedDate || undefined)
+									}
+								/>}
+							</View>
+							<View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>End Date:</Text>
+								{showEndDateModal && <DateTimePicker
+									value={endDate || new Date()}
+									mode="date"
+									display="default"
+									onChange={(event, selectedDate) =>
+										setEndDate(selectedDate || undefined)
+									}
+								/>}
+							</View>
 							{/* <View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>Start Date:</Text>
 								<TouchableOpacity
