@@ -325,6 +325,7 @@ export class SpotifyService {
 		if (result === undefined) {
 			throw new Error("Failed to add song to database");
 		}
+		// addAudioFeaturesToSongs([result]);
 		return result;
 	}
 
@@ -403,6 +404,41 @@ export class SpotifyService {
 				},
 			});
 		}); //end mutex
+		// addAudioFeaturesToSongs(result);
 		return result;
 	}
+
+	/*
+	async addAudioFeaturesToSongs(
+		songs: PrismaTypes.song[],
+		api: SpotifyApi,
+	): Promise<void> {
+		await navigator.locks.request("SONG_TABLE_EDIT_LOCK", async () => {
+			const songIDs: string[] = [];
+			for (const song of songs) {
+				if (song.spotify_id) {
+					songIDs.push(song.spotify_id);
+				}
+			}
+			const features: Spotify.AudioFeatures[] =
+				await api.tracks.audioFeatures(songIDs);
+			const updateList: Prisma.songUpdateInput[] = [];
+			for (const feature of features) {
+				const song: Prisma.songUpdateInput = {
+					spotify_id: feature.id,
+					audio_features: JSON.stringify(feature),
+				};
+				updateList.push(song);
+			}
+			await this.prisma.song.updateMany({
+				where: {
+					spotify_id: {
+						in: songIDs,
+					},
+				},
+				data: updateList,
+			});
+		});
+	}
+		*/
 }
