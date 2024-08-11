@@ -21,7 +21,6 @@ import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
-import profileIcon from "../../assets/profile-icon.png";
 
 const ProfileScreen: React.FC = () => {
 	const router = useRouter();
@@ -52,7 +51,7 @@ const ProfileScreen: React.FC = () => {
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
-	const [imageLoaded, setImageLoaded] = useState(false);
+
 	const [profileData, setProfileData] = useState<any>(null);
 
 	const [drawerVisible, setDrawerVisible] = useState(false);
@@ -319,13 +318,6 @@ const ProfileScreen: React.FC = () => {
 	};
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
 			<View style={{ padding: 15 }} testID="profile-screen">
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<View style={{ flex: 1 }} />
@@ -389,25 +381,10 @@ const ProfileScreen: React.FC = () => {
 					style={{ alignItems: "center", marginTop: 20 }}
 					testID="profile-pic"
 				>
-					{!imageLoaded ||
-					profileInfo?.profile_picture_url ===
-						"https://example.com/default-profile-picture.png" ? (
-						<Image
-							source={require("../../assets/profile-icon.png")}
-							style={styles.profileImage}
-						/>
-					) : (
-						<Image
-							source={{ uri: profileInfo.profile_picture_url }}
-							style={[
-								styles.profileImage,
-								,
-								!imageLoaded && { display: "none" },
-							]}
-							onLoad={() => setImageLoaded(true)}
-							defaultSource={require("../../assets/profile-icon.png")} // Note: `defaultSource` is not supported in the latest versions of React Native.
-						/>
-					)}
+					<Image
+						source={{ uri: profileData.profile_picture_url }}
+						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+					/>
 				</View>
 				<Text style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}>
 					{profileData.profile_name}
@@ -502,7 +479,6 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		marginBottom: 20,
 	},
-	profileImage: { width: 125, height: 125 },
 	title: {
 		fontSize: 20,
 		fontWeight: "600",

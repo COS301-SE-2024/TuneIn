@@ -12,8 +12,6 @@ interface FriendCardProps {
 	user: string | string[];
 }
 
-const { width: screenWidth } = Dimensions.get("window");
-
 const FriendCard: React.FC<FriendCardProps> = ({
 	profilePicture,
 	username,
@@ -58,7 +56,7 @@ const styles = StyleSheet.create({
 		padding: 16,
 		borderBottomWidth: 1,
 		borderBottomColor: "#ddd",
-		backgroundColor: "#f9f9f9",
+		backgroundColor: "#f2f2f2",
 		borderRadius: 15, // Rounded borders
 		overflow: "hidden", // Ensures the image and content respect the rounded corners
 		width: "100%", // Full width of the link container
