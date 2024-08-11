@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Link } from "expo-router";
-import { Friend } from "../models/friend"; // Assume you have a Friend model
+import { Friend } from "../models/friend"; // Adjust path accordingly
 
 interface FriendCardProps {
 	profilePicture: string;
@@ -16,15 +16,21 @@ const FriendCard: React.FC<FriendCardProps> = ({
 	friend,
 	user,
 }) => {
-	console.log("Friendcard: " + JSON.stringify(friend) + "user: " + user);
 	return (
 		<Link
 			href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
 			style={styles.link}
+			testID="friend-card-link"
 		>
-			<View style={styles.cardContainer}>
-				<Image source={{ uri: profilePicture }} style={styles.profileImage} />
-				<Text style={styles.username}>{username}</Text>
+			<View style={styles.cardContainer} testID="friend-card-container">
+				<Image
+					source={{ uri: profilePicture }}
+					style={styles.profileImage}
+					testID="friend-card-image"
+				/>
+				<Text style={styles.username} testID="friend-card-username">
+					{username}
+				</Text>
 			</View>
 		</Link>
 	);
