@@ -69,6 +69,11 @@ const PlaylistAnalytics: React.FC = () => {
 		artistName: "Artist Name",
 	};
 
+	const onRoomPick = async (room: string) => {
+		console.log("Room picked", room);
+	};
+
+
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>
 			<View style={styles.container}>
@@ -91,7 +96,7 @@ const PlaylistAnalytics: React.FC = () => {
 						/>
 					))}
 				</View>
-				<RoomDropdown initialRooms={rooms} />
+				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick}/>
 				<View style={styles.cardsContainer}>
 					<MetricsCard
 						title="Total Upvotes"

@@ -11,12 +11,14 @@ import {
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { get } from "http";
+import { on } from "events";
 
 type RoomDropdownProps = {
 	initialRooms: string[];
+	onRoomPick: (room: string) => void;
 };
 
-const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms }) => {
+const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms, onRoomPick}) => {
 	const [rooms, setRooms] = useState<string[]>(initialRooms);
 	const [selectedRoom, setSelectedRoom] = useState<string>(initialRooms[0]);
 	const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
@@ -39,6 +41,7 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms }) => {
 
 		setRooms(initialRooms);
 		getRoom();
+		onRoomPick(selectedRoom);
 	}, [initialRooms]);
 
 	const handleRoomSelect = async (room: string) => {
@@ -46,6 +49,8 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms }) => {
 		setDropdownVisible(false);
 		await StorageService.setItem("currentRoom", room);
 	};
+
+	onRoomPick(selectedRoom);
 
 	return (
 		<View style={styles.container}>

@@ -24,10 +24,10 @@ const LineGraphCard: React.FC<LineGraphCardProps> = ({ data, title }) => {
 			>
 			<LineChart
 				data={{
-					labels: data.map((item) => item.label),
+					labels: data?.map((item) => item?.label),
 					datasets: [
 						{
-							data: data.map((item) => item.value),
+							data: data?.map((item) => item?.value),
 						},
 					],
 				}}

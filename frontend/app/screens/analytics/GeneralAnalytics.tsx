@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -6,30 +6,86 @@ import {
 	ScrollView,
 	StyleSheet,
 } from "react-native";
+import * as StorageService from "../../services/StorageService";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LineGraphCard from "../../components/LineGraphCard"; // Import the LineGraphCard
 import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
 import TableCard from "../../components/TableCard";
 import RoomDropdown from "../../components/RoomDropdown";
+import AuthManagement from "../../services/AuthManagement";
+import { API_BASE_URL } from "../../services/Utils";
 
 const GeneralAnalytics: React.FC = () => {
 	const router = useRouter();
+	const [userRooms, setRooms] = useState<any[]>([]);
+	const [generalAnalytics, setGeneralAnalytics] = useState<any | null>(null);
+	const [selectedRoom, setSelectedRoom] = useState<{
+		room_name: string;
+		roomID: string;
+	} | null>(null);
 
-	const rooms = ["Room A", "Room B", "Room C", "Room D", "Room E"];
+	useEffect(() => {
+		const fetchRooms = async () => {
+			// make an axios request with the API_BASE_URL and the auth token
+			const accessToken: string | null = await AuthManagement.getToken();
+			console.log("access token fr", accessToken);
+			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			const data = await response.json();
+			// console.log(data);
+			setRooms(data);
+			const currentRoom = await StorageService.getItem("currentRoom");
+			console.log("user rooms", userRooms, "and current room", currentRoom);
+			const room = userRooms.find((room) => room.room_name === currentRoom);
+			console.log("selected room", room);
+			setSelectedRoom(room);
+		};
+		fetchRooms();
+	}, [userRooms, selectedRoom]);
 
-	// Sample data for the past seven days
-	const data = [50, 60, 70, 65, 80, 90, 85];
+	useEffect(() => {
+		const fetchGeneralAnalytics = async () => {
+			const accessToken: string | null = await AuthManagement.getToken();
+			const currentRoom = await StorageService.getItem("currentRoom");
+			console.log("current roooooom", currentRoom);
+			console.log(selectedRoom);
+			const response = await fetch(`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`, {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			const data = await response.json();
+			setGeneralAnalytics(data);
+		};
+		fetchGeneralAnalytics();
+		console.log("general analytics", generalAnalytics);
+	}, [selectedRoom, generalAnalytics]);
+
+	// fetch data from the analytics/participation endpoint for the selected room and store it in generalAnalytics
+	const rooms = userRooms.map((room) => room.room_name);
+	console.log("mapped rooms", rooms);
 
 	// Sample data for the horizontal bar graph
+	console.log("rooms fr this time", userRooms);
 	const datah = [
-		{ label: "Room A", value: 562 },
+		{ label: "Room A fr", value: 562 },
 		{ label: "Room B", value: 747 },
 		{ label: "Room C", value: 191 },
 		{ label: "Room D", value: 435 },
 		{ label: "Room E", value: 85 },
 		{ label: "Room F", value: 241 },
 	];
+	const data = generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
+		return {
+			label: join.day,
+			value: join.count,
+		};
+	}) ?? [];
+
 
 	const headers = ["Room", "Longest", "Shortest"];
 	const dataTable = [
@@ -37,6 +93,27 @@ const GeneralAnalytics: React.FC = () => {
 		["Room B", "2 hrs 30min", "7 min"],
 		["Room C", "2hrs", "4 min"],
 	];
+
+	const onRoomPick = async (room: string) => {
+		const selected = userRooms.find((r) => r.room_name === room);
+		setSelectedRoom(selected);
+		await StorageService.setItem("currentRoom", room);
+		const accessToken: string | null = await AuthManagement.getToken();
+		console.log("selected room", selectedRoom?.roomID);
+		const roomID: string = selectedRoom?.roomID ?? "";
+		const response = await fetch(`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+		const data = await response.json();
+		// if (data.statusCode !== 200) {
+		// 	console.log("error fetching interaction analytics");
+		// 	return;
+		// }
+		if(generalAnalytics?.room_previews === undefined) setGeneralAnalytics(data);
+		console.log("Room picked", room);
+	};
 
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>
@@ -48,7 +125,7 @@ const GeneralAnalytics: React.FC = () => {
 					<Text style={styles.headerTitle}>General and Room Analytics</Text>
 					<View style={styles.headerSpacer} />
 				</View>
-				<RoomDropdown initialRooms={rooms} />
+				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick}/>
 				<LineGraphCard data={data} title="Weekly Participants" />
 				<HorizontalBarGraphCard
 					data={datah}
@@ -61,6 +138,7 @@ const GeneralAnalytics: React.FC = () => {
 						{ label: "Task 3", value: 55 },
 						{ label: "Task 4", value: 221 },
 						{ label: "Task 5", value: 15 },
+						{ label: "Task 6", value: 41 },
 					]}
 					title="Average Session Duration"
 					unit="minutes" // Pass "minutes" to format the total as hours and minutes
