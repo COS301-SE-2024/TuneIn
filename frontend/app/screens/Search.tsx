@@ -27,6 +27,8 @@ import Dropdown from "../components/Dropdown";
 // import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
+import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
+import SkeletonUserItem from "../components/SkeletonUserItem";
 
 type SearchResult = {
 	id: string;
@@ -110,6 +112,7 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
+	const [loading, setLoading] = useState(true);
 	// const [startDate, setStartDate] = useState(null);
 	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
@@ -180,6 +183,7 @@ const Search: React.FC = () => {
 
 	const handleSearch = async () => {
 		console.log("Search Filter: " + filter);
+		setLoading(true);
 		try {
 			const token = await auth.getToken();
 
@@ -301,23 +305,25 @@ const Search: React.FC = () => {
 							},
 						);
 						// console.log("Search: " + JSON.stringify(response));
-						const formatResults: SearchResult[] = response.data.map((item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						const formatResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: "room",
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}));
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+									language: item.language,
+									roomSize: item.participant_count,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+								},
+							}),
+						);
 
 						setResults(formatResults);
 						// console.log("Results: " + JSON.stringify(results));
@@ -383,6 +389,7 @@ const Search: React.FC = () => {
 			console.error("Error fetching search info:", error);
 			return null;
 		}
+		setLoading(false);
 	};
 
 	const handleScroll = useCallback(
@@ -422,6 +429,7 @@ const Search: React.FC = () => {
 				</View>
 			);
 		}
+
 		if (item.type === "user" && item.userData) {
 			return <UserItem user={item.userData} />;
 		}
@@ -434,19 +442,21 @@ const Search: React.FC = () => {
 
 	const handleSelection = (selectedFilter: string) => {
 		setFilter(selectedFilter);
-		// if(searchTerm !== ""){
-		// 	handleSearch();
-		// }
 	};
 
 	useEffect(() => {
 		// Check if the filter has changed and if the searchTerm is not empty
 		if (prevFilterRef.current !== filter && searchTerm !== "") {
-		  handleSearch();
+			handleSearch();
 		}
 		// Update the previous filter ref to the current filter
 		prevFilterRef.current = filter;
-	  }, [filter, searchTerm]);
+	}, [filter, searchTerm]);
+
+	useEffect(() => {
+		if (loading && results.length == 0) {
+		}
+	}, [loading, results]);
 
 	const getGenres = async () => {
 		try {
@@ -653,15 +663,27 @@ const Search: React.FC = () => {
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch value={temporary} onValueChange={setTemporary} testID="temp-switch" />
+									<Switch
+										value={temporary}
+										onValueChange={setTemporary}
+										testID="temp-switch"
+									/>
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Private</Text>
-									<Switch value={isPrivate} onValueChange={setIsPrivate} testID="priv-switch" />
+									<Switch
+										value={isPrivate}
+										onValueChange={setIsPrivate}
+										testID="priv-switch"
+									/>
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch value={scheduled} onValueChange={setScheduled} testID="scheduled-switch" />
+									<Switch
+										value={scheduled}
+										onValueChange={setScheduled}
+										testID="scheduled-switch"
+									/>
 								</View>
 							</View>
 						</ScrollView>
@@ -669,13 +691,40 @@ const Search: React.FC = () => {
 				</>
 			)}
 
-			<FlatList
-				data={results}
-				keyExtractor={(item) => item.id}
-				renderItem={renderResult}
-				contentContainerStyle={styles.resultsContainer}
-				onScroll={handleScroll}
-			/>
+			{loading ? (
+				// Render Skeleton if loading
+				<View style={styles.roomCardPadding}>
+					{filter === "room" ? (
+						<>
+							<SkeletonRoomCard />
+							<SkeletonRoomCard />
+							<SkeletonRoomCard />
+						</>
+					) : (
+						<>
+							<SkeletonUserItem />
+							<SkeletonUserItem />
+							<SkeletonUserItem />
+							<SkeletonUserItem />
+							<SkeletonUserItem />
+						</>
+					)}
+				</View>
+			) : results.length === 0 ? (
+				// Render No Results Message if no results
+				<View>
+					<Text>No results found</Text>
+				</View>
+			) : (
+				// Render FlatList if there are results
+				<FlatList
+					data={results}
+					keyExtractor={(item) => item.id}
+					renderItem={renderResult}
+					contentContainerStyle={styles.resultsContainer}
+					onScroll={handleScroll}
+				/>
+			)}
 
 			<Animated.View
 				style={[
