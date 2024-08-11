@@ -712,7 +712,7 @@ const Search: React.FC = () => {
 				</View>
 			) : results.length === 0 ? (
 				// Render No Results Message if no results
-				<View>
+				<View style={styles.noResult}>
 					<Text>No results found</Text>
 				</View>
 			) : (
@@ -753,6 +753,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginBottom: 20,
+	},
+	noResult: {
+		flex: 1,                     // Make the View take up the full screen
+        alignItems: 'center',
+		justifyContent: 'center',
 	},
 	title: {
 		fontSize: 24,
