@@ -37,6 +37,7 @@ import {
 	RoomAnalyticsSongsDto,
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
+	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 
 @Controller("rooms")
@@ -522,4 +523,28 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.roomsService.getRoomContributorsAnalytics(roomID, userInfo.id);
 	}
+
+	// create an endpoint to get the keymetrics for a user's rooms
+	// make it a get request
+	// /rooms/analytics/keymetrics
+	// input: none`
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("analytics/keymetrics")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Get key metrics for user's rooms" })
+	@ApiOkResponse({
+		description: "The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async getKeyMetrics(
+		@Request() req: any,
+	): Promise<RoomAnalyticsKeyMetricsDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return this.roomsService.getKeyMetrics(userInfo.id);
+	}
+
+	
 }
