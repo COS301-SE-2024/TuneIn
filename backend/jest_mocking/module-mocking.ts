@@ -309,7 +309,13 @@ export async function createSongsTestingModule(): Promise<TestingModule> {
 //RoomQueueModule
 export async function createRoomQueueTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, DtoGenModule, DbUtilsModule],
+		imports: [
+			PrismaModule,
+			DtoGenModule,
+			DbUtilsModule,
+			SpotifyModule,
+			SpotifyAuthModule,
+		],
 		providers: [
 			RoomQueueService,
 			{ provide: PrismaService, useValue: mockPrismaService },

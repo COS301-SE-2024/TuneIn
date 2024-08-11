@@ -16,6 +16,8 @@ import { VoteDto } from "../dto/vote.dto";
 import { RoomSongDto } from "../dto/roomsong.dto";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
+import { SpotifyService } from "../../../spotify/spotify.service";
+import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
 
 // Postgres tables:
 /*
@@ -80,6 +82,7 @@ class RoomSong {
 	private playbackStartTime: Date | null;
 	private spotifyDetails: Spotify.Track | null = null;
 	private internalSongID: string;
+	private internalQueueItemID: string;
 
 	constructor(
 		spotifyID: string,
@@ -182,6 +185,19 @@ class RoomSong {
 		return this.votes;
 	}
 
+	exportNewVotes(): Prisma.voteCreateManyInput[] {
+		const votes: Prisma.voteCreateManyInput[] = [];
+		for (const vote of this.votes) {
+			votes.push({
+				is_upvote: vote.isUpvote,
+				vote_time: vote.createdAt,
+				queue_id: this.queueItemID,
+				user_id: vote.userID,
+			});
+		}
+		return votes;
+	}
+
 	getPlaybackStartTime(): Date | null {
 		return this.playbackStartTime;
 	}
@@ -197,6 +213,22 @@ class RoomSong {
 	set spotifyInfo(info: Spotify.Track) {
 		this.spotifyDetails = info;
 	}
+
+	get songID(): string {
+		return this.internalSongID;
+	}
+
+	set songID(id: string) {
+		this.internalSongID = id;
+	}
+
+	get queueItemID(): string {
+		return this.internalQueueItemID;
+	}
+
+	set queueItemID(id: string) {
+		this.internalQueueItemID = id;
+	}
 }
 
 class ActiveRoom {
@@ -206,6 +238,10 @@ class ActiveRoom {
 
 	constructor(room: RoomDto) {
 		this.room = room;
+		this.initQueues();
+	}
+
+	initQueues() {
 		const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
 		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
 		const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
@@ -216,6 +252,23 @@ class ActiveRoom {
 			return playbackTime.valueOf();
 		};
 		this.historicQueue = new MinPriorityQueue<RoomSong>(playbackStartTime);
+	}
+
+	async reflushRoomSongs(songs: RoomSong[]) {
+		this.initQueues();
+		for (let i = 0; i < songs.length; i++) {
+			const song = songs[i];
+			if (song.spotifyID === null) {
+				throw new Error("Song does not have a spotify id");
+			}
+
+			const startTime = song.getPlaybackStartTime();
+			if (startTime !== null && startTime.valueOf() < Date.now().valueOf()) {
+				this.historicQueue.enqueue(song);
+			} else {
+				this.queue.enqueue(song);
+			}
+		}
 	}
 
 	async reloadQueue(prisma: PrismaService) {
@@ -249,6 +302,7 @@ class ActiveRoom {
 			}
 		}
 
+		const rs: RoomSong[] = [];
 		for (let i = 0; i < queueItems.length; i++) {
 			const queueItem = queueItems[i];
 			const songEnqueuer = songEnqueuers[i];
@@ -264,12 +318,9 @@ class ActiveRoom {
 				queueItem.start_time,
 			);
 			song.addVotes(queueItem.vote);
-			if (queueItem.start_time === null && queueItem.is_done_playing) {
-				this.historicQueue.enqueue(song);
-			} else {
-				this.queue.enqueue(song);
-			}
+			rs.push(song);
 		}
+		await this.reflushRoomSongs(rs);
 	}
 
 	updateQueue() {
@@ -279,6 +330,148 @@ class ActiveRoom {
 
 	getQueueLockName(): string {
 		return `EDIT_QUEUE_LOCK_${this.room.roomID}`;
+	}
+
+	async flushtoDB(
+		spotify: SpotifyService,
+		api: SpotifyApi,
+		prisma: PrismaService,
+	) {
+		//flush queue to db
+		await navigator.locks.request(this.getQueueLockName(), async () => {
+			//ensure individual songs are in db
+
+			//get all songs in queue
+			const historicQueue: RoomSong[] = this.historicQueue.toArray();
+			const upcomingQueue: RoomSong[] = this.queue.toArray();
+			const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
+
+			//ensure enqueued songs are in db (songs table)
+			const tracks: Spotify.Track[] = await spotify.getManyTracks(
+				queue.map((s) => s.spotifyID),
+				api,
+			);
+			const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
+
+			//ensure enqueued songs are queueitems associated with room
+			const newQueueItems: Prisma.queueCreateManyInput[] = [];
+			for (let i = 0, n = historicQueue.length; i < n; i++) {
+				const dbSong = songs.find(
+					(s) => s.spotify_id === historicQueue[i].spotifyID,
+				);
+				if (!dbSong || dbSong === null) {
+					throw new Error("Song is not in the database somehow?");
+				}
+
+				historicQueue[i].songID = dbSong.song_id;
+				const song = historicQueue[i];
+				newQueueItems.push({
+					room_id: this.room.roomID,
+					song_id: song.songID,
+					is_done_playing: true,
+					start_time: song.getPlaybackStartTime(),
+					insert_time: song.insertTime,
+				});
+			}
+			for (let i = 0, n = upcomingQueue.length; i < n; i++) {
+				const dbSong = songs.find(
+					(s) => s.spotify_id === upcomingQueue[i].spotifyID,
+				);
+				if (!dbSong || dbSong === null) {
+					throw new Error("Song is not in the database somehow?");
+				}
+
+				historicQueue[i].songID = dbSong.song_id;
+				const song = upcomingQueue[i];
+				newQueueItems.push({
+					room_id: this.room.roomID,
+					song_id: dbSong.song_id,
+					is_done_playing: false,
+					start_time: song.getPlaybackStartTime(),
+					insert_time: song.insertTime,
+				});
+			}
+			await prisma.queue.createMany({
+				data: newQueueItems,
+			});
+
+			//link queue items to songs
+			const queueItems = await prisma.queue.findMany({
+				where: {
+					room_id: this.room.roomID,
+				},
+				include: {
+					vote: true,
+					song: true,
+				},
+				orderBy: {
+					start_time: "asc",
+				},
+			});
+
+			//link queue item ids & song ids to songs
+			for (let i = 0, n = queue.length; i < n; i++) {
+				if (!queue[i].songID || queue[i].songID === null) {
+					const dbSong = queueItems.find(
+						(q) =>
+							q.song.spotify_id === queue[i].spotifyID &&
+							q.insert_time === queue[i].insertTime &&
+							q.start_time === queue[i].getPlaybackStartTime(),
+					);
+					if (!dbSong || dbSong === null) {
+						throw new Error("Song is not in the queue somehow?");
+					}
+					queue[i].songID = dbSong.song_id;
+					queue[i].queueItemID = dbSong.queue_id;
+				}
+
+				if (!queue[i].spotifyInfo && queue[i].spotifyID !== null) {
+					const song = queue[i];
+					const track = tracks.find((t) => t.id === song.spotifyID);
+					if (!track || track === null) {
+						throw new Error("Song is not in the queue somehow?");
+					}
+					song.spotifyInfo = track;
+				}
+			}
+
+			await this.reflushRoomSongs(queue);
+
+			//ensure votes are in db
+			const existingVotes: PrismaTypes.vote[] = await prisma.vote.findMany({
+				where: {
+					queue_id: {
+						in: queue.map((s) => s.queueItemID),
+					},
+				},
+				include: {
+					queue: true,
+					users: true,
+				},
+			});
+			const newVotes: Prisma.voteCreateManyInput[] = [];
+			for (const song of queue) {
+				const v = song.exportNewVotes();
+				if (v.length > 0) {
+					for (const vote of v) {
+						const existingVote = existingVotes.find(
+							(ev) =>
+								ev.queue_id === song.queueItemID &&
+								ev.user_id === vote.user_id &&
+								ev.is_upvote === vote.is_upvote &&
+								ev.vote_time === vote.vote_time,
+						);
+						if (existingVote) {
+							continue;
+						}
+						newVotes.push(vote);
+					}
+				}
+			}
+			await prisma.vote.createMany({
+				data: newVotes,
+			});
+		});
 	}
 
 	async addVote(vote: VoteDto): Promise<boolean> {
@@ -438,6 +631,8 @@ export class RoomQueueService {
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly prisma: PrismaService,
+		private readonly spotify: SpotifyService,
+		private readonly spotifyAuth: SpotifyAuthService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
 	}
