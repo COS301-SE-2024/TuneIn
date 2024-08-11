@@ -20,8 +20,11 @@ const AddRoomCard: React.FC<AddRoomCardProps> = ({ style }) => {
 	};
 
 	return (
-		<TouchableOpacity onPress={navigateToTarget}>
-			<View style={[styles.container, style]}>
+		<TouchableOpacity
+			onPress={navigateToTarget}
+			testID="add-room-card-touchable"
+		>
+			<View style={[styles.container, style]} testID="add-room-card-container">
 				<Text style={styles.plusSign}>+</Text>
 			</View>
 		</TouchableOpacity>
