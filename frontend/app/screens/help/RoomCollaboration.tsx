@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export default function GettingStarted() {
+export default function RoomCollaboration() {
 	const router = useRouter();
 
 	return (

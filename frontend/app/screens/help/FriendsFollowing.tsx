@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
-export default function GettingStarted() {
+export default function FriendsFollowing() {
 	const router = useRouter();
 
 	return (
