@@ -21,7 +21,6 @@ const TestPage = () => {
 		<View style={styles.container}>
 			<FlyingView object={object} />
 			<EmojiPicker ref={emojiPickerRef} onSelectEmoji={handleSelectEmoji} />
-			<FlyingView object={object} />
 			{/* Example button to demonstrate passEmojiToTextField */}
 			<TouchableOpacity
 				onPress={() => passEmojiToTextField("😎")}
