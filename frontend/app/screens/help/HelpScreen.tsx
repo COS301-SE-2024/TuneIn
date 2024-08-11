@@ -34,6 +34,7 @@ const menuItems = [
 				title: "Personalized Recommendations",
 				screen: "screens/help/ProfileManagement",
 			},
+			{ title: "Analytics", screen: "screens/help/ProfileManagement" },
 		],
 		route: "screens/help/ProfileManagement",
 	},

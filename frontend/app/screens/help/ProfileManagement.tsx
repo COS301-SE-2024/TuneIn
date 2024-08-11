@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Entypo from '@expo/vector-icons/Entypo';
 
 export default function ProfileManagement() {
 	const router = useRouter();
@@ -26,7 +27,7 @@ export default function ProfileManagement() {
 				<View style={styles.cardContent}>
 					<FontAwesome
 						name="edit"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -47,7 +48,7 @@ export default function ProfileManagement() {
 				<View style={styles.cardContent}>
 					<FontAwesome
 						name="music"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -65,7 +66,7 @@ export default function ProfileManagement() {
 				<View style={styles.cardContent}>
 					<Octicons
 						name="heart-fill"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -74,6 +75,28 @@ export default function ProfileManagement() {
 						<Text style={styles.cardText}>
 							Receive personalized room recommendations to enhance discovery and
 							connection through shared tastes.
+						</Text>
+					</View>
+				</View>
+			</View>
+			<View style={styles.card}>
+				<View style={styles.cardContent}>
+					<Entypo
+						name="bar-graph"
+						size={28}
+						color="#08bdbd"
+						style={styles.icon}
+					/>
+					<View style={styles.textContainer}>
+						<Text style={styles.cardTitle}>Analytics</Text>
+						<Text style={styles.cardText}>
+							Users can access detailed analytics to track engagement and
+							feedback from your rooms. This includes the number of
+							participants, the most voted songs, and activity levels. To view
+							your analytics, simply navigate to your profile page and click on
+							'Settings'. From there, you can explore all available metrics.
+							These insights help you tailor your content to better meet the
+							preferences of your audience
 						</Text>
 					</View>
 				</View>

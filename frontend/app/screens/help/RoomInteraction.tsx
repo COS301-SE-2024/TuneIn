@@ -84,9 +84,10 @@ export default function InteractiveSessions() {
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Managing Rooms</Text>
 						<Text style={styles.cardText}>
-							Room owners can manage participants, moderate content, delete the
-							room and control what other users are allowed to do in room such
-							as enabling chat, voting and if they may add to queue.
+							Room owners can manage participants, edit the playlist, moderate
+							content, delete the room and control what other users are allowed
+							to do in room such as enabling chat, voting and if they may add to
+							the queue.
 						</Text>
 					</View>
 				</View>
