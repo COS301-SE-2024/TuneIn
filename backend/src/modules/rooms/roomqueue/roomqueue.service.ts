@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.room
 )
 */
 
-class RoomSong {
+export class RoomSong {
 	private _score: number;
 	public readonly userID: string;
 	public readonly spotifyID: string;
@@ -246,7 +246,7 @@ class RoomSong {
 	}
 }
 
-class ActiveRoom {
+export class ActiveRoom {
 	public readonly room: RoomDto;
 	private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
 	private historicQueue: MinPriorityQueue<RoomSong>; //priority queue of songs that have already been played
@@ -911,18 +911,18 @@ export class RoomQueueService {
 		return activeRoom.isPlaying();
 	}
 
-	/*
 	async isPaused(roomID: string): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
-		}
-		return activeRoom.isPaused();
+		console.log(`room (${roomID}) is never paused`);
+		return false;
+		// if (!this.roomQueues.has(roomID)) {
+		// 	this.createRoomQueue(roomID);
+		// }
+		// const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		// if (!activeRoom || activeRoom === undefined) {
+		// 	throw new Error("Weird error. HashMap is broken");
+		// }
+		// return activeRoom.isPaused();
 	}
-		*/
 
 	async playSongNow(roomID: string): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
