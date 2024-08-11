@@ -295,25 +295,26 @@ class ActiveRoom {
 			//get spotify info for all songs
 			this.updateQueue();
 			const songs = this.queue.toArray();
-			const songsWithoutInfo = songs.filter((s) => s.spotifyInfo === null);
-			const songIDs = songsWithoutInfo.map((s) => s.spotifyID);
-			const songInfo = await api.tracks.get(songIDs);
-			for (const s of songsWithoutInfo) {
-				const info = songInfo.find((i) => i.id === s.spotifyID);
-				if (info) {
-					s.spotifyInfo = info;
-					//update songs array
-					const index = songs.findIndex(
-						(song) => song.spotifyID === s.spotifyID,
-					);
-					if (index === -1) {
-						throw new Error("Song not found in queue");
-					}
-					songs[index] = s;
+			const songsWithoutInfo: number[] = [];
+			for (let i = 0, n = songs.length; i < n; i++) {
+				if (!songs[i].spotifyInfo) {
+					songsWithoutInfo.push(i);
 				}
 			}
-			//update queue
-			this.queue = MaxPriorityQueue.fromArray(songs);
+			if (songsWithoutInfo.length > 0) {
+				const songIDs: string[] = songsWithoutInfo.map(
+					(i) => songs[i].spotifyID,
+				);
+				const songInfo = await api.tracks.get(songIDs);
+				for (const i of songsWithoutInfo) {
+					const info = songInfo.find((s) => s.id === songs[i].spotifyID);
+					if (info) {
+						songs[i].spotifyInfo = info;
+					}
+				}
+				//update queue
+				this.queue = MaxPriorityQueue.fromArray(songs);
+			}
 
 			// Now the lock will be released.
 		});
