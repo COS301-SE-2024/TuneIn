@@ -29,7 +29,7 @@ export default function InteractiveSessions() {
 
 			<TouchableOpacity
 				style={styles.card}
-				onPress={() => navigateToScreen("../CreateRoom")}
+				onPress={() => navigateToScreen("../rooms/CreateRoom")}
 			>
 				<View style={styles.cardContent}>
 					<FontAwesome5
@@ -48,10 +48,7 @@ export default function InteractiveSessions() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("")}
-			>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<Ionicons
 						name="settings"
@@ -70,10 +67,7 @@ export default function InteractiveSessions() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("ManagingRooms")}
-			>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<FontAwesome5
 						name="tools"

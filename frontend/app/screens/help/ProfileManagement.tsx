@@ -9,10 +9,18 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import Entypo from '@expo/vector-icons/Entypo';
+import Entypo from "@expo/vector-icons/Entypo";
 
 export default function ProfileManagement() {
 	const router = useRouter();
+
+	const navigateToProfile = () => {
+		router.navigate("../profile/ProfilePage");
+	};
+
+	const navigateToAnaytics = () => {
+		router.navigate("../analytics/AnalyticsPage");
+	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -31,7 +39,10 @@ export default function ProfileManagement() {
 						color="#08bdbd"
 						style={styles.icon}
 					/>
-					<View style={styles.textContainer}>
+					<TouchableOpacity
+						style={styles.textContainer}
+						onPress={navigateToProfile}
+					>
 						<Text style={styles.cardTitle}>
 							Creating and Updating Your Profile
 						</Text>
@@ -40,7 +51,7 @@ export default function ProfileManagement() {
 							bookmarked rooms and unique taste profile by creating or updating
 							your profile for other users to see your music taste.
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
 			</View>
 
@@ -79,7 +90,7 @@ export default function ProfileManagement() {
 					</View>
 				</View>
 			</View>
-			<View style={styles.card}>
+			<TouchableOpacity style={styles.card} onPress={navigateToAnaytics}>
 				<View style={styles.cardContent}>
 					<Entypo
 						name="bar-graph"
@@ -100,7 +111,7 @@ export default function ProfileManagement() {
 						</Text>
 					</View>
 				</View>
-			</View>
+			</TouchableOpacity>
 		</ScrollView>
 	);
 }

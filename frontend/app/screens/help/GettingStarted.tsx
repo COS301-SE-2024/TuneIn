@@ -17,11 +17,11 @@ import { useRouter } from "expo-router";
 export default function GettingStarted() {
 	const router = useRouter();
 	const navigateToLogin = () => {
-		router.navigate("../LoginScreen");
+		router.navigate("../Auth/LoginScreen");
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("../RegisterScreen");
+		router.navigate("../Auth/RegisterOther");
 	};
 
 	return (
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.2,
 		shadowRadius: 5,
-		elevation: 3, // for Android
+		elevation: 3,
 	},
 	cardContent: {
 		flexDirection: "row",
