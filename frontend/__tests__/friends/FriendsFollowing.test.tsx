@@ -3,6 +3,7 @@ import { render, fireEvent } from "@testing-library/react-native";
 import FriendsFollowing from "../../app/screens/help/FriendsFollowing";
 import { useRouter } from "expo-router";
 
+// Mock the useRouter hook
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
 }));
@@ -11,7 +12,7 @@ describe("FriendsFollowing", () => {
 	const mockBack = jest.fn();
 
 	beforeEach(() => {
-		useRouter.mockReturnValue({
+		(useRouter as jest.Mock).mockReturnValue({
 			back: mockBack,
 		});
 	});

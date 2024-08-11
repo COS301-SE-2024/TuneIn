@@ -59,7 +59,7 @@ const Followers: React.FC = () => {
 
 	const renderRequest = ({ item }: { item: Friend }) => (
 		<FriendCard
-			profilePicture={item.profilePicture}
+			profile_picture_url={item.profile_picture_url}
 			username={item.username}
 			friend={item}
 			user="current_user" // Replace with actual current user info
@@ -68,7 +68,7 @@ const Followers: React.FC = () => {
 
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
-			profilePicture={item.profilePicture}
+			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
 			user="current_user" // Replace with actual current user info
