@@ -28,8 +28,25 @@ import DevicePicker from "../../components/DevicePicker";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { RoomSongDto } from "../../models/RoomSongDto";
+import * as Spotify from "@spotify/web-api-ts-sdk";
 
 const MemoizedCommentWidget = memo(CommentWidget);
+const constructArtistString = (
+	artists: Spotify.SimplifiedArtist[] | undefined,
+) => {
+	if (!artists) {
+		return "";
+	}
+
+	let artistString = "";
+	artists.forEach((artist, index) => {
+		artistString += artist.name;
+		if (index < artists.length - 1) {
+			artistString += ", ";
+		}
+	});
+	return artistString;
+};
 
 const RoomPage = () => {
 	live.initialiseSocket();
@@ -183,8 +200,8 @@ const RoomPage = () => {
 
 	useEffect(() => {
 		const fetchQueue = async () => {
-			live.getRoomQueue(setQueue);
-		}
+			live.fetchRoomQueue(setQueue);
+		};
 		fetchQueue();
 	}, [roomData.roomID, roomID]);
 
@@ -389,21 +406,18 @@ const RoomPage = () => {
 				</View>
 				<View style={styles.trackDetails}>
 					<Image
-						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
+						source={{
+							uri: queue[currentTrackIndex].track?.album?.images[0].url,
+						}}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
-						{queue[currentTrackIndex]?.name}
+						{queue[currentTrackIndex]?.track?.name}
 					</Text>
 					<Text>
-						{queue[currentTrackIndex]?.artists.map((artist, index) => (
-							<Text key={index}>
-								{artist.name}
-								{index < queue[currentTrackIndex].artists.length - 1 && ", "}
-							</Text>
-						))}
+						{constructArtistString(queue[currentTrackIndex].track?.artists)}
 					</Text>
 				</View>
 
@@ -450,7 +464,7 @@ const RoomPage = () => {
 			>
 				{queue.map((track, index) => (
 					<TouchableOpacity
-						key={track.id}
+						key={track.track?.id}
 						style={[
 							styles.track,
 							index === currentTrackIndex
@@ -460,19 +474,13 @@ const RoomPage = () => {
 						onPress={() => playPauseTrack(index, 0)}
 					>
 						<Image
-							source={{ uri: track.albumArtUrl }}
+							source={{ uri: track.track?.album.uri }}
 							style={styles.queueAlbumArt}
 						/>
 						<View style={styles.trackInfo}>
-							<Text style={styles.queueTrackName}>{track.name}</Text>
+							<Text style={styles.queueTrackName}>{track.track?.name}</Text>
 							<Text style={styles.queueTrackArtist}>
-								{queue[currentTrackIndex]?.artists.map((artist, index) => (
-									<Text key={index}>
-										{artist.name}
-										{index < queue[currentTrackIndex].artists.length - 1 &&
-											", "}
-									</Text>
-								))}
+								{constructArtistString(queue[currentTrackIndex].track?.artists)}
 							</Text>
 						</View>
 					</TouchableOpacity>
