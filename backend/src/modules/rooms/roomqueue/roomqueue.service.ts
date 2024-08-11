@@ -165,63 +165,95 @@ class ActiveRoom {
 		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
 	}
 
-	addVote(vote: VoteDto): boolean {
-		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-		if (index === -1) {
-			return false;
-		}
-		const result = songs[index].addVote(vote);
-		this.queue = MaxPriorityQueue.fromArray(songs);
+	updateQueue() {
+		//update queue
+		this.queue = MaxPriorityQueue.fromArray(this.queue.toArray());
+	}
+
+	async addVote(vote: VoteDto): Promise<boolean> {
+		let result = false;
+		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+			this.updateQueue();
+			const songs: RoomSong[] = this.queue.toArray();
+			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+			if (index === -1) {
+				result = false;
+				return;
+			}
+			result = songs[index].addVote(vote);
+			this.queue = MaxPriorityQueue.fromArray(songs);
+		});
 		return result;
 	}
 
-	removeVote(vote: VoteDto): boolean {
-		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-		if (index === -1) {
-			return false;
-		}
-		const result = songs[index].removeVote(vote);
-		this.queue = MaxPriorityQueue.fromArray(songs);
+	async removeVote(vote: VoteDto): Promise<boolean> {
+		let result = false;
+		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+			this.updateQueue();
+			const songs: RoomSong[] = this.queue.toArray();
+			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+			if (index === -1) {
+				result = false;
+				return;
+			}
+			result = songs[index].removeVote(vote);
+			this.queue = MaxPriorityQueue.fromArray(songs);
+		});
 		return result;
 	}
 
-	swapVote(spotifyID: string, userID: string): boolean {
-		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-		if (index === -1) {
-			return false;
-		}
-		const result = songs[index].swapVote(userID);
-		this.queue = MaxPriorityQueue.fromArray(songs);
+	async swapVote(spotifyID: string, userID: string): Promise<boolean> {
+		let result = false;
+		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+			this.updateQueue();
+			const songs: RoomSong[] = this.queue.toArray();
+			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+			if (index === -1) {
+				result = false;
+				return;
+			}
+			result = songs[index].swapVote(userID);
+			this.queue = MaxPriorityQueue.fromArray(songs);
+		});
 		return result;
 	}
 
-	addSong(spotifyID: string, userID: string): boolean {
-		const songs: RoomSong[] = this.queue.toArray();
-		if (!songs.find((s) => s.spotifyID === spotifyID)) {
-			this.queue.enqueue(new RoomSong(spotifyID, userID));
-			return true;
-		}
-		return false;
+	async addSong(spotifyID: string, userID: string): Promise<boolean> {
+		let result = false;
+		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+			this.updateQueue();
+			const songs: RoomSong[] = this.queue.toArray();
+			if (!songs.find((s) => s.spotifyID === spotifyID)) {
+				this.queue.enqueue(new RoomSong(spotifyID, userID));
+				result = true;
+			}
+		});
+		return result;
 	}
 
-	removeSong(spotifyID: string, userID: string): boolean {
-		const songs: RoomSong[] = this.queue.toArray();
-		const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-		if (index === -1) {
-			return false;
-		}
-		if (songs[index].userID !== userID) {
-			return false;
-		}
-		songs.splice(index, 1);
-		this.queue = MaxPriorityQueue.fromArray(songs);
-		return true;
+	async removeSong(spotifyID: string, userID: string): Promise<boolean> {
+		let result = false;
+		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+			this.updateQueue();
+			const songs: RoomSong[] = this.queue.toArray();
+			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+			if (index === -1) {
+				result = false;
+				return;
+			}
+			if (songs[index].userID !== userID) {
+				result = false;
+				return;
+			}
+			songs.splice(index, 1);
+			this.queue = MaxPriorityQueue.fromArray(songs);
+			result = true;
+		});
+		return result;
 	}
 
 	queueAsRoomSongDto(): RoomSongDto[] {
+		this.updateQueue();
 		return this.queue.toArray().map((s) => s.asRoomSongDto());
 	}
 
@@ -234,6 +266,7 @@ class ActiveRoom {
 	}
 
 	allVotes(): VoteDto[] {
+		this.updateQueue();
 		const songs: RoomSong[] = this.queue.toArray();
 		const votes: VoteDto[] = [];
 		for (const song of songs) {
