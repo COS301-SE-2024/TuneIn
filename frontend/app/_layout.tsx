@@ -12,13 +12,7 @@ const Layout = () => {
 				backgroundColor={colors.backgroundColor}
 			/>
 			<Stack screenOptions={{ title: "Room", headerShown: false }}>
-				<Stack.Screen
-					name="screens/Home"
-					options={{
-						title: "Home",
-						header: () => <TopNavBar />,
-					}}
-				/>
+				<Stack.Screen name="screens/Home" />
 				<Stack.Screen
 					name="screens/rooms/RoomPage"
 					options={{ title: "Room", headerShown: false }}
