@@ -1,11 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, Ref } from "react";
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	StyleSheet,
-	Dimensions,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 type EmojiPickerProps = {
@@ -40,7 +34,11 @@ const EmojiPicker = forwardRef<EmojiPickerRef, EmojiPickerProps>(
 
 		return (
 			<View style={styles.container}>
-				<TouchableOpacity onPress={handlePress} style={styles.iconButton}>
+				<TouchableOpacity
+					testID="EmojiButton"
+					onPress={handlePress}
+					style={styles.iconButton}
+				>
 					<Ionicons name="happy" size={24} />
 				</TouchableOpacity>
 				{isOpen && (
