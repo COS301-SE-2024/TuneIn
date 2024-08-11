@@ -192,7 +192,7 @@ const Search: React.FC = () => {
 							},
 						},
 					);
-					console.log("Search: " + JSON.stringify(response));
+					// console.log("Search: " + JSON.stringify(response));
 					const results: SearchResult[] = response.data.rooms.map(
 						(item: any) => ({
 							id: item.roomID,
@@ -229,7 +229,7 @@ const Search: React.FC = () => {
 
 					const combinedResult = results.concat(users);
 
-					console.log("Formatted results: " + JSON.stringify(results));
+					// console.log("Formatted results: " + JSON.stringify(results));
 					setResults(combinedResult);
 				} else if (filter === "room") {
 					if (showMoreFilters) {
@@ -268,8 +268,8 @@ const Search: React.FC = () => {
 							},
 						});
 
-						console.log("Request: " + request);
-						console.log("Search: " + JSON.stringify(response));
+						// console.log("Request: " + request);
+						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
 							type: "room",
@@ -431,7 +431,7 @@ const Search: React.FC = () => {
 		setShowMoreFilters(!showMoreFilters);
 	};
 
-	const handleSelection = (selectedFilter) => {
+	const handleSelection = (selectedFilter: string) => {
 		setFilter(selectedFilter);
 		// console.log("Filter: " + filter);
 	};
@@ -544,10 +544,12 @@ const Search: React.FC = () => {
 										<ToggleButton
 											label="Minimum Followers"
 											onValueChange={setMinFollowers}
+											testID="minFol-btn"
 										/>
 										<ToggleButton
 											label="Minimum Following"
 											onValueChange={setMaxFollowers}
+											testID="maxFl-btn"
 										/>
 									</View>
 								</View>

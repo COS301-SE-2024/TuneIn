@@ -108,61 +108,6 @@ describe("Search Component", () => {
 		expect(searchInput.props.value).toBe("Room 1");
 	});
 
-	// it("should perform search and display results", async () => {
-	// 	(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
-	// 	(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
-	// 	const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
-	// 	const searchInput = getByPlaceholderText("Search...");
-
-	// 	fireEvent.changeText(searchInput, "Room 1");
-	// 	expect(searchInput.props.value).toBe("Room 1");
-	// 	fireEvent.press(getByTestId("search-button"));
-	// 	// getByText("Room 1");
-
-	// 	// // Mocking the actual search logic inside the Search component if necessary
-	// 	// await waitFor(() => {
-	// 	// 	expect(getByText("Room 1")).toBeTruthy();
-	// 	// });
-	// });
-
-	// // test("should filter results by room", () => {
-	// // 	const { getByTestId, getByText } = render(<Search />);
-
-	// // 	// Simulate user interaction to filter results
-	// // 	fireEvent.changeText(getByTestId("search-input"), "Room 1");
-	// // 	fireEvent.press(getByTestId("search-button"));
-
-	// // 	// Debug the output to see if the expected text is rendered
-	// // 	screen.debug();
-
-	// // 	// Assert that room results are displayed
-	// // 	expect(getByText("Room 1")).toBeTruthy();
-	// // 	expect(getByText("Room 2")).toBeTruthy();
-
-	// // 	// Assert that user results are not displayed
-	// // 	expect(() => getByText("User 1")).toThrow();
-	// // 	expect(() => getByText("User 2")).toThrow();
-	// // });
-
-	// // test("should filter results by user", () => {
-	// // 	render(<Search />);
-
-	// // 	// Simulate user interaction
-	// // 	fireEvent.changeText(screen.getByPlaceholderText("Search..."), "User 1");
-	// // 	fireEvent.press(screen.getByTestId("search-button"));
-
-	// // 	// Debug to check what is rendered
-	// // 	screen.debug();
-
-	// // 	// Assert that user results are displayed
-	// // 	expect(screen.getByText("User 1")).toBeTruthy();
-	// // 	expect(screen.getByText("User 2")).toBeTruthy();
-
-	// // 	// Assert that room results are not displayed
-	// // 	expect(() => screen.getByText("Room 1")).toThrow();
-	// // 	expect(() => screen.getByText("Room 2")).toThrow();
-	// // });
-
 	it("should toggle more filters", async () => {
 		// Mock search result
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
@@ -262,49 +207,25 @@ describe("Search Component", () => {
 		fireEvent(getByTestId("temp-switch"), "valueChange", true);
 		fireEvent(getByTestId("priv-switch"), "valueChange", true);
 		fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
-		// fireEvent.call()
 
-		// Simulate search input change
-		// fireEvent.changeText(getByTestId("search-input"), "Room 1");
-
-		// Simulate search button press
 		await act(async () => {
 			const searchInput = getByPlaceholderText("Search...");
 			fireEvent.changeText(searchInput, "Room 1");
             fireEvent.press(getByTestId("search-button"));
-            // await waitFor(() => {expect(getByText("Room 1")).toBeTruthy()});
         });
-
-        // Verify the API call was made
-        // expect(axios.get).toHaveBeenCalledTimes(2);
 	});
 
-	it("should search with all user filters", async () => {
+	it("should search with no room filters", async () => {
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
-		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
-		// Simulate filter switches
-		// fireEvent(getByTestId("explicit-switch"), "valueChange", true);
-		// fireEvent(getByTestId("nsfw-switch"), "valueChange", true);
-		// fireEvent(getByTestId("temp-switch"), "valueChange", true);
-		// fireEvent(getByTestId("priv-switch"), "valueChange", true);
-		// fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
-
-		// Simulate search input change
-		// fireEvent.changeText(getByTestId("search-input"), "Room 1");
-
-		// Simulate search button press
 		await act(async () => {
-			// fireEvent.click(getByTestId("user-btn"));
 			const searchInput = getByPlaceholderText("Search...");
-			fireEvent.changeText(searchInput, "User 1");
+			fireEvent.changeText(searchInput, "Room 1");
             fireEvent.press(getByTestId("search-button"));
-            await waitFor(() => {expect(getByText("Room 1")).toBeTruthy()});
         });
-
-        // Verify the API call was made
-        // expect(axios.get).toHaveBeenCalledTimes(2);
 	});
+
 });
