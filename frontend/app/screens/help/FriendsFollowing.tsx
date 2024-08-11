@@ -16,10 +16,13 @@ export default function GettingStarted() {
 
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-			<Text style={styles.header}>Friends and Following</Text>
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+				<Text style={styles.headerTitle}>Friends and Following</Text>
+				<View style={styles.headerSpacer} />
+			</View>
 
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
@@ -68,11 +71,22 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 15,
 	},
 	header: {
-		fontSize: 28,
-		fontWeight: "bold",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: 10,
 		marginBottom: 20,
-		color: "#000",
-		textAlign: "center",
+	},
+	closeButton: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	headerTitle: {
+		fontSize: 24,
+		fontWeight: "bold",
+	},
+	headerSpacer: {
+		width: 0,
 	},
 	card: {
 		marginBottom: 20,
@@ -105,11 +119,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: "#34495e",
 		lineHeight: 22,
-	},
-	backButton: {
-		position: "absolute",
-		top: 10,
-		left: 10,
-		zIndex: 1,
 	},
 });

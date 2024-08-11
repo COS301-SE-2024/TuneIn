@@ -43,8 +43,9 @@ const menuItems = [
 		subcategories: [
 			{ title: "Creating Rooms", screen: "screens/help/RoomInteraction" },
 			{ title: "Room Settings", screen: "screens/help/RoomInteraction" },
-			{ title: "Joining Rooms", screen: "screens/help/RoomInteraction" },
 			{ title: "Managing Rooms", screen: "screens/help/RoomInteraction" },
+			{ title: "Joining Rooms", screen: "screens/help/RoomInteraction" },
+			{ title: "Bookmarking Rooms", screen: "screens/help/RoomInteraction" },
 		],
 		route: "screens/help/RoomInteraction",
 	},
