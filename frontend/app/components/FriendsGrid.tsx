@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Assume you have a Friend model
+import { colors } from "../styles/colors";
 
 interface FriendsGridProps {
 	friends: Friend[];
@@ -14,7 +15,10 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 	user,
 	maxVisible,
 }) => {
-	console.log("Friend: " + JSON.stringify(friends) + "user: " + user);
+	const truncateUsername = (username: string) => {
+		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+	};
+
 	return (
 		<View style={styles.container} testID="friends-grid-container">
 			<View style={styles.gridContainer} testID="friends-grid">
@@ -43,7 +47,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 								style={styles.friendName}
 								testID={`friend-name-${friend.username}`}
 							>
-								{friend.username}
+								{truncateUsername(friend.username)}
 							</Text>
 						</View>
 					</Link>
@@ -76,7 +80,7 @@ const styles = StyleSheet.create({
 	imageBorder: {
 		alignItems: "center",
 		borderWidth: 2,
-		borderColor: "#0000FF", // Use hex color for blue
+		borderColor: colors.primary,
 		borderRadius: 50,
 		padding: 4,
 	},

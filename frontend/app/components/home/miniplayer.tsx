@@ -100,13 +100,13 @@ const Miniplayer: React.FC = () => {
 						</Animated.Text>
 					</View>
 				</View>
-				<View style={styles.peopleCountContainer}>
+				{/* <View style={styles.peopleCountContainer}>
 					<Icon name="users" size={20} color="#000" />
 					<Text style={styles.peopleCount}>{NumberOfPeople}</Text>
-				</View>
-				<TouchableOpacity style={styles.leaveButton}>
+				</View> */}
+				{/* <TouchableOpacity style={styles.leaveButton}>
 					<Text>Leave</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</TouchableOpacity>
 		</View>
 	);

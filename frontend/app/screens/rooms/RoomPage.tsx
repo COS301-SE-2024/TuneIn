@@ -39,6 +39,7 @@ import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
+import { colors } from "../../styles/colors";
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const RoomPage = () => {
@@ -963,7 +964,7 @@ const styles = StyleSheet.create({
 		marginVertical: 10,
 		paddingVertical: 8,
 		paddingHorizontal: 16,
-		backgroundColor: "#007AFF",
+		backgroundColor: colors.primary,
 		borderRadius: 20,
 	},
 	joinLeaveButtonText: {
