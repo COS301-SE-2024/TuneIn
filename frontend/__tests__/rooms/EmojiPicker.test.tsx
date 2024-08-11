@@ -3,7 +3,6 @@ import { render, fireEvent, screen } from "@testing-library/react-native";
 import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../app/components/rooms/emojiPicker"; // Adjust the import path as necessary
-import { Ionicons } from "@expo/vector-icons";
 import { act } from "react-test-renderer";
 
 describe("EmojiPicker", () => {

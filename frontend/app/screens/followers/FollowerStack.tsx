@@ -3,7 +3,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import AllFriends from "./AllFriends";
 import Followers from "./Followers";
 import Following from "./Following";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 
 // Create a tab navigator
