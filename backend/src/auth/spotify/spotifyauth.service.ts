@@ -72,10 +72,11 @@ export class SpotifyCallbackResponse {
 
 @Injectable()
 export class SpotifyAuthService {
-	private clientId;
-	private clientSecret;
-	private redirectUri;
-	private authHeader;
+	private clientId: string;
+	private clientSecret: string;
+	private redirectUri: string;
+	private authHeader: string;
+	private selfAuthorisedAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -107,6 +108,11 @@ export class SpotifyAuthService {
 
 		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
 			"base64",
+		);
+
+		this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
+			this.clientId,
+			this.clientSecret,
 		);
 	}
 
@@ -392,5 +398,9 @@ export class SpotifyAuthService {
 			return newPair;
 		}
 		return JSON.parse(tokens.token) as SpotifyTokenPair;
+	}
+
+	getUserlessAPI(): Spotify.SpotifyApi {
+		return this.selfAuthorisedAPI;
 	}
 }

@@ -13,6 +13,8 @@ import {
 import { RoomDto } from "../dto/room.dto";
 import { VoteDto } from "../dto/vote.dto";
 import { RoomSongDto } from "../dto/roomsong.dto";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import * as Spotify from "@spotify/web-api-ts-sdk";
 
 // Postgres tables:
 /*
@@ -74,6 +76,7 @@ class RoomSong {
 	public readonly spotifyID: string;
 	private votes: VoteDto[];
 	public readonly insertTime: Date;
+	private spotifyDetails: Spotify.Track | null = null;
 
 	constructor(spotifyID: string, userID: string) {
 		this._score = 0;
@@ -153,6 +156,13 @@ class RoomSong {
 	getVotes(): VoteDto[] {
 		return this.votes;
 	}
+	get spotifyInfo(): Spotify.Track | null {
+		return this.spotifyDetails;
+	}
+
+	set spotifyInfo(info: Spotify.Track) {
+		this.spotifyDetails = info;
+	}
 }
 
 class ActiveRoom {
@@ -170,9 +180,13 @@ class ActiveRoom {
 		this.queue = MaxPriorityQueue.fromArray(this.queue.toArray());
 	}
 
+	getQueueLockName(): string {
+		return `EDIT_QUEUE_LOCK_${this.room.roomID}`;
+	}
+
 	async addVote(vote: VoteDto): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
@@ -188,7 +202,7 @@ class ActiveRoom {
 
 	async removeVote(vote: VoteDto): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
@@ -204,7 +218,7 @@ class ActiveRoom {
 
 	async swapVote(spotifyID: string, userID: string): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
@@ -220,7 +234,7 @@ class ActiveRoom {
 
 	async addSong(spotifyID: string, userID: string): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			if (!songs.find((s) => s.spotifyID === spotifyID)) {
@@ -233,7 +247,7 @@ class ActiveRoom {
 
 	async removeSong(spotifyID: string, userID: string): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request("EDIT_QUEUE_LOCK", async () => {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
@@ -274,6 +288,38 @@ class ActiveRoom {
 		}
 		return votes;
 	}
+
+	async getSpotifyInfo(api: SpotifyApi) {
+		await navigator.locks.request(this.getQueueLockName(), async () => {
+			// The lock has been acquired.
+			//get spotify info for all songs
+			this.updateQueue();
+			const songs = this.queue.toArray();
+			const songsWithoutInfo = songs.filter((s) => s.spotifyInfo === null);
+			const songIDs = songsWithoutInfo.map((s) => s.spotifyID);
+			const songInfo = await api.tracks.get(songIDs);
+			for (const s of songsWithoutInfo) {
+				const info = songInfo.find((i) => i.id === s.spotifyID);
+				if (info) {
+					s.spotifyInfo = info;
+					//update songs array
+					const index = songs.findIndex(
+						(song) => song.spotifyID === s.spotifyID,
+					);
+					if (index === -1) {
+						throw new Error("Song not found in queue");
+					}
+					songs[index] = s;
+				}
+			}
+			//update queue
+			this.queue = MaxPriorityQueue.fromArray(songs);
+
+			// Now the lock will be released.
+		});
+	}
+
+	isPlaying(): boolean {}
 }
 
 @Injectable()
