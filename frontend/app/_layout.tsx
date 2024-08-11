@@ -11,7 +11,7 @@ const Layout = () => {
 				barStyle="light-content"
 				backgroundColor={colors.backgroundColor}
 			/>
-			<Stack>
+			<Stack screenOptions={{ title: "Room", headerShown: false }}>
 				<Stack.Screen
 					name="screens/Home"
 					options={{

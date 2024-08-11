@@ -32,6 +32,11 @@ import { live, instanceExists } from "./../services/Live"; // Import AuthManagem
 import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";
+import TopNavBar from "../components/TopNavBar";
+interface UserData {
+	username: string;
+	// Add other properties if needed
+}
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -47,8 +52,7 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [cache, setCacheLoaded] = useState(false);
-	const [userData, setUserData] = useState();
+	const [userData, setUserData] = useState<UserData | undefined>(undefined);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -230,9 +234,11 @@ const Home: React.FC = () => {
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
+		const safeUserData = userData ?? { username: "defaultUser" };
+
 		router.navigate({
 			pathname: "/screens/followers/FollowerStack",
-			params: { username: userData.username },
+			params: { username: safeUserData.username },
 		});
 	};
 
@@ -244,10 +250,6 @@ const Home: React.FC = () => {
 		initialize();
 		return;
 	}, [refreshData]);
-
-	const navigateToCreateNew = () => {
-		router.navigate("/screens/rooms/CreateRoom");
-	};
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -285,14 +287,9 @@ const Home: React.FC = () => {
 		extrapolate: "clamp",
 	});
 
-	const buttonTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 70],
-		extrapolate: "clamp",
-	});
-
 	return (
 		<View style={styles.container}>
+			<TopNavBar />
 			<ScrollView
 				ref={scrollViewRef}
 				onScroll={handleScroll}
@@ -340,20 +337,6 @@ const Home: React.FC = () => {
 					</View>
 				)}
 			</ScrollView>
-
-			{/* <Animated.View
-				style={[
-					styles.createRoomButtonContainer,
-					{ transform: [{ translateY: buttonTranslateY }] },
-				]}
-			>
-				<TouchableOpacity
-					style={styles.createRoomButton}
-					onPress={navigateToCreateNew}
-				>
-					<Text style={styles.createRoomButtonText}>+</Text>
-				</TouchableOpacity>
-			</Animated.View> */}
 			<Animated.View
 				style={[
 					styles.navBar,
