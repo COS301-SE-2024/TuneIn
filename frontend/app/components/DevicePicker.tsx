@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome"; // Example: using Font
 import { Devices } from "../models/Devices";
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import * as spotifyAuth from "../services/SpotifyAuth";
+import { colors } from "../styles/colors";
 
 const DevicePicker = () => {
 	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
@@ -162,7 +163,7 @@ const DevicePicker = () => {
 								<>
 									<Text style={styles.popupTitle}>Select a Device</Text>
 									{isLoading ? (
-										<ActivityIndicator size="large" color="blue" />
+										<ActivityIndicator size="large" color={colors.primary} />
 									) : (
 										devices.map((device: Devices, index: number) => (
 											<TouchableOpacity

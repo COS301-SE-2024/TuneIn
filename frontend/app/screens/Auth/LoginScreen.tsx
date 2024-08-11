@@ -134,7 +134,7 @@ const LoginScreen: React.FC = () => {
 					/>
 				</View>
 				{isLoading ? (
-					<ActivityIndicator size="small" color="#08BDBD" />
+					<ActivityIndicator size="small" color={colors.primary} />
 				) : (
 					<CyanButton title="LOGIN" onPress={navigateToHome} />
 				)}
