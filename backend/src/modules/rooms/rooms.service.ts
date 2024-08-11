@@ -9,7 +9,7 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import { subHours, addHours, isBefore, startOfHour } from 'date-fns';
+import { subHours, addHours, isBefore, startOfHour, startOfDay } from 'date-fns';
 import {
 	RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
@@ -657,6 +657,14 @@ export class RoomsService {
 			ORDER BY day ASC;
 		`;
 
+		// get the room creation date
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null = room?.date_created ?? null;
+
 		if (userActivityPerDay.length === 0) {
 			return joins;
 		}
@@ -669,9 +677,19 @@ export class RoomsService {
 			uniqueUserActivityPerDay[i].count = Number(uniqueUserActivityPerDay[i].count);
 			unique_joins += uniqueUserActivityPerDay[i].count;
 		}
+		// fill in the missing days
+		// get all the days from the first day the room was created until today if the room is not older than 7 days
+		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
 		const today: Date = new Date();
-		let day: Date = userActivityPerDay[0].day;
+		const firstDay: Date = userActivityPerDay[0].day;
+		let day: Date = roomCreationDate ?? firstDay;
+		if (isBefore(day, subHours(today, 24 * 7))) {
+			day = subHours(today, 24 * 7);
+		}
+		//floor the day to the nearest day
+		day = startOfDay(day);
+		// add the first day
 		while (isBefore(day, today)) {
 			console.log("adding day", day);
 			allDays.push(day);
@@ -738,16 +756,30 @@ export class RoomsService {
 		if (sessionDurations.length === 0) {
 			return sessionData;
 		}
+		// get the room creation date
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null = room?.date_created ?? null;
+
 
 		// fill in the missing days
 		const allDays: Date[] = [];
 		const today: Date = new Date();
 		const firstDay: Date = sessionDurations[0].day;
-		let day: Date = firstDay;
+		let day: Date = roomCreationDate ?? firstDay;
+		if (isBefore(day, subHours(today, 24 * 7))) {
+			day = subHours(today, 24 * 7);
+		}
+		//floor the day to the nearest day
+		day = startOfDay(day);
 		while (isBefore(day, today)) {
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
+		day = startOfDay(day);
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean = sessionDurations.find(
@@ -802,8 +834,23 @@ export class RoomsService {
 			return participantsPerHour;
 		}
 
+		// get the room creation date
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null = room?.date_created ?? null;
+
+
 		const allHours: Date[] = [];
-		let hour: Date = userActivityPerHour[0].hour;
+		let hour: Date = roomCreationDate ?? userActivityPerHour[0].hour;
+		if (isBefore(hour, subHours(today, 24))) {
+			hour = subHours(today, 24);
+		}
+		//floor the day to the nearest day
+		hour = startOfHour(hour);
+
 		while (isBefore(hour, today)) {
 			allHours.push(hour);
 			hour = addHours(hour, 1);
