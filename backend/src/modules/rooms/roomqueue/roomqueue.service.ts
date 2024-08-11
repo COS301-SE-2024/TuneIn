@@ -3,6 +3,7 @@ import { PrismaService } from "../../../../prisma/prisma.service";
 import { DtoGenService } from "../../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../../db-utils/db-utils.service";
 import * as PrismaTypes from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
 	PriorityQueue,
 	MinPriorityQueue,
@@ -80,12 +81,22 @@ class RoomSong {
 	private spotifyDetails: Spotify.Track | null = null;
 	private internalSongID: string;
 
-	constructor(spotifyID: string, userID: string) {
+	constructor(
+		spotifyID: string,
+		userID: string,
+		internalSongID?: string,
+		insertTime: Date = new Date(),
+		playbackStartTime: Date | null = null,
+	) {
 		this._score = 0;
 		this.userID = userID;
 		this.spotifyID = spotifyID;
 		this.votes = [];
-		this.insertTime = new Date();
+		this.insertTime = insertTime;
+		this.playbackStartTime = playbackStartTime;
+		if (internalSongID) {
+			this.internalSongID = internalSongID;
+		}
 	}
 
 	private calculateScore(): number {
@@ -121,12 +132,13 @@ class RoomSong {
 		return true;
 	}
 
-	swapVote(userID: string): boolean {
+	swapVote(userID: string, swapTime: Date): boolean {
 		const index = this.votes.findIndex((v) => v.userID === userID);
 		if (index === -1) {
 			return false;
 		}
 		this.votes[index].isUpvote = !this.votes[index].isUpvote;
+		this.votes[index].createdAt = swapTime;
 		this._score = this.calculateScore();
 		return true;
 	}
@@ -227,7 +239,11 @@ class ActiveRoom {
 		return result;
 	}
 
-	async swapVote(spotifyID: string, userID: string): Promise<boolean> {
+	async swapVote(
+		spotifyID: string,
+		userID: string,
+		swapTime: Date,
+	): Promise<boolean> {
 		let result = false;
 		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
@@ -237,19 +253,25 @@ class ActiveRoom {
 				result = false;
 				return;
 			}
-			result = songs[index].swapVote(userID);
+			result = songs[index].swapVote(userID, swapTime);
 			this.queue = MaxPriorityQueue.fromArray(songs);
 		});
 		return result;
 	}
 
-	async addSong(spotifyID: string, userID: string): Promise<boolean> {
+	async addSong(
+		spotifyID: string,
+		userID: string,
+		insertTime: Date,
+	): Promise<boolean> {
 		let result = false;
 		await navigator.locks.request(this.getQueueLockName(), async () => {
 			this.updateQueue();
 			const songs: RoomSong[] = this.queue.toArray();
 			if (!songs.find((s) => s.spotifyID === spotifyID)) {
-				this.queue.enqueue(new RoomSong(spotifyID, userID));
+				this.queue.enqueue(
+					new RoomSong(spotifyID, userID, undefined, insertTime),
+				);
 				result = true;
 			}
 		});
@@ -350,6 +372,7 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 		userID: string,
+		insertTime: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
@@ -362,10 +385,14 @@ export class RoomQueueService {
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error("Weird error. HashMap is broken");
 		}
-		return activeRoom.addSong(spotifyID, userID);
+		return activeRoom.addSong(spotifyID, userID, insertTime);
 	}
 
-	removeSong(roomID: string, spotifyID: string, userID: string): boolean {
+	async removeSong(
+		roomID: string,
+		spotifyID: string,
+		userID: string,
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -376,7 +403,12 @@ export class RoomQueueService {
 		return activeRoom.removeSong(spotifyID, userID);
 	}
 
-	upvoteSong(roomID: string, spotifyID: string, userID: string): boolean {
+	async upvoteSong(
+		roomID: string,
+		spotifyID: string,
+		userID: string,
+		createdAt: Date,
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -384,6 +416,7 @@ export class RoomQueueService {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
+			createdAt: new Date(),
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -392,7 +425,12 @@ export class RoomQueueService {
 		return activeRoom.addVote(vote);
 	}
 
-	downvoteSong(roomID: string, spotifyID: string, userID: string): boolean {
+	async downvoteSong(
+		roomID: string,
+		spotifyID: string,
+		userID: string,
+		createdAt: Date,
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -400,6 +438,7 @@ export class RoomQueueService {
 			isUpvote: false,
 			userID: userID,
 			spotifyID: spotifyID,
+			createdAt: createdAt,
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -408,7 +447,11 @@ export class RoomQueueService {
 		return activeRoom.addVote(vote);
 	}
 
-	undoSongVote(roomID: string, spotifyID: string, userID: string): boolean {
+	async undoSongVote(
+		roomID: string,
+		spotifyID: string,
+		userID: string,
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -416,6 +459,7 @@ export class RoomQueueService {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
+			createdAt: createdAt,
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -424,7 +468,12 @@ export class RoomQueueService {
 		return activeRoom.removeVote(vote);
 	}
 
-	swapSongVote(roomID: string, spotifyID: string, userID: string): boolean {
+	async swapSongVote(
+		roomID: string,
+		spotifyID: string,
+		userID: string,
+		insertTime: Date,
+	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			throw new Error("Room does not exist");
 		}
@@ -432,7 +481,7 @@ export class RoomQueueService {
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error("Weird error. HashMap is broken");
 		}
-		return activeRoom.swapVote(spotifyID, userID);
+		return activeRoom.swapVote(spotifyID, userID, insertTime);
 	}
 
 	getQueueState(roomID: string): {

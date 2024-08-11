@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsObject, ValidateNested } from "class-validator";
+import { IsString, IsObject, ValidateNested, IsDate } from "class-validator";
 import { RoomSongDto } from "src/modules/rooms/dto/roomsong.dto";
 
 export class QueueEventDto {
@@ -11,4 +11,8 @@ export class QueueEventDto {
 	@ApiProperty()
 	@IsString()
 	roomID: string;
+
+	@ApiProperty()
+	@IsDate()
+	createdAt?: Date;
 }

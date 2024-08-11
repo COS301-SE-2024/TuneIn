@@ -719,7 +719,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				const somethingChanged: boolean = this.roomQueue.upvoteSong(
 					payload.roomID,
 					payload.song.spotifyID,
@@ -759,7 +759,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				const somethingChanged: boolean = this.roomQueue.downvoteSong(
 					payload.roomID,
 					payload.song.spotifyID,
@@ -839,7 +839,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				const somethingChanged: boolean = this.roomQueue.swapSongVote(
 					payload.roomID,
 					payload.song.spotifyID,
@@ -879,7 +879,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				//this.server.emit();
 				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
+				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				const somethingChanged: boolean = await this.roomQueue.addSong(
 					payload.roomID,
 					payload.song.spotifyID,
@@ -1000,7 +1000,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		return result;
 	}
 
-	async validateQueueEvent(payload: string): Promise<QueueEventDto> {
+	async validateQueueEvent(
+		payload: string,
+		dateRequired: boolean = false,
+	): Promise<QueueEventDto> {
 		/*
 		if no token, return error
 		if token
@@ -1016,7 +1019,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			throw new Error("Invalid JSON received");
 		}
 		if (!q.roomID) {
-			throw new Error("No userID provided");
+			throw new Error("No 'userID' provided");
+		}
+		if (dateRequired && !q.createdAt) {
+			throw new Error("No 'createdAt' provided");
 		}
 		return q;
 	}

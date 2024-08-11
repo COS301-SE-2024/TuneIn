@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsBoolean } from "class-validator";
+import { IsString, IsBoolean, IsDate } from "class-validator";
 
 export class VoteDto {
 	@ApiProperty()
@@ -13,4 +13,8 @@ export class VoteDto {
 	@ApiProperty()
 	@IsString()
 	spotifyID: string;
+
+	@ApiProperty()
+	@IsDate()
+	createdAt: Date;
 }
