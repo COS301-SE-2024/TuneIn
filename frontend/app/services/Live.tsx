@@ -9,6 +9,8 @@ import * as utils from "./Utils";
 import { SimpleSpotifyPlayback } from "./SimpleSpotifyPlayback";
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
+import { RoomSongDto } from "../models/RoomSongDto";
+import { VoteDto } from "../models/VoteDto";
 
 const TIMEOUT = 5000000;
 
@@ -35,6 +37,7 @@ type stateSetMessages = React.Dispatch<React.SetStateAction<Message[]>>;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
+type stateSetQueue = React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
 
 let playback: SimpleSpotifyPlayback | null = null;
 
@@ -43,6 +46,7 @@ class LiveSocketService {
 	private socket: Socket;
 	private currentUser: UserDto | null = null;
 	private currentRoom: RoomDto | null = null;
+	private currentRoomVotes: VoteDto[] = [];
 	private initialised = false;
 	private isConnecting = false;
 	private requestingChatHistory = false;
@@ -54,6 +58,7 @@ class LiveSocketService {
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
+	private setQueue: stateSetQueue | null = null;
 
 	private chatHistoryReceived = false;
 	private pingSent = false;
@@ -325,10 +330,10 @@ class LiveSocketService {
 					return;
 				}
 
-				if (!response.songID) {
+				if (!response.spotifyID) {
 					throw new Error("Server did not return song ID");
 				}
-				const songID: string = response.songID;
+				const songID: string = response.spotifyID;
 				const spotifyID: string = await songService.getSpotifyID(songID);
 
 				if (!playback) {
@@ -601,7 +606,7 @@ class LiveSocketService {
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
-			songID: null,
+			spotifyID: null,
 			UTC_time: null,
 		};
 		this.socket.emit("initPlay", JSON.stringify(input));
@@ -623,7 +628,7 @@ class LiveSocketService {
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
-			songID: null,
+			spotifyID: null,
 			UTC_time: null,
 		};
 		this.socket.emit("initPause", JSON.stringify(input));
@@ -645,7 +650,7 @@ class LiveSocketService {
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
-			songID: null,
+			spotifyID: null,
 			UTC_time: null,
 		};
 		this.socket.emit("initStop", JSON.stringify(input));

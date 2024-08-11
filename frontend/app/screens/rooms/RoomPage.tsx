@@ -27,6 +27,7 @@ import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
+import { RoomSongDto } from "../../models/RoomSongDto";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -47,7 +48,7 @@ const RoomPage = () => {
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [joined, setJoined] = useState(false);
-	const [queue, setQueue] = useState<Track[]>([]);
+	const [queue, setQueue] = useState<RoomSongDto[]>([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
@@ -118,6 +119,7 @@ const RoomPage = () => {
 	const expandedHeight = screenHeight - 350;
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
+	/*
 	useEffect(() => {
 		const fetchQueue = async () => {
 			const storedToken = await auth.getToken();
