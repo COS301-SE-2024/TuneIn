@@ -5,10 +5,8 @@ import { DbUtilsService } from "../../db-utils/db-utils.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import {
-	PriorityQueue,
 	MinPriorityQueue,
 	MaxPriorityQueue,
-	ICompare,
 	IGetCompareValue,
 } from "@datastructures-js/priority-queue";
 import { RoomDto } from "../dto/room.dto";
@@ -232,6 +230,19 @@ class RoomSong {
 
 	set queueItemID(id: string) {
 		this.internalQueueItemID = id;
+	}
+
+	isPlaying(): boolean {
+		if (!this.playbackStartTime || this.playbackStartTime === null) {
+			return false;
+		}
+		if (!this.spotifyDetails || this.spotifyDetails === null) {
+			throw new Error("Song does not have spotify info");
+		}
+		return (
+			this.playbackStartTime.valueOf() + this.spotifyDetails.duration_ms >=
+			new Date().valueOf()
+		);
 	}
 }
 
@@ -484,34 +495,12 @@ class ActiveRoom {
 			return null;
 		}
 		let result = this.historicQueue.front();
-		let st = result.getPlaybackStartTime();
-		if (result.spotifyInfo === null) {
-			throw new Error(
-				"Queue songs do not have spotify info, after explicitly requesting it. Something has gone very wrong",
-			);
-		}
-		if (
-			st &&
-			st !== null &&
-			st.getMilliseconds() + result.spotifyInfo.duration_ms >=
-				new Date().getMilliseconds()
-		) {
+		if (result.isPlaying()) {
 			return result;
 		}
 
 		result = this.queue.front();
-		st = result.getPlaybackStartTime();
-		if (result.spotifyInfo === null) {
-			throw new Error(
-				"Queue songs do not have spotify info, after explicitly requesting it. Something has gone very wrong",
-			);
-		}
-		while (
-			st &&
-			st !== null &&
-			st.getMilliseconds() + result.spotifyInfo.duration_ms <
-				new Date().getMilliseconds()
-		) {
+		while (!result.isPlaying()) {
 			result = this.queue.dequeue();
 			this.historicQueue.enqueue(result);
 
@@ -520,7 +509,6 @@ class ActiveRoom {
 			}
 
 			result = this.queue.front();
-			st = result.getPlaybackStartTime();
 			if (result.spotifyInfo === null) {
 				throw new Error(
 					"Queue songs do not have spotify info, after explicitly requesting it. Something has gone very wrong",
@@ -691,9 +679,21 @@ class ActiveRoom {
 		return result;
 	}
 
-	isPlaying(): boolean {}
+	async isPlaying(): Promise<boolean> {
+		this.updateQueue();
+		if (this.historicQueue.isEmpty()) {
+			return false;
+		}
+		const song = await this.getCurrentOrNextSong();
+		return song !== null && song.isPlaying();
+	}
+
+	/*
 	isPaused(): boolean {}
-	isEmpty(): boolean {}
+	*/
+	isEmpty(): boolean {
+		return this.queue.isEmpty();
+	}
 }
 
 @Injectable()
@@ -911,6 +911,7 @@ export class RoomQueueService {
 		return activeRoom.isPlaying();
 	}
 
+	/*
 	async isPaused(roomID: string): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
 			this.createRoomQueue(roomID);
@@ -921,6 +922,7 @@ export class RoomQueueService {
 		}
 		return activeRoom.isPaused();
 	}
+		*/
 
 	async playSongNow(roomID: string): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
