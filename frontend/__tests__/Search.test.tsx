@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
@@ -50,6 +50,35 @@ jest.mock("../app/services/AuthManagement", () => ({
 	},
 }));
 
+const roomMock = [{"creator":{"profile_name":"Farmer23","userID":"01ece2d8-e091-7023-c1f2-d3399faa7071","username":"farmer 345","profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-06-23T13:23:20.848Z-image.jpeg","followers":{"count":0,"data":[]},"following":{"count":0,"data":[]},"links":{"count":0,"data":[]},"bio":"Music enthusiast who loves exploring new tunes across various genres. Always on the lookout for fresh beats and hidden gems!","current_song":{"title":"","artists":[],"cover":"","start_time":"2024-08-11T17:22:28.862Z"},"fav_genres":{"count":0,"data":[]},"fav_songs":{"count":0,"data":[]},"fav_rooms":{"count":0,"data":[]},"recent_rooms":{"count":0,"data":[]}},"roomID":"66bb6bf7-25be-45af-bc38-7e7e258797b8","participant_count":0,"room_name":"chill vibes","description":"A room for relaxing and enjoying soothing music. Join us to unwind and chill with your favorite tunes.","is_temporary":false,"is_private":false,"is_scheduled":false,"start_date":"2024-08-11T17:22:28.862Z","end_date":"2024-08-11T17:22:28.862Z","language":"English","has_explicit_content":true,"has_nsfw_content":false,"room_image":"https://ik.imagekit.io/ikmedia/backlit.jpg","current_song":{"title":"","artists":[],"cover":"","start_time":"2024-08-11T17:22:28.862Z"},"tags":["explicit"]}];
+
+const userMock = [
+	{
+		id: "2",
+		type: "user",
+		name: "User 1",
+		userData: {
+			id: "1",
+			profile_picture_url:
+				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+			profile_name: "User 1",
+			username: "user1",
+		},
+	},
+	{
+		id: "4",
+		type: "user",
+		name: "User 2",
+		userData: {
+			id: "2",
+			profile_picture_url:
+				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+			profile_name: "User 2",
+			username: "user2",
+		},
+	},
+];
+
 describe("Search Component", () => {
 	beforeEach(() => {
 		// Clear mocks before each test
@@ -59,20 +88,20 @@ describe("Search Component", () => {
 	});
 
 	it("should render correctly", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const tree = renderer.create(<Search />).toJSON();
 		expect(tree).toMatchSnapshot();
 	});
 
 	it("should render the header with a title and back button", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByText, getByTestId } = render(<Search />);
 		expect(getByText("Search")).toBeTruthy();
 		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
 	it("should handle search input changes", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByPlaceholderText } = render(<Search />);
 		const searchInput = getByPlaceholderText("Search...");
 		fireEvent.changeText(searchInput, "Room 1");
@@ -80,83 +109,84 @@ describe("Search Component", () => {
 	});
 
 	// it("should perform search and display results", async () => {
-	// 	(axios.get as jest.Mock).mockResolvedValue(["jazz"]);
+	// 	(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+	// 	(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
 	// 	const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
 	// 	const searchInput = getByPlaceholderText("Search...");
 
 	// 	fireEvent.changeText(searchInput, "Room 1");
 	// 	expect(searchInput.props.value).toBe("Room 1");
 	// 	fireEvent.press(getByTestId("search-button"));
-	// 	getByText("Room 1");
+	// 	// getByText("Room 1");
 
-	// 	// Mocking the actual search logic inside the Search component if necessary
+	// 	// // Mocking the actual search logic inside the Search component if necessary
 	// 	// await waitFor(() => {
 	// 	// 	expect(getByText("Room 1")).toBeTruthy();
 	// 	// });
 	// });
 
-	// test("should filter results by room", () => {
-	// 	const { getByTestId, getByText } = render(<Search />);
+	// // test("should filter results by room", () => {
+	// // 	const { getByTestId, getByText } = render(<Search />);
 
-	// 	// Simulate user interaction to filter results
-	// 	fireEvent.changeText(getByTestId("search-input"), "Room 1");
-	// 	fireEvent.press(getByTestId("search-button"));
+	// // 	// Simulate user interaction to filter results
+	// // 	fireEvent.changeText(getByTestId("search-input"), "Room 1");
+	// // 	fireEvent.press(getByTestId("search-button"));
 
-	// 	// Debug the output to see if the expected text is rendered
-	// 	screen.debug();
+	// // 	// Debug the output to see if the expected text is rendered
+	// // 	screen.debug();
 
-	// 	// Assert that room results are displayed
-	// 	expect(getByText("Room 1")).toBeTruthy();
-	// 	expect(getByText("Room 2")).toBeTruthy();
+	// // 	// Assert that room results are displayed
+	// // 	expect(getByText("Room 1")).toBeTruthy();
+	// // 	expect(getByText("Room 2")).toBeTruthy();
 
-	// 	// Assert that user results are not displayed
-	// 	expect(() => getByText("User 1")).toThrow();
-	// 	expect(() => getByText("User 2")).toThrow();
-	// });
+	// // 	// Assert that user results are not displayed
+	// // 	expect(() => getByText("User 1")).toThrow();
+	// // 	expect(() => getByText("User 2")).toThrow();
+	// // });
 
-	// test("should filter results by user", () => {
-	// 	render(<Search />);
+	// // test("should filter results by user", () => {
+	// // 	render(<Search />);
 
-	// 	// Simulate user interaction
-	// 	fireEvent.changeText(screen.getByPlaceholderText("Search..."), "User 1");
-	// 	fireEvent.press(screen.getByTestId("search-button"));
+	// // 	// Simulate user interaction
+	// // 	fireEvent.changeText(screen.getByPlaceholderText("Search..."), "User 1");
+	// // 	fireEvent.press(screen.getByTestId("search-button"));
 
-	// 	// Debug to check what is rendered
-	// 	screen.debug();
+	// // 	// Debug to check what is rendered
+	// // 	screen.debug();
 
-	// 	// Assert that user results are displayed
-	// 	expect(screen.getByText("User 1")).toBeTruthy();
-	// 	expect(screen.getByText("User 2")).toBeTruthy();
+	// // 	// Assert that user results are displayed
+	// // 	expect(screen.getByText("User 1")).toBeTruthy();
+	// // 	expect(screen.getByText("User 2")).toBeTruthy();
 
-	// 	// Assert that room results are not displayed
-	// 	expect(() => screen.getByText("Room 1")).toThrow();
-	// 	expect(() => screen.getByText("Room 2")).toThrow();
-	// });
+	// // 	// Assert that room results are not displayed
+	// // 	expect(() => screen.getByText("Room 1")).toThrow();
+	// // 	expect(() => screen.getByText("Room 2")).toThrow();
+	// // });
 
 	it("should toggle more filters", async () => {
 		// Mock search result
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 
 		// Render the page component (this triggers the mock usage)
 		const { getByText, getByTestId, queryByTestId } = render(<Search />);
 
 		// Press the button to show more filters
-		fireEvent.press(getByText('View More Filters'));
+		fireEvent.press(getByText("View More Filters"));
 
 		// Check if the additional filters are shown
-		expect(getByTestId('host-toggle')).toBeTruthy();
-		expect(getByTestId('room-count-toggle')).toBeTruthy();
+		expect(getByTestId("host-toggle")).toBeTruthy();
+		expect(getByTestId("room-count-toggle")).toBeTruthy();
 
 		// Press the button to hide more filters
-		fireEvent.press(getByText('View Less Filters'));
+		fireEvent.press(getByText("View Less Filters"));
 
 		// Check if the additional filters are hidden
-		expect(queryByTestId('host-toggle')).toBeNull();
-		expect(queryByTestId('room-count-toggle')).toBeNull();
+		expect(queryByTestId("host-toggle")).toBeNull();
+		expect(queryByTestId("room-count-toggle")).toBeNull();
 	});
 
 	it("should handle explicit filter switch", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const explicitSwitch = getByTestId("explicit-switch");
@@ -169,7 +199,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle nsfw filter switch", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const nsfwSwitch = getByTestId("nsfw-switch");
@@ -182,7 +212,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle temp filter switch", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const tempSwitch = getByTestId("temp-switch");
@@ -195,7 +225,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle priv filter switch", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const privSwitch = getByTestId("priv-switch");
@@ -208,7 +238,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle scheduled filter switch", () => {
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const scheduledSwitch = getByTestId("scheduled-switch");
@@ -218,5 +248,63 @@ describe("Search Component", () => {
 
 		// Verify the switch value has changed
 		expect(scheduledSwitch.props.value).toBe(true);
+	});
+
+	it("should search with all room filters", async () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
+		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		// Simulate filter switches
+		fireEvent(getByTestId("explicit-switch"), "valueChange", true);
+		fireEvent(getByTestId("nsfw-switch"), "valueChange", true);
+		fireEvent(getByTestId("temp-switch"), "valueChange", true);
+		fireEvent(getByTestId("priv-switch"), "valueChange", true);
+		fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
+		// fireEvent.call()
+
+		// Simulate search input change
+		// fireEvent.changeText(getByTestId("search-input"), "Room 1");
+
+		// Simulate search button press
+		await act(async () => {
+			const searchInput = getByPlaceholderText("Search...");
+			fireEvent.changeText(searchInput, "Room 1");
+            fireEvent.press(getByTestId("search-button"));
+            // await waitFor(() => {expect(getByText("Room 1")).toBeTruthy()});
+        });
+
+        // Verify the API call was made
+        // expect(axios.get).toHaveBeenCalledTimes(2);
+	});
+
+	it("should search with all user filters", async () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
+		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		// Simulate filter switches
+		// fireEvent(getByTestId("explicit-switch"), "valueChange", true);
+		// fireEvent(getByTestId("nsfw-switch"), "valueChange", true);
+		// fireEvent(getByTestId("temp-switch"), "valueChange", true);
+		// fireEvent(getByTestId("priv-switch"), "valueChange", true);
+		// fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
+
+		// Simulate search input change
+		// fireEvent.changeText(getByTestId("search-input"), "Room 1");
+
+		// Simulate search button press
+		await act(async () => {
+			// fireEvent.click(getByTestId("user-btn"));
+			const searchInput = getByPlaceholderText("Search...");
+			fireEvent.changeText(searchInput, "User 1");
+            fireEvent.press(getByTestId("search-button"));
+            await waitFor(() => {expect(getByText("Room 1")).toBeTruthy()});
+        });
+
+        // Verify the API call was made
+        // expect(axios.get).toHaveBeenCalledTimes(2);
 	});
 });

@@ -44,6 +44,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID, onValueChang
 					onChangeText={changeText}
 					placeholder={`Enter ${label}`}
 					placeholderTextColor="#fff"
+					testID={`${label} input`}
 				/>
 			) : (
 				<Text style={styles.label}>{label}</Text>

@@ -299,8 +299,8 @@ const Search: React.FC = () => {
 								},
 							},
 						);
-						console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
+						// console.log("Search: " + JSON.stringify(response));
+						const formatResults: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
 							type: "room",
 							name: item.room_name,
@@ -318,7 +318,8 @@ const Search: React.FC = () => {
 							},
 						}));
 
-						setResults(results);
+						setResults(formatResults);
+						// console.log("Results: " + JSON.stringify(results));
 					}
 				} else if (filter === "user") {
 					if (showMoreFilters) {
@@ -331,14 +332,14 @@ const Search: React.FC = () => {
 							request += `&followers=${maxFollowers}`;
 						}
 
-						console.log("Request: " + request);
+						// console.log("Request: " + request);
 
 						const response = await axios.get(request, {
 							headers: {
 								Authorization: `Bearer ${token}`,
 							},
 						});
-						console.log("Search: " + JSON.stringify(response));
+						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.id,
 							type: "user",
@@ -361,7 +362,7 @@ const Search: React.FC = () => {
 								},
 							},
 						);
-						console.log("Search: " + JSON.stringify(response));
+						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.id,
 							type: "user",
@@ -413,6 +414,7 @@ const Search: React.FC = () => {
 
 	const renderResult = ({ item }: { item: SearchResult }) => {
 		if (item.type === "room" && item.roomData) {
+			// console.log("Render Called");
 			return (
 				<View style={styles.roomCardPadding}>
 					<RoomCardWidget roomCard={item.roomData} />
@@ -431,6 +433,7 @@ const Search: React.FC = () => {
 
 	const handleSelection = (selectedFilter) => {
 		setFilter(selectedFilter);
+		// console.log("Filter: " + filter);
 	};
 
 	const getGenres = async () => {
@@ -513,6 +516,7 @@ const Search: React.FC = () => {
 						filter === "user" && styles.activeFilter,
 					]}
 					onPress={() => handleSelection("user")}
+					testID="user-btn"
 				>
 					<Text style={styles.filterText}>Users</Text>
 				</TouchableOpacity>

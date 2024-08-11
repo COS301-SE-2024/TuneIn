@@ -242,6 +242,7 @@ exports[`Search Component should render correctly 1`] = `
           "paddingVertical": 10,
         }
       }
+      testID="user-btn"
     >
       <Text
         style={
