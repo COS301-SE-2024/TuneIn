@@ -3,6 +3,11 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import GenreBubble from "./GenreBubble";
 
 const GenreList = ({ items }) => {
+	if (!Array.isArray(items)) {
+		console.error("Expected 'items' to be an array");
+		return null;
+	}
+
 	return (
 		<View style={styles.wrapper}>
 			<Text style={styles.title}>Favorite Genres</Text>

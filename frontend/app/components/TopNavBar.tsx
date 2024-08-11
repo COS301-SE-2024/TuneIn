@@ -1,22 +1,19 @@
-// TopNavBar.tsx
-import React, { useEffect, useState, Suspense } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
-// import axios from "axios";
-// import auth from "./../services/AuthManagement"; // Import AuthManagement
-// import * as utils from "./../services/Utils"; // Import Utils
+import axios from "axios";
+import auth from "../services/AuthManagement";
+import * as utils from "./../services/Utils";
 import { colors } from "../styles/colors";
-import profileIcon from "../../assets/profile-icon.png";
 
-// Lazy load the Image component
-const LazyImage = React.lazy(() =>
-	import("react-native").then((module) => ({ default: module.Image })),
-);
+// Default profile icon for fallback
+const defaultProfileIcon = require("../../assets/profile-icon.png");
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
 	const [profileImage, setProfileImage] = useState<string>("");
+	const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchProfilePicture = async () => {
@@ -34,14 +31,14 @@ const TopNavBar: React.FC = () => {
 						!imageUrl ||
 						imageUrl === "https://example.com/default-profile-picture.png"
 					) {
-						setProfileImage(profileIcon);
+						setProfileImage(defaultProfileIcon);
 					} else {
 						setProfileImage(imageUrl);
 					}
 				}
 			} catch (error) {
 				console.error("Error fetching profile info:", error);
-				setProfileImage(profileIcon); // Fallback in case of error
+				setProfileImage(defaultProfileIcon); // Fallback in case of error
 			}
 		};
 
@@ -51,7 +48,6 @@ const TopNavBar: React.FC = () => {
 	const navigateToProfile = () => {
 		router.push({
 			pathname: "/screens/profile/ProfilePage",
-			// params: { profile: username },
 		});
 	};
 
@@ -65,17 +61,16 @@ const TopNavBar: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			{/* <View style={styles.emptyView}></View> */}
 			<TouchableOpacity onPress={navigateToProfile}>
-				<LazyImage
-					source={
-						typeof profileImage === "string"
-							? { uri: profileImage }
-							: profileImage
-					}
-					style={styles.profileImage}
-					testID="profile-image"
-				/>
+				{!imageLoaded || profileImage === defaultProfileIcon ? (
+					<Image source={defaultProfileIcon} style={styles.profileImage} />
+				) : (
+					<Image
+						source={{ uri: profileImage }}
+						style={[styles.profileImage, !imageLoaded && { display: "none" }]}
+						onLoad={() => setImageLoaded(true)}
+					/>
+				)}
 			</TouchableOpacity>
 			<View style={styles.appNameContainer}>
 				<Text style={styles.appName}>{appName}</Text>
@@ -97,22 +92,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		backgroundColor: colors.backgroundColor,
 	},
-	// emptyView: {
-	// 	width: 40, // Adjust as needed
-	// },
 	appName: {
 		color: "black",
 		fontSize: 20,
 		fontWeight: "bold",
-		// alignItems: "center",
 	},
 	profileImage: {
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		// marginRight: 16,
-		borderWidth: 1, // Add a border
-		borderColor: "grey", // Set the border color to grey
+		borderWidth: 1,
+		borderColor: "grey",
 	},
 	appNameContainer: {
 		flex: 1,

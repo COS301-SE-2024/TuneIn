@@ -22,7 +22,7 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
@@ -39,7 +39,7 @@ import { formatRoomData, Room } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
-} from "../../components/rooms/emojiPicker"; // Adjust the path as per your file structure
+} from "../../components/rooms/emojiPicker";
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const RoomPage = () => {
@@ -502,9 +502,13 @@ const RoomPage = () => {
 
 	return (
 		<View style={styles.container}>
-			{/* <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-				<Text style={styles.backButtonText}>← Back</Text>
-			</TouchableOpacity> */}
+			<TouchableOpacity
+				onPress={() => router.back()}
+				style={styles.backButton}
+				testID="backButton"
+			>
+				<Ionicons name="chevron-back" size={24} color="black" />
+			</TouchableOpacity>
 
 			<Image
 				source={{ uri: roomData.backgroundImage }}
