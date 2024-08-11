@@ -9,7 +9,7 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import { subHours, addHours, isBefore } from 'date-fns';
+import { subHours, addHours, isBefore, startOfHour } from 'date-fns';
 import {
 	RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
@@ -21,6 +21,7 @@ import {
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
+import { all } from "axios";
 
 @Injectable()
 export class RoomsService {
@@ -910,6 +911,13 @@ export class RoomsService {
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
 		console.log("Today", today, "Yesterday", yesterday);
+		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+				},
+			});
+
+		const roomCreationDate: Date | null = room?.date_created ?? null;
 		const messageActivityPerHour: any = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('hour', date_sent) AS hour,
 				COUNT(message.message_id) as count
@@ -921,16 +929,27 @@ export class RoomsService {
 			ORDER BY hour ASC;
 		`;
 		console.log("Getting room message interactions analytics for room", roomID, "and message activity", messageActivityPerHour);
-		if (messageActivityPerHour.length === 0) {
-			return messages;
-		}
+		
 		// fill in the missing hours
-		const allHours: Date[] = [];
-		let hour: Date = messageActivityPerHour[0].hour;
+		let allHours: Date[] = [];
+		// from from the date the room was created, get all the hours until now if the room is not older than a day	
+		let hour: Date = roomCreationDate ?? new Date();
+		console.log("Room creation date", roomCreationDate);
+		if (isBefore(hour, yesterday)) {
+			hour = yesterday;
+		}
+		console.log("Starting hour", hour);
+		//floor the hour to the nearest hour
+		hour = startOfHour(hour);
+
+		// let hour: Date = messageActivityPerHour[0].hour ;
 		while (isBefore(hour, today)) {
 			allHours.push(hour);
 			hour = addHours(hour, 1);
 		}
+		console.log("All hours", allHours.length);
+		// remove the last element of the array
+		allHours = allHours.slice(0, allHours.length - 1);
 		// add the missing hours
 		for (const h of allHours) {
 			const hourExists: boolean = messageActivityPerHour.find(
