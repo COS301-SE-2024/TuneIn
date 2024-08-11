@@ -212,6 +212,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
               "padding": 10,
             }
           }
+          testID="chat-item-touchable"
         >
           <Image
             source={
@@ -227,6 +228,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
                 "width": 48,
               }
             }
+            testID="chat-item-avatar"
           />
           <View
             style={
@@ -302,6 +304,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
               "padding": 10,
             }
           }
+          testID="chat-item-touchable"
         >
           <Image
             source={
@@ -317,6 +320,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
                 "width": 48,
               }
             }
+            testID="chat-item-avatar"
           />
           <View
             style={

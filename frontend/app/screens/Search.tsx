@@ -16,7 +16,6 @@ import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";
 import UserItem from "../components/UserItem";
-import NavBar from "../components/NavBar";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
@@ -445,9 +444,7 @@ const Search: React.FC = () => {
 					styles.navBar,
 					{ transform: [{ translateY: navBarTranslateY }] },
 				]}
-			>
-				<NavBar />
-			</Animated.View>
+			></Animated.View>
 		</View>
 	);
 };

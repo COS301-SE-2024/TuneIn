@@ -16,15 +16,21 @@ const CommentWidget: React.FC<CommentWidgetProps> = ({
 }) => {
 	return (
 		<View
+			testID="comment-widget-container"
 			style={[
 				styles.container,
 				me ? styles.containerMe : styles.containerOther,
 			]}
 		>
-			<Image source={{ uri: profilePictureUrl }} style={styles.avatar} />
+			<Image
+				testID="comment-widget-avatar"
+				source={{ uri: profilePictureUrl }}
+				style={styles.avatar}
+			/>
 			<View>
 				<Text style={styles.username}>{username}</Text>
 				<View
+					testID="comment-widget-bubble"
 					style={[styles.bubble, me ? styles.bubbleMe : styles.bubbleOther]}
 				>
 					<Text style={styles.text}>{message}</Text>

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
+import { colors } from "../../styles/colors";
 
 interface RoomCardWidgetProps {
 	roomCard: Room;
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	editButton: {
-		backgroundColor: "#1E90FF",
+		backgroundColor: colors.primary,
 		width: 56,
 		height: 56,
 		borderRadius: 28,

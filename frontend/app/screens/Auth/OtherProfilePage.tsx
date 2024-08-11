@@ -19,6 +19,7 @@ import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
+import { colors } from "../../styles/colors";
 
 const ProfileScreen: React.FC = () => {
 	const params = useLocalSearchParams();
@@ -170,7 +171,7 @@ const ProfileScreen: React.FC = () => {
 	if (loading) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-				<ActivityIndicator size="large" color="#0000ff" />
+				<ActivityIndicator size="large" color={colors.primary} />
 			</View>
 		);
 	}

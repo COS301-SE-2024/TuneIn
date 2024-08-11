@@ -1,9 +1,8 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ForgotPasswordScreen from "../app/screens/Auth/ForgotPassword"; // Adjust the path as needed
-import { Alert, AlertButton, TouchableOpacity } from "react-native";
+import { Alert, AlertButton } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
