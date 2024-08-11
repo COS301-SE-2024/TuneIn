@@ -2,7 +2,11 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "../app/services/AuthManagement";
 import renderer from "react-test-renderer";
+import Fuse from "fuse.js";
 
 // Mocking modules
 jest.mock("expo-router", () => ({
@@ -29,24 +33,46 @@ jest.mock("../app/components/NavBar", () => {
 	return MockNavBar;
 });
 
+jest.mock("axios");
+
+// jest.mock('fuse.js', () => {
+// 	return jest.fn().mockImplementation(() => {
+// 		return {
+// 			search: jest.fn(),
+// 		};
+// 	});
+// });
+
+jest.mock("../app/services/AuthManagement", () => ({
+	__esModule: true,
+	default: {
+		getToken: jest.fn(), // Mock getToken method
+	},
+}));
+
 describe("Search Component", () => {
 	beforeEach(() => {
 		// Clear mocks before each test
 		(useNavigation as jest.Mock).mockClear();
+		(axios.get as jest.Mock).mockClear();
+		(auth.getToken as jest.Mock).mockReturnValue("token");
 	});
 
 	it("should render correctly", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
 		const tree = renderer.create(<Search />).toJSON();
 		expect(tree).toMatchSnapshot();
 	});
 
 	it("should render the header with a title and back button", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
 		const { getByText, getByTestId } = render(<Search />);
 		expect(getByText("Search")).toBeTruthy();
 		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
 	it("should handle search input changes", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
 		const { getByPlaceholderText } = render(<Search />);
 		const searchInput = getByPlaceholderText("Search...");
 		fireEvent.changeText(searchInput, "Room 1");
@@ -54,6 +80,7 @@ describe("Search Component", () => {
 	});
 
 	// it("should perform search and display results", async () => {
+	// 	(axios.get as jest.Mock).mockResolvedValue(["jazz"]);
 	// 	const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
 	// 	const searchInput = getByPlaceholderText("Search...");
 
@@ -107,20 +134,29 @@ describe("Search Component", () => {
 	// });
 
 	it("should toggle more filters", async () => {
+		// Mock search result
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+
+		// Render the page component (this triggers the mock usage)
 		const { getByText, getByTestId, queryByTestId } = render(<Search />);
 
 		// Press the button to show more filters
-		fireEvent.press(getByText("View More Filters"));
-		expect(getByTestId("host-toggle")).toBeTruthy();
-		expect(getByTestId("room-count-toggle")).toBeTruthy();
+		fireEvent.press(getByText('View More Filters'));
+
+		// Check if the additional filters are shown
+		expect(getByTestId('host-toggle')).toBeTruthy();
+		expect(getByTestId('room-count-toggle')).toBeTruthy();
 
 		// Press the button to hide more filters
-		fireEvent.press(getByText("View Less Filters"));
-		expect(queryByTestId("host-toggle")).toBeNull();
-		expect(queryByTestId("room-count-toggle")).toBeNull();
+		fireEvent.press(getByText('View Less Filters'));
+
+		// Check if the additional filters are hidden
+		expect(queryByTestId('host-toggle')).toBeNull();
+		expect(queryByTestId('room-count-toggle')).toBeNull();
 	});
 
 	it("should handle explicit filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const explicitSwitch = getByTestId("explicit-switch");
@@ -133,6 +169,7 @@ describe("Search Component", () => {
 	});
 
 	it("should handle nsfw filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const nsfwSwitch = getByTestId("nsfw-switch");
@@ -142,5 +179,44 @@ describe("Search Component", () => {
 
 		// Verify the switch value has changed
 		expect(nsfwSwitch.props.value).toBe(true);
+	});
+
+	it("should handle temp filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const tempSwitch = getByTestId("temp-switch");
+
+		// Simulate toggling the switch
+		fireEvent(tempSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(tempSwitch.props.value).toBe(true);
+	});
+
+	it("should handle priv filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const privSwitch = getByTestId("priv-switch");
+
+		// Simulate toggling the switch
+		fireEvent(privSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(privSwitch.props.value).toBe(true);
+	});
+
+	it("should handle scheduled filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ['jazz', 'rock'] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const scheduledSwitch = getByTestId("scheduled-switch");
+
+		// Simulate toggling the switch
+		fireEvent(scheduledSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(scheduledSwitch.props.value).toBe(true);
 	});
 });

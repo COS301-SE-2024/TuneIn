@@ -24,8 +24,8 @@ import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
-// import DatePickerModal from "../components/DatePickerModal";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePicker from "../components/DatePicker";
+// import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
 
 type SearchResult = {
@@ -453,7 +453,6 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		getGenres();
-		console.log(genres[0]);
 	}, []);
 
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -604,78 +603,47 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
-							<Text style={styles.includeHeader}>Room Availability:</Text>
+							{/* <Text style={styles.includeHeader}>Room Availability:</Text>
 							<View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>Start Date:</Text>
-								
+								<DatePicker selectedOption={startDate} onPress={() => setShowStartDateModal(!showStartDateModal)}></DatePicker>
 								{showStartDateModal && <DateTimePicker
 									value={startDate || new Date()}
-									mode="date"
+									mode="datetime"
 									display="default"
-									onChange={(event, selectedDate) =>
+									onChange={(event, selectedDate) =>{
 										setStartDate(selectedDate || undefined)
+										setShowStartDateModal(false);
+									}
 									}
 								/>}
 							</View>
 							<View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>End Date:</Text>
+								<DatePicker selectedOption={startDate} onPress={() => setShowEndDateModal(!showEndDateModal)}></DatePicker>
 								{showEndDateModal && <DateTimePicker
 									value={endDate || new Date()}
-									mode="date"
+									mode="datetime"
 									display="default"
-									onChange={(event, selectedDate) =>
-										setEndDate(selectedDate || undefined)
-									}
+									onChange={(event, selectedDate) =>{
+										setEndDate(selectedDate || undefined);
+										setShowEndDateModal(false);
+									}}
 								/>}
-							</View>
-							{/* <View style={styles.datePickerContainer}>
-								<Text style={styles.datePickerLabel}>Start Date:</Text>
-								<TouchableOpacity
-									style={styles.button}
-									onPress={() => setShowStartDateModal(true)}
-								>
-									<Text style={styles.buttonText}>
-										{startDate ? startDate.toDateString() : "Select Start Date"}
-									</Text>
-								</TouchableOpacity>
-								<DatePickerModal
-									selectedDate={startDate}
-									onDateChange={setStartDate}
-									isVisible={showStartDateModal}
-									onClose={() => setShowStartDateModal(false)}
-								/>
-							</View> */}
-
-							{/* <View style={styles.datePickerContainer}>
-								<Text style={styles.datePickerLabel}>End Date:</Text>
-								<TouchableOpacity
-									style={styles.button}
-									onPress={() => setShowEndDateModal(true)}
-								>
-									<Text style={styles.buttonText}>
-										{endDate ? endDate.toDateString() : "Select End Date"}
-									</Text>
-								</TouchableOpacity>
-								<DatePickerModal
-									selectedDate={endDate}
-									onDateChange={setEndDate}
-									isVisible={showEndDateModal}
-									onClose={() => setShowEndDateModal(false)}
-								/>
 							</View> */}
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch value={temporary} onValueChange={setTemporary} />
+									<Switch value={temporary} onValueChange={setTemporary} testID="temp-switch" />
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Private</Text>
-									<Switch value={isPrivate} onValueChange={setIsPrivate} />
+									<Switch value={isPrivate} onValueChange={setIsPrivate} testID="priv-switch" />
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch value={scheduled} onValueChange={setScheduled} />
+									<Switch value={scheduled} onValueChange={setScheduled} testID="scheduled-switch" />
 								</View>
 							</View>
 						</ScrollView>
