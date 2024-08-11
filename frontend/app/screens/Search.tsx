@@ -692,24 +692,26 @@ const Search: React.FC = () => {
 			)}
 
 			{loading ? (
-				// Render Skeleton if loading
-				<View style={styles.roomCardPadding}>
-					{filter === "room" ? (
-						<>
-							<SkeletonRoomCard />
-							<SkeletonRoomCard />
-							<SkeletonRoomCard />
-						</>
-					) : (
-						<>
-							<SkeletonUserItem />
-							<SkeletonUserItem />
-							<SkeletonUserItem />
-							<SkeletonUserItem />
-							<SkeletonUserItem />
-						</>
-					)}
-				</View>
+				!showMoreFilters && (
+					// Render Skeleton if loading
+					<View style={styles.roomCardPadding}>
+						{filter === "room" ? (
+							<>
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
+							</>
+						) : (
+							<>
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+							</>
+						)}
+					</View>
+				)
 			) : results.length === 0 ? (
 				// Render No Results Message if no results
 				<View style={styles.noResult}>
@@ -755,9 +757,9 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	noResult: {
-		flex: 1,                     // Make the View take up the full screen
-        alignItems: 'center',
-		justifyContent: 'center',
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	title: {
 		fontSize: 24,
