@@ -11,7 +11,6 @@ import {
 	StyleSheet,
 	Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
 import uploadImage from "../../services/ImageUpload";

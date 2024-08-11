@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Slot, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
@@ -10,7 +10,6 @@ import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
 import "../polyfills";
-import { registerRootComponent } from "expo";
 
 const fetchFonts = () => {
 	return Font.loadAsync({

@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle, Ref } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 

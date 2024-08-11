@@ -28,14 +28,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
-import { formatRoomData, Room } from "../../models/Room";
+import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
@@ -87,7 +86,6 @@ const RoomPage = () => {
 	const [isSending, setIsSending] = useState(false);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
-	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
 
 	//Emoji picker

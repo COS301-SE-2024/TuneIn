@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	StyleSheet,
-	FlatList,
-} from "react-native";
-import { useNavigation, useLocalSearchParams } from "expo-router";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
 import auth from "../../services/AuthManagement";
 import axios from "axios";
@@ -20,7 +14,6 @@ interface Friend {
 const AllFriends: React.FC = () => {
 	const params = useLocalSearchParams();
 	const myUsername = params.username;
-	const navigation = useNavigation();
 	const [friends, setFriends] = useState<Friend[]>([]); // State to hold friends list
 
 	useEffect(() => {

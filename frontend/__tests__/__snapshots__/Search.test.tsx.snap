@@ -349,8 +349,6 @@ exports[`Search Component should render correctly 1`] = `
         "zIndex": 10,
       }
     }
-  >
-    <div />
-  </View>
+  />
 </View>
 `;
