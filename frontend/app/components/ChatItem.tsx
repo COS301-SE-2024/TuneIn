@@ -12,6 +12,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 	return (
 		<TouchableOpacity
+			testID="chat-item-touchable"
 			style={styles.container}
 			onPress={() =>
 				router.push(
@@ -19,7 +20,11 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 				)
 			}
 		>
-			<Image source={{ uri: chat.avatar }} style={styles.avatar} />
+			<Image
+				testID="chat-item-avatar"
+				source={{ uri: chat.avatar }}
+				style={styles.avatar}
+			/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.name}>{chat.name}</Text>
 				<Text style={styles.lastMessage}>{chat.lastMessage}</Text>
