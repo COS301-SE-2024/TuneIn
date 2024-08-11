@@ -13,6 +13,7 @@ import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import { colors } from "../../styles/colors";
 
 interface Track {
 	id: string;
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	searchButton: {
-		backgroundColor: "#4c50bf",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
