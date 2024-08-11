@@ -24,7 +24,7 @@ import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
-import DatePicker from "../components/DatePicker";
+// import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
 
@@ -110,18 +110,18 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
-	const [startDate, setStartDate] = useState(null);
-	const [endDate, setEndDate] = useState(null);
+	// const [startDate, setStartDate] = useState(null);
+	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
-	const [loadingGenres, setLoadingGenres] = useState(true);
 	const [host, setHost] = useState<string>("");
 	const [roomCount, setRoomCount] = useState("");
 	const [maxFollowers, setMaxFollowers] = useState("");
 	const [minFollowers, setMinFollowers] = useState("");
-	const [showStartDateModal, setShowStartDateModal] = useState(false);
-	const [showEndDateModal, setShowEndDateModal] = useState(false);
+	const prevFilterRef = useRef(filter);
+	// const [showStartDateModal, setShowStartDateModal] = useState(false);
+	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const mockResults: SearchResult[] = [
 		{
@@ -179,6 +179,7 @@ const Search: React.FC = () => {
 	];
 
 	const handleSearch = async () => {
+		console.log("Search Filter: " + filter);
 		try {
 			const token = await auth.getToken();
 
@@ -433,8 +434,19 @@ const Search: React.FC = () => {
 
 	const handleSelection = (selectedFilter: string) => {
 		setFilter(selectedFilter);
-		// console.log("Filter: " + filter);
+		// if(searchTerm !== ""){
+		// 	handleSearch();
+		// }
 	};
+
+	useEffect(() => {
+		// Check if the filter has changed and if the searchTerm is not empty
+		if (prevFilterRef.current !== filter && searchTerm !== "") {
+		  handleSearch();
+		}
+		// Update the previous filter ref to the current filter
+		prevFilterRef.current = filter;
+	  }, [filter, searchTerm]);
 
 	const getGenres = async () => {
 		try {
