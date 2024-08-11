@@ -10,6 +10,7 @@ import {
 	Modal,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
+import { get } from "http";
 
 type RoomDropdownProps = {
 	initialRooms: string[];
@@ -22,20 +23,28 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms }) => {
 	const [inputText, setInputText] = useState<string>("");
 
 	useEffect(() => {
-		const setCurrentRoom = async () => {
-			await StorageService.setItem("currentRoom", selectedRoom);
+		// check if currentRoom is stored in StorageService
+		// if it is, set selectedRoom to the stored value
+		// if not, set selectedRoom to the first room in initialRooms
+		// set rooms to initialRooms
+
+		const getRoom = async () => {
+			const currentRoom = await StorageService.getItem("currentRoom");
+			if (currentRoom) {
+				setSelectedRoom(currentRoom);
+			} else {
+				setSelectedRoom(initialRooms[0]);
+			}
 		};
-		if (initialRooms.length > 0) {
-			setSelectedRoom(initialRooms[0]);
-			setRooms(initialRooms);
-		}
-		setCurrentRoom();
+
+		setRooms(initialRooms);
+		getRoom();
 	}, [initialRooms]);
 
-	const handleRoomSelect = (room: string) => {
+	const handleRoomSelect = async (room: string) => {
 		setSelectedRoom(room);
 		setDropdownVisible(false);
-
+		await StorageService.setItem("currentRoom", room);
 	};
 
 	return (
