@@ -76,7 +76,9 @@ class RoomSong {
 	public readonly spotifyID: string;
 	private votes: VoteDto[];
 	public readonly insertTime: Date;
+	private playbackStartTime: Date | null;
 	private spotifyDetails: Spotify.Track | null = null;
+	private internalSongID: string;
 
 	constructor(spotifyID: string, userID: string) {
 		this._score = 0;
@@ -156,6 +158,15 @@ class RoomSong {
 	getVotes(): VoteDto[] {
 		return this.votes;
 	}
+
+	getPlaybackStartTime(): Date | null {
+		return this.playbackStartTime;
+	}
+
+	setPlaybackStartTime(startTime: Date): void {
+		this.playbackStartTime = startTime;
+	}
+
 	get spotifyInfo(): Spotify.Track | null {
 		return this.spotifyDetails;
 	}
