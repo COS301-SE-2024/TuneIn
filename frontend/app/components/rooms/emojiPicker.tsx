@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
 		position: "absolute", // Position it absolutely
 		bottom: 40,
 		right: 0, // Align to the right of the icon
+		width: 300,
 		flexDirection: "row",
 		padding: 10,
 		backgroundColor: "#f0f0f0", // Light grey background color
