@@ -48,6 +48,7 @@ const LoginScreen: React.FC = () => {
 			onSuccess: function (result) {
 				// Store token in storage if remember me is checked
 				if (rememberMe) {
+					console.log("cognitoToken", result.getAccessToken().getJwtToken());
 					StorageService.setItem(
 						"cognitoToken",
 						result.getAccessToken().getJwtToken(),
@@ -133,7 +134,7 @@ const LoginScreen: React.FC = () => {
 					/>
 				</View>
 				{isLoading ? (
-					<ActivityIndicator size="small" color="#08BDBD" />
+					<ActivityIndicator size="small" color={colors.primary} />
 				) : (
 					<CyanButton title="LOGIN" onPress={navigateToHome} />
 				)}
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
 	registerLinkText: {
 		fontSize: 16,
 		textAlign: "center",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerLinkBold: {
 		fontWeight: "bold",

@@ -13,6 +13,7 @@ import {
 	SPOTIFY_CLIENT_SECRET,
 	SPOTIFY_REDIRECT_TARGET,
 } from "react-native-dotenv";
+import { colors } from "../styles/colors";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -139,7 +140,7 @@ const SpotifyRedirect = () => {
 				<Text style={styles.error}>Error: {error}</Text>
 			) : (
 				<View style={styles.loadingContainer}>
-					<ActivityIndicator size="large" color="#0000ff" />
+					<ActivityIndicator size="large" color={colors.primary} />
 					<Text style={styles.loadingText}>Authenticating...</Text>
 				</View>
 			)}
