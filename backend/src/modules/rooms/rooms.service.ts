@@ -1141,6 +1141,7 @@ export class RoomsService {
 		);
 		const keyMetrics: RoomAnalyticsKeyMetricsDto = new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
+		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
 		return keyMetrics;
 	}
 
@@ -1155,45 +1156,116 @@ export class RoomsService {
 				room_creator: userID,
 			},
 		});
-		const roomIDs: string[] = rooms.map((r) => r.room_id);
+		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
 		console.log("Getting unique visitors for user", userID, "and rooms", roomIDs);
 		// get unique visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
-		const uniqueVisitorsYesterday: any = await this.prisma.user_activity.findMany({
-			where: {
-				room_id: {
-					in: roomIDs,
-				},
-				room_join_time: {
-					lt: yesterday,
-				},
-			},
-			select: {
-				user_id: true,
-			},
-		});
-		const uniqueVisitorsToday: any = await this.prisma.user_activity.findMany({
-			where: {
-				room_id: {
-					in: roomIDs,
-				},
-				room_join_time: {
-					gt: yesterday,
-				},
-			},
-			select: {
-				user_id: true,
-			},
-		});
-		if (uniqueVisitorsYesterday.length === 0 || uniqueVisitorsToday.length === 0) {
-			return uniqueVisitors;
-		}
-		const countYesterday: number = Number(uniqueVisitorsYesterday[0].count);
-		const countToday: number = Number(uniqueVisitorsToday[0].count);
+		// make the query to get the unique visitors
+
+		/**
+		 * SELECT
+		 * 	COUNT(DISTINCT user_id) as count
+		 * FROM
+		 * 	user_activity
+		 * WHERE
+		 * 	room_id IN (roomIDs)
+		 * 	AND room_join_time < yesterday
+		 * GROUP BY
+		 * 	user_id
+		 * 
+		 * PROVIDE THE PRISMA QUERY FOR THIS
+		 */
+		const uniqueVisitorsYesterday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				COUNT(DISTINCT user_id) as count
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time < ${yesterday}
+			GROUP BY
+				user_id;
+		`);
+
+		const uniqueVisitorsToday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				COUNT(DISTINCT user_id) as count
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time > ${yesterday}
+			GROUP BY
+				user_id;
+		`);
+		console.log("Unique visitors yesterday", uniqueVisitorsYesterday, "Unique visitors today", uniqueVisitorsToday);
+		// if (uniqueVisitorsYesterday.length === 0 || uniqueVisitorsToday.length === 0) {
+		// 	return uniqueVisitors;
+		// }
+		
+		const countYesterday: number = Number(uniqueVisitorsYesterday.length);
+		const countToday: number = Number(uniqueVisitorsToday.length);
 		uniqueVisitors.count = countToday;
-		uniqueVisitors.percentage_change = (countToday - countYesterday) / countYesterday;
+		uniqueVisitors.percentage_change = countYesterday === 0? 0 : (countToday - countYesterday) / countYesterday;
 		return uniqueVisitors;
+	}
+
+	async getReturningVisitors(userID: string): Promise<RoomAnalyticsKeyMetricsDto["returning_visitors"]> {
+		const returningVisitors: RoomAnalyticsKeyMetricsDto["returning_visitors"] = {
+			count: 0,
+			percentage_change: 0,
+		};
+
+		// get the returning visitors for a user's all rooms
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
+		console.log("Getting returning visitors for user", userID, "and rooms", roomIDs, Prisma.join(roomIDs));
+		// get returning visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
+		// returning visitors are users who have joined a room more than once
+		const today: Date = new Date();
+		const yesterday: Date = subHours(today, 24);
+		const returningVisitorsYesterday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				COUNT(user_id) as count,
+				user_id
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time < ${yesterday}
+			GROUP BY
+				user_id
+			HAVING
+				COUNT(user_id) > 1;
+		`);
+		const returningVisitorsToday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				COUNT(user_id) as count,
+				user_id
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time > ${yesterday}
+			GROUP BY
+				user_id
+			HAVING
+				COUNT(user_id) > 1;
+		`);
+		// if (returningVisitorsYesterday.length === 0 || returningVisitorsToday.length === 0) {
+		// 	return returningVisitors;
+		// }
+		const countYesterday: number = Number(returningVisitorsYesterday.length);
+		const countToday: number = Number(returningVisitorsToday.length);
+		returningVisitors.count = countToday;
+		returningVisitors.percentage_change = countYesterday === 0? 0 : (countToday - countYesterday) / countYesterday;
+		return returningVisitors;
+
 	}
 
 	async saveReaction(
