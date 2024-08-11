@@ -440,5 +440,22 @@ export class SpotifyService {
 			});
 		});
 	}
-		*/
+	*/
+
+	async getManyTracks(
+		trackIDs: string[],
+		api: SpotifyApi,
+	): Promise<Spotify.Track[]> {
+		const promises: Promise<Spotify.Track[]>[] = [];
+		for (let i = 0; i < trackIDs.length; i += 50) {
+			const ids = trackIDs.slice(i, i + 50);
+			promises.push(api.tracks.get(ids));
+		}
+		const results: Spotify.Track[][] = await Promise.all(promises);
+		const tracks: Spotify.Track[] = [];
+		for (const result of results) {
+			tracks.push(...result);
+		}
+		return tracks;
+	}
 }
