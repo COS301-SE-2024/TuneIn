@@ -62,10 +62,13 @@
     "jest-mock-extended": "^3.0.7",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "murlock": "^4.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.0",
+    "redis": "^4.7.0",
+    "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.5",
     "sqlstring": "^2.3.3"

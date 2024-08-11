@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./../prisma/prisma.module";
@@ -21,6 +21,9 @@ import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
+import { RedisModule } from "nestjs-redis";
+import { RedisLockModule } from "nestjs-simple-redis-lock";
+import { MurLockModule } from "murlock";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -45,6 +48,13 @@ import { SongsModule } from "./modules/songs/songs.module";
 		GenresModule,
 		ScheduleModule.forRoot(),
 		SongsModule,
+		MurLockModule.forRoot({
+			redisOptions: { url: "redis://localhost:6379" },
+			wait: 1000,
+			maxAttempts: 3,
+			logLevel: "log",
+			ignoreUnlockFail: false,
+		}),
 	],
 	controllers: [AppController],
 	providers: [AppService],
