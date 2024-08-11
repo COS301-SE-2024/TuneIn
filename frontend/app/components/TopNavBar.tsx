@@ -26,6 +26,7 @@ const TopNavBar: React.FC = () => {
 						},
 					});
 					const imageUrl = response.data.profile_picture_url;
+					console.log("Image URL: " + imageUrl);
 
 					if (
 						!imageUrl ||
@@ -33,6 +34,7 @@ const TopNavBar: React.FC = () => {
 					) {
 						setProfileImage(defaultProfileIcon);
 					} else {
+						console.log("I work ");
 						setProfileImage(imageUrl);
 					}
 				}
@@ -62,7 +64,7 @@ const TopNavBar: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity onPress={navigateToProfile}>
-				{!imageLoaded || profileImage === defaultProfileIcon ? (
+				{profileImage === defaultProfileIcon ? (
 					<Image source={defaultProfileIcon} style={styles.profileImage} />
 				) : (
 					<Image
