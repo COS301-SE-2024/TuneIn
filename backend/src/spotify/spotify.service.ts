@@ -11,6 +11,7 @@ import {
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
 import { sleep } from "../common/utils";
+import { MurLockService } from "murlock";
 
 const NUMBER_OF_RETRIES: number = 3;
 
@@ -25,6 +26,7 @@ export class SpotifyService {
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
+		private readonly murLockService: MurLockService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -299,29 +301,33 @@ export class SpotifyService {
 
 	async addTrackToDB(track: Spotify.Track): Promise<PrismaTypes.song> {
 		let result: PrismaTypes.song | undefined;
-		await navigator.locks.request("SONG_TABLE_EDIT_LOCK", async () => {
-			const song: PrismaTypes.song | null = await this.prisma.song.findFirst({
-				where: {
-					spotify_id: track.id,
-				},
-			});
-			if (song) {
-				result = song;
-				return;
-			}
+		await this.murLockService.runWithLock(
+			"SONG_TABLE_EDIT_LOCK",
+			5000,
+			async () => {
+				const song: PrismaTypes.song | null = await this.prisma.song.findFirst({
+					where: {
+						spotify_id: track.id,
+					},
+				});
+				if (song) {
+					result = song;
+					return;
+				}
 
-			const s: Prisma.songCreateInput = {
-				name: track.name,
-				artist: track.artists[0].name,
-				duration: track.duration_ms,
-				genres: track.album.genres ? track.album.genres : [],
-				artwork_url: this.getLargestImage(track.album.images).url,
-				spotify_id: track.id,
-			};
-			result = await this.prisma.song.create({
-				data: s,
-			});
-		}); //end mutex
+				const s: Prisma.songCreateInput = {
+					name: track.name,
+					artist: track.artists[0].name,
+					duration: track.duration_ms,
+					genres: track.album.genres ? track.album.genres : [],
+					artwork_url: this.getLargestImage(track.album.images).url,
+					spotify_id: track.id,
+				};
+				result = await this.prisma.song.create({
+					data: s,
+				});
+			},
+		); //end mutex
 		if (result === undefined) {
 			throw new Error("Failed to add song to database");
 		}
@@ -331,79 +337,85 @@ export class SpotifyService {
 
 	async addTracksToDB(tracks: Spotify.Track[]): Promise<PrismaTypes.song[]> {
 		let result: PrismaTypes.song[] = [];
-		await navigator.locks.request("SONG_TABLE_EDIT_LOCK", async () => {
-			const allIDs: string[] = tracks.map((track) => track.id);
+		await this.murLockService.runWithLock(
+			"SONG_TABLE_EDIT_LOCK",
+			5000,
+			async () => {
+				const allIDs: string[] = tracks.map((track) => track.id);
 
-			const songs: PrismaTypes.song[] = await this.prisma.song.findMany({
-				where: {
-					spotify_id: {
-						in: allIDs,
+				const songs: PrismaTypes.song[] = await this.prisma.song.findMany({
+					where: {
+						spotify_id: {
+							in: allIDs,
+						},
 					},
-				},
-			});
-			const foundIDs: (string | null)[] = songs.map((song) => song.spotify_id);
+				});
+				const foundIDs: (string | null)[] = songs.map(
+					(song) => song.spotify_id,
+				);
 
-			const createList: Prisma.songCreateInput[] = [];
-			const editList: Prisma.songUpdateInput[] = [];
-			const editListIDs: string[] = [];
-			for (const track of tracks) {
-				if (track.id !== null) {
-					if (!foundIDs.includes(track.id)) {
-						const song: Prisma.songCreateInput = {
-							name: track.name,
-							artist: track.artists[0].name,
-							duration: track.duration_ms,
-							genres: track.album.genres ? track.album.genres : [],
-							artwork_url: this.getLargestImage(track.album.images).url,
-							spotify_id: track.id,
-						};
-						createList.push(song);
-					} else {
-						const song: Prisma.songUpdateInput = {
-							name: track.name,
-							artist: track.artists[0].name,
-							duration: track.duration_ms,
-							genres: track.album.genres ? track.album.genres : [],
-							artwork_url: this.getLargestImage(track.album.images).url,
-						};
-						editList.push(song);
-						editListIDs.push(track.id);
+				const createList: Prisma.songCreateInput[] = [];
+				const editList: Prisma.songUpdateInput[] = [];
+				const editListIDs: string[] = [];
+				for (const track of tracks) {
+					if (track.id !== null) {
+						if (!foundIDs.includes(track.id)) {
+							const song: Prisma.songCreateInput = {
+								name: track.name,
+								artist: track.artists[0].name,
+								duration: track.duration_ms,
+								genres: track.album.genres ? track.album.genres : [],
+								artwork_url: this.getLargestImage(track.album.images).url,
+								spotify_id: track.id,
+							};
+							createList.push(song);
+						} else {
+							const song: Prisma.songUpdateInput = {
+								name: track.name,
+								artist: track.artists[0].name,
+								duration: track.duration_ms,
+								genres: track.album.genres ? track.album.genres : [],
+								artwork_url: this.getLargestImage(track.album.images).url,
+							};
+							editList.push(song);
+							editListIDs.push(track.id);
+						}
 					}
 				}
-			}
-			const promises: (
-				| Prisma.PrismaPromise<PrismaTypes.song[]>
-				| Prisma.PrismaPromise<Prisma.BatchPayload>
-			)[] = [];
-			if (createList.length > 0) {
-				promises.push(
-					this.prisma.song.createManyAndReturn({
-						data: createList,
-						skipDuplicates: true,
-					}),
-				);
-			}
-			if (editList.length > 0) {
-				promises.push(
-					this.prisma.song.updateMany({
-						where: {
-							spotify_id: {
-								in: editListIDs,
+				const promises: (
+					| Prisma.PrismaPromise<PrismaTypes.song[]>
+					| Prisma.PrismaPromise<Prisma.BatchPayload>
+				)[] = [];
+				if (createList.length > 0) {
+					promises.push(
+						this.prisma.song.createManyAndReturn({
+							data: createList,
+							skipDuplicates: true,
+						}),
+					);
+				}
+				if (editList.length > 0) {
+					promises.push(
+						this.prisma.song.updateMany({
+							where: {
+								spotify_id: {
+									in: editListIDs,
+								},
 							},
+							data: editList,
+						}),
+					);
+				}
+				await Promise.all(promises);
+				result = await this.prisma.song.findMany({
+					where: {
+						spotify_id: {
+							in: allIDs,
 						},
-						data: editList,
-					}),
-				);
-			}
-			await Promise.all(promises);
-			result = await this.prisma.song.findMany({
-				where: {
-					spotify_id: {
-						in: allIDs,
 					},
-				},
-			});
-		}); //end mutex
+				});
+			},
+		); //end mutex
 		// addAudioFeaturesToSongs(result);
 		return result;
 	}
@@ -413,7 +425,7 @@ export class SpotifyService {
 		songs: PrismaTypes.song[],
 		api: SpotifyApi,
 	): Promise<void> {
-		await navigator.locks.request("SONG_TABLE_EDIT_LOCK", async () => {
+		await this.murLockService.runWithLock("SONG_TABLE_EDIT_LOCK", 5000, async () => {
 			const songIDs: string[] = [];
 			for (const song of songs) {
 				if (song.spotify_id) {

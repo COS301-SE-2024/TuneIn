@@ -5,6 +5,7 @@ import { DtoGenModule } from "../../dto-gen/dto-gen.module";
 import { DbUtilsModule } from "../../db-utils/db-utils.module";
 import { SpotifyModule } from "../../../spotify/spotify.module";
 import { SpotifyAuthModule } from "../../../auth/spotify/spotifyauth.module";
+import { MurLockModule } from "murlock";
 
 @Module({
 	imports: [
@@ -13,6 +14,7 @@ import { SpotifyAuthModule } from "../../../auth/spotify/spotifyauth.module";
 		DbUtilsModule,
 		SpotifyModule,
 		SpotifyAuthModule,
+		MurLockModule,
 	],
 	providers: [RoomQueueService],
 	exports: [RoomQueueService],

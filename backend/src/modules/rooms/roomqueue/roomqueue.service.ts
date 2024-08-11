@@ -16,6 +16,7 @@ import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { SpotifyService } from "../../../spotify/spotify.service";
 import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
+import { MurLockService } from "murlock";
 
 // Postgres tables:
 /*
@@ -355,142 +356,147 @@ export class ActiveRoom {
 		spotify: SpotifyService,
 		api: SpotifyApi,
 		prisma: PrismaService,
+		murLockService: MurLockService,
 	) {
 		//flush queue to db
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			//ensure individual songs are in db
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				//ensure individual songs are in db
 
-			//get all songs in queue
-			const historicQueue: RoomSong[] = this.historicQueue.toArray();
-			const upcomingQueue: RoomSong[] = this.queue.toArray();
-			const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
+				//get all songs in queue
+				const historicQueue: RoomSong[] = this.historicQueue.toArray();
+				const upcomingQueue: RoomSong[] = this.queue.toArray();
+				const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
 
-			//ensure enqueued songs are in db (songs table)
-			const tracks: Spotify.Track[] = await spotify.getManyTracks(
-				queue.map((s) => s.spotifyID),
-				api,
-			);
-			const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
-
-			//ensure enqueued songs are queueitems associated with room
-			const newQueueItems: Prisma.queueCreateManyInput[] = [];
-			for (let i = 0, n = historicQueue.length; i < n; i++) {
-				const dbSong = songs.find(
-					(s) => s.spotify_id === historicQueue[i].spotifyID,
+				//ensure enqueued songs are in db (songs table)
+				const tracks: Spotify.Track[] = await spotify.getManyTracks(
+					queue.map((s) => s.spotifyID),
+					api,
 				);
-				if (!dbSong || dbSong === null) {
-					throw new Error("Song is not in the database somehow?");
-				}
+				const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
 
-				historicQueue[i].songID = dbSong.song_id;
-				const song = historicQueue[i];
-				newQueueItems.push({
-					room_id: this.room.roomID,
-					song_id: song.songID,
-					is_done_playing: true,
-					start_time: song.getPlaybackStartTime(),
-					insert_time: song.insertTime,
-				});
-			}
-			for (let i = 0, n = upcomingQueue.length; i < n; i++) {
-				const dbSong = songs.find(
-					(s) => s.spotify_id === upcomingQueue[i].spotifyID,
-				);
-				if (!dbSong || dbSong === null) {
-					throw new Error("Song is not in the database somehow?");
-				}
-
-				historicQueue[i].songID = dbSong.song_id;
-				const song = upcomingQueue[i];
-				newQueueItems.push({
-					room_id: this.room.roomID,
-					song_id: dbSong.song_id,
-					is_done_playing: false,
-					start_time: song.getPlaybackStartTime(),
-					insert_time: song.insertTime,
-				});
-			}
-			await prisma.queue.createMany({
-				data: newQueueItems,
-			});
-
-			//link queue items to songs
-			const queueItems = await prisma.queue.findMany({
-				where: {
-					room_id: this.room.roomID,
-				},
-				include: {
-					vote: true,
-					song: true,
-				},
-				orderBy: {
-					start_time: "asc",
-				},
-			});
-
-			//link queue item ids & song ids to songs
-			for (let i = 0, n = queue.length; i < n; i++) {
-				if (!queue[i].songID || queue[i].songID === null) {
-					const dbSong = queueItems.find(
-						(q) =>
-							q.song.spotify_id === queue[i].spotifyID &&
-							q.insert_time === queue[i].insertTime &&
-							q.start_time === queue[i].getPlaybackStartTime(),
+				//ensure enqueued songs are queueitems associated with room
+				const newQueueItems: Prisma.queueCreateManyInput[] = [];
+				for (let i = 0, n = historicQueue.length; i < n; i++) {
+					const dbSong = songs.find(
+						(s) => s.spotify_id === historicQueue[i].spotifyID,
 					);
 					if (!dbSong || dbSong === null) {
-						throw new Error("Song is not in the queue somehow?");
+						throw new Error("Song is not in the database somehow?");
 					}
-					queue[i].songID = dbSong.song_id;
-					queue[i].queueItemID = dbSong.queue_id;
-				}
 
-				if (!queue[i].spotifyInfo && queue[i].spotifyID !== null) {
-					const song = queue[i];
-					const track = tracks.find((t) => t.id === song.spotifyID);
-					if (!track || track === null) {
-						throw new Error("Song is not in the queue somehow?");
+					historicQueue[i].songID = dbSong.song_id;
+					const song = historicQueue[i];
+					newQueueItems.push({
+						room_id: this.room.roomID,
+						song_id: song.songID,
+						is_done_playing: true,
+						start_time: song.getPlaybackStartTime(),
+						insert_time: song.insertTime,
+					});
+				}
+				for (let i = 0, n = upcomingQueue.length; i < n; i++) {
+					const dbSong = songs.find(
+						(s) => s.spotify_id === upcomingQueue[i].spotifyID,
+					);
+					if (!dbSong || dbSong === null) {
+						throw new Error("Song is not in the database somehow?");
 					}
-					song.spotifyInfo = track;
+
+					historicQueue[i].songID = dbSong.song_id;
+					const song = upcomingQueue[i];
+					newQueueItems.push({
+						room_id: this.room.roomID,
+						song_id: dbSong.song_id,
+						is_done_playing: false,
+						start_time: song.getPlaybackStartTime(),
+						insert_time: song.insertTime,
+					});
 				}
-			}
+				await prisma.queue.createMany({
+					data: newQueueItems,
+				});
 
-			await this.reflushRoomSongs(queue);
-
-			//ensure votes are in db
-			const existingVotes: PrismaTypes.vote[] = await prisma.vote.findMany({
-				where: {
-					queue_id: {
-						in: queue.map((s) => s.queueItemID),
+				//link queue items to songs
+				const queueItems = await prisma.queue.findMany({
+					where: {
+						room_id: this.room.roomID,
 					},
-				},
-				include: {
-					queue: true,
-					users: true,
-				},
-			});
-			const newVotes: Prisma.voteCreateManyInput[] = [];
-			for (const song of queue) {
-				const v = song.exportNewVotes();
-				if (v.length > 0) {
-					for (const vote of v) {
-						const existingVote = existingVotes.find(
-							(ev) =>
-								ev.queue_id === song.queueItemID &&
-								ev.user_id === vote.user_id &&
-								ev.is_upvote === vote.is_upvote &&
-								ev.vote_time === vote.vote_time,
+					include: {
+						vote: true,
+						song: true,
+					},
+					orderBy: {
+						start_time: "asc",
+					},
+				});
+
+				//link queue item ids & song ids to songs
+				for (let i = 0, n = queue.length; i < n; i++) {
+					if (!queue[i].songID || queue[i].songID === null) {
+						const dbSong = queueItems.find(
+							(q) =>
+								q.song.spotify_id === queue[i].spotifyID &&
+								q.insert_time === queue[i].insertTime &&
+								q.start_time === queue[i].getPlaybackStartTime(),
 						);
-						if (existingVote) {
-							continue;
+						if (!dbSong || dbSong === null) {
+							throw new Error("Song is not in the queue somehow?");
 						}
-						newVotes.push(vote);
+						queue[i].songID = dbSong.song_id;
+						queue[i].queueItemID = dbSong.queue_id;
+					}
+
+					if (!queue[i].spotifyInfo && queue[i].spotifyID !== null) {
+						const song = queue[i];
+						const track = tracks.find((t) => t.id === song.spotifyID);
+						if (!track || track === null) {
+							throw new Error("Song is not in the queue somehow?");
+						}
+						song.spotifyInfo = track;
 					}
 				}
-			}
-			await prisma.vote.createMany({
-				data: newVotes,
-			});
-		});
+
+				await this.reflushRoomSongs(queue);
+
+				//ensure votes are in db
+				const existingVotes: PrismaTypes.vote[] = await prisma.vote.findMany({
+					where: {
+						queue_id: {
+							in: queue.map((s) => s.queueItemID),
+						},
+					},
+					include: {
+						queue: true,
+						users: true,
+					},
+				});
+				const newVotes: Prisma.voteCreateManyInput[] = [];
+				for (const song of queue) {
+					const v = song.exportNewVotes();
+					if (v.length > 0) {
+						for (const vote of v) {
+							const existingVote = existingVotes.find(
+								(ev) =>
+									ev.queue_id === song.queueItemID &&
+									ev.user_id === vote.user_id &&
+									ev.is_upvote === vote.is_upvote &&
+									ev.vote_time === vote.vote_time,
+							);
+							if (existingVote) {
+								continue;
+							}
+							newVotes.push(vote);
+						}
+					}
+				}
+				await prisma.vote.createMany({
+					data: newVotes,
+				});
+			},
+		);
 	}
 
 	async getCurrentOrNextSong(): Promise<RoomSong | null> {
@@ -521,35 +527,49 @@ export class ActiveRoom {
 		return result;
 	}
 
-	async addVote(vote: VoteDto): Promise<boolean> {
+	async addVote(
+		vote: VoteDto,
+		murLockService: MurLockService,
+	): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const songs: RoomSong[] = this.queue.toArray();
-			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-			if (index === -1) {
-				result = false;
-				return;
-			}
-			result = songs[index].addVote(vote);
-			this.queue = MaxPriorityQueue.fromArray(songs);
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const songs: RoomSong[] = this.queue.toArray();
+				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+				if (index === -1) {
+					result = false;
+					return;
+				}
+				result = songs[index].addVote(vote);
+				this.queue = MaxPriorityQueue.fromArray(songs);
+			},
+		);
 		return result;
 	}
 
-	async removeVote(vote: VoteDto): Promise<boolean> {
+	async removeVote(
+		vote: VoteDto,
+		murLockService: MurLockService,
+	): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const songs: RoomSong[] = this.queue.toArray();
-			const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-			if (index === -1) {
-				result = false;
-				return;
-			}
-			result = songs[index].removeVote(vote);
-			this.queue = MaxPriorityQueue.fromArray(songs);
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const songs: RoomSong[] = this.queue.toArray();
+				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+				if (index === -1) {
+					result = false;
+					return;
+				}
+				result = songs[index].removeVote(vote);
+				this.queue = MaxPriorityQueue.fromArray(songs);
+			},
+		);
 		return result;
 	}
 
@@ -557,19 +577,24 @@ export class ActiveRoom {
 		spotifyID: string,
 		userID: string,
 		swapTime: Date,
+		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const songs: RoomSong[] = this.queue.toArray();
-			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-			if (index === -1) {
-				result = false;
-				return;
-			}
-			result = songs[index].swapVote(userID, swapTime);
-			this.queue = MaxPriorityQueue.fromArray(songs);
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const songs: RoomSong[] = this.queue.toArray();
+				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+				if (index === -1) {
+					result = false;
+					return;
+				}
+				result = songs[index].swapVote(userID, swapTime);
+				this.queue = MaxPriorityQueue.fromArray(songs);
+			},
+		);
 		return result;
 	}
 
@@ -577,39 +602,52 @@ export class ActiveRoom {
 		spotifyID: string,
 		userID: string,
 		insertTime: Date,
+		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const songs: RoomSong[] = this.queue.toArray();
-			if (!songs.find((s) => s.spotifyID === spotifyID)) {
-				this.queue.enqueue(
-					new RoomSong(spotifyID, userID, undefined, insertTime),
-				);
-				result = true;
-			}
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const songs: RoomSong[] = this.queue.toArray();
+				if (!songs.find((s) => s.spotifyID === spotifyID)) {
+					this.queue.enqueue(
+						new RoomSong(spotifyID, userID, undefined, insertTime),
+					);
+					result = true;
+				}
+			},
+		);
 		return result;
 	}
 
-	async removeSong(spotifyID: string, userID: string): Promise<boolean> {
+	async removeSong(
+		spotifyID: string,
+		userID: string,
+		murLockService: MurLockService,
+	): Promise<boolean> {
 		let result = false;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const songs: RoomSong[] = this.queue.toArray();
-			const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-			if (index === -1) {
-				result = false;
-				return;
-			}
-			if (songs[index].userID !== userID) {
-				result = false;
-				return;
-			}
-			songs.splice(index, 1);
-			this.queue = MaxPriorityQueue.fromArray(songs);
-			result = true;
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const songs: RoomSong[] = this.queue.toArray();
+				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+				if (index === -1) {
+					result = false;
+					return;
+				}
+				if (songs[index].userID !== userID) {
+					result = false;
+					return;
+				}
+				songs.splice(index, 1);
+				this.queue = MaxPriorityQueue.fromArray(songs);
+				result = true;
+			},
+		);
 		return result;
 	}
 
@@ -636,49 +674,57 @@ export class ActiveRoom {
 		return votes;
 	}
 
-	async getSpotifyInfo(api: SpotifyApi) {
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			// The lock has been acquired.
-			//get spotify info for all songs
-			this.updateQueue();
-			const songs = this.queue.toArray();
-			const songsWithoutInfo: number[] = [];
-			for (let i = 0, n = songs.length; i < n; i++) {
-				if (!songs[i].spotifyInfo) {
-					songsWithoutInfo.push(i);
-				}
-			}
-			if (songsWithoutInfo.length > 0) {
-				const songIDs: string[] = songsWithoutInfo.map(
-					(i) => songs[i].spotifyID,
-				);
-				const songInfo = await api.tracks.get(songIDs);
-				for (const i of songsWithoutInfo) {
-					const info = songInfo.find((s) => s.id === songs[i].spotifyID);
-					if (info) {
-						songs[i].spotifyInfo = info;
+	async getSpotifyInfo(api: SpotifyApi, murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				// The lock has been acquired.
+				//get spotify info for all songs
+				this.updateQueue();
+				const songs = this.queue.toArray();
+				const songsWithoutInfo: number[] = [];
+				for (let i = 0, n = songs.length; i < n; i++) {
+					if (!songs[i].spotifyInfo) {
+						songsWithoutInfo.push(i);
 					}
 				}
-				//update queue
-				this.queue = MaxPriorityQueue.fromArray(songs);
-			}
+				if (songsWithoutInfo.length > 0) {
+					const songIDs: string[] = songsWithoutInfo.map(
+						(i) => songs[i].spotifyID,
+					);
+					const songInfo = await api.tracks.get(songIDs);
+					for (const i of songsWithoutInfo) {
+						const info = songInfo.find((s) => s.id === songs[i].spotifyID);
+						if (info) {
+							songs[i].spotifyInfo = info;
+						}
+					}
+					//update queue
+					this.queue = MaxPriorityQueue.fromArray(songs);
+				}
 
-			// Now the lock will be released.
-		});
+				// Now the lock will be released.
+			},
+		);
 	}
 
-	async playSongNow(): Promise<RoomSong | null> {
+	async playSongNow(murLockService: MurLockService): Promise<RoomSong | null> {
 		let result: RoomSong | null = null;
-		await navigator.locks.request(this.getQueueLockName(), async () => {
-			this.updateQueue();
-			const song = this.queue.dequeue();
-			if (!song || song === null) {
-				return;
-			}
-			song.setPlaybackStartTime(new Date());
-			this.historicQueue.enqueue(song);
-			result = song;
-		});
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const song = this.queue.dequeue();
+				if (!song || song === null) {
+					return;
+				}
+				song.setPlaybackStartTime(new Date());
+				this.historicQueue.enqueue(song);
+				result = song;
+			},
+		);
 		return result;
 	}
 
@@ -709,6 +755,7 @@ export class RoomQueueService {
 		private readonly prisma: PrismaService,
 		private readonly spotify: SpotifyService,
 		private readonly spotifyAuth: SpotifyAuthService,
+		private readonly murLockService: MurLockService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
 	}
@@ -718,9 +765,17 @@ export class RoomQueueService {
 		if (!room || room === null) {
 			throw new Error("Room does not exist");
 		}
+		console.log("1");
+		console.log(room);
 		const activeRoom = new ActiveRoom(room);
+		console.log("2");
 		await activeRoom.reloadQueue(this.prisma);
+		console.log("3");
 		this.roomQueues.set(roomID, activeRoom);
+		console.log("4");
+		console.log(
+			`Created room queue for room ${roomID} with active room: ${activeRoom}`,
+		);
 	}
 
 	async addSong(
@@ -734,9 +789,16 @@ export class RoomQueueService {
 		}
 		const activeRoom = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.addSong",
+			);
 		}
-		return activeRoom.addSong(spotifyID, userID, insertTime);
+		return await activeRoom.addSong(
+			spotifyID,
+			userID,
+			insertTime,
+			this.murLockService,
+		);
 	}
 
 	async removeSong(
@@ -749,9 +811,11 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.removeSong",
+			);
 		}
-		return activeRoom.removeSong(spotifyID, userID);
+		return await activeRoom.removeSong(spotifyID, userID, this.murLockService);
 	}
 
 	async upvoteSong(
@@ -771,9 +835,11 @@ export class RoomQueueService {
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.upvoteSong",
+			);
 		}
-		return activeRoom.addVote(vote);
+		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
 	async downvoteSong(
@@ -793,9 +859,11 @@ export class RoomQueueService {
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.downvoteSong",
+			);
 		}
-		return activeRoom.addVote(vote);
+		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
 	async undoSongVote(
@@ -814,9 +882,11 @@ export class RoomQueueService {
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.undoSongVote",
+			);
 		}
-		return activeRoom.removeVote(vote);
+		return await activeRoom.removeVote(vote, this.murLockService);
 	}
 
 	async swapSongVote(
@@ -830,9 +900,16 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.swapSongVote",
+			);
 		}
-		return activeRoom.swapVote(spotifyID, userID, insertTime);
+		return await activeRoom.swapVote(
+			spotifyID,
+			userID,
+			insertTime,
+			this.murLockService,
+		);
 	}
 
 	getQueueState(roomID: string): {
@@ -845,7 +922,9 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.getQueueState",
+			);
 		}
 		return {
 			room: activeRoom.room,
@@ -860,7 +939,9 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.getSongAsRoomSongDto",
+			);
 		}
 		return activeRoom.songAsRoomSongDto(spotifyID);
 	}
@@ -871,7 +952,9 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.initiatePlayback",
+			);
 		}
 		if (!activeRoom.isPlaying()) {
 			if (activeRoom.isEmpty()) {
@@ -892,9 +975,14 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.getCurrentOrNextSong",
+			);
 		}
-		await activeRoom.getSpotifyInfo(this.spotifyAuth.getUserlessAPI());
+		await activeRoom.getSpotifyInfo(
+			this.spotifyAuth.getUserlessAPI(),
+			this.murLockService,
+		);
 		const song = await activeRoom.getCurrentOrNextSong();
 		if (!song || song === null) {
 			return null;
@@ -905,13 +993,19 @@ export class RoomQueueService {
 	//is song playing
 	async isPlaying(roomID: string): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			console.log("creating room queue");
+			await this.createRoomQueue(roomID);
 		}
+		console.log("getting active room");
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
+		console.log("got active room");
+		console.log(activeRoom);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.isPlaying",
+			);
 		}
-		return activeRoom.isPlaying();
+		return await activeRoom.isPlaying();
 	}
 
 	async isPaused(roomID: string): Promise<boolean> {
@@ -933,9 +1027,11 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.playSongNow",
+			);
 		}
-		const song = await activeRoom.playSongNow();
+		const song = await activeRoom.playSongNow(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}
@@ -989,9 +1085,11 @@ export class RoomQueueService {
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
+			throw new Error(
+				"Weird error. HashMap is broken: RoomQueueService.skipSong",
+			);
 		}
-		await activeRoom.playSongNow();
+		await activeRoom.playSongNow(this.murLockService);
 	}
 
 	/*
