@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import {
 	View,
 	Text,
@@ -21,14 +22,20 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms }) => {
 	const [inputText, setInputText] = useState<string>("");
 
 	useEffect(() => {
+		const setCurrentRoom = async () => {
+			await StorageService.setItem("currentRoom", selectedRoom);
+		};
 		if (initialRooms.length > 0) {
 			setSelectedRoom(initialRooms[0]);
+			setRooms(initialRooms);
 		}
+		setCurrentRoom();
 	}, [initialRooms]);
 
 	const handleRoomSelect = (room: string) => {
 		setSelectedRoom(room);
 		setDropdownVisible(false);
+
 	};
 
 	return (
