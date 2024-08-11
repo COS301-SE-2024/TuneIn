@@ -179,6 +179,14 @@ const RoomPage = () => {
 
 		fetchQueue();
 	}, [roomData.roomID, roomID]);
+	*/
+
+	useEffect(() => {
+		const fetchQueue = async () => {
+			live.getRoomQueue(setQueue);
+		}
+		fetchQueue();
+	}, [roomData.roomID, roomID]);
 
 	useEffect(() => {
 		return () => {

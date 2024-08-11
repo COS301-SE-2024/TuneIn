@@ -415,6 +415,30 @@ class LiveSocketService {
 				//add the new reaction to components
 			});
 
+			this.socket.on(
+				"queueState",
+				(response: {
+					room: RoomDto;
+					songs: RoomSongDto[];
+					votes: VoteDto[];
+				}) => {
+					console.log("SOCKET EVENT: queueState", response);
+
+					if (!this.currentUser) {
+						//throw new Error("Something went wrong while getting user's info");
+						return;
+					}
+
+					this.currentRoom = response.room;
+
+					if (this.setQueue) {
+						this.setQueue(response.songs);
+					}
+
+					this.currentRoomVotes = response.votes;
+				},
+			);
+
 			console.log("socket connected?", this.socket.connected);
 			this.socket.connect();
 			this.socket.emit(
@@ -708,6 +732,14 @@ class LiveSocketService {
 			return true;
 		}
 		return false;
+	}
+
+	public fetchRoomQueue(setQueue: stateSetQueue): void {
+		if (!this.currentRoom) {
+			return;
+		}
+		this.setQueue = setQueue;
+		this.socket.emit("requestQueue", this.currentRoom.roomID);
 	}
 
 	public async disconnectSocket() {
