@@ -546,5 +546,4 @@ export class RoomsController {
 		return this.roomsService.getKeyMetrics(userInfo.id);
 	}
 
-	
 }

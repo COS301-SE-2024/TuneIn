@@ -1142,6 +1142,7 @@ export class RoomsService {
 		const keyMetrics: RoomAnalyticsKeyMetricsDto = new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
 		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
+		keyMetrics.average_session_duration = await this.getAverageSessionDuration(userID);
 		return keyMetrics;
 	}
 
@@ -1211,6 +1212,57 @@ export class RoomsService {
 		return uniqueVisitors;
 	}
 
+	async getAverageSessionDuration(userID: string): Promise<RoomAnalyticsKeyMetricsDto["average_session_duration"]> {
+		const averageSessionDuration: RoomAnalyticsKeyMetricsDto["average_session_duration"] = {
+			duration: 0,
+			percentage_change: 0,
+		};
+		// get the average session duration for a user's all rooms
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
+		console.log("Getting average session duration for user", userID, "and rooms", roomIDs);
+		// get the average session duration from more than 24 hours ago, then get the average session duration from the last 24 hours to calculate the percentage change
+		const today: Date = new Date();
+		const yesterday: Date = subHours(today, 24);
+		const averageSessionDurationYesterday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time < ${yesterday}
+			GROUP BY
+				user_id;
+		`);
+		const averageSessionDurationToday: any = await this.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time > ${yesterday}
+			GROUP BY
+				user_id;
+		`);
+		console.log("Average session duration yesterday", averageSessionDurationYesterday, "Average session duration today", averageSessionDurationToday);
+		// if (averageSessionDurationYesterday.length === 0 || averageSessionDurationToday.length === 0) {
+		// 	return averageSessionDuration;
+		// }
+		// sum the durations and divide by the number of sessionser, b: number) => a + b, 0) / averageSessionDurationToday.length);
+		const totalDurationYesterday: number = Number(averageSessionDurationYesterday.map((r: any) => Number(r.avg_duration)).reduce((a: number, b: number) => a + b, 0));
+		const totalDurationToday: number = Number(averageSessionDurationToday.map((r: any) => Number(r.avg_duration)).reduce((a: number, b: number) => a + b, 0));
+		const durationYesterday: number = averageSessionDurationYesterday.length === 0? 0:  totalDurationYesterday / averageSessionDurationYesterday.length;
+		const durationToday: number = averageSessionDurationToday.length === 0? 0: totalDurationToday / averageSessionDurationToday.length;
+		averageSessionDuration.duration = (durationToday + durationYesterday) / 2;
+		averageSessionDuration.percentage_change = durationYesterday === 0? 0 : (durationToday - durationYesterday) / durationYesterday;
+		return averageSessionDuration;
+	}
 	async getReturningVisitors(userID: string): Promise<RoomAnalyticsKeyMetricsDto["returning_visitors"]> {
 		const returningVisitors: RoomAnalyticsKeyMetricsDto["returning_visitors"] = {
 			count: 0,
