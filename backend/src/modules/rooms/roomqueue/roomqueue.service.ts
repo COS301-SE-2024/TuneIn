@@ -120,6 +120,17 @@ class RoomSong {
 		return true;
 	}
 
+	addVotes(votes: PrismaTypes.vote[]) {
+		const voteDtos: VoteDto[] = votes.map((v) => ({
+			isUpvote: v.is_upvote,
+			userID: v.user_id,
+			spotifyID: v.queue_id,
+			createdAt: v.vote_time,
+		}));
+		this.votes.push(...voteDtos);
+		this._score = this.calculateScore();
+	}
+
 	removeVote(vote: VoteDto): boolean {
 		const index = this.votes.findIndex(
 			(v) => v.userID === vote.userID && v.spotifyID === vote.spotifyID,
@@ -191,11 +202,74 @@ class RoomSong {
 class ActiveRoom {
 	public readonly room: RoomDto;
 	private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
+	private historicQueue: MinPriorityQueue<RoomSong>; //priority queue of songs that have already been played
 
 	constructor(room: RoomDto) {
 		this.room = room;
 		const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
 		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
+		const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
+			const playbackTime: Date | null = song.getPlaybackStartTime();
+			if (!playbackTime || playbackTime === null) {
+				throw new Error("Song has no playback start time");
+			}
+			return playbackTime.valueOf();
+		};
+		this.historicQueue = new MinPriorityQueue<RoomSong>(playbackStartTime);
+	}
+
+	async reloadQueue(prisma: PrismaService) {
+		//load historic queue from db
+		const roomID = this.room.roomID;
+		const queueItems = await prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+			orderBy: {
+				start_time: "asc",
+			},
+			include: {
+				vote: true,
+				song: true,
+			},
+		});
+		if (!queueItems || queueItems === null) {
+			throw new Error("There was an issue fetching the queue");
+		}
+
+		// assume first person who voted for the song is the enqueuer
+		const songEnqueuers: string[] = [];
+		for (const queueItem of queueItems) {
+			if (queueItem.vote.length === 0) {
+				// assign song to room owner
+				songEnqueuers.push(this.room.creator.userID);
+			} else {
+				const enqueuer = queueItem.vote[0].user_id;
+				songEnqueuers.push(enqueuer);
+			}
+		}
+
+		for (let i = 0; i < queueItems.length; i++) {
+			const queueItem = queueItems[i];
+			const songEnqueuer = songEnqueuers[i];
+			if (queueItem.song.spotify_id === null) {
+				throw new Error("Song does not have a spotify id");
+			}
+
+			const song = new RoomSong(
+				queueItem.song.spotify_id,
+				songEnqueuer,
+				queueItem.song_id,
+				queueItem.insert_time,
+				queueItem.start_time,
+			);
+			song.addVotes(queueItem.vote);
+			if (queueItem.start_time === null && queueItem.is_done_playing) {
+				this.historicQueue.enqueue(song);
+			} else {
+				this.queue.enqueue(song);
+			}
+		}
 	}
 
 	updateQueue() {
@@ -368,6 +442,16 @@ export class RoomQueueService {
 		this.roomQueues = new Map<string, ActiveRoom>();
 	}
 
+	async createRoomQueue(roomID: string): Promise<void> {
+		const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
+		if (!room || room === null) {
+			throw new Error("Room does not exist");
+		}
+		const activeRoom = new ActiveRoom(room);
+		await activeRoom.reloadQueue(this.prisma);
+		this.roomQueues.set(roomID, activeRoom);
+	}
+
 	async addSong(
 		roomID: string,
 		spotifyID: string,
@@ -375,11 +459,7 @@ export class RoomQueueService {
 		insertTime: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
-			if (!room || room === null) {
-				throw new Error("Room does not exist");
-			}
-			this.roomQueues.set(roomID, new ActiveRoom(room));
+			this.createRoomQueue(roomID);
 		}
 		const activeRoom = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -394,7 +474,7 @@ export class RoomQueueService {
 		userID: string,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -410,13 +490,13 @@ export class RoomQueueService {
 		createdAt: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
-			createdAt: new Date(),
+			createdAt: createdAt,
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -432,7 +512,7 @@ export class RoomQueueService {
 		createdAt: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: false,
@@ -453,13 +533,13 @@ export class RoomQueueService {
 		userID: string,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
-			createdAt: createdAt,
+			createdAt: new Date(),
 		};
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -475,7 +555,7 @@ export class RoomQueueService {
 		insertTime: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -490,7 +570,7 @@ export class RoomQueueService {
 		votes: VoteDto[];
 	} {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -505,7 +585,7 @@ export class RoomQueueService {
 
 	getSongAsRoomSongDto(roomID: string, spotifyID: string): RoomSongDto | null {
 		if (!this.roomQueues.has(roomID)) {
-			throw new Error("Room does not exist");
+			this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
