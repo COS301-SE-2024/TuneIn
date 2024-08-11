@@ -18,6 +18,7 @@ import {
 	RoomAnalyticsSongsDto,
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
+	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
 
@@ -1129,6 +1130,70 @@ export class RoomsService {
 			userID,
 		);
 		return new RoomAnalyticsContributorsDto();
+	}
+
+	async getKeyMetrics(
+		userID: string,
+	): Promise<RoomAnalyticsKeyMetricsDto> {
+		console.log(
+			" and given userID: ",
+			userID,
+		);
+		const keyMetrics: RoomAnalyticsKeyMetricsDto = new RoomAnalyticsKeyMetricsDto();
+		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
+		return keyMetrics;
+	}
+
+	async getUniqueVisitors(userID: string): Promise<RoomAnalyticsKeyMetricsDto["unique_visitors"]> {
+		const uniqueVisitors: RoomAnalyticsKeyMetricsDto["unique_visitors"] = {
+			count: 0,
+			percentage_change: 0,
+		};
+		// get the unique visitors for a user's all rooms
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: string[] = rooms.map((r) => r.room_id);
+		console.log("Getting unique visitors for user", userID, "and rooms", roomIDs);
+		// get unique visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
+		const today: Date = new Date();
+		const yesterday: Date = subHours(today, 24);
+		const uniqueVisitorsYesterday: any = await this.prisma.user_activity.findMany({
+			where: {
+				room_id: {
+					in: roomIDs,
+				},
+				room_join_time: {
+					lt: yesterday,
+				},
+			},
+			select: {
+				user_id: true,
+			},
+		});
+		const uniqueVisitorsToday: any = await this.prisma.user_activity.findMany({
+			where: {
+				room_id: {
+					in: roomIDs,
+				},
+				room_join_time: {
+					gt: yesterday,
+				},
+			},
+			select: {
+				user_id: true,
+			},
+		});
+		if (uniqueVisitorsYesterday.length === 0 || uniqueVisitorsToday.length === 0) {
+			return uniqueVisitors;
+		}
+		const countYesterday: number = Number(uniqueVisitorsYesterday[0].count);
+		const countToday: number = Number(uniqueVisitorsToday[0].count);
+		uniqueVisitors.count = countToday;
+		uniqueVisitors.percentage_change = (countToday - countYesterday) / countYesterday;
+		return uniqueVisitors;
 	}
 
 	async saveReaction(
