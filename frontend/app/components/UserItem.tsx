@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
+import { router } from "expo-router";
 
 interface UserItemProps {
 	user: User;
@@ -14,16 +15,23 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		setIsFollowing((prevState) => !prevState);
 	};
 
+	const navigateToHelp = () => {
+		router.navigate(`/screens/profile/ProfilePage?friend=${JSON.stringify({profile_picture_url: user.profile_picture_url,
+			username: user.username,})}&user=${user}`);
+	};
+
 	return (
 		<View style={styles.container}>
-			<Image
-				source={{ uri: user.profile_picture_url }}
-				style={styles.profileImage}
-			/>
-			<View style={styles.details}>
-				<Text style={styles.profileName}>{user.profile_name}</Text>
-				<Text style={styles.username}>{user.username}</Text>
-			</View>
+			<TouchableOpacity onPress={navigateToHelp} style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 40 }}>
+				<Image
+					source={{ uri: user.profile_picture_url }}
+					style={styles.profileImage}
+				/>
+				<View style={styles.details}>
+					<Text style={styles.profileName}>{user.profile_name}</Text>
+					<Text style={styles.username}>{user.username}</Text>
+				</View>
+			</TouchableOpacity>
 			<TouchableOpacity
 				style={[styles.followButton, isFollowing && styles.unfollowButton]}
 				onPress={handleFollowToggle}
