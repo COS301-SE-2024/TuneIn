@@ -48,6 +48,7 @@ class LiveSocketService {
 	private currentUser: UserDto | null = null;
 	private currentRoom: RoomDto | null = null;
 	private currentRoomVotes: VoteDto[] = [];
+	private currentRoomQueue: RoomSongDto[] = [];
 	private initialised = false;
 	private isConnecting = false;
 	private requestingChatHistory = false;
@@ -436,13 +437,64 @@ class LiveSocketService {
 
 					this.currentRoom = response.room;
 
+					this.currentRoomQueue = response.songs;
 					if (this.setQueue) {
-						this.setQueue(response.songs);
+						this.setQueue(this.currentRoomQueue);
 					}
 
 					this.currentRoomVotes = response.votes;
 				},
 			);
+
+			this.socket.on("songAdded", (newSong: QueueEventDto) => {
+				console.log("SOCKET EVENT: songAdded", newSong);
+
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				this.currentRoomQueue.push(newSong.song);
+				if (this.setQueue) {
+					this.setQueue(this.currentRoomQueue);
+				}
+			});
+
+			this.socket.on("songRemoved", (removedSong: QueueEventDto) => {
+				console.log("SOCKET EVENT: songRemoved", removedSong);
+
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				this.currentRoomQueue = this.currentRoomQueue.filter(
+					(song) => song.spotifyID !== removedSong.song.spotifyID,
+				);
+				if (this.setQueue) {
+					this.setQueue(this.currentRoomQueue);
+				}
+			});
+
+			this.socket.on("voteUpdated", (updatedSong: QueueEventDto) => {
+				console.log("SOCKET EVENT: voteUpdated", updatedSong);
+
+				if (!this.currentUser) {
+					//throw new Error("Something went wrong while getting user's info");
+					return;
+				}
+
+				const i = this.currentRoomQueue.findIndex(
+					(song) => song.spotifyID === updatedSong.song.spotifyID,
+				);
+				if (i === -1) {
+					return;
+				}
+				this.currentRoomQueue[i] = updatedSong.song;
+				if (this.setQueue) {
+					this.setQueue(this.currentRoomQueue);
+				}
+			});
 
 			console.log("socket connected?", this.socket.connected);
 			this.socket.connect();
