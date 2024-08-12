@@ -28,25 +28,10 @@ import DevicePicker from "../../components/DevicePicker";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { RoomSongDto } from "../../models/RoomSongDto";
+import * as rs from "../../models/RoomSongDto";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 
 const MemoizedCommentWidget = memo(CommentWidget);
-const constructArtistString = (
-	artists: Spotify.SimplifiedArtist[] | undefined,
-) => {
-	if (!artists) {
-		return "";
-	}
-
-	let artistString = "";
-	artists.forEach((artist, index) => {
-		artistString += artist.name;
-		if (index < artists.length - 1) {
-			artistString += ", ";
-		}
-	});
-	return artistString;
-};
 
 const RoomPage = () => {
 	live.initialiseSocket();
@@ -407,18 +392,16 @@ const RoomPage = () => {
 				<View style={styles.trackDetails}>
 					<Image
 						source={{
-							uri: queue[currentTrackIndex].track?.album?.images[0].url,
+							uri: rs.getAlbumArtUrl(queue[currentTrackIndex]),
 						}}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
-						{queue[currentTrackIndex]?.track?.name}
+						{rs.getTitle(queue[currentTrackIndex])}
 					</Text>
-					<Text>
-						{constructArtistString(queue[currentTrackIndex].track?.artists)}
-					</Text>
+					<Text>{rs.constructArtistString(queue[currentTrackIndex])}</Text>
 				</View>
 
 				{roomData.mine ? (
@@ -464,7 +447,7 @@ const RoomPage = () => {
 			>
 				{queue.map((track, index) => (
 					<TouchableOpacity
-						key={track.track?.id}
+						key={rs.getID(track)}
 						style={[
 							styles.track,
 							index === currentTrackIndex
@@ -474,13 +457,13 @@ const RoomPage = () => {
 						onPress={() => playPauseTrack(index, 0)}
 					>
 						<Image
-							source={{ uri: track.track?.album.uri }}
+							source={{ uri: rs.getAlbumArtUrl(track) }}
 							style={styles.queueAlbumArt}
 						/>
 						<View style={styles.trackInfo}>
-							<Text style={styles.queueTrackName}>{track.track?.name}</Text>
+							<Text style={styles.queueTrackName}>{rs.getTitle(track)}</Text>
 							<Text style={styles.queueTrackArtist}>
-								{constructArtistString(queue[currentTrackIndex].track?.artists)}
+								{rs.constructArtistString(queue[currentTrackIndex])}
 							</Text>
 						</View>
 					</TouchableOpacity>

@@ -13,7 +13,13 @@ import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import { live } from "../../services/Live";
 
+import { RoomSongDto } from "../../models/RoomSongDto";
+import * as rs from "../../models/RoomSongDto";
+import * as Spotify from "@spotify/web-api-ts-sdk";
+
+/*
 interface Track {
 	id: string;
 	name: string;
@@ -35,6 +41,14 @@ interface SimplifiedTrack {
 	uri: string;
 	duration_ms: number;
 }
+*/
+// Type guard for Spotify.Track
+function isSpotifyTrack(track: any): track is Spotify.Track {
+	return (
+		(track as Spotify.Track).id !== undefined &&
+		(track as Spotify.Track).track === undefined
+	);
+}
 
 const EditPlaylist: React.FC = () => {
 	const router = useRouter();
@@ -42,7 +56,7 @@ const EditPlaylist: React.FC = () => {
 	console.log("passed in Room id:", Room_id);
 	const { searchResults, handleSearch } = useSpotifySearch();
 
-	const parseInitialPlaylist = (data: string | string[]): SimplifiedTrack[] => {
+	const parseInitialPlaylist = (data: string | string[]): RoomSongDto[] => {
 		if (typeof data === "string") {
 			try {
 				const parsed = JSON.parse(data);
@@ -50,7 +64,7 @@ const EditPlaylist: React.FC = () => {
 					Array.isArray(parsed) &&
 					parsed.every((item) => typeof item === "object")
 				) {
-					return parsed as SimplifiedTrack[];
+					return parsed as RoomSongDto[];
 				} else {
 					console.error("Parsed data is not an array of objects");
 					return [];
@@ -62,24 +76,24 @@ const EditPlaylist: React.FC = () => {
 		} else if (Array.isArray(data)) {
 			return data.map((item) => {
 				if (typeof item === "string") {
-					// Assuming item is a JSON string that represents a SimplifiedTrack object
+					// Assuming item is a JSON string that represents a RoomSongDto object
 					try {
 						const parsedItem = JSON.parse(item);
 						if (typeof parsedItem === "object") {
-							return parsedItem as SimplifiedTrack;
+							return parsedItem as RoomSongDto;
 						} else {
 							console.error("Parsed item is not an object");
-							return {} as SimplifiedTrack;
+							return {} as RoomSongDto;
 						}
 					} catch (error) {
 						console.error("Failed to parse playlist item:", error);
-						return {} as SimplifiedTrack;
+						return {} as RoomSongDto;
 					}
 				} else if (typeof item === "object") {
-					return item as SimplifiedTrack;
+					return item as RoomSongDto;
 				} else {
 					console.error("Item is not a string or object");
-					return {} as SimplifiedTrack;
+					return {} as RoomSongDto;
 				}
 			});
 		}
@@ -87,27 +101,27 @@ const EditPlaylist: React.FC = () => {
 	};
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() =>
+	const [playlist, setPlaylist] = useState<RoomSongDto[]>(() =>
 		parseInitialPlaylist(queue),
 	);
 
-	const addToPlaylist = (track: Track) => {
-		const simplifiedTrack: SimplifiedTrack = {
-			id: track.id,
-			name: track.name,
-			artistNames: track.artists.map((artist) => artist.name).join(", "),
-			albumArtUrl: track.album.images[0].url,
-			explicit: track.explicit,
-			preview_url: track.preview_url,
-			uri: track.uri,
-			duration_ms: track.duration_ms,
-		};
-		setPlaylist((prevPlaylist) => [...prevPlaylist, simplifiedTrack]);
+	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
+		if (isSpotifyTrack(track)) {
+			// if track is a Spotify track
+			const song: RoomSongDto = {
+				spotifyID: track.id,
+				userID: "user-id", // Replace with actual user ID
+				track: track,
+			};
+			setPlaylist((prevPlaylist) => [...prevPlaylist, song]);
+		} else {
+			setPlaylist((prevPlaylist) => [...prevPlaylist, track]);
+		}
 	};
 
 	const removeFromPlaylist = (trackId: string) => {
 		setPlaylist((prevPlaylist) =>
-			prevPlaylist.filter((track) => track.id !== trackId),
+			prevPlaylist.filter((track) => track.track && track.track.id !== trackId),
 		);
 	};
 
@@ -117,8 +131,8 @@ const EditPlaylist: React.FC = () => {
 
 		// Add logic to save the playlist to the backend if necessary
 		try {
+			/*
 			const storedToken = await auth.getToken();
-			// Replace with your backend API URL
 			const response = await fetch(
 				`${utils.API_BASE_URL}/rooms/${Room_id}/songs`,
 				{
@@ -132,10 +146,18 @@ const EditPlaylist: React.FC = () => {
 			);
 			const data = await response.json();
 			console.log("Playlist saved to backend:", data);
+			*/
+			for (let i = 0; i < playlist.length; i++) {
+				const song = playlist[i];
+				const track = song.track;
+				if (track) {
+					live.enqueueSong(song);
+				}
+			}
 		} catch (error) {
 			console.error("Error saving playlist:", error);
 		}
-		router.navigate("/screens/Home");
+		router.back();
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -162,22 +184,24 @@ const EditPlaylist: React.FC = () => {
 			{/* Selected Playlist Section */}
 			<ScrollView style={styles.selectedContainer}>
 				<Text style={styles.sectionTitle}>Selected Tracks</Text>
-				{playlist.map((track) => (
-					<View key={track.id} style={styles.trackContainer}>
+				{playlist.map((song) => (
+					<View key={rs.getID(song)} style={styles.trackContainer}>
 						<Image
-							source={{ uri: track.albumArtUrl }}
+							source={{ uri: rs.getAlbumArtUrl(song) }}
 							style={styles.albumArt}
 						/>
 						<View style={styles.trackInfo}>
-							<Text style={styles.trackName}>{track.name}</Text>
-							<Text style={styles.artistNames}>{track.artistNames}</Text>
-							{track.explicit && (
+							<Text style={styles.trackName}>{rs.getTitle(song)}</Text>
+							<Text style={styles.artistNames}>
+								{rs.constructArtistString(song)}
+							</Text>
+							{rs.getExplicit(song) && (
 								<Text style={styles.explicitTag}>Explicit</Text>
 							)}
 						</View>
 						<TouchableOpacity
 							style={styles.removeButton}
-							onPress={() => removeFromPlaylist(track.id)}
+							onPress={() => removeFromPlaylist(rs.getID(song))}
 						>
 							<Text style={styles.buttonText}>Remove</Text>
 						</TouchableOpacity>
@@ -187,15 +211,15 @@ const EditPlaylist: React.FC = () => {
 
 			{/* Search Results Section */}
 			<ScrollView style={styles.resultsContainer}>
-				{searchResults.map((track) => (
+				{searchResults.map((track: Spotify.Track) => (
 					<SongCard
 						key={track.id}
 						track={track}
-						onPlay={() => playPreview(track.preview_url)}
+						onPlay={() => playPreview(track.preview_url || "")}
 						onAdd={() => addToPlaylist(track)}
 						onRemove={() => removeFromPlaylist(track.id)}
 						isAdded={playlist.some(
-							(selectedTrack) => selectedTrack.id === track.id,
+							(selectedTrack) => selectedTrack.spotifyID === track.id,
 						)}
 					/>
 				))}
