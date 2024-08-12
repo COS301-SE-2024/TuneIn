@@ -568,10 +568,11 @@ export class RoomsController {
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		// define the body of the request as a json with playlist name and description
-		@Body() archiveInfo: {
-			name: string,
-			description: string
-		}
+		@Body()
+		archiveInfo: {
+			name: string;
+			description: string;
+		},
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
@@ -612,7 +613,7 @@ export class RoomsController {
 	@ApiTags("rooms")
 	async deleteArchivedSongs(
 		@Request() req: any,
-		@Param("playlistID") playlistID: string
+		@Param("playlistID") playlistID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
@@ -634,6 +635,4 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.roomsService.getCurrentRoom(userInfo.id);
 	}
-
-
 }
