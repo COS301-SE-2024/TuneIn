@@ -13,6 +13,7 @@ export const useSpotifyDevices = () => {
 			try {
 				const allTokens = await spotifyAuth.getTokens();
 				const token = allTokens.access_token;
+				console.log("allTokens: ", allTokens, "\ntoken: ", token);
 				setAccessToken(token);
 			} catch (err) {
 				setError("An error occurred while fetching the token");
@@ -72,6 +73,7 @@ export const useSpotifyDevices = () => {
 	// Updated getDeviceIDs function to return an array of Devices
 	const getDeviceIDs = async (): Promise<Devices[] | null> => {
 		try {
+			console.log("getDeviceIDs token: ", accessToken);
 			const response = await fetch(
 				"https://api.spotify.com/v1/me/player/devices",
 				{

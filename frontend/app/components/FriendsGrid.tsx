@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Assume you have a Friend model
+import { colors } from "../styles/colors";
 
 interface FriendsGridProps {
 	friends: Friend[];
@@ -14,24 +15,40 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 	user,
 	maxVisible,
 }) => {
-	// console.log("Friend: " + JSON.stringify(friends));
+	const truncateUsername = (username: string) => {
+		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+	};
+
 	return (
-		<View style={styles.container}>
-			<View style={styles.gridContainer}>
+		<View style={styles.container} testID="friends-grid-container">
+			<View style={styles.gridContainer} testID="friends-grid">
 				{friends.slice(0, maxVisible).map((friend, index) => (
 					<Link
 						key={index}
 						href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
 						style={styles.link}
+						testID={`friend-link-${friend.username}`}
 					>
-						<View style={styles.friendContainer}>
-							<View style={styles.imageBorder}>
+						<View
+							style={styles.friendContainer}
+							testID={`friend-container-${friend.username}`}
+						>
+							<View
+								style={styles.imageBorder}
+								testID={`friend-image-border-${friend.username}`}
+							>
 								<Image
-									source={{ uri: friend.profilePicture }}
+									source={{ uri: friend.profile_picture_url }}
 									style={styles.profileImage}
+									testID={`friend-profile-image-${friend.username}`}
 								/>
 							</View>
-							<Text style={styles.friendName}>{friend.username}</Text>
+							<Text
+								style={styles.friendName}
+								testID={`friend-name-${friend.username}`}
+							>
+								{truncateUsername(friend.username)}
+							</Text>
 						</View>
 					</Link>
 				))}
@@ -63,7 +80,7 @@ const styles = StyleSheet.create({
 	imageBorder: {
 		alignItems: "center",
 		borderWidth: 2,
-		borderColor: "#0000FF", // Use hex color for blue
+		borderColor: colors.primary,
 		borderRadius: 50,
 		padding: 4,
 	},

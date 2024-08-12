@@ -389,7 +389,7 @@ const EditProfileScreen = () => {
 						onPress={() => setLinkAddDialogVisible(true)}
 						style={styles.editButton}
 					>
-						<Text style={{ fontWeight: 600 }}>Add link</Text>
+						<Text style={{ fontWeight: "600" }}>Add link</Text>
 					</TouchableOpacity>
 					<EditDialog
 						value="link"
