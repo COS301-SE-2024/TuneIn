@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -10,6 +10,8 @@ import {
 	ScrollView,
 } from "react-native";
 import { colors } from "../styles/colors";
+import Fuse from "fuse.js";
+import Selector from "./Selector";
 
 interface DropdownProps {
 	options: string[];
@@ -28,6 +30,11 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [items, setItems] = useState(options);
+
+	useEffect(() => {
+		setItems(options);
+	}, [options]);
 
 	const toggleModal = () => setModalVisible(!modalVisible);
 
@@ -36,10 +43,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 		onSelect(option);
 		toggleModal();
 	};
-
-	const filteredOptions = options.filter((option) =>
-		option.toLowerCase().includes(searchQuery.toLowerCase()),
-	);
 
 	return (
 		<View style={styles.container}>
@@ -53,41 +56,13 @@ const Dropdown: React.FC<DropdownProps> = ({
 				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
 			</TouchableOpacity>
 
-			<Modal
+			<Selector
+				options={options}
+				placeholder={placeholder}
 				visible={modalVisible}
-				transparent={true}
-				animationType="slide"
-				onRequestClose={toggleModal}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalContent}>
-						<TextInput
-							style={styles.searchInput}
-							placeholder={`Search ${placeholder.toLowerCase()}...`}
-							value={searchQuery}
-							onChangeText={setSearchQuery}
-						/>
-						<ScrollView style={styles.scrollView}>
-							<FlatList
-								testID="flat-list"
-								data={filteredOptions}
-								keyExtractor={(item) => item}
-								renderItem={({ item }) => (
-									<TouchableOpacity
-										style={styles.filterOption}
-										onPress={() => handleSelectOption(item)}
-									>
-										<Text style={styles.filterText}>{item}</Text>
-									</TouchableOpacity>
-								)}
-							/>
-						</ScrollView>
-						<TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-							<Text style={styles.filterText}>Close</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</Modal>
+				onSelect={handleSelectOption}
+				onClose={toggleModal}
+			/>
 		</View>
 	);
 };

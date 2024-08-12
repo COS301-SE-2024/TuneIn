@@ -14,6 +14,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLo
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { live } from "../../services/Live";
+import { colors } from "../../styles/colors";
 
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	searchButton: {
-		backgroundColor: "#4c50bf",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",

@@ -98,6 +98,7 @@ const SongCard: React.FC<SongCardProps> = ({
 			</View>
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity
+					testID="play-pause-button"
 					style={styles.iconButton}
 					onPress={isPlaying ? pauseAudio : playAudio}
 				>
