@@ -1057,6 +1057,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		*/
 		let q: QueueEventDto;
 		try {
+			console.log(`Payload: "${payload}"`);
 			const j = JSON.parse(payload);
 			q = j as QueueEventDto;
 		} catch (e) {

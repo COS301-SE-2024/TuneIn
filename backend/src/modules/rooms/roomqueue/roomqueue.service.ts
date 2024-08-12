@@ -798,12 +798,17 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.addSong",
 			);
 		}
-		return await activeRoom.addSong(
+		const result: boolean = await activeRoom.addSong(
 			spotifyID,
 			userID,
 			insertTime,
 			this.murLockService,
 		);
+		await activeRoom.getSpotifyInfo(
+			this.spotifyAuth.getUserlessAPI(),
+			this.murLockService,
+		);
+		return result;
 	}
 
 	async removeSong(
