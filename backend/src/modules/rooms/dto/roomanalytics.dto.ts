@@ -42,7 +42,6 @@ export class RoomAnalyticsKeyMetricsDto {
 		duration: number;
 		percentage_change: number;
 	};
-
 }
 
 export class RoomAnalyticsQueueDto {
