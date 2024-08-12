@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	TextInput,
@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
 import * as Spotify from "@spotify/web-api-ts-sdk";
+import { RoomDto } from "../../../api-client";
 
 /*
 interface Track {
@@ -56,60 +57,28 @@ const EditPlaylist: React.FC = () => {
 	const router = useRouter();
 	const { Room_id } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
 	console.log("passed in Room id:", Room_id);
+	const [isMine, setIsMine] = useState<boolean>(false);
 	const { searchResults, handleSearch } = useSpotifySearch();
-	/*
-	const parseInitialPlaylist = (data: string | string[]): RoomSongDto[] => {
-		if (typeof data === "string") {
-			try {
-				const parsed = JSON.parse(data);
-				if (
-					Array.isArray(parsed) &&
-					parsed.every((item) => typeof item === "object")
-				) {
-					return parsed as RoomSongDto[];
-				} else {
-					console.error("Parsed data is not an array of objects");
-					return [];
-				}
-			} catch (error) {
-				console.error("Failed to parse initial playlist:", error);
-				return [];
-			}
-		} else if (Array.isArray(data)) {
-			return data.map((item) => {
-				if (typeof item === "string") {
-					// Assuming item is a JSON string that represents a RoomSongDto object
-					try {
-						const parsedItem = JSON.parse(item);
-						if (typeof parsedItem === "object") {
-							return parsedItem as RoomSongDto;
-						} else {
-							console.error("Parsed item is not an object");
-							return {} as RoomSongDto;
-						}
-					} catch (error) {
-						console.error("Failed to parse playlist item:", error);
-						return {} as RoomSongDto;
-					}
-				} else if (typeof item === "object") {
-					return item as RoomSongDto;
-				} else {
-					console.error("Item is not a string or object");
-					return {} as RoomSongDto;
-				}
-			});
-		}
-		return [];
-	};
-	*/
-
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
 		live.getLastRoomQueue(),
 	);
-	const [addedSongs, setAddedSongs] = useState<SimplifiedTrack[]>([]);
+	const [addedSongs, setAddedSongs] = useState<Spotify.Track[]>([]);
+
+	useEffect(() => {
+		setPlaylist(live.getLastRoomQueue());
+		const room: RoomDto | null = live.getCurrentRoom();
+		if (room) {
+			setIsMine(live.roomIsMine());
+		}
+	}, []);
 
 	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
+		if (!isMine && addedSongs.length >= 3) {
+			alert("You can only add up to 3 songs.");
+			return;
+		}
+
 		if (isSpotifyTrack(track)) {
 			// if track is a Spotify track
 			const song: RoomSongDto = {
@@ -118,28 +87,17 @@ const EditPlaylist: React.FC = () => {
 				track: track,
 			};
 			setPlaylist((prevPlaylist) => [...prevPlaylist, song]);
+			if (!isMine) {
+				setAddedSongs((prevAddedSongs) => [...prevAddedSongs, track]);
+			}
 		} else {
 			setPlaylist((prevPlaylist) => [...prevPlaylist, track]);
-	const addToPlaylist = (track: Track) => {
-		if (!isMine && addedSongs.length >= 3) {
-			alert("You can only add up to 3 songs.");
-			return;
-		}
-
-		const simplifiedTrack: SimplifiedTrack = {
-			id: track.id,
-			name: track.name,
-			artistNames: track.artists.map((artist) => artist.name).join(", "),
-			albumArtUrl: track.album.images[0].url,
-			explicit: track.explicit,
-			preview_url: track.preview_url,
-			uri: track.uri,
-			duration_ms: track.duration_ms,
-		};
-
-		setPlaylist((prevPlaylist) => [...prevPlaylist, simplifiedTrack]);
-		if (!isMine) {
-			setAddedSongs((prevAddedSongs) => [...prevAddedSongs, simplifiedTrack]);
+			if (!isMine) {
+				const t: Spotify.Track | undefined = track.track;
+				if (t) {
+					setAddedSongs((prevAddedSongs) => [...prevAddedSongs, t]);
+				}
+			}
 		}
 	};
 
@@ -242,7 +200,9 @@ const EditPlaylist: React.FC = () => {
 							)}
 						</View>
 						{isMine ||
-						addedSongs.some((addedTrack) => addedTrack.id === rs.getID(track)) ? (
+						addedSongs.some(
+							(addedTrack) => addedTrack.id === rs.getID(song),
+						) ? (
 							<TouchableOpacity
 								style={styles.removeButton}
 								onPress={() => removeFromPlaylist(rs.getID(song))}
@@ -265,6 +225,7 @@ const EditPlaylist: React.FC = () => {
 						isAdded={playlist.some(
 							(selectedTrack) => selectedTrack.spotifyID === track.id,
 						)}
+						onRemove={() => removeFromPlaylist(track.id)}
 					/>
 				))}
 			</ScrollView>

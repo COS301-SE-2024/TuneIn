@@ -838,6 +838,20 @@ class LiveSocketService {
 		return this.currentRoomQueue;
 	}
 
+	public getLastRoomVotes(): VoteDto[] {
+		return this.currentRoomVotes;
+	}
+
+	public updateSong(song: RoomSongDto): RoomSongDto {
+		const result: RoomSongDto | undefined = this.currentRoomQueue.find(
+			(s) => s.spotifyID === song.spotifyID,
+		);
+		if (!result) {
+			return song;
+		}
+		return result;
+	}
+
 	public getCurrentRoom(): RoomDto | null {
 		return this.currentRoom;
 	}
@@ -947,6 +961,22 @@ class LiveSocketService {
 
 	public setEmojiObjects(setObjects: stateSetEmojiObject): void {
 		this.setObjects = setObjects;
+	}
+
+	public roomIsMine(): boolean {
+		if (!this.currentRoom) {
+			return false;
+		}
+		if (!this.currentUser) {
+			return false;
+		}
+		if (!this.currentRoom.creator) {
+			return false;
+		}
+		if (this.currentRoom.creator.userID === this.currentUser.userID) {
+			return true;
+		}
+		return false;
 	}
 
 	public async disconnectSocket() {

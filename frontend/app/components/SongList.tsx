@@ -2,29 +2,32 @@ import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import Voting from "../components/rooms/Voting";
 import { Track } from "../models/Track";
+import {
+	RoomSongDto,
+	getAlbumArtUrl,
+	constructArtistString,
+	getTitle,
+} from "../models/RoomSongDto";
 
 interface SongListProps {
-	track: Track;
-	voteCount: number;
+	track: RoomSongDto;
 	showVoting?: boolean;
 	songNumber: number;
 	index: number; // Index of the song in the list
 	isCurrent: boolean; // Indicates if this song is the currently playing song
 	swapSongs: (index: number, direction: "up" | "down") => void; // Function to swap songs
-	setVoteCount: (newVoteCount: number) => void; // Function to update vote count
+	setVoteCount: (newVoteCount: number) => void;
 }
 
 const SongList: React.FC<SongListProps> = ({
 	track,
-	voteCount,
 	showVoting = true,
 	songNumber,
 	index,
 	isCurrent,
 	swapSongs,
-	setVoteCount,
 }) => {
-	const albumCoverUrl = track.album.images[0]?.url;
+	const albumCoverUrl = getAlbumArtUrl(track);
 
 	return (
 		<View
@@ -41,16 +44,14 @@ const SongList: React.FC<SongListProps> = ({
 				<Text
 					style={[styles.songName, isCurrent ? styles.currentSongText : null]}
 				>
-					{track.name}
+					{getTitle(track)}
 				</Text>
-				<Text style={styles.artist}>
-					{track.artists.map((artist) => artist.name).join(", ")}
-				</Text>
+				<Text style={styles.artist}>{constructArtistString(track)}</Text>
 			</View>
 
 			<Voting
-				voteCount={voteCount}
-				setVoteCount={setVoteCount}
+				song={track}
+				voteCount={track.score || 0}
 				index={index}
 				swapSongs={swapSongs}
 			/>

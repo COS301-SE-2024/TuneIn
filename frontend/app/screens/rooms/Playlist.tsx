@@ -6,6 +6,7 @@ import SongList from "../../components/SongList"; // Import the SongList compone
 import { Track } from "../../models/Track";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import { live } from "../../services/Live";
+import { VoteDto } from "../../models/VoteDto";
 
 // Add mock songs here for testing
 const mockSongs: Track[] = [
@@ -48,40 +49,26 @@ const Playlist = () => {
 	const router = useRouter();
 	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
-	const [playlist, setPlaylist] = useState<RoomSongDto[]>(live.getLastRoomQueue());
+	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
+		live.getLastRoomQueue(),
+	);
 
 	useEffect(() => {
 		setPlaylist(live.getLastRoomQueue());
 	}, []);
-	const [playlist, setPlaylist] = useState<Track[]>([]);
-	const [votes, setVotes] = useState<number[]>([]); // Track votes for each song
-
-	useEffect(() => {
-		try {
-			if (typeof queue === "string") {
-				const parsedQueue = JSON.parse(queue) as Track[];
-				setPlaylist(parsedQueue);
-				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
-			} else if (Array.isArray(queue)) {
-				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
-				setPlaylist(parsedQueue);
-				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
-			}
-		} catch (error) {
-			console.error("Failed to parse queue:", error);
-		}
-	}, [queue]);
 
 	// Function to handle voting
 	const handleVoteChange = (index: number, newVoteCount: number) => {
-		const updatedVotes = [...votes];
-		updatedVotes[index] = newVoteCount;
+		const songs = [...playlist];
+		songs[index].score = newVoteCount;
 
 		const sortedPlaylist = [...playlist]
-			.map((track, i) => ({ track, vote: updatedVotes[i], index: i }))
+			.map((track, i) => ({ track, index: i }))
 			.sort((a, b) => {
-				if (a.vote === b.vote) return a.index - b.index; // Keep original order for same votes
-				return b.vote - a.vote; // Sort descending by votes
+				const aScore: number = a.track.score || 0;
+				const bScore: number = b.track.score || 0;
+				if (aScore === bScore) return a.index - b.index; // Keep original order for same votes
+				return bScore - aScore; // Sort descending by votes
 			})
 			.map((item) => item.track);
 
@@ -91,7 +78,6 @@ const Playlist = () => {
 			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
 		];
 
-		setVotes(updatedVotes);
 		setPlaylist(finalPlaylist);
 	};
 
@@ -123,12 +109,14 @@ const Playlist = () => {
 					<SongList
 						key={index}
 						songNumber={index + 1}
-						track={roomSong.track as Track}
-						voteCount={roomSong.score || 0} // Assuming voteCount is managed elsewhere
+						track={roomSong}
 						showVoting={true} // Assuming showVoting is managed elsewhere
 						index={index}
 						isCurrent={index === Number(currentTrackIndex)} // Check if current song
 						swapSongs={(index, direction) => {}} // Pass an appropriate function here
+						setVoteCount={(newVoteCount) =>
+							handleVoteChange(index, newVoteCount)
+						}
 					/>
 				))}
 				{playlist.length > 0 ? (
@@ -137,7 +125,6 @@ const Playlist = () => {
 							key={index}
 							songNumber={index + 1}
 							track={track}
-							voteCount={votes[index]}
 							showVoting={true}
 							index={index}
 							isCurrent={index === Number(currentTrackIndex)}
