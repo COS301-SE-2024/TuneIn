@@ -10,24 +10,46 @@ const Playlist = () => {
 	const { queue, currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
 	const [playlist, setPlaylist] = useState<Track[]>([]);
+	const [votes, setVotes] = useState<number[]>([]); // Track votes for each song
 
 	useEffect(() => {
 		try {
 			if (typeof queue === "string") {
 				const parsedQueue = JSON.parse(queue) as Track[];
 				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
 			} else if (Array.isArray(queue)) {
 				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
 				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
 			}
 		} catch (error) {
 			console.error("Failed to parse queue:", error);
 		}
 	}, [queue]);
 
-	useEffect(() => {
-		console.log("Current Track Index:", Number(currentTrackIndex));
-	}, [currentTrackIndex]);
+	// Function to handle voting
+	const handleVoteChange = (index: number, newVoteCount: number) => {
+		const updatedVotes = [...votes];
+		updatedVotes[index] = newVoteCount;
+
+		const sortedPlaylist = [...playlist]
+			.map((track, i) => ({ track, vote: updatedVotes[i], index: i }))
+			.sort((a, b) => {
+				if (a.vote === b.vote) return a.index - b.index; // Keep original order for same votes
+				return b.vote - a.vote; // Sort descending by votes
+			})
+			.map((item) => item.track);
+
+		// Ensure songs don't move above the current track index
+		const finalPlaylist = [
+			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
+			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
+		];
+
+		setVotes(updatedVotes);
+		setPlaylist(finalPlaylist);
+	};
 
 	const navigateToAddSong = () => {
 		console.log("curr room_id:", Room_id);
@@ -60,17 +82,23 @@ const Playlist = () => {
 							key={index}
 							songNumber={index + 1}
 							track={track}
-							voteCount={0} // Assuming voteCount is managed elsewhere
-							showVoting={false} // Assuming showVoting is managed elsewhere
+							voteCount={votes[index]}
+							showVoting={true}
 							index={index}
-							isCurrent={index === Number(currentTrackIndex)} // Check if current song
-							swapSongs={(index, direction) => {}} // Pass an appropriate function here
+							isCurrent={index === Number(currentTrackIndex)}
+							swapSongs={() => {}} // Not needed here
+							setVoteCount={(newVoteCount) =>
+								handleVoteChange(index, newVoteCount)
+							}
 						/>
 					))
 				) : (
 					<View style={styles.emptyQueueContainer}>
 						<Text style={styles.emptyQueueText}>
-							The queue is empty. {isMine ? "Add some songs to get started!" : "Wait for the host to add some songs."}
+							The queue is empty.{" "}
+							{isMine
+								? "Add some songs to get started!"
+								: "Wait for the host to add some songs."}
 						</Text>
 					</View>
 				)}

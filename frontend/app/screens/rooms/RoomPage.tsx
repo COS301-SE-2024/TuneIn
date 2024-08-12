@@ -42,6 +42,11 @@ import EmojiPicker, {
 import { colors } from "../../styles/colors";
 const MemoizedCommentWidget = memo(CommentWidget);
 
+type EmojiReaction = {
+	emoji: string;
+	userId: string; // Add more properties if needed
+};
+
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
