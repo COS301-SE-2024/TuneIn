@@ -30,7 +30,7 @@ const WelcomeScreen: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<view style={styles.imageContainer}>
+			<View style={styles.imageContainer}>
 				<ImageBackground
 					source={require("../../assets/logo8.png")}
 					style={[styles.imageBackground, { width, height: height * 0.6 }]}
@@ -45,7 +45,7 @@ const WelcomeScreen: React.FC = () => {
 						/>
 					</TouchableOpacity>
 				</ImageBackground>
-			</view>
+			</View>
 			<View style={styles.innerContainer}>
 				{/* <Text style={styles.logoText}>Logo</Text>
 				<Text style={styles.titleText}>TuneIn</Text> */}

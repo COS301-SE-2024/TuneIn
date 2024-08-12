@@ -10,62 +10,46 @@ const Playlist = () => {
 	const { queue, currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
 	const [playlist, setPlaylist] = useState<Track[]>([]);
+	const [votes, setVotes] = useState<number[]>([]); // Track votes for each song
 
 	useEffect(() => {
 		try {
-			// if (typeof queue === "string") {
-			// 	const parsedQueue = JSON.parse(queue) as Track[];
-			// 	setPlaylist(parsedQueue);
-			// } else if (Array.isArray(queue)) {
-			// 	const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
-			// 	setPlaylist(parsedQueue);
-			// } else {
-			// Add mock songs here for testing
-			const mockSongs: Track[] = [
-				{
-					id: "1",
-					name: "Song One",
-					artists: [{ name: "Artist One" }],
-					album: { images: [{ url: "https://example.com/album1.jpg" }] },
-					explicit: false,
-					preview_url: "https://example.com/preview1.mp3",
-					uri: "spotify:track:1",
-					duration_ms: 210000, // 3 minutes and 30 seconds
-					albumArtUrl: "https://example.com/album1.jpg",
-				},
-				{
-					id: "2",
-					name: "Song Two",
-					artists: [{ name: "Artist Two" }],
-					album: { images: [{ url: "https://example.com/album2.jpg" }] },
-					explicit: true,
-					preview_url: "https://example.com/preview2.mp3",
-					uri: "spotify:track:2",
-					duration_ms: 180000, // 3 minutes
-					albumArtUrl: "https://example.com/album2.jpg",
-				},
-				{
-					id: "3",
-					name: "Song Three",
-					artists: [{ name: "Artist Three" }],
-					album: { images: [{ url: "https://example.com/album3.jpg" }] },
-					explicit: false,
-					preview_url: "https://example.com/preview3.mp3",
-					uri: "spotify:track:3",
-					duration_ms: 240000, // 4 minutes
-					albumArtUrl: "https://example.com/album3.jpg",
-				},
-			];
-			setPlaylist(mockSongs);
-			// }
+			if (typeof queue === "string") {
+				const parsedQueue = JSON.parse(queue) as Track[];
+				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
+			} else if (Array.isArray(queue)) {
+				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
+				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
+			}
 		} catch (error) {
 			console.error("Failed to parse queue:", error);
 		}
 	}, [queue]);
 
-	useEffect(() => {
-		console.log("Current Track Index:", Number(currentTrackIndex));
-	}, [currentTrackIndex]);
+	// Function to handle voting
+	const handleVoteChange = (index: number, newVoteCount: number) => {
+		const updatedVotes = [...votes];
+		updatedVotes[index] = newVoteCount;
+
+		const sortedPlaylist = [...playlist]
+			.map((track, i) => ({ track, vote: updatedVotes[i], index: i }))
+			.sort((a, b) => {
+				if (a.vote === b.vote) return a.index - b.index; // Keep original order for same votes
+				return b.vote - a.vote; // Sort descending by votes
+			})
+			.map((item) => item.track);
+
+		// Ensure songs don't move above the current track index
+		const finalPlaylist = [
+			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
+			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
+		];
+
+		setVotes(updatedVotes);
+		setPlaylist(finalPlaylist);
+	};
 
 	const navigateToAddSong = () => {
 		console.log("curr room_id:", Room_id);
@@ -75,6 +59,7 @@ const Playlist = () => {
 				queue: queue,
 				currentTrackIndex: currentTrackIndex,
 				Room_id: Room_id,
+				isMine: mine,
 			},
 		});
 	};
@@ -91,31 +76,40 @@ const Playlist = () => {
 				<Text style={styles.pageName}>Queue</Text>
 			</View>
 			<View style={styles.songListContainer}>
-				{playlist.map((track, index) => (
-					<SongList
-						key={index}
-						songNumber={index + 1}
-						track={track}
-						voteCount={0} // Assuming voteCount is managed elsewhere
-						showVoting={false} // Assuming showVoting is managed elsewhere
-						index={index}
-						isCurrent={index === Number(currentTrackIndex)} // Check if current song
-						swapSongs={(index, direction) => {}} // Pass an appropriate function here
-					/>
-				))}
+				{playlist.length > 0 ? (
+					playlist.map((track, index) => (
+						<SongList
+							key={index}
+							songNumber={index + 1}
+							track={track}
+							voteCount={votes[index]}
+							showVoting={true}
+							index={index}
+							isCurrent={index === Number(currentTrackIndex)}
+							swapSongs={() => {}} // Not needed here
+							setVoteCount={(newVoteCount) =>
+								handleVoteChange(index, newVoteCount)
+							}
+						/>
+					))
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty.{" "}
+							{isMine
+								? "Add some songs to get started!"
+								: "Wait for the host to add some songs."}
+						</Text>
+					</View>
+				)}
 			</View>
-			{isMine ? (
-				<View style={styles.addButtonContainer}>
-					<TouchableOpacity
-						style={styles.addButton}
-						onPress={navigateToAddSong}
-					>
-						<Text style={styles.addButtonText}>Add Song</Text>
-					</TouchableOpacity>
-				</View>
-			) : (
-				<View></View>
-			)}
+			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+				{isMine ? (
+					<Text style={styles.addButtonText}>Manage queue</Text>
+				) : (
+					<Text style={styles.addButtonText}>Add Song</Text>
+				)}
+			</TouchableOpacity>
 		</View>
 	);
 };
@@ -142,6 +136,17 @@ const styles = StyleSheet.create({
 	songListContainer: {
 		flex: 1,
 		marginTop: 16,
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	addButtonContainer: {
 		alignItems: "center",
