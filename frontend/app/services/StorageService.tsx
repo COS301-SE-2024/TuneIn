@@ -45,4 +45,5 @@ export const clear = async () => {
 		).default;
 		await AsyncStorage.clear();
 	}
+	console.log("Storage cleared");
 };

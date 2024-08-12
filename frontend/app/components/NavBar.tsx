@@ -1,12 +1,38 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { colors } from "../styles/colors";
 
 const NavBar: React.FC = () => {
 	const router = useRouter();
+	const segments = useSegments();
 	const [activeTab, setActiveTab] = useState<string>("Home");
+
+	// Update active tab based on the current route
+	useFocusEffect(
+		React.useCallback(() => {
+			const currentPath = segments.join("/"); // Get the current path
+			switch (currentPath) {
+				case "screens/Home":
+					setActiveTab("Home");
+					break;
+				case "screens/site":
+					setActiveTab("Sitemap");
+					break;
+				case "screens/Search":
+					setActiveTab("Search");
+					break;
+				case "screens/help/HelpScreen":
+					setActiveTab("Help");
+					break;
+				default:
+					setActiveTab("");
+					break;
+			}
+		}, [segments]),
+	);
 
 	const navigate = (route: string, tab: string) => {
 		setActiveTab(tab);
@@ -30,7 +56,7 @@ const NavBar: React.FC = () => {
 					</Text>
 				</View>
 			</TouchableOpacity>
-			<TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
+			{/* <TouchableOpacity onPress={() => navigate("/screens/site", "Sitemap")}>
 				<View style={styles.tabItem}>
 					<Ionicons
 						name={activeTab === "Sitemap" ? "map-sharp" : "map-outline"}
@@ -43,7 +69,7 @@ const NavBar: React.FC = () => {
 						Sitemap
 					</Text>
 				</View>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 			<TouchableOpacity onPress={() => navigate("/screens/Search", "Search")}>
 				<View style={styles.tabItem}>
 					<Ionicons

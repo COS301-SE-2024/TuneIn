@@ -1,9 +1,22 @@
 # TuneIn
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
-<a href="https://codecov.io/github/COS301-SE-2024/TuneIn" > 
- <img src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/> 
+<div><a href="https://codecov.io/github/COS301-SE-2024/TuneIn" >
+ <img alt="Code Coverage Percentage" src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/>
 </a>
+<a href="https://github.com/COS301-SE-2024/TuneIn/commits/develop/" >
+ <img alt="Last Commit" src="https://img.shields.io/github/last-commit/COS301-SE-2024/TuneIn"/>
+</a>
+<img alt="Our top language" src="https://img.shields.io/github/languages/top/COS301-SE-2024/TuneIn"/>
+</div>
+
+<div>
+<img alt="Repo size" src="https://img.shields.io/github/repo-size/COS301-SE-2024/TuneIn"/>
+<img alt="Number of languages" src="https://img.shields.io/github/languages/count/COS301-SE-2024/TuneIn"/>
+<a href="https://github.com/COS301-SE-2024/TuneIn/stargazers" > 
+ <img alt="Last Commit" src="https://img.shields.io/github/stars/COS301-SE-2024/TuneIn"/>
+</a>
+</div>
 
 ## TuneIn - Apollo - Project Description
 
@@ -25,36 +38,14 @@ Key Features:
 TuneIn isn't just an app—it's a gateway to a world where music brings people closer together. Whether you're sharing a favourite track with friends or discovering new beats in a virtual room, TuneIn is here to amplify the joy of music and strengthen connections. Let's turn up the volume on togetherness with TuneIn!
 
 # 🧑‍💻Meet the team
-(team member images temporarily removed due to poor spacing)
-
 <table style="border-width: 1px; width: 100%; font-family: Arial, sans-serif; border-collapse: collapse;">
   <tr>
     <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-      <img src="" width="800" height="auto" style="display: block; margin: 0 auto;">
-    </td>
-    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
-      <h2><b style="font-size: 18px;">Lesedi Kekana</b></h2>
-      <b style="font-size: 16px;">Project Manager | DevOps Engineer (lead) | Integration Engineer (lead)<br>Designer (consultant) | Services Engineer<br></b><br>
-      Driven by a passion for computing and problem-solving, I am a final-year BSc Computer Science student with a robust portfolio of successful projects, both in my internship and in personal capacity, translating academic knowledge into real-world applications.<br><br> With this technical knowledge and a dedication to continuous learning, through leveraging my problem-solving skills and passion, I am poised to tackle complex challenges, drive innovation, and make impactful contributions to the field of software engineering.
-      <br><br>
-      <a href="https://github.com/lkekana" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
-        <img src="https://img.icons8.com/material-rounded/24/000000/github.png" width="30" height="30">
-      </a>
-      <a href="https://www.linkedin.com/in/lesedi-kekana-4b966728a/" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
-        <img src="https://img.icons8.com/fluency/24/000000/linkedin.png"  width="30" height="30">
-      </a>
-      <br><br>
-      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=lkekana&show_icons=true&hide_border=true"/>
-      <br>
-    </td>
-  </tr>
-  <tr>
-    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/linda.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
     </td>
     <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
       <h2><b style="font-size: 18px;">Linda Masia</b></h2> 
-​      <b style="font-size: 16px;">System Architect | UI Engineer (co-lead) | Services Engineer<br></b><br>
+​      <b style="font-size: 16px;">Project Manager | System Architect | UI Engineer (co-lead)<br></b><br>
       I am a detail-oriented final year Computer Science student with a passion for coding and a knack for problem-solving. With a strong background in full-stack web development, database management, and a touch of machine learning expertise, I bring a diverse skill set to the table.<br><br>By day, I'm immersed in the world of algorithms and data structures, and by night, I'm conjuring up innovative solutions to real-world problems.
 ​      <br><br>
 ​      <a href="https://github.com/Linda-Masia" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
@@ -69,8 +60,28 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 ​    </td>
   </tr>
   <tr>
+    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
+      <img src="assets/team/lesedi.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
+    </td>
+    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
+      <h2><b style="font-size: 18px;">Lesedi Kekana</b></h2>
+      <b style="font-size: 16px;">DevOps Engineer (lead) | Integration Engineer (lead) | Former Project Manager<br>Designer (consultant) | Services Engineer<br></b><br>
+      Driven by a passion for computing and problem-solving, I am a final-year BSc Computer Science student with a robust portfolio of successful projects, both in my internship and in personal capacity, translating academic knowledge into real-world applications.<br><br> With this technical knowledge and a dedication to continuous learning, through leveraging my problem-solving skills and passion, I am poised to tackle complex challenges, drive innovation, and make impactful contributions to the field of software engineering.
+      <br><br>
+      <a href="https://github.com/lkekana" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
+        <img src="https://img.icons8.com/material-rounded/24/000000/github.png" width="30" height="30">
+      </a>
+      <a href="https://www.linkedin.com/in/lesedi-kekana-4b966728a/" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
+        <img src="https://img.icons8.com/fluency/24/000000/linkedin.png"  width="30" height="30">
+      </a>
+      <br><br>
+      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=lkekana&show_icons=true&hide_border=true"/>
+      <br>
+    </td>
+  </tr>
+  <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/nerina.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Nerina Borchard</h2></b>
@@ -90,11 +101,11 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/thabiso.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Thabiso Matau</b></h2>
-​      <b style="font-size: 16px;">Business Analyst (co-lead) | Data Engineer (lead) | Services Engineer (lead)<br></b><br>
+​      <b style="font-size: 16px;">Business Analyst (co-lead) | Data Engineer (lead) | Services Engineer (lead) | Integration Engineer<br></b><br>
     Highly motivated and dedicated final-year Computer Science student with a focus on Data Science and Mathematical Statistics. I am seeking a position as a Software Engineer or Data Engineer, committed to leveraging my skills and passion for learning new technologies to contribute value to a dynamic workplace.<br><br>Organized and dependable, successful at managing multiple priorities with a positive attitude. I am willing to take on added responsibilities to meet team goals.
 ​      <br><br>
 ​      <a href="https://github.com/8xbbie" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
@@ -110,7 +121,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
   <tr>
 ​    <td style="vertical-align: top; width:auto; border: 0; padding: 10px;">
-​      <img src="" width="400" height="auto" style="display: block; margin: 0 auto;">
+      <img src="assets/team/jaden.jpg" width="600" height="auto" style="display: block; margin: 0 auto; border-radius: 50%; margin-top: 100px">
 ​    </td>
 ​    <td style="vertical-align: top; width: auto; border: 0; padding: 10px;">
 ​      <h2><b style="font-size: 18px;">Jaden Moodley</b></h2>
@@ -144,13 +155,18 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 ## :gear: Technologies
 
 ### Frontend
-![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)  ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
+![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)  ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ### Backend
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)   ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)  ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)  ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 
-### Other
-![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)  ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)  ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white) ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)  ![CodeCov](https://img.shields.io/badge/codecov-%23ff0077.svg?style=for-the-badge&logo=codecov&logoColor=white) ![openapi initiative](https://img.shields.io/badge/openapiinitiative-%23000000.svg?style=for-the-badge&logo=openapiinitiative&logoColor=white) ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white) 
+### Streaming Services
+![Spotify](https://img.shields.io/badge/Spotify-1ED760?style=for-the-badge&logo=spotify&logoColor=white) ![YouTube Music](https://img.shields.io/badge/YouTube_Music-FF0000?style=for-the-badge&logo=youtube-music&logoColor=white)
+
+### More
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)  ![Markdown](https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white)  ![CodeCov](https://img.shields.io/badge/codecov-%23ff0077.svg?style=for-the-badge&logo=codecov&logoColor=white) ![openapi initiative](https://img.shields.io/badge/openapiinitiative-%23000000.svg?style=for-the-badge&logo=openapiinitiative&logoColor=white) ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white) ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101) ![Webpack](https://img.shields.io/badge/webpack-%238DD6F9.svg?style=for-the-badge&logo=webpack&logoColor=black) ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
+
+
 
 ## 📊 Project Management
 

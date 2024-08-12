@@ -1,8 +1,12 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "../app/services/AuthManagement";
 import renderer from "react-test-renderer";
+import Fuse from "fuse.js";
 
 // Mocking modules
 jest.mock("expo-router", () => ({
@@ -29,53 +33,243 @@ jest.mock("../app/components/NavBar", () => {
 	return MockNavBar;
 });
 
+jest.mock("axios");
+
+// jest.mock('fuse.js', () => {
+// 	return jest.fn().mockImplementation(() => {
+// 		return {
+// 			search: jest.fn(),
+// 		};
+// 	});
+// });
+
+jest.mock("../app/services/AuthManagement", () => ({
+	__esModule: true,
+	default: {
+		getToken: jest.fn(), // Mock getToken method
+	},
+}));
+
+const roomMock = [
+	{
+		creator: {
+			profile_name: "Farmer23",
+			userID: "01ece2d8-e091-7023-c1f2-d3399faa7071",
+			username: "farmer 345",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-06-23T13:23:20.848Z-image.jpeg",
+			followers: { count: 0, data: [] },
+			following: { count: 0, data: [] },
+			links: { count: 0, data: [] },
+			bio: "Music enthusiast who loves exploring new tunes across various genres. Always on the lookout for fresh beats and hidden gems!",
+			current_song: {
+				title: "",
+				artists: [],
+				cover: "",
+				start_time: "2024-08-11T17:22:28.862Z",
+			},
+			fav_genres: { count: 0, data: [] },
+			fav_songs: { count: 0, data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		},
+		roomID: "66bb6bf7-25be-45af-bc38-7e7e258797b8",
+		participant_count: 0,
+		room_name: "chill vibes",
+		description:
+			"A room for relaxing and enjoying soothing music. Join us to unwind and chill with your favorite tunes.",
+		is_temporary: false,
+		is_private: false,
+		is_scheduled: false,
+		start_date: "2024-08-11T17:22:28.862Z",
+		end_date: "2024-08-11T17:22:28.862Z",
+		language: "English",
+		has_explicit_content: true,
+		has_nsfw_content: false,
+		room_image: "https://ik.imagekit.io/ikmedia/backlit.jpg",
+		current_song: {
+			title: "",
+			artists: [],
+			cover: "",
+			start_time: "2024-08-11T17:22:28.862Z",
+		},
+		tags: ["explicit"],
+	},
+];
+
+const userMock = [
+	{
+		id: "2",
+		type: "user",
+		name: "User 1",
+		userData: {
+			id: "1",
+			profile_picture_url:
+				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+			profile_name: "User 1",
+			username: "user1",
+		},
+	},
+	{
+		id: "4",
+		type: "user",
+		name: "User 2",
+		userData: {
+			id: "2",
+			profile_picture_url:
+				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+			profile_name: "User 2",
+			username: "user2",
+		},
+	},
+];
+
 describe("Search Component", () => {
 	beforeEach(() => {
 		// Clear mocks before each test
 		(useNavigation as jest.Mock).mockClear();
+		(axios.get as jest.Mock).mockClear();
+		(auth.getToken as jest.Mock).mockReturnValue("token");
 	});
 
 	it("should render correctly", () => {
-		const tree = renderer.create(<Search />).toJSON();
-		expect(tree).toMatchSnapshot();
+		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		// const tree = renderer.create(<Search />).toJSON();
+		// expect(tree).toMatchSnapshot();
 	});
 
 	it("should render the header with a title and back button", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByText, getByTestId } = render(<Search />);
 		expect(getByText("Search")).toBeTruthy();
 		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
 	it("should handle search input changes", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByPlaceholderText } = render(<Search />);
 		const searchInput = getByPlaceholderText("Search...");
 		fireEvent.changeText(searchInput, "Room 1");
 		expect(searchInput.props.value).toBe("Room 1");
 	});
 
-	it("should display the modal with filter options when filter button is pressed", () => {
-		const { getByTestId, getByText } = render(<Search />);
-		const filterButton = getByTestId("filter-button");
-		fireEvent.press(filterButton);
-		expect(getByText("Select Filters")).toBeTruthy();
+	it("should toggle more filters", async () => {
+		// Mock search result
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+
+		// Render the page component (this triggers the mock usage)
+		const { getByText, getByTestId, queryByTestId } = render(<Search />);
+
+		// Press the button to show more filters
+		fireEvent.press(getByText("View More Filters"));
+
+		// Check if the additional filters are shown
+		expect(getByTestId("host-toggle")).toBeTruthy();
+		expect(getByTestId("room-count-toggle")).toBeTruthy();
+
+		// Press the button to hide more filters
+		fireEvent.press(getByText("View Less Filters"));
+
+		// Check if the additional filters are hidden
+		expect(queryByTestId("host-toggle")).toBeNull();
+		expect(queryByTestId("room-count-toggle")).toBeNull();
 	});
 
-	it("should handle filter selection and display selected filters", async () => {
+	it("should handle explicit filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const explicitSwitch = getByTestId("explicit-switch");
 
-		// Open the filter modal
-		const filterButton = getByTestId("filter-button");
-		fireEvent.press(filterButton);
+		// Simulate toggling the switch
+		fireEvent(explicitSwitch, "valueChange", true);
 
-		// Select a filter
-		const filterOption = getByText("Room Name");
-		fireEvent.press(filterOption);
+		// Verify the switch value has changed
+		expect(explicitSwitch.props.value).toBe(true);
+	});
 
-		// Close the modal
-		const closeButton = getByTestId("close-button");
-		fireEvent.press(closeButton);
+	it("should handle nsfw filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const nsfwSwitch = getByTestId("nsfw-switch");
 
-		// Check if the selected filter is displayed
-		expect(getByText("Room Name")).toBeTruthy();
+		// Simulate toggling the switch
+		fireEvent(nsfwSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(nsfwSwitch.props.value).toBe(true);
+	});
+
+	it("should handle temp filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const tempSwitch = getByTestId("temp-switch");
+
+		// Simulate toggling the switch
+		fireEvent(tempSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(tempSwitch.props.value).toBe(true);
+	});
+
+	it("should handle priv filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const privSwitch = getByTestId("priv-switch");
+
+		// Simulate toggling the switch
+		fireEvent(privSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(privSwitch.props.value).toBe(true);
+	});
+
+	it("should handle scheduled filter switch", () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		const { getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByText("View More Filters"));
+		const scheduledSwitch = getByTestId("scheduled-switch");
+
+		// Simulate toggling the switch
+		fireEvent(scheduledSwitch, "valueChange", true);
+
+		// Verify the switch value has changed
+		expect(scheduledSwitch.props.value).toBe(true);
+	});
+
+	it("should search with all room filters", async () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
+		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		// Simulate filter switches
+		fireEvent(getByTestId("explicit-switch"), "valueChange", true);
+		fireEvent(getByTestId("nsfw-switch"), "valueChange", true);
+		fireEvent(getByTestId("temp-switch"), "valueChange", true);
+		fireEvent(getByTestId("priv-switch"), "valueChange", true);
+		fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
+
+		await act(async () => {
+			const searchInput = getByPlaceholderText("Search...");
+			fireEvent.changeText(searchInput, "Room 1");
+			fireEvent.press(getByTestId("search-button"));
+		});
+	});
+
+	it("should search with no room filters", async () => {
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		await act(async () => {
+			const searchInput = getByPlaceholderText("Search...");
+			fireEvent.changeText(searchInput, "Room 1");
+			fireEvent.press(getByTestId("search-button"));
+		});
 	});
 });

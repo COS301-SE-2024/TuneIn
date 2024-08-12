@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
 	loginLinkText: {
 		fontSize: 16,
 		textAlign: "center",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	loginLinkBold: {
 		fontWeight: "bold",

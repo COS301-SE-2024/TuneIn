@@ -93,6 +93,7 @@ exports[`Search Component should render correctly 1`] = `
           "height": 40,
         }
       }
+      testID="search-input"
       value=""
     />
     <View
@@ -196,56 +197,7 @@ exports[`Search Component should render correctly 1`] = `
           {
             "color": "#333",
             "fontWeight": "bold",
-          }
-        }
-      >
-        All
-      </Text>
-    </View>
-    <View
-      accessibilityState={
-        {
-          "busy": undefined,
-          "checked": undefined,
-          "disabled": undefined,
-          "expanded": undefined,
-          "selected": undefined,
-        }
-      }
-      accessibilityValue={
-        {
-          "max": undefined,
-          "min": undefined,
-          "now": undefined,
-          "text": undefined,
-        }
-      }
-      accessible={true}
-      collapsable={false}
-      focusable={true}
-      onClick={[Function]}
-      onResponderGrant={[Function]}
-      onResponderMove={[Function]}
-      onResponderRelease={[Function]}
-      onResponderTerminate={[Function]}
-      onResponderTerminationRequest={[Function]}
-      onStartShouldSetResponder={[Function]}
-      style={
-        {
-          "borderColor": "#ccc",
-          "borderRadius": 7,
-          "borderWidth": 1,
-          "opacity": 1,
-          "paddingHorizontal": 20,
-          "paddingVertical": 10,
-        }
-      }
-    >
-      <Text
-        style={
-          {
-            "color": "#333",
-            "fontWeight": "bold",
+            "textAlign": "center",
           }
         }
       >
@@ -290,12 +242,14 @@ exports[`Search Component should render correctly 1`] = `
           "paddingVertical": 10,
         }
       }
+      testID="user-btn"
     >
       <Text
         style={
           {
             "color": "#333",
             "fontWeight": "bold",
+            "textAlign": "center",
           }
         }
       >
@@ -340,24 +294,25 @@ exports[`Search Component should render correctly 1`] = `
           "paddingVertical": 10,
         }
       }
-      testID="filter-button"
+      testID="toggle-filters-button"
     >
-      <Text />
+      <Text
+        style={
+          {
+            "color": "#333",
+            "fontWeight": "bold",
+            "textAlign": "center",
+          }
+        }
+      >
+        View More Filters
+      </Text>
     </View>
   </View>
-  <View
-    style={
-      {
-        "flexDirection": "row",
-        "flexWrap": "wrap",
-        "marginBottom": 20,
-      }
-    }
-  />
   <RCTScrollView
     contentContainerStyle={
       {
-        "paddingBottom": 20,
+        "paddingVertical": 10,
       }
     }
     data={[]}
@@ -375,7 +330,6 @@ exports[`Search Component should render correctly 1`] = `
     renderItem={[Function]}
     scrollEventThrottle={0.0001}
     stickyHeaderIndices={[]}
-    testID="scroll-view"
     viewabilityConfigCallbackPairs={[]}
   >
     <View />
@@ -396,8 +350,6 @@ exports[`Search Component should render correctly 1`] = `
         "zIndex": 10,
       }
     }
-  >
-    <div />
-  </View>
+  />
 </View>
 `;

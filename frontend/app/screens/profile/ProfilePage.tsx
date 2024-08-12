@@ -7,8 +7,10 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	ActivityIndicator,
+	Modal,
+	TouchableWithoutFeedback,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
 import RoomCard from "../../components/rooms/RoomCard";
@@ -18,14 +20,46 @@ import MusicBottomSheet from "../../components/MusicBottomSheet";
 import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 const ProfileScreen: React.FC = () => {
 	const router = useRouter();
+	let params = useLocalSearchParams();
+	let ownsProfile = true;
+	let friend = "";
+
+	const navigateToAnayltics = () => {
+		router.navigate("/screens/analytics/AnalyticsPage");
+	};
+
+	const navigateToLogout = () => {
+		router.navigate("/screens/WelcomScreen");
+	};
+
+	const navigateToHelp = () => {
+		router.navigate("/screens/help/HelpScreen");
+	};
+
+	// console.log("Params: " + JSON.stringify(params));
+
+	if (JSON.stringify(params) !== "{}") {
+		friend = JSON.parse(params.friend as string);
+		ownsProfile = false;
+	}
+
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [following, setFollowing] = useState<boolean>(false);
 
 	const [profileData, setProfileData] = useState<any>(null);
+
+	const [drawerVisible, setDrawerVisible] = useState(false);
+
+	const toggleDrawer = () => {
+		setDrawerVisible(!drawerVisible);
+	};
 
 	useEffect(() => {
 		const getTokenAndData = async () => {
@@ -34,6 +68,16 @@ const ProfileScreen: React.FC = () => {
 
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
+					// console.log(data);
+					if (!ownsProfile) {
+						const isFollowing = data.followers.data.some(
+							(item: any) => item.username === params.user,
+						);
+						// console.log(isFollowing);
+						setFollowing(isFollowing);
+						// console.log(isFollowing);
+					}
+
 					setProfileData(data);
 					setLoading(false);
 				}
@@ -47,15 +91,70 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
-			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
+			if (ownsProfile) {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				return response.data;
+			}
+
+			const response = await axios.get(
+				`${utils.API_BASE_URL}/users/${friend.username}`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			});
+			);
+
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching profile info:", error);
 			return null;
+		}
+	};
+
+	const followHandler = async () => {
+		const storedToken = await auth.getToken();
+
+		if (storedToken) {
+			if (following) {
+				const response = await axios.post(
+					`${utils.API_BASE_URL}/users/${profileData.userID}/unfollow`,
+					{},
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (response) {
+					setFollowing(false);
+					profileData.followers.count--;
+				} else {
+					console.error("Issue unfollowing user");
+				}
+			} else {
+				const response = await axios.post(
+					`${utils.API_BASE_URL}/users/${profileData.userID}/follow`,
+					{},
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (response) {
+					setFollowing(true);
+					profileData.followers.count++;
+				} else {
+					console.error("Issue unfollowing user");
+				}
+			}
 		}
 	};
 
@@ -114,6 +213,42 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
+	const renderFollowOrEdit = () => {
+		if (ownsProfile) {
+			return (
+				<View
+					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
+				>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={() =>
+							router.push({
+								pathname: "screens/profile/EditProfilePage",
+								params: { profile: JSON.stringify(profileInfo) },
+							})
+						}
+					>
+						<Text style={styles.buttonText}>Edit</Text>
+					</TouchableOpacity>
+				</View>
+			);
+		}
+
+		return (
+			<View style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={() => followHandler()}
+					testID="follow-button"
+				>
+					<Text style={styles.buttonText}>
+						{following ? "Unfollow" : "Follow"}
+					</Text>
+				</TouchableOpacity>
+			</View>
+		);
+	};
+
 	const renderFavRooms = () => {
 		if (profileData.fav_rooms.count > 0) {
 			return (
@@ -141,7 +276,7 @@ const ProfileScreen: React.FC = () => {
 
 	const renderRecentRooms = () => {
 		if (profileData.recent_rooms.count > 0) {
-			console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
+			// console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
 				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
 					<Text style={styles.title}>Recently Visited</Text>
@@ -168,7 +303,7 @@ const ProfileScreen: React.FC = () => {
 				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
 				testID="loading-indicator"
 			>
-				<ActivityIndicator size={100} color="#0000ff" />
+				<ActivityIndicator size={100} color={colors.primary} />
 			</View>
 		);
 	}
@@ -182,7 +317,6 @@ const ProfileScreen: React.FC = () => {
 		fav_genres: profileData.fav_genres,
 		fav_songs: profileData.fav_songs,
 	};
-
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
 			<View style={{ padding: 15 }} testID="profile-screen">
@@ -194,6 +328,48 @@ const ProfileScreen: React.FC = () => {
             </Text>
           </TouchableOpacity> */}
 				</View>
+				{ownsProfile && (
+					<View style={styles.container}>
+						{/* Settings Icon */}
+						<TouchableOpacity onPress={toggleDrawer}>
+							<Ionicons name="settings-outline" size={24} color="black" />
+						</TouchableOpacity>
+
+						{/* Drawer Modal */}
+						<Modal
+							transparent={true}
+							visible={drawerVisible}
+							animationType="slide"
+							onRequestClose={() => setDrawerVisible(false)}
+						>
+							{/* Overlay */}
+							<TouchableWithoutFeedback onPress={() => setDrawerVisible(false)}>
+								<View style={styles.overlay} />
+							</TouchableWithoutFeedback>
+
+							{/* Drawer Content */}
+							<View style={styles.drawer}>
+								{/* Close Drawer Button */}
+								<View style={styles.closeButtonContainer}>
+									<TouchableOpacity onPress={toggleDrawer}>
+										<Ionicons name="close" size={24} color="black" />
+									</TouchableOpacity>
+								</View>
+
+								{/* Drawer Items */}
+								<Text style={styles.drawerItem} onPress={navigateToAnayltics}>
+									Analytics
+								</Text>
+								<Text style={styles.drawerItem} onPress={navigateToHelp}>
+									Help Menu
+								</Text>
+								<Text style={styles.drawerItem} onPress={navigateToLogout}>
+									Logout
+								</Text>
+							</View>
+						</Modal>
+					</View>
+				)}
 				<Text
 					style={{
 						fontWeight: "600",
@@ -254,21 +430,7 @@ const ProfileScreen: React.FC = () => {
 					}}
 					links={profileData.links.data}
 				/>
-				<View
-					style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}
-				>
-					<TouchableOpacity
-						style={styles.button}
-						onPress={() =>
-							router.push({
-								pathname: "screens/profile/EditProfilePage",
-								params: { profile: JSON.stringify(profileInfo) },
-							})
-						}
-					>
-						<Text style={styles.buttonText}>Edit</Text>
-					</TouchableOpacity>
-				</View>
+				{renderFollowOrEdit()}
 				{/* <View style={{ paddingHorizontal: 20 }}>
           <NowPlaying
             title={favoriteSongsData[0].songTitle}
@@ -276,12 +438,16 @@ const ProfileScreen: React.FC = () => {
             duration={favoriteSongsData[0].duration}
           />
         </View> */}
-				<View style={{ paddingHorizontal: 20 }} testID="bio">
-					<BioSection content={profileData.bio} />
-				</View>
-				<View style={{ paddingHorizontal: 20 }} testID="genres">
-					<GenreList items={profileData.fav_genres.data} />
-				</View>
+				{profileData.bio !== "" && (
+					<View style={{ paddingHorizontal: 20 }} testID="bio">
+						<BioSection content={profileData.bio} />
+					</View>
+				)}
+				{profileData.fav_genres.count > 0 && (
+					<View style={{ paddingHorizontal: 20 }} testID="genres">
+						<GenreList items={profileData.fav_genres.data} />
+					</View>
+				)}
 				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{profileData.fav_songs.data.slice(0, 2).map((song) => (
@@ -336,6 +502,47 @@ const styles = StyleSheet.create({
 	buttonText: {
 		color: "black",
 		fontWeight: "600",
+	},
+
+	container: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "flex-end", // Aligns the icon to the right
+		paddingHorizontal: 20,
+	},
+
+	// Modal overlay to capture clicks outside the drawer
+	overlay: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+
+	// Drawer style
+	drawer: {
+		width: "60%", // Adjust this to control the drawer width
+		height: "100%",
+		backgroundColor: "white",
+		position: "absolute",
+		right: 0, // Makes the drawer appear from the left side
+		padding: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 5, height: 0 },
+		shadowOpacity: 0.3,
+		shadowRadius: 5,
+		elevation: 5,
+	},
+
+	// Close button container aligned to the right
+	closeButtonContainer: {
+		alignItems: "flex-end",
+	},
+
+	// Drawer items style
+	drawerItem: {
+		fontSize: 18,
+		paddingVertical: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: "#ddd",
 	},
 });
 

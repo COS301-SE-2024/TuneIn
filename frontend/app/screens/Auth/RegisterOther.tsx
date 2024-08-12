@@ -6,7 +6,13 @@ import {
 	ResponseType,
 } from "expo-auth-session";
 //import { generateRandom } from "expo-auth-session/build/PKCE";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Platform,
+} from "react-native";
 import { useRouter } from "expo-router";
 import {
 	Poppins_400Regular,
@@ -27,8 +33,9 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
+import { live } from "../../services/Live";
+import { colors } from "../../styles/colors";
 
-WebBrowser.maybeCompleteAuthSession();
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
 	throw new Error(
@@ -78,6 +85,9 @@ const makeStateVariable = (redirectURI: string) => {
 
 const RegisterOtherScreen: React.FC = () => {
 	const router = useRouter();
+	if (Platform.OS === "web") {
+		console.log(WebBrowser.maybeCompleteAuthSession());
+	}
 	const redirectURI = makeRedirectUri({
 		scheme: "tunein-app",
 		path: "screens/Auth/SpotifyRedirect",
@@ -110,32 +120,39 @@ const RegisterOtherScreen: React.FC = () => {
 
 	console.log("Request:", request);
 	console.log("Response:", response);
-	console.log("PromptAsync:", promptAsync);
+	console.log("PromptAsync (below)");
+	console.log(promptAsync);
 
 	React.useEffect(() => {
 		console.log("Response:", response);
-		if (response?.type === "success") {
-			if (response.params.error) {
-				console.error("Error:", response.params.error);
-				return;
-			}
-			const { code, state } = response.params;
-			console.log("Code:", code);
+		if (response && response !== null) {
+			if (response?.type === "success") {
+				if (response.params.error) {
+					console.error("Error:", response.params.error);
+					return;
+				}
+				const { code, state } = response.params;
+				console.log("Code:", code);
 
-			//make post request to backend server get access token
-			const doExchange = async () => {
-				const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
-					code,
-					state,
-					redirectURI,
+				//make post request to backend server get access token
+				const doExchange = async () => {
+					const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
+						code,
+						state,
+						redirectURI,
+					);
+					await auth.setToken(tokens.token);
+					live.initialiseSocket();
+					router.navigate("screens/Home");
+				};
+				doExchange();
+			} else {
+				throw new Error(
+					"Received unsuccessful response from Spotify. Please try again.",
 				);
-				await auth.setToken(tokens.token);
-				auth.postAuthInit();
-				router.navigate("screens/Home");
-			};
-			doExchange();
+			}
 		}
-	}, [response]);
+	}, [response, redirectURI, router]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -172,23 +189,23 @@ const RegisterOtherScreen: React.FC = () => {
 				</TouchableOpacity>
 				<View style={styles.dividerContainer}>
 					<View style={styles.divider} />
-					<Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
+					<Text style={styles.dividerText}>Or Register with own details</Text>
 					<View style={styles.divider} />
 				</View>
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={() => router.navigate("screens/RegisterScreen")}
+					onPress={() => router.navigate("screens/Auth/RegisterScreen")}
 				>
 					<Text style={styles.buttonText}>Account</Text>
 				</TouchableOpacity>
 			</View>
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={() => router.navigate("screens/LoginStreaming")}
+				onPress={() => router.navigate("screens/Auth/LoginScreen")}
 			>
 				<Text style={styles.registerText}>
-					Don’t have an account?{" "}
-					<Text style={styles.registerBoldText}>Register Now</Text>
+					Already have an account?{" "}
+					<Text style={styles.registerBoldText}>Login Now!</Text>
 				</Text>
 			</TouchableOpacity>
 		</View>
@@ -286,6 +303,7 @@ const styles = StyleSheet.create({
 	registerBoldText: {
 		fontWeight: "bold",
 		fontFamily: "Poppins_700Bold",
+		color: colors.primary,
 	},
 });
 

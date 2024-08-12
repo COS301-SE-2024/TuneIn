@@ -45,6 +45,15 @@ model bookmark {
   room        room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
 }
 
+model chat_reactions {
+  reaction_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String @db.Uuid
+  room_id     String @db.Uuid
+  reaction    String
+  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+}
+
 model follows {
   follower                      String?  @db.Uuid
   followee                      String?  @db.Uuid
@@ -141,24 +150,25 @@ model queue {
 }
 
 model room {
-  room_id        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name           String
-  room_creator   String          @db.Uuid
+  room_creator   String           @db.Uuid
   playlist_photo String?
-  description    String?         @default("This room has no description")
-  date_created   DateTime        @default(now()) @db.Timestamptz(6)
-  nsfw           Boolean         @default(false)
-  is_temporary   Boolean?        @default(false)
-  room_language  String?         @default("English")
-  explicit       Boolean?        @default(false)
+  description    String?          @default("This room has no description")
+  date_created   DateTime         @default(now()) @db.Timestamptz(6)
+  nsfw           Boolean          @default(false)
+  is_temporary   Boolean?         @default(false)
+  room_language  String?          @default("English")
+  explicit       Boolean?         @default(false)
   tags           String[]
   banned         banned[]
   bookmark       bookmark[]
+  chat_reactions chat_reactions[]
   participate    participate[]
   private_room   private_room?
   public_room    public_room?
   queue          queue[]
-  users          users           @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  users          users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
   room_message   room_message[]
   scheduled_room scheduled_room?
   table_state    table_state?
@@ -170,6 +180,13 @@ model room_message {
   room_id    String  @db.Uuid
   room       room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
   message    message @relation(fields: [message_id], references: [message_id], onDelete: Cascade)
+}
+
+model room_previews {
+  room_id        String   @db.Uuid
+  user_id        String   @db.Uuid
+  date_previewed DateTime @default(now()) @db.Timestamptz(6)
+  preview_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
 }
 
 model scheduled_room {
@@ -243,6 +260,7 @@ model users {
   blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
+  chat_reactions                  chat_reactions[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
   friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
@@ -254,11 +272,15 @@ model users {
   room                            room[]
   search_history                  search_history[]
   user_activity                   user_activity[]
+  vote                            vote[]
 }
 
 model vote {
-  vote_id   String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  is_upvote Boolean @default(true)
-  queue_id  String  @db.Uuid
-  queue     queue   @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+  vote_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  is_upvote Boolean  @default(true)
+  queue_id  String   @db.Uuid
+  user_id   String   @db.Uuid
+  vote_time DateTime @default(now()) @db.Timestamptz(6)
+  queue     queue    @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
+  users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
 }

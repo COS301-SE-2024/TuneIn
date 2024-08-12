@@ -1,117 +1,82 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import SongList from "../app/components/SongList";
-// import { StyleSheet } from "react-native"; // Import StyleSheet to access styles
-import { Track } from "../app/models/Track";
+import { Track } from "../app/models/Track"; // Adjust the import path as needed
+const mockTrack: Track = {
+	id: "1",
+	name: "Test Song",
+	artists: [{ name: "Test Artist" }],
+	album: {
+		images: [{ url: "https://example.com/test.jpg" }],
+	},
+	explicit: false,
+	preview_url: "https://example.com/preview.mp3",
+	uri: "spotify:track:1",
+	duration_ms: 200000,
+};
 
-jest.mock("expo-font", () => ({
-	...jest.requireActual("expo-font"),
-	loadAsync: jest.fn(),
-}));
+describe("SongList Component", () => {
+	it("should render correctly", () => {
+		const mockSetVoteCount = jest.fn();
+		const mockSwapSongs = jest.fn();
 
-jest.mock("expo-asset", () => ({
-	...jest.requireActual("expo-asset"),
-	fromModule: jest.fn(() => ({
-		downloadAsync: jest.fn(),
-		uri: "mock-uri",
-	})),
-}));
-
-jest.mock("@expo/vector-icons", () => ({
-	Ionicons: "MockedIonicons",
-}));
-
-jest.mock("../app/components/Voting", () => {
-	return {
-		__esModule: true,
-		default: ({ voteCount }: { voteCount: number }) => {
-			return <div>Votes: {voteCount}</div>;
-		},
-	};
-});
-
-describe("SongList", () => {
-	const mockSwapSongs = jest.fn();
-
-	const track: Track = {
-		id: "1",
-		name: "Test Song",
-		artists: [{ name: "Test Artist" }],
-		album: { images: [{ url: "https://example.com/test.jpg" }] },
-		explicit: false,
-		preview_url: "https://example.com/preview.mp3",
-		uri: "spotify:track:1",
-		duration_ms: 180000,
-		albumArtUrl: "https://example.com/test.jpg",
-	};
-
-	it("renders correctly", () => {
-		const { getByText, getByTestId } = render(
+		const { getByTestId, getByText } = render(
 			<SongList
-				track={track}
-				voteCount={5}
-				showVoting={true}
+				track={mockTrack}
+				voteCount={10}
 				songNumber={1}
 				index={0}
 				isCurrent={false}
 				swapSongs={mockSwapSongs}
+				setVoteCount={mockSetVoteCount}
 			/>,
 		);
 
-		expect(getByText("1")).toBeTruthy();
-		expect(getByTestId("album-cover-image").props.source.uri).toBe(
-			"https://example.com/test.jpg",
+		// Check if the album cover image is rendered with the correct URL
+		const albumCoverImage = getByTestId("album-cover-image");
+		expect(albumCoverImage.props.source.uri).toBe(
+			mockTrack.album.images[0].url,
 		);
-		expect(getByText("Test Song")).toBeTruthy();
-		expect(getByText("Test Artist")).toBeTruthy();
+
+		// Check if the song number is rendered
+		const songNumber = getByText("1");
+		expect(songNumber).toBeTruthy();
+
+		// Check if the song name is rendered
+		const songName = getByText("Test Song");
+		expect(songName).toBeTruthy();
+
+		// Check if the artist name is rendered
+		const artistName = getByText("Test Artist");
+		expect(artistName).toBeTruthy();
 	});
 
-	it("renders current song correctly", () => {
-		const { getByText } = render(
+	it("should apply current song styles correctly", () => {
+		const mockSetVoteCount = jest.fn();
+		const mockSwapSongs = jest.fn();
+
+		const { getByTestId, getByText } = render(
 			<SongList
-				track={track}
-				voteCount={5}
-				showVoting={true}
+				track={mockTrack}
+				voteCount={10}
 				songNumber={1}
 				index={0}
 				isCurrent={true}
 				swapSongs={mockSwapSongs}
-			/>,
-		);
-		expect(getByText("Test Song").props.style[1].color).toBe("blue");
-	});
-
-	// it("calls swapSongs function on up vote", () => {
-	// 	const { getByText } = render(
-	// 		<SongList
-	// 			track={track}
-	// 			voteCount={5}
-	// 			showVoting={true}
-	// 			songNumber={1}
-	// 			index={0}
-	// 			isCurrent={false}
-	// 			swapSongs={mockSwapSongs}
-	// 		/>,
-	// 	);
-
-	// 	fireEvent.press(getByText("Votes: 5"));
-	// 	expect(mockSwapSongs).toHaveBeenCalledWith(0, "up");
-	// });
-
-	it("handles more button press", () => {
-		const { getByTestId } = render(
-			<SongList
-				track={track}
-				voteCount={5}
-				showVoting={true}
-				songNumber={1}
-				index={0}
-				isCurrent={false}
-				swapSongs={mockSwapSongs}
+				setVoteCount={mockSetVoteCount}
 			/>,
 		);
 
-		fireEvent.press(getByTestId("more-button"));
-		// Add your expectation for the more button press here
+		// Check if the song container has the current song style
+		const songContainer = getByTestId("song-container");
+		expect(songContainer.props.style).toContainEqual(
+			expect.objectContaining({ backgroundColor: "#f0f0f0" }),
+		);
+
+		// Check if the song name has the current song text style
+		const songName = getByText("Test Song");
+		expect(songName.props.style).toContainEqual(
+			expect.objectContaining({ color: "blue" }),
+		);
 	});
 });

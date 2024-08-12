@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -7,12 +7,15 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import ChatItem from "../../components/ChatItem";
 import { Chat } from "../../models/chat";
+import { colors } from "../../styles/colors";
+import CreateChatScreen from "./CreateChatScreen";
+import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
 
-const chats: Chat[] = [
+const initialChats: Chat[] = [
 	{
 		id: "1",
 		name: "John Doe",
@@ -32,52 +35,83 @@ const chats: Chat[] = [
 
 const ChatListScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [filteredChats, setFilteredChats] = useState<Chat[]>(initialChats);
+	const [isModalVisible, setModalVisible] = useState(false);
 	const router = useRouter();
 
-	const handleSearch = () => {
-		console.log("Searching for:", searchQuery);
+	useEffect(() => {
+		if (searchQuery === "") {
+			setFilteredChats(initialChats);
+		} else {
+			const filtered = initialChats.filter((chat) =>
+				chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+			);
+			setFilteredChats(filtered);
+		}
+	}, [searchQuery]);
+
+	const toggleModal = () => {
+		setModalVisible(!isModalVisible);
 	};
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				backgroundColor: "white",
-				paddingHorizontal: 20,
-				paddingTop: 20,
-			}}
-		>
-			<View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
+		<View style={styles.screenContainer}>
+			<View style={styles.headerContainer}>
 				<TouchableOpacity testID="back-button" onPress={() => router.back()}>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.chatHeader}>Chats </Text>
+				<Text style={styles.chatHeader}>Chats</Text>
 			</View>
 			<View style={styles.searchContainer}>
 				<TextInput
-					testID="search-input"
 					style={styles.searchInput}
 					placeholder="Search for a user..."
 					value={searchQuery}
 					onChangeText={setSearchQuery}
 				/>
-				<TouchableOpacity
-					style={styles.searchIconContainer}
-					onPress={handleSearch}
-				>
+				<TouchableOpacity style={styles.searchIconContainer} onPress={() => {}}>
 					<Ionicons name="search" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
 			<FlatList
-				data={chats}
+				data={filteredChats}
 				keyExtractor={(item) => item.id}
 				renderItem={({ item }) => <ChatItem chat={item} />}
 			/>
+			<TouchableOpacity style={styles.newChatButton} onPress={toggleModal}>
+				<Entypo name="message" size={24} color="white" />
+			</TouchableOpacity>
+			<Modal
+				isVisible={isModalVisible}
+				onBackdropPress={toggleModal}
+				onSwipeComplete={toggleModal}
+				swipeDirection="down"
+				style={styles.modal}
+			>
+				<CreateChatScreen closeModal={toggleModal} />
+			</Modal>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	screenContainer: {
+		flex: 1,
+		backgroundColor: "white",
+		paddingHorizontal: 20,
+		paddingTop: 20,
+	},
+	headerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		padding: 10,
+	},
+	chatHeader: {
+		flex: 1,
+		fontSize: 24,
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	searchContainer: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -88,12 +122,6 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 		marginTop: 10,
 	},
-	chatHeader: {
-		flex: 1,
-		fontSize: 24,
-		fontWeight: "bold",
-		textAlign: "center",
-	},
 	searchInput: {
 		flex: 1,
 		height: 40,
@@ -101,6 +129,22 @@ const styles = StyleSheet.create({
 	},
 	searchIconContainer: {
 		padding: 10,
+	},
+	newChatButton: {
+		position: "absolute",
+		right: 20,
+		bottom: 20,
+		width: 60,
+		height: 60,
+		borderRadius: 30,
+		backgroundColor: colors.primary,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	modal: {
+		justifyContent: "flex-end",
+		margin: 0,
+		height: "90%",
 	},
 });
 
