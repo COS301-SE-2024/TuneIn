@@ -294,6 +294,13 @@ const Search: React.FC = () => {
 						}));
 
 						setResults(results);
+						setSelectedGenre(null);
+						setSelectedLanguage(null);
+						setExplicit(false);
+						setNsfw(false);
+						setTemporary(false);
+						setIsPrivate(false);
+						setScheduled(false);
 						setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
