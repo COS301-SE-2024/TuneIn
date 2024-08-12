@@ -795,12 +795,27 @@ class LiveSocketService {
 		if (!this.currentRoom) {
 			return;
 		}
+		if (!this.currentUser) {
+			return;
+		}
 		this.setQueue = setQueue;
-		this.socket.emit("requestQueue", this.currentRoom.roomID);
+		const input: QueueEventDto = {
+			song: {
+				spotifyID: "123",
+				userID: this.currentUser.userID,
+			},
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("requestQueue", JSON.stringify(input));
 	}
 
 	public getLastRoomQueue(): RoomSongDto[] {
 		return this.currentRoomQueue;
+	}
+
+	public getCurrentRoom(): RoomDto | null {
+		return this.currentRoom;
 	}
 
 	public enqueueSong(song: RoomSongDto): void {
@@ -818,6 +833,8 @@ class LiveSocketService {
 		};
 		this.socket.emit("enqueueSong", JSON.stringify(input));
 		console.log("emitted: enqueueSong");
+		this.socket.emit("requestQueue", JSON.stringify(input));
+		console.log("emitted: requestQueue");
 	}
 
 	public dequeueSong(song: RoomSongDto): void {
@@ -836,6 +853,8 @@ class LiveSocketService {
 		};
 		this.socket.emit("dequeueSong", JSON.stringify(input));
 		console.log("emitted: dequeueSong");
+		this.socket.emit("requestQueue", JSON.stringify(input));
+		console.log("emitted: requestQueue");
 	}
 
 	public upvoteSong(song: RoomSongDto): void {
