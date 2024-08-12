@@ -476,8 +476,9 @@ describe("advancedRoomsSearchQueryBuilder function", () => {
 		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
 		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name
-			HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`),
+			normalizeWhitespace(
+				`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND room_language = 'Language' AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`,
+			),
 		);
 	});
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -19,9 +19,15 @@ import UserItem from "../components/UserItem";
 import { colors } from "../styles/colors";
 import { Room } from "../models/Room";
 import { User } from "../models/user";
+import axios from "axios";
+import auth from "../services/AuthManagement";
+import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
-// import DatePickerModal from "../components/DatePickerModal";
+// import DatePicker from "../components/DatePicker";
+// import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
+import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
+import SkeletonUserItem from "../components/SkeletonUserItem";
 
 type SearchResult = {
 	id: string;
@@ -31,8 +37,23 @@ type SearchResult = {
 	userData?: User;
 };
 
+const roomFilterCategories = [
+	{ id: "roomName", label: "Room Name" },
+	{ id: "username", label: "Host" },
+	{ id: "participationCount", label: "Participation Count" },
+	{ id: "description", label: "Description" },
+	{ id: "isTemporary", label: "Temporary" },
+	{ id: "isPrivate", label: "Private" },
+	{ id: "isScheduled", label: "Scheduled" },
+	{ id: "startDate", label: "Start Date" },
+	//   { id: 'endDate', label: 'End Date' },
+	{ id: "language", label: "Language" },
+	{ id: "explicit", label: "Explicit" },
+	{ id: "nsfw", label: "NSFW" },
+	{ id: "tags", label: "Tags" },
+];
 // Sample genre data with additional genres
-const genres = [
+let genres: string[] = [
 	"Rock",
 	"Pop",
 	"Jazz",
@@ -90,11 +111,17 @@ const Search: React.FC = () => {
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
+	const [loading, setLoading] = useState(true);
 	// const [startDate, setStartDate] = useState(null);
 	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
+	const [host, setHost] = useState<string>("");
+	const [roomCount, setRoomCount] = useState("");
+	const [maxFollowers, setMaxFollowers] = useState("");
+	const [minFollowers, setMinFollowers] = useState("");
+	const prevFilterRef = useRef(filter);
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
@@ -153,20 +180,222 @@ const Search: React.FC = () => {
 		},
 	];
 
-	const handleSearch = () => {
-		const filteredResults = mockResults.filter((result) => {
-			if (filter === "all") {
-				return (
-					result.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-					selectedFilters.length === 0
-				);
+	const handleSearch = async () => {
+		console.log("Search Filter: " + filter);
+		setLoading(true);
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				if (filter === "all") {
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/search?q=${searchTerm}`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						},
+					);
+					// console.log("Search: " + JSON.stringify(response));
+					const results: SearchResult[] = response.data.rooms.map(
+						(item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+								language: item.language,
+								roomSize: item.participant_count,
+								isExplicit: item.has_explicit_content,
+								isNsfw: item.has_nsfw_content,
+							},
+						}),
+					);
+
+					const users: SearchResult[] = response.data.users.map(
+						(item: any) => ({
+							id: item.id,
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}),
+					);
+
+					const combinedResult = results.concat(users);
+
+					// console.log("Formatted results: " + JSON.stringify(results));
+					setResults(combinedResult);
+				} else if (filter === "room") {
+					if (showMoreFilters) {
+						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
+						if (nsfw) {
+							request += `&nsfw=${nsfw}`;
+						}
+						if (explicit) {
+							request += `&explicit=${explicit}`;
+						}
+						if (scheduled) {
+							request += `&is_scheduled=${scheduled}`;
+						}
+						if (isPrivate) {
+							request += `&is_priv=${isPrivate}`;
+						}
+						if (temporary) {
+							request += `&is_temporary=${temporary}`;
+						}
+						if (selectedGenre) {
+							request += `&tags=${selectedGenre}`;
+						}
+						if (selectedLanguage) {
+							request += `&lang=${selectedLanguage}`;
+						}
+						if (host !== "") {
+							request += `&creator_username=${host}`;
+						}
+						if (roomCount !== "") {
+							request += `&participant_count=${roomCount}`;
+						}
+
+						const response = await axios.get(request, {
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						});
+
+						// console.log("Request: " + request);
+						// console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+								language: item.language,
+								roomSize: item.participant_count,
+								isExplicit: item.has_explicit_content,
+								isNsfw: item.has_nsfw_content,
+							},
+						}));
+
+						setResults(results);
+						setSelectedGenre(null);
+						setSelectedLanguage(null);
+						setExplicit(false);
+						setNsfw(false);
+						setTemporary(false);
+						setIsPrivate(false);
+						setScheduled(false);
+						setShowMoreFilters(false);
+					} else {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						// console.log("Search: " + JSON.stringify(response));
+						const formatResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: "room",
+								name: item.room_name,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+									language: item.language,
+									roomSize: item.participant_count,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+								},
+							}),
+						);
+
+						setResults(formatResults);
+						// console.log("Results: " + JSON.stringify(results));
+					}
+				} else if (filter === "user") {
+					if (showMoreFilters) {
+						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
+
+						if (minFollowers !== "") {
+							request += `&following=${minFollowers}`;
+						}
+						if (maxFollowers !== "") {
+							request += `&followers=${maxFollowers}`;
+						}
+
+						// console.log("Request: " + request);
+
+						const response = await axios.get(request, {
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						});
+						// console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.id,
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}));
+						setResults(results);
+						setShowMoreFilters(false);
+					} else {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						// console.log("Search: " + JSON.stringify(response));
+						const results: SearchResult[] = response.data.map((item: any) => ({
+							id: item.id,
+							type: "user",
+							name: item.username,
+							userData: {
+								id: item.id,
+								profile_picture_url: item.profile_picture_url,
+								profile_name: item.profile_name,
+								username: item.username,
+							},
+						}));
+						setResults(results);
+					}
+				}
 			}
-			return (
-				result.type === filter &&
-				result.name.toLowerCase().includes(searchTerm.toLowerCase())
-			);
-		});
-		setResults(filteredResults);
+		} catch (error) {
+			console.error("Error fetching search info:", error);
+			return null;
+		}
+		setLoading(false);
 	};
 
 	const handleScroll = useCallback(
@@ -199,12 +428,14 @@ const Search: React.FC = () => {
 
 	const renderResult = ({ item }: { item: SearchResult }) => {
 		if (item.type === "room" && item.roomData) {
+			// console.log("Render Called");
 			return (
 				<View style={styles.roomCardPadding}>
 					<RoomCardWidget roomCard={item.roomData} />
 				</View>
 			);
 		}
+
 		if (item.type === "user" && item.userData) {
 			return <UserItem user={item.userData} />;
 		}
@@ -215,9 +446,45 @@ const Search: React.FC = () => {
 		setShowMoreFilters(!showMoreFilters);
 	};
 
-	const handleSelection = (selectedFilter) => {
+	const handleSelection = (selectedFilter: string) => {
 		setFilter(selectedFilter);
 	};
+
+	useEffect(() => {
+		// Check if the filter has changed and if the searchTerm is not empty
+		if (prevFilterRef.current !== filter && searchTerm !== "") {
+			handleSearch();
+		}
+		// Update the previous filter ref to the current filter
+		prevFilterRef.current = filter;
+	}, [filter, searchTerm]);
+
+	useEffect(() => {
+		if (loading && results.length === 0) {
+		}
+	}, [loading, results]);
+
+	const getGenres = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Genre data" + response.data);
+				genres = response.data;
+			}
+		} catch (error) {
+			console.error("Error fetching genres:", error);
+		}
+	};
+
+	useEffect(() => {
+		getGenres();
+	}, []);
 
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -277,6 +544,7 @@ const Search: React.FC = () => {
 						filter === "user" && styles.activeFilter,
 					]}
 					onPress={() => handleSelection("user")}
+					testID="user-btn"
 				>
 					<Text style={styles.filterText}>Users</Text>
 				</TouchableOpacity>
@@ -301,8 +569,16 @@ const Search: React.FC = () => {
 								<View style={styles.includeSection}>
 									<Text style={styles.includeHeader}>Search by:</Text>
 									<View style={styles.searchBy}>
-										<ToggleButton label="Minimum Followers" />
-										<ToggleButton label="Maximum Followers" />
+										<ToggleButton
+											label="Minimum Followers"
+											onValueChange={setMinFollowers}
+											testID="minFol-btn"
+										/>
+										<ToggleButton
+											label="Minimum Following"
+											onValueChange={setMaxFollowers}
+											testID="maxFl-btn"
+										/>
 									</View>
 								</View>
 							)}
@@ -314,8 +590,16 @@ const Search: React.FC = () => {
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Search by:</Text>
 								<View style={styles.searchBy}>
-									<ToggleButton label="Host" testID="host-toggle" />
-									<ToggleButton label="Room Count" testID="room-count-toggle" />
+									<ToggleButton
+										label="Host"
+										testID="host-toggle"
+										onValueChange={setHost}
+									/>
+									<ToggleButton
+										label="Room Count"
+										testID="room-count-toggle"
+										onValueChange={setRoomCount}
+									/>
 								</View>
 							</View>
 							<View style={styles.includeSection}>
@@ -353,77 +637,59 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
-							{/* <Text style={styles.includeHeader}>Room Availability:</Text> */}
-							{/* <View style={styles.datePickerContainer}>
-						<Text style={styles.datePickerLabel}>Start Date:</Text>
-						<DateTimePicker
-							value={startDate || new Date()}
-							mode="date"
-							display="default"
-							onChange={(event, selectedDate) =>
-								setStartDate(selectedDate || undefined)
-							}
-						/>
-					</View> */}
-							{/* <View style={styles.datePickerContainer}>
-						<Text style={styles.datePickerLabel}>End Date:</Text>
-						<DateTimePicker
-							value={endDate || new Date()}
-							mode="date"
-							display="default"
-							onChange={(event, selectedDate) =>
-								setEndDate(selectedDate || undefined)
-							}
-						/>
-					</View> */}
-							{/* <View style={styles.datePickerContainer}>
+							{/* <Text style={styles.includeHeader}>Room Availability:</Text>
+							<View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>Start Date:</Text>
-								<TouchableOpacity
-									style={styles.button}
-									onPress={() => setShowStartDateModal(true)}
-								>
-									<Text style={styles.buttonText}>
-										{startDate ? startDate.toDateString() : "Select Start Date"}
-									</Text>
-								</TouchableOpacity>
-								<DatePickerModal
-									selectedDate={startDate}
-									onDateChange={setStartDate}
-									isVisible={showStartDateModal}
-									onClose={() => setShowStartDateModal(false)}
-								/>
-							</View> */}
-
-							{/* <View style={styles.datePickerContainer}>
+								<DatePicker selectedOption={startDate} onPress={() => setShowStartDateModal(!showStartDateModal)}></DatePicker>
+								{showStartDateModal && <DateTimePicker
+									value={startDate || new Date()}
+									mode="datetime"
+									display="default"
+									onChange={(event, selectedDate) =>{
+										setStartDate(selectedDate || undefined)
+										setShowStartDateModal(false);
+									}
+									}
+								/>}
+							</View>
+							<View style={styles.datePickerContainer}>
 								<Text style={styles.datePickerLabel}>End Date:</Text>
-								<TouchableOpacity
-									style={styles.button}
-									onPress={() => setShowEndDateModal(true)}
-								>
-									<Text style={styles.buttonText}>
-										{endDate ? endDate.toDateString() : "Select End Date"}
-									</Text>
-								</TouchableOpacity>
-								<DatePickerModal
-									selectedDate={endDate}
-									onDateChange={setEndDate}
-									isVisible={showEndDateModal}
-									onClose={() => setShowEndDateModal(false)}
-								/>
+								<DatePicker selectedOption={startDate} onPress={() => setShowEndDateModal(!showEndDateModal)}></DatePicker>
+								{showEndDateModal && <DateTimePicker
+									value={endDate || new Date()}
+									mode="datetime"
+									display="default"
+									onChange={(event, selectedDate) =>{
+										setEndDate(selectedDate || undefined);
+										setShowEndDateModal(false);
+									}}
+								/>}
 							</View> */}
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch value={temporary} onValueChange={setTemporary} />
+									<Switch
+										value={temporary}
+										onValueChange={setTemporary}
+										testID="temp-switch"
+									/>
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Private</Text>
-									<Switch value={isPrivate} onValueChange={setIsPrivate} />
+									<Switch
+										value={isPrivate}
+										onValueChange={setIsPrivate}
+										testID="priv-switch"
+									/>
 								</View>
 								<View style={styles.switchContainer}>
 									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch value={scheduled} onValueChange={setScheduled} />
+									<Switch
+										value={scheduled}
+										onValueChange={setScheduled}
+										testID="scheduled-switch"
+									/>
 								</View>
 							</View>
 						</ScrollView>
@@ -431,13 +697,42 @@ const Search: React.FC = () => {
 				</>
 			)}
 
-			<FlatList
-				data={results}
-				keyExtractor={(item) => item.id}
-				renderItem={renderResult}
-				contentContainerStyle={styles.resultsContainer}
-				onScroll={handleScroll}
-			/>
+			{loading ? (
+				!showMoreFilters && (
+					// Render Skeleton if loading
+					<View style={styles.roomCardPadding}>
+						{filter === "room" ? (
+							<>
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
+							</>
+						) : (
+							<>
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+								<SkeletonUserItem />
+							</>
+						)}
+					</View>
+				)
+			) : results.length === 0 ? (
+				// Render No Results Message if no results
+				<View style={styles.noResult}>
+					<Text>No results found</Text>
+				</View>
+			) : (
+				// Render FlatList if there are results
+				<FlatList
+					data={results}
+					keyExtractor={(item) => item.id}
+					renderItem={renderResult}
+					contentContainerStyle={styles.resultsContainer}
+					onScroll={handleScroll}
+				/>
+			)}
 
 			<Animated.View
 				style={[
@@ -464,6 +759,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginBottom: 20,
+	},
+	noResult: {
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	title: {
 		fontSize: 24,

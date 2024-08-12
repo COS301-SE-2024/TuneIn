@@ -13,36 +13,21 @@ import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
 import Selector from "./Selector";
 
-interface DropdownProps {
-	options: string[];
-	placeholder: string;
-	onSelect: (option: string) => void;
+interface DatePickerProps {
 	selectedOption: string | null;
-	setSelectedOption: (option: string | null) => void;
+	onPress: () => void;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({
-	options,
-	placeholder,
-	onSelect,
-	selectedOption,
-	setSelectedOption,
-}) => {
-	const [modalVisible, setModalVisible] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [items, setItems] = useState(options);
-
+const DatePicker: React.FC<DatePickerProps> = ({ selectedOption, onPress }) => {
+	const [date, setDate] = useState(selectedOption);
 	useEffect(() => {
-		setItems(options);
-	}, [options]);
+		setDate(selectedOption);
+	}, [selectedOption]);
 
-	const toggleModal = () => setModalVisible(!modalVisible);
-
-	const handleSelectOption = (option: string) => {
-		setSelectedOption(option);
-		onSelect(option);
-		toggleModal();
-	};
+	// const handleSelectOption = (option: string) => {
+	// 	setSelectedOption(option);
+	// 	onSelect(option);
+	// };
 
 	return (
 		<View style={styles.container}>
@@ -51,18 +36,12 @@ const Dropdown: React.FC<DropdownProps> = ({
 					styles.filterDropDown,
 					selectedOption ? styles.activeFilter : {},
 				]}
-				onPress={toggleModal}
+				onPress={onPress}
 			>
-				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
+				<Text style={styles.filterText}>
+					{date ? date.toLocaleString() : "Start Date"}
+				</Text>
 			</TouchableOpacity>
-
-			<Selector
-				options={options}
-				placeholder={placeholder}
-				visible={modalVisible}
-				onSelect={handleSelectOption}
-				onClose={toggleModal}
-			/>
 		</View>
 	);
 };
@@ -138,4 +117,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default Dropdown;
+export default DatePicker;
