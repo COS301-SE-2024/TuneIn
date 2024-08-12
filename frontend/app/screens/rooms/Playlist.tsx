@@ -53,9 +53,16 @@ const Playlist = () => {
 		live.getLastRoomQueue(),
 	);
 
-	useEffect(() => {
+	// Define a function to fetch the latest playlist
+	const fetchPlaylist = () => {
+		live.fetchRoomQueue(setPlaylist);
 		setPlaylist(live.getLastRoomQueue());
-	}, []);
+	};
+
+	useEffect(() => {
+		// Fetch playlist initially
+		fetchPlaylist();
+	}, []); // Empty dependency array ensures this effect runs only once on mount
 
 	// Function to handle voting
 	const handleVoteChange = (index: number, newVoteCount: number) => {
@@ -77,7 +84,6 @@ const Playlist = () => {
 			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
 			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
 		];
-
 		setPlaylist(finalPlaylist);
 	};
 
@@ -105,20 +111,6 @@ const Playlist = () => {
 				<Text style={styles.pageName}>Queue</Text>
 			</View>
 			<View style={styles.songListContainer}>
-				{playlist.map((roomSong, index) => (
-					<SongList
-						key={index}
-						songNumber={index + 1}
-						track={roomSong}
-						showVoting={true} // Assuming showVoting is managed elsewhere
-						index={index}
-						isCurrent={index === Number(currentTrackIndex)} // Check if current song
-						swapSongs={(index, direction) => {}} // Pass an appropriate function here
-						setVoteCount={(newVoteCount) =>
-							handleVoteChange(index, newVoteCount)
-						}
-					/>
-				))}
 				{playlist.length > 0 ? (
 					playlist.map((track, index) => (
 						<SongList

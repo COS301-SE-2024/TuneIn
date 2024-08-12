@@ -61,7 +61,6 @@ const RoomPage = () => {
 		roomData = JSON.parse(room);
 	}
 	const roomID = roomData.id;
-
 	const playerContext = useContext(Player);
 	if (!playerContext) {
 		throw new Error(
@@ -481,7 +480,6 @@ const RoomPage = () => {
 		router.navigate({
 			pathname: "/screens/rooms/Playlist",
 			params: {
-				queue: JSON.stringify(queue),
 				currentTrackIndex,
 				Room_id: roomID,
 				mine: roomData.mine,

@@ -63,7 +63,7 @@ class LiveSocketService {
 	private setJoined: stateSetJoined | null = null;
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
-	private setQueue: stateSetQueue | null = null;
+	private setQueues: stateSetQueue[] = [];
 	private setObjects: stateSetEmojiObject | null = null;
 
 	private chatHistoryReceived = false;
@@ -462,8 +462,10 @@ class LiveSocketService {
 					this.currentRoom = response.room;
 
 					this.currentRoomQueue = response.songs;
-					if (this.setQueue) {
-						this.setQueue(this.currentRoomQueue);
+					if (this.setQueues.length > 0) {
+						for (const setQueue of this.setQueues) {
+							setQueue(this.currentRoomQueue);
+						}
 					}
 
 					this.currentRoomVotes = response.votes;
@@ -479,8 +481,10 @@ class LiveSocketService {
 				}
 
 				this.currentRoomQueue.push(newSong.song);
-				if (this.setQueue) {
-					this.setQueue(this.currentRoomQueue);
+				if (this.setQueues.length > 0) {
+					for (const setQueue of this.setQueues) {
+						setQueue(this.currentRoomQueue);
+					}
 				}
 			});
 
@@ -495,8 +499,10 @@ class LiveSocketService {
 				this.currentRoomQueue = this.currentRoomQueue.filter(
 					(song) => song.spotifyID !== removedSong.song.spotifyID,
 				);
-				if (this.setQueue) {
-					this.setQueue(this.currentRoomQueue);
+				if (this.setQueues.length > 0) {
+					for (const setQueue of this.setQueues) {
+						setQueue(this.currentRoomQueue);
+					}
 				}
 			});
 
@@ -515,8 +521,10 @@ class LiveSocketService {
 					return;
 				}
 				this.currentRoomQueue[i] = updatedSong.song;
-				if (this.setQueue) {
-					this.setQueue(this.currentRoomQueue);
+				if (this.setQueues.length > 0) {
+					for (const setQueue of this.setQueues) {
+						setQueue(this.currentRoomQueue);
+					}
 				}
 			});
 
@@ -822,7 +830,9 @@ class LiveSocketService {
 		if (!this.currentUser) {
 			return;
 		}
-		this.setQueue = setQueue;
+		if (!this.setQueues.includes(setQueue)) {
+			this.setQueues.push(setQueue);
+		}
 		const input: QueueEventDto = {
 			song: {
 				spotifyID: "123",
