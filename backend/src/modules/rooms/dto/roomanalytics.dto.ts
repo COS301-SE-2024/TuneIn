@@ -8,6 +8,41 @@ import {
 	ValidateNested,
 } from "class-validator";
 import { UserDto } from "src/modules/users/dto/user.dto";
+export class RoomAnalyticsKeyMetricsDto {
+	// an object called unique visitors with two properties, count and percentage_change. both are numbers
+	@ApiProperty({
+		description: "Unique visitors to the user's rooms",
+		type: "object",
+	})
+	@IsObject()
+	@ValidateNested()
+	unique_visitors: {
+		count: number;
+		percentage_change: number;
+	};
+	// an object called returning_visitors with two properties, count and percentage_change. both are numbers
+	@ApiProperty({
+		description: "Returning visitors to the user's rooms",
+		type: "object",
+	})
+	@IsObject()
+	@ValidateNested()
+	returning_visitors: {
+		count: number;
+		percentage_change: number;
+	};
+	// an object called average_session_duration with two properties, duration and percentage_change. both are numbers
+	@ApiProperty({
+		description: "Average session duration in the user's rooms",
+		type: "object",
+	})
+	@IsObject()
+	@ValidateNested()
+	average_session_duration: {
+		duration: number;
+		percentage_change: number;
+	};
+}
 
 export class RoomAnalyticsQueueDto {
 	@ApiProperty({ description: "Total number of songs ever queued in the room" })

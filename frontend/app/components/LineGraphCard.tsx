@@ -1,56 +1,68 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
 interface LineGraphCardProps {
-	data: number[]; // Data for the line chart
+	data: {
+		value: number;
+		label: string;
+	}[];
 	title: string; // Title for the card
 }
 
+const needsScrolling = true;
+
 const LineGraphCard: React.FC<LineGraphCardProps> = ({ data, title }) => {
+	console.log("data", data);
+	console.log(
+		"data from the thing",
+		data.map((item) => item.label),
+		data.map((item) => item.value),
+	);
 	return (
 		<View style={styles.card}>
 			<Text style={styles.cardTitle}>{title}</Text>
-			<LineChart
-				data={{
-					labels: [
-						"Day 1",
-						"Day 2",
-						"Day 3",
-						"Day 4",
-						"Day 5",
-						"Day 6",
-						"Day 7",
-					],
-					datasets: [
-						{
-							data: data,
+			<ScrollView
+				horizontal={needsScrolling}
+				showsHorizontalScrollIndicator={needsScrolling}
+			>
+				<LineChart
+					data={{
+						labels: data?.map((item) => item?.label),
+						datasets: [
+							{
+								data: data?.map((item) => item?.value),
+							},
+						],
+					}}
+					width={
+						needsScrolling
+							? data.length * 50
+							: Dimensions.get("window").width - 40
+					} // From StyleSheet
+					height={220}
+					yAxisLabel=""
+					yAxisSuffix=""
+					chartConfig={{
+						backgroundColor: "#fff",
+						backgroundGradientFrom: "#fff",
+						backgroundGradientTo: "#fff",
+						decimalPlaces: 2,
+						color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the graph line
+						style: {
+							borderRadius: 16,
 						},
-					],
-				}}
-				width={Dimensions.get("window").width - 40} // From StyleSheet
-				height={220}
-				yAxisLabel=""
-				yAxisSuffix=""
-				chartConfig={{
-					backgroundColor: "#fff",
-					backgroundGradientFrom: "#fff",
-					backgroundGradientTo: "#fff",
-					decimalPlaces: 2,
-					color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the graph line
-					style: {
-						borderRadius: 16,
-					},
-					// Customization for labels
-					propsForLabels: {
-						fontFamily: "System", // Use system font for labels
-						fontSize: 12,
-						color: "#000", // Set label color to black
-					},
-				}}
-				bezier
-				style={styles.chart}
-			/>
+						// Customization for labels
+						propsForLabels: {
+							fontFamily: "System", // Use system font for labels
+							fontSize: 12,
+							color: "#000", // Set label color to black
+						},
+					}}
+					bezier
+					style={styles.chart}
+				/>
+			</ScrollView>
 		</View>
 	);
 };

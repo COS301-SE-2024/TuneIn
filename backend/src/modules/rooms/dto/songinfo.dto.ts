@@ -32,5 +32,5 @@ export class SongInfoDto {
 
 	@ApiProperty()
 	@IsDate()
-	start_time: Date;
+	start_time: Date | null;
 }
