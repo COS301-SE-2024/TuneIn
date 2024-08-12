@@ -223,7 +223,7 @@ const ProfileScreen: React.FC = () => {
 						style={styles.button}
 						onPress={() =>
 							router.push({
-								pathname: "screens/EditProfilePage",
+								pathname: "./EditProfilePage",
 								params: { profile: JSON.stringify(profileInfo) },
 							})
 						}
@@ -328,46 +328,48 @@ const ProfileScreen: React.FC = () => {
             </Text>
           </TouchableOpacity> */}
 				</View>
-				<View style={styles.container}>
-					{/* Settings Icon */}
-					<TouchableOpacity onPress={toggleDrawer}>
-						<Ionicons name="settings-outline" size={24} color="black" />
-					</TouchableOpacity>
+				{ownsProfile && (
+					<View style={styles.container}>
+						{/* Settings Icon */}
+						<TouchableOpacity onPress={toggleDrawer}>
+							<Ionicons name="settings-outline" size={24} color="black" />
+						</TouchableOpacity>
 
-					{/* Drawer Modal */}
-					<Modal
-						transparent={true}
-						visible={drawerVisible}
-						animationType="slide"
-						onRequestClose={() => setDrawerVisible(false)}
-					>
-						{/* Overlay */}
-						<TouchableWithoutFeedback onPress={() => setDrawerVisible(false)}>
-							<View style={styles.overlay} />
-						</TouchableWithoutFeedback>
+						{/* Drawer Modal */}
+						<Modal
+							transparent={true}
+							visible={drawerVisible}
+							animationType="slide"
+							onRequestClose={() => setDrawerVisible(false)}
+						>
+							{/* Overlay */}
+							<TouchableWithoutFeedback onPress={() => setDrawerVisible(false)}>
+								<View style={styles.overlay} />
+							</TouchableWithoutFeedback>
 
-						{/* Drawer Content */}
-						<View style={styles.drawer}>
-							{/* Close Drawer Button */}
-							<View style={styles.closeButtonContainer}>
-								<TouchableOpacity onPress={toggleDrawer}>
-									<Ionicons name="close" size={24} color="black" />
-								</TouchableOpacity>
+							{/* Drawer Content */}
+							<View style={styles.drawer}>
+								{/* Close Drawer Button */}
+								<View style={styles.closeButtonContainer}>
+									<TouchableOpacity onPress={toggleDrawer}>
+										<Ionicons name="close" size={24} color="black" />
+									</TouchableOpacity>
+								</View>
+
+								{/* Drawer Items */}
+								<Text style={styles.drawerItem} onPress={navigateToAnayltics}>
+									Analytics
+								</Text>
+								<Text style={styles.drawerItem} onPress={navigateToHelp}>
+									Help Menu
+								</Text>
+								<Text style={styles.drawerItem} onPress={navigateToLogout}>
+									Logout
+								</Text>
 							</View>
-
-							{/* Drawer Items */}
-							<Text style={styles.drawerItem} onPress={navigateToAnayltics}>
-								Analytics
-							</Text>
-							<Text style={styles.drawerItem} onPress={navigateToHelp}>
-								Help Menu
-							</Text>
-							<Text style={styles.drawerItem} onPress={navigateToLogout}>
-								Logout
-							</Text>
-						</View>
-					</Modal>
-				</View>
+						</Modal>
+					</View>
+				)}
 				<Text
 					style={{
 						fontWeight: "600",
@@ -436,12 +438,16 @@ const ProfileScreen: React.FC = () => {
             duration={favoriteSongsData[0].duration}
           />
         </View> */}
-				<View style={{ paddingHorizontal: 20 }} testID="bio">
-					<BioSection content={profileData.bio} />
-				</View>
-				<View style={{ paddingHorizontal: 20 }} testID="genres">
-					<GenreList items={profileData.fav_genres.data} />
-				</View>
+				{profileData.bio !== "" && (
+					<View style={{ paddingHorizontal: 20 }} testID="bio">
+						<BioSection content={profileData.bio} />
+					</View>
+				)}
+				{profileData.fav_genres.count > 0 && (
+					<View style={{ paddingHorizontal: 20 }} testID="genres">
+						<GenreList items={profileData.fav_genres.data} />
+					</View>
+				)}
 				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{profileData.fav_songs.data.slice(0, 2).map((song) => (
@@ -502,7 +508,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "flex-end", // Aligns the icon to the right
-		padding: 20,
+		paddingHorizontal: 20,
 	},
 
 	// Modal overlay to capture clicks outside the drawer
