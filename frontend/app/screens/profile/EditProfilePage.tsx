@@ -379,7 +379,6 @@ const EditProfileScreen = () => {
 
 		setIsSongDialogVisible(false);
 	};
-	
 
 	const renderAddLink = () => {
 		if (profileData.links.count < 3) {
@@ -407,9 +406,7 @@ const EditProfileScreen = () => {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
-					<TouchableOpacity
-						onPress={() => router.navigate("./ProfilePage")}
-					>
+					<TouchableOpacity onPress={() => router.navigate("./ProfilePage")}>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
@@ -548,7 +545,10 @@ const EditProfileScreen = () => {
 						/>
 					))}
 					{/* Render add genre button */}
-					<TouchableOpacity onPress={toggleGenreSelector} style={styles.addGenreButton}>
+					<TouchableOpacity
+						onPress={toggleGenreSelector}
+						style={styles.addGenreButton}
+					>
 						<Text
 							style={{
 								color: "black",
@@ -592,13 +592,19 @@ const EditProfileScreen = () => {
 						justifyContent: "center",
 					}}
 				>
-					<TouchableOpacity onPress={() => setIsSongDialogVisible(true)} style={styles.container2}>
+					<TouchableOpacity
+						onPress={() => setIsSongDialogVisible(true)}
+						style={styles.container2}
+					>
 						<Text style={styles.text}>
 							Add Song <Icons name="plus" size={14} color="black" />
 						</Text>
 					</TouchableOpacity>
 				</View>
-				<AddFavSong visible={isSongDialogVisible} handleSave={addSong}></AddFavSong>
+				<AddFavSong
+					visible={isSongDialogVisible}
+					handleSave={addSong}
+				></AddFavSong>
 			</ScrollView>
 		</View>
 	);

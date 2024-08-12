@@ -276,7 +276,7 @@ export class SearchService {
 		if (params.nsfw !== undefined) {
 			query += ` AND nsfw = ${params.nsfw}`;
 		}
-		if(params.lang !== undefined) {
+		if (params.lang !== undefined) {
 			query += ` AND room_language = ${sqlstring.escape(params.lang)}`;
 		}
 

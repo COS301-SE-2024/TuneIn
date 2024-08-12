@@ -15,18 +15,14 @@ import Selector from "./Selector";
 
 interface DatePickerProps {
 	selectedOption: string | null;
-    onPress: () => void;
+	onPress: () => void;
 }
 
-const DatePicker: React.FC<DatePickerProps> = ({
-	selectedOption,
-    onPress
-}) => {
-    const [date, setDate] = useState(selectedOption);
-    useEffect(() => {
-        setDate(selectedOption);
+const DatePicker: React.FC<DatePickerProps> = ({ selectedOption, onPress }) => {
+	const [date, setDate] = useState(selectedOption);
+	useEffect(() => {
+		setDate(selectedOption);
 	}, [selectedOption]);
-
 
 	// const handleSelectOption = (option: string) => {
 	// 	setSelectedOption(option);
@@ -42,7 +38,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
 				]}
 				onPress={onPress}
 			>
-				<Text style={styles.filterText}>{date ? date.toLocaleString(): "Start Date"}</Text>
+				<Text style={styles.filterText}>
+					{date ? date.toLocaleString() : "Start Date"}
+				</Text>
 			</TouchableOpacity>
 		</View>
 	);

@@ -460,7 +460,7 @@ const Search: React.FC = () => {
 	}, [filter, searchTerm]);
 
 	useEffect(() => {
-		if (loading && results.length == 0) {
+		if (loading && results.length === 0) {
 		}
 	}, [loading, results]);
 

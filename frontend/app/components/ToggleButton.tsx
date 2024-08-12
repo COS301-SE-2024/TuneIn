@@ -7,7 +7,11 @@ type ToggleButtonProps = {
 	onValueChange: (value: string) => void;
 };
 
-const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID, onValueChange }) => {
+const ToggleButton: React.FC<ToggleButtonProps> = ({
+	label,
+	testID,
+	onValueChange,
+}) => {
 	const [isSelected, setIsSelected] = useState(false);
 	const [text, setText] = useState("");
 	const inputRef = useRef<TextInput>(null);
@@ -19,7 +23,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ label, testID, onValueChang
 	const changeText = (val: any) => {
 		setText(val);
 		onValueChange(val);
-	}
+	};
 
 	useEffect(() => {
 		if (isSelected && inputRef.current) {

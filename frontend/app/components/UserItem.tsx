@@ -16,13 +16,20 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	};
 
 	const navigateToHelp = () => {
-		router.navigate(`/screens/profile/ProfilePage?friend=${JSON.stringify({profile_picture_url: user.profile_picture_url,
-			username: user.username,})}&user=${user}`);
+		router.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+			})}&user=${user}`,
+		);
 	};
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity onPress={navigateToHelp} style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 40 }}>
+			<TouchableOpacity
+				onPress={navigateToHelp}
+				style={{ flexDirection: "row", alignItems: "center", paddingRight: 40 }}
+			>
 				<Image
 					source={{ uri: user.profile_picture_url }}
 					style={styles.profileImage}
