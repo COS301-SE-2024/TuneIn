@@ -96,7 +96,9 @@ const RoomPage = () => {
 
 	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
-		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+		if (username) {
+			return username.length > 10 ? username.slice(0, 8) + "..." : username;
+		}
 	};
 
 	//Emoji picker
