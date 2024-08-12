@@ -775,7 +775,71 @@ class LiveSocketService {
 			roomID: this.currentRoom.roomID,
 			createdAt: new Date(),
 		};
-		this.socket.emit("enqueueSong", JSON.stringify(input));
+		this.socket.emit("dequeueSong", JSON.stringify(input));
+	}
+
+	public upvoteSong(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("upvoteSong", JSON.stringify(input));
+	}
+
+	public downvoteSong(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("downvoteSong", JSON.stringify(input));
+	}
+
+	public swapSongVote(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("swapSongVote", JSON.stringify(input));
+	}
+
+	public undoSongVote(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("undoSongVote", JSON.stringify(input));
 	}
 
 	public async disconnectSocket() {
