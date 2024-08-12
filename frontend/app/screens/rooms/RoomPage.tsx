@@ -473,7 +473,8 @@ const RoomPage = () => {
 		setJoined(!joined);
 		if (!joined) {
 			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			await live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			live.fetchRoomQueue(setQueue);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(

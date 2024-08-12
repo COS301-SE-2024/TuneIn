@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
 import { RoomSongDto } from "../../models/RoomSongDto";
+import { live } from "../../services/Live";
 
 // Add mock songs here for testing
 const mockSongs: Track[] = [
@@ -45,25 +46,13 @@ const mockSongs: Track[] = [
 
 const Playlist = () => {
 	const router = useRouter();
-	const { queue, currentTrackIndex, Room_id, mine } = useLocalSearchParams();
+	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
-	const [playlist, setPlaylist] = useState<RoomSongDto[]>([]);
+	const [playlist, setPlaylist] = useState<RoomSongDto[]>(live.getLastRoomQueue());
 
 	useEffect(() => {
-		try {
-			if (typeof queue === "string") {
-				const parsedQueue = JSON.parse(queue) as RoomSongDto[];
-				setPlaylist(parsedQueue);
-			} else if (Array.isArray(queue)) {
-				const parsedQueue = queue.map(
-					(item) => JSON.parse(item) as RoomSongDto,
-				);
-				setPlaylist(parsedQueue);
-			}
-		} catch (error) {
-			console.error("Failed to parse queue:", error);
-		}
-	}, [queue]);
+		setPlaylist(live.getLastRoomQueue());
+	}, []);
 
 	useEffect(() => {
 		console.log("Current Track Index:", Number(currentTrackIndex));
@@ -74,7 +63,6 @@ const Playlist = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditPlaylist",
 			params: {
-				queue: queue,
 				currentTrackIndex: currentTrackIndex,
 				Room_id: Room_id,
 			},

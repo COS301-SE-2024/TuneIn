@@ -53,10 +53,10 @@ function isSpotifyTrack(track: any): track is Spotify.Track {
 
 const EditPlaylist: React.FC = () => {
 	const router = useRouter();
-	const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
+	const { Room_id } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
 	console.log("passed in Room id:", Room_id);
 	const { searchResults, handleSearch } = useSpotifySearch();
-
+	/*
 	const parseInitialPlaylist = (data: string | string[]): RoomSongDto[] => {
 		if (typeof data === "string") {
 			try {
@@ -100,10 +100,11 @@ const EditPlaylist: React.FC = () => {
 		}
 		return [];
 	};
+	*/
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [playlist, setPlaylist] = useState<RoomSongDto[]>(() =>
-		parseInitialPlaylist(queue),
+	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
+		live.getLastRoomQueue(),
 	);
 
 	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
