@@ -223,7 +223,7 @@ const ProfileScreen: React.FC = () => {
 						style={styles.button}
 						onPress={() =>
 							router.push({
-								pathname: "./EditProfilePage",
+								pathname: "screens/profile/EditProfilePage",
 								params: { profile: JSON.stringify(profileInfo) },
 							})
 						}

@@ -406,14 +406,16 @@ const EditProfileScreen = () => {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
-					<TouchableOpacity onPress={() => router.navigate("./ProfilePage")}>
+					<TouchableOpacity
+						onPress={() => router.navigate("screens/profile/ProfilePage")}
+					>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
 					<Text style={styles.title}>Edit Profile</Text>
 					<TouchableOpacity
 						onPress={() => {
 							updateProfile(changed);
-							router.navigate("./ProfilePage");
+							router.navigate("screens/profile/ProfilePage");
 						}}
 						style={styles.saveButton}
 					>
