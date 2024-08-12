@@ -693,7 +693,12 @@ export class ActiveRoom {
 					const songIDs: string[] = songsWithoutInfo.map(
 						(i) => songs[i].spotifyID,
 					);
-					const songInfo = await api.tracks.get(songIDs);
+					const songInfo: Spotify.Track[] = [];
+					for (let i = 0, n = songIDs.length; i < n; i += 50) {
+						const ids = songIDs.slice(i, i + 50);
+						const info = await api.tracks.get(ids);
+						songInfo.push(...info);
+					}
 					for (const i of songsWithoutInfo) {
 						const info = songInfo.find((s) => s.id === songs[i].spotifyID);
 						if (info) {
