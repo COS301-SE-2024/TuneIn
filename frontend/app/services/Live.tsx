@@ -799,7 +799,12 @@ class LiveSocketService {
 		this.socket.emit("requestQueue", this.currentRoom.roomID);
 	}
 
+	public getLastRoomQueue(): RoomSongDto[] {
+		return this.currentRoomQueue;
+	}
+
 	public enqueueSong(song: RoomSongDto): void {
+		console.log("Enqueueing song", song);
 		if (!this.currentRoom) {
 			return;
 		}
@@ -812,9 +817,11 @@ class LiveSocketService {
 			createdAt: new Date(),
 		};
 		this.socket.emit("enqueueSong", JSON.stringify(input));
+		console.log("emitted: enqueueSong");
 	}
 
 	public dequeueSong(song: RoomSongDto): void {
+		console.log("Dequeueing song", song);
 		if (!this.currentRoom) {
 			return;
 		}
@@ -828,6 +835,7 @@ class LiveSocketService {
 			createdAt: new Date(),
 		};
 		this.socket.emit("dequeueSong", JSON.stringify(input));
+		console.log("emitted: dequeueSong");
 	}
 
 	public upvoteSong(song: RoomSongDto): void {
