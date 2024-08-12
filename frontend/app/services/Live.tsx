@@ -11,6 +11,7 @@ import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
 import { RoomSongDto } from "../models/RoomSongDto";
 import { VoteDto } from "../models/VoteDto";
+import { QueueEventDto } from "../models/QueueEventDto";
 
 const TIMEOUT = 5000000;
 
@@ -157,7 +158,11 @@ class LiveSocketService {
 	public async initialiseSocket() {
 		console.log("Initialising socket");
 		console.log("initialised:", this.initialised);
-		if (!this.initialised && !this.isConnecting) {
+		if (
+			!this.initialised &&
+			!this.isConnecting &&
+			(await auth.getToken()) !== null
+		) {
 			this.isConnecting = true;
 			if (!playback) {
 				playback = SimpleSpotifyPlayback.getInstance();
@@ -740,6 +745,37 @@ class LiveSocketService {
 		}
 		this.setQueue = setQueue;
 		this.socket.emit("requestQueue", this.currentRoom.roomID);
+	}
+
+	public enqueueSong(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("enqueueSong", JSON.stringify(input));
+	}
+
+	public dequeueSong(song: RoomSongDto): void {
+		if (!this.currentRoom) {
+			return;
+		}
+
+		if (!this.currentUser) {
+			return;
+		}
+		const input: QueueEventDto = {
+			song: song,
+			roomID: this.currentRoom.roomID,
+			createdAt: new Date(),
+		};
+		this.socket.emit("enqueueSong", JSON.stringify(input));
 	}
 
 	public async disconnectSocket() {
