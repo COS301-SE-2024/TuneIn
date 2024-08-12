@@ -28,9 +28,8 @@ export class EmojiReactionDto {
 	date_created: Date;
 
 	@ApiProperty()
-	@IsObject()
-	@ValidateNested()
-	body: Emoji;
+	@IsString()
+	body: string;
 
 	@ApiProperty()
 	@IsString()

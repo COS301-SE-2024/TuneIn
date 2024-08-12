@@ -68,6 +68,10 @@ const RoomPage = () => {
 	const [joined, setJoined] = useState(false);
 
 	useEffect(() => {
+		live.setEmojiObjects(setObject);
+	}, []);
+
+	useEffect(() => {
 		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
@@ -98,6 +102,15 @@ const RoomPage = () => {
 	const emojiPickerRef = useRef<EmojiPickerRef>(null);
 
 	const handleSelectEmoji = (emoji: string) => {
+		live.sendReaction(emoji);
+		setObject((prev) => [
+			...prev,
+			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
+		]);
+		setObject((prev) => [
+			...prev,
+			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
+		]);
 		setObject((prev) => [
 			...prev,
 			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },

@@ -12,6 +12,8 @@ import { Emoji } from "rn-emoji-picker/dist/interfaces";
 import { RoomSongDto } from "../models/RoomSongDto";
 import { VoteDto } from "../models/VoteDto";
 import { QueueEventDto } from "../models/QueueEventDto";
+import { ObjectConfig } from "react-native-flying-objects";
+import { Text } from "react-native";
 
 const TIMEOUT = 5000000;
 
@@ -39,6 +41,7 @@ type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetQueue = React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
+type stateSetEmojiObject = React.Dispatch<React.SetStateAction<ObjectConfig[]>>;
 
 let playback: SimpleSpotifyPlayback | null = null;
 
@@ -61,6 +64,7 @@ class LiveSocketService {
 	private setMessage: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
 	private setQueue: stateSetQueue | null = null;
+	private setObjects: stateSetEmojiObject | null = null;
 
 	private chatHistoryReceived = false;
 	private pingSent = false;
@@ -419,6 +423,26 @@ class LiveSocketService {
 				}
 
 				//add the new reaction to components
+				if (!this.setObjects) {
+					return;
+				}
+
+				if (reaction.userID === this.currentUser.userID) {
+					return;
+				}
+
+				this.setObjects((prev) => [
+					...prev,
+					{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+				]);
+				this.setObjects((prev) => [
+					...prev,
+					{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+				]);
+				this.setObjects((prev) => [
+					...prev,
+					{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+				]);
 			});
 
 			this.socket.on(
@@ -624,7 +648,7 @@ class LiveSocketService {
 		}
 	}
 
-	public async sendReaction(emoji: Emoji) {
+	public async sendReaction(emoji: string) {
 		if (!this.currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
@@ -919,6 +943,10 @@ class LiveSocketService {
 			createdAt: new Date(),
 		};
 		this.socket.emit("undoSongVote", JSON.stringify(input));
+	}
+
+	public setEmojiObjects(setObjects: stateSetEmojiObject): void {
+		this.setObjects = setObjects;
 	}
 
 	public async disconnectSocket() {

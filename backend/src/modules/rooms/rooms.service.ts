@@ -685,7 +685,7 @@ export class RoomsService {
 				data: {
 					user_id: userID,
 					room_id: roomID,
-					reaction: JSON.stringify(emojiReactionDto.body),
+					reaction: emojiReactionDto.body,
 				},
 			});
 		if (!newReaction || newReaction === null) {
