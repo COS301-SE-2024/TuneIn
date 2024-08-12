@@ -333,7 +333,7 @@ const EditProfileScreen = () => {
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
 					<TouchableOpacity
-						onPress={() => router.navigate("screens/ProfilePage")}
+						onPress={() => router.navigate("screens/profile/ProfilePage")}
 					>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
@@ -341,7 +341,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => {
 							updateProfile(changed);
-							router.navigate("screens/ProfilePage");
+							router.navigate("screens/profile/ProfilePage");
 						}}
 						style={styles.saveButton}
 					>
