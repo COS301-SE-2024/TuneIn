@@ -328,7 +328,7 @@ const ProfileScreen: React.FC = () => {
             </Text>
           </TouchableOpacity> */}
 				</View>
-				<View style={styles.container}>
+				{(ownsProfile && <View style={styles.container}>
 					{/* Settings Icon */}
 					<TouchableOpacity onPress={toggleDrawer}>
 						<Ionicons name="settings-outline" size={24} color="black" />
@@ -367,7 +367,7 @@ const ProfileScreen: React.FC = () => {
 							</Text>
 						</View>
 					</Modal>
-				</View>
+				</View>)}
 				<Text
 					style={{
 						fontWeight: "600",
@@ -436,12 +436,12 @@ const ProfileScreen: React.FC = () => {
             duration={favoriteSongsData[0].duration}
           />
         </View> */}
-				<View style={{ paddingHorizontal: 20 }} testID="bio">
+				{profileData.bio !== "" && (<View style={{ paddingHorizontal: 20 }} testID="bio">
 					<BioSection content={profileData.bio} />
-				</View>
-				<View style={{ paddingHorizontal: 20 }} testID="genres">
+				</View>)}
+				{profileData.fav_genres.count > 0 && (<View style={{ paddingHorizontal: 20 }} testID="genres">
 					<GenreList items={profileData.fav_genres.data} />
-				</View>
+				</View>)}
 				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{profileData.fav_songs.data.slice(0, 2).map((song) => (
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "flex-end", // Aligns the icon to the right
-		padding: 20,
+		paddingHorizontal: 20,
 	},
 
 	// Modal overlay to capture clicks outside the drawer
