@@ -43,6 +43,11 @@ module.exports = {
 
     // Prevent conflicts with Prettier
     ...rules,
-    "prettier/prettier": 0,
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
   },
 };

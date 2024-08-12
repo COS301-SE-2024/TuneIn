@@ -73,7 +73,6 @@ const PlaylistAnalytics: React.FC = () => {
 		console.log("Room picked", room);
 	};
 
-
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>
 			<View style={styles.container}>

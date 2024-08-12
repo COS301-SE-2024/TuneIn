@@ -53,11 +53,14 @@ const GeneralAnalytics: React.FC = () => {
 			const currentRoom = await StorageService.getItem("currentRoom");
 			console.log("current roooooom", currentRoom);
 			console.log(selectedRoom);
-			const response = await fetch(`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
 			setGeneralAnalytics(data);
 		};
@@ -79,13 +82,13 @@ const GeneralAnalytics: React.FC = () => {
 		{ label: "Room E", value: 85 },
 		{ label: "Room F", value: 241 },
 	];
-	const data = generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
-		return {
-			label: join.day,
-			value: join.count,
-		};
-	}) ?? [];
-
+	const data =
+		generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
+			return {
+				label: join.day,
+				value: join.count,
+			};
+		}) ?? [];
 
 	const headers = ["Room", "Longest", "Shortest"];
 	const dataTable = [
@@ -101,17 +104,21 @@ const GeneralAnalytics: React.FC = () => {
 		const accessToken: string | null = await AuthManagement.getToken();
 		console.log("selected room", selectedRoom?.roomID);
 		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
+		const response = await fetch(
+			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
 			},
-		});
+		);
 		const data = await response.json();
 		// if (data.statusCode !== 200) {
 		// 	console.log("error fetching interaction analytics");
 		// 	return;
 		// }
-		if(generalAnalytics?.room_previews === undefined) setGeneralAnalytics(data);
+		if (generalAnalytics?.room_previews === undefined)
+			setGeneralAnalytics(data);
 		console.log("Room picked", room);
 	};
 
@@ -125,7 +132,7 @@ const GeneralAnalytics: React.FC = () => {
 					<Text style={styles.headerTitle}>General and Room Analytics</Text>
 					<View style={styles.headerSpacer} />
 				</View>
-				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick}/>
+				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick} />
 				<LineGraphCard data={data} title="Weekly Participants" />
 				<HorizontalBarGraphCard
 					data={datah}
