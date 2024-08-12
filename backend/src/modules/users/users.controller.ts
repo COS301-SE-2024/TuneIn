@@ -483,9 +483,6 @@ export class UsersController {
 	response: code (2xx for success, 4xx for error)
 	*/
 
-	
-
-
 	/*
 	### `/users/{username}/befriend`
 	#### POST: sends a friend request to user with given username
@@ -507,5 +504,4 @@ export class UsersController {
 	no input
 	response: code (2xx for success, 4xx for error)
 	*/
-
 }

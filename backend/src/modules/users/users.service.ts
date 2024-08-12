@@ -493,7 +493,7 @@ export class UsersService {
 		if (userID === newPotentialFriendID) {
 			throw new HttpException(
 				"You cannot friend yourself",
-				HttpStatus.BAD_REQUEST
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -501,24 +501,36 @@ export class UsersService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		// check if friend exists as a user
 		if (!(await this.dbUtils.userExists(newPotentialFriendID))) {
 			throw new HttpException(
 				"User (" + newPotentialFriendID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 
 		// check if they are already friends
 		if (
-			(await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID, true)) ||
-			(await this.dbUtils.isFriendsOrPending(userID, newPotentialFriendID, false))
+			(await this.dbUtils.isFriendsOrPending(
+				userID,
+				newPotentialFriendID,
+				true,
+			)) ||
+			(await this.dbUtils.isFriendsOrPending(
+				userID,
+				newPotentialFriendID,
+				false,
+			))
 		) {
 			throw new HttpException(
-				"User (" + userID + ") is already friends with (" + newPotentialFriendID + ") or has a pending request",
+				"User (" +
+					userID +
+					") is already friends with (" +
+					newPotentialFriendID +
+					") or has a pending request",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
@@ -529,14 +541,12 @@ export class UsersService {
 				HttpStatus.BAD_REQUEST,
 			);
 		}
-		const result = await this.prisma.friends.create(
-			{
-				data: {
-					friend1: userID,
-					friend2: newPotentialFriendID,
-				},
+		const result = await this.prisma.friends.create({
+			data: {
+				friend1: userID,
+				friend2: newPotentialFriendID,
 			},
-		);
+		});
 
 		if (!result || result === null) {
 			throw new Error("Failed to befriend user (" + newPotentialFriendID + ")");
@@ -554,7 +564,7 @@ export class UsersService {
 		if (userID === friendUserID) {
 			throw new HttpException(
 				"You cannot unfriend yourself",
-				HttpStatus.BAD_REQUEST
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -562,13 +572,13 @@ export class UsersService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		if (!(await this.dbUtils.userExists(friendUserID))) {
 			throw new HttpException(
 				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 
@@ -576,7 +586,7 @@ export class UsersService {
 		if (!(await this.dbUtils.isFriendsOrPending(userID, friendUserID, false))) {
 			throw new HttpException(
 				"User (" + userID + ") is not friends with (" + friendUserID + ")",
-				HttpStatus.BAD_REQUEST
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -584,8 +594,8 @@ export class UsersService {
 		const result = await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
-						{ friend1: userID, friend2: friendUserID },
-						{ friend1: friendUserID, friend2: userID },
+					{ friend1: userID, friend2: friendUserID },
+					{ friend1: friendUserID, friend2: userID },
 				],
 			},
 		});
@@ -610,20 +620,20 @@ export class UsersService {
 		if (userID === friendUserID) {
 			throw new HttpException(
 				"You cannot accept yourself",
-				HttpStatus.BAD_REQUEST
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		// check if users exist
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		if (!(await this.dbUtils.userExists(friendUserID))) {
 			throw new HttpException(
 				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		const result = await this.prisma.friends.updateMany({
@@ -639,8 +649,12 @@ export class UsersService {
 		console.log("accepted friend request", result);
 		if (result.count === 0) {
 			throw new HttpException(
-				"User (" + friendUserID + ") has not sent a friend request to user (" + userID + ")",
-				HttpStatus.BAD_REQUEST
+				"User (" +
+					friendUserID +
+					") has not sent a friend request to user (" +
+					userID +
+					")",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		return true;
@@ -657,20 +671,20 @@ export class UsersService {
 		if (userID === friendUserID) {
 			throw new HttpException(
 				"You cannot reject yourself",
-				HttpStatus.BAD_REQUEST
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		// check if users exist
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		if (!(await this.dbUtils.userExists(friendUserID))) {
 			throw new HttpException(
 				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND
+				HttpStatus.NOT_FOUND,
 			);
 		}
 		const rejectedRequest = await this.prisma.friends.deleteMany({
@@ -682,8 +696,12 @@ export class UsersService {
 		});
 		if (rejectedRequest.count === 0) {
 			throw new HttpException(
-				"User (" + friendUserID + ") has not sent a friend request to user (" + userID + ")",
-				HttpStatus.BAD_REQUEST
+				"User (" +
+					friendUserID +
+					") has not sent a friend request to user (" +
+					userID +
+					")",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		return true;
