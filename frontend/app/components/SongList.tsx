@@ -1,7 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import Voting from "./Voting";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, StyleSheet, Image } from "react-native";
+import Voting from "../components/rooms/Voting";
 import { Track } from "../models/Track";
 
 interface SongListProps {
@@ -12,16 +11,18 @@ interface SongListProps {
 	index: number; // Index of the song in the list
 	isCurrent: boolean; // Indicates if this song is the currently playing song
 	swapSongs: (index: number, direction: "up" | "down") => void; // Function to swap songs
+	setVoteCount: (newVoteCount: number) => void; // Function to update vote count
 }
 
 const SongList: React.FC<SongListProps> = ({
 	track,
 	voteCount,
-	showVoting = false,
+	showVoting = true,
 	songNumber,
 	index,
 	isCurrent,
 	swapSongs,
+	setVoteCount,
 }) => {
 	const albumCoverUrl = track.album.images[0]?.url;
 
@@ -46,17 +47,13 @@ const SongList: React.FC<SongListProps> = ({
 					{track.artists.map((artist) => artist.name).join(", ")}
 				</Text>
 			</View>
-			{showVoting && (
-				<Voting
-					voteCount={voteCount}
-					setVoteCount={(newVoteCount: number) => {}}
-					index={index}
-					swapSongs={swapSongs}
-				/>
-			)}
-			<TouchableOpacity style={styles.moreButton} testID="more-button">
-				<Ionicons name="ellipsis-vertical" size={24} color="black" />
-			</TouchableOpacity>
+
+			<Voting
+				voteCount={voteCount}
+				setVoteCount={setVoteCount}
+				index={index}
+				swapSongs={swapSongs}
+			/>
 		</View>
 	);
 };
@@ -89,7 +86,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	songName: {
-		fontSize: 16,
+		fontSize: 14,
 		fontWeight: "bold",
 	},
 	currentSongText: {

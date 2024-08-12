@@ -15,6 +15,7 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { live } from "../../services/Live";
 import { colors } from "../../styles/colors";
+import { Ionicons } from "@expo/vector-icons";
 
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
@@ -27,8 +28,8 @@ interface Track {
 	artists: { name: string }[];
 	album: { images: { url: string }[] };
 	explicit: boolean;
-	preview_url: string; // URL for previewing the song
-	uri: string; // URI used to play the song
+	preview_url: string;
+	uri: string;
 	duration_ms: number;
 }
 
@@ -106,6 +107,7 @@ const EditPlaylist: React.FC = () => {
 	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
 		live.getLastRoomQueue(),
 	);
+	const [addedSongs, setAddedSongs] = useState<SimplifiedTrack[]>([]);
 
 	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
 		if (isSpotifyTrack(track)) {
@@ -118,20 +120,50 @@ const EditPlaylist: React.FC = () => {
 			setPlaylist((prevPlaylist) => [...prevPlaylist, song]);
 		} else {
 			setPlaylist((prevPlaylist) => [...prevPlaylist, track]);
+	const addToPlaylist = (track: Track) => {
+		if (!isMine && addedSongs.length >= 3) {
+			alert("You can only add up to 3 songs.");
+			return;
+		}
+
+		const simplifiedTrack: SimplifiedTrack = {
+			id: track.id,
+			name: track.name,
+			artistNames: track.artists.map((artist) => artist.name).join(", "),
+			albumArtUrl: track.album.images[0].url,
+			explicit: track.explicit,
+			preview_url: track.preview_url,
+			uri: track.uri,
+			duration_ms: track.duration_ms,
+		};
+
+		setPlaylist((prevPlaylist) => [...prevPlaylist, simplifiedTrack]);
+		if (!isMine) {
+			setAddedSongs((prevAddedSongs) => [...prevAddedSongs, simplifiedTrack]);
 		}
 	};
 
 	const removeFromPlaylist = (trackId: string) => {
+		if (!isMine && !addedSongs.some((track) => track.id === trackId)) {
+			alert("You can only remove songs that you added.");
+			return;
+		}
+
 		setPlaylist((prevPlaylist) =>
 			prevPlaylist.filter((track) => track.track && track.track.id !== trackId),
 		);
+
+		if (!isMine) {
+			setAddedSongs((prevAddedSongs) =>
+				prevAddedSongs.filter((track) => track.id !== trackId),
+			);
+		}
 	};
 
 	const savePlaylist = async () => {
 		console.log("Playlist saved:", playlist);
 		console.log("in room :", Room_id);
 
-		// Add logic to save the playlist to the backend if necessary
 		try {
 			/*
 			const storedToken = await auth.getToken();
@@ -170,6 +202,14 @@ const EditPlaylist: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
+			<View>
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={() => router.back()}
+				>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+			</View>
 			<TextInput
 				style={styles.input}
 				placeholder="Search for songs..."
@@ -201,12 +241,15 @@ const EditPlaylist: React.FC = () => {
 								<Text style={styles.explicitTag}>Explicit</Text>
 							)}
 						</View>
-						<TouchableOpacity
-							style={styles.removeButton}
-							onPress={() => removeFromPlaylist(rs.getID(song))}
-						>
-							<Text style={styles.buttonText}>Remove</Text>
-						</TouchableOpacity>
+						{isMine ||
+						addedSongs.some((addedTrack) => addedTrack.id === rs.getID(track)) ? (
+							<TouchableOpacity
+								style={styles.removeButton}
+								onPress={() => removeFromPlaylist(rs.getID(song))}
+							>
+								<Text style={styles.buttonText}>Remove</Text>
+							</TouchableOpacity>
+						) : null}
 					</View>
 				))}
 			</ScrollView>
@@ -219,7 +262,6 @@ const EditPlaylist: React.FC = () => {
 						track={track}
 						onPlay={() => playPreview(track.preview_url || "")}
 						onAdd={() => addToPlaylist(track)}
-						onRemove={() => removeFromPlaylist(track.id)}
 						isAdded={playlist.some(
 							(selectedTrack) => selectedTrack.spotifyID === track.id,
 						)}
@@ -245,10 +287,16 @@ const styles = StyleSheet.create({
 		padding: 20,
 		backgroundColor: "#fff",
 	},
+	backButton: {
+		position: "absolute",
+		left: 0,
+		top: -10,
+	},
 	input: {
+		marginTop: 30,
 		borderWidth: 1,
 		borderColor: "#ccc",
-		borderRadius: 15,
+		borderRadius: 20,
 		padding: 10,
 		marginBottom: 15,
 	},
@@ -306,25 +354,24 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	saveButton: {
-		backgroundColor: "#8b8fa8",
+		backgroundColor: colors.secondary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
 		justifyContent: "center",
 		elevation: 5,
-		marginTop: 20,
+		marginTop: 10,
 	},
 	removeButton: {
-		backgroundColor: "red",
+		backgroundColor: "#ff5c5c",
 		borderRadius: 30,
 		height: 30,
 		alignItems: "center",
 		justifyContent: "center",
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
 	},
 	buttonText: {
 		color: "#fff",
-		fontSize: 16,
 		fontWeight: "bold",
 	},
 });

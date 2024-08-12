@@ -53,10 +53,47 @@ const Playlist = () => {
 	useEffect(() => {
 		setPlaylist(live.getLastRoomQueue());
 	}, []);
+	const [playlist, setPlaylist] = useState<Track[]>([]);
+	const [votes, setVotes] = useState<number[]>([]); // Track votes for each song
 
 	useEffect(() => {
-		console.log("Current Track Index:", Number(currentTrackIndex));
-	}, [currentTrackIndex]);
+		try {
+			if (typeof queue === "string") {
+				const parsedQueue = JSON.parse(queue) as Track[];
+				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
+			} else if (Array.isArray(queue)) {
+				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
+				setPlaylist(parsedQueue);
+				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
+			}
+		} catch (error) {
+			console.error("Failed to parse queue:", error);
+		}
+	}, [queue]);
+
+	// Function to handle voting
+	const handleVoteChange = (index: number, newVoteCount: number) => {
+		const updatedVotes = [...votes];
+		updatedVotes[index] = newVoteCount;
+
+		const sortedPlaylist = [...playlist]
+			.map((track, i) => ({ track, vote: updatedVotes[i], index: i }))
+			.sort((a, b) => {
+				if (a.vote === b.vote) return a.index - b.index; // Keep original order for same votes
+				return b.vote - a.vote; // Sort descending by votes
+			})
+			.map((item) => item.track);
+
+		// Ensure songs don't move above the current track index
+		const finalPlaylist = [
+			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
+			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
+		];
+
+		setVotes(updatedVotes);
+		setPlaylist(finalPlaylist);
+	};
 
 	const navigateToAddSong = () => {
 		console.log("curr room_id:", Room_id);
@@ -65,6 +102,7 @@ const Playlist = () => {
 			params: {
 				currentTrackIndex: currentTrackIndex,
 				Room_id: Room_id,
+				isMine: mine,
 			},
 		});
 	};
@@ -93,19 +131,40 @@ const Playlist = () => {
 						swapSongs={(index, direction) => {}} // Pass an appropriate function here
 					/>
 				))}
+				{playlist.length > 0 ? (
+					playlist.map((track, index) => (
+						<SongList
+							key={index}
+							songNumber={index + 1}
+							track={track}
+							voteCount={votes[index]}
+							showVoting={true}
+							index={index}
+							isCurrent={index === Number(currentTrackIndex)}
+							swapSongs={() => {}} // Not needed here
+							setVoteCount={(newVoteCount) =>
+								handleVoteChange(index, newVoteCount)
+							}
+						/>
+					))
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty.{" "}
+							{isMine
+								? "Add some songs to get started!"
+								: "Wait for the host to add some songs."}
+						</Text>
+					</View>
+				)}
 			</View>
-			{isMine ? (
-				<View style={styles.addButtonContainer}>
-					<TouchableOpacity
-						style={styles.addButton}
-						onPress={navigateToAddSong}
-					>
-						<Text style={styles.addButtonText}>Add Song</Text>
-					</TouchableOpacity>
-				</View>
-			) : (
-				<View></View>
-			)}
+			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+				{isMine ? (
+					<Text style={styles.addButtonText}>Manage queue</Text>
+				) : (
+					<Text style={styles.addButtonText}>Add Song</Text>
+				)}
+			</TouchableOpacity>
 		</View>
 	);
 };
@@ -132,6 +191,17 @@ const styles = StyleSheet.create({
 	songListContainer: {
 		flex: 1,
 		marginTop: 16,
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	addButtonContainer: {
 		alignItems: "center",

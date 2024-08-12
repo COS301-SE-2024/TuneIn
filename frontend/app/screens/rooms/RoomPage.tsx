@@ -46,6 +46,11 @@ import { colors } from "../../styles/colors";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
+type EmojiReaction = {
+	emoji: string;
+	userId: string; // Add more properties if needed
+};
+
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
@@ -96,6 +101,9 @@ const RoomPage = () => {
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
 	const bookmarker = useRef(new Bookmarker()).current;
+	const truncateUsername = (username: string) => {
+		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+	};
 
 	//Emoji picker
 	const [object, setObject] = useState<ObjectConfig[]>([]);
@@ -564,7 +572,9 @@ const RoomPage = () => {
 							source={{ uri: roomData.userProfile }}
 							style={styles.userImage}
 						/>
-						<Text style={styles.username}>{roomData.username}</Text>
+						<Text style={styles.username}>
+							{truncateUsername(roomData.username)}
+						</Text>
 					</View>
 
 					{/* Right side */}
