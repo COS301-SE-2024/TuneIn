@@ -33,7 +33,7 @@ const WelcomeScreen: React.FC = () => {
 		<View style={styles.container}>
 			<view style={styles.imageContainer}>
 				<ImageBackground
-					source={require("../../assets/logo4.png")}
+					source={require("../../assets/logo8.png")}
 					style={[styles.imageBackground, { width, height: height * 0.6 }]}
 					resizeMode="cover"
 				>
@@ -63,15 +63,13 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	imageContainer: {
-		paddingTop: 40,
+		paddingTop: 60,
 		flex: 1,
 		justifyContent: "center",
-		// paddingBottom: -20,
 	},
 	imageBackground: {
 		width: "100%",
 		height: "50%",
-		// position: "relative",
 	},
 	innerContainer: {
 		flex: 1,
