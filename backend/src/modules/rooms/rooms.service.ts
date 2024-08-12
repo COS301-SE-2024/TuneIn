@@ -27,7 +27,6 @@ import {
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
-import { PartialType } from '@nestjs/swagger';
 
 @Injectable()
 export class RoomsService {
@@ -162,7 +161,7 @@ export class RoomsService {
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
 				where: {
-					user_id: user_id
+					user_id: user_id,
 				},
 			});
 
@@ -221,7 +220,7 @@ export class RoomsService {
 					room_leave_time: null,
 				},
 			});
-			if(user === null) {
+			if (user === null) {
 				return false;
 			}
 			// if the user has been successfully remove from the room, then update the room_leave_time to the user_activity table
@@ -1531,7 +1530,11 @@ export class RoomsService {
 	}
 
 	// define a function that will archive all the songs in a room
-	async archiveRoomSongs(roomID: string, userID: string, archiveInfo: any): Promise<void> {
+	async archiveRoomSongs(
+		roomID: string,
+		userID: string,
+		archiveInfo: any,
+	): Promise<void> {
 		// get all the songs in the room from the queue table
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
@@ -1562,7 +1565,7 @@ export class RoomsService {
 				name: archiveInfo.name,
 				description: archiveInfo.description,
 				user_id: userID,
-				playlist: playlist
+				playlist: playlist,
 			},
 		});
 
@@ -1570,7 +1573,10 @@ export class RoomsService {
 		if (result) {
 			throw new HttpException("Playlist created", HttpStatus.OK);
 		}
-		throw new HttpException("Failed to create playlist", HttpStatus.INTERNAL_SERVER_ERROR);
+		throw new HttpException(
+			"Failed to create playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
 	}
 
 	async getArchivedSongs(userID: string): Promise<any> {
@@ -1583,7 +1589,7 @@ export class RoomsService {
 		const playlists: any = await this.prisma.playlist.findMany({
 			where: {
 				user_id: userID,
-			}
+			},
 		});
 		// if there are no playlists, return false
 		console.log("Playlists: ", playlists);
@@ -1607,7 +1613,7 @@ export class RoomsService {
 			where: {
 				user_id: userID,
 				playlist_id: playlistID,
-			}
+			},
 		});
 		// if the playlist does not exist, return false
 		if (!playlist || playlist === null) {
@@ -1617,13 +1623,16 @@ export class RoomsService {
 		const result = await this.prisma.playlist.delete({
 			where: {
 				playlist_id: playlistID,
-			}
+			},
 		});
 		// if the playlist is deleted, return true
 		if (result) {
 			throw new HttpException("Playlist deleted", HttpStatus.OK);
 		}
-		throw new HttpException("Failed to delete playlist", HttpStatus.INTERNAL_SERVER_ERROR);
+		throw new HttpException(
+			"Failed to delete playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
 	}
 
 	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
@@ -1633,31 +1642,34 @@ export class RoomsService {
 		const room: any = await this.prisma.participate.findFirst({
 			where: {
 				user_id: userID,
-			}, include: {
-				room: true
-			}
+			},
+			include: {
+				room: true,
+			},
 		});
-		// if the user is in a room, get the join time from the user_activity table. 
+		// if the user is in a room, get the join time from the user_activity table.
 		// do the query on user id and retrieve the activity with a leave date of null
 		// if the user is not in a room, return null
-		if(room === null) {
+		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
 		const userActivity: any = await this.prisma.user_activity.findFirst({
 			where: {
 				user_id: userID,
 				room_id: room.room_id,
-				room_leave_time: null
-			}
+				room_leave_time: null,
+			},
 		});
 		// add the join date to the returned object
-		try{
+		try {
 			room.room_join_time = userActivity.room_join_time;
 		} catch (error) {
 			console.error("Error getting room join time:", error);
-			throw new HttpException("Error getting room join time", HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpException(
+				"Error getting room join time",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
 		}
 		return room;
 	}
-
 }
