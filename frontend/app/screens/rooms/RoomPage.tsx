@@ -29,6 +29,7 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
+import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { Player } from "../../PlayerContext";
@@ -50,6 +51,7 @@ type EmojiReaction = {
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
+	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -402,6 +404,41 @@ const RoomPage = () => {
 		};
 	}, [isPlaying]);
 
+	// const handleJoinLeave = async () => {
+	// 	console.log("Joining/Leaving room...", joined);
+	// 	setJoined((prevJoined) => !prevJoined);
+	// 	if (!joined) {
+	// 		// joinRoom();
+	// 		const token = await auth.getToken();
+	// 		currentRoom.leaveJoinRoom(token as string, roomID, false);
+	// 		setJoined(true);
+	// 		live.joinRoom(roomID, setJoined, setMessages, setMessage);
+	// 		//setJoined(true);
+	// 		setJoinedSongIndex(currentTrackIndex);
+	// 		setJoinedSecondsPlayed(secondsPlayed);
+	// 		console.log(
+	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+	// 		);
+	// 	} else {
+	// 		const token = await auth.getToken();
+	// 		currentRoom.leaveJoinRoom(token as string, roomID, true);
+	// 		// leaveRoom();
+	// 		setJoined(false);
+	// 		playbackManager.pause();
+	// 		//leaveRoom();
+	// 		live.leaveRoom();
+	// 		//setJoined(false);
+	// 		setJoinedSongIndex(null);
+	// 		setJoinedSecondsPlayed(null);
+	// 		//playbackManager.pause();
+	// 		const deviceID = await playback.getFirstDevice();
+	// 		if (deviceID && deviceID !== null) {
+	// 			playback.handlePlayback(deviceID, "pause");
+	// 		}
+	// 		setIsPlaying(false);
+	// 	}
+	// };
+
 	const playPauseTrack = useCallback(
 		async (index: number, offset: number) => {
 			/*
@@ -468,7 +505,11 @@ const RoomPage = () => {
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
 		setJoined(!joined);
+		const token = await auth.getToken();
+		console.log("Token fr fr:", token);
 		if (!joined) {
+			console.log("Joining room........", roomID, token);
+			roomCurrent.leaveJoinRoom(token as string, roomID, false);
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages, setMessage);
 			setJoinedSongIndex(currentTrackIndex);
@@ -478,6 +519,8 @@ const RoomPage = () => {
 			);
 		} else {
 			leaveRoom();
+			setJoined(false);
+			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			live.leaveRoom();
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);

@@ -78,15 +78,7 @@ export class RoomsService {
 	}
 
 	async getRoomInfo(roomID: string): Promise<RoomDto> {
-		// TODO: Implement logic to get room info
-		// an an example to generate a RoomDto
-		/*
-		const roomID = "xxxx"
-		const room = await this.dtogen.generateRoomDto(roomID);
-		if (room) {
-			return room;
-		}
-		*/
+		console.log("Getting room info for room", roomID);
 		try {
 			const room = await this.prisma.room.findFirst({
 				where: {
@@ -103,17 +95,6 @@ export class RoomsService {
 			console.error("Error getting room info:", error);
 			return new RoomDto();
 		}
-		// const room = await this.prisma.room.findFirst({
-		// 	where: {
-		// 		room_id: roomID
-		// 	}
-		// });
-		// if (!room) {
-		// 	return new RoomDto();
-		// }
-		// // filter out null values
-		// const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-		// return roomDto? roomDto : new RoomDto();
 	}
 
 	async updateRoomInfo(
@@ -174,13 +155,12 @@ export class RoomsService {
 		}
 	}
 
-	async joinRoom(room_id: string, user_id: string): Promise<boolean> {
-		console.log("user", user_id, "joining room", room_id);
+	async joinRoom(_room_id: string, user_id: string): Promise<boolean> {
+		console.log("user", user_id, "joining room", _room_id);
 		try {
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
 				where: {
-					room_id: room_id,
 					user_id: user_id,
 				},
 			});
@@ -191,14 +171,21 @@ export class RoomsService {
 			// Add the user to the room
 			await this.prisma.participate.create({
 				data: {
-					room_id: room_id,
+					room_id: _room_id,
 					user_id: user_id,
 				},
 			});
-
+			// add user to the user_activity table
+			await this.prisma.user_activity.create({
+				data: {
+					room_id: _room_id,
+					user_id: user_id,
+					room_join_time: new Date(),
+				},
+			});
 			return true;
 		} catch (error) {
-			console.error("Error joining room:");
+			console.error("Error joining room:", error);
 			return false;
 		}
 	}
@@ -226,10 +213,28 @@ export class RoomsService {
 					participate_id: room.participate_id,
 				},
 			});
-
+			const user = await this.prisma.user_activity.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id,
+					room_leave_time: null,
+				},
+			});
+			if (user === null) {
+				return false;
+			}
+			// if the user has been successfully remove from the room, then update the room_leave_time to the user_activity table
+			await this.prisma.user_activity.update({
+				where: {
+					activity_id: user.activity_id,
+				},
+				data: {
+					room_leave_time: new Date(),
+				},
+			});
 			return true;
 		} catch (error) {
-			console.error("Error leaving room:");
+			console.error("Error leaving room:", error);
 			return false;
 		}
 	}
@@ -1522,5 +1527,149 @@ export class RoomsService {
 				"Failed to save reaction. Database returned null after insert.",
 			);
 		}
+	}
+
+	// define a function that will archive all the songs in a room
+	async archiveRoomSongs(
+		roomID: string,
+		userID: string,
+		archiveInfo: any,
+	): Promise<void> {
+		// get all the songs in the room from the queue table
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const songs: any = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		// if there are no songs in the room, return false
+		if (!songs || songs === null) {
+			throw new HttpException("No songs in the room", HttpStatus.NOT_FOUND);
+		}
+		// create a playlist as an array of song ids
+		const playlist: string[] = [];
+		for (const song of songs) {
+			playlist.push(song.song_id);
+		}
+
+		// add the songs to the playlist table
+		const result = await this.prisma.playlist.create({
+			data: {
+				name: archiveInfo.name,
+				description: archiveInfo.description,
+				user_id: userID,
+				playlist: playlist,
+			},
+		});
+
+		// if the playlist is created, return true
+		if (result) {
+			throw new HttpException("Playlist created", HttpStatus.OK);
+		}
+		throw new HttpException(
+			"Failed to create playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
+	}
+
+	async getArchivedSongs(userID: string): Promise<any> {
+		// get all the playlists created by the user
+		console.log("User ID: ", userID, " is getting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlists: any = await this.prisma.playlist.findMany({
+			where: {
+				user_id: userID,
+			},
+		});
+		// if there are no playlists, return false
+		console.log("Playlists: ", playlists);
+		if (!playlists || playlists === null) {
+			throw new HttpException("No playlists found", HttpStatus.NOT_FOUND);
+		}
+		return playlists;
+	}
+
+	async deleteArchivedSongs(userID: string, playlistID: string): Promise<void> {
+		// delete the playlist created by the user
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		console.log("User ID: ", userID, " is deleting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlist: any = await this.prisma.playlist.findFirst({
+			where: {
+				user_id: userID,
+				playlist_id: playlistID,
+			},
+		});
+		// if the playlist does not exist, return false
+		if (!playlist || playlist === null) {
+			throw new HttpException("Playlist not found", HttpStatus.NOT_FOUND);
+		}
+		// delete the playlist
+		const result = await this.prisma.playlist.delete({
+			where: {
+				playlist_id: playlistID,
+			},
+		});
+		// if the playlist is deleted, return true
+		if (result) {
+			throw new HttpException("Playlist deleted", HttpStatus.OK);
+		}
+		throw new HttpException(
+			"Failed to delete playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
+	}
+
+	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const room: any = await this.prisma.participate.findFirst({
+			where: {
+				user_id: userID,
+			},
+			include: {
+				room: true,
+			},
+		});
+		// if the user is in a room, get the join time from the user_activity table.
+		// do the query on user id and retrieve the activity with a leave date of null
+		// if the user is not in a room, return null
+		if (room === null) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		const userActivity: any = await this.prisma.user_activity.findFirst({
+			where: {
+				user_id: userID,
+				room_id: room.room_id,
+				room_leave_time: null,
+			},
+		});
+		// add the join date to the returned object
+		try {
+			room.room_join_time = userActivity.room_join_time;
+		} catch (error) {
+			console.error("Error getting room join time:", error);
+			throw new HttpException(
+				"Error getting room join time",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+		return room;
 	}
 }

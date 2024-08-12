@@ -60,6 +60,7 @@ export class RoomsController {
 	})
 	@ApiTags("rooms")
 	async getNewRooms(): Promise<RoomDto[]> {
+		console.log("getting new rooms");
 		return await this.roomsService.getNewRooms();
 	}
 
@@ -545,5 +546,93 @@ export class RoomsController {
 	): Promise<RoomAnalyticsKeyMetricsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.roomsService.getKeyMetrics(userInfo.id);
+	}
+
+	// define an endpoint for room song archival
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":roomID/archive/playlist")
+	@ApiTags("rooms")
+	@ApiOperation({ summary: "Archive a room's songs" })
+	@ApiParam({ name: "roomID" })
+	@ApiOkResponse({
+		description: "Room songs archived successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async archiveRoomSongs(
+		@Request() req: any,
+		@Param("roomID") roomID: string,
+		// define the body of the request as a json with playlist name and description
+		@Body()
+		archiveInfo: {
+			name: string;
+			description: string;
+		},
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
+	}
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("archive/playlist")
+	@ApiOperation({ summary: "Get a user's archived songs" })
+	@ApiOkResponse({
+		description: "User's archived songs retrieved successfully",
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getArchivedSongs(@Request() req: any): Promise<any> {
+		console.log("getting archived songs");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.getArchivedSongs(userInfo.id);
+	}
+
+	// define an endpoint for deleting a user's archived songs based on playlist id
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Delete("archive/playlist/:playlistID")
+	@ApiOperation({ summary: "Delete a user's archived songs" })
+	@ApiParam({ name: "playlistID" })
+	@ApiOkResponse({
+		description: "User's archived songs deleted successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Playlist not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async deleteArchivedSongs(
+		@Request() req: any,
+		@Param("playlistID") playlistID: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
+	}
+
+	// define an endpoint for getting a user's current room
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("current/room")
+	@ApiOperation({ summary: "Get a user's current room" })
+	@ApiOkResponse({
+		description: "User's current room retrieved successfully",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getCurrentRoom(@Request() req: any): Promise<any> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.getCurrentRoom(userInfo.id);
 	}
 }
