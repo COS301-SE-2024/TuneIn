@@ -521,11 +521,7 @@ const Search: React.FC = () => {
 					onPress={handleSearch}
 					testID="search-button"
 				>
-					<Ionicons
-						name="search-circle-sharp"
-						size={40}
-						color={colors.primary}
-					/>
+					<Ionicons name="search-sharp" size={30} color={colors.primary} />
 				</TouchableOpacity>
 			</View>
 			<View style={styles.filterContainer}>
@@ -703,9 +699,9 @@ const Search: React.FC = () => {
 					<View style={styles.roomCardPadding}>
 						{filter === "room" ? (
 							<>
+								{/* <SkeletonRoomCard />
 								<SkeletonRoomCard />
-								<SkeletonRoomCard />
-								<SkeletonRoomCard />
+								<SkeletonRoomCard /> */}
 							</>
 						) : (
 							<>
@@ -796,7 +792,7 @@ const styles = StyleSheet.create({
 	filterButton: {
 		paddingVertical: 10,
 		paddingHorizontal: 20,
-		borderRadius: 7,
+		borderRadius: 20,
 		borderWidth: 1,
 		borderColor: "#ccc",
 	},
