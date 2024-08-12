@@ -534,7 +534,8 @@ export class RoomsController {
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get key metrics for user's rooms" })
 	@ApiOkResponse({
-		description: "The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+		description:
+			"The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -545,5 +546,4 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.roomsService.getKeyMetrics(userInfo.id);
 	}
-
 }
