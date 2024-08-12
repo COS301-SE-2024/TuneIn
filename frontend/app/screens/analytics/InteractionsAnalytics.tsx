@@ -69,13 +69,16 @@ const InteractionsAnalytics: React.FC = () => {
 			const accessToken: string | null = await AuthManagement.getToken();
 			const currentRoom = await StorageService.getItem("currentRoom");
 			console.log("current roooooom", currentRoom);
-			const response = await fetch(`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
-			if(interactionAnalytics === null) setInteractionAnalytics(data);
+			if (interactionAnalytics === null) setInteractionAnalytics(data);
 		};
 
 		fetchInteractionAnalytics();
@@ -94,38 +97,33 @@ const InteractionsAnalytics: React.FC = () => {
 		setSelectedRoom(selected);
 		console.log("selected room", selectedRoom?.roomID);
 		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
+		const response = await fetch(
+			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
 			},
-		});
+		);
 		const data = await response.json();
 		// if (data.statusCode !== 200) {
 		// 	console.log("error fetching interaction analytics");
 		// 	return;
 		// }
-		if(interactionAnalytics?.bookmarked_count === undefined) setInteractionAnalytics(data);
+		if (interactionAnalytics?.bookmarked_count === undefined)
+			setInteractionAnalytics(data);
 		console.log("interaction analytics", interactionAnalytics);
 		// close the dropdown
 	};
 
 	// Sample data for the past seven days
 	console.log("interaction stuffs", interactionAnalytics);
-	// const data = [
-	// 	{ label: "Day 1", value: 50 },
-	// 	{ label: "Day 2", value: 60 },
-	// 	{ label: "Day 3", value: 70 },
-	// 	{ label: "Day 4", value: 65 },
-	// 	{ label: "Day 5", value: 80 },
-	// 	{ label: "Day 6", value: 90 },
-	// 	{ label: "Day 7", value: 85 },
-	// 	{ label: "Day 8", value: 100 },
-	// 	{ label: "Day 9", value: 110 },
-	// 	{ label: "Day 10", value: 120 },
-	// ];
 
 	const data = interactionAnalytics?.messages?.per_hour?.map((hour) => {
-		return { label: (new Date (hour.hour)).getHours().toString() + ":00", value: hour.count };
+		return {
+			label: new Date(hour.hour).getHours().toString() + ":00",
+			value: hour.count,
+		};
 	});
 	console.log("data", data);
 
@@ -162,13 +160,16 @@ const InteractionsAnalytics: React.FC = () => {
 					<Text style={styles.headerTitle}>User Interactions in Room</Text>
 					<View style={styles.headerSpacer} />
 				</View>
-				<RoomDropdown initialRooms={rooms ?? []} onRoomPick={handleRoomSelect}/>
+				<RoomDropdown
+					initialRooms={rooms ?? []}
+					onRoomPick={handleRoomSelect}
+				/>
 				<LineGraphCard data={data ?? []} title="Daily Messages" />
 				<IconProgressCard
 					icon="message"
 					header="Messages"
 					number={interactionAnalytics?.messages?.total?.toString() ?? "0"}
-					progress={((interactionAnalytics?.messages?.total)) ?? 0 } // Progress from 0 to 1
+					progress={interactionAnalytics?.messages?.total ?? 0} // Progress from 0 to 1
 				/>
 				<IconProgressCard
 					icon="emoji-happy"

@@ -95,7 +95,7 @@ const PlaylistAnalytics: React.FC = () => {
 						/>
 					))}
 				</View>
-				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick}/>
+				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick} />
 				<View style={styles.cardsContainer}>
 					<MetricsCard
 						title="Total Upvotes"

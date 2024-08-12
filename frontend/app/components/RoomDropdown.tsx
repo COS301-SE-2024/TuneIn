@@ -10,15 +10,16 @@ import {
 	Modal,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { get } from "http";
-import { on } from "events";
 
 type RoomDropdownProps = {
 	initialRooms: string[];
 	onRoomPick: (room: string) => void;
 };
 
-const RoomDropdown: React.FC<RoomDropdownProps> = ({ initialRooms, onRoomPick}) => {
+const RoomDropdown: React.FC<RoomDropdownProps> = ({
+	initialRooms,
+	onRoomPick,
+}) => {
 	const [rooms, setRooms] = useState<string[]>(initialRooms);
 	const [selectedRoom, setSelectedRoom] = useState<string>(initialRooms[0]);
 	const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
