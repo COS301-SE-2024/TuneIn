@@ -381,8 +381,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.emit(SOCKET_EVENTS.USER_JOINED_ROOM, joinAnnouncement);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
 
+				if (await this.roomQueue.isPlaying(roomID)) {
+					await this.sendMediaState(roomID);
+					await this.sendQueueState(roomID);
+				}
 				//send current media state
-				this.sendMediaState(roomID);
+				await this.sendMediaState(roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -968,15 +972,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
-				const queueState: {
-					room: RoomDto;
-					songs: RoomSongDto[];
-					votes: VoteDto[];
-				} = await this.roomQueue.getQueueState(payload.roomID);
-				this.server
-					.to(payload.roomID)
-					.emit(SOCKET_EVENTS.QUEUE_STATE, queueState);
-				console.log("Response emitted: " + SOCKET_EVENTS.QUEUE_STATE);
+				await this.sendQueueState(payload.roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -1003,6 +999,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.server.to(roomID).emit(SOCKET_EVENTS.CURRENT_MEDIA, response);
 			console.log("Response emitted: " + SOCKET_EVENTS.CURRENT_MEDIA);
 		}
+	}
+
+	async sendQueueState(roomID: string): Promise<void> {
+		const queueState: {
+			room: RoomDto;
+			songs: RoomSongDto[];
+			votes: VoteDto[];
+		} = await this.roomQueue.getQueueState(roomID);
+		this.server.to(roomID).emit(SOCKET_EVENTS.QUEUE_STATE, queueState);
+		console.log("Response emitted: " + SOCKET_EVENTS.QUEUE_STATE);
 	}
 
 	async validateChatEvent(payload: string): Promise<ChatEventDto> {
