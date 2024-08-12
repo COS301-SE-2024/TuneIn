@@ -33,7 +33,6 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import * as StorageService from "../../services/StorageService";
 import { live } from "../../services/Live";
 import { colors } from "../../styles/colors";
 
@@ -153,7 +152,7 @@ const RegisterOtherScreen: React.FC = () => {
 				);
 			}
 		}
-	}, [response]);
+	}, [response, redirectURI, router]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,

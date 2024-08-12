@@ -23,7 +23,7 @@ describe("HelpMenu", () => {
 	});
 
 	test("renders correctly", () => {
-		const { getByTestId, getAllByTestId } = render(<HelpMenu />);
+		const { getByTestId } = render(<HelpMenu />);
 
 		// Check if the title is rendered
 		expect(getByTestId("title")).toBeTruthy();

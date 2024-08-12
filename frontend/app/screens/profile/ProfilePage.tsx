@@ -21,6 +21,7 @@ import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 const ProfileScreen: React.FC = () => {
 	const router = useRouter();
@@ -302,7 +303,7 @@ const ProfileScreen: React.FC = () => {
 				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
 				testID="loading-indicator"
 			>
-				<ActivityIndicator size={100} color="#0000ff" />
+				<ActivityIndicator size={100} color={colors.primary} />
 			</View>
 		);
 	}

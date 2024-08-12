@@ -13,13 +13,51 @@ const Playlist = () => {
 
 	useEffect(() => {
 		try {
-			if (typeof queue === "string") {
-				const parsedQueue = JSON.parse(queue) as Track[];
-				setPlaylist(parsedQueue);
-			} else if (Array.isArray(queue)) {
-				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
-				setPlaylist(parsedQueue);
-			}
+			// if (typeof queue === "string") {
+			// 	const parsedQueue = JSON.parse(queue) as Track[];
+			// 	setPlaylist(parsedQueue);
+			// } else if (Array.isArray(queue)) {
+			// 	const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
+			// 	setPlaylist(parsedQueue);
+			// } else {
+			// Add mock songs here for testing
+			const mockSongs: Track[] = [
+				{
+					id: "1",
+					name: "Song One",
+					artists: [{ name: "Artist One" }],
+					album: { images: [{ url: "https://example.com/album1.jpg" }] },
+					explicit: false,
+					preview_url: "https://example.com/preview1.mp3",
+					uri: "spotify:track:1",
+					duration_ms: 210000, // 3 minutes and 30 seconds
+					albumArtUrl: "https://example.com/album1.jpg",
+				},
+				{
+					id: "2",
+					name: "Song Two",
+					artists: [{ name: "Artist Two" }],
+					album: { images: [{ url: "https://example.com/album2.jpg" }] },
+					explicit: true,
+					preview_url: "https://example.com/preview2.mp3",
+					uri: "spotify:track:2",
+					duration_ms: 180000, // 3 minutes
+					albumArtUrl: "https://example.com/album2.jpg",
+				},
+				{
+					id: "3",
+					name: "Song Three",
+					artists: [{ name: "Artist Three" }],
+					album: { images: [{ url: "https://example.com/album3.jpg" }] },
+					explicit: false,
+					preview_url: "https://example.com/preview3.mp3",
+					uri: "spotify:track:3",
+					duration_ms: 240000, // 4 minutes
+					albumArtUrl: "https://example.com/album3.jpg",
+				},
+			];
+			setPlaylist(mockSongs);
+			// }
 		} catch (error) {
 			console.error("Failed to parse queue:", error);
 		}
