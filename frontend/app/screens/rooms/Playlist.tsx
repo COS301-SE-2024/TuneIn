@@ -54,18 +54,26 @@ const Playlist = () => {
 				<Text style={styles.pageName}>Queue</Text>
 			</View>
 			<View style={styles.songListContainer}>
-				{playlist.map((track, index) => (
-					<SongList
-						key={index}
-						songNumber={index + 1}
-						track={track}
-						voteCount={0} // Assuming voteCount is managed elsewhere
-						showVoting={false} // Assuming showVoting is managed elsewhere
-						index={index}
-						isCurrent={index === Number(currentTrackIndex)} // Check if current song
-						swapSongs={(index, direction) => {}} // Pass an appropriate function here
-					/>
-				))}
+				{playlist.length > 0 ? (
+					playlist.map((track, index) => (
+						<SongList
+							key={index}
+							songNumber={index + 1}
+							track={track}
+							voteCount={0} // Assuming voteCount is managed elsewhere
+							showVoting={false} // Assuming showVoting is managed elsewhere
+							index={index}
+							isCurrent={index === Number(currentTrackIndex)} // Check if current song
+							swapSongs={(index, direction) => {}} // Pass an appropriate function here
+						/>
+					))
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty. {isMine ? "Add some songs to get started!" : "Wait for the host to add some songs."}
+						</Text>
+					</View>
+				)}
 			</View>
 			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
 				{isMine ? (
@@ -100,6 +108,17 @@ const styles = StyleSheet.create({
 	songListContainer: {
 		flex: 1,
 		marginTop: 16,
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	addButtonContainer: {
 		alignItems: "center",
