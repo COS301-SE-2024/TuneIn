@@ -67,7 +67,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
         }
       }
     >
-      Chats 
+      Chats
     </Text>
   </View>
   <View
@@ -94,7 +94,6 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
           "paddingVertical": 0,
         }
       }
-      testID="search-input"
       value=""
     />
     <View
@@ -208,10 +207,12 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
               "borderBottomColor": "#D1D5DB",
               "borderBottomWidth": 1,
               "flexDirection": "row",
+              "margin": 10,
               "opacity": 1,
               "padding": 10,
             }
           }
+          testID="chat-item-touchable"
         >
           <Image
             source={
@@ -227,6 +228,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
                 "width": 48,
               }
             }
+            testID="chat-item-avatar"
           />
           <View
             style={
@@ -297,10 +299,12 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
               "borderBottomColor": "#D1D5DB",
               "borderBottomWidth": 1,
               "flexDirection": "row",
+              "margin": 10,
               "opacity": 1,
               "padding": 10,
             }
           }
+          testID="chat-item-touchable"
         >
           <Image
             source={
@@ -316,6 +320,7 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
                 "width": 48,
               }
             }
+            testID="chat-item-avatar"
           />
           <View
             style={
@@ -349,5 +354,50 @@ exports[`ChatListScreen renders the chat list screen correctly 1`] = `
       </View>
     </View>
   </RCTScrollView>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onClick={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#08BDBD",
+        "borderRadius": 30,
+        "bottom": 20,
+        "height": 60,
+        "justifyContent": "center",
+        "opacity": 1,
+        "position": "absolute",
+        "right": 20,
+        "width": 60,
+      }
+    }
+  >
+    <Text />
+  </View>
 </View>
 `;

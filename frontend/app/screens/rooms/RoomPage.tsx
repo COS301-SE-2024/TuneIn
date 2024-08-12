@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback, memo } from "react";
+import React, {
+	useEffect,
+	useState,
+	useRef,
+	useCallback,
+	memo,
+	useContext,
+} from "react";
 import {
 	View,
 	Text,
@@ -15,25 +22,34 @@ import {
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import PlaybackManager from "../PlaybackManager";
 import Bookmarker from "./functions/Bookmarker";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+import { Player } from "../../PlayerContext";
 import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
-
+import { formatRoomData } from "../../models/Room";
+import { FlyingView, ObjectConfig } from "react-native-flying-objects";
+import EmojiPicker, {
+	EmojiPickerRef,
+} from "../../components/rooms/emojiPicker";
+import { colors } from "../../styles/colors";
 const MemoizedCommentWidget = memo(CommentWidget);
+
+type EmojiReaction = {
+	emoji: string;
+	userId: string; // Add more properties if needed
+};
 
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
-	console.log("here");
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -41,12 +57,27 @@ const RoomPage = () => {
 		roomData = JSON.parse(room);
 	}
 	const roomID = roomData.id;
-	console.log("Room ID:", roomID);
+
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { currentRoom, setCurrentRoom } = playerContext;
+	const [joined, setJoined] = useState(false);
+
+	useEffect(() => {
+		console.log("Room ID: " + currentRoom?.roomID);
+		if (currentRoom && currentRoom?.roomID === roomID) {
+			setJoined(true);
+		}
+	}, [currentRoom, roomID]);
 
 	const router = useRouter();
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
-	const [joined, setJoined] = useState(false);
 	const [queue, setQueue] = useState<Track[]>([]);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -59,10 +90,27 @@ const RoomPage = () => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
-	const playback = useRef(SimpleSpotifyPlayback.getInstance()).current;
+	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
-	const playbackManager = useRef(new PlaybackManager()).current;
 	const bookmarker = useRef(new Bookmarker()).current;
+	const truncateUsername = (username: string) => {
+		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+	};
+
+	//Emoji picker
+	const [object, setObject] = useState<ObjectConfig[]>([]);
+	const emojiPickerRef = useRef<EmojiPickerRef>(null);
+
+	const handleSelectEmoji = (emoji: string) => {
+		setObject((prev) => [
+			...prev,
+			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
+		]);
+	};
+
+	const passEmojiToTextField = (emoji: string) => {
+		emojiPickerRef.current?.passEmojiToTextField(emoji);
+	};
 
 	const checkBookmark = useCallback(async () => {
 		try {
@@ -109,6 +157,158 @@ const RoomPage = () => {
 			console.error("Error:", error);
 		}
 	};
+
+	const joinRoom = useCallback(() => {
+		const formattedRoom = formatRoomData(roomData);
+		setJoined(true);
+		setCurrentRoom(formattedRoom);
+		// if (userRef.current && socket.current) {
+		// 	const u: UserDto = userRef.current;
+		// 	const input: ChatEventDto = {
+		// 		userID: u.userID,
+		// 		body: {
+		// 			messageBody: "",
+		// 			sender: u,
+		// 			roomID: roomID,
+		// 			dateCreated: new Date(),
+		// 		},
+		// 	};
+		// 	socket.current.emit("joinRoom", JSON.stringify(input));
+		//
+		// }
+	}, [roomData, setCurrentRoom]);
+
+	const leaveRoom = () => {
+		// if (userRef.current && socket.current) {
+		// 	const u: UserDto = userRef.current;
+		// 	const input: ChatEventDto = {
+		// 		userID: u.userID,
+		// 		body: {
+		// 			messageBody: "",
+		// 			sender: u,
+		// 			roomID: roomID,
+		// 			dateCreated: new Date(),
+		// 		},
+		// 	};
+		// 	console.log("Socket emit: leaveRoom", input);
+		// 	socket.current.emit("leaveRoom", JSON.stringify(input));
+		// 	setJoined(false);
+
+		// }
+		setCurrentRoom(null);
+	};
+	//init & connect to socket
+	// useEffect(() => {
+	// 	const getTokenAndSelf = async () => {
+	// 		const storedToken = await auth.getToken();
+	// 		console.log("token:", token);
+	// 		token.current = storedToken;
+	// 		console.log("Stored token:", token.current);
+	// 		try {
+	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+	// 				headers: {
+	// 					Authorization: `Bearer ${storedToken}`,
+	// 				},
+	// 			});
+	// 			userRef.current = response.data as UserDto;
+	// 		} catch (error) {
+	// 			console.error("Error fetching user's own info:", error);
+	// 		}
+
+	// 		try {
+	// 			const roomDto = await axios.get(
+	// 				`${utils.API_BASE_URL}/rooms/${roomID}`,
+	// 				{
+	// 					headers: {
+	// 						Authorization: `Bearer ${storedToken}`,
+	// 					},
+	// 				},
+	// 			);
+	// 			roomObjRef.current = roomDto.data;
+	// 		} catch (error) {
+	// 			console.error("Error fetching room:", error);
+	// 		}
+	// 	};
+
+	// 	const setupSocketEventHandlers = () => {
+	// 		console.log("Setting up socket event handlers...");
+	// 		if (socket.current) {
+	// 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+	// 				const u = userRef.current;
+	// 				if (u) {
+	// 					console.log("User joined room:", response);
+	// 					const input: ChatEventDto = {
+	// 						userID: u.userID,
+	// 						body: {
+	// 							messageBody: "",
+	// 							sender: u,
+	// 							roomID: roomID,
+	// 							dateCreated: new Date(),
+	// 						},
+	// 					};
+
+	// 					console.log("Socket emit: getChatHistory", input);
+	// 					if (socket.current)
+	// 						socket.current.emit("getChatHistory", JSON.stringify(input));
+	// 				}
+	// 			});
+
+	// 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
+	// 				const u = userRef.current;
+	// 				if (u) {
+	// 					const chatHistory = history.map((msg) => ({
+	// 						message: msg,
+	// 						me: msg.sender.userID === u.userID,
+	// 					}));
+	// 					setMessages(chatHistory);
+	// 				}
+	// 			});
+
+	// 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+	// 				console.log("Received live message:", newMessage);
+	// 				const message = newMessage.body;
+	// 				const u = userRef.current;
+	// 				if (message && u) {
+	// 					const me: boolean = message.sender.userID === u.userID;
+	// 					if (me) {
+	// 						setMessage("");
+	// 					}
+	// 					setMessages((prevMessages) => [
+	// 						...prevMessages,
+	// 						{ message, me: message.sender.userID === u.userID },
+	// 					]);
+	// 				}
+	// 			});
+
+	// 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+	// 				console.log("User left room:", response);
+	// 			});
+
+	// 			socket.current.on("error", (response: ChatEventDto) => {
+	// 				console.error("Error:", response.errorMessage);
+	// 			});
+	// 		}
+
+	// 		if (socket.current) {
+	// 			socket.current.on("connect", () => {
+	// 				if (userRef.current) {
+	// 					const input: ChatEventDto = {
+	// 						userID: userRef.current.userID,
+	// 					};
+	// 					if (socket.current)
+	// 						socket.current.emit("connectUser", JSON.stringify(input));
+	// 				}
+	// 			});
+
+	// 			socket.current.on("connected", (response: ChatEventDto) => {
+	// 				if (!joined && readyToJoinRoom) {
+	// 					// joinRoom();
+	// 				}
+	// 			});
+	// 		}
+	// 	};
+
+	// 	getTokenAndSelf();
 	// 	checkBookmark();
 
 	const trackPositionIntervalRef = useRef<number | null>(null);
@@ -139,9 +339,6 @@ const RoomPage = () => {
 					},
 				);
 
-				console.log("URL: ", `${utils.API_BASE_URL}/rooms/${roomID}/songs`);
-				console.log("response: ", response);
-
 				if (!response.ok) {
 					const errorText = await response.text();
 					console.error(
@@ -152,8 +349,6 @@ const RoomPage = () => {
 				}
 
 				const data = await response.json();
-				console.log("Fetched queue data:", data);
-
 				if (Array.isArray(data)) {
 					const tracks: Track[] = data.map((item: any) => ({
 						id: item.id,
@@ -225,7 +420,7 @@ const RoomPage = () => {
 			}
 		},
 		//[queue, playbackManager],
-		[],
+		[playback, roomID],
 	);
 
 	const playNextTrack = () => {
@@ -270,20 +465,18 @@ const RoomPage = () => {
 
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
-		setJoined((prevJoined) => !prevJoined);
+		setJoined(!joined);
 		if (!joined) {
-			// joinRoom();
+			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages, setMessage);
-			//setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
-			//leaveRoom();
+			leaveRoom();
 			live.leaveRoom();
-			//setJoined(false);
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
 			//playbackManager.pause();
@@ -316,9 +509,13 @@ const RoomPage = () => {
 
 	return (
 		<View style={styles.container}>
-			{/* <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-				<Text style={styles.backButtonText}>← Back</Text>
-			</TouchableOpacity> */}
+			<TouchableOpacity
+				onPress={() => router.back()}
+				style={styles.backButton}
+				testID="backButton"
+			>
+				<Ionicons name="chevron-back" size={24} color="black" />
+			</TouchableOpacity>
 
 			<Image
 				source={{ uri: roomData.backgroundImage }}
@@ -348,7 +545,9 @@ const RoomPage = () => {
 							source={{ uri: roomData.userProfile }}
 							style={styles.userImage}
 						/>
-						<Text style={styles.username}>{roomData.username}</Text>
+						<Text style={styles.username}>
+							{truncateUsername(roomData.username)}
+						</Text>
 					</View>
 
 					{/* Right side */}
@@ -504,17 +703,25 @@ const RoomPage = () => {
 				</TouchableOpacity>
 				{isChatExpanded && (
 					<>
-						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{messages.map((msg, index) => (
-								<MemoizedCommentWidget
-									key={index}
-									username={msg.message.sender.username}
-									message={msg.message.messageBody}
-									profilePictureUrl={msg.message.sender.profilePictureUrl}
-									me={msg.me}
-								/>
-							))}
-						</ScrollView>
+						<View style={styles.container}>
+							<ScrollView style={styles.scrollView}>
+								{messages.map((msg, index) => (
+									<MemoizedCommentWidget
+										key={index}
+										username={msg.message.sender.username}
+										message={msg.message.messageBody}
+										profilePictureUrl={msg.message.sender.profilePictureUrl}
+										me={msg.me}
+									/>
+								))}
+							</ScrollView>
+							<FlyingView
+								object={object}
+								containerProps={{
+									style: styles.flyingView,
+								}}
+							/>
+						</View>
 						<KeyboardAvoidingView
 							behavior={Platform.OS === "ios" ? "padding" : "height"}
 							keyboardVerticalOffset={90}
@@ -540,6 +747,11 @@ const RoomPage = () => {
 									onChangeText={setMessage}
 									onSubmitEditing={sendMessage}
 								/>
+
+								<EmojiPicker
+									ref={emojiPickerRef}
+									onSelectEmoji={handleSelectEmoji}
+								/>
 								<TouchableOpacity
 									onPress={sendMessage}
 									style={{ marginLeft: 10 }}
@@ -558,8 +770,18 @@ const RoomPage = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "white",
 		position: "relative",
+	},
+	scrollView: {
+		flex: 1,
+		marginTop: 10,
+	},
+	flyingView: {
+		position: "absolute",
+		top: 10, // Adjust this value as needed
+		right: 10, // Adjust this value as needed
+		width: 150,
+		height: 200,
 	},
 	backButton: {
 		position: "absolute",
@@ -752,7 +974,7 @@ const styles = StyleSheet.create({
 		marginVertical: 10,
 		paddingVertical: 8,
 		paddingHorizontal: 16,
-		backgroundColor: "#007AFF",
+		backgroundColor: colors.primary,
 		borderRadius: 20,
 	},
 	joinLeaveButtonText: {

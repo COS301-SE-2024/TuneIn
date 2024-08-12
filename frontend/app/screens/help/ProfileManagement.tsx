@@ -9,26 +9,40 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
 
 export default function ProfileManagement() {
 	const router = useRouter();
 
+	const navigateToProfile = () => {
+		router.navigate("../profile/ProfilePage");
+	};
+
+	const navigateToAnaytics = () => {
+		router.navigate("../analytics/AnalyticsPage");
+	};
+
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-			<Text style={styles.header}>Profile Management</Text>
-
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+				<Text style={styles.headerTitle}>Profile Management</Text>
+				<View style={styles.headerSpacer} />
+			</View>
 			<View style={styles.card}>
 				<View style={styles.cardContent}>
 					<FontAwesome
 						name="edit"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
-					<View style={styles.textContainer}>
+					<TouchableOpacity
+						style={styles.textContainer}
+						onPress={navigateToProfile}
+					>
 						<Text style={styles.cardTitle}>
 							Creating and Updating Your Profile
 						</Text>
@@ -37,7 +51,7 @@ export default function ProfileManagement() {
 							bookmarked rooms and unique taste profile by creating or updating
 							your profile for other users to see your music taste.
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
 			</View>
 
@@ -45,7 +59,7 @@ export default function ProfileManagement() {
 				<View style={styles.cardContent}>
 					<FontAwesome
 						name="music"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -63,7 +77,7 @@ export default function ProfileManagement() {
 				<View style={styles.cardContent}>
 					<Octicons
 						name="heart-fill"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
 					/>
@@ -76,6 +90,28 @@ export default function ProfileManagement() {
 					</View>
 				</View>
 			</View>
+			<TouchableOpacity style={styles.card} onPress={navigateToAnaytics}>
+				<View style={styles.cardContent}>
+					<Entypo
+						name="bar-graph"
+						size={28}
+						color="#08bdbd"
+						style={styles.icon}
+					/>
+					<View style={styles.textContainer}>
+						<Text style={styles.cardTitle}>Analytics</Text>
+						<Text style={styles.cardText}>
+							Users can access detailed analytics to track engagement and
+							feedback from your rooms. This includes the number of
+							participants, the most voted songs, and activity levels. To view
+							your analytics, simply navigate to your profile page and click on
+							'Settings'. From there, you can explore all available metrics.
+							These insights help you tailor your content to better meet the
+							preferences of your audience
+						</Text>
+					</View>
+				</View>
+			</TouchableOpacity>
 		</ScrollView>
 	);
 }
@@ -88,11 +124,22 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 15,
 	},
 	header: {
-		fontSize: 28,
-		fontWeight: "bold",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: 10,
 		marginBottom: 20,
-		color: "#2c3e50",
-		textAlign: "center",
+	},
+	closeButton: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	headerTitle: {
+		fontSize: 24,
+		fontWeight: "bold",
+	},
+	headerSpacer: {
+		width: 0,
 	},
 	card: {
 		marginBottom: 20,
@@ -125,11 +172,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: "#34495e",
 		lineHeight: 22,
-	},
-	backButton: {
-		position: "absolute",
-		top: 10,
-		left: 10,
-		zIndex: 1,
 	},
 });

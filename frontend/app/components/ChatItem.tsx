@@ -12,14 +12,19 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 	return (
 		<TouchableOpacity
+			testID="chat-item-touchable"
 			style={styles.container}
 			onPress={() =>
 				router.push(
-					`/screens/ChatScreen?name=${chat.name}&avatar=${chat.avatar}`,
+					`/screens/messaging/ChatScreen?name=${chat.name}&avatar=${chat.avatar}`,
 				)
 			}
 		>
-			<Image source={{ uri: chat.avatar }} style={styles.avatar} />
+			<Image
+				testID="chat-item-avatar"
+				source={{ uri: chat.avatar }}
+				style={styles.avatar}
+			/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.name}>{chat.name}</Text>
 				<Text style={styles.lastMessage}>{chat.lastMessage}</Text>
@@ -30,6 +35,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		margin: 10,
 		flexDirection: "row",
 		alignItems: "center",
 		padding: 10,
