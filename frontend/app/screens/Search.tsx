@@ -699,9 +699,9 @@ const Search: React.FC = () => {
 					<View style={styles.roomCardPadding}>
 						{filter === "room" ? (
 							<>
-								{/* <SkeletonRoomCard />
 								<SkeletonRoomCard />
-								<SkeletonRoomCard /> */}
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
 							</>
 						) : (
 							<>

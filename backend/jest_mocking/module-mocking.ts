@@ -58,6 +58,7 @@ import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
 import { LiveService } from "../src/live/live.service";
 import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
+import { JwtAuthGuard } from "../src/auth/jwt-auth.guard";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -233,7 +234,8 @@ export async function createSearchTestingModule(): Promise<TestingModule> {
 			DbUtilsService,
 		],
 		exports: [SearchService],
-	}).compile();
+	}).overrideGuard(JwtAuthGuard)
+	.useValue({ canActivate: () => true }).compile();
 }
 
 //UsersModule

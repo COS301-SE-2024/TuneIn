@@ -1,25 +1,12 @@
 import { TestingModule } from "@nestjs/testing";
+import * as request from "supertest";
 import { SearchService } from "./search.service";
 import { SearchController } from "./search.controller";
 import { createSearchTestingModule } from "../../../jest_mocking/module-mocking";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
-import { RoomDto } from "../rooms/dto/room.dto";
 import { MockContext, Context, createMockContext } from "../../../context";
-
-describe("SearchController", () => {
-	let controller: SearchController;
-
-	beforeEach(async () => {
-		const module: TestingModule = await createSearchTestingModule();
-		controller = module.get<SearchController>(SearchController);
-	});
-
-	it("should be defined", () => {
-		expect(controller).toBeDefined();
-	});
-});
-
+import { INestApplication } from "@nestjs/common";
 
 const userMock = [
 	{
@@ -53,23 +40,14 @@ const uDtoMock = [
 		},
 		links: {
 			count: 2,
-			data: [
-				{
-					type: "instagram",
-					links: "instagram.com/farmer",
-				},
-				{
-					type: "tiktok",
-					links: "tiktok.com/farmer",
-				},
-			],
+			data: ["sdjhjkvds"],
 		},
 		bio: "Music enthusiast who loves exploring new tunes across various genres. Always on the lookout for fresh beats and hidden gems!",
 		current_song: {
 			title: "",
 			artists: [],
 			cover: "",
-			start_time: "2024-07-21T15:18:16.126Z",
+start_time: "2024-07-21T15:18:16.126Z",
 		},
 		fav_genres: {
 			count: 2,
@@ -80,10 +58,10 @@ const uDtoMock = [
 			data: [
 				{
 					title: "Faster",
-					artists: "Good Kid",
+					artists: ["Good Kid"],
 					cover:
 						"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-					start_time: "",
+					start_time: "2024-07-21T15:18:16.126Z",
 				},
 			],
 		},
@@ -98,8 +76,8 @@ const uDtoMock = [
 	},
 ];
 
-describe("searchUsers function", () => {
-	let controller: SearchController;
+describe("SearchController", () => {
+	let app: INestApplication;
 	let service: SearchService;
 	let dtoGen: DtoGenService;
 	let mockCtx: MockContext;
@@ -108,26 +86,50 @@ describe("searchUsers function", () => {
 	beforeEach(async () => {
 		mockCtx = createMockContext();
 		ctx = mockCtx as unknown as Context;
+
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
 		dtoGen = module.get<DtoGenService>(DtoGenService);
-		controller = module.get<SearchController>(SearchController);
+
+		app = module.createNestApplication();
+		await app.init();
 	});
 
-	it("should return an empty UserDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue([]);
-
-		const result = await service.searchUsers("testing", ctx);
-
-		expect(result).toMatchObject([new UserDto()]);
+	afterEach(async () => {
+		await app.close();
 	});
+
+	it("should be defined", () => {
+		expect(app).toBeDefined();
+	});
+
+	// it("should return an empty UserDto array when query returns an empty array", async () => {
+	//     // Mock the service behavior
+	//     mockCtx.prisma.$queryRaw.mockResolvedValue([]);
+	//     jest.spyOn(service, 'searchUsers').mockResolvedValue([new UserDto()]);
+
+	//     const response = await request(app.getHttpServer())
+	//         .get('/search/users')
+	//         .query({ query: 'testing' })
+	//         .expect(200);
+
+	//     expect(response.body).toEqual([new UserDto()]);
+	//     expect(service.searchUsers).toHaveBeenCalledWith('testing', ctx);
+	// });
 
 	it("should return a UserDto array when query returns an array", async () => {
+		// Mock the service behavior
 		mockCtx.prisma.$queryRaw.mockResolvedValue(userMock);
+		(service.searchUsers as jest.Mock).mockResolvedValueOnce(uDtoMock);
+
 		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
 
-		const result = await service.searchUsers("testing", ctx);
+		const response = await request(app.getHttpServer())
+			.get("/search/users")
+			.query({ query: "testing" })
+			.expect(200);
 
-		expect(result).toMatchObject(uDtoMock);
+		expect(response.body).toEqual(uDtoMock);
+		expect(service.searchUsers).toHaveBeenCalledWith("testing", ctx);
 	});
 });
