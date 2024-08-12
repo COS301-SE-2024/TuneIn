@@ -75,28 +75,28 @@ export class SearchService {
 	// 	console.log(result);
 	// }
 
-	async insertSearchHistory(
-		endpoint: string,
-		params: any,
-		user_id: string,
-		ctx: Context,
-	) {
-		let url = `${endpoint}?q=${params.q}`;
+	// async insertSearchHistory(
+	// 	endpoint: string,
+	// 	params: any,
+	// 	user_id: string,
+	// 	ctx: Context,
+	// ) {
+	// 	let url = `${endpoint}?q=${params.q}`;
 
-		if (params.creator) {
-			url += `&creator=${params.creator}`;
-		}
+	// 	if (params.creator) {
+	// 		url += `&creator=${params.creator}`;
+	// 	}
 
-		const result = await ctx.prisma.search_history.create({
-			data: {
-				user_id: user_id,
-				search_term: params.q,
-				url: url,
-			},
-		});
+	// 	const result = await ctx.prisma.search_history.create({
+	// 		data: {
+	// 			user_id: user_id,
+	// 			search_term: params.q,
+	// 			url: url,
+	// 		},
+	// 	});
 
-		console.log("Insertion result: " + result);
-	}
+	// 	console.log("Insertion result: " + result);
+	// }
 
 	async combinedSearch(
 		params: {
@@ -275,6 +275,9 @@ export class SearchService {
 		}
 		if (params.nsfw !== undefined) {
 			query += ` AND nsfw = ${params.nsfw}`;
+		}
+		if (params.lang !== undefined) {
+			query += ` AND room_language = ${sqlstring.escape(params.lang)}`;
 		}
 
 		if (params.tags && params.tags.length > 0) {
@@ -477,7 +480,7 @@ export class SearchService {
 			query += ` HAVING COALESCE(f2.num_following, 0) >= ${params.followers};`;
 		}
 
-		console.log(query);
+		console.log("Query: " + query);
 
 		return query;
 	}

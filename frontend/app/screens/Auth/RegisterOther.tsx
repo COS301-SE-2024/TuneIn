@@ -193,14 +193,14 @@ const RegisterOtherScreen: React.FC = () => {
 				</View>
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={() => router.navigate("screens/RegisterScreen")}
+					onPress={() => router.navigate("./RegisterScreen")}
 				>
 					<Text style={styles.buttonText}>Account</Text>
 				</TouchableOpacity>
 			</View>
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={() => router.navigate("screens/LoginStreaming")}
+				onPress={() => router.navigate("./LoginStreaming")}
 			>
 				<Text style={styles.registerText}>
 					Don’t have an account?{" "}
