@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 
 const defaultProfileIcon = require("../../assets/profile-icon.png");
@@ -9,7 +8,7 @@ interface FriendRequestCardProps {
 	profilePicture?: string | null;
 	username: string;
 	friend: Friend;
-	handleRequest: (friendId: Friend, accept: boolean) => void;
+	handleRequest: (friend: Friend, accept: boolean) => Promise<void>;
 }
 
 const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
