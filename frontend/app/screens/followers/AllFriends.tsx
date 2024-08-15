@@ -5,7 +5,6 @@ import FriendCard from "../../components/FriendCard";
 import auth from "../../services/AuthManagement";
 import axios from "axios";
 import * as utils from "../../services/Utils";
-import { set } from "react-datepicker/dist/date_utils";
 
 interface Friend {
 	profile_picture_url: string;

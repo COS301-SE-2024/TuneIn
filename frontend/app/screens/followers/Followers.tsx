@@ -15,8 +15,6 @@ import auth from "../../services/AuthManagement";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
-	const [requests, setRequests] = useState<Friend[]>([]);
-	const [filteredRequests, setFilteredRequests] = useState<Friend[]>([]);
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
 
@@ -24,17 +22,13 @@ const Followers: React.FC = () => {
 		const fetchRequestsAndFollowers = async () => {
 			try {
 				const token = await auth.getToken(); // Await the token to resolve the promise
-				const [requestsResponse, followersResponse] = await Promise.all([
-					axios.get<Friend[]>(`${API_BASE_URL}/users/friends/requests`, {
+				const followersResponse = await axios.get<Friend[]>(
+					`${API_BASE_URL}/users/followers`,
+					{
 						headers: { Authorization: `Bearer ${token}` },
-					}),
-					axios.get<Friend[]>(`${API_BASE_URL}/users/followers`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				]);
-				setRequests(requestsResponse.data);
+					},
+				);
 				setFollowers(followersResponse.data);
-				setFilteredRequests(requestsResponse.data);
 				setFilteredFollowers(followersResponse.data);
 			} catch (error) {
 				console.error("Error fetching data:", error);
@@ -46,30 +40,15 @@ const Followers: React.FC = () => {
 
 	useEffect(() => {
 		if (search === "") {
-			setFilteredRequests(requests);
 			setFilteredFollowers(followers);
 		} else {
-			setFilteredRequests(
-				requests.filter((request) =>
-					request.username.toLowerCase().includes(search.toLowerCase()),
-				),
-			);
 			setFilteredFollowers(
 				followers.filter((follower) =>
 					follower.username.toLowerCase().includes(search.toLowerCase()),
 				),
 			);
 		}
-	}, [search, requests, followers]);
-
-	const renderRequest = ({ item }: { item: Friend }) => (
-		<FriendCard
-			profile_picture_url={item.profile_picture_url}
-			username={item.username}
-			friend={item}
-			user="current_user" // Replace with actual current user info
-		/>
-	);
+	}, [search, followers]);
 
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
@@ -79,9 +58,6 @@ const Followers: React.FC = () => {
 			user="current_user" // Replace with actual current user info
 		/>
 	);
-
-	const requestsToShow = filteredRequests.slice(0, 6);
-	const remainingRequests = filteredRequests.length - requestsToShow.length;
 
 	return (
 		<View style={styles.container}>
