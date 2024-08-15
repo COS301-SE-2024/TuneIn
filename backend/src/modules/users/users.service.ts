@@ -409,7 +409,12 @@ export class UsersService {
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
-			where: { OR: [{ friend1: userID }, { friend2: userID }] },
+			where: {
+				AND: [
+					{ OR: [{ friend1: userID }, { friend2: userID }] },
+					{ is_pending: false },
+				],
+			},
 		});
 		console.log(f);
 		if (!f) {
