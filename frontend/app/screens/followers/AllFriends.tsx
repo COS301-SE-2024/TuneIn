@@ -5,11 +5,15 @@ import FriendCard from "../../components/FriendCard";
 import auth from "../../services/AuthManagement";
 import axios from "axios";
 import * as utils from "../../services/Utils";
+import FriendRequestCard from "../../components/FriendRequestCard";
+import { Friend } from "../../models/friend";
+import { profile } from "console";
 
-interface Friend {
-	profile_picture_url: string;
-	username: string;
-}
+// interface Friend {
+// 	profile_picture_url: string | null;
+// 	username: string;
+// 	friend_id: string;
+// }
 
 const AllFriends: React.FC = () => {
 	const params = useLocalSearchParams();
@@ -26,6 +30,9 @@ const AllFriends: React.FC = () => {
 			if (token) {
 				const friendsData = await getFriends(token);
 				const requestsData = await getFriendRequests(token);
+				// map the response data to the Friend model correctly
+				console.log("Friends:", friendsData);
+				console.log("Requests:", requestsData);
 				setFriends(friendsData);
 				setRequests(requestsData);
 			}
@@ -52,22 +59,26 @@ const AllFriends: React.FC = () => {
 		}
 	}, [search, requests, friends]);
 
-	const getFriends = async (token: string) => {
+	const getFriends = async (token: string): Promise<Friend[]> => {
+		const _token = await auth.getToken();
+		console.log("Token:", _token, "Token from auth:", token);
 		try {
-			const response = await axios.get<Friend[]>(
-				`${utils.API_BASE_URL}/users/friends`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			return response.data;
+			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
+				headers: { Authorization: `Bearer ${_token}` },
+			});
+			const mappedFriends: Friend[] = response.data.map((friend: any) => ({
+				profile_picture_url: friend.profile_picture_url,
+				friend_id: friend.userID,
+				username: friend.username,
+			}));
+			return mappedFriends;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
 			return [];
 		}
 	};
 
-	const getFriendRequests = async (token: string) => {
+	const getFriendRequests = async (token: string): Promise<Friend[]> => {
 		try {
 			const response = await axios.get<Friend[]>(
 				`${utils.API_BASE_URL}/users/friends/requests`,
@@ -75,20 +86,58 @@ const AllFriends: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
-			return response.data;
+			const mappedRequests: Friend[] = response.data.map((request: any) => ({
+				profile_picture_url: request.profile_picture_url,
+				friend_id: request.userID,
+				username: request.username,
+			}));
+			return mappedRequests;
 		} catch (error) {
 			console.error("Error fetching friend requests:", error);
 			return [];
 		}
 	};
 
+	const handleFriendRequest = async (
+		friend: Friend,
+		accept: boolean,
+	): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.friend_id}/${accept ? "accept" : "reject"}`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Response:", response.status);
+				if (response.status === 201) {
+					const updatedRequests = requests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setRequests(updatedRequests);
+					// set friends if request is accepted
+					if (accept) {
+						setFriends([...friends, friend]);
+					}
+					console.log("Friend request handled successfully.", requests);
+				}
+			} catch (error) {
+				console.error("Error handling request:", error);
+			}
+		}
+	};
+
 	const renderRequest = ({ item }: { item: Friend }) => (
-		<FriendCard
-			profile_picture_url={item.profile_picture_url}
+		<FriendRequestCard
+			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
-			cardType="requests"
+			handleRequest={handleFriendRequest}
 		/>
 	);
 
