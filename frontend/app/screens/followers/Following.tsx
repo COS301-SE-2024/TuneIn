@@ -3,8 +3,8 @@ import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import { API_BASE_URL } from "../../services/Utils";
+import auth from "../../services/AuthManagement";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -14,14 +14,17 @@ const Following: React.FC = () => {
 	useEffect(() => {
 		const fetchFollowing = async () => {
 			try {
-				const response = await axios.get(`${API_BASE_URL}/users/following`);
+				const token = await auth.getToken(); // Await the token to resolve the promise
+				const response = await axios.get(`${API_BASE_URL}/users/following`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				console.log("Following:", response.data);
 				setFollowing(response.data);
 				setFilteredFollowing(response.data);
 			} catch (error) {
 				console.error("Error fetching following:", error);
 			}
 		};
-
 		fetchFollowing();
 	}, []);
 
