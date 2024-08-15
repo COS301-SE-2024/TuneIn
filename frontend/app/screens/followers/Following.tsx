@@ -5,11 +5,15 @@ import FriendCard from "../../components/FriendCard"; // Import the FriendCard c
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
 import { API_BASE_URL } from "../../services/Utils";
 import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [following, setFollowing] = useState<Friend[]>([]);
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
+
+	const user = useLocalSearchParams();
+	console.log("User:", user);
 
 	useEffect(() => {
 		const fetchFollowing = async () => {
@@ -19,8 +23,13 @@ const Following: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				console.log("Following:", response.data);
-				setFollowing(response.data);
-				setFilteredFollowing(response.data);
+				const mappedFollowing = response.data.map((user: any) => ({
+					profile_picture_url: user.profile_picture_url,
+					username: user.username,
+					friend_id: user.userID,
+				}));
+				setFollowing(mappedFollowing);
+				setFilteredFollowing(mappedFollowing);
 			} catch (error) {
 				console.error("Error fetching following:", error);
 			}
@@ -40,13 +49,45 @@ const Following: React.FC = () => {
 		}
 	}, [search, following]);
 
+	const handleUnfollow = async (friend: Friend) => {
+		console.log("Unfollowing user:", friend);
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${API_BASE_URL}/users/${friend.friend_id}/unfollow`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+							"Content-Type": "application/json",
+						},
+					},
+				);
+				if (!response.ok) {
+					console.error("Error unfollowing user:", response);
+					return;
+				}
+				console.log("Unfollow response:", response);
+				console.log("Unfollowed user:", friend);
+				const updatedFollowing = following.filter(
+					(user) => user.username !== friend.username,
+				);
+				setFollowing(updatedFollowing);
+				setFilteredFollowing(updatedFollowing);
+			} catch (error) {
+				console.error("Error unfollowing user:", error);
+			}
+		}
+	};
 	const renderFollowing = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username} // Replace with actual current user info
 			cardType="following"
+			handle={handleUnfollow}
 		/>
 	);
 
