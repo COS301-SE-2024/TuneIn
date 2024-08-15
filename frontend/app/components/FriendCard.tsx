@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 
@@ -10,6 +10,8 @@ interface FriendCardProps {
 	username: string;
 	friend: Friend;
 	user: string | string[];
+	cardType: "following" | "followers" | "allFriends" | "requests";
+	handleRequest: (action: "accept" | "reject", friendId: string) => void;
 }
 
 const FriendCard: React.FC<FriendCardProps> = ({
@@ -17,6 +19,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 	username,
 	friend,
 	user,
+	cardType,
+	handleRequest,
 }) => {
 	// Check if the profile picture is null, undefined, or the default URL
 	const profileImageSource =
@@ -40,6 +44,24 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				<Text style={styles.username} testID="friend-card-username">
 					{username}
 				</Text>
+				{cardType === "requests" && (
+					<>
+						<TouchableOpacity
+							style={styles.acceptButton}
+							onPress={() => handleRequest("accept", " ")}
+							testID="accept-button"
+						>
+							<Text style={styles.acceptText}>Accept</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.rejectButton}
+							onPress={() => handleRequest("reject", " ")}
+							testID="reject-button"
+						>
+							<Text style={styles.rejectText}>Reject</Text>
+						</TouchableOpacity>
+					</>
+				)}
 			</View>
 		</Link>
 	);
@@ -49,6 +71,22 @@ const styles = StyleSheet.create({
 	link: {
 		width: "95%", // Takes up 95% of the screen width
 		alignSelf: "center",
+	},
+	acceptButton: {
+		backgroundColor: "#4caf50",
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	rejectButton: {
+		backgroundColor: "#f44336",
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	rejectText: {
+		color: "#fff",
+		fontWeight: "bold",
 	},
 	cardContainer: {
 		flexDirection: "row",
@@ -66,6 +104,10 @@ const styles = StyleSheet.create({
 		height: 50,
 		borderRadius: 25, // Rounded profile image
 		marginRight: 16,
+	},
+	acceptText: {
+		color: "#fff",
+		fontWeight: "bold",
 	},
 	username: {
 		fontSize: 18,

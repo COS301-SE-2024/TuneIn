@@ -88,6 +88,7 @@ const AllFriends: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user="current_user" // Replace with actual current user info
+			cardType="requests"
 		/>
 	);
 
@@ -97,6 +98,7 @@ const AllFriends: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user={myUsername}
+			cardType="allFriends"
 		/>
 	);
 

@@ -46,6 +46,7 @@ const Following: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user="current_user" // Replace with actual current user info
+			cardType="following"
 		/>
 	);
 
