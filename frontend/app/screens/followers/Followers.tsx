@@ -10,8 +10,8 @@ import {
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import { API_BASE_URL } from "../../services/Utils";
+import auth from "../../services/AuthManagement";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -23,9 +23,14 @@ const Followers: React.FC = () => {
 	useEffect(() => {
 		const fetchRequestsAndFollowers = async () => {
 			try {
+				const token = await auth.getToken(); // Await the token to resolve the promise
 				const [requestsResponse, followersResponse] = await Promise.all([
-					axios.get(`${API_BASE_URL}/users/requests`),
-					axios.get(`${API_BASE_URL}/users/followers`),
+					axios.get<Friend[]>(`${API_BASE_URL}/users/friends/requests`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+					axios.get<Friend[]>(`${API_BASE_URL}/users/followers`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
 				]);
 				setRequests(requestsResponse.data);
 				setFollowers(followersResponse.data);
@@ -86,7 +91,7 @@ const Followers: React.FC = () => {
 				value={search}
 				onChangeText={setSearch}
 			/>
-			<View style={styles.requestsSection}>
+			{/* <View style={styles.requestsSection}>
 				<Text style={styles.requestsTitle}>Requests</Text>
 				{requestsToShow.length > 0 ? (
 					<>
@@ -108,9 +113,9 @@ const Followers: React.FC = () => {
 				) : (
 					<Text style={styles.noRequestsText}>No requests available.</Text>
 				)}
-			</View>
+			</View> */}
 			<View style={styles.followersSection}>
-				<Text style={styles.followersTitle}>Followers</Text>
+				{/* <Text style={styles.followersTitle}>Followers</Text> */}
 				{filteredFollowers.length > 0 ? (
 					<FlatList
 						data={filteredFollowers}
