@@ -717,6 +717,18 @@ export class UsersService {
 			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
 			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
 		*/
-		return [];
+
+		const friendRequests = await this.dbUtils.getFriendRequests(userID);
+		if (!friendRequests) {
+			return [];
+		}
+		const ids: string[] = friendRequests.map((friend) => friend.friend1);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for friend requests. Received null.",
+			);
+		}
+		return result;
 	}
 }
