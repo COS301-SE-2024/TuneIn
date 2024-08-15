@@ -10,8 +10,8 @@ interface FriendCardProps {
 	username: string;
 	friend: Friend;
 	user: string | string[];
-	cardType: "following" | "followers" | "allFriends" | "requests";
-	handleRequest: (action: "accept" | "reject", friendId: string) => void;
+	cardType: "following" | "followers" | "allFriends";
+	handle: (friend: Friend) => void;
 }
 
 const FriendCard: React.FC<FriendCardProps> = ({
@@ -20,7 +20,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 	friend,
 	user,
 	cardType,
-	handleRequest,
+	handle,
 }) => {
 	// Check if the profile picture is null, undefined, or the default URL
 	const profileImageSource =
@@ -28,42 +28,61 @@ const FriendCard: React.FC<FriendCardProps> = ({
 		profilePicture === "https://example.com/default-profile-picture.png"
 			? defaultProfileIcon
 			: { uri: profilePicture };
+	console.log("cardType", cardType);
 
 	return (
-		<Link
-			href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
-			style={styles.link}
-			testID="friend-card-link"
-		>
-			<View style={styles.cardContainer} testID="friend-card-container">
+		<View style={styles.cardContainer} testID="friend-card-container">
+			<Link
+				href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
+				style={(styles.link, { pointerEvents: "box-none" })}
+				testID="friend-card-link"
+			>
 				<Image
 					source={profileImageSource}
 					style={styles.profileImage}
 					testID="friend-card-image"
 				/>
-				<Text style={styles.username} testID="friend-card-username">
-					{username}
-				</Text>
-				{cardType === "requests" && (
-					<>
-						<TouchableOpacity
-							style={styles.acceptButton}
-							onPress={() => handleRequest("accept", " ")}
-							testID="accept-button"
-						>
-							<Text style={styles.acceptText}>Accept</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.rejectButton}
-							onPress={() => handleRequest("reject", " ")}
-							testID="reject-button"
-						>
-							<Text style={styles.rejectText}>Reject</Text>
-						</TouchableOpacity>
-					</>
-				)}
-			</View>
-		</Link>
+			</Link>
+			<Text style={styles.username} testID="friend-card-username">
+				{username}
+			</Text>
+			{(cardType === "allFriends" && (
+				<TouchableOpacity
+					style={styles.unfriendButton}
+					onPress={(event) => {
+						event.stopPropagation();
+						handle(friend);
+					}}
+					testID="unfriend-button"
+				>
+					<Text style={styles.rejectText}>Unfriend</Text>
+				</TouchableOpacity>
+			)) ||
+				(cardType === "following" && (
+					<TouchableOpacity
+						style={styles.unfriendButton}
+						onPress={(event) => {
+							event.stopPropagation();
+							handle(friend);
+						}}
+						testID="unfollow-button"
+					>
+						<Text style={styles.rejectText}>Unfollow User</Text>
+					</TouchableOpacity>
+				)) ||
+				(cardType === "followers" && (
+					<TouchableOpacity
+						style={styles.acceptButton}
+						onPress={(event) => {
+							event.stopPropagation();
+							handle(friend);
+						}}
+						testID="follow-button"
+					>
+						<Text style={styles.acceptText}>Follow User</Text>
+					</TouchableOpacity>
+				))}
+		</View>
 	);
 };
 
@@ -74,6 +93,12 @@ const styles = StyleSheet.create({
 	},
 	acceptButton: {
 		backgroundColor: "#4caf50",
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	unfriendButton: {
+		backgroundColor: "#f44336",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 4,
