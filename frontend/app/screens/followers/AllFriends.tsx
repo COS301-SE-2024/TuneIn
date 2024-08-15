@@ -132,6 +132,33 @@ const AllFriends: React.FC = () => {
 		}
 	};
 
+	const handleFriend = async (friend: Friend): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.friend_id}/unfriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Response:", response.status);
+				if (response.status === 201) {
+					const updatedFriends = friends.filter(
+						(friend) => friend.friend_id !== friend.friend_id,
+					);
+					setFriends(updatedFriends);
+					console.log("User unfriended successfully.", friends);
+				}
+			} catch (error) {
+				console.error("Error following friend:", error);
+			}
+		}
+	};
+
 	const renderRequest = ({ item }: { item: Friend }) => (
 		<FriendRequestCard
 			profilePicture={item.profile_picture_url}
@@ -148,6 +175,7 @@ const AllFriends: React.FC = () => {
 			friend={item}
 			user={myUsername}
 			cardType="allFriends"
+			handle={handleFriend}
 		/>
 	);
 
