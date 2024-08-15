@@ -9,7 +9,7 @@ interface FriendRequestCardProps {
 	profilePicture?: string | null;
 	username: string;
 	friend: Friend;
-	handleRequest: (action: "accept" | "reject", friendId: string) => void;
+	handleRequest: (friendId: Friend, accept: boolean) => void;
 }
 
 const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
@@ -37,14 +37,14 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 			</Text>
 			<TouchableOpacity
 				style={styles.acceptButton}
-				onPress={() => handleRequest("accept", friend.id)}
+				onPress={() => handleRequest(friend, true)}
 				testID="accept-button"
 			>
 				<Text style={styles.acceptText}>Accept</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
 				style={styles.rejectButton}
-				onPress={() => handleRequest("reject", friend.id)}
+				onPress={() => handleRequest(friend, false)}
 				testID="reject-button"
 			>
 				<Text style={styles.rejectText}>Reject</Text>
