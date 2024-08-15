@@ -345,6 +345,21 @@ export class DbUtilsService {
 		return true;
 	}
 
+	async getFriendRequests(userID: string): Promise<Prisma.friends[] | null> {
+		const friendRequests: Prisma.friends[] | null =
+			await this.prisma.friends.findMany({
+				where: {
+					friend2: userID,
+					is_pending: true,
+				},
+			});
+
+		if (!friendRequests || friendRequests === null) {
+			return null;
+		}
+		return friendRequests;
+	}
+
 	async isMutualFollow(
 		userID: string,
 		accountFollowedId: string,
