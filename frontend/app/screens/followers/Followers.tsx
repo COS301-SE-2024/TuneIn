@@ -12,12 +12,13 @@ import FriendCard from "../../components/FriendCard"; // Import the FriendCard c
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
 import { API_BASE_URL } from "../../services/Utils";
 import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
-
+	const user = useLocalSearchParams();
 	useEffect(() => {
 		const fetchRequestsAndFollowers = async () => {
 			try {
@@ -28,8 +29,13 @@ const Followers: React.FC = () => {
 						headers: { Authorization: `Bearer ${token}` },
 					},
 				);
-				setFollowers(followersResponse.data);
-				setFilteredFollowers(followersResponse.data);
+				const mappedFollowers = followersResponse.data.map((user: any) => ({
+					profile_picture_url: user.profile_picture_url,
+					username: user.username,
+					friend_id: user.userID,
+				}));
+				setFollowers(mappedFollowers);
+				setFilteredFollowers(mappedFollowers);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
@@ -49,13 +55,39 @@ const Followers: React.FC = () => {
 			);
 		}
 	}, [search, followers]);
+	const handleFollow = async (friend: Friend) => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${API_BASE_URL}/users/${friend.friend_id}/follow`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Following user:", friend, response);
+				// const updatedFollowers = followers.filter(
+				// 	(user) => user.username !== friend.username,
+				// );
+				// setFollowers(updatedFollowers);
+				// setFilteredFollowers(updatedFollowers);
+			} catch (error) {
+				console.error("Error following user:", error);
+			}
+		}
+	};
 
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username} // Replace with actual current user info
+			cardType="followers"
+			handle={handleFollow}
 		/>
 	);
 
