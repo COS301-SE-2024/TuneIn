@@ -426,17 +426,20 @@ const RoomPage = () => {
 	}, [isPlaying]);
 
 	const playPauseTrack = useCallback(
-		async (index: number, offset: number) => {
+		async (index: number = currentTrackIndex, offset: number = 0) => {
 			/*
 			playbackManager.playPauseTrack(queue[index], index, offset);
 			setCurrentTrackIndex(index);
 			setIsPlaying(playbackManager.getIsPlaying());
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
 			*/
+			console.log("playPauseTrack playPauseTrack playPauseTrack");
 			if (live.canControlRoom()) {
-				if (playback.isPlaying()) {
+				if (!playback.isPlaying()) {
+					console.log("starting playback");
 					live.startPlayback(roomID);
 				} else {
+					console.log("stopping playback");
 					live.stopPlayback(roomID);
 				}
 				setCurrentTrackIndex(index);
@@ -453,6 +456,9 @@ const RoomPage = () => {
 		playbackManager.playPreviousTrack();
 		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
 		*/
+		console.log(
+			"playNextTrack playNextTrack playNextTrack playNextTrack playNextTrack",
+		);
 		if (live.canControlRoom()) {
 		}
 	};
@@ -626,7 +632,7 @@ const RoomPage = () => {
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={() => playPreviousTrack}
+							onPress={() => playPauseTrack()}
 						>
 							<FontAwesome5
 								name={isPlaying ? "pause" : "play"}

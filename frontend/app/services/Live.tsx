@@ -327,24 +327,29 @@ class LiveSocketService {
 				console.log("SOCKET EVENT: playMedia", response);
 				if (!this.currentUser) {
 					//throw new Error("Something went wrong while getting user's info");
+					console.log("User not found");
 					return;
 				}
 
 				if (!this.currentRoom) {
 					//throw new Error("Current room not set");
+					console.log("Room not found");
 					return;
 				}
 
 				if (!response.UTC_time) {
 					//throw new Error("UTC time not found");
+					console.log("UTC time not found");
 					return;
 				}
 
 				if (!response.spotifyID) {
 					throw new Error("Server did not return song ID");
 				}
+				/*
 				const songID: string = response.spotifyID;
 				const spotifyID: string = await songService.getSpotifyID(songID);
+				*/
 
 				if (!playback) {
 					playback = SimpleSpotifyPlayback.getInstance();
@@ -355,7 +360,7 @@ class LiveSocketService {
 					playback.handlePlayback(
 						"play",
 						deviceID,
-						spotifyID,
+						response.spotifyID,
 						this.calculateSeekTime(response.UTC_time, 0),
 					);
 				}
