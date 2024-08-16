@@ -333,6 +333,7 @@ export class DbUtilsService {
 				followee: accountFollowedId,
 			},
 		});
+		console.log("Follow: ", follow);
 		if (!follow || follow === null) {
 			return false;
 		}
@@ -372,6 +373,69 @@ export class DbUtilsService {
 			return null;
 		}
 		return pendingRequests;
+	}
+
+	// get users who aren't friends with the user, but are mutual followers
+	async getPotentialFriends(userID: string): Promise<Prisma.users[] | null> {
+		const following: Prisma.follows[] | null =
+			await this.prisma.follows.findMany({
+				where: { follower: userID },
+			});
+
+		if (!following || following === null) {
+			return null;
+		}
+
+		const followingIDs: string[] = [];
+		for (let i = 0; i < following.length; i++) {
+			const f = following[i];
+			if (f && f !== null) {
+				if (f.followee && f.followee !== null) {
+					followingIDs.push(f.followee);
+				}
+			}
+		}
+
+		const followers: Prisma.follows[] | null =
+			await this.prisma.follows.findMany({
+				where: { followee: userID },
+			});
+
+		if (!followers || followers === null) {
+			return null;
+		}
+
+		const followerIDs: string[] = [];
+		for (let i = 0; i < followers.length; i++) {
+			const f = followers[i];
+			if (f && f !== null) {
+				if (f.follower && f.follower !== null) {
+					followerIDs.push(f.follower);
+				}
+			}
+		}
+
+		const mutualFollowers: string[] = followingIDs.filter((id) =>
+			followerIDs.includes(id),
+		);
+
+		// potential friends are users who are mutual followers but not friends
+		const potentialFriends: Prisma.users[] = [];
+		for (let i = 0; i < mutualFollowers.length; i++) {
+			const id = mutualFollowers[i];
+			console.log("ID: ", id);
+			if (!(await this.isFriendsOrPending(userID, id))) {
+				console.log("Not friends nor pending with: ", id);
+				const user: Prisma.users | null = await this.prisma.users.findUnique({
+					where: { user_id: id },
+				});
+				if (user && user !== null) {
+					potentialFriends.push(user);
+				}
+			}
+		}
+		console.log("Potential friends: ", potentialFriends);
+		return potentialFriends;
 	}
 
 	async getRelationshipStatus(
@@ -454,7 +518,7 @@ export class DbUtilsService {
 	async isFriendsOrPending(
 		userID: string,
 		accountFriendId: string,
-		isPending: boolean,
+		isPending?: boolean,
 	): Promise<boolean> {
 		// check if user is friends with accountFriendId
 		// userId can be friend1 or friend2, so check both
@@ -462,6 +526,7 @@ export class DbUtilsService {
 
 		// query must look like this
 		// SELECT * FROM friends WHERE (friend1 = userID AND friend2 = accountFriendId) OR (friend1 = accountFriendId AND friend2 = userID) AND is_pending = false;
+		console.log("isPending: ", isPending);
 		const friends: Prisma.friends[] = await this.prisma.friends.findMany({
 			where: {
 				OR: [
@@ -477,6 +542,7 @@ export class DbUtilsService {
 				is_pending: isPending,
 			},
 		});
+		console.log("Friends: ", friends);
 		if (!friends || friends === null) {
 			return false;
 		}
