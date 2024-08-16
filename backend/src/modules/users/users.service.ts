@@ -429,7 +429,11 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		const r = await this.dtogen.generateMultipleUserDto(ids);
+		let r = await this.dtogen.generateMultipleUserDto(ids);
+		r = r.map((user) => {
+			user.relationship = "friend";
+			return user;
+		});
 		console.log(r);
 		return r;
 	}
@@ -441,12 +445,23 @@ export class UsersService {
 		}
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
 			);
 		}
+
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
@@ -457,12 +472,22 @@ export class UsersService {
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
 			);
 		}
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
