@@ -7,6 +7,7 @@ import axios from "axios";
 import * as utils from "../../services/Utils";
 import FriendRequestCard from "../../components/FriendRequestCard";
 import { Friend } from "../../models/friend";
+import { set } from "react-datepicker/dist/date_utils";
 
 // interface Friend {
 // 	profile_picture_url: string | null;
@@ -22,6 +23,14 @@ const AllFriends: React.FC = () => {
 	const [filteredFriends, setFilteredFriends] = useState<Friend[]>([]);
 	const [requests, setRequests] = useState<Friend[]>([]);
 	const [filteredRequests, setFilteredRequests] = useState<Friend[]>([]);
+	const [potentialFriends, setPotentialFriends] = useState<Friend[]>([]);
+	const [filteredPotentialRequests, setFilteredPotentialRequests] = useState<
+		Friend[]
+	>([]);
+	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
+	const [filteredPendingRequests, setFilteredPendingRequests] = useState<
+		Friend[]
+	>([]);
 
 	useEffect(() => {
 		const fetchFriends = async () => {
@@ -29,11 +38,17 @@ const AllFriends: React.FC = () => {
 			if (token) {
 				const friendsData = await getFriends(token);
 				const requestsData = await getFriendRequests(token);
+				const potentialFriendsData = await getPotentialFriends(token);
+				const pendingRequestsData = await getPendingRequests(token);
 				// map the response data to the Friend model correctly
 				console.log("Friends:", friendsData);
 				console.log("Requests:", requestsData);
+				console.log("Potential Friends:", potentialFriendsData);
+				console.log("Pending Requests:", pendingRequestsData);
 				setFriends(friendsData);
 				setRequests(requestsData);
+				setPotentialFriends(potentialFriendsData);
+				setPendingRequests(pendingRequestsData);
 			}
 		};
 
@@ -44,6 +59,8 @@ const AllFriends: React.FC = () => {
 		if (search === "") {
 			setFilteredRequests(requests);
 			setFilteredFriends(friends);
+			setFilteredPotentialRequests(potentialFriends);
+			setFilteredPendingRequests(pendingRequests);
 		} else {
 			setFilteredRequests(
 				requests.filter((request) =>
@@ -55,8 +72,18 @@ const AllFriends: React.FC = () => {
 					friend.username.toLowerCase().includes(search.toLowerCase()),
 				),
 			);
+			setFilteredPotentialRequests(
+				potentialFriends.filter((friend) =>
+					friend.username.toLowerCase().includes(search.toLowerCase()),
+				),
+			);
+			setFilteredPendingRequests(
+				pendingRequests.filter((request) =>
+					request.username.toLowerCase().includes(search.toLowerCase()),
+				),
+			);
 		}
-	}, [search, requests, friends]);
+	}, [search, requests, friends, potentialFriends, pendingRequests]);
 
 	const getFriends = async (token: string): Promise<Friend[]> => {
 		const _token = await auth.getToken();
@@ -95,6 +122,110 @@ const AllFriends: React.FC = () => {
 		} catch (error) {
 			console.error("Error fetching friend requests:", error);
 			return [];
+		}
+	};
+
+	const handleSendRequest = async (friend: Friend): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.friend_id}/befriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Response:", response.status);
+				if (response.status === 201) {
+					console.log("Friend request sent successfully.");
+					// remove from potential friends and add to pending requests
+					const updatedPotentialFriends = potentialFriends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setPotentialFriends(updatedPotentialFriends);
+					setPendingRequests([...pendingRequests, friend]);
+				}
+			} catch (error) {
+				console.error("Error sending request:", error);
+			}
+		}
+	};
+	console.log("filtered pending requests:", filteredPendingRequests);
+
+	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/potential`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPotentialFriends: Friend[] = response.data.map(
+				(friend: any) => ({
+					profile_picture_url: friend.profile_picture_url,
+					friend_id: friend.userID,
+					username: friend.username,
+					relationship: "mutual",
+				}),
+			);
+			return mappedPotentialFriends;
+		} catch (error) {
+			console.error("Error fetching potential friends:", error);
+			return [];
+		}
+	};
+
+	const getPendingRequests = async (token: string): Promise<Friend[]> => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/pending`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPendingRequests: Friend[] = response.data.map(
+				(request: any) => ({
+					profile_picture_url: request.profile_picture_url,
+					friend_id: request.userID,
+					username: request.username,
+					relationship: "pending",
+				}),
+			);
+			return mappedPendingRequests;
+		} catch (error) {
+			console.error("Error fetching pending requests:", error);
+			return [];
+		}
+	};
+
+	const handleCancelRequest = async (friend: Friend): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/friends/${friend.friend_id}/cancel`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Response:", response.status);
+				if (response.status === 201) {
+					const updatedRequests = requests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setRequests(updatedRequests);
+					setPotentialFriends([...potentialFriends, friend]);
+					console.log("Friend request cancelled successfully.", requests);
+				}
+			} catch (error) {
+				console.error("Error cancelling request:", error);
+			}
 		}
 	};
 
@@ -168,16 +299,30 @@ const AllFriends: React.FC = () => {
 		/>
 	);
 
-	const renderFriend = ({ item }: { item: Friend }) => (
-		<FriendCard
-			profilePicture={item.profile_picture_url}
-			username={item.username}
-			friend={item}
-			user={myUsername}
-			cardType="friend"
-			handle={handleFriend}
-		/>
-	);
+	const renderFriend = ({ item }: { item: Friend }) => {
+		const getHandler = (item: Friend) => {
+			const handlers: { [key: string]: (friend: Friend) => Promise<void> } = {
+				pending: handleCancelRequest,
+				friend: handleFriend,
+				mutual: handleSendRequest,
+			};
+
+			return item.relationship === undefined
+				? () => {}
+				: handlers[item.relationship as string];
+		};
+
+		return (
+			<FriendCard
+				profilePicture={item.profile_picture_url}
+				username={item.username}
+				friend={item}
+				user={myUsername}
+				cardType={item.relationship as "friend" | "pending" | "mutual"}
+				handle={getHandler(item)}
+			/>
+		);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -215,6 +360,46 @@ const AllFriends: React.FC = () => {
 					<View style={styles.moreRequests}>
 						<Text style={styles.moreRequestsText}>
 							View more friend requests
+						</Text>
+					</View>
+				)}
+			</View>
+			<View style={styles.requestsSection}>
+				<Text style={styles.requestsTitle}>Potential Friends</Text>
+				{filteredPotentialRequests.length > 0 ? (
+					<FlatList
+						data={filteredPotentialRequests}
+						renderItem={renderFriend}
+						keyExtractor={(item) => item.username}
+						contentContainerStyle={styles.friendsList}
+					/>
+				) : (
+					<Text style={styles.noRequestsText}>No potential friends found.</Text>
+				)}
+				{potentialFriends.length > 6 && (
+					<View style={styles.moreRequests}>
+						<Text style={styles.moreRequestsText}>
+							View more potential friends
+						</Text>
+					</View>
+				)}
+			</View>
+			<View style={styles.requestsSection}>
+				<Text style={styles.requestsTitle}>Pending Requests</Text>
+				{filteredPendingRequests.length > 0 ? (
+					<FlatList
+						data={filteredPendingRequests}
+						renderItem={renderFriend}
+						keyExtractor={(item) => item.username}
+						contentContainerStyle={styles.friendsList}
+					/>
+				) : (
+					<Text style={styles.noRequestsText}>No pending requests found.</Text>
+				)}
+				{pendingRequests.length > 6 && (
+					<View style={styles.moreRequests}>
+						<Text style={styles.moreRequestsText}>
+							View more pending requests
 						</Text>
 					</View>
 				)}
