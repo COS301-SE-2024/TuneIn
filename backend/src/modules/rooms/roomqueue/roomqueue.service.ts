@@ -241,6 +241,7 @@ export class RoomSong {
 			return false;
 		}
 		if (!this.spotifyDetails || this.spotifyDetails === null) {
+			console.log("this.spotifyDetails: ", this.spotifyDetails);
 			throw new Error("Song does not have spotify info");
 		}
 		return (
@@ -500,6 +501,11 @@ export class ActiveRoom {
 	}
 
 	async getCurrentOrNextSong(): Promise<RoomSong | null> {
+		console.log("historicQueue");
+		console.log(this.historicQueue.toArray());
+		console.log("currentQueue");
+		console.log(this.queue.toArray());
+
 		if (this.queue.isEmpty()) {
 			return null;
 		}
@@ -511,6 +517,9 @@ export class ActiveRoom {
 		result = this.queue.front();
 		while (!result.isPlaying()) {
 			result = this.queue.dequeue();
+			if (result.getPlaybackStartTime() === null) {
+				result.setPlaybackStartTime(new Date());
+			}
 			this.historicQueue.enqueue(result);
 
 			if (this.queue.isEmpty()) {
@@ -723,9 +732,27 @@ export class ActiveRoom {
 				this.updateQueue();
 				const song = this.queue.dequeue();
 				if (!song || song === null) {
-					return;
+					return null;
 				}
 				song.setPlaybackStartTime(new Date());
+				this.historicQueue.enqueue(song);
+				result = song;
+			},
+		);
+		return result;
+	}
+
+	async skipSong(murLockService: MurLockService): Promise<RoomSong | null> {
+		let result: RoomSong | null = null;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				const song = this.queue.dequeue();
+				if (!song || song === null) {
+					return null;
+				}
 				this.historicQueue.enqueue(song);
 				result = song;
 			},
@@ -976,6 +1003,14 @@ export class RoomQueueService {
 				}
 			}
 		}
+		/*
+		activeRoom.flushtoDB(
+			this.spotify,
+			this.spotifyAuth.getUserlessAPI(),
+			this.prisma,
+			this.murLockService,
+		);
+		*/
 		return true;
 	}
 

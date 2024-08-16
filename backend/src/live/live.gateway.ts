@@ -528,8 +528,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				//{check user permissions}
+				/*
 				if (await this.roomQueue.isPaused(roomID)) {
-					/*
 					const startTime: Date = await this.roomQueue.resumeSong(roomID);
 					const songID: string | null =
 						await this.roomQueue.getCurrentSong(roomID);
@@ -545,11 +545,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						UTC_time: startTime.getTime(),
 					};
 					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
-					*/
 				} else if (!(await this.roomQueue.isPlaying(roomID))) {
+				*/
 					let song: RoomSongDto | null;
 					if (await this.roomQueue.initiatePlayback(roomID)) {
 						song = await this.roomQueue.playSongNow(roomID);
+						console.log("Song to play: " + song);
 						if (song === null) {
 							throw new Error("No song is queued");
 						}
@@ -566,7 +567,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						};
 						this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 					}
-				}
+				// }
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

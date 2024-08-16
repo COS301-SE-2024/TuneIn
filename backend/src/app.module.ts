@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./../prisma/prisma.module";
@@ -21,8 +21,6 @@ import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
-import { RedisModule } from "nestjs-redis";
-import { RedisLockModule } from "nestjs-simple-redis-lock";
 import { MurLockModule } from "murlock";
 @Module({
 	imports: [
