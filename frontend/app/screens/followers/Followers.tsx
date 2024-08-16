@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-	View,
-	Text,
-	TextInput,
-	FlatList,
-	StyleSheet,
-	TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
@@ -29,11 +22,15 @@ const Followers: React.FC = () => {
 						headers: { Authorization: `Bearer ${token}` },
 					},
 				);
-				const mappedFollowers = followersResponse.data.map((user: any) => ({
-					profile_picture_url: user.profile_picture_url,
-					username: user.username,
-					friend_id: user.userID,
-				}));
+				const mappedFollowers = followersResponse.data.map(
+					(user: any): Friend => ({
+						profile_picture_url: user.profile_picture_url,
+						username: user.username,
+						friend_id: user.userID,
+						relationship: user.relationship,
+					}),
+				);
+				console.log("Followers:", mappedFollowers);
 				setFollowers(mappedFollowers);
 				setFilteredFollowers(mappedFollowers);
 			} catch (error) {
@@ -59,8 +56,9 @@ const Followers: React.FC = () => {
 		const token = await auth.getToken();
 		if (token) {
 			try {
+				const action = friend.relationship === "mutual" ? "unfollow" : "follow";
 				const response = await fetch(
-					`${API_BASE_URL}/users/${friend.friend_id}/follow`,
+					`${API_BASE_URL}/users/${friend.friend_id}/${action}`,
 					{
 						method: "POST",
 						headers: {
@@ -69,11 +67,19 @@ const Followers: React.FC = () => {
 					},
 				);
 				console.log("Following user:", friend, response);
-				// const updatedFollowers = followers.filter(
-				// 	(user) => user.username !== friend.username,
-				// );
-				// setFollowers(updatedFollowers);
-				// setFilteredFollowers(updatedFollowers);
+				// change relationship status of the user
+				const updatedFollowers = followers.map((follower) => {
+					if (follower.username === friend.username) {
+						return {
+							...follower,
+							relationship:
+								friend.relationship === "mutual" ? "follower" : "mutual",
+						};
+					}
+					return follower;
+				});
+				setFollowers(updatedFollowers);
+				setFilteredFollowers(updatedFollowers);
 			} catch (error) {
 				console.error("Error following user:", error);
 			}
@@ -86,7 +92,7 @@ const Followers: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user={user.username} // Replace with actual current user info
-			cardType="followers"
+			cardType={item.relationship === "mutual" ? "following" : "follower"}
 			handle={handleFollow}
 		/>
 	);
