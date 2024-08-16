@@ -360,6 +360,47 @@ export class DbUtilsService {
 		return friendRequests;
 	}
 
+	async getRelationshipStatus(
+		userID: string,
+		accountFriendId: string,
+	): Promise<
+		"following" | "follower" | "mutual" | "friend" | "pending" | "none"
+	> {
+		// check if user is following accountFriendId
+		const following: boolean = await this.isFollowing(userID, accountFriendId);
+
+		// check if accountFriendId is following user
+		const follower: boolean = await this.isFollowing(accountFriendId, userID);
+
+		// check if user is friends with accountFriendId
+		const friends: boolean = await this.isFriendsOrPending(
+			userID,
+			accountFriendId,
+			false,
+		);
+
+		// check if user has a pending friend request from accountFriendId
+		const pending: boolean = await this.isFriendsOrPending(
+			userID,
+			accountFriendId,
+			true,
+		);
+
+		if (friends) {
+			return "friend";
+		} else if (following && follower) {
+			return "mutual";
+		} else if (following) {
+			return "following";
+		} else if (follower) {
+			return "follower";
+		} else if (pending) {
+			return "pending";
+		} else {
+			return "none";
+		}
+	}
+
 	async isMutualFollow(
 		userID: string,
 		accountFollowedId: string,
