@@ -93,4 +93,15 @@ export class UserDto {
 		accept_url: string;
 		reject_url: string;
 	};
+
+	// optional field for relationship status
+	@ApiProperty()
+	@IsString()
+	relationship?:
+		| "following"
+		| "follower"
+		| "mutual"
+		| "friend"
+		| "pending"
+		| "none";
 }
