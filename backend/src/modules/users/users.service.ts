@@ -761,4 +761,85 @@ export class UsersService {
 		}
 		return result;
 	}
+
+	async getPotentialFriends(userID: string): Promise<UserDto[]> {
+		//get all potential friends for the user
+		console.log("Getting potential friends for user " + userID);
+		const potentialFriends = await this.dbUtils.getPotentialFriends(userID);
+		if (!potentialFriends) {
+			return [];
+		}
+		const ids: string[] = potentialFriends.map((friend: any) => friend.user_id);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for potential friends. Received null.",
+			);
+		}
+		return result;
+	}
+
+	async getPendingRequests(userID: string): Promise<UserDto[]> {
+		//get all pending friend requests for the user
+		console.log("Getting pending friend requests for user " + userID);
+		const pendingRequests = await this.dbUtils.getPendingRequests(userID);
+		if (!pendingRequests) {
+			return [];
+		}
+		const ids: string[] = pendingRequests.map((friend) => friend.friend2);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for pending requests. Received null.",
+			);
+		}
+		return result;
+	}
+
+	async cancelFriendRequest(
+		userID: string,
+		friendUserID: string,
+	): Promise<boolean> {
+		//cancel friend request
+		console.log(
+			"user (" + userID + ") cancelled friend request to @" + friendUserID,
+		);
+		if (userID === friendUserID) {
+			throw new HttpException(
+				"You cannot cancel a friend request to yourself",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		// check if users exist
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		if (!(await this.dbUtils.userExists(friendUserID))) {
+			throw new HttpException(
+				"User (" + friendUserID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		const cancelledRequest = await this.prisma.friends.deleteMany({
+			where: {
+				friend1: userID,
+				friend2: friendUserID,
+				is_pending: true,
+			},
+		});
+		if (cancelledRequest.count === 0) {
+			throw new HttpException(
+				"User (" +
+					userID +
+					") has not sent a friend request to user (" +
+					friendUserID +
+					")",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		return true;
+	}
 }
