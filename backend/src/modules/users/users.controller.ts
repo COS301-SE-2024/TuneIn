@@ -270,6 +270,22 @@ export class UsersController {
 		return await this.usersService.cancelFriendRequest(userInfo.id, userID);
 	}
 
+	// add an endpoint to get potential friends
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/potential")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get potential friends for the user" })
+	@ApiOkResponse({
+		description: "The user's potential friends as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getPotentialFriends(@Request() req: any): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPotentialFriends(userInfo.id);
+	}
+
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
