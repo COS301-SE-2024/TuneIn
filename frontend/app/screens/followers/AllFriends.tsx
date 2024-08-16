@@ -7,7 +7,6 @@ import axios from "axios";
 import * as utils from "../../services/Utils";
 import FriendRequestCard from "../../components/FriendRequestCard";
 import { Friend } from "../../models/friend";
-import { profile } from "console";
 
 // interface Friend {
 // 	profile_picture_url: string | null;
@@ -70,6 +69,7 @@ const AllFriends: React.FC = () => {
 				profile_picture_url: friend.profile_picture_url,
 				friend_id: friend.userID,
 				username: friend.username,
+				relationship: friend.relationship,
 			}));
 			return mappedFriends;
 		} catch (error) {
@@ -148,7 +148,7 @@ const AllFriends: React.FC = () => {
 				console.log("Response:", response.status);
 				if (response.status === 201) {
 					const updatedFriends = friends.filter(
-						(friend) => friend.friend_id !== friend.friend_id,
+						(_friend) => _friend.friend_id !== friend.friend_id,
 					);
 					setFriends(updatedFriends);
 					console.log("User unfriended successfully.", friends);
@@ -174,7 +174,7 @@ const AllFriends: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user={myUsername}
-			cardType="allFriends"
+			cardType="friend"
 			handle={handleFriend}
 		/>
 	);
