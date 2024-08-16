@@ -23,11 +23,14 @@ const Following: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				console.log("Following:", response.data);
-				const mappedFollowing = response.data.map((user: any) => ({
-					profile_picture_url: user.profile_picture_url,
-					username: user.username,
-					friend_id: user.userID,
-				}));
+				const mappedFollowing: Friend[] = response.data.map(
+					(user: any): Friend => ({
+						profile_picture_url: user.profile_picture_url,
+						username: user.username,
+						friend_id: user.userID,
+						relationship: user.relationship,
+					}),
+				);
 				setFollowing(mappedFollowing);
 				setFilteredFollowing(mappedFollowing);
 			} catch (error) {
