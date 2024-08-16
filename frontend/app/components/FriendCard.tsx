@@ -10,7 +10,7 @@ interface FriendCardProps {
 	username: string;
 	friend: Friend;
 	user: string | string[];
-	cardType: "following" | "follower" | "friend" | "mutual";
+	cardType: "following" | "follower" | "friend" | "mutual" | "pending";
 	handle: (friend: Friend) => void;
 }
 
@@ -92,6 +92,18 @@ const FriendCard: React.FC<FriendCardProps> = ({
 						testID="add-friend-button"
 					>
 						<Text style={styles.acceptText}>Add Friend</Text>
+					</TouchableOpacity>
+				)) ||
+				(cardType === "pending" && (
+					<TouchableOpacity
+						style={styles.rejectButton}
+						onPress={(event) => {
+							event.stopPropagation();
+							handle(friend);
+						}}
+						testID="reject-button"
+					>
+						<Text style={styles.rejectText}>Cancel</Text>
 					</TouchableOpacity>
 				))}
 		</View>
