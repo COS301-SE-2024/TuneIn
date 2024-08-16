@@ -360,6 +360,20 @@ export class DbUtilsService {
 		return friendRequests;
 	}
 
+	async getPendingRequests(userID: string): Promise<Prisma.friends[] | null> {
+		const pendingRequests: Prisma.friends[] | null =
+			await this.prisma.friends.findMany({
+				where: {
+					friend1: userID,
+					is_pending: true,
+				},
+			});
+		if (!pendingRequests || pendingRequests === null) {
+			return null;
+		}
+		return pendingRequests;
+	}
+
 	async getRelationshipStatus(
 		userID: string,
 		accountFriendId: string,
