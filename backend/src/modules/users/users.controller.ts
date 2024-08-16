@@ -228,6 +228,48 @@ export class UsersController {
 		return await this.usersService.getFriendRequests(userInfo.id);
 	}
 
+	// add endpoint for getting a user's pending requests
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/pending")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get a user's pending friend requests" })
+	@ApiOkResponse({
+		description: "The user's pending friend requests as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getPendingRequests(@Request() req: any): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPendingRequests(userInfo.id);
+	}
+
+	// add an endpoint for cancelling a friend request
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post("friends/:userID/cancel")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Cancel a friend request to the given user" })
+	@ApiParam({
+		name: "userID",
+		description: "The userID of the user to cancel the friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully cancelled friend request.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error cancelling friend request.",
+		type: Boolean,
+	})
+	async cancelFriendRequest(
+		@Request() req: any,
+		@Param("userID") userID: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.cancelFriendRequest(userInfo.id, userID);
+	}
+
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
