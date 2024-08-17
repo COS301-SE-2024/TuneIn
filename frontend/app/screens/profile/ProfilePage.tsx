@@ -87,7 +87,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	});
+	}, []);
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
