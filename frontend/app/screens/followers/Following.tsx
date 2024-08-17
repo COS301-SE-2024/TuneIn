@@ -89,7 +89,11 @@ const Following: React.FC = () => {
 			username={item.username}
 			friend={item}
 			user={user.username} // Replace with actual current user info
-			cardType="following"
+			cardType={
+				item.relationship === "mutual" || item.relationship === "following"
+					? "following"
+					: "friend-follow"
+			}
 			handle={handleUnfollow}
 		/>
 	);
