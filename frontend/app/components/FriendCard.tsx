@@ -67,7 +67,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 						}}
 						testID="unfollow-button"
 					>
-						<Text style={styles.rejectText}>Unfollow User</Text>
+						<Text style={styles.rejectText}>Unfollow</Text>
 					</TouchableOpacity>
 				)) ||
 				(cardType === "follower" && (
@@ -79,7 +79,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 						}}
 						testID="follow-button"
 					>
-						<Text style={styles.acceptText}>Follow User</Text>
+						<Text style={styles.acceptText}>Follow</Text>
 					</TouchableOpacity>
 				)) ||
 				(cardType === "mutual" && (
