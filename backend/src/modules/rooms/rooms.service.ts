@@ -1419,6 +1419,12 @@ export class RoomsService {
 				.map((r: any) => Number(r.avg_duration))
 				.reduce((a: number, b: number) => a + b, 0),
 		);
+		console.log(
+			"total duration today:",
+			totalDurationToday,
+			"total duration yesterday:",
+			totalDurationYesterday,
+		);
 		const durationYesterday: number =
 			averageSessionDurationYesterday.length === 0
 				? 0
@@ -1427,11 +1433,17 @@ export class RoomsService {
 			averageSessionDurationToday.length === 0
 				? 0
 				: totalDurationToday / averageSessionDurationToday.length;
-		averageSessionDuration.duration = (durationToday + durationYesterday) / 2;
+		averageSessionDuration.duration =
+			averageSessionDurationToday.length === 0 &&
+			averageSessionDurationYesterday.length === 0
+				? 0
+				: (totalDurationToday + totalDurationYesterday) /
+					(averageSessionDurationToday.length +
+						averageSessionDurationYesterday.length);
 		averageSessionDuration.percentage_change =
 			durationYesterday === 0
 				? 0
-				: (durationToday - durationYesterday) / durationYesterday;
+				: (durationYesterday - durationToday) / durationYesterday;
 		return averageSessionDuration;
 	}
 	async getReturningVisitors(
