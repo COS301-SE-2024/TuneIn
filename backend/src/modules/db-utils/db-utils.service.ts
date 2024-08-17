@@ -466,14 +466,14 @@ export class DbUtilsService {
 
 		if (friends) {
 			return "friend";
+		} else if (pending) {
+			return "pending";
 		} else if (following && follower) {
 			return "mutual";
 		} else if (following) {
 			return "following";
 		} else if (follower) {
 			return "follower";
-		} else if (pending) {
-			return "pending";
 		} else {
 			return "none";
 		}
