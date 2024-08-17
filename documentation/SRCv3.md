@@ -596,7 +596,13 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 ![](../assets/tunein-uml-class.png)
 
-## 6. Architectural Requirements
+## 6. Architectural Diagram
+
+
+![MVC Architectural diagram - Copy](https://github.com/user-attachments/assets/3891acf6-f546-46e5-920c-1eee03371810)
+
+
+
 
 ### 6.1 Architectural Requirements
 1. **Domain-Driven Architecture (DDA)**:
