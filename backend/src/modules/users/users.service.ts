@@ -674,6 +674,7 @@ export class UsersService {
 			},
 			data: {
 				is_pending: false,
+				date_friended: new Date(),
 			},
 		});
 		console.log("accepted friend request", result);
