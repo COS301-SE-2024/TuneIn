@@ -78,11 +78,6 @@ const AllFriends: React.FC = () => {
 				),
 			);
 		}
-		console.log("Search:", search);
-		console.log("Requests:", requests);
-		console.log("Friends:", friends);
-		console.log("Potential Friends:", potentialFriends);
-		console.log("Pending Requests:", pendingRequests);
 	}, [search, requests, friends, potentialFriends, pendingRequests]);
 
 	const getFriends = async (token: string): Promise<Friend[]> => {
@@ -137,10 +132,8 @@ const AllFriends: React.FC = () => {
 						},
 					},
 				);
-				console.log("Response:", response.status);
 				if (response.status === 201) {
 					console.log("Friend request sent successfully.");
-					// remove from potential friends and add to pending requests
 					const updatedPotentialFriends = potentialFriends.filter(
 						(_friend) => _friend.friend_id !== friend.friend_id,
 					);
@@ -153,7 +146,6 @@ const AllFriends: React.FC = () => {
 			}
 		}
 	};
-	console.log("filtered pending requests:", filteredPendingRequests);
 
 	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
 		try {
@@ -214,13 +206,10 @@ const AllFriends: React.FC = () => {
 						},
 					},
 				);
-				console.log("Response:", response.status);
 				if (response.status === 201) {
 					const updatedRequests = pendingRequests.filter(
 						(request) => request.friend_id !== friend.friend_id,
 					);
-					console.log("Cancelled request:", friend);
-					console.log("Updated requests should be empty:", updatedRequests);
 					setPendingRequests(updatedRequests);
 					friend.relationship = "mutual";
 					setPotentialFriends([...potentialFriends, friend]);
