@@ -40,11 +40,6 @@ const AllFriends: React.FC = () => {
 				const requestsData = await getFriendRequests(token);
 				const potentialFriendsData = await getPotentialFriends(token);
 				const pendingRequestsData = await getPendingRequests(token);
-				// map the response data to the Friend model correctly
-				console.log("Friends:", friendsData);
-				console.log("Requests:", requestsData);
-				console.log("Potential Friends:", potentialFriendsData);
-				console.log("Pending Requests:", pendingRequestsData);
 				setFriends(friendsData);
 				setRequests(requestsData);
 				setPotentialFriends(potentialFriendsData);
@@ -83,11 +78,15 @@ const AllFriends: React.FC = () => {
 				),
 			);
 		}
+		console.log("Search:", search);
+		console.log("Requests:", requests);
+		console.log("Friends:", friends);
+		console.log("Potential Friends:", potentialFriends);
+		console.log("Pending Requests:", pendingRequests);
 	}, [search, requests, friends, potentialFriends, pendingRequests]);
 
 	const getFriends = async (token: string): Promise<Friend[]> => {
 		const _token = await auth.getToken();
-		console.log("Token:", _token, "Token from auth:", token);
 		try {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${_token}` },
@@ -146,6 +145,7 @@ const AllFriends: React.FC = () => {
 						(_friend) => _friend.friend_id !== friend.friend_id,
 					);
 					setPotentialFriends(updatedPotentialFriends);
+					friend.relationship = "pending";
 					setPendingRequests([...pendingRequests, friend]);
 				}
 			} catch (error) {
@@ -216,10 +216,13 @@ const AllFriends: React.FC = () => {
 				);
 				console.log("Response:", response.status);
 				if (response.status === 201) {
-					const updatedRequests = requests.filter(
+					const updatedRequests = pendingRequests.filter(
 						(request) => request.friend_id !== friend.friend_id,
 					);
-					setRequests(updatedRequests);
+					console.log("Cancelled request:", friend);
+					console.log("Updated requests should be empty:", updatedRequests);
+					setPendingRequests(updatedRequests);
+					friend.relationship = "mutual";
 					setPotentialFriends([...potentialFriends, friend]);
 					console.log("Friend request cancelled successfully.", requests);
 				}
@@ -251,9 +254,12 @@ const AllFriends: React.FC = () => {
 						(request) => request.friend_id !== friend.friend_id,
 					);
 					setRequests(updatedRequests);
-					// set friends if request is accepted
 					if (accept) {
+						friend.relationship = "friend";
 						setFriends([...friends, friend]);
+					} else {
+						friend.relationship = "mutual";
+						setPotentialFriends([...potentialFriends, friend]);
 					}
 					console.log("Friend request handled successfully.", requests);
 				}
@@ -282,6 +288,8 @@ const AllFriends: React.FC = () => {
 						(_friend) => _friend.friend_id !== friend.friend_id,
 					);
 					setFriends(updatedFriends);
+					friend.relationship = "mutual";
+					setPotentialFriends([...potentialFriends, friend]);
 					console.log("User unfriended successfully.", friends);
 				}
 			} catch (error) {
