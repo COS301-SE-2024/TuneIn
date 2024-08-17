@@ -1345,7 +1345,7 @@ export class RoomsService {
 
 		const countYesterday: number = Number(uniqueVisitorsYesterday.length);
 		const countToday: number = Number(uniqueVisitorsToday.length);
-		uniqueVisitors.count = countToday;
+		uniqueVisitors.count = countToday + countYesterday;
 		uniqueVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
 		return uniqueVisitors;
@@ -1495,7 +1495,7 @@ export class RoomsService {
 		// }
 		const countYesterday: number = Number(returningVisitorsYesterday.length);
 		const countToday: number = Number(returningVisitorsToday.length);
-		returningVisitors.count = countToday;
+		returningVisitors.count = countToday + countYesterday;
 		returningVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
 		return returningVisitors;
