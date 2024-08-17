@@ -10,7 +10,13 @@ interface FriendCardProps {
 	username: string;
 	friend: Friend;
 	user: string | string[];
-	cardType: "following" | "follower" | "friend" | "mutual" | "pending";
+	cardType:
+		| "following"
+		| "follower"
+		| "friend"
+		| "mutual"
+		| "pending"
+		| "friend-follow";
 	handle: (friend: Friend) => void;
 }
 
@@ -28,7 +34,6 @@ const FriendCard: React.FC<FriendCardProps> = ({
 		profilePicture === "https://example.com/default-profile-picture.png"
 			? defaultProfileIcon
 			: { uri: profilePicture };
-	console.log("cardType", cardType);
 
 	return (
 		<View style={styles.cardContainer} testID="friend-card-container">
@@ -105,7 +110,13 @@ const FriendCard: React.FC<FriendCardProps> = ({
 					>
 						<Text style={styles.rejectText}>Cancel</Text>
 					</TouchableOpacity>
-				))}
+				)) ||
+				(cardType === "friend-follow" && ( // whomever is redesigning this, please make that a user cannot unfollow a friend so there ideally shouldn't be a button here
+					<Text style={styles.acceptText} testID="friend-card-username">
+						Friends/Pending
+					</Text>
+				)) ||
+				null}
 		</View>
 	);
 };
