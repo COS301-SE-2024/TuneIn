@@ -49,7 +49,7 @@ jobs:
 
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
-        run: cd frontend && expo run:android --variant debug
+        run: cd frontend && eas build -p all --local --wait --non-interactive
 
   end:
     name: The end
