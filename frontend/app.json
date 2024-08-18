@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "TuneIn",
-    "slug": "TuneIn",
-    "owner": "Apollo",
+    "slug": "tunein",
+    "owner": "apollotunein",
     "scheme": "tunein-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,19 +14,27 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.Apollo.TuneIn"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.Apollo.TuneIn"
+
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
-    ]
-  }
+    ],
+		"extra": {
+			"eas": {
+				"projectId": "0b7f95d1-330a-423a-ab7d-de539d6d9bfb"
+			}
+		}
+	}
 }
