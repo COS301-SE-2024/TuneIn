@@ -8,6 +8,10 @@ response: return UserDto
 input: UserDto
 output: updated UserDto
 
+### `/users/dms`
+#### GET: gets the last DMs sent to or received from another user
+response: return DirectMessageDto[]
+
 ### `/users/{username}`
 #### GET: gets profile info for given username✅
 no input

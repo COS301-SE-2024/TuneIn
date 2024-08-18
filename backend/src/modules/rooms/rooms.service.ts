@@ -26,7 +26,7 @@ import {
 	RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
-import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
+import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 
 @Injectable()
 export class RoomsService {

@@ -26,6 +26,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
+import { DirectMessageDto } from "./dto/dm.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -116,6 +117,22 @@ export class UsersController {
 	): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("dms")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get the last DMs sent to or received from another user",
+	})
+	@ApiOkResponse({
+		description: "The last DMs as an array of DirectMessageDto.",
+		type: Object,
+	})
+	async getDMs(@Request() req: any): Promise<DirectMessageDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getLastDMs(userInfo.id);
 	}
 
 	@ApiBearerAuth()
