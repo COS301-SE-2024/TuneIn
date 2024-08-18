@@ -26,7 +26,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
 						isPositive ? styles.positive : styles.negative,
 					]}
 				>
-					{percentage}
+					{percentage + "%"}
 				</Text>
 				<AntDesign
 					name={isPositive ? "arrowup" : "arrowdown"}

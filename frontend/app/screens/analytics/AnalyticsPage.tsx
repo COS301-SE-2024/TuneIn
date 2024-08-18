@@ -204,15 +204,24 @@ const AnalyticsPage: React.FC = () => {
 							title="Unique Visitors"
 							number={keymetrics?.unique_visitors.count.toString() ?? "0"}
 							percentage={
-								keymetrics?.unique_visitors.percentage_change.toString() ?? "0"
+								keymetrics?.returning_visitors.percentage_change.toString() ===
+								undefined
+									? "0"
+									: (
+											keymetrics?.unique_visitors.percentage_change * 100
+										).toString()
 							}
 						/>
 						<MetricsCard
 							title="Returning Visitors"
 							number={keymetrics?.returning_visitors.count.toString() ?? "0"}
 							percentage={
-								keymetrics?.returning_visitors.percentage_change.toString() ??
-								"0"
+								keymetrics?.returning_visitors.percentage_change.toString() ===
+								undefined
+									? "0"
+									: (
+											keymetrics?.returning_visitors.percentage_change * 100
+										).toString()
 							}
 						/>
 					</View>
@@ -223,8 +232,13 @@ const AnalyticsPage: React.FC = () => {
 								keymetrics?.average_session_duration.duration ?? 0,
 							)}
 							percentage={
-								keymetrics?.average_session_duration.percentage_change.toString() ??
-								"0"
+								keymetrics?.average_session_duration.percentage_change.toString() ===
+								undefined
+									? "0"
+									: (
+											keymetrics?.average_session_duration.percentage_change *
+											100
+										).toString()
 							}
 						/>
 					</View>
