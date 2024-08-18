@@ -23,6 +23,7 @@ export type LiveMessage = {
 export type DirectMessage = {
 	message: DirectMessageDto;
 	me?: boolean;
+	messageSent: boolean;
 };
 
 // How to integrate Emoji Reactions

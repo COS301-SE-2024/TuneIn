@@ -102,6 +102,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p1",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -115,6 +116,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p2",
 		},
 		me: true,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -128,6 +130,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p3",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -141,6 +144,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p4",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -154,6 +158,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p5",
 		},
 		me: true,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -167,6 +172,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p6",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -180,6 +186,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p7",
 		},
 		me: true,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -193,6 +200,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p8",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -206,6 +214,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p9",
 		},
 		me: false,
+		messageSent: true,
 	},
 	{
 		message: {
@@ -219,6 +228,7 @@ const dummyMessages: DirectMessage[] = [
 			pID: "p10",
 		},
 		me: true,
+		messageSent: true,
 	},
 	// Add more messages here if needed
 ];
@@ -227,10 +237,10 @@ const dummyMessages: DirectMessage[] = [
 const ChatScreen = () => {
 	const [self, setSelf] = useState<UserDto | null>(null);
 	const [otherUser, setOtherUser] = useState<UserDto | null>(null);
-	const [message, setMessage] = useState("");
+	const [message, setMessage] = useState<string>("");
 	const [messages, setMessages] = useState<DirectMessage[]>([]);
-	const [connected, setConnected] = useState(false);
-	const [isSending, setIsSending] = useState(false);
+	const [connected, setConnected] = useState<boolean>(false);
+	const [isSending, setIsSending] = useState<boolean>(false);
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
@@ -291,7 +301,6 @@ const ChatScreen = () => {
 					fetchedSelf.userID,
 					fetchedOtherUser.userID,
 					setMessages,
-					setMessage,
 					setConnected,
 				);
 				if (!live.receivedDMHistory()) {
@@ -327,8 +336,10 @@ const ChatScreen = () => {
 				pID: "",
 			},
 			me: true,
+			messageSent: false,
 		};
 		setIsSending(true);
+		setMessage("");
 		live.sendDM(newMessage, otherUser).finally(() => {
 			setIsSending(false);
 		});
@@ -378,6 +389,7 @@ const ChatScreen = () => {
 					value={message}
 					onChangeText={setMessage}
 					onSubmitEditing={handleSend}
+					testID="messageInput"
 				/>
 				<TouchableOpacity
 					style={styles.sendButton}
