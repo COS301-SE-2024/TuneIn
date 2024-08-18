@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -11,18 +11,87 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import MetricsCard from "../../components/MetricsCard";
 import PieChartCard from "../../components/PieChartCard";
+import { Room } from "../../models/Room";
+import { API_BASE_URL } from "../../services/Utils";
+import * as StorageService from "../../services/StorageService";
+import AuthManagement from "../../services/AuthManagement";
 
 const AnalyticsPage: React.FC = () => {
 	const router = useRouter();
 	const [activeButton, setActiveButton] = useState("Day");
 	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [keymetrics, setKeyMetrics] = useState<{
+		unique_visitors: {
+			count: number;
+			percentage_change: number;
+		};
+		returning_visitors: {
+			count: number;
+			percentage_change: number;
+		};
+		average_session_duration: {
+			duration: number;
+			percentage_change: number;
+		};
+	} | null>(null);
 
+	useEffect(() => {
+		const fetchKeyMetrics = async () => {
+			const accessToken: string | null = await AuthManagement.getToken();
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/analytics/keymetrics`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				},
+			);
+			const data = await response.json();
+			setKeyMetrics(data);
+		};
+		if (keymetrics === null) fetchKeyMetrics();
+		console.log("keymetrics", keymetrics);
+	});
 	const handleButtonPress = (button: string) => {
 		setActiveButton(button);
 	};
 
 	const toggleDrawer = () => {
 		setDrawerOpen(!drawerOpen);
+	};
+
+	const secondsToString = (seconds: number) => {
+		const years = Math.floor(seconds / 31536000);
+		const months = Math.floor(seconds / 2628000);
+		const weeks = Math.floor(seconds / 604800);
+		const days = Math.floor(seconds / 86400);
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const remainingSeconds = Math.floor(seconds % 60);
+		let result = "";
+		if (years > 0) {
+			result += `${years}y `;
+		}
+		if (months > 0) {
+			result += `${months}mo `;
+		}
+		if (weeks > 0) {
+			result += `${weeks}w `;
+		}
+		if (days > 0) {
+			result += `${days}d `;
+		}
+
+		if (hours > 0) {
+			result += `${hours}h `;
+		}
+		if (minutes > 0) {
+			result += `${minutes}m `;
+		}
+		if (remainingSeconds > 0) {
+			result += `${remainingSeconds}s`;
+		}
+		return result;
 	};
 
 	return (
@@ -38,25 +107,27 @@ const AnalyticsPage: React.FC = () => {
 						/>
 					</TouchableOpacity>
 					<View style={styles.drawerContent}>
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							onPress={() => router.push("/screens/analytics/GeneralAnalytics")}
 						>
 							<Text style={styles.drawerItem}>General Analytics</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 						<TouchableOpacity
 							onPress={() =>
-								router.push("/screens/analytics/InteractionsAnalytics")
+								router.navigate({
+									pathname: "/screens/analytics/InteractionsAnalytics",
+								})
 							}
 						>
 							<Text style={styles.drawerItem}>Interactions Analytics</Text>
 						</TouchableOpacity>
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							onPress={() =>
 								router.push("/screens/analytics/PlaylistAnalytics")
 							}
 						>
 							<Text style={styles.drawerItem}>Playlist Analytics</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 					</View>
 				</View>
 			)}
@@ -74,7 +145,7 @@ const AnalyticsPage: React.FC = () => {
 							<Ionicons name="menu" size={24} color="black" />
 						</TouchableOpacity>
 					</View>
-					<View style={styles.buttonContainer}>
+					{/* <View style={styles.buttonContainer}>
 						<TouchableOpacity
 							style={[
 								styles.timeButton,
@@ -126,29 +197,45 @@ const AnalyticsPage: React.FC = () => {
 								Month
 							</Text>
 						</TouchableOpacity>
-					</View>
+					</View> */}
 
 					<View style={styles.cardsContainer}>
 						<MetricsCard
 							title="Unique Visitors"
-							number="1,234"
-							percentage="+12%"
+							number={keymetrics?.unique_visitors.count.toString() ?? "0"}
+							percentage={
+								keymetrics?.unique_visitors.percentage_change.toString() ?? "0"
+							}
 						/>
 						<MetricsCard
 							title="Returning Visitors"
-							number="567"
-							percentage="-8%"
+							number={keymetrics?.returning_visitors.count.toString() ?? "0"}
+							percentage={
+								keymetrics?.returning_visitors.percentage_change.toString() ??
+								"0"
+							}
 						/>
 					</View>
 					<View style={styles.cardsContainer}>
 						<MetricsCard
 							title="Average Session Duration"
-							number="1 hour 30 min"
-							percentage="+12%"
+							number={secondsToString(
+								keymetrics?.average_session_duration.duration ?? 0,
+							)}
+							percentage={
+								keymetrics?.average_session_duration.percentage_change.toString() ??
+								"0"
+							}
 						/>
 					</View>
 					<View style={styles.cardsContainer}>
-						<PieChartCard returningVisitors={80} newVisitors={20} />
+						<PieChartCard
+							returningVisitors={keymetrics?.returning_visitors.count ?? 0}
+							newVisitors={
+								(keymetrics?.unique_visitors.count ?? 0) -
+								(keymetrics?.returning_visitors.count ?? 0)
+							}
+						/>
 					</View>
 				</View>
 			</ScrollView>

@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
 		color: "white",
 		paddingBottom: 5,
 		fontSize: 18,
-		fontWeight: 700,
+		fontWeight: "700",
 		textAlign: "left", // Align text to the left
 	},
 	mediaHeader: {
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
 		paddingTop: 10,
 		color: "white",
 		fontSize: 14,
-		fontWeight: 400,
+		fontWeight: "400",
 		textAlign: "left", // Align text to the left
 	},
 	link: {
 		color: "white",
 		paddingBottom: 3,
 		fontSize: 12,
-		fontWeight: 400,
+		fontWeight: "400",
 		textAlign: "left", // Align text to the left
 	},
 	dragHandle: {

@@ -13,7 +13,6 @@ import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import UserPool from "../../services/UserPool";
-import * as StorageService from "../../services/StorageService";
 
 const PasswordReset: React.FC = () => {
 	const router = useRouter();
@@ -168,7 +167,7 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	inputGroup: {
 		width: "92%",
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerBoldText: {
 		fontWeight: "bold",

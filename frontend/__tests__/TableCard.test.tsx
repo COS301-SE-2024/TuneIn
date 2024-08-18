@@ -14,7 +14,7 @@ describe("TableCard Component", () => {
 	};
 
 	it("renders correctly with provided props", () => {
-		const { getByText, getAllByText } = render(<TableCard {...defaultProps} />);
+		const { getByText } = render(<TableCard {...defaultProps} />);
 
 		// Check if the title is displayed
 		expect(getByText("Sample Table")).toBeTruthy();
@@ -41,7 +41,7 @@ describe("TableCard Component", () => {
 			],
 		};
 
-		const { getByText, getAllByText } = render(<TableCard {...props} />);
+		const { getByText } = render(<TableCard {...props} />);
 
 		// Check if the title is displayed
 		expect(getByText("Another Table")).toBeTruthy();

@@ -2,7 +2,7 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import VerifyEmailScreen from "../app/screens/Auth/VerifyEmail";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser } from "amazon-cognito-identity-js";
+
 import { Alert } from "react-native";
 
 // Mocking useRouter and useLocalSearchParams from expo-router

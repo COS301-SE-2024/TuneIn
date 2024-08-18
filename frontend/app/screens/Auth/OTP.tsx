@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
 	instructionText: {
 		fontSize: 16,
 		color: colors.primary,
-		fontWeight: 500,
+		fontWeight: "500",
 		textAlign: "center",
 		marginBottom: 50,
 		paddingHorizontal: 30,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerBoldText: {
 		fontWeight: "bold",

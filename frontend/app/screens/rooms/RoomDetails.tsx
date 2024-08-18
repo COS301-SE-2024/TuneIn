@@ -91,7 +91,7 @@ const RoomDetails: React.FC = () => {
 		newRoom["room_image"] = imageURL;
 		const token = await auth.getToken();
 		// console.log('Token:', token);
-		fetch(`${utils.API_BASE_URL}users/rooms`, {
+		fetch(`${utils.API_BASE_URL}/users/rooms`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

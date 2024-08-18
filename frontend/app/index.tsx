@@ -8,6 +8,8 @@ import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { PlayerContextProvider } from "./PlayerContext";
+import "../polyfills";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -84,7 +86,11 @@ const App: React.FC = () => {
 		checkTokenAndLoadFonts();
 	}, [router]);
 
-	return <WelcomeScreen />;
+	return (
+		<PlayerContextProvider>
+			<WelcomeScreen />
+		</PlayerContextProvider>
+	);
 };
 
 export default App;

@@ -33,8 +33,8 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import * as StorageService from "../../services/StorageService";
 import { live } from "../../services/Live";
+import { colors } from "../../styles/colors";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -152,7 +152,7 @@ const RegisterOtherScreen: React.FC = () => {
 				);
 			}
 		}
-	}, [response]);
+	}, [response, redirectURI, router]);
 
 	let [fontsLoaded] = useFonts({
 		Poppins_400Regular,
@@ -189,23 +189,23 @@ const RegisterOtherScreen: React.FC = () => {
 				</TouchableOpacity>
 				<View style={styles.dividerContainer}>
 					<View style={styles.divider} />
-					<Text style={styles.dividerText}>Or Login with TuneIn Details</Text>
+					<Text style={styles.dividerText}>Or Register with own details</Text>
 					<View style={styles.divider} />
 				</View>
 				<TouchableOpacity
 					style={[styles.button, styles.otherButton]}
-					onPress={() => router.navigate("screens/RegisterScreen")}
+					onPress={() => router.navigate("screens/Auth/RegisterScreen")}
 				>
 					<Text style={styles.buttonText}>Account</Text>
 				</TouchableOpacity>
 			</View>
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={() => router.navigate("screens/LoginStreaming")}
+				onPress={() => router.navigate("screens/Auth/LoginScreen")}
 			>
 				<Text style={styles.registerText}>
-					Don’t have an account?{" "}
-					<Text style={styles.registerBoldText}>Register Now</Text>
+					Already have an account?{" "}
+					<Text style={styles.registerBoldText}>Login Now!</Text>
 				</Text>
 			</TouchableOpacity>
 		</View>
@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
 	registerBoldText: {
 		fontWeight: "bold",
 		fontFamily: "Poppins_700Bold",
+		color: colors.primary,
 	},
 });
 

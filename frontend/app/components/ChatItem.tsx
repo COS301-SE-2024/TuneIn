@@ -15,6 +15,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
 
 	return (
 		<TouchableOpacity
+			testID="chat-item-touchable"
 			style={styles.container}
 			onPress={() =>
 				router.push(
@@ -24,6 +25,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
 		>
 			<Image
 				source={{ uri: otherUser.profile_picture_url }}
+				testID="chat-item-avatar"
 				style={styles.avatar}
 			/>
 			<View style={{ flex: 1 }}>

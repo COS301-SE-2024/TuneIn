@@ -13,6 +13,8 @@ import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import { colors } from "../../styles/colors";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Track {
 	id: string;
@@ -20,8 +22,8 @@ interface Track {
 	artists: { name: string }[];
 	album: { images: { url: string }[] };
 	explicit: boolean;
-	preview_url: string; // URL for previewing the song
-	uri: string; // URI used to play the song
+	preview_url: string;
+	uri: string;
 	duration_ms: number;
 }
 
@@ -38,9 +40,9 @@ interface SimplifiedTrack {
 
 const EditPlaylist: React.FC = () => {
 	const router = useRouter();
-	const { Room_id, queue } = useLocalSearchParams(); // Assuming useLocalSearchParams returns roomId and playlists
-	console.log("passed in Room id:", Room_id);
+	const { Room_id, queue, isMine } = useLocalSearchParams();
 	const { searchResults, handleSearch } = useSpotifySearch();
+	console.log("is Mine: " + isMine);
 
 	const parseInitialPlaylist = (data: string | string[]): SimplifiedTrack[] => {
 		if (typeof data === "string") {
@@ -62,7 +64,6 @@ const EditPlaylist: React.FC = () => {
 		} else if (Array.isArray(data)) {
 			return data.map((item) => {
 				if (typeof item === "string") {
-					// Assuming item is a JSON string that represents a SimplifiedTrack object
 					try {
 						const parsedItem = JSON.parse(item);
 						if (typeof parsedItem === "object") {
@@ -90,8 +91,14 @@ const EditPlaylist: React.FC = () => {
 	const [playlist, setPlaylist] = useState<SimplifiedTrack[]>(() =>
 		parseInitialPlaylist(queue),
 	);
+	const [addedSongs, setAddedSongs] = useState<SimplifiedTrack[]>([]);
 
 	const addToPlaylist = (track: Track) => {
+		if (!isMine && addedSongs.length >= 3) {
+			alert("You can only add up to 3 songs.");
+			return;
+		}
+
 		const simplifiedTrack: SimplifiedTrack = {
 			id: track.id,
 			name: track.name,
@@ -102,23 +109,36 @@ const EditPlaylist: React.FC = () => {
 			uri: track.uri,
 			duration_ms: track.duration_ms,
 		};
+
 		setPlaylist((prevPlaylist) => [...prevPlaylist, simplifiedTrack]);
+		if (!isMine) {
+			setAddedSongs((prevAddedSongs) => [...prevAddedSongs, simplifiedTrack]);
+		}
 	};
 
 	const removeFromPlaylist = (trackId: string) => {
+		if (!isMine && !addedSongs.some((track) => track.id === trackId)) {
+			alert("You can only remove songs that you added.");
+			return;
+		}
+
 		setPlaylist((prevPlaylist) =>
 			prevPlaylist.filter((track) => track.id !== trackId),
 		);
+
+		if (!isMine) {
+			setAddedSongs((prevAddedSongs) =>
+				prevAddedSongs.filter((track) => track.id !== trackId),
+			);
+		}
 	};
 
 	const savePlaylist = async () => {
 		console.log("Playlist saved:", playlist);
 		console.log("in room :", Room_id);
 
-		// Add logic to save the playlist to the backend if necessary
 		try {
 			const storedToken = await auth.getToken();
-			// Replace with your backend API URL
 			const response = await fetch(
 				`${utils.API_BASE_URL}/rooms/${Room_id}/songs`,
 				{
@@ -146,6 +166,14 @@ const EditPlaylist: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
+			<View>
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={() => router.back()}
+				>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+			</View>
 			<TextInput
 				style={styles.input}
 				placeholder="Search for songs..."
@@ -175,12 +203,15 @@ const EditPlaylist: React.FC = () => {
 								<Text style={styles.explicitTag}>Explicit</Text>
 							)}
 						</View>
-						<TouchableOpacity
-							style={styles.removeButton}
-							onPress={() => removeFromPlaylist(track.id)}
-						>
-							<Text style={styles.buttonText}>Remove</Text>
-						</TouchableOpacity>
+						{isMine ||
+						addedSongs.some((addedTrack) => addedTrack.id === track.id) ? (
+							<TouchableOpacity
+								style={styles.removeButton}
+								onPress={() => removeFromPlaylist(track.id)}
+							>
+								<Text style={styles.buttonText}>Remove</Text>
+							</TouchableOpacity>
+						) : null}
 					</View>
 				))}
 			</ScrollView>
@@ -193,7 +224,6 @@ const EditPlaylist: React.FC = () => {
 						track={track}
 						onPlay={() => playPreview(track.preview_url)}
 						onAdd={() => addToPlaylist(track)}
-						onRemove={() => removeFromPlaylist(track.id)}
 						isAdded={playlist.some(
 							(selectedTrack) => selectedTrack.id === track.id,
 						)}
@@ -219,10 +249,16 @@ const styles = StyleSheet.create({
 		padding: 20,
 		backgroundColor: "#fff",
 	},
+	backButton: {
+		position: "absolute",
+		left: 0,
+		top: -10,
+	},
 	input: {
+		marginTop: 30,
 		borderWidth: 1,
 		borderColor: "#ccc",
-		borderRadius: 15,
+		borderRadius: 20,
 		padding: 10,
 		marginBottom: 15,
 	},
@@ -270,7 +306,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	searchButton: {
-		backgroundColor: "#4c50bf",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
@@ -280,25 +316,24 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	saveButton: {
-		backgroundColor: "#8b8fa8",
+		backgroundColor: colors.secondary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
 		justifyContent: "center",
 		elevation: 5,
-		marginTop: 20,
+		marginTop: 10,
 	},
 	removeButton: {
-		backgroundColor: "red",
+		backgroundColor: "#ff5c5c",
 		borderRadius: 30,
 		height: 30,
 		alignItems: "center",
 		justifyContent: "center",
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
 	},
 	buttonText: {
 		color: "#fff",
-		fontSize: 16,
 		fontWeight: "bold",
 	},
 });
