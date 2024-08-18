@@ -1,12 +1,24 @@
 // jest.setup.js
 import dotenv from "dotenv";
 import mockAsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock";
-import * as jwt from "jwt-decode";
+//import * as jwt from "jwt-decode";
 import JWT from "expo-jwt";
 
 dotenv.config({ path: ".env" });
 jest.mock("@react-native-async-storage/async-storage", () => mockAsyncStorage);
 global.alert = jest.fn();
+
+const mockToken: string = JWT.encode(
+	{
+		sub: "123456789",
+		aud: "123456789",
+		exp: Number.MAX_SAFE_INTEGER,
+		nbf: Number.MAX_SAFE_INTEGER,
+		iat: Number.MAX_SAFE_INTEGER,
+		jti: "123456789",
+	},
+	"mock-secret-key",
+);
 
 // Mocking StorageService module functions
 jest.mock("./app/services/StorageService", () => ({
@@ -15,17 +27,7 @@ jest.mock("./app/services/StorageService", () => ({
 	// return a mock value unless the input is "token"
 	getItem: jest.fn().mockImplementation((key: string) => {
 		if (key === "token") {
-			return JWT.encode(
-				{
-					sub: "123456789",
-					aud: "123456789",
-					exp: Number.MAX_SAFE_INTEGER,
-					nbf: Number.MAX_SAFE_INTEGER,
-					iat: Number.MAX_SAFE_INTEGER,
-					jti: "123456789",
-				},
-				"mock-secret-key",
-			);
+			return mockToken;
 		}
 		return jest.fn().mockResolvedValue(undefined);
 	}),
@@ -78,24 +80,3 @@ jest.mock("./app/services/Live", () => {
 	};
 });
 
-jest.mock("jwt-decode", () => ({
-	...jest.requireActual("jwt-decode"), // import and retain the original functionalities
-	decodeToken: jest.fn().mockReturnValue({
-		/*
-		iss?: string;
-		sub?: string;
-		aud?: string[] | string;
-		exp?: number;
-		nbf?: number;
-		iat?: number;
-		jti?: string;
-		*/
-		iss: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789",
-		sub: "123456789",
-		aud: "123456789",
-		exp: Number.MAX_SAFE_INTEGER,
-		nbf: Number.MAX_SAFE_INTEGER,
-		iat: Number.MAX_SAFE_INTEGER,
-		jti: "123456789",
-	}),
-}));
