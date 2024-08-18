@@ -45,13 +45,13 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-    #   - name: Install dependencies
-    #     run:  |
-    #       cd frontend && npm ci
+      - name: 📦 Install NPM dependencies
+        run:  |
+          cd frontend && npm ci
 
-    #   # Step 4: Install dependencies
-    #   - name: 📦 Install Yarn dependencies
-    #     run: cd frontend && yarn install
+      # Step 4: Install dependencies
+      - name: 📦 Install Yarn dependencies
+        run: cd frontend && yarn install
 
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
