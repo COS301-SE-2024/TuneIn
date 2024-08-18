@@ -10,7 +10,7 @@ import {
 	Modal,
 	TouchableWithoutFeedback,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
 import RoomCard from "../../components/rooms/RoomCard";
@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 
 const ProfileScreen: React.FC = () => {
+	const navigation = useNavigation();
 	const router = useRouter();
 	let params = useLocalSearchParams();
 	let ownsProfile = true;
@@ -87,7 +88,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		getTokenAndData();
-	});
+	}, []);
 
 	const fetchProfileInfo = async (token: string) => {
 		try {
@@ -320,21 +321,23 @@ const ProfileScreen: React.FC = () => {
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
 			<View style={{ padding: 15 }} testID="profile-screen">
-				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-					<View style={{ flex: 1 }} />
-					{/* <TouchableOpacity>
-            <Text style={[styles.buttonText, { paddingBottom: 20 }]}>
-              Settings
-            </Text>
-          </TouchableOpacity> */}
-				</View>
-				{ownsProfile && (
-					<View style={styles.container}>
-						{/* Settings Icon */}
+				<View style={styles.profileHeader}>
+					{/* Back Button */}
+					<TouchableOpacity
+						onPress={() => navigation.goBack()}
+						testID="back-button"
+					>
+						<Ionicons name="chevron-back" size={30} color="black" />
+					</TouchableOpacity>
+					{/* Settings Icon */}
+					{ownsProfile && (
 						<TouchableOpacity onPress={toggleDrawer}>
 							<Ionicons name="settings-outline" size={24} color="black" />
 						</TouchableOpacity>
-
+					)}
+				</View>
+				{ownsProfile && (
+					<View style={styles.container}>
 						{/* Drawer Modal */}
 						<Modal
 							transparent={true}
@@ -490,6 +493,11 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		fontWeight: "600",
 		paddingBottom: 10,
+	},
+	profileHeader: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
 	},
 	button: {
 		width: 155,
