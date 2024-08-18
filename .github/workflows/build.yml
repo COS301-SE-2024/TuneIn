@@ -24,11 +24,11 @@ jobs:
       - name: Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
 
-    #   - name: Create frontend env file
-    #     run: |
-    #       touch frontend/.env
-    #       echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
-    #     shell: bash
+      - name: Create frontend env file
+        run: |
+          touch frontend/.env
+          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+        shell: bash
 
       - name: Set up Node (stable)
         uses: actions/setup-node@v4
