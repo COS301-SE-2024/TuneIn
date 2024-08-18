@@ -37,7 +37,7 @@ jobs:
 
       # Step 3: Install Expo CLI
       - name: 📦 Install Expo CLI
-        run: cd frontend && npm install -g expo-cli sharp-cli
+        run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
 
       - name: Install dependencies
         run:  |
