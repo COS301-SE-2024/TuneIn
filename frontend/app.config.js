@@ -30,4 +30,10 @@ export default ({ config }) => ({
 		spotifyClientId: SPOTIFY_CLIENT_ID,
 		spotifyRedirectUri: SPOTIFY_REDIRECT_TARGET,
 	},
+	android: {
+		package: "com.Apollo.TuneIn",
+	},
+	ios: {
+		bundleIdentifier: "com.Apollo.TuneIn",
+	},
 });
