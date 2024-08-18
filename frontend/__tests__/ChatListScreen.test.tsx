@@ -2,6 +2,9 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import ChatListScreen from "../app/screens/messaging/ChatListScreen";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import { DirectMessageDto } from "../app/models/DmDto";
+import { UserDto } from "../app/models/UserDto";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -156,7 +159,6 @@ describe("ChatListScreen", () => {
 		jest.clearAllMocks();
 	});
 
-	/*
 	it("renders the chat list screen correctly", () => {
 		const { toJSON } = render(<ChatListScreen />);
 		expect(toJSON()).toMatchSnapshot();
@@ -164,7 +166,7 @@ describe("ChatListScreen", () => {
 
 	it("handles search input correctly", () => {
 		const { getByPlaceholderText } = render(<ChatListScreen />);
-		const searchInput = getByPlaceholderText("Search for a user..."); // Adjust placeholder to match your component
+		const searchInput = getByPlaceholderText("Search for a user...");
 
 		fireEvent.changeText(searchInput, "John");
 
@@ -172,12 +174,11 @@ describe("ChatListScreen", () => {
 	});
 
 	it("navigates back when back button is pressed", () => {
-		const { getAllByTestId } = render(<ChatListScreen />);
-		const backButton = getAllByTestId("back-button")[0]; // Assuming the back button has a testID of 'back-button'
+		const { getByTestId } = render(<ChatListScreen />);
+		const backButton = getByTestId("back-button");
 
 		fireEvent.press(backButton);
 
 		expect(mockRouter.back).toHaveBeenCalled();
 	});
-	*/
 });

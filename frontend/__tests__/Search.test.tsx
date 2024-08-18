@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
-import renderer from "react-test-renderer";
 
 // Mocking modules
 jest.mock("expo-router", () => ({
@@ -36,7 +35,7 @@ describe("Search Component", () => {
 	});
 
 	it("should render correctly", () => {
-		const tree = renderer.create(<Search />).toJSON();
+		const tree = render(<Search />).toJSON();
 		expect(tree).toMatchSnapshot();
 	});
 
