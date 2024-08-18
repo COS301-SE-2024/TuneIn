@@ -17,7 +17,7 @@ jobs:
           echo "Beginning to build ${{ github.repository }}"
 
   build:
-    name: Test Frontend
+    name: Build Frontend
     needs: start
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +49,7 @@ jobs:
 
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
-        run: cd frontend && expo build:android --no-wait --non-interactive
+        run: cd frontend && expo run:android --variant debug
 
   end:
     name: The end
