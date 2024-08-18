@@ -1,0 +1,62 @@
+name: Build Frontend
+on:
+  push:
+    branches: [ main, develop ]
+
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  start:
+    name: Initial Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Starting Job
+        run: |
+          echo "Beginning to build ${{ github.repository }}"
+
+  build:
+    name: Test Frontend
+    needs: start
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout "${{ github.repository }}"
+        uses: actions/checkout@v4
+
+      - name: Create frontend env file
+        run: |
+          touch frontend/.env
+          echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+        shell: bash
+
+      - name: Set up Node (stable)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.18
+
+      # Step 3: Install Expo CLI
+      - name: 📦 Install Expo CLI
+        run: cd frontend && npm install -g expo-cli
+
+      - name: Install dependencies
+        run:  |
+          cd frontend && npm ci
+
+      # Step 4: Install dependencies
+      - name: 📦 Install Yarn dependencies
+        run: cd frontend && yarn install
+
+      # Step 5: Build APK with Expo CLI
+      - name: 📱 Build APK
+        run: cd frontend && expo build:android --no-wait --non-interactive
+
+  end:
+    name: The end
+    runs-on: ubuntu-latest
+    needs: [start, build]
+    steps:
+      - name: Ending
+        id: init
+        run: |
+          echo "${{ github.repository }} has been built successfully"
