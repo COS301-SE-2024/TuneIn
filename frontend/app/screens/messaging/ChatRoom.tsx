@@ -338,7 +338,7 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 							}}
 						>
 							<Image
-								source={{ uri: msg.message.sender.profilePictureUrl }}
+								source={{ uri: msg.message.sender.profile_picture_url }}
 								style={{
 									width: 40,
 									height: 40,

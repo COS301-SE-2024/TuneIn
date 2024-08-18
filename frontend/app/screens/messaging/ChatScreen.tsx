@@ -235,8 +235,8 @@ const dummyMessages: DirectMessage[] = [
 
 //path: http://localhost:8081/screens/messaging/ChatScreen?friend=8xbbie
 const ChatScreen = () => {
-	const [self, setSelf] = useState<UserDto | null>(null);
-	const [otherUser, setOtherUser] = useState<UserDto | null>(null);
+	const [self, setSelf] = useState<UserDto>();
+	const [otherUser, setOtherUser] = useState<UserDto>();
 	const [message, setMessage] = useState<string>("");
 	const [messages, setMessages] = useState<DirectMessage[]>([]);
 	const [connected, setConnected] = useState<boolean>(false);

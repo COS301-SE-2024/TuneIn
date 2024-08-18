@@ -69,8 +69,6 @@ class LiveSocketService {
 	private setDMs: stateSetDirectMessages | null = null;
 	private setJoined: stateSetJoined | null = null;
 	private setConnected: stateSetConnected | null = null;
-	private setLiveMessageTextBox: stateSetMessage | null = null;
-	private setDMTextBox: stateSetMessage | null = null;
 	private setIsSending: stateSetIsSending | null = null;
 
 	private liveChatHistoryReceived = false;
@@ -271,7 +269,6 @@ class LiveSocketService {
 				const u = this.currentUser;
 				const me = message.sender.userID === u.userID;
 				if (me) {
-					if (this.setLiveMessageTextBox) this.setLiveMessageTextBox("");
 					if (this.setIsSending) {
 						this.setIsSending(false);
 						this.setIsSending = null;
@@ -329,14 +326,12 @@ class LiveSocketService {
 					this.setJoined &&
 					this.currentRoom &&
 					this.currentRoom.roomID &&
-					this.setLiveChatMessages &&
-					this.setLiveMessageTextBox
+					this.setLiveChatMessages
 				) {
 					this.joinRoom(
 						this.currentRoom.roomID,
 						this.setJoined,
 						this.setLiveChatMessages,
-						this.setLiveMessageTextBox,
 					);
 				}
 			});
@@ -454,9 +449,10 @@ class LiveSocketService {
 				const dm = {
 					message: data,
 					me: data.sender.userID === u.userID,
-				};
+					messageSent: true,
+				} as DirectMessage;
 				if (me) {
-					if (this.setDMTextBox) this.setDMTextBox("");
+					//if (this.setDMTextBox) this.setDMTextBox("");
 				}
 				if (this.setDMs) {
 					this.setDMs((prevMessages) => {
@@ -512,10 +508,14 @@ class LiveSocketService {
 				if (this.setDMs) {
 					console.log("Setting DMs");
 					const u = this.currentUser;
-					const dmHistory = data.map((msg) => ({
-						message: msg,
-						me: msg.sender.userID === u.userID,
-					}));
+					const dmHistory = data.map(
+						(msg: DirectMessageDto) =>
+							({
+								message: msg,
+								me: msg.sender.userID === u.userID,
+								messageSent: true,
+							}) as DirectMessage,
+					);
 					dmHistory.sort((a, b) => a.message.index - b.message.index);
 					this.fetchedHistory = dmHistory;
 					this.setDMs(dmHistory);
@@ -542,7 +542,6 @@ class LiveSocketService {
 		roomID: string,
 		setJoined: stateSetJoined,
 		setLiveChatMessages: stateSetLiveMessages,
-		setMessageBox: stateSetMessage,
 	) {
 		this.pollLatency();
 		if (!this.currentUser) {
@@ -552,7 +551,6 @@ class LiveSocketService {
 
 		this.setJoined = setJoined;
 		this.setLiveChatMessages = setLiveChatMessages;
-		this.setLiveMessageTextBox = setMessageBox;
 
 		try {
 			const token = await auth.getToken();
@@ -707,7 +705,6 @@ class LiveSocketService {
 		userID: string,
 		participantID: string,
 		setDMs: stateSetDirectMessages,
-		setMessageBox: stateSetMessage,
 		setConnected: stateSetJoined,
 	) {
 		this.pollLatency();
@@ -717,7 +714,6 @@ class LiveSocketService {
 		}
 
 		this.setDMs = setDMs;
-		this.setDMTextBox = setMessageBox;
 		this.setConnected = setConnected;
 		const u = this.currentUser;
 		const input = {
@@ -739,12 +735,6 @@ class LiveSocketService {
 			this.setDMs([]);
 			this.setDMs = null;
 			console.log("end of: if (this.setDMs)");
-		}
-
-		if (this.setDMTextBox) {
-			this.setDMTextBox("");
-			this.setDMTextBox = null;
-			console.log("end of: if (this.setDMTextBox)");
 		}
 
 		if (this.setConnected) {
@@ -989,7 +979,6 @@ class LiveSocketService {
 		this.currentRoom = null;
 		this.setLiveChatMessages = null;
 		this.setJoined = null;
-		this.setLiveMessageTextBox = null;
 		if (this.socket) {
 			this.socket.disconnect();
 		}

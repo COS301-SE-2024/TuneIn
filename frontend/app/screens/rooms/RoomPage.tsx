@@ -273,7 +273,7 @@ const RoomPage = () => {
 		setJoined((prevJoined) => !prevJoined);
 		if (!joined) {
 			// joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			live.joinRoom(roomID, setJoined, setMessages);
 			//setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
@@ -312,6 +312,7 @@ const RoomPage = () => {
 		if (isSending) return;
 		setIsSending(true);
 		live.sendLiveChatMessage(message, setIsSending);
+		setMessage("");
 	};
 
 	return (
@@ -510,7 +511,7 @@ const RoomPage = () => {
 									key={index}
 									username={msg.message.sender.username}
 									message={msg.message.messageBody}
-									profilePictureUrl={msg.message.sender.profilePictureUrl}
+									profilePictureUrl={msg.message.sender.profile_picture_url}
 									me={msg.me}
 								/>
 							))}
