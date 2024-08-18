@@ -39,6 +39,12 @@ jobs:
       - name: 📦 Install Expo CLI
         run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
 
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
       - name: Install dependencies
         run:  |
           cd frontend && npm ci
