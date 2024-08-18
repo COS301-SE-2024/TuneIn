@@ -514,8 +514,8 @@ const RoomPage = () => {
 			console.log("Joining room........", roomID, token);
 			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
-			//setJoined(true);
+			live.joinRoom(roomID, setJoined, setMessages);
+			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
@@ -754,17 +754,17 @@ const RoomPage = () => {
 				{isChatExpanded && (
 					<>
 						<View style={styles.container}>
-						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{messages.map((msg, index) => (
-								<MemoizedCommentWidget
-									key={index}
-									username={msg.message.sender.username}
-									message={msg.message.messageBody}
-									profilePictureUrl={msg.message.sender.profile_picture_url}
-									me={msg.me}
-								/>
-							))}
-						</ScrollView>
+							<ScrollView style={{ flex: 1, marginTop: 10 }}>
+								{messages.map((msg, index) => (
+									<MemoizedCommentWidget
+										key={index}
+										username={msg.message.sender.username}
+										message={msg.message.messageBody}
+										profilePictureUrl={msg.message.sender.profile_picture_url}
+										me={msg.me}
+									/>
+								))}
+							</ScrollView>
 							<FlyingView
 								object={object}
 								containerProps={{
