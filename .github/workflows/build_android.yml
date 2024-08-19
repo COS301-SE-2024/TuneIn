@@ -1,4 +1,4 @@
-name: 🛠️ Build Frontend
+name: 🛠️ Build Android
 on:
   push:
     branches: [ main, develop ]
@@ -17,7 +17,7 @@ jobs:
           echo "Beginning to build ${{ github.repository }}"
 
   build:
-    name: 🏗️ Build Frontend
+    name: 🏗️ Build
     needs: start
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +34,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.18.x
-          cache: 'npm'
 
       # # Step 3: Install Expo CLI
       # - name: 📦 Install Expo CLI
