@@ -35,9 +35,9 @@ jobs:
         with:
           node-version: 18.18
 
-    #   # Step 3: Install Expo CLI
-    #   - name: 📦 Install Expo CLI
-    #     run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
+      # # Step 3: Install Expo CLI
+      # - name: 📦 Install Expo CLI
+      #   run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
@@ -52,6 +52,12 @@ jobs:
       # Step 4: Install dependencies
       - name: 📦 Install Yarn dependencies
         run: cd frontend && yarn install
+
+      - name: 📦 Install Potential Peer Dependencies
+        run: cd frontend && npx expo install react-native-reanimated @types/node @types/yargs-parser @babel/core @types/babel__generator @types/babel__template @types/babel__traverse @types/istanbul-lib-coverage @types/istanbul-lib-report @types/tough-cookie @types/prop-types react-datepicker @types/react @types/yargs-parser eslint eslint-plugin-import eslint-config-prettier expo expo-constants expo-linking expo-status-bar react-native-safe-area-context react-native-screens jest-resolve
+
+      - name: 📦 Fix Anything that may needed fixing
+        run: cd frontend && npx expo install --fix
 
       - uses: actions/setup-java@v4
         with:
