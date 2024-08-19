@@ -70,7 +70,7 @@ jobs:
 
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
-        run: cd frontend && eas build -p android --local --wait --non-interactive --output ${{ github.workspace }}/app-release.apk
+        run: cd frontend && eas build --platform android --profile development --local --wait --non-interactive --output ${{ github.workspace }}/app-release.apk
 
       - name: 📤 Upload APK artifact
         uses: actions/upload-artifact@v4
