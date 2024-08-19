@@ -9,6 +9,7 @@ import {
 	ActivityIndicator,
 	Modal,
 	TouchableWithoutFeedback,
+	RefreshControl,
 } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
@@ -49,6 +50,7 @@ const ProfileScreen: React.FC = () => {
 	const [following, setFollowing] = useState<boolean>(false);
 	const [friend, setFriend] = useState<any>(null);
 	const [profileInfo, setProfileInfo] = useState<any>(null);
+	const [refreshing] = React.useState(false);
 
 	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
 	const [secondaryProfileData, setSecProfileData] = useState<any>(null);
@@ -75,12 +77,14 @@ const ProfileScreen: React.FC = () => {
 			if (!ownsProfile) {
 				const parsedFriend = JSON.parse(params.friend as string);
 				setFriend(parsedFriend);
-				
 
 				try {
 					const storedToken = await auth.getToken();
 					if (storedToken) {
-						const data = await fetchProfileInfo(storedToken, parsedFriend.username);
+						const data = await fetchProfileInfo(
+							storedToken,
+							parsedFriend.username,
+						);
 						setPrimProfileData(data);
 
 						const isFollowing = data.followers.data.some(
@@ -97,8 +101,7 @@ const ProfileScreen: React.FC = () => {
 					try {
 						const storedToken = await auth.getToken();
 						if (storedToken) {
-							const info = await fetchProfileInfo(storedToken, "");
-							setUserData(info);
+							fetchProfileInfo(storedToken, "");
 						}
 					} catch (error) {
 						console.error("Failed to retrieve profile data:", error);
@@ -148,7 +151,7 @@ const ProfileScreen: React.FC = () => {
 					},
 				});
 				setUserData(response.data);
-				if(ownsProfile){
+				if (ownsProfile) {
 					console.log("returning data: " + JSON.stringify(response.data));
 					return response.data;
 				}
@@ -351,7 +354,26 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	if (loading || ownsProfile === null || userData === null || primaryProfileData === null) {
+	const onRefresh = React.useCallback(async () => {
+		setLoading(true);
+		const storedToken = await auth.getToken();
+
+		if (storedToken) {
+			setUserData(null);
+			fetchProfileInfo(storedToken, "");
+		}
+
+		setTimeout(() => {
+			setLoading(false);
+		}, 2000);
+	}, []);
+
+	if (
+		loading ||
+		ownsProfile === null ||
+		userData === null ||
+		primaryProfileData === null
+	) {
 		return (
 			<View
 				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -363,7 +385,12 @@ const ProfileScreen: React.FC = () => {
 	}
 
 	return (
-		<ScrollView showsVerticalScrollIndicator={false}>
+		<ScrollView
+			showsVerticalScrollIndicator={false}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+			}
+		>
 			<View style={{ padding: 15 }} testID="profile-screen">
 				<View style={styles.profileHeader}>
 					{/* Back Button */}
