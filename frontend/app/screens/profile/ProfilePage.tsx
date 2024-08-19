@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
 	View,
 	Text,
@@ -22,14 +22,12 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
+import { Player } from "../../PlayerContext";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
 	const router = useRouter();
-	let params = useLocalSearchParams();
-	let ownsProfile = true;
-	let friend = "";
-
+	const params = useLocalSearchParams();
 	const navigateToAnayltics = () => {
 		router.navigate("/screens/analytics/AnalyticsPage");
 	};
@@ -42,74 +40,129 @@ const ProfileScreen: React.FC = () => {
 		router.navigate("/screens/help/HelpScreen");
 	};
 
-	// console.log("Params: " + JSON.stringify(params));
+	let ownsProfile: boolean = true;
 
-	if (JSON.stringify(params) !== "{}") {
-		friend = JSON.parse(params.friend as string);
-		ownsProfile = false;
-	}
-
+	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
+	const [friend, setFriend] = useState<any>(null);
+	const [profileInfo, setProfileInfo] = useState<any>(null);
 
-	const [profileData, setProfileData] = useState<any>(null);
+	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
+	const [secondaryProfileData, setSecProfileData] = useState<any>(null);
 
 	const [drawerVisible, setDrawerVisible] = useState(false);
+
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { userData, setUserData } = playerContext;
+
+	if (params && JSON.stringify(params) !== "{}") {
+		console.log("profile params: " + JSON.stringify(params));
+		ownsProfile = false;
+	}
+
+	useEffect(() => {
+		// console.log("init effect called");
+		const initializeProfile = async () => {
+			if (!ownsProfile) {
+				const parsedFriend = JSON.parse(params.friend as string);
+				setFriend(parsedFriend);
+				
+
+				try {
+					const storedToken = await auth.getToken();
+					if (storedToken) {
+						const data = await fetchProfileInfo(storedToken, parsedFriend.username);
+						setPrimProfileData(data);
+
+						const isFollowing = data.followers.data.some(
+							(item: any) => item.username === params.username,
+						);
+						setFollowing(isFollowing);
+					}
+				} catch (error) {
+					console.error("Failed to retrieve profile data:", error);
+				}
+			} else {
+				console.log("Owner called");
+				if (!userData) {
+					try {
+						const storedToken = await auth.getToken();
+						if (storedToken) {
+							const info = await fetchProfileInfo(storedToken, "");
+							setUserData(info);
+						}
+					} catch (error) {
+						console.error("Failed to retrieve profile data:", error);
+					}
+				}
+				setPrimProfileData(userData);
+			}
+
+			setLoading(false);
+		};
+
+		initializeProfile();
+	}, [userData, setUserData]);
+
+	useEffect(() => {
+		console.log(
+			"edit effect called, owns profile: " +
+				ownsProfile +
+				" profileData: " +
+				primaryProfileData,
+		);
+		if (ownsProfile && primaryProfileData) {
+			console.log("set Info called");
+			setProfileInfo({
+				profile_picture_url: primaryProfileData.profile_picture_url,
+				profile_name: primaryProfileData.profile_name,
+				username: primaryProfileData.username,
+				bio: primaryProfileData.bio,
+				links: primaryProfileData.links,
+				fav_genres: primaryProfileData.fav_genres,
+				fav_songs: primaryProfileData.fav_songs,
+			});
+		}
+	}, [primaryProfileData, ownsProfile]);
 
 	const toggleDrawer = () => {
 		setDrawerVisible(!drawerVisible);
 	};
 
-	useEffect(() => {
-		const getTokenAndData = async () => {
-			try {
-				const storedToken = await auth.getToken();
-
-				if (storedToken) {
-					const data = await fetchProfileInfo(storedToken);
-					// console.log(data);
-					if (!ownsProfile) {
-						const isFollowing = data.followers.data.some(
-							(item: any) => item.username === params.user,
-						);
-						// console.log(isFollowing);
-						setFollowing(isFollowing);
-						// console.log(isFollowing);
-					}
-
-					setProfileData(data);
-					setLoading(false);
-				}
-			} catch (error) {
-				console.error("Failed to retrieve token:", error);
-			}
-		};
-
-		getTokenAndData();
-	}, []);
-
-	const fetchProfileInfo = async (token: string) => {
+	const fetchProfileInfo = async (token: string, username: string) => {
 		try {
-			if (ownsProfile) {
+			if (!userData) {
+				console.log("Fetching profile info");
 				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				return response.data;
+				setUserData(response.data);
+				if(ownsProfile){
+					console.log("returning data: " + JSON.stringify(response.data));
+					return response.data;
+				}
 			}
+			// console.log("Fetching with data: " + JSON.stringify(friend));
 
 			const response = await axios.get(
-				`${utils.API_BASE_URL}/users/${friend.username}`,
+				`${utils.API_BASE_URL}/users/${username}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
 					},
 				},
 			);
-
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching profile info:", error);
@@ -123,7 +176,7 @@ const ProfileScreen: React.FC = () => {
 		if (storedToken) {
 			if (following) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${profileData.userID}/unfollow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/unfollow`,
 					{},
 					{
 						headers: {
@@ -134,13 +187,13 @@ const ProfileScreen: React.FC = () => {
 
 				if (response) {
 					setFollowing(false);
-					profileData.followers.count--;
+					primaryProfileData.followers.count--;
 				} else {
 					console.error("Issue unfollowing user");
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${profileData.userID}/follow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/follow`,
 					{},
 					{
 						headers: {
@@ -151,7 +204,7 @@ const ProfileScreen: React.FC = () => {
 
 				if (response) {
 					setFollowing(true);
-					profileData.followers.count++;
+					primaryProfileData.followers.count++;
 				} else {
 					console.error("Issue unfollowing user");
 				}
@@ -165,8 +218,8 @@ const ProfileScreen: React.FC = () => {
 			const response = await axios.post(
 				`${utils.API_BASE_URL}/joinLeaveRoom`,
 				{
-					roomId: profileData.current_room.roomId,
-					action: profileData.current_room.joined ? "leave" : "join",
+					roomId: primaryProfileData.current_room.roomId,
+					action: primaryProfileData.current_room.joined ? "leave" : "join",
 				},
 				{
 					headers: {
@@ -175,19 +228,19 @@ const ProfileScreen: React.FC = () => {
 				},
 			);
 			const updatedProfileData = {
-				...profileData,
+				...primaryProfileData,
 				current_room: response.data,
 			};
-			setProfileData(updatedProfileData);
+			setPrimProfileData(updatedProfileData);
 		} catch (error) {
 			console.error("Error updating room join/leave:", error);
 		}
 	};
 
 	const renderLinks = () => {
-		if (profileData.links.count && profileData.links.count > 1) {
-			const firstLink = profileData.links.data[0].links;
-			const remainingCount = profileData.links.count - 1;
+		if (primaryProfileData.links.count && primaryProfileData.links.count > 1) {
+			const firstLink = primaryProfileData.links.data[0].links;
+			const remainingCount = primaryProfileData.links.count - 1;
 
 			return (
 				<View>
@@ -199,13 +252,13 @@ const ProfileScreen: React.FC = () => {
 					</Text>
 				</View>
 			);
-		} else if (profileData.links.count === 1) {
+		} else if (primaryProfileData.links.count === 1) {
 			return (
 				<View>
 					<Text
 						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
 					>
-						{profileData.links.data[0].links}
+						{primaryProfileData.links.data[0].links}
 					</Text>
 				</View>
 			);
@@ -251,7 +304,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const renderFavRooms = () => {
-		if (profileData.fav_rooms.count > 0) {
+		if (primaryProfileData.fav_rooms.count > 0) {
 			return (
 				<View
 					style={{ paddingHorizontal: 20, paddingTop: 10 }}
@@ -259,7 +312,7 @@ const ProfileScreen: React.FC = () => {
 				>
 					<Text style={styles.title}>Favorite Rooms</Text>
 					<View style={styles.roomCardsContainer}>
-						{profileData.fav_rooms.data.slice(0, 2).map((room) => (
+						{primaryProfileData.fav_rooms.data.slice(0, 2).map((room) => (
 							<RoomCard
 								key={room.roomId}
 								roomName={room.room_name}
@@ -276,13 +329,13 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const renderRecentRooms = () => {
-		if (profileData.recent_rooms.count > 0) {
+		if (primaryProfileData.recent_rooms.count > 0) {
 			// console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
 			return (
 				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
 					<Text style={styles.title}>Recently Visited</Text>
 					<View style={styles.roomCardsContainer}>
-						{profileData.recent_rooms.data.slice(0, 2).map((room) => (
+						{primaryProfileData.recent_rooms.data.slice(0, 2).map((room) => (
 							<RoomCard
 								key={room.roomId}
 								roomName={room.room_name}
@@ -298,7 +351,7 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	if (loading) {
+	if (loading || ownsProfile === null || userData === null || primaryProfileData === null) {
 		return (
 			<View
 				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -309,15 +362,6 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
-	const profileInfo = {
-		profile_picture_url: profileData.profile_picture_url,
-		profile_name: profileData.profile_name,
-		username: profileData.username,
-		bio: profileData.bio,
-		links: profileData.links,
-		fav_genres: profileData.fav_genres,
-		fav_songs: profileData.fav_songs,
-	};
 	return (
 		<ScrollView showsVerticalScrollIndicator={false}>
 			<View style={{ padding: 15 }} testID="profile-screen">
@@ -388,15 +432,15 @@ const ProfileScreen: React.FC = () => {
 					testID="profile-pic"
 				>
 					<Image
-						source={{ uri: profileData.profile_picture_url }}
+						source={{ uri: primaryProfileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 				</View>
 				<Text style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}>
-					{profileData.profile_name}
+					{primaryProfileData.profile_name}
 				</Text>
 				<Text style={{ fontWeight: "400", textAlign: "center" }}>
-					@{profileData.username}
+					@{primaryProfileData.username}
 				</Text>
 				<View
 					style={{
@@ -407,13 +451,13 @@ const ProfileScreen: React.FC = () => {
 				>
 					<View style={{ alignItems: "center" }}>
 						<Text style={{ fontSize: 20, fontWeight: "600" }}>
-							{profileData.followers.count}
+							{primaryProfileData.followers.count}
 						</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
 					</View>
 					<View style={{ marginLeft: 60, alignItems: "center" }}>
 						<Text style={{ fontSize: 20, fontWeight: "600" }}>
-							{profileData.following.count}
+							{primaryProfileData.following.count}
 						</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
 					</View>
@@ -431,7 +475,7 @@ const ProfileScreen: React.FC = () => {
 					onClose={() => {
 						setLinkDialogVisible(false);
 					}}
-					links={profileData.links.data}
+					links={primaryProfileData.links.data}
 				/>
 				{renderFollowOrEdit()}
 				{/* <View style={{ paddingHorizontal: 20 }}>
@@ -441,19 +485,19 @@ const ProfileScreen: React.FC = () => {
             duration={favoriteSongsData[0].duration}
           />
         </View> */}
-				{profileData.bio !== "" && (
+				{primaryProfileData.bio !== "" && (
 					<View style={{ paddingHorizontal: 20 }} testID="bio">
-						<BioSection content={profileData.bio} />
+						<BioSection content={primaryProfileData.bio} />
 					</View>
 				)}
-				{profileData.fav_genres.count > 0 && (
+				{primaryProfileData.fav_genres.count > 0 && (
 					<View style={{ paddingHorizontal: 20 }} testID="genres">
-						<GenreList items={profileData.fav_genres.data} />
+						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
 				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
-					{profileData.fav_songs.data.slice(0, 2).map((song) => (
+					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
 							key={song.id}
 							songTitle={song.title}
@@ -470,11 +514,13 @@ const ProfileScreen: React.FC = () => {
 				</View>
 				{renderFavRooms()}
 				{renderRecentRooms()}
-				{profileData.current_room ? (
+				{primaryProfileData.current_room ? (
 					<View style={{ alignItems: "center", marginTop: 20 }}>
 						<TouchableOpacity style={styles.button} onPress={handleJoinLeave}>
 							<Text style={styles.buttonText}>
-								{profileData.current_room.joined ? "Leave Room" : "Join Room"}
+								{primaryProfileData.current_room.joined
+									? "Leave Room"
+									: "Join Room"}
 							</Text>
 						</TouchableOpacity>
 					</View>
