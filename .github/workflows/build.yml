@@ -1,4 +1,4 @@
-name: Build Frontend
+name: 🛠️ Build Frontend
 on:
   push:
     branches: [ main, develop ]
@@ -8,72 +8,82 @@ on:
 
 jobs:
   start:
-    name: Initial Setup
+    name: 🚀 Initial Setup
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Starting Job
+      - name: 🏁 Starting Job
         run: |
           echo "Beginning to build ${{ github.repository }}"
 
   build:
-    name: Build Frontend
+    name: 🏗️ Build Frontend
     needs: start
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout "${{ github.repository }}"
+      - name: 📥 Checkout "${{ github.repository }}"
         uses: actions/checkout@v4
 
-      - name: Create frontend env file
+      - name: 📝 Create frontend env file
         run: |
           touch frontend/.env
           echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
         shell: bash
 
-      - name: Set up Node (stable)
+      - name: 🧰 Set up Node (stable)
         uses: actions/setup-node@v4
         with:
-          node-version: 18.18
+          node-version: 18.18.x
+          cache: 'npm'
 
       # # Step 3: Install Expo CLI
       # - name: 📦 Install Expo CLI
       #   run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
 
-      - name: 🏗 Setup EAS
+      - name: 🏗️ Setup EAS
         uses: expo/expo-github-action@v8
         with:
+          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
 
       - name: 📦 Install NPM dependencies
         run:  |
           cd frontend && npm ci
 
       # Step 4: Install dependencies
-      - name: 📦 Install Yarn dependencies
-        run: cd frontend && yarn install
+      # - name: 📦 Install Yarn dependencies
+      #   run: cd frontend && yarn install
 
       - name: 📦 Install Potential Peer Dependencies
         run: cd frontend && npx expo install react-native-reanimated @types/node @types/yargs-parser @babel/core @types/babel__generator @types/babel__template @types/babel__traverse @types/istanbul-lib-coverage @types/istanbul-lib-report @types/tough-cookie @types/prop-types react-datepicker @types/react @types/yargs-parser eslint eslint-plugin-import eslint-config-prettier expo expo-constants expo-linking expo-status-bar react-native-safe-area-context react-native-screens jest-resolve
 
-      - name: 📦 Fix Anything that may needed fixing
+      - name: 📦 Fix Anything that may need fixing
         run: cd frontend && npx expo install --fix
 
-      - uses: actions/setup-java@v4
+      - name: 🧰 Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu' # See 'Supported distributions' for available options
+          distribution: 'temurin'
           java-version: '17'
 
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
-        run: cd frontend && eas build -p android --local --wait --non-interactive
+        run: cd frontend && eas build -p android --local --wait --non-interactive --output ${{ github.workspace }}/app-release.apk
+
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: ${{ github.workspace }}/app-release.apk
 
   end:
-    name: The end
+    name: 🏁 The end
     runs-on: ubuntu-latest
     needs: [start, build]
     steps:
-      - name: Ending
+      - name: 🏁 Ending
         id: init
         run: |
           echo "${{ github.repository }} has been built successfully"
