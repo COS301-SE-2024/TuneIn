@@ -53,6 +53,11 @@ jobs:
       - name: 📦 Install Yarn dependencies
         run: cd frontend && yarn install
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '17'
+
       # Step 5: Build APK with Expo CLI
       - name: 📱 Build APK
         run: cd frontend && eas build -p android --local --wait --non-interactive
