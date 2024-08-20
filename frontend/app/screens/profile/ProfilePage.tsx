@@ -87,10 +87,12 @@ const ProfileScreen: React.FC = () => {
 						);
 						setPrimProfileData(data);
 
-						const isFollowing = data.followers.data.some(
-							(item: any) => item.username === params.username,
-						);
-						setFollowing(isFollowing);
+						if (userData !== null) {
+							const isFollowing = data.followers.data.some(
+								(item: any) => item.username === userData.username,
+							);
+							setFollowing(isFollowing);
+						}
 					}
 				} catch (error) {
 					console.error("Failed to retrieve profile data:", error);
@@ -189,8 +191,9 @@ const ProfileScreen: React.FC = () => {
 				);
 
 				if (response) {
-					setFollowing(false);
+					console.log("Called Unfollow");
 					primaryProfileData.followers.count--;
+					setFollowing(false);
 				} else {
 					console.error("Issue unfollowing user");
 				}
@@ -206,8 +209,9 @@ const ProfileScreen: React.FC = () => {
 				);
 
 				if (response) {
-					setFollowing(true);
+					console.log("Called Follow");
 					primaryProfileData.followers.count++;
+					setFollowing(true);
 				} else {
 					console.error("Issue unfollowing user");
 				}
