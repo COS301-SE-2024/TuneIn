@@ -4,7 +4,7 @@ import { Job } from "bull";
 import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
 import { SpotifyService } from "../spotify/spotify.service";
 import { Prisma } from "@prisma/client";
-import * as PrismaTypes from "@prisma/client";
+// import * as PrismaTypes from "@prisma/client";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { PrismaService } from "../../prisma/prisma.service";
 
