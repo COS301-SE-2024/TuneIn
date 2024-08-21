@@ -300,8 +300,9 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//send current media state
 				if (await this.roomUsers.isPlaying(roomID)) {
-					const songID: string | null =
-						await this.roomUsers.getCurrentSong(roomID);
+					const songID: string | null = await this.roomUsers.getCurrentSong(
+						roomID,
+					);
 					if (songID) {
 						const startTime: Date | null =
 							await this.roomUsers.getCurrentSongStartTime(roomID);
@@ -799,8 +800,9 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				//{check user permissions}
 				if (await this.roomUsers.isPaused(roomID)) {
 					const startTime: Date = await this.roomUsers.resumeSong(roomID);
-					const songID: string | null =
-						await this.roomUsers.getCurrentSong(roomID);
+					const songID: string | null = await this.roomUsers.getCurrentSong(
+						roomID,
+					);
 					if (songID === null) {
 						throw new Error("No song is queued somehow?");
 					}
@@ -814,8 +816,9 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					};
 					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 				} else if (!(await this.roomUsers.isPlaying(roomID))) {
-					const songID: string | null =
-						await this.roomUsers.getQueueHead(roomID);
+					const songID: string | null = await this.roomUsers.getQueueHead(
+						roomID,
+					);
 					if (songID === null) {
 						throw new Error("No song is queued");
 					}
