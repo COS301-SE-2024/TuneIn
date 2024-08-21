@@ -18,6 +18,7 @@ import RoomCard from "../../components/rooms/RoomCard";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import MusicBottomSheet from "../../components/MusicBottomSheet";
+import NowPlaying from "../../components/NowPlaying";
 import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
@@ -53,8 +54,7 @@ const ProfileScreen: React.FC = () => {
 	const [refreshing] = React.useState(false);
 
 	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
-	const [secondaryProfileData, setSecProfileData] = useState<any>(null);
-
+	const [roomData, setRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
 
 	const playerContext = useContext(Player);
@@ -64,7 +64,7 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData } = playerContext;
+	const { userData, setUserData, currentRoom } = playerContext;
 
 	if (params && JSON.stringify(params) !== "{}") {
 		console.log("profile params: " + JSON.stringify(params));
@@ -93,6 +93,10 @@ const ProfileScreen: React.FC = () => {
 							);
 							setFollowing(isFollowing);
 						}
+						if (roomData === null) {
+							fetchRoomInfo(data.userID);
+							console.log("Friend room call");
+						}
 					}
 				} catch (error) {
 					console.error("Failed to retrieve profile data:", error);
@@ -107,6 +111,11 @@ const ProfileScreen: React.FC = () => {
 						}
 					} catch (error) {
 						console.error("Failed to retrieve profile data:", error);
+					}
+				} else {
+					if (roomData === null) {
+						fetchRoomInfo(userData.userID);
+						console.log("Owner room call");
 					}
 				}
 				setPrimProfileData(userData);
@@ -171,6 +180,34 @@ const ProfileScreen: React.FC = () => {
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching profile info:", error);
+			return null;
+		}
+	};	
+
+	const fetchRoomInfo = async (userID: string) => {
+		try {
+			const storedToken = await auth.getToken();
+			if (storedToken) {
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/users/${userID}/room/current`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+				setRoomData(response.data);
+			}
+		} catch (error) {
+			if (error.response && error.response.status === 404) {
+				setRoomData(error.response.data);
+				return {
+					message: "Profile not found",
+					status: 404,
+				};
+			}
+
+			console.error("Error fetching room info:", error);
 			return null;
 		}
 	};
@@ -372,11 +409,19 @@ const ProfileScreen: React.FC = () => {
 		}, 2000);
 	}, []);
 
+	setInterval(() => {
+        if (primaryProfileData !== null) {
+			console.log("Timeout called");
+            fetchRoomInfo(primaryProfileData.userID);
+        }
+    }, 10000);
+
 	if (
 		loading ||
 		ownsProfile === null ||
 		userData === null ||
-		primaryProfileData === null
+		primaryProfileData === null ||
+		roomData === null
 	) {
 		return (
 			<View
@@ -509,13 +554,15 @@ const ProfileScreen: React.FC = () => {
 					links={primaryProfileData.links.data}
 				/>
 				{renderFollowOrEdit()}
-				{/* <View style={{ paddingHorizontal: 20 }}>
-          <NowPlaying
-            title={favoriteSongsData[0].songTitle}
-            artist={favoriteSongsData[0].artist}
-            duration={favoriteSongsData[0].duration}
-          />
-        </View> */}
+				{roomData?.statusCode !== 404 && (
+					<View style={{ paddingHorizontal: 20 }}>
+						<NowPlaying
+							name={roomData.room.name}
+							creator={roomData.room.room_creator}
+							art={roomData.room.playlist_photo}
+						/>
+					</View>
+				)}
 				{primaryProfileData.bio !== "" && (
 					<View style={{ paddingHorizontal: 20 }} testID="bio">
 						<BioSection content={primaryProfileData.bio} />
