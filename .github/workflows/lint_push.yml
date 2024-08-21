@@ -47,7 +47,7 @@ jobs:
           else
             git commit -m "Auto-fix frontend linting issues"
             # Only push if commit was successful
-            git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+            git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
           fi
 
       - name: Run Frontend Linting
@@ -85,7 +85,7 @@ jobs:
           else
             git commit -m "Auto-fix frontend linting issues"
             # Only push if commit was successful
-            git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+            git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
           fi
 
       - name: Run Backend Linting
