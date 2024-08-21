@@ -8,13 +8,13 @@ import {
 	Alert,
 	ActivityIndicator,
 } from "react-native";
-import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
+import { useSpotifyDevices } from "../../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
-import { Devices } from "../models/Devices";
-import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
-import * as spotifyAuth from "../services/SpotifyAuth";
-import { colors } from "../styles/colors";
+import { Devices } from "../../models/Devices";
+import SpeakerIcon from "../Spotify/SpeakerIcon"; // Import SVG components
+import * as spotifyAuth from "../../services/SpotifyAuth";
+import { colors } from "../../styles/colors";
 
 const DevicePicker = () => {
 	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();

@@ -31,7 +31,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
-import DevicePicker from "../../components/DevicePicker";
+import DevicePicker from "../../components/rooms/DevicePicker";
 import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
