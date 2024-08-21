@@ -1634,42 +1634,4 @@ export class RoomsService {
 			HttpStatus.INTERNAL_SERVER_ERROR,
 		);
 	}
-
-	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-		const room: any = await this.prisma.participate.findFirst({
-			where: {
-				user_id: userID,
-			},
-			include: {
-				room: true,
-			},
-		});
-		// if the user is in a room, get the join time from the user_activity table.
-		// do the query on user id and retrieve the activity with a leave date of null
-		// if the user is not in a room, return null
-		if (room === null) {
-			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
-		}
-		const userActivity: any = await this.prisma.user_activity.findFirst({
-			where: {
-				user_id: userID,
-				room_id: room.room_id,
-				room_leave_time: null,
-			},
-		});
-		// add the join date to the returned object
-		try {
-			room.room_join_time = userActivity.room_join_time;
-		} catch (error) {
-			console.error("Error getting room join time:", error);
-			throw new HttpException(
-				"Error getting room join time",
-				HttpStatus.INTERNAL_SERVER_ERROR,
-			);
-		}
-		return room;
-	}
 }
