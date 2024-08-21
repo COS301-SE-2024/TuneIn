@@ -101,7 +101,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -116,7 +116,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 	*/
@@ -131,7 +131,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 	*/
@@ -192,7 +192,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -242,7 +242,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -321,7 +321,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -377,7 +377,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -408,7 +408,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -450,7 +450,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -492,7 +492,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -534,7 +534,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -578,7 +578,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -623,7 +623,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -659,7 +659,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(chatID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -743,7 +743,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -835,7 +835,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -871,7 +871,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 
@@ -907,7 +907,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -925,7 +925,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -943,7 +943,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -961,7 +961,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -979,7 +979,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
