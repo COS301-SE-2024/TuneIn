@@ -1,17 +1,20 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Image, View, Text, StyleSheet } from "react-native";
 
-const NowPlaying = ({ title, artist, duration }) => {
+const NowPlaying = ({ name, creator, art }) => {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Now Playing</Text>
+			<Text style={styles.title}>Current Room</Text>
 			<View style={styles.playingContainer}>
-				<View style={styles.albumArt}></View>
+				<Image
+					source={{ uri: art }}
+					style={styles.roomArt}
+				/>
 				<View style={styles.detailsContainer}>
-					<Text style={styles.songTitle}>{title}</Text>
-					<Text style={styles.artist}>{artist}</Text>
+					<Text style={styles.roomName}>{name}</Text>
+					<Text style={styles.creator}>{creator}</Text>
 				</View>
-				<Text style={styles.duration}>{duration}</Text>
+				{/* <Text style={styles.duration}>{duration}</Text> */}
 			</View>
 		</View>
 	);
@@ -37,21 +40,20 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(209, 214, 232, 1)",
 		paddingVertical: 10, // Added paddingVertical for space
 	},
-	albumArt: {
+	roomArt: {
 		width: 57,
 		height: 57,
 		borderRadius: 12,
-		backgroundColor: "rgba(158, 171, 184, 1)",
 		marginRight: 16,
 	},
 	detailsContainer: {
 		flex: 1,
 	},
-	songTitle: {
+	roomName: {
 		fontSize: 16,
 		fontWeight: "600",
 	},
-	artist: {
+	creator: {
 		fontSize: 12,
 		fontWeight: "400",
 		marginTop: 5,
