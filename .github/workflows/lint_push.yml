@@ -32,23 +32,23 @@ jobs:
         run:  |
           cd frontend && npm ci
 
-      - name: Auto-fix Frontend Linting
-        run:  |
-          cd frontend && npm run lint-fix
+      # - name: Auto-fix Frontend Linting
+      #   run:  |
+      #     cd frontend && npm run lint-fix
 
-      - name: Commit fixes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add -A
-          # Check if there are changes and only commit if so
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Auto-fix frontend linting issues"
-            # Only push if commit was successful
-            git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
-          fi
+      # - name: Commit fixes
+      #   run: |
+      #     git config --global user.name 'github-actions[bot]'
+      #     git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      #     git add -A
+      #     # Check if there are changes and only commit if so
+      #     if git diff --staged --quiet; then
+      #       echo "No changes to commit"
+      #     else
+      #       git commit -m "Auto-fix frontend linting issues"
+      #       # Only push if commit was successful
+      #       git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+      #     fi
 
       - name: Run Frontend Linting
         run: |
@@ -70,23 +70,23 @@ jobs:
         run:  |
           cd backend && npm ci
 
-      - name: Auto-fix Backend Linting
-        run:  |
-          cd backend && npm run lint-fix
+      # - name: Auto-fix Backend Linting
+      #   run:  |
+      #     cd backend && npm run lint-fix
 
-      - name: Commit fixes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add -A
-          # Check if there are changes and only commit if so
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Auto-fix frontend linting issues"
-            # Only push if commit was successful
-            git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
-          fi
+      # - name: Commit fixes
+      #   run: |
+      #     git config --global user.name 'github-actions[bot]'
+      #     git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      #     git add -A
+      #     # Check if there are changes and only commit if so
+      #     if git diff --staged --quiet; then
+      #       echo "No changes to commit"
+      #     else
+      #       git commit -m "Auto-fix frontend linting issues"
+      #       # Only push if commit was successful
+      #       git push https://${{ secrets.LESEDI_TUNEIN_ACTIONS_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+      #     fi
 
       - name: Run Backend Linting
         run:  |
