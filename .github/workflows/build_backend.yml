@@ -1,0 +1,47 @@
+name: 🛠️ Build Backend
+on:
+    push:
+        branches: [ main, develop ]
+    pull_request:
+        branches: [ main, develop ]
+
+jobs:
+  start:
+    name: 🏁 Initial Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 🚀 Starting Job
+        run: |
+          echo "Beginning to build ${{ github.repository }}"
+
+  build_backend:
+    name: 🏗️ Build Backend
+    runs-on: ubuntu-latest
+    needs: start
+    steps:
+      - name: 📥 Checkout "${{ github.repository }}"
+        uses: actions/checkout@v3
+      - name: 📦 Set up Node (stable)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.18
+
+      - name: 📥 Install dependencies
+        run:  |
+          cd backend && npm ci
+
+      - name: ▶️ Run `nest build`
+        run:  |
+          cd backend && npm run build
+
+  end:
+    name: 🏁 The end
+    runs-on: ubuntu-latest
+    needs: [build_backend]
+    steps:
+      - name: 🏁 Ending
+        id: init
+        run: |
+          echo "${{ github.repository }} has been built"
