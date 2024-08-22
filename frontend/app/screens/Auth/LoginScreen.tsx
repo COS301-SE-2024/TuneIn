@@ -16,9 +16,9 @@ import * as StorageService from "../../services/StorageService";
 import UserPool from "../../services/UserPool";
 import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
+import { initialiseSocket, instanceExists } from "../../services/Live";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -48,12 +48,17 @@ const LoginScreen: React.FC = () => {
 			onSuccess: function (result) {
 				// Store token in storage if remember me is checked
 				if (rememberMe) {
+					console.log("cognitoToken", result.getAccessToken().getJwtToken());
 					StorageService.setItem(
 						"cognitoToken",
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				auth.exchangeCognitoToken(result.getIdToken().getJwtToken());
+				auth.exchangeCognitoToken(
+					result.getAccessToken().getJwtToken(),
+					initialiseSocket,
+					instanceExists(),
+				);
 				router.navigate("/screens/Home");
 				setIsLoading(false);
 			},
@@ -66,7 +71,7 @@ const LoginScreen: React.FC = () => {
 	};
 
 	const navigateToRegister = () => {
-		router.navigate("/screens/Auth/RegisterScreen");
+		router.navigate("/screens/Auth/RegisterOther");
 	};
 
 	const navigateToForgot = () => {
@@ -129,7 +134,7 @@ const LoginScreen: React.FC = () => {
 					/>
 				</View>
 				{isLoading ? (
-					<ActivityIndicator size="small" color="#08BDBD" />
+					<ActivityIndicator size="small" color={colors.primary} />
 				) : (
 					<CyanButton title="LOGIN" onPress={navigateToHome} />
 				)}
@@ -223,7 +228,7 @@ const styles = StyleSheet.create({
 	registerLinkText: {
 		fontSize: 16,
 		textAlign: "center",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerLinkBold: {
 		fontWeight: "bold",

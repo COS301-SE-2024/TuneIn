@@ -60,20 +60,6 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
     >
       <Text />
     </View>
-    <Image
-      source={
-        {
-          "uri": "https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-        }
-      }
-      style={
-        {
-          "borderRadius": 20,
-          "height": 40,
-          "width": 40,
-        }
-      }
-    />
     <Text
       style={
         {
@@ -83,31 +69,17 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
         }
       }
     >
-      John Doe
+      Loading...
     </Text>
   </View>
   <RCTScrollView
     contentContainerStyle={
       {
+        "marginHorizontal": 20,
         "paddingVertical": 10,
       }
     }
-    data={
-      [
-        {
-          "id": "1",
-          "me": false,
-          "sender": "John Doe",
-          "text": "Hey there!",
-        },
-        {
-          "id": "2",
-          "me": true,
-          "sender": "Me",
-          "text": "Hi! How are you?",
-        },
-      ]
-    }
+    data={[]}
     getItem={[Function]}
     getItemCount={[Function]}
     keyExtractor={[Function]}
@@ -124,120 +96,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
     stickyHeaderIndices={[]}
     viewabilityConfigCallbackPairs={[]}
   >
-    <View>
-      <View
-        onFocusCapture={[Function]}
-        onLayout={[Function]}
-        style={null}
-      >
-        <View
-          style={
-            [
-              {
-                "alignItems": "flex-end",
-                "flexDirection": "row",
-                "marginVertical": 4,
-              },
-              {
-                "justifyContent": "flex-start",
-              },
-            ]
-          }
-        >
-          <Image
-            source={
-              {
-                "uri": "https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-              }
-            }
-            style={
-              {
-                "borderRadius": 15,
-                "height": 30,
-                "marginRight": 10,
-                "width": 30,
-              }
-            }
-          />
-          <View
-            style={
-              [
-                {
-                  "borderRadius": 25,
-                  "elevation": 2,
-                  "maxWidth": "75%",
-                  "paddingHorizontal": 15,
-                  "paddingVertical": 10,
-                },
-                {
-                  "alignSelf": "flex-start",
-                  "backgroundColor": "#FFFFFF",
-                  "borderColor": "#ECECEC",
-                },
-              ]
-            }
-          >
-            <Text
-              style={
-                {
-                  "fontSize": 16,
-                }
-              }
-            >
-              Hey there!
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View
-        onFocusCapture={[Function]}
-        onLayout={[Function]}
-        style={null}
-      >
-        <View
-          style={
-            [
-              {
-                "alignItems": "flex-end",
-                "flexDirection": "row",
-                "marginVertical": 4,
-              },
-              {
-                "justifyContent": "flex-end",
-              },
-            ]
-          }
-        >
-          <View
-            style={
-              [
-                {
-                  "borderRadius": 25,
-                  "elevation": 2,
-                  "maxWidth": "75%",
-                  "paddingHorizontal": 15,
-                  "paddingVertical": 10,
-                },
-                {
-                  "alignSelf": "flex-end",
-                  "backgroundColor": "#08bdbd",
-                },
-              ]
-            }
-          >
-            <Text
-              style={
-                {
-                  "fontSize": 16,
-                }
-              }
-            >
-              Hi! How are you?
-            </Text>
-          </View>
-        </View>
-      </View>
-    </View>
+    <View />
   </RCTScrollView>
   <View
     style={
@@ -254,6 +113,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
   >
     <TextInput
       onChangeText={[Function]}
+      onSubmitEditing={[Function]}
       placeholder="Message..."
       style={
         {
@@ -268,6 +128,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
           "paddingVertical": 10,
         }
       }
+      testID="messageInput"
       value=""
     />
     <View
@@ -306,19 +167,7 @@ exports[`ChatScreen renders the chat screen correctly 1`] = `
       }
       testID="sendButton"
     >
-      <Image
-        source={
-          {
-            "uri": "https://img.icons8.com/material-outlined/24/000000/filled-sent.png",
-          }
-        }
-        style={
-          {
-            "height": 24,
-            "width": 24,
-          }
-        }
-      />
+      <Text />
     </View>
   </View>
 </View>

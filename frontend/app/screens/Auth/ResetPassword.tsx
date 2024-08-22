@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 20,
 		paddingHorizontal: 30,
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	inputGroup: {
 		width: "92%",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontWeight: 500,
+		fontWeight: "500",
 	},
 	registerBoldText: {
 		fontWeight: "bold",

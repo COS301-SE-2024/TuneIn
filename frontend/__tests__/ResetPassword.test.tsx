@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import PasswordReset from "../app/screens/Auth/ResetPassword";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CognitoUser, CognitoUserPool } from "amazon-cognito-identity-js";
 import { Alert } from "react-native";
 
 // Mocking useRouter and useLocalSearchParams from expo-router

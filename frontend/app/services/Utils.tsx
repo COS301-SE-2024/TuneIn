@@ -2,7 +2,6 @@ import localhost from "react-native-localhost";
 import { Buffer } from "buffer";
 
 const USE_LOCAL_BACKEND_SERVER = true;
-
 function getAPIBase(): string {
 	if (!USE_LOCAL_BACKEND_SERVER) {
 		//do something

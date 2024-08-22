@@ -15,7 +15,7 @@ if (!clientId) {
 	);
 }
 
-class SimpleSpotifyPlayback {
+export class SimpleSpotifyPlayback {
 	private static instance: SimpleSpotifyPlayback;
 	private accessToken: string = "";
 	private tokens: spotifyAuth.SpotifyTokenResponse | null = null;
@@ -228,5 +228,3 @@ class SimpleSpotifyPlayback {
 		return false;
 	}
 }
-
-export const playback = SimpleSpotifyPlayback.getInstance();

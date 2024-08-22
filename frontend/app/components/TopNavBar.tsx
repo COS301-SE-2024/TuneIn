@@ -1,16 +1,19 @@
-// TopNavBar.tsx
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
 import axios from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
+import auth from "../services/AuthManagement";
+import * as utils from "./../services/Utils";
+import { colors } from "../styles/colors";
+
+// Default profile icon for fallback
+const defaultProfileIcon = require("../../assets/profile-icon.png");
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
-	const [profileImage, setProfileImage] = useState<string>(
-		"https://cdn-.jk.-png.freepik.com/512/3135/3135715.png",
-	);
+	const [profileImage, setProfileImage] = useState<string>("");
+	const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchProfilePicture = async () => {
@@ -22,11 +25,22 @@ const TopNavBar: React.FC = () => {
 							Authorization: `Bearer ${token}`,
 						},
 					});
-					console.log(response);
-					setProfileImage(response.data.profile_picture_url);
+					const imageUrl = response.data.profile_picture_url;
+					console.log("Image URL: " + imageUrl);
+
+					if (
+						!imageUrl ||
+						imageUrl === "https://example.com/default-profile-picture.png"
+					) {
+						setProfileImage(defaultProfileIcon);
+					} else {
+						console.log("I work ");
+						setProfileImage(imageUrl);
+					}
 				}
 			} catch (error) {
 				console.error("Error fetching profile info:", error);
+				setProfileImage(defaultProfileIcon); // Fallback in case of error
 			}
 		};
 
@@ -39,18 +53,32 @@ const TopNavBar: React.FC = () => {
 		});
 	};
 
+	const navigateToDMs = () => {
+		router.push({
+			pathname: "/screens/messaging/ChatListScreen",
+		});
+	};
+
 	const appName = "TuneIn"; // Change this to your app's name
 
 	return (
 		<View style={styles.container}>
-			<View style={styles.emptyView}></View>
-			<Text style={styles.appName}>{appName}</Text>
 			<TouchableOpacity onPress={navigateToProfile}>
-				<Image
-					source={{ uri: profileImage }}
-					style={styles.profileImage}
-					testID="profile-image"
-				/>
+				{profileImage === defaultProfileIcon ? (
+					<Image source={defaultProfileIcon} style={styles.profileImage} />
+				) : (
+					<Image
+						source={{ uri: profileImage }}
+						style={[styles.profileImage, !imageLoaded && { display: "none" }]}
+						onLoad={() => setImageLoaded(true)}
+					/>
+				)}
+			</TouchableOpacity>
+			<View style={styles.appNameContainer}>
+				<Text style={styles.appName}>{appName}</Text>
+			</View>
+			<TouchableOpacity onPress={navigateToDMs}>
+				<Entypo name="direction" size={24} color="black" />
 			</TouchableOpacity>
 		</View>
 	);
@@ -58,17 +86,13 @@ const TopNavBar: React.FC = () => {
 
 const styles = StyleSheet.create({
 	container: {
+		marginTop: 0,
 		flexDirection: "row",
 		height: 56,
 		alignItems: "center",
 		justifyContent: "space-between",
 		paddingHorizontal: 16,
-		backgroundColor: "#FFF",
-		borderBottomWidth: 1,
-		borderBottomColor: "#E5E5E5",
-	},
-	emptyView: {
-		width: 40, // Adjust as needed
+		backgroundColor: colors.backgroundColor,
 	},
 	appName: {
 		color: "black",
@@ -79,7 +103,12 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		marginRight: 16,
+		borderWidth: 1,
+		borderColor: "grey",
+	},
+	appNameContainer: {
+		flex: 1,
+		alignItems: "center",
 	},
 });
 

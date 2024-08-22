@@ -18,10 +18,12 @@ import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
+import Selector from "../../components/Selector";
+import AddFavSong from "../../components/AddFavSong";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
-	const params = useLocalSearchParams(); // Correct way to access query parameters
+	const params = useLocalSearchParams();
 	// console.log("Profile :", params);
 	const profile = Array.isArray(params.profile)
 		? params.profile[0]
@@ -29,6 +31,8 @@ const EditProfileScreen = () => {
 	const profileInfo = JSON.parse(profile as string);
 
 	const [profileData, setProfileData] = useState(profileInfo);
+	const [genres, setGenres] = useState<string[]>([]);
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
@@ -36,6 +40,8 @@ const EditProfileScreen = () => {
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
+	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
+	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -52,7 +58,7 @@ const EditProfileScreen = () => {
 	}, []);
 
 	const updateProfile = async (changed) => {
-		console.log("Changed: " + JSON.stringify(profileData));
+		// console.log("Changed: " + JSON.stringify(profileData));
 		if (changed) {
 			try {
 				const response = await axios.patch(
@@ -65,7 +71,7 @@ const EditProfileScreen = () => {
 					},
 				);
 
-				console.log(response.data);
+				// console.log(response.data);
 				return response.data;
 			} catch (error) {
 				console.error("Error updating profile info:", error);
@@ -75,7 +81,7 @@ const EditProfileScreen = () => {
 	};
 
 	const handleImageUpload = async (uri) => {
-		console.log(uri);
+		// console.log(uri);
 		try {
 			// Fetch the file from the URI
 			// const response = await fetch(uri);
@@ -94,10 +100,10 @@ const EditProfileScreen = () => {
 				{ headers },
 			);
 			*/
-			console.log(profileData);
-			console.log("Uploading image...", uri);
+			// console.log(profileData);
+			// console.log("Uploading image...", uri);
 			const imageLink = await uploadImage(uri, "image");
-			console.log("image link:", imageLink);
+			// console.log("image link:", imageLink);
 			// console.log("File uploaded successfully", uploadResponse.data);
 			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
@@ -109,15 +115,23 @@ const EditProfileScreen = () => {
 	const updateImage = async (uri) => {
 		try {
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
-			console.log("image:", image);
+			// console.log("image:", image);
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
 			setChanged(true);
-			console.log("\n\nUpdated profile data:", profileData);
+			// console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
+		}
+	};
+
+	const toggleGenreSelector = () => {
+		if (isGenreDialogVisible) {
+			setIsGenreDialogVisible(false);
+		} else {
+			setIsGenreDialogVisible(true);
 		}
 	};
 
@@ -133,7 +147,7 @@ const EditProfileScreen = () => {
 	const [changed, setChanged] = useState(false);
 
 	const handleSave = (text, value) => {
-		console.log("Saved:", text);
+		// console.log("Saved:", text);
 		if (dialogs[value]) {
 			dialogs[value](false);
 		} else {
@@ -151,7 +165,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				profile_name: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "username") {
 			setProfileData((prevProfileData) => ({
@@ -163,7 +177,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				username: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "bio") {
 			setProfileData((prevProfileData) => ({
@@ -176,7 +190,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				bio: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 			// } else if (value === "instagramLink") {
 			// 	setProfileData((prevProfileData) => ({
 			// 		...prevProfileData,
@@ -200,7 +214,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				fav_genres: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "favoriteSongs") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -212,7 +226,7 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				fav_songs: text,
 			}));
-			console.log("Changed: " + JSON.stringify(changedFields));
+			// console.log("Changed: " + JSON.stringify(changedFields));
 		}
 	};
 
@@ -242,10 +256,33 @@ const EditProfileScreen = () => {
 					),
 				},
 			}));
-			console.log(profileData.links);
+			// console.log(profileData.links);
 			setChanged(true);
 		}
 	};
+
+	const getGenres = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Genre data" + response.data);
+				setGenres(response.data);
+			}
+		} catch (error) {
+			console.error("Error fetching genres:", error);
+		}
+	};
+
+	useEffect(() => {
+		getGenres();
+		console.log("Genres: " + genres[0]);
+	}, []);
 
 	const [currentLinkIndex, setCurrentLinkIndex] = useState(null);
 	const [currentLinkEditText, setCurrentLinkEditText] = useState("");
@@ -267,7 +304,7 @@ const EditProfileScreen = () => {
 					),
 				},
 			}));
-			console.log(profileData.links);
+			// console.log(profileData.links);
 			setLinkEditDialogVisible(false);
 			setChanged(true);
 		}
@@ -285,6 +322,22 @@ const EditProfileScreen = () => {
 				},
 			}));
 			setChanged(true);
+		}
+	};
+
+	const addGenre = (genreToAdd) => {
+		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
+			// Check if the genre already exists
+			if (!profileData.fav_genres.data.includes(genreToAdd)) {
+				setProfileData((prevProfileData) => ({
+					...prevProfileData,
+					fav_genres: {
+						...prevProfileData.fav_genres,
+						data: [...prevProfileData.fav_genres.data, genreToAdd],
+					},
+				}));
+				setChanged(true);
+			}
 		}
 	};
 
@@ -306,6 +359,27 @@ const EditProfileScreen = () => {
 		}));
 	};
 
+	const addSong = (newSongs: any) => {
+		setProfileData((prevProfileData: any) => {
+			const updatedSongs = [...prevProfileData.fav_songs.data, ...newSongs];
+			return {
+				...prevProfileData,
+				fav_songs: {
+					...prevProfileData.fav_songs,
+					data: updatedSongs,
+				},
+			};
+		});
+		setChanged(true);
+		setChangedFields((prevChangedFields) => ({
+			...prevChangedFields,
+		}));
+
+		console.log("Fav Songs: " + JSON.stringify(profileData.fav_songs));
+
+		setIsSongDialogVisible(false);
+	};
+
 	const renderAddLink = () => {
 		if (profileData.links.count < 3) {
 			return (
@@ -314,7 +388,7 @@ const EditProfileScreen = () => {
 						onPress={() => setLinkAddDialogVisible(true)}
 						style={styles.editButton}
 					>
-						<Text style={{ fontWeight: 600 }}>Add link</Text>
+						<Text style={{ fontWeight: "600" }}>Add link</Text>
 					</TouchableOpacity>
 					<EditDialog
 						value="link"
@@ -333,7 +407,7 @@ const EditProfileScreen = () => {
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.profileHeader}>
 					<TouchableOpacity
-						onPress={() => router.navigate("screens/ProfilePage")}
+						onPress={() => router.navigate("screens/profile/ProfilePage")}
 					>
 						<Text>Cancel</Text>
 					</TouchableOpacity>
@@ -341,7 +415,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => {
 							updateProfile(changed);
-							router.navigate("screens/ProfilePage");
+							router.navigate("screens/profile/ProfilePage");
 						}}
 						style={styles.saveButton}
 					>
@@ -357,6 +431,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setPhotoDialogVisible(true)}
 						style={styles.changePhotoButton}
+						testID="photo-button"
 					>
 						<Text>Change Photo</Text>
 					</TouchableOpacity>
@@ -372,6 +447,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setNameDialogVisible(true)}
 						style={styles.editButton}
+						testID="name-button"
 					>
 						<Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text>
 					</TouchableOpacity>
@@ -389,6 +465,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setUsernameDialogVisible(true)}
 						style={styles.editButton}
+						testID="username-button"
 					>
 						<Text style={{ marginLeft: 15 }}>@{profileData.username}</Text>
 					</TouchableOpacity>
@@ -407,6 +484,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setBioDialogVisible(true)}
 						style={styles.editButton}
+						testID="bio-button"
 					>
 						<Text style={{ marginLeft: 60 }}>{profileData.bio}</Text>
 					</TouchableOpacity>
@@ -432,6 +510,7 @@ const EditProfileScreen = () => {
 							<TouchableOpacity
 								onPress={() => openEditDialog(index, link.links)}
 								style={styles.editButton}
+								testID="link-edit-button"
 							>
 								<Text>{link.links}</Text>
 							</TouchableOpacity>
@@ -468,7 +547,10 @@ const EditProfileScreen = () => {
 						/>
 					))}
 					{/* Render add genre button */}
-					<TouchableOpacity onPress={() => {}} style={styles.addGenreButton}>
+					<TouchableOpacity
+						onPress={toggleGenreSelector}
+						style={styles.addGenreButton}
+					>
 						<Text
 							style={{
 								color: "black",
@@ -479,6 +561,13 @@ const EditProfileScreen = () => {
 							Add +
 						</Text>
 					</TouchableOpacity>
+					<Selector
+						options={genres}
+						placeholder={"Search Genres"}
+						visible={isGenreDialogVisible}
+						onSelect={addGenre}
+						onClose={toggleGenreSelector}
+					/>
 				</View>
 				{/* Favorite Songs */}
 				<View style={styles.divider} />
@@ -505,12 +594,19 @@ const EditProfileScreen = () => {
 						justifyContent: "center",
 					}}
 				>
-					<View style={styles.container2}>
+					<TouchableOpacity
+						onPress={() => setIsSongDialogVisible(true)}
+						style={styles.container2}
+					>
 						<Text style={styles.text}>
 							Add Song <Icons name="plus" size={14} color="black" />
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
+				<AddFavSong
+					visible={isSongDialogVisible}
+					handleSave={addSong}
+				></AddFavSong>
 			</ScrollView>
 		</View>
 	);

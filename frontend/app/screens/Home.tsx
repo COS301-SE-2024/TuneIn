@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, {
+	useState,
+	useRef,
+	useCallback,
+	useContext,
+	useEffect,
+} from "react";
 import {
 	View,
 	Text,
@@ -9,6 +15,7 @@ import {
 	ActivityIndicator,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
+	RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";
@@ -16,23 +23,42 @@ import { Room } from "../models/Room";
 import { Friend } from "../models/friend";
 import AppCarousel from "../components/AppCarousel";
 import FriendsGrid from "../components/FriendsGrid";
-import TopNavBar from "../components/TopNavBar";
+import Miniplayer from "../components/home/miniplayer";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
+import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";
+import TopNavBar from "../components/TopNavBar";
+interface UserData {
+	username: string;
+	// Add other properties if needed
+}
 
 const Home: React.FC = () => {
-	console.log("Home");
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { currentRoom } = playerContext;
+
+	console.log("currentRoom: " + currentRoom);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	// const [cache, setCacheLoaded] = useState(false);
+	const [userData, setUserData] = useState<UserData | undefined>(undefined);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+	if (!instanceExists()) {
+		live.initialiseSocket();
+	}
 
 	const BackgroundIMG: string =
 		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -59,10 +85,28 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
+
+			// console.log("Friends: " + JSON.stringify(response.data));
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
 			return [];
+		}
+	};
+
+	const fetchProfileInfo = async (token: string) => {
+		try {
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Home Response Data: " + JSON.stringify(response));
+				return response.data;
+			}
+		} catch (error) {
+			console.error("Error fetching profile info:", error);
 		}
 	};
 
@@ -113,8 +157,11 @@ const Home: React.FC = () => {
 	};
 
 	const refreshData = useCallback(async () => {
+		// await StorageService.clear();
+		// console.log("CLEARED STORAGE");
 		setLoading(true);
 		const storedToken = await auth.getToken();
+		console.log("Stored token:", storedToken);
 
 		if (storedToken) {
 			// Fetch recent rooms
@@ -146,19 +193,24 @@ const Home: React.FC = () => {
 				JSON.stringify(formattedMyRooms),
 			);
 
+			const userInfo = await fetchProfileInfo(storedToken);
+			setUserData(userInfo);
+
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
 
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profilePicture: friend.profile_picture_url
+						profile_picture_url: friend.profile_picture_url
 							? friend.profile_picture_url
 							: ProfileIMG,
-						profile_name: friend.profile_name, // Ensure you include the profile_name property
+						username: friend.username, // Ensure you include the profile_name property
 					}))
 				: [];
 
 			setFriends(formattedFriends);
+
+			console.log("Friends after format: " + JSON.stringify(formattedFriends));
 
 			await StorageService.setItem(
 				"cachedFriends",
@@ -169,18 +221,14 @@ const Home: React.FC = () => {
 		setLoading(false);
 	}, []);
 
-	useEffect(() => {
-		const initialize = async () => {
-			await loadCachedData();
-			await refreshData();
-		};
-		initialize();
+	const [refreshing] = React.useState(false);
 
-		const interval = setInterval(() => {
-			refreshData();
-		}, 240000); // Refresh data every 240 seconds (4 minutes)
-
-		return () => clearInterval(interval);
+	const onRefresh = React.useCallback(() => {
+		setLoading(true);
+		refreshData();
+		setTimeout(() => {
+			setLoading(false);
+		}, 2000);
 	}, [refreshData]);
 
 	const renderItem = ({ item }: { item: Room }) => (
@@ -189,12 +237,22 @@ const Home: React.FC = () => {
 
 	const router = useRouter();
 	const navigateToAllFriends = () => {
-		router.navigate("/screens/AllFriends");
+		const safeUserData = userData ?? { username: "defaultUser" };
+
+		router.navigate({
+			pathname: "/screens/followers/FollowerStack",
+			params: { username: safeUserData.username },
+		});
 	};
 
-	const navigateToCreateNew = () => {
-		router.navigate("/screens/rooms/CreateRoom");
-	};
+	useEffect(() => {
+		const initialize = async () => {
+			await loadCachedData();
+			await refreshData();
+		};
+		initialize();
+		return;
+	}, [refreshData]);
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -226,54 +284,38 @@ const Home: React.FC = () => {
 		[scrollY],
 	);
 
-	const topNavBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, -100],
-		extrapolate: "clamp",
-	});
-
 	const navBarTranslateY = scrollY.interpolate({
 		inputRange: [0, 100],
 		outputRange: [0, 100],
 		extrapolate: "clamp",
 	});
 
-	const buttonTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 70],
-		extrapolate: "clamp",
-	});
-
 	return (
 		<View style={styles.container}>
-			<Animated.View
-				style={{
-					transform: [{ translateY: topNavBarTranslateY }],
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					zIndex: 10,
-				}}
-			>
-				<TopNavBar />
-			</Animated.View>
+			<TopNavBar />
 			<ScrollView
 				ref={scrollViewRef}
 				onScroll={handleScroll}
 				scrollEventThrottle={16}
 				contentContainerStyle={styles.scrollViewContent}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			>
 				{loading ? (
 					<ActivityIndicator
 						size={60}
-						color="#0000ff"
+						color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
 				) : (
 					<View style={styles.contentContainer}>
-						<Text style={styles.sectionTitle}>Recent Rooms</Text>
-						<AppCarousel data={myRecents} renderItem={renderItem} />
+						{myRecents.length > 0 && (
+							<>
+								<Text style={styles.sectionTitle}>Recent Rooms</Text>
+								<AppCarousel data={myRecents} renderItem={renderItem} />
+							</>
+						)}
 						<Text style={styles.sectionTitle}>Picks for you</Text>
 						<AppCarousel data={myPicks} renderItem={renderItem} />
 						<TouchableOpacity
@@ -282,31 +324,29 @@ const Home: React.FC = () => {
 						>
 							<Text style={styles.sectionTitle}>Friends</Text>
 						</TouchableOpacity>
-						<FriendsGrid friends={friends} maxVisible={8} />
+						{userData && userData.username ? (
+							<FriendsGrid
+								friends={friends}
+								user={userData.username}
+								maxVisible={8}
+							/>
+						) : null}
 						<Text style={styles.sectionTitle}>My Rooms</Text>
-						<AppCarousel data={myRooms} renderItem={renderItem} />
+						<AppCarousel
+							data={myRooms}
+							renderItem={renderItem}
+							showAddRoomCard={true} // Conditionally show the AddRoomCard
+						/>
 					</View>
 				)}
 			</ScrollView>
-			<Animated.View
-				style={[
-					styles.createRoomButtonContainer,
-					{ transform: [{ translateY: buttonTranslateY }] },
-				]}
-			>
-				<TouchableOpacity
-					style={styles.createRoomButton}
-					onPress={navigateToCreateNew}
-				>
-					<Text style={styles.createRoomButtonText}>+</Text>
-				</TouchableOpacity>
-			</Animated.View>
 			<Animated.View
 				style={[
 					styles.navBar,
 					{ transform: [{ translateY: navBarTranslateY }] },
 				]}
 			>
+				<Miniplayer />
 				<NavBar />
 			</Animated.View>
 		</View>
@@ -316,13 +356,6 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-	},
-	topNavBar: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 	scrollViewContent: {
 		paddingTop: 40,

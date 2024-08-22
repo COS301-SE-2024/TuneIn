@@ -1,0 +1,51 @@
+name: Sync VSCode Settings
+on:
+  push:
+    branches: [ main, develop ]
+permissions:
+  contents: write
+
+jobs:
+  start:
+    name: Initial Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Starting Job
+        run: |
+          echo "Beginning to lint ${{ github.repository }}"
+
+  copy_vscode_settings:
+        name: Copy VSCode Settings
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Copy .vscode to frontend/.vscode
+              run: |
+                mkdir -p frontend/.vscode
+                cp -r .vscode/* frontend/.vscode/
+
+            - name: Copy .vscode to backend/.vscode
+              run: |
+                mkdir -p backend/.vscode
+                cp -r .vscode/* backend/.vscode/
+
+            - name: Commit and push changes
+              run: |
+                git config --global user.name 'github-actions[bot]'
+                git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+                git add frontend/.vscode backend/.vscode
+                git commit -m "Copy .vscode settings to frontend and backend directories" || echo "No changes to commit"
+                git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+  end:
+    name: The end
+    runs-on: ubuntu-latest
+    needs: [start, copy_vscode_settings]
+    steps:
+      - name: Ending
+        id: init
+        run: |
+          echo "${{ github.repository }} has been successfully linted"

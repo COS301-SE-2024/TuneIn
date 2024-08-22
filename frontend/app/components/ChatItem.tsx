@@ -2,27 +2,35 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Chat } from "../models/chat";
+import { DirectMessageDto } from "../models/DmDto";
+import { UserDto } from "../models/UserDto";
 
-interface ChatItemProps {
-	chat: Chat;
+export interface ChatItemProps {
+	message: DirectMessageDto;
+	otherUser: UserDto;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
+const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
 	const router = useRouter();
 
 	return (
 		<TouchableOpacity
+			testID="chat-item-touchable"
 			style={styles.container}
 			onPress={() =>
 				router.push(
-					`/screens/ChatScreen?name=${chat.name}&avatar=${chat.avatar}`,
+					`/screens/messaging/ChatScreen?username=${otherUser.username}`,
 				)
 			}
 		>
-			<Image source={{ uri: chat.avatar }} style={styles.avatar} />
+			<Image
+				source={{ uri: otherUser.profile_picture_url }}
+				testID="chat-item-avatar"
+				style={styles.avatar}
+			/>
 			<View style={{ flex: 1 }}>
-				<Text style={styles.name}>{chat.name}</Text>
-				<Text style={styles.lastMessage}>{chat.lastMessage}</Text>
+				<Text style={styles.name}>{otherUser.profile_name}</Text>
+				<Text style={styles.lastMessage}>{message.messageBody}</Text>
 			</View>
 		</TouchableOpacity>
 	);
@@ -30,6 +38,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		margin: 10,
 		flexDirection: "row",
 		alignItems: "center",
 		padding: 10,

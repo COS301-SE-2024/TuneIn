@@ -26,6 +26,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
+import { DirectMessageDto } from "./dto/dm.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -116,6 +117,22 @@ export class UsersController {
 	): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("dms")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get the last DMs sent to or received from another user",
+	})
+	@ApiOkResponse({
+		description: "The last DMs as an array of DirectMessageDto.",
+		type: Object,
+	})
+	async getDMs(@Request() req: any): Promise<DirectMessageDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getLastDMs(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -294,7 +311,7 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/follow")
+	@Post(":userID/follow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Follow the given user" })
 	@ApiParam({
@@ -311,15 +328,15 @@ export class UsersController {
 	})
 	async followUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, username);
+		return await this.usersService.followUser(userInfo.id, userID);
 	}
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/unfollow")
+	@Post(":userID/unfollow")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Unfollow the given user" })
 	@ApiParam({
@@ -336,10 +353,10 @@ export class UsersController {
 	})
 	async unfollowUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, username);
+		return await this.usersService.unfollowUser(userInfo.id, userID);
 	}
 
 	/*
@@ -366,12 +383,12 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post(":username/befriend")
+	@Post(":userID/befriend")
 	@ApiTags("users")
 	@ApiOperation({ summary: "Send a friend request to the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user to send a friend request to.",
+		name: "userID",
+		description: "The userID of the user to send a friend request to.",
 	})
 	@ApiOkResponse({
 		description: "Successfully sent friend request.",
@@ -383,18 +400,19 @@ export class UsersController {
 	})
 	async befriendUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.befriendUser(userInfo.id, username);
+		return await this.usersService.befriendUser(userInfo.id, userID);
 	}
 
-	@Post(":username/unfriend")
+	@Post(":userID/unfriend")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "End friendship with the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user to end friendship with.",
+		name: "userID",
+		description: "The userID of the user to end friendship with.",
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
@@ -406,18 +424,19 @@ export class UsersController {
 	})
 	async unfriendUser(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfriendUser(userInfo.id, username);
+		return await this.usersService.unfriendUser(userInfo.id, userID);
 	}
 
-	@Post(":username/accept")
+	@Post(":userID/accept")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Accept a friend request from the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user whose friend request to accept.",
+		name: "userID",
+		description: "The userID of the user whose friend request to accept.",
 	})
 	@ApiOkResponse({
 		description: "Successfully accepted friend request.",
@@ -429,18 +448,19 @@ export class UsersController {
 	})
 	async acceptFriendRequest(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.acceptFriendRequest(userInfo.id, username);
+		return await this.usersService.acceptFriendRequest(userInfo.id, userID);
 	}
 
-	@Post(":username/reject")
+	@Post(":userID/reject")
 	@ApiTags("users")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Reject a friend request from the given user" })
 	@ApiParam({
-		name: "username",
-		description: "The username of the user whose friend request to reject.",
+		name: "userID",
+		description: "The userID of the user whose friend request to reject.",
 	})
 	@ApiOkResponse({
 		description: "Successfully rejected friend request.",
@@ -452,9 +472,53 @@ export class UsersController {
 	})
 	async rejectFriendRequest(
 		@Request() req: any,
-		@Param("username") username: string,
+		@Param("userID") userID: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.rejectFriendRequest(userInfo.id, username);
+		return await this.usersService.rejectFriendRequest(userInfo.id, userID);
 	}
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
 }

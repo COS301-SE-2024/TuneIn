@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { Message } from "../models/message";
+import { DirectMessage } from "../services/Live";
+import { colors } from "../styles/colors";
 
 interface MessageItemProps {
-	message: Message;
-	avatarUrl: string;
+	message: DirectMessage;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 	return (
 		<View
 			style={[
@@ -16,7 +16,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
 			]}
 		>
 			{!message.me && (
-				<Image source={{ uri: avatarUrl }} style={styles.avatar} />
+				<Image
+					source={{ uri: message.message.sender.profile_picture_url }}
+					style={styles.avatar}
+				/>
 			)}
 			<View
 				style={[
@@ -24,7 +27,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
 					message.me ? styles.bubbleMe : styles.bubbleOther,
 				]}
 			>
-				<Text style={styles.text}>{message.text}</Text>
+				<Text style={styles.text}>{message.message.messageBody}</Text>
 			</View>
 		</View>
 	);
@@ -47,6 +50,7 @@ const styles = StyleSheet.create({
 		height: 30,
 		borderRadius: 15,
 		marginRight: 10,
+		marginBottom: 5,
 	},
 	bubble: {
 		paddingVertical: 10,
@@ -56,13 +60,24 @@ const styles = StyleSheet.create({
 		maxWidth: "75%",
 	},
 	bubbleMe: {
-		backgroundColor: "#08bdbd",
+		backgroundColor: colors.primary,
 		alignSelf: "flex-end",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	bubbleOther: {
 		backgroundColor: "#FFFFFF",
-		borderColor: "#ECECEC",
+		borderWidth: 1,
+		borderColor: "#E0E0E0",
 		alignSelf: "flex-start",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	text: {
 		fontSize: 16,
