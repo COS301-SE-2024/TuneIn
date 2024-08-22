@@ -196,6 +196,7 @@ const ProfileScreen: React.FC = () => {
 						},
 					},
 				);
+				// console.log("Room info: " + JSON.stringify(response.data));
 				setRoomData(response.data);
 			}
 		} catch (error) {
@@ -558,7 +559,7 @@ const ProfileScreen: React.FC = () => {
 					<View style={{ paddingHorizontal: 20 }}>
 						<NowPlaying
 							name={roomData.room.name}
-							creator={roomData.room.room_creator}
+							creator={roomData.creator_name}
 							art={roomData.room.playlist_photo}
 						/>
 					</View>
