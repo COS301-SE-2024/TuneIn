@@ -1,35 +1,81 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
 	View,
 	Text,
 	StyleSheet,
 	Dimensions,
-	TouchableOpacity,
 	ScrollView,
 	ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
+import SongList from "../../components/SongList";
+import { Track } from "../../models/Track";
+import { colors } from "../../styles/colors";
 
-const SplittingRoomCard: React.FC = () => {
+interface SplittingRoomCardProps {
+	queueData: Track[]; // Pass queue data as props
+	currentTrackIndex: number;
+	rootParentName: string;
+	topGenre: string;
+	numberOfParticipants: number;
+	backgroundImageSource: any; // Adjust type based on your image import method
+}
+
+const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
+	queueData,
+	currentTrackIndex,
+	rootParentName,
+	topGenre,
+	numberOfParticipants,
+	backgroundImageSource,
+}) => {
 	const { height, width } = Dimensions.get("window");
 	const cardHeight = height * 0.8;
 	const cardWidth = width * 0.9;
-	const upperSectionHeight = cardHeight * 0.5; // 50% of card height
-	const lowerSectionHeight = cardHeight * 0.5; // 50% of card height
+	const upperSectionHeight = cardHeight * 0.4; // 40% of card height
+	const lowerSectionHeight = cardHeight * 0.6; // 60% of card height
 
-	// Example data
-	const rootParentName = "RootParent";
-	const topGenre = "TopGenre";
-	const numberOfParticipants = 15;
-	const backgroundImage = require("../../assets/jazzBackground.png");
+	// Initialize playlist and votes using useState
+	const [playlist, setPlaylist] = useState<Track[]>([]);
+	const [votes, setVotes] = useState<number[]>([]);
+
+	// Memoize the queue data to prevent unnecessary re-renders
+	const memoizedQueue = useMemo(() => queueData, [queueData]);
+
+	// Update playlist and votes when memoizedQueue changes
+	useEffect(() => {
+		if (memoizedQueue && memoizedQueue.length > 0) {
+			setPlaylist(memoizedQueue);
+			setVotes(new Array(memoizedQueue.length).fill(0));
+		}
+	}, [memoizedQueue]);
+
+	// Function to handle voting
+	const handleVoteChange = (index: number, newVoteCount: number) => {
+		const updatedVotes = [...votes];
+		updatedVotes[index] = newVoteCount;
+
+		const sortedPlaylist = playlist
+			.map((track, i) => ({ track, vote: updatedVotes[i], originalIndex: i }))
+			.sort((a, b) => {
+				// Keep current track at its position
+				if (a.originalIndex === currentTrackIndex) return -1;
+				if (b.originalIndex === currentTrackIndex) return 1;
+				// Sort by votes descending, then by original order
+				if (a.vote === b.vote) return a.originalIndex - b.originalIndex;
+				return b.vote - a.vote;
+			})
+			.map((item) => item.track);
+
+		setVotes(updatedVotes);
+		setPlaylist(sortedPlaylist);
+	};
 
 	return (
-		<TouchableOpacity
-			style={[styles.card, { height: cardHeight, width: cardWidth }]}
-		>
+		<View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
 			<ImageBackground
-				source={backgroundImage}
+				source={backgroundImageSource}
 				style={[
 					styles.upperSection,
 					{ height: upperSectionHeight, width: cardWidth },
@@ -46,7 +92,7 @@ const SplittingRoomCard: React.FC = () => {
 					</View>
 				</View>
 				<LinearGradient
-					colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.8)"]}
+					colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)"]}
 					style={styles.gradientOverlay}
 				/>
 			</ImageBackground>
@@ -54,83 +100,108 @@ const SplittingRoomCard: React.FC = () => {
 				style={[styles.lowerSection, { height: lowerSectionHeight }]}
 				contentContainerStyle={styles.scrollViewContent}
 			>
-				{/* Lower section content goes here */}
+				{playlist.length > 0 ? (
+					playlist.map((track, index) => (
+						<SongList
+							key={track.id || index}
+							songNumber={index + 1}
+							track={track}
+							voteCount={votes[index]}
+							showVoting={false}
+							isCurrent={index === currentTrackIndex}
+							setVoteCount={(newVoteCount) =>
+								handleVoteChange(index, newVoteCount)
+							}
+						/>
+					))
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty. Add some songs to get started!
+						</Text>
+					</View>
+				)}
 			</ScrollView>
-		</TouchableOpacity>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	card: {
 		alignItems: "center",
-		backgroundColor: "#343434",
+		backgroundColor: colors.backgroundColor,
 		borderRadius: 10,
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 8,
 		elevation: 5,
+		overflow: "hidden",
 	},
 	upperSection: {
 		justifyContent: "center",
 		alignItems: "center",
-		borderBottomWidth: 1,
-		borderBottomColor: "#ddd",
 	},
 	lowerSection: {
 		padding: 10,
 		width: "100%",
 	},
 	scrollViewContent: {
-		justifyContent: "center",
-		alignItems: "center",
+		paddingBottom: 20,
 	},
 	backgroundImage: {
-		borderRadius: 10,
-		opacity: 0.8,
+		width: "100%",
+		height: "100%",
+		resizeMode: "cover",
 	},
 	overlay: {
-		flex: 1,
-		width: "100%",
-		justifyContent: "flex-start", // Align content to the top
+		position: "absolute",
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.3)", // Dark overlay to improve text visibility
-		padding: 10, // Added padding for better spacing
+		padding: 10,
 	},
 	roomName: {
 		fontSize: 24,
 		fontWeight: "bold",
 		color: "#fff",
-		marginTop: 20, // Positioning the room name higher
+		textAlign: "center",
 	},
 	participants: {
 		fontWeight: "bold",
 		fontSize: 16,
 		color: "#0d0d0d",
+		marginLeft: 5,
 	},
 	gradientOverlay: {
 		position: "absolute",
-		width: "100%",
-		height: "100%",
-		borderRadius: 10,
-		zIndex: 1,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		height: "50%",
 	},
 	peopleCountContainer: {
-		height: 35,
-		width: 80,
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: 5,
-		paddingVertical: 3,
-		paddingHorizontal: 10,
-		borderWidth: 1,
-		borderColor: "#000",
+		marginTop: 10,
+		paddingVertical: 5,
+		paddingHorizontal: 15,
 		borderRadius: 20,
 		backgroundColor: "#fff",
-		position: "absolute", // Absolute positioning
-		bottom: 10, // Aligning to the bottom
-		right: 10, // Aligning to the right
-		zIndex: 2, // Ensure it appears above the gradient
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 });
 

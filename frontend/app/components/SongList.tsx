@@ -48,12 +48,15 @@ const SongList: React.FC<SongListProps> = ({
 				</Text>
 			</View>
 
-			<Voting
-				voteCount={voteCount}
-				setVoteCount={setVoteCount}
-				index={index}
-				swapSongs={swapSongs}
-			/>
+			{/* Conditionally render the Voting component */}
+			{showVoting && (
+				<Voting
+					voteCount={voteCount}
+					setVoteCount={setVoteCount}
+					index={index}
+					swapSongs={swapSongs}
+				/>
+			)}
 		</View>
 	);
 };
