@@ -72,6 +72,20 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 		setPlaylist(sortedPlaylist);
 	};
 
+	// Function to swap songs in the playlist
+	const swapSongs = (index: number, direction: "up" | "down") => {
+		const newIndex = direction === "up" ? index - 1 : index + 1;
+
+		if (newIndex < 0 || newIndex >= playlist.length) return; // Out of bounds
+
+		const updatedPlaylist = [...playlist];
+		const temp = updatedPlaylist[index];
+		updatedPlaylist[index] = updatedPlaylist[newIndex];
+		updatedPlaylist[newIndex] = temp;
+
+		setPlaylist(updatedPlaylist);
+	};
+
 	return (
 		<View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
 			<ImageBackground
@@ -82,6 +96,10 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 				]}
 				imageStyle={styles.backgroundImage}
 			>
+				<LinearGradient
+					colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
+					style={styles.gradientOverlay}
+				/>
 				<View style={styles.overlay}>
 					<Text
 						style={styles.roomName}
@@ -91,10 +109,6 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 						<Text style={styles.participants}>{numberOfParticipants}</Text>
 					</View>
 				</View>
-				<LinearGradient
-					colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)"]}
-					style={styles.gradientOverlay}
-				/>
 			</ImageBackground>
 			<ScrollView
 				style={[styles.lowerSection, { height: lowerSectionHeight }]}
@@ -109,6 +123,8 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 							voteCount={votes[index]}
 							showVoting={false}
 							isCurrent={index === currentTrackIndex}
+							index={index} // Pass the index prop
+							swapSongs={swapSongs} // Pass the swapSongs function
 							setVoteCount={(newVoteCount) =>
 								handleVoteChange(index, newVoteCount)
 							}
@@ -141,8 +157,10 @@ const styles = StyleSheet.create({
 	upperSection: {
 		justifyContent: "center",
 		alignItems: "center",
+		position: "relative",
 	},
 	lowerSection: {
+		paddingTop: 20,
 		padding: 10,
 		width: "100%",
 	},
@@ -178,10 +196,10 @@ const styles = StyleSheet.create({
 	},
 	gradientOverlay: {
 		position: "absolute",
+		height: "70%",
 		left: 0,
 		right: 0,
-		bottom: 0,
-		height: "50%",
+		bottom: -5,
 	},
 	peopleCountContainer: {
 		flexDirection: "row",
