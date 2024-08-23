@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
 import { useLocalSearchParams } from "expo-router";
+import { Player } from "../app/PlayerContext";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -29,6 +30,16 @@ jest.mock("expo-router", () => {
 	};
 });
 
+const mockPlayerContextValue = {
+	userData: { name: "John Doe", age: 30 },
+	setUserData: jest.fn(),
+	currentRoom: "Room 1",
+};
+
+const PlayerContextProviderMock = ({ children }) => (
+	<Player.Provider value={mockPlayerContextValue}>{children}</Player.Provider>
+);
+
 describe("ProfileScreen", () => {
 	beforeEach(() => {
 		// Clear mocks and set initial states
@@ -40,7 +51,11 @@ describe("ProfileScreen", () => {
 
 	it("renders loading indicator initially", async () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
-		const { getByTestId } = render(<ProfileScreen />);
+		const { getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		const loadingIndicator = getByTestId("loading-indicator");
 		expect(loadingIndicator).toBeTruthy();
@@ -71,7 +86,11 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(<ProfileScreen />);
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete
 		await act(async () => {
@@ -123,7 +142,11 @@ describe("ProfileScreen", () => {
 		});
 
 		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(<ProfileScreen />);
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete
 		await act(async () => {
@@ -176,7 +199,11 @@ describe("ProfileScreen", () => {
 		});
 
 		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(<ProfileScreen />);
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete
 		await act(async () => {
@@ -230,7 +257,11 @@ describe("ProfileScreen", () => {
 		});
 
 		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(<ProfileScreen />);
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete
 		await act(async () => {
@@ -274,7 +305,11 @@ describe("ProfileScreen", () => {
 		});
 
 		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(<ProfileScreen />);
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete
 		await act(async () => {
@@ -326,7 +361,11 @@ describe("ProfileScreen", () => {
 			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
-			const { getByText } = render(<ProfileScreen />);
+			const { getByText } = render(
+				<PlayerContextProviderMock>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
+			);
 
 			// Wait for async operations to complete
 			await act(async () => {
@@ -365,7 +404,11 @@ describe("ProfileScreen", () => {
 			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
-			const { getByText } = render(<ProfileScreen />);
+			const { getByText } = render(
+				<PlayerContextProviderMock>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
+			);
 
 			// Wait for async operations to complete
 			await act(async () => {
@@ -435,7 +478,11 @@ describe("ProfileScreen", () => {
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
-			const { getByText, getByTestId } = render(<ProfileScreen />);
+			const { getByText, getByTestId } = render(
+				<PlayerContextProviderMock>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
+			);
 
 			// Assert that the title "Favorite Rooms" is rendered
 			await act(async () => {
@@ -530,7 +577,11 @@ describe("ProfileScreen", () => {
 			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
-			const { getByText, getByTestId } = render(<ProfileScreen />);
+			const { getByText, getByTestId } = render(
+				<PlayerContextProviderMock>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
+			);
 
 			// Assert that the title "Recent Rooms" is rendered
 			await act(async () => {
@@ -623,7 +674,11 @@ describe("ProfileScreen", () => {
 
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
-		const { getByTestId, queryByTestId, getByText } = render(<ProfileScreen />);
+		const { getByTestId, queryByTestId, getByText } = render(
+			<PlayerContextProviderMock>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
 
 		// Wait for async operations to complete and profile data to be rendered
 		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
