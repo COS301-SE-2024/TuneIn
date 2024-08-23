@@ -60,6 +60,7 @@ import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
+import { MyLogger } from "../src/logger/logger.service";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -71,7 +72,7 @@ const JWT_SECRET_KEY: string = tmpSecret;
 export async function createAppTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		controllers: [AppController],
-		providers: [AppService],
+		providers: [AppService, MyLogger],
 		imports: [
 			ConfigModule.forRoot({ isGlobal: true }),
 			PrismaModule,
