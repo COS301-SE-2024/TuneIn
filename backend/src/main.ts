@@ -14,16 +14,18 @@ async function bootstrap() {
 
 	let app: NestExpressApplication;
 	// if files exist, use https, otherwise use http
-	if (!fs.existsSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem') || !fs.existsSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem')) {
+	if (
+		!fs.existsSync("certs/privkey.pem") ||
+		!fs.existsSync("certs/fullchain.pem")
+	) {
 		console.log("Using HTTP");
 		app = await NestFactory.create<NestExpressApplication>(AppModule, {
 			logger: logger, // Use custom logger
 		});
-	}
-	else {
+	} else {
 		const httpsOptions = {
-			key: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem'),
-			cert: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem'),
+			key: fs.readFileSync("certs/privkey.pem"),
+			cert: fs.readFileSync("certs/fullchain.pem"),
 		};
 		console.log("Using HTTPS");
 		app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -56,11 +58,13 @@ async function bootstrap() {
 		module.hot.dispose(() => app.close());
 	}
 
-	app.use(morgan('combined', {
-		stream: {
-		write: (message: string) => logger.log(message.trim()),
-		},
-	}));
+	app.use(
+		morgan("combined", {
+			stream: {
+				write: (message: string) => logger.log(message.trim()),
+			},
+		}),
+	);
 
 	await app.listen(3000);
 }
