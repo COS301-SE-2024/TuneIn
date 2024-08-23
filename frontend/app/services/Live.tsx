@@ -718,5 +718,5 @@ class LiveSocketService {
 }
 // Export the singleton instance
 export const live = LiveSocketService.getInstance();
-export const initialiseSocket = live.initialiseSocket;
+export const initialiseSocket = live.initialiseSocket.bind(live);
 export const instanceExists = LiveSocketService.instanceExists;
