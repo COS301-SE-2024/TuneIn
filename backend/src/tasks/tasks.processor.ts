@@ -4,6 +4,7 @@ import { Job } from "bull";
 import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
 import { SpotifyService } from "../spotify/spotify.service";
 import { Prisma } from "@prisma/client";
+// import * as PrismaTypes from "@prisma/client";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { PrismaService } from "../../prisma/prisma.service";
 
@@ -64,12 +65,12 @@ export class TasksProcessor {
 		}
 
 		const ids: string[] = [];
-		for (const track of existingSongs) {
-			const song = await this.spotifyService.findSavedSongInDB(track);
-			if (song) {
-				dbLikedSongs.push(song);
-			}
-		}
+		// for (const track of existingSongs) {
+		// 	const song: PrismaTypes.song | null = await this.spotifyService.findSavedSongInDB(track);
+		// 	if (song) {
+		// 		dbLikedSongs.push(song);
+		// 	}
+		// }
 
 		const newSongs = await this.prisma.song.createManyAndReturn({
 			data: dbLikedSongs,

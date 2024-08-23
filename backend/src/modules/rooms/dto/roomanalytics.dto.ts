@@ -7,7 +7,7 @@ import {
 	IsString,
 	ValidateNested,
 } from "class-validator";
-import { UserDto } from "src/modules/users/dto/user.dto";
+import { UserDto } from "../../users/dto/user.dto";
 export class RoomAnalyticsKeyMetricsDto {
 	// an object called unique visitors with two properties, count and percentage_change. both are numbers
 	@ApiProperty({

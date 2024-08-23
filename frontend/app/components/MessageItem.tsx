@@ -1,14 +1,13 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { Message } from "../models/message";
+import { DirectMessage } from "../services/Live";
 import { colors } from "../styles/colors";
 
 interface MessageItemProps {
-	message: Message;
-	avatarUrl: string;
+	message: DirectMessage;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 	return (
 		<View
 			style={[
@@ -17,7 +16,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
 			]}
 		>
 			{!message.me && (
-				<Image source={{ uri: avatarUrl }} style={styles.avatar} />
+				<Image
+					source={{ uri: message.message.sender.profile_picture_url }}
+					style={styles.avatar}
+				/>
 			)}
 			<View
 				style={[
@@ -25,7 +27,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, avatarUrl }) => {
 					message.me ? styles.bubbleMe : styles.bubbleOther,
 				]}
 			>
-				<Text style={styles.text}>{message.text}</Text>
+				<Text style={styles.text}>{message.message.messageBody}</Text>
 			</View>
 		</View>
 	);
