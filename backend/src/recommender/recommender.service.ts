@@ -40,7 +40,7 @@ export class RecommenderService implements OnModuleInit {
 	}
 
 	private async loadData(): Promise<void> {
-		const filePath = path.join(__dirname, "..", "combined_playlists.json"); // this is path to the mock data
+		const filePath = path.join(__dirname, "..", "combined_playlists.json"); // this is path to the mock data JSON
 
 		try {
 			const data = fs.readFileSync(filePath, "utf-8");
@@ -57,7 +57,7 @@ export class RecommenderService implements OnModuleInit {
 	private flattenPlaylists(playlists: { [key: string]: any[] }): {
 		[key: string]: any[];
 	} {
-		// Flatten playlists structure
+		// JSON is already flattened. No need to do anything
 		return playlists;
 	}
 
@@ -117,8 +117,30 @@ export class RecommenderService implements OnModuleInit {
 
 		return playlistScores;
 	}
+	analyzeFeatureDistribution = (playlists: any[]) => {
+		console.log("Analyzing feature distribution");
+		console.log(playlists);
+		const features = ["danceability", "energy", "loudness", "tempo", "valence"];
+		features.forEach((feature) => {
+			// console.log(
+			// 	"Playlist map: ",
+			// 	playlists.map((p) => p[feature]),
+			// 	"with feature: ",
+			// 	feature,
+			// );
+			const values = playlists.map((p) => {
+				// console.log("p: ", p[0][feature]);
+				return p[0][feature];
+			});
+			const min = Math.min(...values);
+			const max = Math.max(...values);
+			console.log(`${feature}: min=${min}, max=${max}`);
+		});
+	};
 
 	getTopPlaylists(topN: number): { playlist: string; score: number }[] {
+		// eslint-disable-next-line prettier/prettier
+        this.analyzeFeatureDistribution(Object.values(this.playlists));
 		const playlistScores = this.getPlaylistSimilarityScores();
 		return Object.entries(playlistScores)
 			.map(([playlist, score]) => ({ playlist, score }))

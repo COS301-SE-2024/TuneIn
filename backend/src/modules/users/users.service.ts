@@ -10,6 +10,7 @@ import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
+import { RecommenderService } from "src/recommender/recommender.service";
 
 @Injectable()
 export class UsersService {

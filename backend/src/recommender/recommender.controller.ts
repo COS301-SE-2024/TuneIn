@@ -18,6 +18,10 @@ export class RecommenderController {
 	@Get("playlistTop")
 	async getPlaylistRecommendations(@Query("topN") query: number) {
 		console.log("getPlaylistRecommendations");
-		return this.recommenderService.getTopPlaylists(query);
+
+		const playlistArray = this.recommenderService.getTopPlaylists(query);
+		// Example usage
+		// analyzeFeatureDistribution(playlistArray);
+		return playlistArray;
 	}
 }
