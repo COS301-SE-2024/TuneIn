@@ -12,9 +12,11 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
+    // "strictNullChecks": true,
+    // "noImplicitAny": true,
+    // "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "strict": true,  // Enables all strict type-checking options
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   }

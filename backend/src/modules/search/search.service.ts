@@ -202,11 +202,25 @@ export class SearchService {
 			params.creator_name !== undefined &&
 			params.creator_username !== undefined
 		) {
-			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance`;
 		} else if (params.creator_name !== undefined) {
-			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance`;
 		} else if (params.creator_username !== undefined) {
-			query += ` LEAST(levenshtein(name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
+			query += ` LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)})) AS distance`;
 		}
 
 		if (params.description !== undefined) {
@@ -233,18 +247,28 @@ export class SearchService {
 			params.creator_name !== undefined &&
 			params.creator_username !== undefined
 		) {
-			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2 OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;
+			query += ` OR similarity(username, ${sqlstring.escape(
+				params.creator_username,
+			)}) > 0.2 OR similarity(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)}) > 0.2`;
 		} else if (params.creator_name !== undefined) {
-			query += ` OR similarity(full_name, ${sqlstring.escape(params.creator_name)}) > 0.2`;
+			query += ` OR similarity(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)}) > 0.2`;
 		} else if (params.creator_username !== undefined) {
-			query += ` OR similarity(username, ${sqlstring.escape(params.creator_username)}) > 0.2`;
+			query += ` OR similarity(username, ${sqlstring.escape(
+				params.creator_username,
+			)}) > 0.2`;
 		}
 		query += ` )`;
 
 		// Handle optional parameters
 
 		if (params.description !== undefined) {
-			query += ` AND levenshtein(description, ${sqlstring.escape(params.description)}) < 100`;
+			query += ` AND levenshtein(description, ${sqlstring.escape(
+				params.description,
+			)}) < 100`;
 		}
 		if (params.is_temp !== undefined) {
 			query += ` AND is_temporary = ${params.is_temp}`;
@@ -265,7 +289,9 @@ export class SearchService {
 		}
 
 		if (params.is_scheduled !== undefined && params.start_date !== undefined) {
-			query += ` AND scheduled_date AT TIME ZONE 'UTC' = ${sqlstring.escape(params.start_date)}`;
+			query += ` AND scheduled_date AT TIME ZONE 'UTC' = ${sqlstring.escape(
+				params.start_date,
+			)}`;
 		}
 		if (params.lang !== undefined) {
 			query += ` AND room_language = ${sqlstring.escape(params.lang)}`;
@@ -419,16 +445,32 @@ export class SearchService {
 			params.creator_name === undefined &&
 			params.creator_username === undefined
 		) {
-			query += ` LEAST(levenshtein(username, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance`;
+			query += ` LEAST(levenshtein(username, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance`;
 		} else if (
 			params.creator_name !== undefined &&
 			params.creator_username !== undefined
 		) {
-			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance`;
 		} else if (params.creator_name !== undefined) {
-			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(full_name, ${sqlstring.escape(params.creator_name)})) AS distance`;
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance`;
 		} else if (params.creator_username !== undefined) {
-			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(params.q)}), levenshtein(username, ${sqlstring.escape(params.creator_username)})) AS distance`;
+			query += ` LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)})) AS distance`;
 		}
 
 		if (params.following !== undefined) {
@@ -457,7 +499,9 @@ export class SearchService {
 			) f2 ON f2.follower = users.user_id`;
 		}
 
-		query += ` WHERE similarity(username, ${sqlstring.escape(params.q)}) > 0.2 AND similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
+		query += ` WHERE similarity(username, ${sqlstring.escape(
+			params.q,
+		)}) > 0.2 AND similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
 
 		if (params.following !== undefined || params.followers !== undefined) {
 			query += ` GROUP BY users.user_id`;

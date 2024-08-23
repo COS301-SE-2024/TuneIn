@@ -18,7 +18,7 @@ export class DtoGenService {
 
 	async generateUserDto(
 		userID: string,
-		fully_qualify: boolean = true,
+		fully_qualify = true,
 	): Promise<UserDto> {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new Error("User with id " + userID + " does not exist");
@@ -54,8 +54,9 @@ export class DtoGenService {
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
 
-			const roomDtoArray: RoomDto[] | null =
-				await this.generateMultipleRoomDto(favRoomIDs);
+			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
+				favRoomIDs,
+			);
 			if (roomDtoArray && roomDtoArray !== null) {
 				result.fav_rooms = {
 					count: roomDtoArray.length,
@@ -153,7 +154,7 @@ export class DtoGenService {
 			);
 		}
 		const result: UserDto = this.generateBriefUserDto(friend);
-		const base: string = `/users/${result.username}`;
+		const base = `/users/${result.username}`;
 		const usersAreFriends: boolean =
 			!friendship.is_pending && friendship.is_close_friend;
 		result.friendship = {
@@ -166,7 +167,7 @@ export class DtoGenService {
 
 	generateBriefUserDto(
 		user: PrismaTypes.users,
-		add_friendship: boolean = false,
+		add_friendship = false,
 	): UserDto {
 		let result: UserDto = {
 			profile_name: user.full_name || "",
@@ -574,7 +575,7 @@ export class DtoGenService {
 	async getChatAsDirectMessageDto(
 		participant1: string,
 		participant2: string,
-		unreadOnly: boolean = false,
+		unreadOnly = false,
 	): Promise<DirectMessageDto[]> {
 		/*
 		const user1: UserDto = await this.generateUserDto(participant1);
