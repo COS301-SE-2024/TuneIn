@@ -66,6 +66,13 @@ const ProfileScreen: React.FC = () => {
 
 	const { userData, setUserData, currentRoom } = playerContext;
 
+	const navigateToRoomPage = () => {
+		router.push({
+			pathname: "/screens/rooms/RoomPage",
+			params: { room: JSON.stringify(currentRoom) },
+		});
+	};
+
 	if (params && JSON.stringify(params) !== "{}") {
 		console.log("profile params: " + JSON.stringify(params));
 		ownsProfile = false;
@@ -564,13 +571,13 @@ const ProfileScreen: React.FC = () => {
 				/>
 				{renderFollowOrEdit()}
 				{roomData?.statusCode !== 404 && (
-					<View style={{ paddingHorizontal: 20 }}>
+					<TouchableOpacity onPress={navigateToRoomPage} style={{ paddingHorizontal: 20 }}>
 						<NowPlaying
 							name={roomData.room.name}
 							creator={roomData.creator_name}
 							art={roomData.room.playlist_photo}
 						/>
-					</View>
+					</TouchableOpacity>
 				)}
 				{primaryProfileData.bio !== "" && (
 					<View style={{ paddingHorizontal: 20 }} testID="bio">
