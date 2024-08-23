@@ -21,7 +21,7 @@ import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
-import { LoggerService } from './logger/logger.service';
+import { MyLogger } from "./logger/logger.service";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -48,6 +48,6 @@ import { LoggerService } from './logger/logger.service';
 		SongsModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, LoggerService],
+	providers: [AppService, MyLogger],
 })
 export class AppModule {}
