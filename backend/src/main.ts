@@ -4,14 +4,31 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import { MyLogger } from "./logger/logger.service";
 import * as morgan from "morgan";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import * as fs from "fs";
 
 declare const module: any;
 
 async function bootstrap() {
 	const logger: MyLogger = new MyLogger();
-	const app = await NestFactory.create(AppModule, {
-		logger: logger, // Use custom logger
-	});
+
+	let app: NestExpressApplication;
+	// if files exist, use https, otherwise use http
+	if (!fs.existsSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem') || !fs.existsSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem')) {
+		app = await NestFactory.create<NestExpressApplication>(AppModule, {
+			logger: logger, // Use custom logger
+		});
+	}
+	else {
+		const httpsOptions = {
+			key: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem'),
+			cert: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem'),
+		};
+		app = await NestFactory.create<NestExpressApplication>(AppModule, {
+			httpsOptions: httpsOptions,
+			logger: logger, // Use custom logger
+		});
+	}
 
 	// Validation
 	app.useGlobalPipes(new ValidationPipe());
