@@ -21,6 +21,7 @@ import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
+import { RecommenderModule } from "./recommender/recommender.module";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -45,6 +46,7 @@ import { SongsModule } from "./modules/songs/songs.module";
 		GenresModule,
 		ScheduleModule.forRoot(),
 		SongsModule,
+		RecommenderModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
