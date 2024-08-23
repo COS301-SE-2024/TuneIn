@@ -15,6 +15,7 @@ async function bootstrap() {
 	let app: NestExpressApplication;
 	// if files exist, use https, otherwise use http
 	if (!fs.existsSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem') || !fs.existsSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem')) {
+		console.log("Using HTTP");
 		app = await NestFactory.create<NestExpressApplication>(AppModule, {
 			logger: logger, // Use custom logger
 		});
@@ -24,6 +25,7 @@ async function bootstrap() {
 			key: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/privkey.pem'),
 			cert: fs.readFileSync('/etc/letsencrypt/live/tunein.co.za/fullchain.pem'),
 		};
+		console.log("Using HTTPS");
 		app = await NestFactory.create<NestExpressApplication>(AppModule, {
 			httpsOptions: httpsOptions,
 			logger: logger, // Use custom logger
