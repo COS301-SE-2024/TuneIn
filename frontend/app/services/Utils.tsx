@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
 
 let shouldUseProductionServer: boolean = false;
-if (USE_PRODUCTION_SERVER && USE_PRODUCTION_SERVER === "true") {
+if (USE_PRODUCTION_SERVER !== undefined && USE_PRODUCTION_SERVER === "true") {
 	shouldUseProductionServer = true;
 }
 
