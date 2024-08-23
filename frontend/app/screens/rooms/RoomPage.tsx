@@ -58,7 +58,13 @@ const RoomPage = () => {
 	} else if (room) {
 		roomData = JSON.parse(room);
 	}
-	const roomID = roomData.id;
+
+	let roomID: string;
+	if(roomData.id !== undefined){
+		roomID = roomData.id;
+	} else {
+		roomID = roomData.roomID;
+	}	
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
