@@ -2,6 +2,20 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class RecommenderService {
+	featureWeights = {
+		danceability: 1,
+		energy: 1,
+		key: 0.5,
+		loudness: 0.5,
+		mode: 0.5,
+		speechiness: 0.5,
+		acousticness: 0.5,
+		instrumentalness: 0.5,
+		liveness: 0.5,
+		valence: 1,
+		tempo: 0.5,
+	};
+
 	audio_features = [
 		// this is merely just a very small subset of the actual data
 		// actual requests to the Spotify API would be made to get the actual data
@@ -107,6 +121,39 @@ export class RecommenderService {
 	};
 
 	constructor() {}
+	private cosineSimilarityWeighted(
+		song1: any,
+		song2: any,
+		weights: any,
+	): number {
+		const dotProduct = Object.keys(song1).reduce((sum, key) => {
+			if (key in weights) {
+				return sum + song1[key] * song2[key] * weights[key];
+			}
+			return sum;
+		}, 0);
+
+		const magnitude1 = Math.sqrt(
+			Object.keys(song1).reduce((sum, key) => {
+				if (key in weights) {
+					return sum + song1[key] * song1[key] * weights[key];
+				}
+				return sum;
+			}, 0),
+		);
+
+		const magnitude2 = Math.sqrt(
+			Object.keys(song2).reduce((sum, key) => {
+				if (key in weights) {
+					return sum + song2[key] * song2[key] * weights[key];
+				}
+				return sum;
+			}, 0),
+		);
+
+		return dotProduct / (magnitude1 * magnitude2);
+	}
+
 	private cosineSimilarity(song1: any, song2: any): number {
 		const dotProduct = Object.keys(song1).reduce((sum, key) => {
 			if (
@@ -147,5 +194,31 @@ export class RecommenderService {
 		);
 
 		return dotProduct / (magnitude1 * magnitude2);
+	}
+	getSimilarityScores() {
+		return this.audio_features
+			.map((song) => ({
+				...song,
+				similarity: this.cosineSimilarity(this.mockSong, song),
+			}))
+			.sort((a, b) => b.similarity - a.similarity);
+	}
+	getTopRecommendations(topN: number) {
+		const sortedSongs = this.getSimilarityScores();
+		return sortedSongs.slice(0, topN);
+	}
+
+	getTopRecommendationsWeighted(topN: number) {
+		const sortedSongs = this.audio_features
+			.map((song) => ({
+				...song,
+				similarity: this.cosineSimilarityWeighted(
+					this.mockSong,
+					song,
+					this.featureWeights,
+				),
+			}))
+			.sort((a, b) => b.similarity - a.similarity);
+		return sortedSongs.slice(0, topN);
 	}
 }
