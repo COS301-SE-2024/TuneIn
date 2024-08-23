@@ -148,6 +148,21 @@ const ProfileScreen: React.FC = () => {
 		}
 	}, [primaryProfileData, ownsProfile]);
 
+	useEffect(() => {
+		// Set up the interval
+		const intervalId = setInterval(() => {
+			if (primaryProfileData !== null) {
+				console.log("Timeout called");
+				fetchRoomInfo(primaryProfileData.userID);
+			}
+		}, 10000);
+	
+		// Cleanup function
+		return () => clearInterval(intervalId);
+	
+	}, [primaryProfileData]);  // Include necessary dependencies
+	
+
 	const toggleDrawer = () => {
 		setDrawerVisible(!drawerVisible);
 	};
@@ -409,13 +424,6 @@ const ProfileScreen: React.FC = () => {
 			setLoading(false);
 		}, 2000);
 	}, []);
-
-	setInterval(() => {
-        if (primaryProfileData !== null) {
-			console.log("Timeout called");
-            fetchRoomInfo(primaryProfileData.userID);
-        }
-    }, 10000);
 
 	if (
 		loading ||
