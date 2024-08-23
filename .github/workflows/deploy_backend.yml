@@ -17,16 +17,11 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-    - name: Update backend .env file
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          echo "${{ secrets.FRONTEND_ENV_FILE }}" > TuneIn/backend/.env
-        EOF
-
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd TuneIn/
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
           git fetch
           git pull
           cd backend
@@ -35,3 +30,7 @@ jobs:
           npm run build
           pm2 restart tunein-backend
         EOF
+
+    - name: Health Check
+      run: |
+        curl --fail "http://tunein.co.za:3000/" || exit 1
