@@ -74,7 +74,7 @@ const makeStateVariable = (redirectURI: string) => {
 	const state = {
 		"unique-pre-padding": generateRandom(10),
 		"expo-redirect": redirectURI,
-		"ip-address": utils.LOCALHOST,
+		"ip-address": utils.API_BASE_NO_PORT,
 		"redirect-used": SPOTIFY_REDIRECT_TARGET,
 		"unique-post-padding": generateRandom(10),
 	};
