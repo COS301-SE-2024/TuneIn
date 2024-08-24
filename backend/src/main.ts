@@ -6,6 +6,8 @@ import { ValidationPipe } from "@nestjs/common";
 import morgan from "morgan";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as fs from "fs";
+import * as path from "path";
+import * as jsyaml from "js-yaml";
 
 declare const module: any;
 
@@ -45,6 +47,20 @@ async function bootstrap() {
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup("api", app, document);
+
+	const schemaJSON_string: string = JSON.stringify(document);
+	const schemaObject = JSON.parse(schemaJSON_string);
+	const yamlDocument = jsyaml.dump(schemaObject, {
+		skipInvalid: true,
+		noRefs: true,
+	});
+
+	const swaggerDir = path.resolve(__dirname, "../../../backend/openapi");
+	if (!fs.existsSync(swaggerDir)) {
+		fs.mkdirSync(swaggerDir, { recursive: true });
+	}
+	fs.writeFileSync(path.join(swaggerDir, "api.yaml"), yamlDocument);
+	fs.writeFileSync(path.join(swaggerDir, "api.json"), schemaJSON_string);
 
 	// CORS
 	app.enableCors();
