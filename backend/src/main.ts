@@ -2,15 +2,15 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
-import { MyLogger } from "./logger/logger.service";
-import * as morgan from "morgan";
+// import { MyLogger } from "./logger/logger.service";
+import morgan from "morgan";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as fs from "fs";
 
 declare const module: any;
 
 async function bootstrap() {
-	const logger: MyLogger = new MyLogger();
+	//const logger: MyLogger = new MyLogger();
 
 	let app: NestExpressApplication;
 	// if files exist, use https, otherwise use http
@@ -58,7 +58,10 @@ async function bootstrap() {
 	app.use(
 		morgan("combined", {
 			stream: {
-				write: (message: string) => logger.log(message.trim()),
+				write: (message: string) => {
+					//logger.log(message.trim());
+					console.log(message.trim());
+				},
 			},
 		}),
 	);
