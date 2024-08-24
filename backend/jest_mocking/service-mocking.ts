@@ -35,6 +35,7 @@ export const mockConfigService = {
 
 export const mockPrismaService = {
 	$queryRaw: jest.fn(),
+	$queryRawUnsafe: jest.fn(),
 };
 
 export const mockAuthService = {

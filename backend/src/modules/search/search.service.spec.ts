@@ -1,10 +1,10 @@
 import { TestingModule } from "@nestjs/testing";
 import { SearchService } from "./search.service";
 import { createSearchTestingModule } from "../../../jest_mocking/module-mocking";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import { MockContext, Context, createMockContext } from "../../../context";
+import { DtoGenService } from "../dto-gen/dto-gen.service";
+import { mockPrismaService } from "../../../jest_mocking/service-mocking";
 
 jest.mock("../db-utils/db-utils.service");
 jest.mock("../dto-gen/dto-gen.service");
@@ -206,479 +206,422 @@ const uHistDtoMock = [
 	},
 ];
 
-// it("should work", async () => {
-
-// 	const module: TestingModule = await createSearchTestingModule();
-// 	service = module.get<SearchService>(SearchService);
-// 	dtoGen = module.get<DtoGenService>(DtoGenService);
-
-// 	mockCtx.prisma.$queryRaw.mockResolvedValue(userMock);
-// 	const result = await service.demoSearch(ctx);
-
-// 	// expect(result).toMatchObject([new UserDto()]);
-// });
-
-describe("searchUsers function", () => {
+describe("SearchService", () => {
 	let service: SearchService;
 	let dtoGen: DtoGenService;
-	let mockCtx: MockContext;
-	let ctx: Context;
 
 	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
 		const module: TestingModule = await createSearchTestingModule();
 		service = module.get<SearchService>(SearchService);
 		dtoGen = module.get<DtoGenService>(DtoGenService);
 	});
 
-	it("should return an empty UserDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue([]);
+	// it("should work", async () => {
+	// 	const module: TestingModule = await createSearchTestingModule();
+	// 	service = module.get<SearchService>(SearchService);
+	// 	dtoGen = module.get<DtoGenService>(DtoGenService);
 
-		const result = await service.searchUsers("testing", ctx);
+	// 	mockCtx.prisma.$queryRaw.mockResolvedValue(userMock);
+	// 	const result = await service.demoSearch(ctx);
 
-		expect(result).toMatchObject([new UserDto()]);
-	});
+	// 	// expect(result).toMatchObject([new UserDto()]);
+	// });
 
-	it("should return a UserDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue(userMock);
-		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
+	describe("searchUsers function", () => {
+		it("should return an empty UserDto array when query returns an empty array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValue([]);
 
-		const result = await service.searchUsers("testing", ctx);
+			const result = await service.searchUsers("testing");
 
-		expect(result).toMatchObject(uDtoMock);
-	});
-});
-
-describe("searchRooms function", () => {
-	let service: SearchService;
-	let dtoGen: DtoGenService;
-	let mockCtx: MockContext;
-	let ctx: Context;
-
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
-	});
-
-	it("should return an empty RoomDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue([]);
-
-		const result = await service.searchRooms({ q: "testing" }, ctx);
-
-		expect(result).toMatchObject([new RoomDto()]);
-	});
-
-	it("should return a RoomDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue(roomMock);
-		(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(rDtoMock);
-
-		const result = await service.searchRooms({ q: "testing" }, ctx);
-
-		expect(result).toMatchObject(rDtoMock);
-	});
-});
-
-describe("combinedSearch function", () => {
-	let service: SearchService;
-	let mockCtx: MockContext;
-	let ctx: Context;
-
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
-
-	it("should return an empty combined search array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValue({ rooms: [], users: [] });
-
-		const result = await service.searchRooms({ q: "testing" }, ctx);
-
-		expect(result).toMatchObject([new RoomDto()]);
-	});
-
-	it("should return a combined search array when query returns an array", async () => {
-		const searchRoomMock = jest
-			.spyOn(service, "searchRooms")
-			.mockResolvedValueOnce(rDtoMock as unknown as RoomDto[]);
-		const searchUsersMock = jest
-			.spyOn(service, "searchUsers")
-			.mockResolvedValueOnce(uDtoMock as unknown as UserDto[]);
-
-		const result = await service.combinedSearch({ q: "testing" }, ctx);
-
-		expect(result).toMatchObject({ rooms: rDtoMock, users: uDtoMock });
-		searchRoomMock.mockRestore();
-		searchUsersMock.mockRestore();
-	});
-});
-
-describe("advancedUserSearchQueryBuilder function", () => {
-	let service: SearchService;
-
-	beforeEach(async () => {
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
-
-	it("builds a query with all search params", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			creator_username: "test",
-			creator_name: "t",
-			following: 0,
-			followers: 2,
+			expect(result).toMatchObject([new UserDto()]);
 		});
 
-		console.log("Test result: " + result);
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+		it("should return a UserDto array when query returns an array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValue(userMock);
+			(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(
+				uDtoMock,
+			);
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, COALESCE(f1.num_followers, 0) AS num_followers, COALESCE(f2.num_following, 0) AS num_following FROM users LEFT JOIN (
-			SELECT followee, COUNT(*) AS num_followers
-			FROM follows
-			GROUP BY followee
-	) f1 ON f1.followee = users.user_id LEFT JOIN (
-			SELECT follower, COUNT(*) AS num_following
-			FROM follows
-			GROUP BY follower
-	) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
-	AND COALESCE(f2.num_following, 0) >= 0;
-	`),
-		);
+			const result = await service.searchUsers("testing");
+
+			expect(result).toMatchObject(uDtoMock);
+		});
 	});
 
-	it("it should build with just q", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
+	describe("searchRooms function", () => {
+		it("should return an empty RoomDto array when query returns an empty array", async () => {
+			//mockCtx.prisma.$queryRaw.mockResolvedValue([]);
+			mockPrismaService.$queryRaw.mockResolvedValue([]);
+
+			const result = await service.searchRooms({ q: "testing" });
+
+			expect(result).toMatchObject([new RoomDto()]);
 		});
 
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+		it("should return a RoomDto array when query returns an array", async () => {
+			//mockCtx.prisma.$queryRaw.mockResolvedValue(roomMock);
+			mockPrismaService.$queryRaw.mockResolvedValue(roomMock);
+			(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(
+				rDtoMock,
+			);
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
-			),
-		);
+			const result = await service.searchRooms({ q: "testing" });
+
+			expect(result).toMatchObject(rDtoMock);
+		});
 	});
 
-	it("it should build with q and username", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			creator_username: "test",
+	describe("combinedSearch function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
 		});
 
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+		it("should return an empty combined search array when query returns an empty array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValue({ rooms: [], users: [] });
+			const result = await service.searchRooms({ q: "testing" });
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
-			),
-		);
+			expect(result).toMatchObject([new RoomDto()]);
+		});
+
+		it("should return a combined search array when query returns an array", async () => {
+			const searchRoomMock = jest
+				.spyOn(service, "searchRooms")
+				.mockResolvedValueOnce(rDtoMock as unknown as RoomDto[]);
+			const searchUsersMock = jest
+				.spyOn(service, "searchUsers")
+				.mockResolvedValueOnce(uDtoMock as unknown as UserDto[]);
+
+			const result = await service.combinedSearch({ q: "testing" });
+
+			expect(result).toMatchObject({ rooms: rDtoMock, users: uDtoMock });
+			searchRoomMock.mockRestore();
+			searchUsersMock.mockRestore();
+		});
 	});
 
-	it("it should build with q and full_name", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			creator_name: "t",
+	describe("advancedUserSearchQueryBuilder function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
 		});
 
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+		it("builds a query with all search params", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				creator_username: "test",
+				creator_name: "t",
+				following: 0,
+				followers: 2,
+			});
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
-			),
-		);
-	});
+			console.log("Test result: " + result);
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-	it("it should build with q and followers", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			creator_name: "t",
-		});
-
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
-
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
-			),
-		);
-	});
-
-	it("it should build with q and following", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			following: 0,
-		});
-
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
-
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f1.num_followers, 0) AS num_followers FROM users LEFT JOIN (
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, COALESCE(f1.num_followers, 0) AS num_followers, COALESCE(f2.num_following, 0) AS num_following FROM users LEFT JOIN (
 				SELECT followee, COUNT(*) AS num_followers
 				FROM follows
 				GROUP BY followee
-		) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
-		);
-	});
-
-	it("it should build with q and followers", async () => {
-		const result = await service.advancedUserSearchQueryBuilder({
-			q: "testing",
-			followers: 2,
-		});
-
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
-
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f2.num_following, 0) AS num_following FROM users LEFT JOIN (
+		) f1 ON f1.followee = users.user_id LEFT JOIN (
 				SELECT follower, COUNT(*) AS num_following
 				FROM follows
 				GROUP BY follower
-		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
-		);
-	});
-});
-
-describe("advancedRoomsSearchQueryBuilder function", () => {
-	let service: SearchService;
-
-	beforeEach(async () => {
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
-
-	it("it should build with all params", async () => {
-		const result = await service.advancedRoomSearchQueryBuilder({
-			q: "testing",
-			creator_username: "test",
-			creator_name: "t",
-			participant_count: 3,
-			description: "desc",
-			is_temp: false,
-			is_priv: false,
-			is_scheduled: false,
-			start_date: "2024-06-15 09:00:00",
-			end_date: "2024-06-15 09:00:00",
-			lang: "Language",
-			explicit: false,
-			nsfw: false,
-			tags: "1,2,3",
+		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
+		AND COALESCE(f2.num_following, 0) >= 0;
+		`),
+			);
 		});
 
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+		it("it should build with just q", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+			});
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND room_language = 'Language' AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`,
-			),
-		);
-	});
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-	it("it should build with just q", async () => {
-		const result = await service.advancedRoomSearchQueryBuilder({
-			q: "testing",
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+				),
+			);
 		});
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
-			),
-		);
-	});
+		it("it should build with q and username", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				creator_username: "test",
+			});
 
-	it("it should build with just q and username", async () => {
-		const result = await service.advancedRoomSearchQueryBuilder({
-			q: "testing",
-			creator_username: "test",
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
+
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+				),
+			);
 		});
-		const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-		expect(normalizeWhitespace(result)).toBe(
-			normalizeWhitespace(
-				`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test')) AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
-			),
-		);
-	});
-});
+		it("it should build with q and full_name", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				creator_name: "t",
+			});
 
-describe("advancedSearchUsers function", () => {
-	let service: SearchService;
-	let dtoGen: DtoGenService;
-	let mockCtx: MockContext;
-	let ctx: Context;
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
-	});
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+				),
+			);
+		});
 
-	it("should return an empty UserDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRawUnsafe.mockResolvedValue([]);
-		const mock = jest
-			.spyOn(service, "advancedUserSearchQueryBuilder")
-			.mockReturnValueOnce(`Select * FROM users`);
+		it("it should build with q and followers", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				creator_name: "t",
+			});
 
-		const result = await service.advancedSearchUsers({ q: "testing" }, ctx);
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-		expect(result).toMatchObject([new UserDto()]);
-		mock.mockRestore();
-	});
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+				),
+			);
+		});
 
-	it("should return a UserDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRawUnsafe.mockResolvedValue(userMock);
-		const mock = jest
-			.spyOn(service, "advancedUserSearchQueryBuilder")
-			.mockReturnValueOnce(`Select * FROM users`);
+		it("it should build with q and following", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				following: 0,
+			});
 
-		(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(uDtoMock);
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-		const result = await service.advancedSearchUsers({ q: "testing" }, ctx);
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f1.num_followers, 0) AS num_followers FROM users LEFT JOIN (
+					SELECT followee, COUNT(*) AS num_followers
+					FROM follows
+					GROUP BY followee
+			) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
+			);
+		});
 
-		expect(result).toMatchObject(uDtoMock);
-		mock.mockRestore();
-	});
-});
+		it("it should build with q and followers", async () => {
+			const result = await service.advancedUserSearchQueryBuilder({
+				q: "testing",
+				followers: 2,
+			});
 
-describe("advancedSearchRooms function", () => {
-	let service: SearchService;
-	let dtoGen: DtoGenService;
-	let mockCtx: MockContext;
-	let ctx: Context;
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-		dtoGen = module.get<DtoGenService>(DtoGenService);
-	});
-
-	it("should return an empty RoomDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRawUnsafe.mockResolvedValue([]);
-		const mock = jest
-			.spyOn(service, "advancedUserSearchQueryBuilder")
-			.mockReturnValueOnce(`Select * FROM rooms`);
-
-		const result = await service.advancedSearchRooms({ q: "testing" }, ctx);
-
-		expect(result).toMatchObject([new RoomDto()]);
-		mock.mockRestore();
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance, COALESCE(f2.num_following, 0) AS num_following FROM users LEFT JOIN (
+					SELECT follower, COUNT(*) AS num_following
+					FROM follows
+					GROUP BY follower
+			) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
+			);
+		});
 	});
 
-	it("should return a RoomDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRawUnsafe.mockResolvedValue(roomMock);
-		(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(rDtoMock);
-		const mock = jest
-			.spyOn(service, "advancedUserSearchQueryBuilder")
-			.mockReturnValueOnce(`Select * FROM rooms`);
+	describe("advancedRoomsSearchQueryBuilder function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
 
-		const result = await service.advancedSearchRooms({ q: "testing" }, ctx);
+		it("it should build with all params", async () => {
+			const result = await service.advancedRoomSearchQueryBuilder({
+				q: "testing",
+				creator_username: "test",
+				creator_name: "t",
+				participant_count: 3,
+				description: "desc",
+				is_temp: false,
+				is_priv: false,
+				is_scheduled: false,
+				start_date: "2024-06-15 09:00:00",
+				end_date: "2024-06-15 09:00:00",
+				lang: "Language",
+				explicit: false,
+				nsfw: false,
+				tags: "1,2,3",
+			});
 
-		expect(result).toMatchObject(rDtoMock);
-		mock.mockRestore();
-	});
-});
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-describe("searchRoomsHistory function", () => {
-	let service: SearchService;
-	let mockCtx: MockContext;
-	let ctx: Context;
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test'), levenshtein(full_name, 't')) AS distance, levenshtein(description, 'Get energized') AS desc_distance FROM room INNER JOIN users ON room_creator = user_id LEFT JOIN scheduled_room on room.room_id = scheduled_room.room_id LEFT JOIN private_room on room.room_id = private_room.room_id INNER JOIN participate ON room.room_id = participate.room_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 OR similarity(full_name, 't') > 0.2 ) AND levenshtein(description, 'desc') < 100 AND is_temporary = false AND scheduled_date IS NULL AND is_listed IS NULL AND scheduled_date AT TIME ZONE 'UTC' = '2024-06-15 09:00:00' AND room_language = 'Language' AND explicit = false AND nsfw = false AND room_language = 'Language' AND (tags @> ARRAY['1'] OR tags @> ARRAY['2'] OR tags @> ARRAY['3']) GROUP BY room.room_id, users.username, users.full_name HAVING COUNT(participate.room_id) >= 3 ORDER BY distance ASC LIMIT 10`,
+				),
+			);
+		});
 
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
+		it("it should build with just q", async () => {
+			const result = await service.advancedRoomSearchQueryBuilder({
+				q: "testing",
+			});
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValueOnce([]);
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT room.*, levenshtein(name, 'testing') AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
+				),
+			);
+		});
 
-		const result = await service.searchRoomsHistory("mockID", ctx);
+		it("it should build with just q and username", async () => {
+			const result = await service.advancedRoomSearchQueryBuilder({
+				q: "testing",
+				creator_username: "test",
+			});
+			const normalizeWhitespace = (str: any) => str.replace(/\s+/g, " ").trim();
 
-		expect(result).toMatchObject([]);
-	});
-
-	it("should return a SearchHistoryDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValueOnce(rHistMock);
-
-		const result = await service.searchRoomsHistory("mockId", ctx);
-
-		expect(result).toMatchObject(rHistDtoMock);
-	});
-});
-
-describe("searchUsersHistory function", () => {
-	let service: SearchService;
-	let mockCtx: MockContext;
-	let ctx: Context;
-
-	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
-
-	it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValueOnce([]);
-
-		const result = await service.searchUsersHistory("mockID", ctx);
-
-		expect(result).toMatchObject([]);
+			expect(normalizeWhitespace(result)).toBe(
+				normalizeWhitespace(
+					`SELECT room.*, LEAST(levenshtein(name, 'testing'), levenshtein(username, 'test')) AS distance FROM room INNER JOIN users ON room_creator = user_id WHERE (similarity(name, 'testing') > 0.2 OR similarity(username, 'test') > 0.2 ) ORDER BY distance ASC LIMIT 10`,
+				),
+			);
+		});
 	});
 
-	it("should return a SearchHistoryDto array when query returns an array", async () => {
-		mockCtx.prisma.$queryRaw.mockResolvedValueOnce(uHistMock);
+	describe("advancedSearchUsers function", () => {
+		it("should return an empty UserDto array when query returns an empty array", async () => {
+			mockPrismaService.$queryRawUnsafe.mockResolvedValue([]);
+			const mock = jest
+				.spyOn(service, "advancedUserSearchQueryBuilder")
+				.mockReturnValueOnce(`Select * FROM users`);
 
-		const result = await service.searchUsersHistory("mockId", ctx);
+			const result = await service.advancedSearchUsers({ q: "testing" });
 
-		expect(result).toMatchObject(uHistDtoMock);
-	});
-});
+			expect(result).toMatchObject([new UserDto()]);
+			mock.mockRestore();
+		});
 
-describe("parseBoolean function", () => {
-	let service: SearchService;
+		it("should return a UserDto array when query returns an array", async () => {
+			mockPrismaService.$queryRawUnsafe.mockResolvedValue(userMock);
+			const mock = jest
+				.spyOn(service, "advancedUserSearchQueryBuilder")
+				.mockReturnValueOnce(`Select * FROM users`);
 
-	beforeEach(async () => {
-		const module: TestingModule = await createSearchTestingModule();
-		service = module.get<SearchService>(SearchService);
-	});
+			(dtoGen.generateMultipleUserDto as jest.Mock).mockReturnValueOnce(
+				uDtoMock,
+			);
 
-	it("should return true for string 'True'", () => {
-		const result = service.parseBoolean("True");
-		expect(result).toBe(true);
-	});
+			const result = await service.advancedSearchUsers({ q: "testing" });
 
-	it("should return true for string '1'", () => {
-		const result = service.parseBoolean("1");
-		expect(result).toBe(true);
-	});
-
-	it("should return false for string 'False'", () => {
-		const result = service.parseBoolean("False");
-		expect(result).toBe(false);
+			expect(result).toMatchObject(uDtoMock);
+			mock.mockRestore();
+		});
 	});
 
-	it("should return false for string '0'", () => {
-		const result = service.parseBoolean("0");
-		expect(result).toBe(false);
+	describe("advancedSearchRooms function", () => {
+		it("should return an empty RoomDto array when query returns an empty array", async () => {
+			mockPrismaService.$queryRawUnsafe.mockResolvedValue([]);
+			const mock = jest
+				.spyOn(service, "advancedUserSearchQueryBuilder")
+				.mockReturnValueOnce(`Select * FROM rooms`);
+
+			const result = await service.advancedSearchRooms({ q: "testing" });
+
+			expect(result).toMatchObject([new RoomDto()]);
+			mock.mockRestore();
+		});
+
+		it("should return a RoomDto array when query returns an array", async () => {
+			mockPrismaService.$queryRawUnsafe.mockResolvedValue(roomMock);
+			(dtoGen.generateMultipleRoomDto as jest.Mock).mockReturnValueOnce(
+				rDtoMock,
+			);
+			const mock = jest
+				.spyOn(service, "advancedUserSearchQueryBuilder")
+				.mockReturnValueOnce(`Select * FROM rooms`);
+
+			const result = await service.advancedSearchRooms({ q: "testing" });
+
+			expect(result).toMatchObject(rDtoMock);
+			mock.mockRestore();
+		});
 	});
 
-	it("should return false for string 'Unknown'", () => {
-		const result = service.parseBoolean("Unknown");
-		expect(result).toBe(false);
+	describe("searchRoomsHistory function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
+
+			const result = await service.searchRoomsHistory("mockID");
+
+			expect(result).toMatchObject([]);
+		});
+
+		it("should return a SearchHistoryDto array when query returns an array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValueOnce(rHistMock);
+
+			const result = await service.searchRoomsHistory("mockId");
+
+			expect(result).toMatchObject(rHistDtoMock);
+		});
+	});
+
+	describe("searchUsersHistory function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
+
+			const result = await service.searchUsersHistory("mockID");
+
+			expect(result).toMatchObject([]);
+		});
+
+		it("should return a SearchHistoryDto array when query returns an array", async () => {
+			mockPrismaService.$queryRaw.mockResolvedValueOnce(uHistMock);
+
+			const result = await service.searchUsersHistory("mockId");
+
+			expect(result).toMatchObject(uHistDtoMock);
+		});
+	});
+
+	describe("parseBoolean function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return true for string 'True'", () => {
+			const result = service.parseBoolean("True");
+			expect(result).toBe(true);
+		});
+
+		it("should return true for string '1'", () => {
+			const result = service.parseBoolean("1");
+			expect(result).toBe(true);
+		});
+
+		it("should return false for string 'False'", () => {
+			const result = service.parseBoolean("False");
+			expect(result).toBe(false);
+		});
+
+		it("should return false for string '0'", () => {
+			const result = service.parseBoolean("0");
+			expect(result).toBe(false);
+		});
+
+		it("should return false for string 'Unknown'", () => {
+			const result = service.parseBoolean("Unknown");
+			expect(result).toBe(false);
+		});
 	});
 });
