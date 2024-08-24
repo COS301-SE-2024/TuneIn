@@ -56,6 +56,7 @@ const ProfileScreen: React.FC = () => {
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
+	const [roomCheck, setRoomCheck] = useState<boolean>(false);
 	const [friend, setFriend] = useState<any>(null);
 	const [profileInfo, setProfileInfo] = useState<any>(null);
 	const [refreshing] = React.useState(false);
@@ -147,7 +148,6 @@ const ProfileScreen: React.FC = () => {
 						}
 						if (roomData === null) {
 							fetchRoomInfo(data.userID);
-							// console.log("Friend room call");
 						}
 					}
 				} catch (error) {
@@ -197,6 +197,7 @@ const ProfileScreen: React.FC = () => {
 
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
+			console.log("Timer called");
 			const intervalId = setInterval(() => {
 				fetchRoomInfo(primaryProfileData.userID);
 			}, 10000);
@@ -273,11 +274,13 @@ const ProfileScreen: React.FC = () => {
 					hasRoom,
 				);
 				setRoomData(formatRoomData(formattedRoomData));
+				setRoomCheck(true);
 				// console.log("My Room? " + hasRoom);
 			}
 		} catch (error) {
 			console.error("Error fetching room info:", error);
-			return null;
+			setRoomData(null);
+			setRoomCheck(true);
 		}
 	};
 
@@ -482,7 +485,8 @@ const ProfileScreen: React.FC = () => {
 		loading ||
 		ownsProfile === null ||
 		userData === null ||
-		primaryProfileData === null
+		primaryProfileData === null ||
+		!roomCheck
 	) {
 		console.log(
 			"loading: " +
