@@ -36,7 +36,7 @@ jobs:
           nvm use default
           npm i
           npm run build
-          pm2 restart tunein-backend
+          pm2 startOrRestart ecosystem.config.js
         EOF
 
     - name: Health Check
