@@ -27,7 +27,7 @@ jobs:
           cd backend
           nvm use default
           npm i
-          npm run build
+          npm run build:swc
           pm2 restart tunein-backend
         EOF
 
