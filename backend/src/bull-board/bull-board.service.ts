@@ -32,7 +32,7 @@ export class BullBoardService implements OnModuleInit {
 		app
 			.listen(port, () => {
 				console.log(
-					`Bull Board is running on http://localhost:${port}/admin/queues`,
+					`Bull Board is running on https://localhost:${port}/admin/queues`,
 				);
 				BullBoardService.serverStarted = true; // Mark server as started
 			})

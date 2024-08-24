@@ -33,4 +33,4 @@ jobs:
 
     - name: Health Check
       run: |
-        curl --fail "http://tunein.co.za:3000/" || exit 1
+        curl --fail "https://tunein.co.za:3000/" || exit 1

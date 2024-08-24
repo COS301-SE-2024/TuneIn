@@ -10,7 +10,7 @@ if (USE_PRODUCTION_SERVER !== undefined && USE_PRODUCTION_SERVER === "true") {
 function getAPIBase(): string {
 	if (!shouldUseProductionServer) {
 		console.log("Using production API base URL");
-		return "http://tunein.co.za:3000";
+		return "https://tunein.co.za:3000";
 	}
 	console.log("Local IP Address: ", localhost);
 	return `http://${localhost}:3000`;
