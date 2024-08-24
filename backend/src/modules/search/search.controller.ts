@@ -243,8 +243,8 @@ export class SearchController {
 	@ApiQuery({
 		name: "tags",
 		required: false,
-		description: "An array of tags to compare",
-		type: "array",
+		description: "A comma separated list of tags to compare",
+		type: "string",
 	})
 	async advancedSearchRooms(
 		@Query("q") q: string,

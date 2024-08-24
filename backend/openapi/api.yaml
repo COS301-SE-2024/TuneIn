@@ -1387,9 +1387,9 @@ paths:
         - name: tags
           required: false
           in: query
-          description: An array of tags to compare
+          description: A comma separated list of tags to compare
           schema:
-            type: array
+            type: string
       responses:
         '200':
           description: Search results as an array of RoomDto.
@@ -1559,25 +1559,6 @@ paths:
                 type: string
       tags:
         - genres
-  /songs/{songID}/spotify:
-    get:
-      operationId: SongsController_getSpotifyId
-      summary: Get the Spotify ID of a song with given ID
-      parameters:
-        - name: songID
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The spotify id of the song.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/'
-      tags:
-        - songs
 info:
   title: TuneIn API
   description: >-

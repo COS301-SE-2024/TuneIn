@@ -11,6 +11,7 @@ import {
 export class SongsController {
 	constructor(private readonly songsService: SongsService) {}
 
+	/*
 	@Get(":songID/spotify")
 	@ApiTags("songs")
 	@ApiOkResponse({
@@ -22,4 +23,5 @@ export class SongsController {
 	async getSpotifyId(@Param("songID") songID: string): Promise<{ id: string }> {
 		return await this.songsService.getSpotifyId(songID);
 	}
+	*/
 }

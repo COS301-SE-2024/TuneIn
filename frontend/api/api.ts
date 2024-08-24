@@ -3408,11 +3408,11 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {string} [lang] The room language (as a ISO 639-1 code)
          * @param {boolean} [explicit] Is the room explicit?
          * @param {boolean} [nsfw] Is the room NSFW?
-         * @param {Array<string>} [tags] An array of tags to compare
+         * @param {string} [tags] A comma separated list of tags to compare
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchControllerAdvancedSearchRooms: async (q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        searchControllerAdvancedSearchRooms: async (q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'q' is not null or undefined
             assertParamExists('searchControllerAdvancedSearchRooms', 'q', q)
             const localVarPath = `/search/rooms/advanced`;
@@ -3479,7 +3479,7 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['nsfw'] = nsfw;
             }
 
-            if (tags) {
+            if (tags !== undefined) {
                 localVarQueryParameter['tags'] = tags;
             }
 
@@ -3878,11 +3878,11 @@ export const SearchApiFp = function(configuration?: Configuration) {
          * @param {string} [lang] The room language (as a ISO 639-1 code)
          * @param {boolean} [explicit] Is the room explicit?
          * @param {boolean} [nsfw] Is the room NSFW?
-         * @param {Array<string>} [tags] An array of tags to compare
+         * @param {string} [tags] A comma separated list of tags to compare
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
+        async searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.searchControllerAdvancedSearchRooms(q, creatorUsername, creatorName, participantCount, description, isTemp, isPriv, isScheduled, startDate, endDate, lang, explicit, nsfw, tags, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SearchApi.searchControllerAdvancedSearchRooms']?.[localVarOperationServerIndex]?.url;
@@ -4044,11 +4044,11 @@ export const SearchApiFactory = function (configuration?: Configuration, basePat
          * @param {string} [lang] The room language (as a ISO 639-1 code)
          * @param {boolean} [explicit] Is the room explicit?
          * @param {boolean} [nsfw] Is the room NSFW?
-         * @param {Array<string>} [tags] An array of tags to compare
+         * @param {string} [tags] A comma separated list of tags to compare
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
+        searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
             return localVarFp.searchControllerAdvancedSearchRooms(q, creatorUsername, creatorName, participantCount, description, isTemp, isPriv, isScheduled, startDate, endDate, lang, explicit, nsfw, tags, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4177,12 +4177,12 @@ export class SearchApi extends BaseAPI {
      * @param {string} [lang] The room language (as a ISO 639-1 code)
      * @param {boolean} [explicit] Is the room explicit?
      * @param {boolean} [nsfw] Is the room NSFW?
-     * @param {Array<string>} [tags] An array of tags to compare
+     * @param {string} [tags] A comma separated list of tags to compare
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SearchApi
      */
-    public searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: Array<string>, options?: RawAxiosRequestConfig) {
+    public searchControllerAdvancedSearchRooms(q: string, creatorUsername?: string, creatorName?: string, participantCount?: number, description?: string, isTemp?: boolean, isPriv?: boolean, isScheduled?: boolean, startDate?: string, endDate?: string, lang?: string, explicit?: boolean, nsfw?: boolean, tags?: string, options?: RawAxiosRequestConfig) {
         return SearchApiFp(this.configuration).searchControllerAdvancedSearchRooms(q, creatorUsername, creatorName, participantCount, description, isTemp, isPriv, isScheduled, startDate, endDate, lang, explicit, nsfw, tags, options).then((request) => request(this.axios, this.basePath));
     }
 
