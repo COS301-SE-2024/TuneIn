@@ -8,7 +8,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "prestart": "node check-versions.js",
-    "build": "npm run prestart && npm run prebuild && nest build",
+    "build": "npm run prestart && nest build",
+    "build:swc": "npm run prestart && nest build -b swc -p tsconfig.swc.json && swc prisma -d dist/",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "npm run prestart && nest build --webpack --webpackPath webpack-hmr.config.js --watch",
