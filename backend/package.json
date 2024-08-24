@@ -24,7 +24,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "gen-api-client": "java -jar ./../tools/swagger-codegen-cli.jar generate -i https://localhost:3000/api-yaml -l typescript-fetch -o ./../frontend/api-client --additional-properties supportsES6=true",
+    "gen-api-client": "java -jar ./../tools/swagger-codegen-cli.jar generate -i https://tunein.co.za:3000/api-yaml -l typescript-fetch -o ./../frontend/api-client --additional-properties supportsES6=true",
     "gen-docs": "compodoc -p tsconfig.json",
     "serve-docs": "compodoc -p tsconfig.json -s",
     "prisma-read": "prisma introspect",
