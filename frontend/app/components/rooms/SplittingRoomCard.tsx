@@ -36,55 +36,18 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 	const upperSectionHeight = cardHeight * 0.4; // 40% of card height
 	const lowerSectionHeight = cardHeight * 0.6; // 60% of card height
 
-	// Initialize playlist and votes using useState
+	// Initialize playlist using useState
 	const [playlist, setPlaylist] = useState<Track[]>([]);
-	const [votes, setVotes] = useState<number[]>([]);
 
 	// Memoize the queue data to prevent unnecessary re-renders
 	const memoizedQueue = useMemo(() => queueData, [queueData]);
 
-	// Update playlist and votes when memoizedQueue changes
+	// Update playlist when memoizedQueue changes
 	useEffect(() => {
 		if (memoizedQueue && memoizedQueue.length > 0) {
 			setPlaylist(memoizedQueue);
-			setVotes(new Array(memoizedQueue.length).fill(0));
 		}
 	}, [memoizedQueue]);
-
-	// Function to handle voting
-	const handleVoteChange = (index: number, newVoteCount: number) => {
-		const updatedVotes = [...votes];
-		updatedVotes[index] = newVoteCount;
-
-		const sortedPlaylist = playlist
-			.map((track, i) => ({ track, vote: updatedVotes[i], originalIndex: i }))
-			.sort((a, b) => {
-				// Keep current track at its position
-				if (a.originalIndex === currentTrackIndex) return -1;
-				if (b.originalIndex === currentTrackIndex) return 1;
-				// Sort by votes descending, then by original order
-				if (a.vote === b.vote) return a.originalIndex - b.originalIndex;
-				return b.vote - a.vote;
-			})
-			.map((item) => item.track);
-
-		setVotes(updatedVotes);
-		setPlaylist(sortedPlaylist);
-	};
-
-	// Function to swap songs in the playlist
-	const swapSongs = (index: number, direction: "up" | "down") => {
-		const newIndex = direction === "up" ? index - 1 : index + 1;
-
-		if (newIndex < 0 || newIndex >= playlist.length) return; // Out of bounds
-
-		const updatedPlaylist = [...playlist];
-		const temp = updatedPlaylist[index];
-		updatedPlaylist[index] = updatedPlaylist[newIndex];
-		updatedPlaylist[newIndex] = temp;
-
-		setPlaylist(updatedPlaylist);
-	};
 
 	return (
 		<View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
@@ -100,14 +63,11 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 					colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
 					style={styles.gradientOverlay}
 				/>
-				<View style={styles.overlay}>
-					<Text
-						style={styles.roomName}
-					>{`${rootParentName} - ${topGenre}`}</Text>
-					<View style={styles.peopleCountContainer}>
-						<Icon name="users" size={20} color="#000" />
-						<Text style={styles.participants}>{numberOfParticipants}</Text>
-					</View>
+				<Text style={styles.roomName}>{rootParentName}</Text>
+				<Text style={styles.topGenre}>{topGenre}</Text>
+				<View style={styles.peopleCountContainer}>
+					<Icon name="users" size={20} color="#000" />
+					<Text style={styles.participants}>{numberOfParticipants}</Text>
 				</View>
 			</ImageBackground>
 			<ScrollView
@@ -120,14 +80,9 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 							key={track.id || index}
 							songNumber={index + 1}
 							track={track}
-							voteCount={votes[index]}
 							showVoting={false}
 							isCurrent={index === currentTrackIndex}
 							index={index} // Pass the index prop
-							swapSongs={swapSongs} // Pass the swapSongs function
-							setVoteCount={(newVoteCount) =>
-								handleVoteChange(index, newVoteCount)
-							}
 						/>
 					))
 				) : (
@@ -172,20 +127,16 @@ const styles = StyleSheet.create({
 		height: "100%",
 		resizeMode: "cover",
 	},
-	overlay: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		justifyContent: "center",
-		alignItems: "center",
-		padding: 10,
-	},
 	roomName: {
-		fontSize: 24,
+		fontSize: 29,
 		fontWeight: "bold",
 		color: "#fff",
+		textAlign: "center",
+		marginBottom: 5,
+	},
+	topGenre: {
+		fontSize: 20,
+		color: "#D3D3D3", // Light grey color for the top genre
 		textAlign: "center",
 	},
 	participants: {

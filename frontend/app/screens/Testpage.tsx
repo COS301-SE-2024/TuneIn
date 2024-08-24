@@ -91,7 +91,7 @@ const TestPage: React.FC = () => {
 		<View style={styles.container}>
 			<SplittingRoomCard
 				queueData={sampleQueue}
-				currentTrackIndex={0}
+				currentTrackIndex={2}
 				rootParentName="Jazz Vibes"
 				topGenre="Smooth Jazz"
 				numberOfParticipants={25}
