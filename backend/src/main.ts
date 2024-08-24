@@ -19,9 +19,7 @@ async function bootstrap() {
 		!fs.existsSync("certs/fullchain.pem")
 	) {
 		console.log("Using HTTP");
-		app = await NestFactory.create<NestExpressApplication>(AppModule, {
-			logger: logger, // Use custom logger
-		});
+		app = await NestFactory.create<NestExpressApplication>(AppModule);
 	} else {
 		const httpsOptions = {
 			key: fs.readFileSync("certs/privkey.pem"),
@@ -30,7 +28,6 @@ async function bootstrap() {
 		console.log("Using HTTPS");
 		app = await NestFactory.create<NestExpressApplication>(AppModule, {
 			httpsOptions: httpsOptions,
-			logger: logger, // Use custom logger
 		});
 	}
 
