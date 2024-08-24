@@ -86,7 +86,7 @@ const ProfileScreen: React.FC = () => {
 	}
 
 	const preFormatRoomData = (room: any, mine: boolean) => {
-		return {		
+		return {
 			id: room.roomID,
 			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
 			name: room.room_name,
@@ -206,10 +206,14 @@ const ProfileScreen: React.FC = () => {
 	}, [primaryProfileData, ownsProfile]);
 
 	useEffect(() => {
-		if (ownsProfile && currentRoom) {
-			console.log("Owner Room Effect Called");
-			setRoomData(currentRoom);
-			console.log("Updated Room Data:", currentRoom);
+		if (ownsProfile) {
+			if (currentRoom) {
+				console.log("Owner Room Effect Called");
+				setRoomData(currentRoom);
+				console.log("Updated Room Data:", currentRoom);
+			} else {
+				setRoomData(null);
+			}
 		}
 	}, [currentRoom, ownsProfile]);
 
@@ -264,9 +268,12 @@ const ProfileScreen: React.FC = () => {
 				);
 				// console.log("Room info: " + JSON.stringify(response.data.room));
 				const hasRoom = await ownsRoom(response.data.room.roomID);
-				const formattedRoomData = preFormatRoomData(response.data.room, hasRoom);
-				setRoomData(formatRoomData(formattedRoomData));				
-				console.log("My Room? " + hasRoom);
+				const formattedRoomData = preFormatRoomData(
+					response.data.room,
+					hasRoom,
+				);
+				setRoomData(formatRoomData(formattedRoomData));
+				// console.log("My Room? " + hasRoom);
 			}
 		} catch (error) {
 			console.error("Error fetching room info:", error);
@@ -619,17 +626,17 @@ const ProfileScreen: React.FC = () => {
 				/>
 				{renderFollowOrEdit()}
 				{roomData !== null && (
-						<TouchableOpacity
-							onPress={navigateToRoomPage}
-							style={{ paddingHorizontal: 20 }}
-						>
-							<NowPlaying
-								name={roomData.name}
-								creator={roomData.username}
-								art={roomData.backgroundImage}
-							/>
-						</TouchableOpacity>
-					)}
+					<TouchableOpacity
+						onPress={navigateToRoomPage}
+						style={{ paddingHorizontal: 20 }}
+					>
+						<NowPlaying
+							name={roomData.name}
+							creator={roomData.username}
+							art={roomData.backgroundImage}
+						/>
+					</TouchableOpacity>
+				)}
 				{primaryProfileData.bio !== "" && (
 					<View style={{ paddingHorizontal: 20 }} testID="bio">
 						<BioSection content={primaryProfileData.bio} />
