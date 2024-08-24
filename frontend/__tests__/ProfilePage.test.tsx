@@ -30,14 +30,30 @@ jest.mock("expo-router", () => {
 	};
 });
 
-const mockPlayerContextValue = {
-	userData: { name: "John Doe", age: 30 },
-	setUserData: jest.fn(),
-	currentRoom: "Room 1",
+const mockRoomData = {
+	user_id: "012c4238-e071-7031-cb6c-30881378722f",
+	room_id: "3abae5ed-7de7-4f4f-833c-07de8a117479",
+	participate_id: "831c770e-8e48-4a2e-b2c4-d205d4198138",
+	room: {
+		room_id: "3abae5ed-7de7-4f4f-833c-07de8a117479",
+		name: "Marvel",
+		room_creator: "db893b11-0a3f-443e-a113-40c2b7ab6ccc",
+		playlist_photo:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T22%3A55%3A31.445Z-marvel.jpeg",
+		description: "This room has no description.",
+		date_created: "2024-08-11T22:55:31.816Z",
+		nsfw: false,
+		is_temporary: false,
+		room_language: "English",
+		explicit: false,
+		tags: [],
+	},
+	creator_name: "Nin",
+	room_join_time: "2024-08-24T10:54:08.778Z",
 };
 
-const PlayerContextProviderMock = ({ children }) => (
-	<Player.Provider value={mockPlayerContextValue}>{children}</Player.Provider>
+const PlayerContextProviderMock = ({ children, value }) => (
+	<Player.Provider value={value}>{children}</Player.Provider>
 );
 
 describe("ProfileScreen", () => {
@@ -51,8 +67,30 @@ describe("ProfileScreen", () => {
 
 	it("renders loading indicator initially", async () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+		const mockPlayerContextValue = {
+			userData: {
+				profile_picture_url: "https://example.com/profile-pic.jpg",
+				profile_name: "John Doe",
+				username: "johndoe",
+				followers: { count: 10 },
+				following: { count: 20 },
+				bio: "Mock bio",
+				links: {
+					count: 1,
+					data: [{ type: "example", links: "https://example.com" }],
+				},
+				fav_genres: { count: 1, data: [] },
+				fav_songs: { data: [] },
+				fav_rooms: { count: 0, data: [] },
+				recent_rooms: { count: 0, data: [] },
+			},
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
 		const { getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -82,12 +120,18 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -135,7 +179,33 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 10 },
+			following: { count: 20, data: [{ username: "johndoe" }] },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -143,7 +213,7 @@ describe("ProfileScreen", () => {
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -192,7 +262,33 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 0 },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -200,7 +296,7 @@ describe("ProfileScreen", () => {
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -244,12 +340,38 @@ describe("ProfileScreen", () => {
 				count: 1,
 				data: [{ type: "example", links: "https://example.com" }],
 			},
-			fav_genres: { data: [] },
+			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 10 },
+			following: { count: 20, data: [{ username: "johndoe" }] },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -258,7 +380,7 @@ describe("ProfileScreen", () => {
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -292,12 +414,38 @@ describe("ProfileScreen", () => {
 				count: 1,
 				data: [{ type: "example", links: "https://example.com" }],
 			},
-			fav_genres: { data: [] },
+			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 0 },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -306,7 +454,7 @@ describe("ProfileScreen", () => {
 
 		// Render the ProfileScreen component
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
@@ -357,12 +505,20 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
+
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
+			(axios.get as jest.Mock)
+				.mockResolvedValueOnce({ data: mockRoomData });
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
-			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(
-				<PlayerContextProviderMock>
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
 			);
@@ -400,12 +556,21 @@ describe("ProfileScreen", () => {
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			};
+
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
-			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+			(axios.get as jest.Mock)
+				.mockResolvedValue({ data: mockProfileData })
+				.mockResolvedValueOnce({ data: mockRoomData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(
-				<PlayerContextProviderMock>
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
 			);
@@ -420,7 +585,7 @@ describe("ProfileScreen", () => {
 		});
 
 		it("does not render any links when count is zero", () => {
-			const profileData = {
+			const mockProfileData = {
 				links: {
 					count: 0,
 					data: [],
@@ -428,8 +593,16 @@ describe("ProfileScreen", () => {
 			};
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
 			const { queryByTestId } = render(
-				<ProfileScreen profileData={profileData} />,
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
 			);
 
 			// Assert that the links container is not rendered
@@ -474,12 +647,20 @@ describe("ProfileScreen", () => {
 				recent_rooms: { count: 0, data: [] },
 			};
 
-			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
+			(axios.get as jest.Mock)
+				.mockResolvedValue({ data: mockProfileData })
+				.mockResolvedValueOnce({ data: mockRoomData });
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(
-				<PlayerContextProviderMock>
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
 			);
@@ -505,7 +686,7 @@ describe("ProfileScreen", () => {
 		});
 
 		it("does not render favorite rooms when count is zero", () => {
-			const profileData = {
+			const mockProfileData = {
 				fav_rooms: {
 					count: 0,
 					data: [],
@@ -513,8 +694,17 @@ describe("ProfileScreen", () => {
 			};
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
+			// Render the ProfileScreen component
 			const { queryByText, queryByTestId } = render(
-				<ProfileScreen profileData={profileData} />,
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
 			);
 
 			// Assert that the title "Favorite Rooms" is not rendered
@@ -573,12 +763,20 @@ describe("ProfileScreen", () => {
 				},
 			};
 
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
+
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
-			(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+			(axios.get as jest.Mock)
+				.mockResolvedValue({ data: mockProfileData })
+				.mockResolvedValueOnce({ data: mockRoomData });
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(
-				<PlayerContextProviderMock>
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
 			);
@@ -604,17 +802,24 @@ describe("ProfileScreen", () => {
 		});
 
 		it("does not render recent rooms when count is zero", () => {
-			const profileData = {
+			const mockProfileData = {
 				recent_rooms: {
 					count: 0,
 					data: [],
 				},
 			};
+			const mockPlayerContextValue = {
+				userData: mockProfileData,
+				setUserData: jest.fn(),
+				currentRoom: "Room 1",
+			};
 
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			const { queryByText, queryByTestId } = render(
-				<ProfileScreen profileData={profileData} />,
+				<PlayerContextProviderMock value={mockPlayerContextValue}>
+					<ProfileScreen />
+				</PlayerContextProviderMock>,
 			);
 
 			// Assert that the title "Favorite Rooms" is not rendered
@@ -672,10 +877,18 @@ describe("ProfileScreen", () => {
 			},
 		};
 
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
-		(axios.get as jest.Mock).mockResolvedValue({ data: mockProfileData });
+		(axios.get as jest.Mock)
+			.mockResolvedValue({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
 		const { getByTestId, queryByTestId, getByText } = render(
-			<PlayerContextProviderMock>
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
