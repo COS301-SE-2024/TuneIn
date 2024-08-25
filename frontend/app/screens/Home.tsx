@@ -102,7 +102,7 @@ const Home: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				
+
 				return response.data;
 			}
 		} catch (error) {

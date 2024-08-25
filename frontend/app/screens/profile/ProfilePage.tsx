@@ -164,8 +164,6 @@ const ProfileScreen: React.FC = () => {
 					setRoomData(currentRoom);
 					setRoomCheck(true);
 				}
-
-				
 			}
 
 			// console.log("Completed effect: " + JSON.stringify(userData));
@@ -269,9 +267,12 @@ const ProfileScreen: React.FC = () => {
 				setRoomCheck(true);
 			}
 		} catch (error) {
-			console.error("Error fetching room info:", error);
-			setRoomData(null);
-			setRoomCheck(true);
+			if (error.response.status === 404) {
+				setRoomData(null);
+				setRoomCheck(true);
+			} else {
+				console.log("Error fetching room info:", error);
+			}
 		}
 	};
 

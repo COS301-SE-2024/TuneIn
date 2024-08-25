@@ -7,7 +7,9 @@ const SkeletonUserItem = () => {
 			<View style={styles.profileRow}>
 				<View style={styles.profileImagePlaceholder} />
 				<View style={styles.detailsPlaceholder}>
-					<View style={styles.profileNamePlaceholder}><Text>            </Text></View>
+					<View style={styles.profileNamePlaceholder}>
+						<Text>            </Text>
+					</View>
 					<View style={styles.usernamePlaceholder} />
 				</View>
 			</View>

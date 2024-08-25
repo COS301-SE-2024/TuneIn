@@ -37,7 +37,7 @@ const EditProfileScreen = () => {
 			"PlayerContext must be used within a PlayerContextProvider",
 		);
 	}
-	
+
 	const { setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);

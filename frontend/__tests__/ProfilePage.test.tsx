@@ -294,7 +294,6 @@ describe("ProfileScreen", () => {
 			</PlayerContextProviderMock>,
 		);
 
-
 		// console.log(
 		// 	"2nd axios.get was called:",
 		// 	(axios.get as jest.Mock).mock.calls.length,
@@ -320,8 +319,6 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
-
-		
 	});
 
 	it("fetches profile data for other page where there is no current room", async () => {
@@ -372,9 +369,9 @@ describe("ProfileScreen", () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
 			.mockResolvedValueOnce({
-				"statusCode": 404,
-				"message": "User is not in a room"
-			  });
+				statusCode: 404,
+				message: "User is not in a room",
+			});
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -408,13 +405,14 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
-
 	});
 
 	it("fetches profile data for other page where there are cached rooms owned by user", async () => {
 		// Mock AsyncStorage.getItem to return a token
 		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
-		(StorageService.getItem as jest.Mock).mockResolvedValueOnce('[{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"theoriginalles@gmail.com"},{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"Solo"}]')
+		(StorageService.getItem as jest.Mock).mockResolvedValueOnce(
+			'[{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"theoriginalles@gmail.com"},{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"Solo"}]',
+		);
 
 		// Mock axios.get to return mock profile data
 		const mockProfileData = {
@@ -493,7 +491,6 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
-
 	});
 
 	it("fetches profile data for other page where user is already following person", async () => {
@@ -577,7 +574,6 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
-
 	});
 
 	it("fetches profile data for other page where user is not following person", async () => {
@@ -851,8 +847,7 @@ describe("ProfileScreen", () => {
 				currentRoom: "Room 1",
 			};
 
-			(axios.get as jest.Mock)
-				.mockResolvedValueOnce({ data: mockRoomData });
+			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component

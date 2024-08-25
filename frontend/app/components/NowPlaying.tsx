@@ -6,10 +6,7 @@ const NowPlaying = ({ name, creator, art }) => {
 		<View style={styles.container}>
 			<Text style={styles.title}>Current Room</Text>
 			<View style={styles.playingContainer}>
-				<Image
-					source={{ uri: art }}
-					style={styles.roomArt}
-				/>
+				<Image source={{ uri: art }} style={styles.roomArt} />
 				<View style={styles.detailsContainer}>
 					<Text style={styles.roomName}>{name}</Text>
 					<Text style={styles.creator}>{creator}</Text>

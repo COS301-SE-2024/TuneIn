@@ -728,9 +728,9 @@ export class UsersService {
 			},
 		});
 
-		if(room !== null) {
+		if (room !== null) {
 			room.room = await this.dtogen.generateRoomDto(room.room.room_id);
-		}		
+		}
 
 		// if the user is in a room, get the join time from the user_activity table.
 		// do the query on user id and retrieve the activity with a leave date of null

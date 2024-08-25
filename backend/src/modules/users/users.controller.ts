@@ -477,7 +477,7 @@ export class UsersController {
 		description: "Unauthorized",
 	})
 	@ApiTags("rooms")
-	async getCurrentRoomByUserId(@Param("userId") userId: string,): Promise<any> {
+	async getCurrentRoomByUserId(@Param("userId") userId: string): Promise<any> {
 		return await this.usersService.getCurrentRoom(userId);
 	}
 
