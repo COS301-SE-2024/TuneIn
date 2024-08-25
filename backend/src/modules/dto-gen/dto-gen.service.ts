@@ -54,8 +54,9 @@ export class DtoGenService {
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
 
-			const roomDtoArray: RoomDto[] | null =
-				await this.generateMultipleRoomDto(favRoomIDs);
+			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
+				favRoomIDs,
+			);
 			if (roomDtoArray && roomDtoArray !== null) {
 				result.fav_rooms = {
 					count: roomDtoArray.length,
@@ -224,7 +225,7 @@ export class DtoGenService {
 
 	async generateMultipleUserDto(
 		user_ids: string[],
-		fully_qualify: boolean = false,
+		fully_qualify = false,
 	): Promise<UserDto[]> {
 		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: user_ids } },
