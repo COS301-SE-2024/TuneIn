@@ -603,6 +603,9 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 
 
+![4 Tier Architectural diagram drawio](https://github.com/user-attachments/assets/6f86ed87-bdee-448c-b543-084a01e5e383)
+
+
 
 ### 6.1 Architectural Requirements
 1. **Domain-Driven Architecture (DDA)**:

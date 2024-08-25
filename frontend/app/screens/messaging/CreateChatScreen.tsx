@@ -10,18 +10,18 @@ import {
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { UserDto } from "../../models/UserDto";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import axios from "axios";
+import { set } from "react-datepicker/dist/date_utils";
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
+	friends: UserDto[];
 }
 
-interface User {
-	id: string;
-	name: string;
-	username: string;
-	avatar: string;
-}
-
+/*
 const users = [
 	{
 		id: "1",
@@ -192,29 +192,42 @@ const users = [
 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
 	},
 ];
+*/
 
-const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
+const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
+	closeModal,
+	friends,
+}) => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
+	const [users, setUsers] = useState<UserDto[]>(friends);
+	const [filteredUsers, setFilteredUsers] = useState<UserDto[]>([]);
 	const router = useRouter();
 
 	const handleSearch = (query: string) => {
+		/*
 		setSearchQuery(query);
 		const filtered = users.filter((user) =>
 			user.name.toLowerCase().includes(query.toLowerCase()),
 		);
 		setFilteredUsers(filtered);
+		*/
+		setSearchQuery(query);
+		const filtered = users.filter((user) =>
+			user.username.toLowerCase().includes(query.toLowerCase()),
+		);
+		setFilteredUsers(filtered);
 	};
 
 	useEffect(() => {
+		console.log("Friends: ", friends);
+		/*
 		const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
 		setFilteredUsers(sortedUsers);
+		*/
 	}, []);
 
-	const handleUserSelect = (user: User) => {
-		router.push(
-			`/screens/messaging/ChatScreen?name=${user.name}&avatar=${user.avatar}`,
-		);
+	const handleUserSelect = (user: UserDto) => {
+		router.push(`/screens/messaging/ChatScreen?username=${user.username}`);
 	};
 
 	return (
@@ -243,15 +256,18 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 			</View>
 			<FlatList
 				data={filteredUsers}
-				keyExtractor={(item) => item.id}
+				keyExtractor={(item) => item.userID}
 				renderItem={({ item }) => (
 					<TouchableOpacity
 						style={styles.userItem}
 						onPress={() => handleUserSelect(item)}
 					>
-						<Image source={{ uri: item.avatar }} style={styles.avatar} />
+						<Image
+							source={{ uri: item.profile_picture_url }}
+							style={styles.avatar}
+						/>
 						<View>
-							<Text style={styles.name}>{item.name}</Text>
+							<Text style={styles.name}>{item.profile_name}</Text>
 							<Text style={styles.username}>{item.username}</Text>
 						</View>
 					</TouchableOpacity>

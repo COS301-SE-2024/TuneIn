@@ -46,8 +46,9 @@ export class AuthController {
 		const userID: string = authInfo.username;
 		console.log("authInfo", authInfo);
 
-		const { username, email } =
-			await this.authService.getUsernameAndEmail(userID);
+		const { username, email } = await this.authService.getUsernameAndEmail(
+			userID,
+		);
 
 		const payload: JWTPayload = {
 			id: authInfo.username,

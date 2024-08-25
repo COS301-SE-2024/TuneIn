@@ -92,12 +92,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const getRefreshToken = async (): Promise<void> => {
-		console.log("local host 1", utils.LOCALHOST);
+		console.log("local host 1", utils.API_BASE_NO_PORT);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				`${utils.LOCALHOST}:4000/refresh_token`,
+				`${utils.API_BASE_NO_PORT}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},
@@ -122,12 +122,12 @@ export const useSpotifyAuth = () => {
 	};
 
 	const refreshAccessToken = async () => {
-		console.log("local host", utils.LOCALHOST);
+		console.log("local host", utils.API_BASE_NO_PORT);
 		try {
 			const storedRefreshToken = await StorageService.getItem("refresh_token");
 			if (!storedRefreshToken) throw new Error("No refresh token found");
 			const response = await axios.post(
-				`${utils.LOCALHOST}:4000/refresh_token`,
+				`${utils.API_BASE_NO_PORT}:4000/refresh_token`,
 				{
 					refresh_token: storedRefreshToken,
 				},

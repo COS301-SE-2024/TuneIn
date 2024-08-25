@@ -30,8 +30,8 @@ import { BullBoardService } from "../src/bull-board/bull-board.service";
 import { BullConfigModule } from "../src/bull-config/bull-config.module";
 import { LiveGateway } from "../src/live/live.gateway";
 import { LiveModule } from "../src/live/live.module";
-import { ConnectedUsersService } from "../src/live/connecteduser/connecteduser.service";
-import { ConnectedUsersModule } from "../src/live/connecteduser/connecteduser.module";
+import { RoomUsersService } from "../src/live/roomusers/roomuser.service";
+import { RoomUsersModule } from "../src/live/roomusers/roomuser.module";
 import { DbUtilsModule } from "../src/modules/db-utils/db-utils.module";
 import { DbUtilsService } from "../src/modules/db-utils/db-utils.service";
 import { DtoGenModule } from "../src/modules/dto-gen/dto-gen.module";
@@ -58,6 +58,8 @@ import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
 import { LiveService } from "../src/live/live.service";
 import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
+import { DmUsersService } from "../src/live/dmusers/dmusers.service";
+import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -164,40 +166,65 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			EventQueueService,
 			LiveService,
 		],
-		imports: [ConnectedUsersModule, DbUtilsModule, DtoGenModule, RoomsModule],
-		exports: [ConnectedUsersModule, LiveGateway],
+		imports: [
+			RoomUsersModule,
+			DmUsersModule,
+			DbUtilsModule,
+			DtoGenModule,
+			RoomsModule,
+			UsersModule,
+		],
+		exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	}).compile();
 }
 
-//ConnectedUsersModule
-export async function createConnectedUsersTestingModule(): Promise<TestingModule> {
+//RoomUsersModule
+export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule],
+		imports: [PrismaModule, DtoGenModule, DbUtilsModule],
 		providers: [
+			RoomUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
-			DtoGenService,
-			DbUtilsService,
-			ConnectedUsersService,
 		],
+		exports: [RoomUsersService],
+	}).compile();
+}
+
+//DmUsersModule
+export async function createDMUsersTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule, DtoGenModule, DbUtilsModule, UsersModule],
+		providers: [
+			DmUsersService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
+		exports: [DmUsersService],
 	}).compile();
 }
 
 //DbUtilsModule
 export async function createDbUtilsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
+		imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
 		providers: [
 			DbUtilsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
+		exports: [DbUtilsService],
 	}).compile();
 }
 
 //DtoGenModule
 export async function createDtoGenTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule],
+		imports: [
+			PrismaModule,
+			DbUtilsModule,
+			ConfigModule.forRoot({ isGlobal: true }),
+		],
 		providers: [
 			{ provide: PrismaService, useValue: mockPrismaService },
+			{ provide: ConfigService, useValue: mockConfigService },
 			DtoGenService,
 		],
 	}).compile();

@@ -1,0 +1,80 @@
+name: 🧰 Validate Frontend Dependencies
+on:
+    push:
+        branches: [ main, develop ]
+
+    pull_request:
+        branches: [ main, develop ]
+
+jobs:
+    start:
+        name: 🚀 Initial Setup
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+          - name: 🏁 Starting Job
+            run: |
+                echo "Beginning to build ${{ github.repository }}"
+
+    build:
+        name: 🧰 Check Dependencies
+        needs: start
+        runs-on: ubuntu-latest
+        steps:
+        - name: 📥 Checkout "${{ github.repository }}"
+          uses: actions/checkout@v4
+
+        - name: 📝 Create frontend env file
+          run: |
+            touch frontend/.env
+            echo "${{ secrets.FRONTEND_ENV_FILE }}" > frontend/.env
+          shell: bash
+
+        - name: 🧰 Set up Node (stable)
+          uses: actions/setup-node@v4
+          with:
+            node-version: 18.18.x
+
+        # Step 3: Install Expo CLI
+        - name: 📦 Install Expo CLI
+          run: cd frontend && npm install -g expo-cli && npm install -g sharp-cli@^2.1.0
+
+        # Step 3: Install Expo Doctor
+        - name: 📦 Install Expo Doctor
+          run: cd frontend && npm install -g expo-doctor
+
+        #   - name: 🏗️ Setup EAS
+        #     uses: expo/expo-github-action@v8
+        #     with:
+        #       expo-version: latest
+        #       eas-version: latest
+        #       token: ${{ secrets.EXPO_TOKEN }}
+
+        - name: 📦 Install NPM dependencies
+          run:  |
+            cd frontend && npm ci
+
+        # Step 4: Install dependencies
+        # - name: 📦 Install Yarn dependencies
+        #   run: cd frontend && yarn install
+
+        - name: 📦 Install Potential Peer Dependencies
+          run: cd frontend && npx expo install react-native-reanimated @types/node @types/yargs-parser @babel/core @types/babel__generator @types/babel__template @types/babel__traverse @types/istanbul-lib-coverage @types/istanbul-lib-report @types/tough-cookie @types/prop-types react-datepicker @types/react @types/yargs-parser eslint eslint-plugin-import eslint-config-prettier expo expo-constants expo-linking expo-status-bar react-native-safe-area-context react-native-screens jest-resolve
+
+        - name: 📋 Check NPM packages with Expo
+          run: cd frontend && npx expo install --check
+
+        - name: 🚦 Check Project issues
+          run: cd frontend && npx expo-doctor
+
+        - name: ⚙️ Check Pre-build config
+          run: cd frontend && npx expo prebuild
+
+    end:
+        name: 🏁 The end
+        runs-on: ubuntu-latest
+        needs: [start, build]
+        steps:
+          - name: 🏁 Ending
+            run: |
+                echo "${{ github.repository }} has been built successfully"
