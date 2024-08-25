@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,101 +41,108 @@ const mockRoomData = {
 	room_id: "8f928675-5c95-497a-b8a7-917064cdb462",
 	participate_id: "9e1c0ece-ceb9-4dbc-8620-13fa146d5520",
 	room: {
-	  creator: {
-		profile_name: "Jaden Moodley",
-		userID: "012c4238-e071-7031-cb6c-30881378722f",
-		username: "Jaden",
-		profile_picture_url: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
-		followers: {
-		  count: 0,
-		  data: []
-		},
-		following: {
-		  count: 0,
-		  data: []
-		},
-		links: {
-		  count: 2,
-		  data: [
-			{
-			  type: "Instagram",
-			  links: "instagram.com/adventurous_epoch"
+		creator: {
+			profile_name: "Jaden Moodley",
+			userID: "012c4238-e071-7031-cb6c-30881378722f",
+			username: "Jaden",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			followers: {
+				count: 0,
+				data: [],
 			},
-			{
-			  type: "Instagram",
-			  links: "instagram.com/general_epoch"
-			}
-		  ]
+			following: {
+				count: 0,
+				data: [],
+			},
+			links: {
+				count: 2,
+				data: [
+					{
+						type: "Instagram",
+						links: "instagram.com/adventurous_epoch",
+					},
+					{
+						type: "Instagram",
+						links: "instagram.com/general_epoch",
+					},
+				],
+			},
+			bio: "Humanity is a boon",
+			current_song: {
+				title: "",
+				artists: [],
+				cover: "",
+				start_time: "2024-08-25T10:15:02.532Z",
+			},
+			fav_genres: {
+				count: 4,
+				data: ["j-pop", "rock", "jazz", "metal"],
+			},
+			fav_songs: {
+				count: 2,
+				data: [
+					{
+						title: "Faster",
+						artists: "Good Kid",
+						cover:
+							"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
+						start_time: "",
+					},
+					{
+						title: "Bohemian Rhapsody",
+						artists: "Queen",
+						cover:
+							"https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
+						start_time: "",
+					},
+				],
+			},
+			fav_rooms: {
+				count: 0,
+				data: [],
+			},
+			recent_rooms: {
+				count: 0,
+				data: [],
+			},
 		},
-		bio: "Humanity is a boon",
+		roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+		participant_count: 0,
+		room_name: "Abyssal Paradise",
+		description: "Submerge yourself in solace",
+		is_temporary: false,
+		is_private: true,
+		is_scheduled: false,
+		start_date: "2024-08-25T10:15:02.406Z",
+		end_date: "2024-08-25T10:15:02.406Z",
+		language: "English",
+		has_explicit_content: false,
+		has_nsfw_content: false,
+		room_image:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
 		current_song: {
-		  title: "",
-		  artists: [],
-		  cover: "",
-		  start_time: "2024-08-25T10:15:02.532Z"
+			title: "",
+			artists: [],
+			cover: "",
+			start_time: "2024-08-25T10:15:02.406Z",
 		},
-		fav_genres: {
-		  count: 4,
-		  data: [
-			"j-pop",
-			"rock",
-			"jazz",
-			"metal",
-		  ]
-		},
-		fav_songs: {
-		  count: 2,
-		  data: [
-			{
-			  title: "Faster",
-			  artists: "Good Kid",
-			  cover: "https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-			  start_time: ""
-			},
-			{
-			  title: "Bohemian Rhapsody",
-			  artists: "Queen",
-			  cover: "https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
-			  start_time: ""
-			}
-		  ]
-		},
-		fav_rooms: {
-		  count: 0,
-		  data: []
-		},
-		recent_rooms: {
-		  count: 0,
-		  data: []
-		}
-	  },
-	  roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
-	  participant_count: 0,
-	  room_name: "Abyssal Paradise",
-	  description: "Submerge yourself in solace",
-	  is_temporary: false,
-	  is_private: true,
-	  is_scheduled: false,
-	  start_date: "2024-08-25T10:15:02.406Z",
-	  end_date: "2024-08-25T10:15:02.406Z",
-	  language: "English",
-	  has_explicit_content: false,
-	  has_nsfw_content: false,
-	  room_image: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
-	  current_song: {
-		title: "",
-		artists: [],
-		cover: "",
-		start_time: "2024-08-25T10:15:02.406Z"
-	  },
-	  tags: []
+		tags: [],
 	},
 	room_join_time: "2024-08-24T10:54:08.778Z",
 };
 
-const PlayerContextProviderMock = ({ children, value }) => (
-	<Player.Provider value={value}>{children}</Player.Provider>
-);
+const PlayerContextProviderMock = ({ children, value }) => {
+	const [userData, setUserData] = useState(value.userData);
+
+	const mockValue = {
+		...value,
+		userData,
+		setUserData,
+	};
+
+	return <Player.Provider value={mockValue}>{children}</Player.Provider>;
+};
 
 describe("ProfileScreen", () => {
 	beforeEach(() => {
@@ -144,7 +151,7 @@ describe("ProfileScreen", () => {
 		(AsyncStorage.getItem as jest.Mock).mockClear();
 		(axios.get as jest.Mock).mockClear();
 		(auth.getToken as jest.Mock).mockReturnValue("token");
-		(StorageService.getItem as jest.Mock).mockResolvedValue([]); 
+		(StorageService.getItem as jest.Mock).mockResolvedValue([]);
 	});
 
 	it("renders loading indicator initially", async () => {
@@ -188,7 +195,6 @@ describe("ProfileScreen", () => {
 	it("fetches profile data and renders profile information", async () => {
 		// Mock AsyncStorage.getItem to return a token
 		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
-		
 
 		// Mock axios.get to return mock profile data
 		const mockProfileData = {
@@ -244,7 +250,249 @@ describe("ProfileScreen", () => {
 			});
 		});
 
-		console.log("1st axios.get was called:", (axios.get as jest.Mock).mock.calls.length, "times");
+		console.log(
+			"1st axios.get was called:",
+			(axios.get as jest.Mock).mock.calls.length,
+			"times",
+		);
+	});
+
+	it("fetches profile data and renders profile information if user data is null", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 0 },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: null,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+
+		// console.log(
+		// 	"2nd axios.get was called:",
+		// 	(axios.get as jest.Mock).mock.calls.length,
+		// 	"times",
+		// );
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+
+		
+	});
+
+	it("fetches profile data for other page where there is no current room", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 1, data: [{ username: "Jaden" }] },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 0 },
+			following: { count: 1, data: [{ username: "johndoe" }] },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({
+				"statusCode": 404,
+				"message": "User is not in a room"
+			  });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("Unfollow")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+
+	});
+
+	it("fetches profile data for other page where there are cached rooms owned by user", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		(StorageService.getItem as jest.Mock).mockResolvedValueOnce('[{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"theoriginalles@gmail.com"},{"profile_picture_url":"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg","username":"Solo"}]')
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 1, data: [{ username: "Jaden" }] },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockProfileData2 = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "Jaden",
+			followers: { count: 0 },
+			following: { count: 1, data: [{ username: "johndoe" }] },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: [{ type: "example", links: "https://example.com" }],
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: { data: [] },
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData2,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: mockProfileData })
+			.mockResolvedValueOnce({ data: mockRoomData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+			user: "Jaden",
+		});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("Unfollow")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
 
 	});
 

@@ -57,10 +57,8 @@ const ProfileScreen: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
 	const [roomCheck, setRoomCheck] = useState<boolean>(false);
-	const [friend, setFriend] = useState<any>(null);
 	const [profileInfo, setProfileInfo] = useState<any>(null);
 	const [refreshing] = React.useState(false);
-
 	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
 	const [roomData, setRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
@@ -82,7 +80,6 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	if (params && JSON.stringify(params) !== "{}") {
-		// console.log("profile params: " + JSON.stringify(params));
 		ownsProfile = false;
 	}
 
@@ -112,7 +109,6 @@ const ProfileScreen: React.FC = () => {
 		const cachedMyRooms = await StorageService.getItem("cachedMyRooms");
 		if (cachedMyRooms && cachedMyRooms.length > 0) {
 			const jsonCache = JSON.parse(cachedMyRooms);
-			// console.log("My Rooms: " + cachedMyRooms + " Room ID: " + room.roomID);
 			for (let i = 0; i < jsonCache.length; i++) {
 				if (jsonCache[i].id === roomID) {
 					return true;
@@ -128,8 +124,6 @@ const ProfileScreen: React.FC = () => {
 		const initializeProfile = async () => {
 			if (!ownsProfile) {
 				const parsedFriend = JSON.parse(params.friend as string);
-				setFriend(parsedFriend);
-
 				try {
 					const storedToken = await auth.getToken();
 					if (storedToken) {
@@ -153,27 +147,28 @@ const ProfileScreen: React.FC = () => {
 					console.error("Failed to retrieve profile data:", error);
 				}
 			} else {
-				// console.log("Owner called with user data: " + JSON.stringify(userData));
 				if (!userData) {
 					try {
 						const storedToken = await auth.getToken();
-						// console.log("Stored token: " + storedToken);
 						if (storedToken) {
-							// console.log("Owner profile call");
-							fetchProfileInfo(storedToken, "");
+							const data = await fetchProfileInfo(storedToken, "");
+							// setPrimProfileData(data);
 						}
 					} catch (error) {
 						console.error("Failed to retrieve profile data:", error);
 					}
 				} else {
-					if (roomData === null) {
-						setRoomData(currentRoom);
-						setRoomCheck(true);
-					}
+					setPrimProfileData(userData);
 				}
-				setPrimProfileData(userData);
+				if (roomData === null) {
+					setRoomData(currentRoom);
+					setRoomCheck(true);
+				}
+
+				
 			}
 
+			// console.log("Completed effect: " + JSON.stringify(userData));
 			setLoading(false);
 		};
 
@@ -228,9 +223,10 @@ const ProfileScreen: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
+				// console.log("Fetching profile info data: " + JSON.stringify(response));
 				setUserData(response.data);
 				if (ownsProfile) {
-					// console.log("Profile info: " + JSON.stringify(response.data));
+					// console.log("Profile return: " + JSON.stringify(response.data));
 					return response.data;
 				}
 			}
@@ -264,7 +260,6 @@ const ProfileScreen: React.FC = () => {
 						},
 					},
 				);
-				// console.log("Room info: " + JSON.stringify(response.data.room));
 				const hasRoom = await ownsRoom(response.data.room.roomID);
 				const formattedRoomData = preFormatRoomData(
 					response.data.room,
@@ -272,7 +267,6 @@ const ProfileScreen: React.FC = () => {
 				);
 				setRoomData(formatRoomData(formattedRoomData));
 				setRoomCheck(true);
-				// console.log("Room? " + roomCheck);
 			}
 		} catch (error) {
 			console.error("Error fetching room info:", error);
@@ -495,7 +489,7 @@ const ProfileScreen: React.FC = () => {
 		// 		" roomData: " +
 		// 		roomData +
 		// 		" roomCheck: " +
-		// 		roomCheck
+		// 		roomCheck,
 		// );
 		return (
 			<View
@@ -632,6 +626,7 @@ const ProfileScreen: React.FC = () => {
 					<TouchableOpacity
 						onPress={navigateToRoomPage}
 						style={{ paddingHorizontal: 20 }}
+						testID="now-playing"
 					>
 						<NowPlaying
 							name={roomData.name}
