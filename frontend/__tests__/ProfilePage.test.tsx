@@ -3,6 +3,7 @@ import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
+import * as StorageService from "../app/services/StorageService";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
 import { useLocalSearchParams } from "expo-router";
 import { Player } from "../app/PlayerContext";
@@ -21,6 +22,11 @@ jest.mock("../app/services/AuthManagement", () => ({
 	},
 }));
 
+jest.mock("../app/services/StorageService", () => ({
+	__esModule: true,
+	getItem: jest.fn(),
+}));
+
 jest.mock("expo-router", () => {
 	const actualModule = jest.requireActual("expo-router");
 	return {
@@ -32,23 +38,98 @@ jest.mock("expo-router", () => {
 
 const mockRoomData = {
 	user_id: "012c4238-e071-7031-cb6c-30881378722f",
-	room_id: "3abae5ed-7de7-4f4f-833c-07de8a117479",
-	participate_id: "831c770e-8e48-4a2e-b2c4-d205d4198138",
+	room_id: "8f928675-5c95-497a-b8a7-917064cdb462",
+	participate_id: "9e1c0ece-ceb9-4dbc-8620-13fa146d5520",
 	room: {
-		room_id: "3abae5ed-7de7-4f4f-833c-07de8a117479",
-		name: "Marvel",
-		room_creator: "db893b11-0a3f-443e-a113-40c2b7ab6ccc",
-		playlist_photo:
-			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T22%3A55%3A31.445Z-marvel.jpeg",
-		description: "This room has no description.",
-		date_created: "2024-08-11T22:55:31.816Z",
-		nsfw: false,
-		is_temporary: false,
-		room_language: "English",
-		explicit: false,
-		tags: [],
+	  creator: {
+		profile_name: "Jaden Moodley",
+		userID: "012c4238-e071-7031-cb6c-30881378722f",
+		username: "Jaden",
+		profile_picture_url: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+		followers: {
+		  count: 0,
+		  data: []
+		},
+		following: {
+		  count: 0,
+		  data: []
+		},
+		links: {
+		  count: 2,
+		  data: [
+			{
+			  type: "Instagram",
+			  links: "instagram.com/adventurous_epoch"
+			},
+			{
+			  type: "Instagram",
+			  links: "instagram.com/general_epoch"
+			}
+		  ]
+		},
+		bio: "Humanity is a boon",
+		current_song: {
+		  title: "",
+		  artists: [],
+		  cover: "",
+		  start_time: "2024-08-25T10:15:02.532Z"
+		},
+		fav_genres: {
+		  count: 4,
+		  data: [
+			"j-pop",
+			"rock",
+			"jazz",
+			"metal",
+		  ]
+		},
+		fav_songs: {
+		  count: 2,
+		  data: [
+			{
+			  title: "Faster",
+			  artists: "Good Kid",
+			  cover: "https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
+			  start_time: ""
+			},
+			{
+			  title: "Bohemian Rhapsody",
+			  artists: "Queen",
+			  cover: "https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
+			  start_time: ""
+			}
+		  ]
+		},
+		fav_rooms: {
+		  count: 0,
+		  data: []
+		},
+		recent_rooms: {
+		  count: 0,
+		  data: []
+		}
+	  },
+	  roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+	  participant_count: 0,
+	  room_name: "Abyssal Paradise",
+	  description: "Submerge yourself in solace",
+	  is_temporary: false,
+	  is_private: true,
+	  is_scheduled: false,
+	  start_date: "2024-08-25T10:15:02.406Z",
+	  end_date: "2024-08-25T10:15:02.406Z",
+	  language: "English",
+	  has_explicit_content: false,
+	  has_nsfw_content: false,
+	  room_image: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+	  current_song: {
+		title: "",
+		artists: [],
+		cover: "",
+		start_time: "2024-08-25T10:15:02.406Z"
+	  },
+	  tags: []
 	},
-	creator_name: "Nin",
 	room_join_time: "2024-08-24T10:54:08.778Z",
 };
 
@@ -62,11 +143,14 @@ describe("ProfileScreen", () => {
 		jest.clearAllMocks();
 		(AsyncStorage.getItem as jest.Mock).mockClear();
 		(axios.get as jest.Mock).mockClear();
-		(auth.getToken as jest.Mock).mockReturnValue("token"); // Mock the token for the test
+		(auth.getToken as jest.Mock).mockReturnValue("token");
+		(StorageService.getItem as jest.Mock).mockResolvedValue([]); 
 	});
 
 	it("renders loading indicator initially", async () => {
-		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			friend: JSON.stringify({ profilePicture: "", username: "l" }),
+		});
 
 		const mockPlayerContextValue = {
 			userData: {
@@ -95,21 +179,24 @@ describe("ProfileScreen", () => {
 			</PlayerContextProviderMock>,
 		);
 
-		const loadingIndicator = getByTestId("loading-indicator");
-		expect(loadingIndicator).toBeTruthy();
+		await waitFor(() => {
+			const loadingIndicator = getByTestId("loading-indicator");
+			expect(loadingIndicator).toBeTruthy();
+		});
 	});
 
 	it("fetches profile data and renders profile information", async () => {
 		// Mock AsyncStorage.getItem to return a token
 		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+		
 
 		// Mock axios.get to return mock profile data
 		const mockProfileData = {
 			profile_picture_url: "https://example.com/profile-pic.jpg",
 			profile_name: "John Doe",
 			username: "johndoe",
-			followers: { count: 10 },
-			following: { count: 20 },
+			followers: { count: 0 },
+			following: { count: 0 },
 			bio: "Mock bio",
 			links: {
 				count: 1,
@@ -126,7 +213,7 @@ describe("ProfileScreen", () => {
 			setUserData: jest.fn(),
 			currentRoom: "Room 1",
 		};
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -156,6 +243,9 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
+
+		console.log("1st axios.get was called:", (axios.get as jest.Mock).mock.calls.length, "times");
+
 	});
 
 	it("fetches profile data for other page where user is already following person", async () => {
@@ -167,8 +257,8 @@ describe("ProfileScreen", () => {
 			profile_picture_url: "https://example.com/profile-pic.jpg",
 			profile_name: "John Doe",
 			username: "johndoe",
-			followers: { count: 10, data: [{ username: "Jaden" }] },
-			following: { count: 20 },
+			followers: { count: 1, data: [{ username: "Jaden" }] },
+			following: { count: 0 },
 			bio: "Mock bio",
 			links: {
 				count: 1,
@@ -184,8 +274,8 @@ describe("ProfileScreen", () => {
 			profile_picture_url: "https://example.com/profile-pic.jpg",
 			profile_name: "John Doe",
 			username: "Jaden",
-			followers: { count: 10 },
-			following: { count: 20, data: [{ username: "johndoe" }] },
+			followers: { count: 0 },
+			following: { count: 1, data: [{ username: "johndoe" }] },
 			bio: "Mock bio",
 			links: {
 				count: 1,
@@ -239,6 +329,7 @@ describe("ProfileScreen", () => {
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
+
 	});
 
 	it("fetches profile data for other page where user is not following person", async () => {
@@ -586,10 +677,20 @@ describe("ProfileScreen", () => {
 
 		it("does not render any links when count is zero", () => {
 			const mockProfileData = {
+				profile_picture_url: "https://example.com/profile-pic.jpg",
+				profile_name: "John Doe",
+				username: "johndoe",
+				followers: { count: 0 },
+				following: { count: 0 },
+				bio: "Mock bio",
 				links: {
 					count: 0,
 					data: [],
 				},
+				fav_genres: { count: 1, data: [] },
+				fav_songs: { data: [] },
+				fav_rooms: { count: 0, data: [] },
+				recent_rooms: { count: 0, data: [] },
 			};
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
@@ -687,10 +788,20 @@ describe("ProfileScreen", () => {
 
 		it("does not render favorite rooms when count is zero", () => {
 			const mockProfileData = {
-				fav_rooms: {
+				profile_picture_url: "https://example.com/profile-pic.jpg",
+				profile_name: "John Doe",
+				username: "johndoe",
+				followers: { count: 0 },
+				following: { count: 0 },
+				bio: "Mock bio",
+				links: {
 					count: 0,
 					data: [],
 				},
+				fav_genres: { count: 1, data: [] },
+				fav_songs: { data: [] },
+				fav_rooms: { count: 0, data: [] },
+				recent_rooms: { count: 0, data: [] },
 			};
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
@@ -803,10 +914,20 @@ describe("ProfileScreen", () => {
 
 		it("does not render recent rooms when count is zero", () => {
 			const mockProfileData = {
-				recent_rooms: {
+				profile_picture_url: "https://example.com/profile-pic.jpg",
+				profile_name: "John Doe",
+				username: "johndoe",
+				followers: { count: 0 },
+				following: { count: 0 },
+				bio: "Mock bio",
+				links: {
 					count: 0,
 					data: [],
 				},
+				fav_genres: { count: 1, data: [] },
+				fav_songs: { data: [] },
+				fav_rooms: { count: 0, data: [] },
+				recent_rooms: { count: 0, data: [] },
 			};
 			const mockPlayerContextValue = {
 				userData: mockProfileData,

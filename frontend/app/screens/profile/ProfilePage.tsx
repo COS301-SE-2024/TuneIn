@@ -138,9 +138,8 @@ const ProfileScreen: React.FC = () => {
 							parsedFriend.username,
 						);
 						setPrimProfileData(data);
-						// console.log("Fetched Data: " + JSON.stringify(data));
 
-						if (userData !== null) {
+						if (userData !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
 								(item: any) => item.username === userData.username,
 							);
@@ -169,6 +168,7 @@ const ProfileScreen: React.FC = () => {
 				} else {
 					if (roomData === null) {
 						setRoomData(currentRoom);
+						setRoomCheck(true);
 					}
 				}
 				setPrimProfileData(userData);
@@ -197,7 +197,6 @@ const ProfileScreen: React.FC = () => {
 
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
-			console.log("Timer called");
 			const intervalId = setInterval(() => {
 				fetchRoomInfo(primaryProfileData.userID);
 			}, 10000);
@@ -209,9 +208,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (ownsProfile) {
 			if (currentRoom) {
-				console.log("Owner Room Effect Called");
 				setRoomData(currentRoom);
-				console.log("Updated Room Data:", currentRoom);
 			} else {
 				setRoomData(null);
 			}
@@ -275,7 +272,7 @@ const ProfileScreen: React.FC = () => {
 				);
 				setRoomData(formatRoomData(formattedRoomData));
 				setRoomCheck(true);
-				// console.log("My Room? " + hasRoom);
+				// console.log("Room? " + roomCheck);
 			}
 		} catch (error) {
 			console.error("Error fetching room info:", error);
@@ -488,16 +485,18 @@ const ProfileScreen: React.FC = () => {
 		primaryProfileData === null ||
 		!roomCheck
 	) {
-		console.log(
-			"loading: " +
-				loading +
-				" userData: " +
-				userData +
-				" primaryProfile: " +
-				primaryProfileData +
-				" roomData: " +
-				roomData,
-		);
+		// console.log(
+		// 	"loading: " +
+		// 		loading +
+		// 		" userData: " +
+		// 		userData +
+		// 		" primaryProfile: " +
+		// 		primaryProfileData +
+		// 		" roomData: " +
+		// 		roomData +
+		// 		" roomCheck: " +
+		// 		roomCheck
+		// );
 		return (
 			<View
 				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
