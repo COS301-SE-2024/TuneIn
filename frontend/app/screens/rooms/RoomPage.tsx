@@ -60,11 +60,11 @@ const RoomPage = () => {
 	}
 
 	let roomID: string;
-	if(roomData.id !== undefined){
+	if (roomData.id !== undefined) {
 		roomID = roomData.id;
 	} else {
 		roomID = roomData.roomID;
-	}	
+	}
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
