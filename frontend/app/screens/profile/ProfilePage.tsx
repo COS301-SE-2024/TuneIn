@@ -267,11 +267,12 @@ const ProfileScreen: React.FC = () => {
 				setRoomCheck(true);
 			}
 		} catch (error) {
-			if (error.response.status === 404) {
+			// console.log("Error: " + error);
+			if (error.response && error.response.status === 404) {
 				setRoomData(null);
 				setRoomCheck(true);
 			} else {
-				console.log("Error fetching room info:", error);
+				console.error("Error fetching room info:", error);
 			}
 		}
 	};

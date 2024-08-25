@@ -366,12 +366,16 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		(axios.get as jest.Mock)
-			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({
-				statusCode: 404,
-				message: "User is not in a room",
-			});
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+
+		(axios.get as jest.Mock).mockRejectedValueOnce({
+			response: {
+				status: 404,
+				data: {
+					message: "User is not in a room",
+				},
+			},
+		});
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
