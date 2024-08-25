@@ -44,14 +44,16 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd TuneIn/
-          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          git checkout develop
           git fetch
           git pull
           cd backend
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
+          chmod +x start_backend.sh
           nvm use default
           npm i
           npm run build:swc
-          pm2 restart tunein-backend
+          ./start_backend.sh
         EOF
 
     - name: Health Check
