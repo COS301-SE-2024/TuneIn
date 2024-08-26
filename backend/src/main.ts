@@ -51,6 +51,8 @@ async function bootstrap() {
 			type: "http",
 			in: "Header",
 		})
+		.addServer("http://localhost:3000", "Development server")
+		.addServer("https://tunein.co.za:3000", "Production server")
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup("api", app, document);
