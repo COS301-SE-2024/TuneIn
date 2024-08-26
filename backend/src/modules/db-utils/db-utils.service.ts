@@ -377,14 +377,18 @@ export class DbUtilsService {
 
 	// get users who aren't friends with the user, but are mutual followers
 	async getPotentialFriends(userID: string): Promise<Prisma.users[] | null> {
-		const following: Prisma.follows[] | null =
-			await this.prisma.follows.findMany({
-				where: { follower: userID },
-			});
+		const follows: Prisma.follows[] | null = await this.prisma.follows.findMany(
+			{
+				where: { OR: [{ follower: userID }, { followee: userID }] },
+			},
+		);
 
-		if (!following || following === null) {
+		if (!follows || follows === null) {
 			return null;
 		}
+
+		const following = follows.filter((f) => f.follower === userID);
+		const followers = follows.filter((f) => f.followee === userID);
 
 		const followingIDs: string[] = [];
 		for (let i = 0; i < following.length; i++) {
@@ -394,15 +398,6 @@ export class DbUtilsService {
 					followingIDs.push(f.followee);
 				}
 			}
-		}
-
-		const followers: Prisma.follows[] | null =
-			await this.prisma.follows.findMany({
-				where: { followee: userID },
-			});
-
-		if (!followers || followers === null) {
-			return null;
 		}
 
 		const followerIDs: string[] = [];
