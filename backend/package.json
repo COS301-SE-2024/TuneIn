@@ -24,7 +24,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "generate-client": "java -jar ./../tools/openapi-generator-cli.jar generate -i openapi/api.yaml -l typescript-axios -o ./../frontend/api-client --additional-properties supportsES6=true",
+    "generate-client": "java -jar ./../tools/openapi-generator-cli.jar generate -i openapi/api.yaml -g typescript-axios -o ./../frontend/api --additional-properties supportsES6=true --additional-properties skipFormModel=false",
     "gen-docs": "compodoc -p tsconfig.json",
     "serve-docs": "compodoc -p tsconfig.json -s",
     "prisma-read": "prisma introspect",

@@ -52,7 +52,7 @@ jobs:
 
       - name: 🧪 Generate API client
         run:  |
-          java -jar tools/openapi-generator-cli.jar generate -i backend/openapi/api.yaml -g typescript-axios -o frontend/api
+          java -jar tools/openapi-generator-cli.jar generate -i backend/openapi/api.yaml -g typescript-axios -o frontend/api --additional-properties supportsES6=true --additional-properties skipFormModel=false
 
   end:
     name: 🏁 The end
