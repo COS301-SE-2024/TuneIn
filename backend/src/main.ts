@@ -43,7 +43,14 @@ async function bootstrap() {
 			"The API for the TuneIn application, handling all the backend logic and making it available to the frontend.",
 		)
 		.setVersion("1.0")
-		.addTag("TuneIn")
+		.addBearerAuth({
+			description: `Please enter token in following format: Bearer <JWT>`,
+			name: "Authorization",
+			bearerFormat: "Bearer",
+			scheme: "Bearer",
+			type: "http",
+			in: "Header",
+		})
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup("api", app, document);
