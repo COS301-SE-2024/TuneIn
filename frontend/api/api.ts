@@ -851,6 +851,10 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -880,6 +884,10 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -1271,6 +1279,10 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
             const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
             if (file !== undefined) { 
                 localVarFormParams.append('file', file as any);
@@ -1491,6 +1503,622 @@ export class GenresApi extends BaseAPI {
 
 
 /**
+ * RoomAnalyticsApi - axios parameter creator
+ * @export
+ */
+export const RoomAnalyticsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Get key metrics for user\'s rooms
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetKeyMetrics: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/rooms/analytics`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room contributor analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomContributorsAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomContributorsAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/contributors`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room interaction analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomInteractionAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomInteractionAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/interactions`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room participation analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomParticipationAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomParticipationAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/participation`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room queue analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomQueueAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomQueueAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/queue`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room song analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomSongsAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomSongsAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/songs`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get room voting analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomVotesAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('roomsControllerGetRoomVotesAnalytics', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/analytics/votes`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RoomAnalyticsApi - functional programming interface
+ * @export
+ */
+export const RoomAnalyticsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RoomAnalyticsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Get key metrics for user\'s rooms
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetKeyMetrics(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetKeyMetrics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room contributor analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomContributorsAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomContributorsAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room interaction analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomInteractionAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomInteractionAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room participation analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomParticipationAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomParticipationAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room queue analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomQueueAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomQueueAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room song analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomSongsAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomSongsAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get room voting analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomVotesAnalytics(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomAnalyticsApi.roomsControllerGetRoomVotesAnalytics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * RoomAnalyticsApi - factory interface
+ * @export
+ */
+export const RoomAnalyticsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = RoomAnalyticsApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Get key metrics for user\'s rooms
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetKeyMetrics(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room contributor analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomContributorsAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room interaction analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomInteractionAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room participation analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomParticipationAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room queue analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomQueueAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room song analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomSongsAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get room voting analytics
+         * @param {string} roomID 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.roomsControllerGetRoomVotesAnalytics(roomID, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * RoomAnalyticsApi - object-oriented interface
+ * @export
+ * @class RoomAnalyticsApi
+ * @extends {BaseAPI}
+ */
+export class RoomAnalyticsApi extends BaseAPI {
+    /**
+     * 
+     * @summary Get key metrics for user\'s rooms
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetKeyMetrics(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room contributor analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomContributorsAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room interaction analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomInteractionAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room participation analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomParticipationAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room queue analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomQueueAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room song analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomSongsAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get room voting analytics
+     * @param {string} roomID 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomAnalyticsApi
+     */
+    public roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomAnalyticsApiFp(this.configuration).roomsControllerGetRoomVotesAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * RoomsApi - axios parameter creator
  * @export
  */
@@ -1521,6 +2149,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -1559,6 +2191,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1593,6 +2229,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1625,6 +2265,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -1660,6 +2304,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1694,6 +2342,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1724,35 +2376,9 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s current room
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetCurrentRoom: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/rooms/current/room`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -1800,36 +2426,6 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Get key metrics for user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetKeyMetrics: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/rooms/analytics/keymetrics`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Get room\'s chat history
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -1850,6 +2446,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -1898,74 +2498,6 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Get room analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get room contributor analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomContributorsAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomContributorsAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/contributors`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Get room info
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -1987,73 +2519,9 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get room interaction analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomInteractionAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomInteractionAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/interactions`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get room participation analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomParticipationAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomParticipationAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/participation`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2077,74 +2545,6 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             // verify required parameter 'roomID' is not null or undefined
             assertParamExists('roomsControllerGetRoomQueue', 'roomID', roomID)
             const localVarPath = `/rooms/{roomID}/songs`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get room queue analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomQueueAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomQueueAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/queue`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get room song analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomSongsAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomSongsAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/songs`
                 .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2204,40 +2604,6 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Get room voting analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomVotesAnalytics: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('roomsControllerGetRoomVotesAnalytics', 'roomID', roomID)
-            const localVarPath = `/rooms/{roomID}/analytics/votes`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Join a room
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -2258,6 +2624,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2293,6 +2663,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2326,6 +2700,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2362,6 +2740,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2402,6 +2784,10 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2519,18 +2905,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s current room
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetCurrentRoom(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetCurrentRoom(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetCurrentRoom']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2539,18 +2913,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetCurrentSong(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetCurrentSong']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get key metrics for user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetKeyMetrics(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetKeyMetrics']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2581,32 +2943,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get room analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomAnalytics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get room contributor analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomContributorsAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomContributorsAnalytics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get room info
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -2616,32 +2952,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomInfo(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomInfo']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get room interaction analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomInteractionAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomInteractionAnalytics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get room participation analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomParticipationAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomParticipationAnalytics']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2659,32 +2969,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get room queue analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomQueueAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomQueueAnalytics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get room song analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomSongsAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomSongsAnalytics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get users in a room
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -2694,19 +2978,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomUsers(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomUsers']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get room voting analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.roomsControllerGetRoomVotesAnalytics(roomID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.roomsControllerGetRoomVotesAnalytics']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2856,30 +3127,12 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s current room
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetCurrentRoom(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetCurrentRoom(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         roomsControllerGetCurrentSong(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.roomsControllerGetCurrentSong(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get key metrics for user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetKeyMetrics(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2903,26 +3156,6 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get room analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomAnalytics(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get room contributor analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomContributorsAnalytics(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get room info
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -2930,26 +3163,6 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          */
         roomsControllerGetRoomInfo(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<RoomDto> {
             return localVarFp.roomsControllerGetRoomInfo(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get room interaction analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomInteractionAnalytics(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get room participation analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomParticipationAnalytics(roomID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2963,26 +3176,6 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get room queue analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomQueueAnalytics(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get room song analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomSongsAnalytics(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get users in a room
          * @param {string} roomID 
          * @param {*} [options] Override http request option.
@@ -2990,16 +3183,6 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          */
         roomsControllerGetRoomUsers(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
             return localVarFp.roomsControllerGetRoomUsers(roomID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get room voting analytics
-         * @param {string} roomID 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.roomsControllerGetRoomVotesAnalytics(roomID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3147,17 +3330,6 @@ export class RoomsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s current room
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetCurrentRoom(options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetCurrentRoom(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @param {string} roomID 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3165,17 +3337,6 @@ export class RoomsApi extends BaseAPI {
      */
     public roomsControllerGetCurrentSong(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).roomsControllerGetCurrentSong(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get key metrics for user\'s rooms
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetKeyMetrics(options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetKeyMetrics(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3204,30 +3365,6 @@ export class RoomsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get room analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get room contributor analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomContributorsAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomContributorsAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get room info
      * @param {string} roomID 
      * @param {*} [options] Override http request option.
@@ -3236,30 +3373,6 @@ export class RoomsApi extends BaseAPI {
      */
     public roomsControllerGetRoomInfo(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).roomsControllerGetRoomInfo(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get room interaction analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomInteractionAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomInteractionAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get room participation analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomParticipationAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomParticipationAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3276,30 +3389,6 @@ export class RoomsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get room queue analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomQueueAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomQueueAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get room song analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomSongsAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomSongsAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get users in a room
      * @param {string} roomID 
      * @param {*} [options] Override http request option.
@@ -3308,18 +3397,6 @@ export class RoomsApi extends BaseAPI {
      */
     public roomsControllerGetRoomUsers(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).roomsControllerGetRoomUsers(roomID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get room voting analytics
-     * @param {string} roomID 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public roomsControllerGetRoomVotesAnalytics(roomID: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).roomsControllerGetRoomVotesAnalytics(roomID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3570,6 +3647,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3600,6 +3681,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3629,6 +3714,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -3702,6 +3791,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3774,6 +3867,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3840,6 +3937,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4338,39 +4439,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Accept a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to accept.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerAcceptFriendRequest_1: async (userID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerAcceptFriendRequest_1', 'userID', userID)
-            const localVarPath = `/users/{userID}/accept`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4406,39 +4477,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Send a friend request to the given user
-         * @param {string} userID The userID of the user to send a friend request to.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerBefriendUser_2: async (userID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerBefriendUser_2', 'userID', userID)
-            const localVarPath = `/users/{userID}/befriend`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4473,41 +4514,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createRoomDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Create a new room
-         * @param {CreateRoomDto} createRoomDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerCreateRoom_3: async (createRoomDto: CreateRoomDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'createRoomDto' is not null or undefined
-            assertParamExists('usersControllerCreateRoom_3', 'createRoomDto', createRoomDto)
-            const localVarPath = `/users/rooms`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4550,43 +4559,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Follow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to follow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerFollowUser_4: async (userID: string, username: any, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerFollowUser_4', 'userID', userID)
-            // verify required parameter 'username' is not null or undefined
-            assertParamExists('usersControllerFollowUser_4', 'username', username)
-            const localVarPath = `/users/{userID}/follow`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)))
-                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4618,35 +4593,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get the authorized user\'s bookmarks
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetBookmarks_5: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/bookmarks`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4678,35 +4627,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s current room (room that they are currently in)
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetCurrentRoom_6: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/rooms/current`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4738,35 +4661,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get the last DMs sent to or received from another user
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetDMs_7: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/dms`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4802,39 +4699,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s followers
-         * @param {any} none 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFollowers_8: async (none: any, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'none' is not null or undefined
-            assertParamExists('usersControllerGetFollowers_8', 'none', none)
-            const localVarPath = `/users/followers`
-                .replace(`{${"none"}}`, encodeURIComponent(String(none)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4866,35 +4733,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s following
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFollowing_9: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/following`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4926,35 +4767,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s friend requests
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFriendRequests_10: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/friends/requests`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -4985,6 +4800,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5020,99 +4839,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get user profile info by username
-         * @param {string} username The username of the user to fetch profile info for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfileByUsername_11: async (username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'username' is not null or undefined
-            assertParamExists('usersControllerGetProfileByUsername_11', 'username', username)
-            const localVarPath = `/users/{username}`
-                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfile_12: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfile_13: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5144,35 +4873,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s recent rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetRecentRooms_14: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/rooms/recent`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5204,35 +4907,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s recommended rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetRecommendedRooms_15: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/rooms/foryou`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5264,35 +4941,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s friends
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetUserFriends_16: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/friends`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5324,35 +4975,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get a user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetUserRooms_17: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/rooms`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5387,41 +5012,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(updateUserDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerPatchProfile_18: async (updateUserDto: UpdateUserDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'updateUserDto' is not null or undefined
-            assertParamExists('usersControllerPatchProfile_18', 'updateUserDto', updateUserDto)
-            const localVarPath = `/users`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5459,41 +5052,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(updateUserDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerPutProfile_19: async (updateUserDto: UpdateUserDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'updateUserDto' is not null or undefined
-            assertParamExists('usersControllerPutProfile_19', 'updateUserDto', updateUserDto)
-            const localVarPath = `/users`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5532,39 +5093,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Reject a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to reject.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerRejectFriendRequest_20: async (userID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerRejectFriendRequest_20', 'userID', userID)
-            const localVarPath = `/users/{userID}/reject`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5604,43 +5135,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Unfollow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to unfollow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerUnfollowUser_21: async (userID: string, username: any, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerUnfollowUser_21', 'userID', userID)
-            // verify required parameter 'username' is not null or undefined
-            assertParamExists('usersControllerUnfollowUser_21', 'username', username)
-            const localVarPath = `/users/{userID}/unfollow`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)))
-                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5676,39 +5173,9 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary End friendship with the given user
-         * @param {string} userID The userID of the user to end friendship with.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerUnfriendUser_22: async (userID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userID' is not null or undefined
-            assertParamExists('usersControllerUnfriendUser_22', 'userID', userID)
-            const localVarPath = `/users/{userID}/unfriend`
-                .replace(`{${"userID"}}`, encodeURIComponent(String(userID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -5746,19 +5213,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Accept a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to accept.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerAcceptFriendRequest_1(userID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerAcceptFriendRequest_1(userID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerAcceptFriendRequest_1']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Send a friend request to the given user
          * @param {string} userID The userID of the user to send a friend request to.
          * @param {*} [options] Override http request option.
@@ -5772,19 +5226,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Send a friend request to the given user
-         * @param {string} userID The userID of the user to send a friend request to.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerBefriendUser_2(userID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerBefriendUser_2(userID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerBefriendUser_2']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Create a new room
          * @param {CreateRoomDto} createRoomDto 
          * @param {*} [options] Override http request option.
@@ -5794,19 +5235,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerCreateRoom(createRoomDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerCreateRoom']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Create a new room
-         * @param {CreateRoomDto} createRoomDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerCreateRoom_3(createRoomDto: CreateRoomDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoomDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerCreateRoom_3(createRoomDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerCreateRoom_3']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5825,20 +5253,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Follow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to follow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerFollowUser_4(userID: string, username: any, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerFollowUser_4(userID, username, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerFollowUser_4']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get the authorized user\'s bookmarks
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5847,18 +5261,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetBookmarks(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetBookmarks']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get the authorized user\'s bookmarks
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetBookmarks_5(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetBookmarks_5(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetBookmarks_5']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5875,18 +5277,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s current room (room that they are currently in)
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetCurrentRoom_6(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoomDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetCurrentRoom_6(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetCurrentRoom_6']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get the last DMs sent to or received from another user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5895,18 +5285,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetDMs(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetDMs']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get the last DMs sent to or received from another user
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetDMs_7(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetDMs_7(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetDMs_7']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -5924,19 +5302,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s followers
-         * @param {any} none 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetFollowers_8(none: any, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetFollowers_8(none, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetFollowers_8']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get a user\'s following
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5949,18 +5314,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s following
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetFollowing_9(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetFollowing_9(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetFollowing_9']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get a user\'s friend requests
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5969,18 +5322,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetFriendRequests(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetFriendRequests']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get a user\'s friend requests
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetFriendRequests_10(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetFriendRequests_10(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetFriendRequests_10']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6010,43 +5351,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get user profile info by username
-         * @param {string} username The username of the user to fetch profile info for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetProfileByUsername_11(username: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetProfileByUsername_11(username, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetProfileByUsername_11']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetProfile_12(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetProfile_12(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetProfile_12']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetProfile_13(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetProfile_13(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetProfile_13']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get a user\'s recent rooms
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6055,18 +5359,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetRecentRooms(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetRecentRooms']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get a user\'s recent rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetRecentRooms_14(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetRecentRooms_14(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetRecentRooms_14']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6083,18 +5375,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s recommended rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetRecommendedRooms_15(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetRecommendedRooms_15(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetRecommendedRooms_15']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get a user\'s friends
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6107,18 +5387,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a user\'s friends
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetUserFriends_16(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetUserFriends_16(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetUserFriends_16']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get a user\'s rooms
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6127,18 +5395,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetUserRooms(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetUserRooms']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get a user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerGetUserRooms_17(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetUserRooms_17(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetUserRooms_17']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6161,36 +5417,10 @@ export const UsersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async usersControllerPatchProfile_18(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerPatchProfile_18(updateUserDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerPatchProfile_18']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
         async usersControllerPutProfile(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerPutProfile(updateUserDto, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerPutProfile']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerPutProfile_19(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerPutProfile_19(updateUserDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerPutProfile_19']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6204,19 +5434,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerRejectFriendRequest(userID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerRejectFriendRequest']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Reject a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to reject.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerRejectFriendRequest_20(userID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerRejectFriendRequest_20(userID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerRejectFriendRequest_20']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6235,20 +5452,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Unfollow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to unfollow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerUnfollowUser_21(userID: string, username: any, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerUnfollowUser_21(userID, username, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerUnfollowUser_21']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary End friendship with the given user
          * @param {string} userID The userID of the user to end friendship with.
          * @param {*} [options] Override http request option.
@@ -6258,19 +5461,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerUnfriendUser(userID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerUnfriendUser']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary End friendship with the given user
-         * @param {string} userID The userID of the user to end friendship with.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async usersControllerUnfriendUser_22(userID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerUnfriendUser_22(userID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerUnfriendUser_22']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -6295,16 +5485,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Accept a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to accept.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerAcceptFriendRequest_1(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerAcceptFriendRequest_1(userID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Send a friend request to the given user
          * @param {string} userID The userID of the user to send a friend request to.
          * @param {*} [options] Override http request option.
@@ -6315,16 +5495,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Send a friend request to the given user
-         * @param {string} userID The userID of the user to send a friend request to.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerBefriendUser_2(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerBefriendUser_2(userID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Create a new room
          * @param {CreateRoomDto} createRoomDto 
          * @param {*} [options] Override http request option.
@@ -6332,16 +5502,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         usersControllerCreateRoom(createRoomDto: CreateRoomDto, options?: RawAxiosRequestConfig): AxiosPromise<RoomDto> {
             return localVarFp.usersControllerCreateRoom(createRoomDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Create a new room
-         * @param {CreateRoomDto} createRoomDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerCreateRoom_3(createRoomDto: CreateRoomDto, options?: RawAxiosRequestConfig): AxiosPromise<RoomDto> {
-            return localVarFp.usersControllerCreateRoom_3(createRoomDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6356,32 +5516,12 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Follow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to follow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerFollowUser_4(userID: string, username: any, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerFollowUser_4(userID, username, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get the authorized user\'s bookmarks
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         usersControllerGetBookmarks(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
             return localVarFp.usersControllerGetBookmarks(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get the authorized user\'s bookmarks
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetBookmarks_5(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
-            return localVarFp.usersControllerGetBookmarks_5(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6394,30 +5534,12 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s current room (room that they are currently in)
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetCurrentRoom_6(options?: RawAxiosRequestConfig): AxiosPromise<RoomDto> {
-            return localVarFp.usersControllerGetCurrentRoom_6(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get the last DMs sent to or received from another user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         usersControllerGetDMs(options?: RawAxiosRequestConfig): AxiosPromise<object> {
             return localVarFp.usersControllerGetDMs(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get the last DMs sent to or received from another user
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetDMs_7(options?: RawAxiosRequestConfig): AxiosPromise<object> {
-            return localVarFp.usersControllerGetDMs_7(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6431,16 +5553,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s followers
-         * @param {any} none 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFollowers_8(none: any, options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
-            return localVarFp.usersControllerGetFollowers_8(none, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get a user\'s following
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6450,30 +5562,12 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s following
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFollowing_9(options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
-            return localVarFp.usersControllerGetFollowing_9(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get a user\'s friend requests
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         usersControllerGetFriendRequests(options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
             return localVarFp.usersControllerGetFriendRequests(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get a user\'s friend requests
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetFriendRequests_10(options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
-            return localVarFp.usersControllerGetFriendRequests_10(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6496,49 +5590,12 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get user profile info by username
-         * @param {string} username The username of the user to fetch profile info for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfileByUsername_11(username: string, options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.usersControllerGetProfileByUsername_11(username, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfile_12(options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.usersControllerGetProfile_12(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetProfile_13(options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.usersControllerGetProfile_13(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get a user\'s recent rooms
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         usersControllerGetRecentRooms(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
             return localVarFp.usersControllerGetRecentRooms(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get a user\'s recent rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetRecentRooms_14(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
-            return localVarFp.usersControllerGetRecentRooms_14(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6551,15 +5608,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s recommended rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetRecommendedRooms_15(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
-            return localVarFp.usersControllerGetRecommendedRooms_15(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get a user\'s friends
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6569,30 +5617,12 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get a user\'s friends
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetUserFriends_16(options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
-            return localVarFp.usersControllerGetUserFriends_16(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get a user\'s rooms
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         usersControllerGetUserRooms(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
             return localVarFp.usersControllerGetUserRooms(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get a user\'s rooms
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerGetUserRooms_17(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
-            return localVarFp.usersControllerGetUserRooms_17(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6611,28 +5641,8 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersControllerPatchProfile_18(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.usersControllerPatchProfile_18(updateUserDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
         usersControllerPutProfile(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
             return localVarFp.usersControllerPutProfile(updateUserDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Update user\'s profile info
-         * @param {UpdateUserDto} updateUserDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerPutProfile_19(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.usersControllerPutProfile_19(updateUserDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6643,16 +5653,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         usersControllerRejectFriendRequest(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
             return localVarFp.usersControllerRejectFriendRequest(userID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Reject a friend request from the given user
-         * @param {string} userID The userID of the user whose friend request to reject.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerRejectFriendRequest_20(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerRejectFriendRequest_20(userID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -6667,17 +5667,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Unfollow the given user
-         * @param {string} userID 
-         * @param {any} username The username of the user to unfollow.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerUnfollowUser_21(userID: string, username: any, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerUnfollowUser_21(userID, username, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary End friendship with the given user
          * @param {string} userID The userID of the user to end friendship with.
          * @param {*} [options] Override http request option.
@@ -6685,16 +5674,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         usersControllerUnfriendUser(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
             return localVarFp.usersControllerUnfriendUser(userID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary End friendship with the given user
-         * @param {string} userID The userID of the user to end friendship with.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        usersControllerUnfriendUser_22(userID: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.usersControllerUnfriendUser_22(userID, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6720,18 +5699,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Accept a friend request from the given user
-     * @param {string} userID The userID of the user whose friend request to accept.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerAcceptFriendRequest_1(userID: string, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerAcceptFriendRequest_1(userID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Send a friend request to the given user
      * @param {string} userID The userID of the user to send a friend request to.
      * @param {*} [options] Override http request option.
@@ -6744,18 +5711,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Send a friend request to the given user
-     * @param {string} userID The userID of the user to send a friend request to.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerBefriendUser_2(userID: string, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerBefriendUser_2(userID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Create a new room
      * @param {CreateRoomDto} createRoomDto 
      * @param {*} [options] Override http request option.
@@ -6764,18 +5719,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerCreateRoom(createRoomDto: CreateRoomDto, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerCreateRoom(createRoomDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Create a new room
-     * @param {CreateRoomDto} createRoomDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerCreateRoom_3(createRoomDto: CreateRoomDto, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerCreateRoom_3(createRoomDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6793,19 +5736,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Follow the given user
-     * @param {string} userID 
-     * @param {any} username The username of the user to follow.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerFollowUser_4(userID: string, username: any, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerFollowUser_4(userID, username, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get the authorized user\'s bookmarks
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6813,17 +5743,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerGetBookmarks(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerGetBookmarks(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get the authorized user\'s bookmarks
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetBookmarks_5(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetBookmarks_5(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6839,17 +5758,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s current room (room that they are currently in)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetCurrentRoom_6(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetCurrentRoom_6(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get the last DMs sent to or received from another user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6857,17 +5765,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerGetDMs(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerGetDMs(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get the last DMs sent to or received from another user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetDMs_7(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetDMs_7(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6884,18 +5781,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s followers
-     * @param {any} none 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetFollowers_8(none: any, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetFollowers_8(none, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get a user\'s following
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6907,17 +5792,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s following
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetFollowing_9(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetFollowing_9(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get a user\'s friend requests
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -6925,17 +5799,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerGetFriendRequests(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerGetFriendRequests(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get a user\'s friend requests
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetFriendRequests_10(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetFriendRequests_10(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -6963,40 +5826,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get user profile info by username
-     * @param {string} username The username of the user to fetch profile info for.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetProfileByUsername_11(username: string, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetProfileByUsername_11(username, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get current user\'s profile info
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetProfile_12(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetProfile_12(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get current user\'s profile info
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetProfile_13(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetProfile_13(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get a user\'s recent rooms
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7004,17 +5833,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerGetRecentRooms(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerGetRecentRooms(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get a user\'s recent rooms
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetRecentRooms_14(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetRecentRooms_14(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7030,17 +5848,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s recommended rooms
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetRecommendedRooms_15(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetRecommendedRooms_15(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get a user\'s friends
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7052,17 +5859,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a user\'s friends
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetUserFriends_16(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetUserFriends_16(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get a user\'s rooms
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -7070,17 +5866,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerGetUserRooms(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerGetUserRooms(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get a user\'s rooms
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerGetUserRooms_17(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerGetUserRooms_17(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7103,32 +5888,8 @@ export class UsersApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public usersControllerPatchProfile_18(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerPatchProfile_18(updateUserDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Update user\'s profile info
-     * @param {UpdateUserDto} updateUserDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
     public usersControllerPutProfile(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerPutProfile(updateUserDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Update user\'s profile info
-     * @param {UpdateUserDto} updateUserDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerPutProfile_19(updateUserDto: UpdateUserDto, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerPutProfile_19(updateUserDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7141,18 +5902,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerRejectFriendRequest(userID: string, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerRejectFriendRequest(userID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Reject a friend request from the given user
-     * @param {string} userID The userID of the user whose friend request to reject.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerRejectFriendRequest_20(userID: string, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerRejectFriendRequest_20(userID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -7170,19 +5919,6 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Unfollow the given user
-     * @param {string} userID 
-     * @param {any} username The username of the user to unfollow.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerUnfollowUser_21(userID: string, username: any, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerUnfollowUser_21(userID, username, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary End friendship with the given user
      * @param {string} userID The userID of the user to end friendship with.
      * @param {*} [options] Override http request option.
@@ -7191,18 +5927,6 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerUnfriendUser(userID: string, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerUnfriendUser(userID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary End friendship with the given user
-     * @param {string} userID The userID of the user to end friendship with.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public usersControllerUnfriendUser_22(userID: string, options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).usersControllerUnfriendUser_22(userID, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
