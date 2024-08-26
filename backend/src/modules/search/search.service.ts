@@ -417,7 +417,7 @@ export class SearchService {
 			console.log("Called");
 			console.log("Result " + result);
 			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
 			console.log(userDtos);
 
 			if (userDtos) {
@@ -549,7 +549,7 @@ export class SearchService {
 
 		if (Array.isArray(result)) {
 			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds);
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
 			// console.log(userDtos);
 
 			if (userDtos) {

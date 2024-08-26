@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
 	friendContainer: {
 		alignItems: "center",
 		padding: 4,
+		paddingHorizontal: 10,
 	},
 	imageBorder: {
 		alignItems: "center",
