@@ -5,11 +5,13 @@ import {
 	HttpStatus,
 	Post,
 	UploadedFile,
+	UseGuards,
 	UseInterceptors,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
 import {
 	ApiBadRequestResponse,
+	ApiBearerAuth,
 	ApiBody,
 	ApiConsumes,
 	ApiOkResponse,
@@ -18,6 +20,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { S3Service } from "./s3/s3.service";
 import { memoryStorage } from "multer";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 
 @Controller()
 export class AppController {
@@ -39,6 +42,8 @@ export class AppController {
 	/*
 	curl -v -X POST http://localhost:3000/upload -F "file=@/Users/lesedikekana/Downloads/f.jpg"
 	*/
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
 	@Post("upload")
 	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
 	@ApiConsumes("multipart/form-data")

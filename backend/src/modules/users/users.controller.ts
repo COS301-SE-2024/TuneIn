@@ -67,23 +67,22 @@ export class UsersController {
 		return this.usersService.remove(id);
 	}
   */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get()
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get current user's profile info" })
 	@ApiOkResponse({
 		description: "Successfully returned user profile info.",
 		type: UserDto,
 	})
-	@ApiTags("users")
 	getProfile(@Request() req: any): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.usersService.getProfile(userInfo.id);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Put()
-	@ApiTags("users")
 	@ApiOperation({ summary: "Update user's profile info" })
 	@ApiOkResponse({
 		description: "Returns the updated user profile info.",
@@ -100,9 +99,9 @@ export class UsersController {
 		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Patch()
-	@ApiTags("users")
 	@ApiOperation({ summary: "Update user's profile info" })
 	@ApiOkResponse({
 		description: "Returns the updated user profile info.",
@@ -122,7 +121,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("dms")
-	@ApiTags("users")
 	@ApiOperation({
 		summary: "Get the last DMs sent to or received from another user",
 	})
@@ -138,7 +136,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's rooms" })
 	@ApiOkResponse({
 		description: "The user's rooms as an array of RoomDto.",
@@ -154,7 +151,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post("rooms")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Create a new room" })
 	@ApiOkResponse({
 		description: "The newly created room as a RoomDto.",
@@ -171,7 +167,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/recent")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's recent rooms" })
 	@ApiOkResponse({
 		description: "The user's recent rooms as an array of RoomDto.",
@@ -186,7 +181,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/foryou")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's recommended rooms" })
 	@ApiOkResponse({
 		description: "The user's recommended rooms as an array of RoomDto.",
@@ -201,7 +195,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/current")
-	@ApiTags("users")
 	@ApiOperation({
 		summary: "Get a user's current room (room that they are currently in)",
 	})
@@ -218,7 +211,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("friends")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's friends" })
 	@ApiOkResponse({
 		description: "The user's friends as an array of UserDto.",
@@ -233,7 +225,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("friends/requests")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's friend requests" })
 	@ApiOkResponse({
 		description: "The user's friend requests as an array of UserDto.",
@@ -248,7 +239,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("followers")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's followers" })
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
@@ -264,7 +254,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("following")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get a user's following" })
 	@ApiOkResponse({
 		description: "The user's following as an array of UserDto.",
@@ -279,7 +268,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("bookmarks")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
 	@ApiOkResponse({
 		description: "The user's bookmarks as an array of RoomDto.",
@@ -291,9 +279,9 @@ export class UsersController {
 		return await this.usersService.getBookmarks(userInfo.id);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":username")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Get user profile info by username" })
 	@ApiParam({
 		name: "username",
@@ -312,7 +300,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":userID/follow")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Follow the given user" })
 	@ApiParam({
 		name: "username",
@@ -337,7 +324,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":userID/unfollow")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Unfollow the given user" })
 	@ApiParam({
 		name: "username",
@@ -384,7 +370,6 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post(":userID/befriend")
-	@ApiTags("users")
 	@ApiOperation({ summary: "Send a friend request to the given user" })
 	@ApiParam({
 		name: "userID",
@@ -407,7 +392,7 @@ export class UsersController {
 	}
 
 	@Post(":userID/unfriend")
-	@ApiTags("users")
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "End friendship with the given user" })
 	@ApiParam({
@@ -431,7 +416,7 @@ export class UsersController {
 	}
 
 	@Post(":userID/accept")
-	@ApiTags("users")
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Accept a friend request from the given user" })
 	@ApiParam({
@@ -455,7 +440,7 @@ export class UsersController {
 	}
 
 	@Post(":userID/reject")
-	@ApiTags("users")
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: "Reject a friend request from the given user" })
 	@ApiParam({

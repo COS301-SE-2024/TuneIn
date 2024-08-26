@@ -48,9 +48,8 @@ export class RoomsController {
 		private readonly dtogen: DtoGenService,
 	) {}
 
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get("new")
+	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get newly created public rooms" })
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
@@ -58,12 +57,12 @@ export class RoomsController {
 		type: RoomDto,
 		isArray: true,
 	})
-	@ApiTags("rooms")
 	async getNewRooms(): Promise<RoomDto[]> {
 		console.log("getting new rooms");
 		return await this.roomsService.getNewRooms();
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID")
 	@ApiTags("rooms")
@@ -86,6 +85,7 @@ export class RoomsController {
 		return await this.roomsService.getRoomInfo(roomID);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Patch(":roomID")
 	@ApiTags("rooms")
@@ -109,6 +109,7 @@ export class RoomsController {
 		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Put(":roomID")
 	@ApiTags("rooms")
@@ -120,6 +121,7 @@ export class RoomsController {
 		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
 	}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete(":roomID")
 	@ApiTags("rooms")
@@ -132,7 +134,6 @@ export class RoomsController {
 		type: Boolean,
 	})
 	@ApiParam({ name: "roomID", required: true })
-	@ApiBearerAuth()
 	@ApiOperation({ summary: "Delete a room" })
 	async deleteRoom(
 		@Request() req: any,
@@ -207,8 +208,6 @@ export class RoomsController {
     no input
     response: array of UserDto
     */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/users")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -231,8 +230,6 @@ export class RoomsController {
     no input
     response: array of SongInfoDto
     */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get the queue of a room" })
@@ -261,6 +258,7 @@ export class RoomsController {
     no input
     response: (2xx for success, 4xx for error)
     */
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete(":roomID/songs")
 	@ApiTags("rooms")
@@ -308,7 +306,6 @@ export class RoomsController {
     no input
     response: SongInfoDto
     */
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
 	getCurrentSong(
@@ -385,7 +382,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -405,7 +402,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/queue")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room queue analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -425,7 +422,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/participation")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room participation analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -446,7 +443,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/interactions")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room interaction analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -467,7 +464,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/votes")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room voting analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -487,7 +484,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/songs")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room song analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -507,7 +504,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/analytics/contributors")
-	@ApiTags("rooms")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room contributor analytics" })
 	@ApiParam({ name: "roomID" })
 	@ApiOkResponse({
@@ -525,14 +522,10 @@ export class RoomsController {
 		return this.roomsService.getRoomContributorsAnalytics(roomID, userInfo.id);
 	}
 
-	// create an endpoint to get the keymetrics for a user's rooms
-	// make it a get request
-	// /rooms/analytics/keymetrics
-	// input: none`
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get("analytics/keymetrics")
-	@ApiTags("rooms")
+	@Get("analytics")
+	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get key metrics for user's rooms" })
 	@ApiOkResponse({
 		description:
@@ -580,6 +573,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("archive/playlist")
+	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get a user's archived songs" })
 	@ApiOkResponse({
 		description: "User's archived songs retrieved successfully",
@@ -588,7 +582,6 @@ export class RoomsController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
-	@ApiTags("rooms")
 	async getArchivedSongs(@Request() req: any): Promise<any> {
 		console.log("getting archived songs");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -599,6 +592,7 @@ export class RoomsController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete("archive/playlist/:playlistID")
+	@ApiTags("rooms")
 	@ApiOperation({ summary: "Delete a user's archived songs" })
 	@ApiParam({ name: "playlistID" })
 	@ApiOkResponse({
@@ -610,29 +604,11 @@ export class RoomsController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
-	@ApiTags("rooms")
 	async deleteArchivedSongs(
 		@Request() req: any,
 		@Param("playlistID") playlistID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
-	}
-
-	// define an endpoint for getting a user's current room
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get("current/room")
-	@ApiOperation({ summary: "Get a user's current room" })
-	@ApiOkResponse({
-		description: "User's current room retrieved successfully",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiTags("rooms")
-	async getCurrentRoom(@Request() req: any): Promise<any> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.getCurrentRoom(userInfo.id);
 	}
 }

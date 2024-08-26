@@ -14,12 +14,13 @@ import {
 	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+
 @Controller("auth")
+@ApiTags("auth")
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	@Post("login")
-	@ApiTags("auth")
 	@ApiOperation({ summary: "Authenticate a user using the Cognito JWT token" })
 	@ApiBody({
 		type: LoginBody,
@@ -66,7 +67,6 @@ export class AuthController {
 	}
 
 	@Post("register")
-	@ApiTags("auth")
 	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
 	@ApiBody({ type: RegisterBody, required: true, description: "User info" })
 	@ApiResponse({
@@ -92,9 +92,7 @@ export class AuthController {
 		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
-	//TODO: Add a POST method to refresh an expired JWT token
 	@Post("refresh")
-	@ApiTags("auth")
 	@ApiOperation({ summary: "Refresh an expired (or almost expired) JWT token" })
 	@ApiBody({
 		type: RefreshBody,

@@ -26,15 +26,14 @@ import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
 
 @Controller("search")
+@ApiTags("search")
 export class SearchController {
 	constructor(
 		private readonly searchService: SearchService,
 		private readonly auth: AuthService,
 	) {}
 
-	@UseGuards(JwtAuthGuard)
 	@Get()
-	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms and users" })
 	@ApiOkResponse({
 		description: "Search results as an array of mixed UserDto and RoomDto.",
@@ -75,9 +74,7 @@ export class SearchController {
 	}
 
 	/* ************************************************** */
-	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Search for rooms" })
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
@@ -123,7 +120,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("history")
-	@ApiTags("search")
 	@ApiOperation({
 		summary: "Get search history (including objects discovered from search)",
 	})
@@ -144,7 +140,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete("history")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Clear search history" })
 	@ApiOkResponse({ description: "Search history cleared" })
 	async clearSearchHistory(@Request() req: Request): Promise<void> {
@@ -155,7 +150,6 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("rooms/advanced")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Advanced search for rooms" })
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
@@ -286,7 +280,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("rooms/history")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched rooms" })
 	@ApiOkResponse({
 		description: "Recently searched rooms as an array of SearchHistoryDto.",
@@ -305,7 +298,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete("rooms/history")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Clear room search history" })
 	@ApiOkResponse({ description: "Room search history cleared" })
 	async clearRoomsHistory(@Request() req: Request): Promise<void> {
@@ -315,9 +307,7 @@ export class SearchController {
 
 	/* ************************************************** */
 
-	@UseGuards(JwtAuthGuard)
 	@Get("users")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Search for users" })
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
@@ -347,7 +337,6 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("users/advanced")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Advanced search for users" })
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
@@ -406,7 +395,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get("users/history")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Get recently searched users" })
 	@ApiOkResponse({
 		description: "Recently searched users as an array of SearchHistoryDto.",
@@ -425,7 +413,6 @@ export class SearchController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Delete("users/history")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Clear user search history" })
 	@ApiOkResponse({ description: "User search history cleared" })
 	async clearUsersHistory(@Request() req: Request): Promise<void> {
@@ -436,7 +423,6 @@ export class SearchController {
 	/* ************************************************** */
 	/*
 	@Get("genres")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Search for genres" })
 	@ApiOkResponse({
 		description: "Search results as an array of strings.",

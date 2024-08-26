@@ -8,11 +8,11 @@ import {
 } from "@nestjs/swagger";
 
 @Controller("genres")
+@ApiTags("genres")
 export class GenresController {
 	constructor(private readonly genresService: GenresService) {}
 
 	@Get()
-	@ApiTags("genres")
 	@ApiOkResponse({
 		description: "List of all genres",
 		type: [String],
