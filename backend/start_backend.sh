@@ -18,4 +18,4 @@ if [ ! -f "$MAIN_FILE" ]; then
 fi
 
 # Start the application with PM2
-pm2 start ecosystem.config.js
+pm2 startOrRestart ecosystem.config.js
