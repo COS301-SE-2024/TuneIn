@@ -58,7 +58,6 @@ export class RoomsController {
 		description: "Returns the new public rooms as an array of RoomDto.",
 		operationId: "getNewRooms",
 	})
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The new public rooms as an array of RoomDto.",
 		type: RoomDto,

@@ -385,7 +385,6 @@ export class UsersController {
 		description: "Get all of the users that follow the authenticated user.",
 		operationId: "getFollowers",
 	})
-	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's followers as an array of UserDto.",
 		type: UserDto,
