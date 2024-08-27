@@ -142,7 +142,7 @@ export class RoomsController {
 		summary: "Update room info",
 		operationId: "updateRoomInfo",
 	})
-	async updateRoomInfo(
+	async patchRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
@@ -174,7 +174,11 @@ export class RoomsController {
 		required: true,
 		description: "The updated room info",
 	})
-	async updateRoom(
+	@ApiOperation({
+		summary: "Update room info",
+		operationId: "putRoomInfo",
+	})
+	async putRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
@@ -223,12 +227,6 @@ export class RoomsController {
 		return await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
-	/*
-    POST /rooms/{roomID}/join
-    adds current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -268,12 +266,6 @@ export class RoomsController {
 		return await this.roomsService.joinRoom(roomID, userID.id);
 	}
 
-	/*
-    POST /rooms/{roomID}/leave
-    remove current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -313,12 +305,6 @@ export class RoomsController {
 		return await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
-	/*
-    GET /rooms/{roomID}/users
-    returns people currently (and previously in room)
-    no input
-    response: array of UserDto
-    */
 	@Get(":roomID/users")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -347,12 +333,6 @@ export class RoomsController {
 		return await this.roomsService.getRoomUsers(roomID);
 	}
 
-	/*
-    GET /rooms/{roomID}/songs
-    returns the queue
-    no input
-    response: array of SongInfoDto
-    */
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
 	@ApiOperation({
@@ -388,12 +368,6 @@ export class RoomsController {
 		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
 	}
 
-	/*
-    DELETE /rooms/{roomID}/songs
-    clears the queue (except for current song, if playing)
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -412,6 +386,11 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
+	@ApiOperation({
+		summary: "Clear the queue of a room",
+		description: "Clears the queue of the room except for the current song.",
+		operationId: "clearRoomQueue",
+	})
 	clearRoomQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -419,12 +398,6 @@ export class RoomsController {
 		return this.roomsService.clearRoomQueue(roomID);
 	}
 
-	/*
-    POST /rooms/{roomID}/songs
-    add a song to queue
-    input: SongInfoDto
-    response: array of SongInfoDto (room queue)
-    */
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -467,12 +440,6 @@ export class RoomsController {
 		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
 	}
 
-	/*
-    GET /rooms/{roomID}/songs/current
-    returns the current playing song
-    no input
-    response: SongInfoDto
-    */
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
 	@ApiParam({
@@ -483,6 +450,11 @@ export class RoomsController {
 		format: "uuid",
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: "Get the current song of a room",
+		description: "Get the song currently playing in the room.",
+		operationId: "getCurrentSong",
 	})
 	getCurrentSong(
 		@Request() req: any,
