@@ -102,21 +102,29 @@ export const APIProvider: React.FC<{ children: ReactNode }> = ({
 };
 
 export const useAPI = () => {
-	const context = useContext(APIContext);
+	let context = useContext(APIContext);
 	if (!context) {
 		throw new Error("useAPI must be used within an APIProvider");
 	}
 
 	const fetchTokenAndUpdateContext = async () => {
 		const t = await auth.getToken();
+
+		// TypeScript won't shut up without this check
+		if (!context) {
+			throw new Error("useAPI must be used within an APIProvider");
+		}
+
 		if (context.tokenState.token !== t) {
 			context.tokenState.setToken(t);
-			// const updatedContext = createAPIGroup(t, context.tokenState.setToken);
-			// return updatedContext;
 		}
-		return context;
 	};
-	return fetchTokenAndUpdateContext().then(() =>
-		console.log("useAPI: token fetched and context updated"),
-	);
+	fetchTokenAndUpdateContext().then(() => console.log("Token refreshed"));
+
+	context = useContext(APIContext);
+	// TypeScript won't shut up without this check (part 2)
+	if (!context) {
+		throw new Error("useAPI must be used within an APIProvider");
+	}
+	return context;
 };
