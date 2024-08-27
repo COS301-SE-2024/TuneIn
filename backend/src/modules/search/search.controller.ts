@@ -14,9 +14,11 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiQuery,
+	ApiSecurity,
 	ApiTags,
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
@@ -118,7 +120,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("history")
 	@ApiOperation({
 		summary: "Get search history (including objects discovered from search)",
@@ -138,7 +145,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete("history")
 	@ApiOperation({ summary: "Clear search history" })
 	@ApiOkResponse({ description: "Search history cleared" })
@@ -278,7 +290,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("rooms/history")
 	@ApiOperation({ summary: "Get recently searched rooms" })
 	@ApiOkResponse({
@@ -296,7 +313,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete("rooms/history")
 	@ApiOperation({ summary: "Clear room search history" })
 	@ApiOkResponse({ description: "Room search history cleared" })
@@ -393,7 +415,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("users/history")
 	@ApiOperation({ summary: "Get recently searched users" })
 	@ApiOkResponse({
@@ -411,7 +438,12 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete("users/history")
 	@ApiOperation({ summary: "Clear user search history" })
 	@ApiOkResponse({ description: "User search history cleared" })

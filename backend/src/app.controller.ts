@@ -14,8 +14,10 @@ import {
 	ApiBearerAuth,
 	ApiBody,
 	ApiConsumes,
+	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
+	ApiSecurity,
 } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { S3Service } from "./s3/s3.service";
@@ -43,7 +45,12 @@ export class AppController {
 	curl -v -X POST http://localhost:3000/upload -F "file=@/Users/lesedikekana/Downloads/f.jpg"
 	*/
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post("upload")
 	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
 	@ApiConsumes("multipart/form-data")
@@ -63,10 +70,10 @@ export class AppController {
 		description: "The URL of the uploaded file",
 		type: String,
 	})
+	/*
 	@ApiBadRequestResponse({
 		description: "Bad request. The file is not a .png or .jpg file.",
 	})
-	/*
 	@ApiPayloadTooLargeResponse({
 		description: "The file is too large. It must be less than 5MB.",
 	})

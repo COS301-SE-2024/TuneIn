@@ -13,10 +13,12 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiHeader,
 	ApiNotFoundResponse,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
+	ApiSecurity,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -63,7 +65,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -86,7 +93,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Patch(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -110,7 +122,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Put(":roomID")
 	@ApiTags("rooms")
 	async updateRoom(
@@ -122,7 +139,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -153,7 +175,12 @@ export class RoomsController {
     response: (2xx for success, 4xx for error)
     */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/join")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -181,7 +208,12 @@ export class RoomsController {
     response: (2xx for success, 4xx for error)
     */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/leave")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -259,7 +291,12 @@ export class RoomsController {
     response: (2xx for success, 4xx for error)
     */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete(":roomID/songs")
 	@ApiTags("rooms")
 	clearRoomQueue(
@@ -276,7 +313,12 @@ export class RoomsController {
     response: array of SongInfoDto (room queue)
     */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/songs")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Add a song to the queue of a room" })
@@ -316,7 +358,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/chat/history")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get room's chat history" })
@@ -334,7 +381,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/bookmark")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Bookmark a room" })
@@ -357,7 +409,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/unbookmark")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Unbookmark a room" })
@@ -380,7 +437,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room analytics" })
@@ -400,7 +462,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/queue")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room queue analytics" })
@@ -420,7 +487,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/participation")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room participation analytics" })
@@ -441,7 +513,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/interactions")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room interaction analytics" })
@@ -462,7 +539,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/votes")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room voting analytics" })
@@ -482,7 +564,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/songs")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room song analytics" })
@@ -502,7 +589,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get(":roomID/analytics/contributors")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room contributor analytics" })
@@ -523,7 +615,12 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("analytics")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get key metrics for user's rooms" })
@@ -543,7 +640,12 @@ export class RoomsController {
 
 	// define an endpoint for room song archival
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Post(":roomID/archive/playlist")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Archive a room's songs" })
@@ -571,7 +673,12 @@ export class RoomsController {
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
 	}
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("archive/playlist")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get a user's archived songs" })
@@ -590,7 +697,12 @@ export class RoomsController {
 
 	// define an endpoint for deleting a user's archived songs based on playlist id
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Delete("archive/playlist/:playlistID")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Delete a user's archived songs" })

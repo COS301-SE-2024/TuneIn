@@ -14,8 +14,10 @@ import {
 } from "./spotifyauth.service";
 import {
 	ApiBearerAuth,
+	ApiHeader,
 	ApiOperation,
 	ApiResponse,
+	ApiSecurity,
 	ApiTags,
 } from "@nestjs/swagger";
 import * as PrismaTypes from "@prisma/client";
@@ -89,7 +91,12 @@ export class SpotifyAuthController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("tokens")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Get Spotify Auth Tokens" })
@@ -110,7 +117,12 @@ export class SpotifyAuthController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	@Get("refresh")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Manually Refresh Spotify Auth Token" })
