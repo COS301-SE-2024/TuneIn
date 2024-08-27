@@ -26,6 +26,11 @@ export class AuthController {
 		type: LoginBody,
 		required: true,
 		description: "Cognito JWT token",
+		examples: {
+			token: {
+				value: "(see https://jwt.io/)",
+			},
+		},
 	})
 	@ApiResponse({
 		status: 200,
@@ -69,6 +74,20 @@ export class AuthController {
 	@Post("register")
 	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
 	@ApiBody({ type: RegisterBody, required: true, description: "User info" })
+	@ApiBody({
+		type: RegisterBody,
+		required: true,
+		description: "User's Cognito information",
+		examples: {
+			register: {
+				value: {
+					username: "cognito-username",
+					email: "john@example.com",
+					userCognitoSub: "cognito-sub-id",
+				},
+			},
+		},
+	})
 	@ApiResponse({
 		status: 200,
 		description: "User successfully registered.",
@@ -98,6 +117,15 @@ export class AuthController {
 		type: RefreshBody,
 		required: true,
 		description: "The expired JWT token",
+		examples: {
+			register: {
+				value: {
+					username: "cognito-username",
+					email: "john@example.com",
+					userCognitoSub: "cognito-sub-id",
+				},
+			},
+		},
 	})
 	@ApiResponse({
 		status: 200,

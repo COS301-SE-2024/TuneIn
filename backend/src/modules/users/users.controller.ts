@@ -13,6 +13,7 @@ import { UsersService } from "./users.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiBody,
 	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
@@ -103,6 +104,11 @@ export class UsersController {
 	@ApiBadRequestResponse({
 		description: "Bad request. The request body may be malformed.",
 	})
+	@ApiBody({
+		type: UpdateUserDto,
+		required: true,
+		description: "The updated user profile info",
+	})
 	async putProfile(
 		@Request() req: any,
 		@Body() updateProfileDto: UpdateUserDto,
@@ -126,6 +132,11 @@ export class UsersController {
 	})
 	@ApiBadRequestResponse({
 		description: "Bad request. The request body may be malformed.",
+	})
+	@ApiBody({
+		type: UpdateUserDto,
+		required: true,
+		description: "The updated user profile info",
 	})
 	async patchProfile(
 		@Request() req: any,
@@ -187,6 +198,11 @@ export class UsersController {
 	@ApiOkResponse({
 		description: "The newly created room as a RoomDto.",
 		type: RoomDto,
+	})
+	@ApiBody({
+		type: CreateRoomDto,
+		required: true,
+		description: "The room to create",
 	})
 	async createRoom(
 		@Request() req: any,

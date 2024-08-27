@@ -13,6 +13,7 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiBody,
 	ApiHeader,
 	ApiNotFoundResponse,
 	ApiOkResponse,
@@ -125,6 +126,11 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
+	@ApiBody({
+		type: UpdateRoomDto,
+		required: true,
+		description: "The updated room info",
+	})
 	@ApiOperation({ summary: "Update room info" })
 	async updateRoomInfo(
 		@Request() req: any,
@@ -152,6 +158,11 @@ export class RoomsController {
 		format: "uuid",
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UpdateRoomDto,
+		required: true,
+		description: "The updated room info",
 	})
 	async updateRoom(
 		@Request() req: any,
