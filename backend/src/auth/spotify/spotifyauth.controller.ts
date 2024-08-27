@@ -16,6 +16,7 @@ import {
 	ApiBearerAuth,
 	ApiHeader,
 	ApiOperation,
+	ApiQuery,
 	ApiResponse,
 	ApiSecurity,
 	ApiTags,
@@ -36,6 +37,23 @@ export class SpotifyAuthController {
 	@Get("redirect")
 	@Redirect()
 	@ApiTags("auth")
+	@ApiQuery({
+		name: "code",
+		description:
+			"The authorization code returned by Spotify after user consent",
+		required: true,
+		type: String,
+		example: "NApCCg..BkWtQ",
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: "state",
+		description: "A unique state value to prevent CSRF attacks",
+		required: true,
+		type: String,
+		example: "34fFs29kd09",
+		allowEmptyValue: false,
+	})
 	@ApiOperation({ summary: "Spotify OAuth Redirect" })
 	async performRedirect(
 		@Request() req: Request,
@@ -59,6 +77,23 @@ export class SpotifyAuthController {
 	@Get("callback")
 	@ApiTags("auth")
 	@ApiOperation({ summary: "Callback for Spotify Auth" })
+	@ApiQuery({
+		name: "code",
+		description:
+			"The authorization code returned by Spotify after user consent",
+		required: true,
+		type: String,
+		example: "NApCCg..BkWtQ",
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: "state",
+		description: "A unique state value to prevent CSRF attacks",
+		required: true,
+		type: String,
+		example: "34fFs29kd09",
+		allowEmptyValue: false,
+	})
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",

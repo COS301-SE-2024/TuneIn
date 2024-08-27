@@ -46,13 +46,30 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A room name / username",
-		type: "string",
+		type: String,
+		example: {
+			room_name: {
+				value: "Chill Room",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator",
 		required: false,
 		description: "A room creator's profile name or username",
-		type: "string",
+		type: String,
+		examples: {
+			profile_name: {
+				value: "John Doe",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
 	})
 	async combinedSearch(
 		@Query("q") q: string,
@@ -86,13 +103,24 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A room name",
-		type: "string",
+		type: String,
+		example: "Chill Room",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator",
 		required: false,
 		description: "A room creator's profile name / username",
-		type: "string",
+		type: String,
+		examples: {
+			profile_name: {
+				value: "John Doe",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	async searchRooms(
 		@Query("q") q: string,
@@ -172,31 +200,41 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A room name",
-		type: "string",
+		type: String,
+		example: "Chill Room",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_username",
 		required: false,
 		description: "A room creator's username",
-		type: "string",
+		type: String,
+		example: "johndoe123",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_name",
 		required: false,
 		description: "A room creator's profile name",
-		type: "string",
+		type: String,
+		example: "John Doe",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "participant_count",
 		required: false,
 		description: "Minimum number of participants",
 		type: "number",
+		example: 5,
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "description",
 		required: false,
 		description: "A string to find in the room description",
-		type: "string",
+		type: String,
+		example: "chill",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "is_temp",
@@ -220,19 +258,19 @@ export class SearchController {
 		name: "start_date",
 		required: false,
 		description: "Only if scheduled, the start date",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "end_date",
 		required: false,
 		description: "Only if scheduled, the end date",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "lang",
 		required: false,
 		description: "The room language (as a ISO 639-1 code)",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "explicit",
@@ -250,7 +288,7 @@ export class SearchController {
 		name: "tags",
 		required: false,
 		description: "A comma separated list of tags to compare",
-		type: "string",
+		type: String,
 	})
 	async advancedSearchRooms(
 		@Query("q") q: string,
@@ -340,7 +378,16 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A username or profile name",
-		type: "string",
+		type: String,
+		examples: {
+			username: {
+				value: "johndoe123",
+			},
+			profile_name: {
+				value: "John Doe",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	async searchUsers(@Query("q") q: string): Promise<UserDto[]> {
 		const result = await this.searchService.searchUsers(q);
@@ -369,31 +416,48 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A username or profile name",
-		type: "string",
+		type: String,
+		examples: {
+			username: {
+				value: "johndoe123",
+			},
+			profile_name: {
+				value: "John Doe",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_username",
 		required: false,
 		description: "A user's username",
-		type: "string",
+		type: String,
+		example: "johndoe123",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_name",
 		required: false,
 		description: "A user's profile name",
-		type: "string",
+		type: String,
+		example: "John Doe",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "following",
 		required: false,
 		description: "Minimum number of following",
 		type: "number",
+		example: 10,
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "followers",
 		required: false,
 		description: "Minimum number of followers",
 		type: "number",
+		example: 10,
+		allowEmptyValue: false,
 	})
 	async advancedSearchUsers(
 		@Query("q") q: string,
@@ -465,7 +529,7 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A genre name",
-		type: "string",
+		type: String,
 	})
 	async searchGenres(@Query("q") q: string): Promise<string[]> {
 		return await this.searchService.searchGenres(q);
