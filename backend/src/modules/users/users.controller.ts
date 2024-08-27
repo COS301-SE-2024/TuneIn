@@ -381,15 +381,19 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/follow")
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	@Post(":username/follow")
 	@ApiOperation({ summary: "Follow the given user" })
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to follow.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully followed the user.",
@@ -401,24 +405,28 @@ export class UsersController {
 	})
 	async followUser(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, userID);
+		return await this.usersService.followUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/unfollow")
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	@Post(":username/unfollow")
 	@ApiOperation({ summary: "Unfollow the given user" })
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to unfollow.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully unfollowed the user.",
@@ -430,24 +438,28 @@ export class UsersController {
 	})
 	async unfollowUser(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, userID);
+		return await this.usersService.unfollowUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/befriend")
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	@Post(":username/befriend")
 	@ApiOperation({ summary: "Send a friend request to the given user" })
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user to send a friend request to.",
+		name: "username",
+		description: "The username of the user to send a friend request to.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully sent friend request.",
@@ -459,13 +471,13 @@ export class UsersController {
 	})
 	async befriendUser(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.befriendUser(userInfo.id, userID);
+		return await this.usersService.befriendUser(userInfo.id, username);
 	}
 
-	@Post(":userID/unfriend")
+	@Post(":username/unfriend")
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -475,8 +487,12 @@ export class UsersController {
 	})
 	@ApiOperation({ summary: "End friendship with the given user" })
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user to end friendship with.",
+		name: "username",
+		description: "The username of the user to end friendship with.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
@@ -488,13 +504,13 @@ export class UsersController {
 	})
 	async unfriendUser(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfriendUser(userInfo.id, userID);
+		return await this.usersService.unfriendUser(userInfo.id, username);
 	}
 
-	@Post(":userID/accept")
+	@Post(":username/accept")
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -504,8 +520,12 @@ export class UsersController {
 	})
 	@ApiOperation({ summary: "Accept a friend request from the given user" })
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user whose friend request to accept.",
+		name: "username",
+		description: "Our new friend. The username of the user to accept a friend request from.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully accepted friend request.",
@@ -517,13 +537,13 @@ export class UsersController {
 	})
 	async acceptFriendRequest(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.acceptFriendRequest(userInfo.id, userID);
+		return await this.usersService.acceptFriendRequest(userInfo.id, username);
 	}
 
-	@Post(":userID/reject")
+	@Post(":username/reject")
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -533,8 +553,12 @@ export class UsersController {
 	})
 	@ApiOperation({ summary: "Reject a friend request from the given user" })
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user whose friend request to reject.",
+		name: "username",
+		description: "The username of the user whose friend request we are rejecting.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully rejected friend request.",
@@ -546,9 +570,9 @@ export class UsersController {
 	})
 	async rejectFriendRequest(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.rejectFriendRequest(userInfo.id, userID);
+		return await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
 }
