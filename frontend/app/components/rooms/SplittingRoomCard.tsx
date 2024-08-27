@@ -14,12 +14,12 @@ import { Track } from "../../models/Track";
 import { colors } from "../../styles/colors";
 
 interface SplittingRoomCardProps {
-	queueData: Track[]; // Pass queue data as props
+	queueData: Track[];
 	currentTrackIndex: number;
 	rootParentName: string;
 	topGenre: string;
 	numberOfParticipants: number;
-	backgroundImageSource: any; // Adjust type based on your image import method
+	backgroundImageSource: any;
 }
 
 const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
@@ -33,16 +33,13 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 	const { height, width } = Dimensions.get("window");
 	const cardHeight = height * 0.8;
 	const cardWidth = width * 0.9;
-	const upperSectionHeight = cardHeight * 0.4; // 40% of card height
-	const lowerSectionHeight = cardHeight * 0.6; // 60% of card height
+	const upperSectionHeight = cardHeight * 0.4;
+	const lowerSectionHeight = cardHeight * 0.6;
 
-	// Initialize playlist using useState
 	const [playlist, setPlaylist] = useState<Track[]>([]);
 
-	// Memoize the queue data to prevent unnecessary re-renders
 	const memoizedQueue = useMemo(() => queueData, [queueData]);
 
-	// Update playlist when memoizedQueue changes
 	useEffect(() => {
 		if (memoizedQueue && memoizedQueue.length > 0) {
 			setPlaylist(memoizedQueue);
@@ -70,29 +67,6 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 					<Text style={styles.participants}>{numberOfParticipants}</Text>
 				</View>
 			</ImageBackground>
-			<ScrollView
-				style={[styles.lowerSection, { height: lowerSectionHeight }]}
-				contentContainerStyle={styles.scrollViewContent}
-			>
-				{playlist.length > 0 ? (
-					playlist.map((track, index) => (
-						<SongList
-							key={track.id || index}
-							songNumber={index + 1}
-							track={track}
-							showVoting={false}
-							isCurrent={index === currentTrackIndex}
-							index={index} // Pass the index prop
-						/>
-					))
-				) : (
-					<View style={styles.emptyQueueContainer}>
-						<Text style={styles.emptyQueueText}>
-							The queue is empty. Add some songs to get started!
-						</Text>
-					</View>
-				)}
-			</ScrollView>
 		</View>
 	);
 };
@@ -136,7 +110,7 @@ const styles = StyleSheet.create({
 	},
 	topGenre: {
 		fontSize: 20,
-		color: "#D3D3D3", // Light grey color for the top genre
+		color: "#D3D3D3",
 		textAlign: "center",
 	},
 	participants: {
