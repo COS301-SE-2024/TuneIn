@@ -14,6 +14,13 @@ declare const module: any;
 async function bootstrap() {
 	//const logger: MyLogger = new MyLogger();
 
+	/*
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        cors: true,
+        bodyParser: true,
+    });
+	*/
+
 	let app: NestExpressApplication;
 	// if files exist, use https, otherwise use http
 	if (
@@ -79,6 +86,16 @@ async function bootstrap() {
 		module.hot.accept();
 		module.hot.dispose(() => app.close());
 	}
+
+	// Rate Limiting
+	/*
+	app.use(
+		RateLimit({
+			windowMs: 15 * 60 * 1000, // 15 minutes
+			max: 100, // limit each IP to 100 requests per windowMs
+		}),
+	);
+	*/
 
 	app.use(
 		morgan("combined", {

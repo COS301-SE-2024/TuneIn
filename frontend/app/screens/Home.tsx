@@ -26,13 +26,17 @@ import FriendsGrid from "../components/FriendsGrid";
 import Miniplayer from "../components/home/miniplayer";
 import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
 import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";
 import TopNavBar from "../components/TopNavBar";
+import { useAPI } from "../APIContext";
+import { UserDto } from "../../api";
+import { RequiredError } from "../../api/base";
+
 interface UserData {
 	username: string;
 	// Add other properties if needed
@@ -47,6 +51,34 @@ const Home: React.FC = () => {
 	}
 
 	const { currentRoom } = playerContext;
+
+	// An example of a well-typed & well-defined way to interact with the API
+	/* ********************************************************************** */
+	const { users, authenticated } = useAPI();
+	const [currentUser, setCurrentUser] = useState<UserDto>();
+	if (authenticated && !currentUser) {
+		users
+			.usersControllerGetProfile()
+			.then((user: AxiosResponse<UserDto>) => {
+				console.log("User: " + user);
+				if (user.status === 401) {
+					//Unauthorized
+					//Auth header is either missing or invalid
+				} else if (user.status === 500) {
+					//Internal Server Error
+					//Something went wrong in the backend (unlikely lmao)
+				}
+				setCurrentUser(user.data);
+			})
+			.catch((error) => {
+				if (error instanceof RequiredError) {
+					// a required field is missing
+				} else {
+					// some other error
+				}
+			});
+	}
+	/* ********************************************************************** */
 
 	console.log("currentRoom: " + currentRoom);
 	const [scrollY] = useState(new Animated.Value(0));
