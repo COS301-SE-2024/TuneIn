@@ -618,21 +618,4 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
 	}
-
-	// define an endpoint for getting a user's current room
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get("current/room")
-	@ApiOperation({ summary: "Get a user's current room" })
-	@ApiOkResponse({
-		description: "User's current room retrieved successfully",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiTags("rooms")
-	async getCurrentRoom(@Request() req: any): Promise<any> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.getCurrentRoom(userInfo.id);
-	}
 }

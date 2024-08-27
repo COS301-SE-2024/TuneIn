@@ -1,6 +1,7 @@
 import React, { createContext, useState } from "react";
 import { Room } from "../app/models/Room";
 import { Track } from "../app/models/Track";
+import { UserDto } from "../api-client";
 
 interface PlayerContextType {
 	setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
@@ -17,6 +18,8 @@ interface PlayerContextType {
 	setArtistName: React.Dispatch<React.SetStateAction<string | null>>;
 	albumArt: string | null;
 	setAlbumArt: React.Dispatch<React.SetStateAction<string | null>>;
+	userData: UserDto | null;
+	setUserData: React.Dispatch<React.SetStateAction<UserDto | null>>;
 }
 
 console.log("hello player context!");
@@ -38,6 +41,7 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	const [trackName, setTrackName] = useState<string | null>(null);
 	const [artistName, setArtistName] = useState<string | null>(null);
 	const [albumArt, setAlbumArt] = useState<string | null>(null);
+	const [userData, setUserData] = useState<UserDto | null>(null);
 
 	return (
 		<Player.Provider
@@ -56,6 +60,8 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 				setArtistName,
 				albumArt,
 				setAlbumArt,
+				userData,
+				setUserData,
 			}}
 		>
 			{children}
