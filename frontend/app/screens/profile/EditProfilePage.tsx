@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	TextInput,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
@@ -455,44 +456,58 @@ const EditProfileScreen = () => {
 				{/* Name */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Name</Text>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						onPress={() => setNameDialogVisible(true)}
 						style={styles.editButton}
 						testID="name-button"
-					>
-						<Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text>
-					</TouchableOpacity>
+					> */}
+					{/* <Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text> */}
+					<TextInput
+						style={{ marginLeft: 42 }}
+						value={profileData.profile_name}
+						onChangeText={(newName: string) => {
+							handleSave(newName, "name");
+						}}
+					/>
+					{/* </TouchableOpacity>
 					<EditDialog
 						initialText={profileData.profile_name}
 						value="name"
 						visible={isNameDialogVisible}
 						onClose={() => setNameDialogVisible(false)}
 						onSave={handleSave}
-					/>
+					/> */}
 				</View>
 				{/* Username */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Username</Text>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						onPress={() => setUsernameDialogVisible(true)}
 						style={styles.editButton}
 						testID="username-button"
-					>
-						<Text style={{ marginLeft: 15 }}>@{profileData.username}</Text>
-					</TouchableOpacity>
-					<EditDialog
+					> */}
+					{/* <Text style={{ marginLeft: 15 }}>@{profileData.username}</Text> */}
+					<TextInput
+						style={{ marginLeft: 11 }}
+						value={`@${profileData.username.toLowerCase()}`}
+						onChangeText={(newName: string) => {
+							handleSave(newName, "username");
+						}}
+					/>
+					{/* </TouchableOpacity> */}
+					{/* <EditDialog
 						initialText={profileData.username}
 						maxLines={1}
 						value="username"
 						visible={isUsernameDialogVisible}
 						onClose={() => setUsernameDialogVisible(false)}
 						onSave={handleSave}
-					/>
+					/> */}
 				</View>
 				{/* Bio */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						onPress={() => setBioDialogVisible(true)}
 						style={styles.editButton}
 						testID="bio-button"
@@ -506,6 +521,13 @@ const EditProfileScreen = () => {
 						visible={isBioDialogVisible}
 						onClose={() => setBioDialogVisible(false)}
 						onSave={handleSave}
+					/> */}
+					<TextInput
+						style={{ marginLeft: 60 }}
+						value={profileData.bio}
+						onChangeText={(newName: string) => {
+							handleSave(newName, "bio");
+						}}
 					/>
 				</View>
 				{/* Social */}
@@ -518,13 +540,22 @@ const EditProfileScreen = () => {
 					profileData.links.data &&
 					profileData.links.data.map((link, index) => (
 						<View key={index} style={styles.listItem}>
-							<TouchableOpacity
+							{/* <TouchableOpacity
 								onPress={() => openEditDialog(index, link.links)}
 								style={styles.editButton}
 								testID="link-edit-button"
 							>
 								<Text>{link.links}</Text>
-							</TouchableOpacity>
+							</TouchableOpacity> */}
+
+							<TextInput
+								style={styles.editButton}
+								value={link.links}
+								onChangeText={(newLink) => {
+									handleLinkEdit(index, newLink);
+								}}
+							/>
+
 							<TouchableOpacity onPress={() => handleLinkDeletion(link.links)}>
 								<Ionicons
 									name="close"
