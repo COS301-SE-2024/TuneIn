@@ -53,7 +53,11 @@ export class RoomsController {
 
 	@Get("new")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get newly created public rooms" })
+	@ApiOperation({
+		summary: "Get newly created public rooms",
+		description: "Returns the new public rooms as an array of RoomDto.",
+		operationId: "getNewRooms",
+	})
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The new public rooms as an array of RoomDto.",
@@ -91,8 +95,11 @@ export class RoomsController {
 		description: "Room not found.",
 		type: RoomDto,
 	})
-	// generate summary
-	@ApiOperation({ summary: "Get room info" })
+	@ApiOperation({
+		summary: "Get room info",
+		description: "Returns the room info as a RoomDto.",
+		operationId: "getRoomInfo",
+	})
 	async getRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -131,7 +138,10 @@ export class RoomsController {
 		required: true,
 		description: "The updated room info",
 	})
-	@ApiOperation({ summary: "Update room info" })
+	@ApiOperation({
+		summary: "Update room info",
+		operationId: "updateRoomInfo",
+	})
 	async updateRoomInfo(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -198,7 +208,10 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
-	@ApiOperation({ summary: "Delete a room" })
+	@ApiOperation({
+		summary: "Delete a room",
+		operationId: "deleteRoom",
+	})
 	async deleteRoom(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -229,7 +242,11 @@ export class RoomsController {
 		description: "User joined room successfully.",
 		type: Boolean,
 	})
-	@ApiOperation({ summary: "Join a room" })
+	@ApiOperation({
+		summary: "Join a room",
+		description: "Adds the current user as a participant to the room.",
+		operationId: "joinRoom",
+	})
 	@ApiBadRequestResponse({
 		description: "User already in room.",
 		type: Boolean,
@@ -270,7 +287,11 @@ export class RoomsController {
 		description: "User left room successfully.",
 		type: Boolean,
 	})
-	@ApiOperation({ summary: "Leave a room" })
+	@ApiOperation({
+		summary: "Leave a room",
+		description: "Removes the current user as a participant to the room.",
+		operationId: "leaveRoom",
+	})
 	@ApiBadRequestResponse({
 		description: "User not in room.",
 		type: Boolean,
@@ -305,7 +326,11 @@ export class RoomsController {
 		type: UserDto,
 		isArray: true,
 	})
-	@ApiOperation({ summary: "Get users in a room" })
+	@ApiOperation({
+		summary: "Get users in a room",
+		description: "Returns the users in the room as an array of UserDto.",
+		operationId: "getRoomUsers",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get users for.",
@@ -330,7 +355,11 @@ export class RoomsController {
     */
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get the queue of a room" })
+	@ApiOperation({
+		summary: "Get the queue of a room",
+		description: "Returns the queue of the room as an array of SongInfoDto.",
+		operationId: "getRoomQueue",
+	})
 	@ApiOkResponse({
 		description: "The queue of the room as an array of SongInfoDto.",
 	})
@@ -405,7 +434,10 @@ export class RoomsController {
 	})
 	@Post(":roomID/songs")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Add a song to the queue of a room" })
+	@ApiOperation({
+		summary: "Add a song to the queue of a room",
+		operationId: "addSongToQueue",
+	})
 	@ApiOkResponse({
 		description: "The queue of the room as an array of SongInfoDto.",
 	})
@@ -468,7 +500,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/chat/history")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room's chat history" })
+	@ApiOperation({
+		summary: "Get the chat history of a room",
+		description:
+			"Returns the chat history of the room as an array of LiveChatMessageDto.",
+		operationId: "getLiveChatHistory",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get the chat history for.",
@@ -499,7 +536,11 @@ export class RoomsController {
 	})
 	@Post(":roomID/bookmark")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Bookmark a room" })
+	@ApiOperation({
+		summary: "Bookmark a room",
+		description: "Adds the room to the user's bookmarks.",
+		operationId: "bookmarkRoom",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to bookmark.",
@@ -535,7 +576,11 @@ export class RoomsController {
 	})
 	@Post(":roomID/unbookmark")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Unbookmark a room" })
+	@ApiOperation({
+		summary: "Unbookmark a room",
+		description: "Removes the room from the user's bookmarks.",
+		operationId: "unbookmarkRoom",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to unbookmark.",
@@ -571,7 +616,11 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room analytics" })
+	@ApiOperation({
+		summary: "Get room analytics",
+		description: "Returns the analytics of the room as a RoomAnalyticsDto.",
+		operationId: "getRoomAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get analytics for.",
@@ -604,7 +653,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/queue")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room queue analytics" })
+	@ApiOperation({
+		summary: "Get room queue analytics",
+		description:
+			"Returns the queue analytics of the room as a RoomAnalyticsQueueDto.",
+		operationId: "getRoomQueueAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get queue analytics for.",
@@ -637,7 +691,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/participation")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room participation analytics" })
+	@ApiOperation({
+		summary: "Get room participation analytics",
+		description:
+			"Returns the participation analytics of the room as a RoomAnalyticsParticipationDto.",
+		operationId: "getRoomParticipationAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get participation analytics for.",
@@ -671,7 +730,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/interactions")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room interaction analytics" })
+	@ApiOperation({
+		summary: "Get room interaction analytics",
+		description:
+			"Returns the interaction analytics of the room as a RoomAnalyticsInteractionsDto.",
+		operationId: "getRoomInteractionAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get interaction analytics for.",
@@ -705,7 +769,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/votes")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room voting analytics" })
+	@ApiOperation({
+		summary: "Get room voting analytics",
+		description:
+			"Returns the voting analytics of the room as a RoomAnalyticsVotesDto.",
+		operationId: "getRoomVotesAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get voting analytics for.",
@@ -738,7 +807,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/songs")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room song analytics" })
+	@ApiOperation({
+		summary: "Get room song analytics",
+		description:
+			"Returns the song analytics of the room as a RoomAnalyticsSongsDto.",
+		operationId: "getRoomSongsAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get song analytics for.",
@@ -771,7 +845,12 @@ export class RoomsController {
 	})
 	@Get(":roomID/analytics/contributors")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get room contributor analytics" })
+	@ApiOperation({
+		summary: "Get room contributor analytics",
+		description:
+			"Returns the contributor analytics of the room as a RoomAnalyticsContributorsDto.",
+		operationId: "getRoomContributorsAnalytics",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get contributor analytics for.",
@@ -805,7 +884,12 @@ export class RoomsController {
 	})
 	@Get("analytics")
 	@ApiTags("room analytics")
-	@ApiOperation({ summary: "Get key metrics for user's rooms" })
+	@ApiOperation({
+		summary: "Get key metrics for user's rooms",
+		description:
+			"Returns the key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+		operationId: "getKeyMetrics",
+	})
 	@ApiOkResponse({
 		description:
 			"The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
