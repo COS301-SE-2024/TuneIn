@@ -363,8 +363,10 @@ export class DbUtilsService {
 		return true;
 	}
 
-	async getFriendRequests(userID: string): Promise<Prisma.friends[] | null> {
-		const friendRequests: Prisma.friends[] | null =
+	async getFriendRequests(
+		userID: string,
+	): Promise<PrismaTypes.friends[] | null> {
+		const friendRequests: PrismaTypes.friends[] | null =
 			await this.prisma.friends.findMany({
 				where: {
 					friend2: userID,
@@ -378,8 +380,10 @@ export class DbUtilsService {
 		return friendRequests;
 	}
 
-	async getPendingRequests(userID: string): Promise<Prisma.friends[] | null> {
-		const pendingRequests: Prisma.friends[] | null =
+	async getPendingRequests(
+		userID: string,
+	): Promise<PrismaTypes.friends[] | null> {
+		const pendingRequests: PrismaTypes.friends[] | null =
 			await this.prisma.friends.findMany({
 				where: {
 					friend1: userID,
@@ -393,12 +397,13 @@ export class DbUtilsService {
 	}
 
 	// get users who aren't friends with the user, but are mutual followers
-	async getPotentialFriends(userID: string): Promise<Prisma.users[] | null> {
-		const follows: Prisma.follows[] | null = await this.prisma.follows.findMany(
-			{
+	async getPotentialFriends(
+		userID: string,
+	): Promise<PrismaTypes.users[] | null> {
+		const follows: PrismaTypes.follows[] | null =
+			await this.prisma.follows.findMany({
 				where: { OR: [{ follower: userID }, { followee: userID }] },
-			},
-		);
+			});
 
 		if (!follows || follows === null) {
 			return null;
@@ -432,15 +437,16 @@ export class DbUtilsService {
 		);
 
 		// potential friends are users who are mutual followers but not friends
-		const potentialFriends: Prisma.users[] = [];
+		const potentialFriends: PrismaTypes.users[] = [];
 		for (let i = 0; i < mutualFollowers.length; i++) {
 			const id = mutualFollowers[i];
 			console.log("ID: ", id);
 			if (!(await this.isFriendsOrPending(userID, id))) {
 				console.log("Not friends nor pending with: ", id);
-				const user: Prisma.users | null = await this.prisma.users.findUnique({
-					where: { user_id: id },
-				});
+				const user: PrismaTypes.users | null =
+					await this.prisma.users.findUnique({
+						where: { user_id: id },
+					});
 				if (user && user !== null) {
 					potentialFriends.push(user);
 				}
