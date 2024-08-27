@@ -117,36 +117,38 @@ export class UsersService {
 	follower: the person who does the following
 	followee (leader): the person being followed
 	*/
-	async followUser(
-		userId: string,
-		accountFollowedId: string,
-	): Promise<boolean> {
-		if (userId === accountFollowedId) {
+	async followUser(selfID: string, usernameToFollow: string): Promise<boolean> {
+		if (!(await this.dbUtils.userExists(selfID))) {
+			throw new Error("User with id: (" + selfID + ") does not exist");
+		}
+
+		const followee = await this.prisma.users.findFirst({
+			where: { username: usernameToFollow },
+		});
+		if (!followee) {
+			throw new Error("User (@" + usernameToFollow + ") does not exist");
+		}
+
+		if (selfID === followee.user_id) {
 			throw new Error("You cannot follow yourself");
 		}
 
-		if (!(await this.dbUtils.userExists(accountFollowedId))) {
-			throw new Error("User (" + accountFollowedId + ") does not exist");
-		}
-
-		if (!(await this.dbUtils.userExists(userId))) {
-			throw new Error("User (" + userId + ") does not exist");
-		}
-
-		if (await this.dbUtils.isFollowing(userId, accountFollowedId)) {
+		if (await this.dbUtils.isFollowing(selfID, followee.user_id)) {
 			return true;
 		}
 
 		try {
 			await this.prisma.follows.create({
 				data: {
-					follower: userId,
-					followee: accountFollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			return true;
 		} catch (e) {
-			throw new Error("Failed to follow user (" + accountFollowedId + ")");
+			throw new Error(
+				"Failed to follow user with id: (" + followee.user_id + ")",
+			);
 		}
 	}
 
@@ -155,22 +157,25 @@ export class UsersService {
 	followee (leader): the person being followed
 	*/
 	async unfollowUser(
-		userId: string,
-		accountUnfollowedId: string,
+		selfID: string,
+		usernameToUnfollow: string,
 	): Promise<boolean> {
-		if (userId === accountUnfollowedId) {
+		if (!(await this.dbUtils.userExists(selfID))) {
+			throw new Error("User with id: (" + selfID + ") does not exist");
+		}
+
+		const followee = await this.prisma.users.findFirst({
+			where: { username: usernameToUnfollow },
+		});
+		if (!followee) {
+			throw new Error("User (@" + usernameToUnfollow + ") does not exist");
+		}
+
+		if (selfID === followee.user_id) {
 			throw new Error("You cannot unfollow yourself");
 		}
 
-		if (!(await this.dbUtils.userExists(accountUnfollowedId))) {
-			throw new Error("User (" + accountUnfollowedId + ") does not exist");
-		}
-
-		if (!(await this.dbUtils.userExists(userId))) {
-			throw new Error("User (" + userId + ") does not exist");
-		}
-
-		if (!(await this.dbUtils.isFollowing(userId, accountUnfollowedId))) {
+		if (!(await this.dbUtils.isFollowing(selfID, followee.user_id))) {
 			return true;
 		}
 
@@ -178,8 +183,8 @@ export class UsersService {
 			//find the follow relationship and delete it
 			const follow = await this.prisma.follows.findFirst({
 				where: {
-					follower: userId,
-					followee: accountUnfollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			if (!follow) {
@@ -189,13 +194,15 @@ export class UsersService {
 			await this.prisma.follows.delete({
 				where: {
 					follows_id: follow.follows_id,
-					follower: userId,
-					followee: accountUnfollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			return true;
 		} catch (e) {
-			throw new Error("Failed to unfollow user (" + accountUnfollowedId + ")");
+			throw new Error(
+				"Failed to unfollow user with id: (" + followee.user_id + ")",
+			);
 		}
 	}
 
@@ -483,33 +490,39 @@ export class UsersService {
 
 	async befriendUser(
 		userID: string,
-		newPotentialFriendID: string,
+		newPotentialFriendUsername: string,
 	): Promise<boolean> {
 		//add friend request for the user
 		console.log(
-			"user (" + userID + ") wants to befriend (" + newPotentialFriendID + ")",
+			"user (" +
+				userID +
+				") wants to befriend (@" +
+				newPotentialFriendUsername +
+				")",
 		);
 
-		// check if user is trying to friend themselves
-		if (userID === newPotentialFriendID) {
-			throw new HttpException(
-				"You cannot friend yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-
-		// check if users exist
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		// check if friend exists as a user
-		if (!(await this.dbUtils.userExists(newPotentialFriendID))) {
+
+		const potentialFriend = await this.prisma.users.findFirst({
+			where: { username: newPotentialFriendUsername },
+		});
+		if (!potentialFriend) {
+			throw new Error(
+				"User (@" + newPotentialFriendUsername + ") does not exist",
+			);
+		}
+
+		// check if user is trying to friend themselves
+		if (userID === potentialFriend.user_id) {
 			throw new HttpException(
-				"User (" + newPotentialFriendID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot friend yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -517,76 +530,91 @@ export class UsersService {
 		if (
 			(await this.dbUtils.isFriendsOrPending(
 				userID,
-				newPotentialFriendID,
+				potentialFriend.user_id,
 				true,
 			)) ||
 			(await this.dbUtils.isFriendsOrPending(
 				userID,
-				newPotentialFriendID,
+				potentialFriend.user_id,
 				false,
 			))
 		) {
 			throw new HttpException(
 				"User (" +
 					userID +
-					") is already friends with (" +
-					newPotentialFriendID +
+					") is already friends with (@" +
+					newPotentialFriendUsername +
 					") or has a pending request",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
 
-		if (!(await this.dbUtils.isMutualFollow(userID, newPotentialFriendID))) {
+		if (!(await this.dbUtils.isMutualFollow(userID, potentialFriend.user_id))) {
 			throw new HttpException(
-				"User (" + userID + ") cannot befriend (" + newPotentialFriendID + ")",
+				"User (" +
+					userID +
+					") cannot befriend (@" +
+					newPotentialFriendUsername +
+					"). Users must follow each other first.",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
 		const result = await this.prisma.friends.create({
 			data: {
 				friend1: userID,
-				friend2: newPotentialFriendID,
+				friend2: potentialFriend.user_id,
 			},
 		});
 
 		if (!result || result === null) {
-			throw new Error("Failed to befriend user (" + newPotentialFriendID + ")");
+			throw new Error(
+				"Failed to befriend user (@" +
+					newPotentialFriendUsername +
+					"). Database error.",
+			);
 		}
 		return true;
 	}
 
-	async unfriendUser(userID: string, friendUserID: string): Promise<boolean> {
+	async unfriendUser(userID: string, friendUsername: string): Promise<boolean> {
 		//remove friend from the user's friend list
 		console.log(
-			"user (" + userID + ") is no longer friends with (" + friendUserID + ")",
+			"user (" +
+				userID +
+				") is no longer friends with (@" +
+				friendUsername +
+				")",
 		);
 
-		// check if user is trying to unfriend themselves
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot unfriend yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-
-		//check if the user exists
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
+			throw new Error("User (@" + friendUsername + ") does not exist");
+		}
+
+		// check if user is trying to unfriend themselves
+		if (userID === friend.user_id) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot unfriend yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
 		//check if they are friends
-		if (!(await this.dbUtils.isFriendsOrPending(userID, friendUserID, false))) {
+		if (
+			!(await this.dbUtils.isFriendsOrPending(userID, friend.user_id, true))
+		) {
 			throw new HttpException(
-				"User (" + userID + ") is not friends with (" + friendUserID + ")",
+				"User (" + userID + ") is not friends with (" + friend.user_id + ")",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
@@ -595,14 +623,16 @@ export class UsersService {
 		const result = await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
-					{ friend1: userID, friend2: friendUserID },
-					{ friend1: friendUserID, friend2: userID },
+					{ friend1: userID, friend2: friend.user_id },
+					{ friend1: friend.user_id, friend2: userID },
 				],
 			},
 		});
 
 		if (!result || result === null) {
-			throw new Error("Failed to unfriend user (" + friendUserID + ")");
+			throw new Error(
+				"Failed to unfriend user (@ " + friendUsername + "). Database error.",
+			);
 		}
 
 		return true;
@@ -610,36 +640,39 @@ export class UsersService {
 
 	async acceptFriendRequest(
 		userID: string,
-		friendUserID: string,
+		friendUsername: string,
 	): Promise<boolean> {
 		//accept friend request
 		console.log(
-			"user (" + userID + ") accepted friend request from @" + friendUserID,
+			"user (" + userID + ") accepted friend request from @" + friendUsername,
 		);
 
-		// check if user is trying to accept themselves
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot accept yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-		// check if users exist
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
+			throw new Error("User (@" + friendUsername + ") does not exist");
+		}
+
+		// check if user is trying to accept themselves
+		if (userID === friend.user_id) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot accept yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
+
 		const result = await this.prisma.friends.updateMany({
 			where: {
-				friend1: friendUserID,
+				friend1: friend.user_id,
 				friend2: userID,
 				is_pending: true,
 			},
@@ -650,8 +683,8 @@ export class UsersService {
 		console.log("accepted friend request", result);
 		if (result.count === 0) {
 			throw new HttpException(
-				"User (" +
-					friendUserID +
+				"User (@" +
+					friendUsername +
 					") has not sent a friend request to user (" +
 					userID +
 					")",
@@ -663,42 +696,47 @@ export class UsersService {
 
 	async rejectFriendRequest(
 		userID: string,
-		friendUserID: string,
+		rejectedUsername: string,
 	): Promise<boolean> {
 		//reject friend request
 		console.log(
-			"user (" + userID + ") rejected friend request from @" + friendUserID,
+			"user (" + userID + ") rejected friend request from @" + rejectedUsername,
 		);
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot reject yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-		// check if users exist
+
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: rejectedUsername },
+		});
+		if (!friend) {
+			throw new Error("User (@" + rejectedUsername + ") does not exist");
+		}
+
+		// check if user is trying to accept themselves
+		if (userID === friend.user_id) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot reject yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
+
 		const rejectedRequest = await this.prisma.friends.deleteMany({
 			where: {
-				friend1: friendUserID,
+				friend1: friend.user_id,
 				friend2: userID,
 				is_pending: true,
 			},
 		});
 		if (rejectedRequest.count === 0) {
 			throw new HttpException(
-				"User (" +
-					friendUserID +
+				"User (@" +
+					rejectedUsername +
 					") has not sent a friend request to user (" +
 					userID +
 					")",

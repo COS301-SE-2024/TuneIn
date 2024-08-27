@@ -122,7 +122,7 @@ const ProfileScreen: React.FC = () => {
 		if (storedToken) {
 			if (following) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${profileData.userID}/unfollow`,
+					`${utils.API_BASE_URL}/users/${profileData.username}/unfollow`,
 					{},
 					{
 						headers: {
@@ -139,7 +139,7 @@ const ProfileScreen: React.FC = () => {
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${profileData.userID}/follow`,
+					`${utils.API_BASE_URL}/users/${profileData.username}/follow`,
 					{},
 					{
 						headers: {
