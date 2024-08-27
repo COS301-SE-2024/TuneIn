@@ -221,7 +221,10 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleUserDto(user_ids: string[]): Promise<UserDto[]> {
+	async generateMultipleUserDto(
+		user_ids: string[],
+		fully_qualify = false,
+	): Promise<UserDto[]> {
 		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: user_ids } },
 		});
@@ -241,7 +244,7 @@ export class DtoGenService {
 				const user: UserDto = await this.generateUserDto(u.user_id, false);
 				result.push(user);
 				*/
-				promises.push(this.generateUserDto(u.user_id, false));
+				promises.push(this.generateUserDto(u.user_id, fully_qualify));
 			}
 		}
 		const result: UserDto[] = await Promise.all(promises);

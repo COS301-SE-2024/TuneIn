@@ -50,7 +50,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom } = playerContext;
+	const { currentRoom, userData, setUserData } = playerContext;
 
 	// An example of a well-typed & well-defined way to interact with the API
 	/* ********************************************************************** */
@@ -84,7 +84,7 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [userData, setUserData] = useState<UserData | undefined>(undefined);
+	// const [userData, setUserData] = useState<UserData | undefined>(undefined);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -134,7 +134,7 @@ const Home: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				// console.log("Home Response Data: " + JSON.stringify(response));
+
 				return response.data;
 			}
 		} catch (error) {
@@ -225,8 +225,10 @@ const Home: React.FC = () => {
 				JSON.stringify(formattedMyRooms),
 			);
 
-			const userInfo = await fetchProfileInfo(storedToken);
-			setUserData(userInfo);
+			if (!userData) {
+				const userInfo = await fetchProfileInfo(storedToken);
+				setUserData(userInfo);
+			}
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);

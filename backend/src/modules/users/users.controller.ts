@@ -20,6 +20,7 @@ import {
 	ApiParam,
 	ApiSecurity,
 	ApiTags,
+	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
@@ -314,10 +315,10 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description:
-			"The user's current room as a RoomDto or {} if they are not in a room.",
+			"The user's current room as a RoomDto.",
 		type: RoomDto,
 	})
-	async getCurrentRoom(@Request() req: any): Promise<RoomDto | object> {
+	async getCurrentRoom(@Request() req: any): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getCurrentRoom(userInfo.id);
 	}
@@ -715,4 +716,67 @@ export class UsersController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(":userId/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@ApiParam({
+		name: "userId",
+		description: "The user id of user's current room to search for.",
+	})
+	@ApiOkResponse({
+		description: "User's current room retrieved successfully",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getCurrentRoomByUserId(@Param("userId") userId: string): Promise<any> {
+		return await this.usersService.getCurrentRoom(userId);
+	}
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
+
+	/*
+	### `/users/{username}/befriend`
+	#### POST: sends a friend request to user with given username
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/unfriend`
+	#### POST: ends friendship with user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/accept`
+	#### POST: accepts friend request from user
+	no input
+	response: code (2xx for success, 4xx for error)
+
+	### `/users/{username}/reject`
+	#### POST: accepts user's friend request
+	no input
+	response: code (2xx for success, 4xx for error)
+	*/
 }
