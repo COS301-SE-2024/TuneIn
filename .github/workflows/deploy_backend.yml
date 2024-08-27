@@ -1,0 +1,44 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout "${{ github.repository }}"
+      uses: actions/checkout@v3
+
+    - name: Install SSH Key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          # Load NVM manually
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+          # Set memory limit manually
+          export NODE_OPTIONS="--max-old-space-size=512"
+
+          cd TuneIn/
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          git fetch
+          git pull
+          cd backend
+          nvm use default
+          npm i
+          npm run build
+          pm2 startOrRestart ecosystem.config.js
+        EOF
+
+    - name: Health Check
+      run: |
+        curl --fail "http://tunein.co.za:3000/" || exit 1

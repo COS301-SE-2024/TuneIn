@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { SOCKET_EVENTS } from "../common/constants";
 import { ChatEventDto } from "./dto/chatevent.dto";
-import { ConnectedUsersService } from "./connecteduser/connecteduser.service";
+import { RoomUsersService } from "./roomusers/roomuser.service";
 import { DbUtilsService } from "../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../modules/dto-gen/dto-gen.service";
 import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
@@ -18,36 +18,11 @@ import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
+import { DmUsersService } from "./dmusers/dmusers.service";
+import { UserDto } from "../modules/users/dto/user.dto";
+import { DirectMessageDto } from "../modules/users/dto/dm.dto";
+import { UsersService } from "../modules/users/users.service";
 import { EmojiReactionDto } from "./dto/emojireaction.dto";
-
-/*
-export class PlaybackEventDto {
-	@ApiProperty()
-	@IsDateString()
-	date_created?: Date;
-
-	@ApiProperty()
-	@IsString()
-	userID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	roomID: string;
-
-	@ApiProperty()
-	@IsString()
-	songID: string | null;
-
-	@ApiProperty()
-	@IsString()
-	UTC_time: number;
-
-	@ApiProperty()
-	@IsString()
-	errorMessage?: string;
-}
-
-*/
 
 @WebSocketGateway({
 	namespace: "/live",
@@ -60,12 +35,14 @@ export class PlaybackEventDto {
 //@UseFilters(new WsExceptionFilter())
 export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private readonly connectedUsers: ConnectedUsersService,
+		private readonly roomUsers: RoomUsersService,
+		private readonly dmUsers: DmUsersService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
 		private readonly eventQueueService: EventQueueService,
 		private readonly liveService: LiveService,
+		private readonly userService: UsersService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -79,7 +56,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleDisconnect(client: Socket) {
 		this.handOverSocketServer(this.server);
 		console.log("Client (id: " + client.id + ") disconnected");
-		this.connectedUsers.removeConnectedUser(client.id);
+		if (this.roomUsers.getConnectedUser(client.id) !== null) {
+			this.roomUsers.leaveRoom(client.id);
+		}
+		this.roomUsers.removeConnectedUser(client.id);
+		this.dmUsers.disconnectChat(client.id);
+		this.dmUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
@@ -109,7 +91,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
-				await this.connectedUsers.addConnectedUser(client.id, payload.userID);
+				await this.roomUsers.addConnectedUser(client.id, payload.userID);
+				await this.dmUsers.addConnectedUser(client.id, payload.userID);
 				const response: ChatEventDto = {
 					userID: null,
 					date_created: new Date(),
@@ -118,7 +101,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -133,10 +116,27 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 	*/
+
+	/*
+	@SubscribeMessage(SOCKET_EVENTS.ERROR)
+	async handleError(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error as Error);
+		}
+	}
+	*/
+
+	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
 	async handleLiveMessage(
@@ -192,7 +192,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -238,121 +238,14 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				const messages: LiveChatMessageDto[] =
 					await this.roomService.getLiveChatHistoryDto(roomID);
-				this.server.emit(SOCKET_EVENTS.CHAT_HISTORY, messages);
-				console.log("Response emitted: " + SOCKET_EVENTS.CHAT_HISTORY);
+				this.server.emit(SOCKET_EVENTS.LIVE_CHAT_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
-
-	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
-	async handleDirectMessage(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
-			try {
-				//this.server.emit();
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
-	async handleGetDirectMessageHistory(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log(
-				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-			);
-			try {
-				console.log(p);
-				//this.server.emit();
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.TYPING)
-	async handleTyping(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.TYPING);
-			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: TYPING, { userId: user.id }
-				*/
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
-	async handleStopTyping(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			this.handOverSocketServer(this.server);
-			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
-			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				emit to room: STOP_TYPING, { userId: user.id }
-				*/
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
-
-	/*
-	@SubscribeMessage(SOCKET_EVENTS.ERROR)
-	async handleError(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		try {
-			//this.server.emit();
-		} catch (error) {
-			console.error(error);
-			this.handleThrownError(client, error);
-		}
-	}
-	*/
 
 	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
 	async handleJoinRoom(
@@ -370,7 +263,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				get room id
 				if room does not exist
 					return error
-				
+
 				add user to room data structure
 				add user to socket room
 				emit to room: USER_JOINED, { userId: user.id }
@@ -394,7 +287,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("Room does not exist");
 				}
 
-				await this.connectedUsers.setRoomId(client.id, roomID);
+				await this.roomUsers.setRoomId(client.id, roomID);
 				client.join(roomID);
 				const joinAnnouncement: ChatEventDto = {
 					userID: null,
@@ -406,12 +299,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
 
 				//send current media state
-				if (await this.connectedUsers.isPlaying(roomID)) {
-					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+				if (await this.roomUsers.isPlaying(roomID)) {
+					const songID: string | null = await this.roomUsers.getCurrentSong(
+						roomID,
+					);
 					if (songID) {
 						const startTime: Date | null =
-							await this.connectedUsers.getCurrentSongStartTime(roomID);
+							await this.roomUsers.getCurrentSongStartTime(roomID);
 						if (!startTime) {
 							throw new Error("No song start time found somehow?");
 						}
@@ -428,7 +322,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -462,7 +356,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					throw new Error("No userID provided");
 				}
 
-				const roomID = this.connectedUsers.getRoomId(client.id);
+				const roomID = this.roomUsers.getRoomId(client.id);
 				if (!roomID) {
 					throw new Error("User is not in a room");
 				}
@@ -471,7 +365,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				if ((await this.roomService.getRoomUserCount(roomID)) === 1) {
-					await this.connectedUsers.stopSong(roomID);
+					await this.roomUsers.stopSong(roomID);
 				}
 
 				const response: ChatEventDto = {
@@ -480,11 +374,11 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_LEFT_ROOM);
-				await this.connectedUsers.leaveRoom(client.id);
+				await this.roomUsers.leaveRoom(client.id);
 				client.leave(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -507,7 +401,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					console.error(e);
 					throw new Error("Invalid JSON received");
 				}
-				const roomID = this.connectedUsers.getRoomId(client.id);
+				const roomID = this.roomUsers.getRoomId(client.id);
 				if (!roomID) {
 					throw new Error("User is not in a room");
 				}
@@ -515,10 +409,347 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
+	/* **************************************************************************************** */
+
+	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
+	async handleDirectMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
+			try {
+				console.log(p);
+				let payload: DirectMessageDto;
+				try {
+					const j = JSON.parse(p);
+					payload = j as DirectMessageDto;
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				console.log("user: " + user);
+				console.log("chatID: " + chatID);
+				const finalMessage: DirectMessageDto =
+					await this.userService.sendMessage(user.userID, payload);
+				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
+	async handleGetDirectMessageHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log(
+				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+			);
+			try {
+				console.log(p);
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+				const messages: DirectMessageDto[] = await this.userService.getMessages(
+					payload.userID,
+					payload.participantID,
+				);
+				let chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					await this.dmUsers.setChatInfo(client.id, payload.participantID);
+					chatID = await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						throw new Error("Chat ID was not set for some reason");
+					}
+					client.join(chatID);
+				}
+				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.TYPING)
+	async handleTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.TYPING);
+			try {
+				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+					*/
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				const typingAnnouncement = {
+					userID: user.userID,
+				};
+				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
+	async handleStopTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
+			try {
+				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					payload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+					*/
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				const stopTypingAnnouncement = {
+					userID: user.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.ENTER_DM)
+	async handleEnterDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.ENTER_DM);
+			try {
+				console.log(p);
+				let enterPayload: { userID: string; participantID: string };
+				try {
+					const j = JSON.parse(p);
+					enterPayload = j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				await this.dmUsers.setChatInfo(client.id, enterPayload.participantID);
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("Chat ID was not set for some reason");
+				}
+				client.join(chatID);
+				const onlineAnnouncement = {
+					userID: enterPayload.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_ONLINE, onlineAnnouncement);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_ONLINE);
+				const messages: DirectMessageDto[] = await this.userService.getMessages(
+					enterPayload.userID,
+					enterPayload.participantID,
+				);
+				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.EXIT_DM)
+	async handleExitDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.EXIT_DM);
+			try {
+				console.log(p);
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				await this.dmUsers.disconnectChat(client.id);
+				const offlineAnnouncement = {
+					userID: user.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_OFFLINE, offlineAnnouncement);
+				console.log("Response emitted: " + SOCKET_EVENTS.USER_OFFLINE);
+				client.leave(chatID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.MODIFY_DM)
+	async handleModifyDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.MODIFY_DM);
+			try {
+				console.log(p);
+				let payload: {
+					userID: string;
+					participantID: string;
+					action: string;
+					message: DirectMessageDto;
+				};
+				try {
+					const j = JSON.parse(p);
+					payload = j as {
+						userID: string;
+						participantID: string;
+						action: string;
+						message: DirectMessageDto;
+					};
+				} catch (e) {
+					console.error(e);
+					throw new Error("Invalid JSON received");
+				}
+
+				const chatID: string | null = await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error("User is not in a DM chat");
+				}
+
+				const user: UserDto | null = await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error("User not found in DM chat");
+				}
+
+				if (payload.action === "edit") {
+					const edited: DirectMessageDto = await this.userService.editMessage(
+						user.userID,
+						payload.message,
+					);
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: "edit",
+						message: edited,
+					});
+				} else if (payload.action === "delete") {
+					let deletedMessage: DirectMessageDto;
+					try {
+						deletedMessage = await this.dtogen.generateDirectMessageDto(
+							payload.message.pID,
+						);
+					} catch (e) {
+						console.error(e);
+						throw new Error("Message does not exist");
+					}
+
+					const deleted = await this.userService.deleteMessage(
+						user.userID,
+						deletedMessage,
+					);
+					if (!deleted) {
+						throw new Error("Message could not be deleted");
+					}
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: "delete",
+						message: deletedMessage,
+					});
+				} else {
+					throw new Error("Invalid action");
+				}
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.PING)
 	async handlePing(@ConnectedSocket() client: Socket): Promise<Date> {
@@ -537,6 +768,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const t1 = Date.now();
 		client.emit("time_sync_response", { t0: data.t0, t1, t2: Date.now() });
 	}
+
+	/* **************************************************************************************** */
 
 	/*
 	//synchronised media playback
@@ -559,16 +792,17 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
 			try {
 				console.log(p);
-				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
 					throw new Error("User is not in a room");
 				}
 
 				//{check user permissions}
-				if (await this.connectedUsers.isPaused(roomID)) {
-					const startTime: Date = await this.connectedUsers.resumeSong(roomID);
-					const songID: string | null =
-						await this.connectedUsers.getCurrentSong(roomID);
+				if (await this.roomUsers.isPaused(roomID)) {
+					const startTime: Date = await this.roomUsers.resumeSong(roomID);
+					const songID: string | null = await this.roomUsers.getCurrentSong(
+						roomID,
+					);
 					if (songID === null) {
 						throw new Error("No song is queued somehow?");
 					}
@@ -581,13 +815,14 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						UTC_time: startTime.getTime(),
 					};
 					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
-				} else if (!(await this.connectedUsers.isPlaying(roomID))) {
-					const songID: string | null =
-						await this.connectedUsers.getQueueHead(roomID);
+				} else if (!(await this.roomUsers.isPlaying(roomID))) {
+					const songID: string | null = await this.roomUsers.getQueueHead(
+						roomID,
+					);
 					if (songID === null) {
 						throw new Error("No song is queued");
 					}
-					const startTime: Date = await this.connectedUsers.playSongNow(
+					const startTime: Date = await this.roomUsers.playSongNow(
 						roomID,
 						songID,
 					);
@@ -603,7 +838,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -619,15 +854,15 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 			console.log(p);
 
-			const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+			const roomID: string | null = this.roomUsers.getRoomId(client.id);
 			if (roomID === null) {
 				throw new Error("User is not in a room");
 			}
 
 			//{check user permissions}
 
-			if (await this.connectedUsers.isPlaying(roomID)) {
-				await this.connectedUsers.pauseSong(roomID);
+			if (await this.roomUsers.isPlaying(roomID)) {
+				await this.roomUsers.pauseSong(roomID);
 				const response: PlaybackEventDto = {
 					date_created: new Date(),
 					userID: null,
@@ -639,7 +874,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 
@@ -655,15 +890,15 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				//this.server.emit();
 				console.log(p);
 
-				const roomID: string | null = this.connectedUsers.getRoomId(client.id);
+				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
 					throw new Error("User is not in a room");
 				}
 
 				//{check user permissions}
 
-				if (await this.connectedUsers.isPlaying(roomID)) {
-					await this.connectedUsers.stopSong(roomID);
+				if (await this.roomUsers.isPlaying(roomID)) {
+					await this.roomUsers.stopSong(roomID);
 					const response: PlaybackEventDto = {
 						date_created: new Date(),
 						userID: null,
@@ -675,7 +910,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -693,7 +928,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -711,7 +946,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -729,7 +964,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -747,10 +982,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
+
+	/* **************************************************************************************** */
 
 	async validateChatEvent(payload: string): Promise<ChatEventDto> {
 		/*

@@ -32,8 +32,8 @@ import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
-import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
@@ -58,7 +58,13 @@ const RoomPage = () => {
 	} else if (room) {
 		roomData = JSON.parse(room);
 	}
-	const roomID = roomData.id;
+
+	let roomID: string;
+	if (roomData.id !== undefined) {
+		roomID = roomData.id;
+	} else {
+		roomID = roomData.roomID;
+	}
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -86,7 +92,7 @@ const RoomPage = () => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [messages, setMessages] = useState<LiveMessage[]>([]);
 	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
@@ -508,10 +514,14 @@ const RoomPage = () => {
 		const token = await auth.getToken();
 		console.log("Token fr fr:", token);
 		if (!joined) {
+			if (!token) {
+				throw new Error("No token found");
+			}
 			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token as string, roomID, false);
+			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages, setMessage);
+			live.joinRoom(roomID, setJoined, setMessages);
+			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
@@ -549,7 +559,8 @@ const RoomPage = () => {
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
-		live.sendMessage(message, setIsSending);
+		live.sendLiveChatMessage(message, setIsSending);
+		setMessage("");
 	};
 
 	return (
@@ -749,13 +760,13 @@ const RoomPage = () => {
 				{isChatExpanded && (
 					<>
 						<View style={styles.container}>
-							<ScrollView style={styles.scrollView}>
+							<ScrollView style={{ flex: 1, marginTop: 10 }}>
 								{messages.map((msg, index) => (
 									<MemoizedCommentWidget
 										key={index}
 										username={msg.message.sender.username}
 										message={msg.message.messageBody}
-										profilePictureUrl={msg.message.sender.profilePictureUrl}
+										profilePictureUrl={msg.message.sender.profile_picture_url}
 										me={msg.me}
 									/>
 								))}

@@ -8,12 +8,17 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
-import ChatItem from "../../components/ChatItem";
+import ChatItem, { ChatItemProps } from "../../components/ChatItem";
 import { Chat } from "../../models/chat";
 import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
+import { DirectMessageDto } from "../../models/DmDto";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import axios from "axios";
+import { UserDto } from "../../models/UserDto";
 
 const initialChats: Chat[] = [
 	{
@@ -33,13 +38,72 @@ const initialChats: Chat[] = [
 	// Add more dummy chats
 ];
 
+const createChats = (
+	messages: DirectMessageDto[],
+	selfID: string,
+): ChatItemProps[] => {
+	const chats: ChatItemProps[] = [];
+	for (const message of messages) {
+		chats.push({
+			message: message,
+			otherUser:
+				message.sender.userID === selfID ? message.recipient : message.sender,
+		});
+	}
+	return chats;
+};
+
 const ChatListScreen = () => {
+	const selfRef = React.useRef<UserDto>();
 	const [searchQuery, setSearchQuery] = useState("");
-	const [filteredChats, setFilteredChats] = useState<Chat[]>(initialChats);
+	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
+	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
+	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
+		// Fetch chats from backend
+		(async () => {
+			try {
+				const token = await auth.getToken();
+
+				const promises = [];
+				promises.push(
+					axios.get(`${utils.API_BASE_URL}/users/dms`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+				);
+				promises.push(
+					axios.get(`${utils.API_BASE_URL}/users`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+				);
+				promises.push(
+					axios.get(`${utils.API_BASE_URL}/users/friends`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+				);
+
+				const responses = await Promise.all(promises);
+				const chats = responses[0].data as DirectMessageDto[];
+				console.log(chats);
+				selfRef.current = responses[1].data as UserDto;
+				console.log(selfRef.current);
+				setFriends(responses[2].data as UserDto[]);
+				console.log(responses[2].data);
+
+				setFilteredChats(createChats(chats, selfRef.current.userID));
+				setUserMessages(chats);
+			} catch (error) {
+				console.error(error);
+				throw error;
+			}
+		})();
+	}, []);
+
+	useEffect(() => {
+		/*
 		if (searchQuery === "") {
 			setFilteredChats(initialChats);
 		} else {
@@ -47,6 +111,22 @@ const ChatListScreen = () => {
 				chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
 			);
 			setFilteredChats(filtered);
+		}
+			*/
+		if (searchQuery === "") {
+			if (selfRef.current !== undefined) {
+				setFilteredChats(createChats(userMessages, selfRef.current.userID));
+			}
+		} else {
+			if (selfRef.current !== undefined) {
+				const filtered = userMessages.filter((chat) => {
+					return chat.sender.profile_name
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase());
+				});
+
+				setFilteredChats(createChats(filtered, selfRef.current.userID));
+			}
 		}
 	}, [searchQuery]);
 
@@ -75,8 +155,10 @@ const ChatListScreen = () => {
 			</View>
 			<FlatList
 				data={filteredChats}
-				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => <ChatItem chat={item} />}
+				keyExtractor={(item) => item.message.pID}
+				renderItem={({ item }) => (
+					<ChatItem message={item.message} otherUser={item.otherUser} />
+				)}
 			/>
 			<TouchableOpacity style={styles.newChatButton} onPress={toggleModal}>
 				<Entypo name="message" size={24} color="white" />
@@ -88,7 +170,7 @@ const ChatListScreen = () => {
 				swipeDirection="down"
 				style={styles.modal}
 			>
-				<CreateChatScreen closeModal={toggleModal} />
+				<CreateChatScreen closeModal={toggleModal} friends={friends} />
 			</Modal>
 		</View>
 	);

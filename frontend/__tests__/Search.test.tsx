@@ -5,7 +5,6 @@ import { useNavigation } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
-import renderer from "react-test-renderer";
 import Fuse from "fuse.js";
 
 // Mocking modules

@@ -19,7 +19,7 @@ class AuthManagement {
 
 	constructor() {
 		console.log("AuthManagement constructor is calling fetchToken");
-		console.trace();
+		//console.trace();
 		this.fetchToken();
 	}
 
