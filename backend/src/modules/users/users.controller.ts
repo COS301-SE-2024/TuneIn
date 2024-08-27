@@ -78,7 +78,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get()
-	@ApiOperation({ summary: "Get current user's profile info" })
+	@ApiOperation({
+		summary: "Get current user's profile info",
+		description: "Get the profile info of the currently authenticated user.",
+		operationId: "getProfile",
+	})
 	@ApiOkResponse({
 		description: "Successfully returned user profile info.",
 		type: UserDto,
@@ -96,7 +100,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Put()
-	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOperation({
+		summary: "Update user's profile info",
+		description: "Update the profile info of the currently authenticated user.",
+		operationId: "putProfile",
+	})
 	@ApiOkResponse({
 		description: "Returns the updated user profile info.",
 		type: UserDto,
@@ -125,7 +133,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Patch()
-	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOperation({
+		summary: "Update user's profile info",
+		description: "Update the profile info of the currently authenticated user.",
+		operationId: "patchProfile",
+	})
 	@ApiOkResponse({
 		description: "Returns the updated user profile info.",
 		type: UserDto,
@@ -156,6 +168,9 @@ export class UsersController {
 	@Get("dms")
 	@ApiOperation({
 		summary: "Get the last DMs sent to or received from another user",
+		description:
+			"Get all of the last DMs either sent to or received from another user",
+		operationId: "getDMs",
 	})
 	@ApiOkResponse({
 		description: "The last DMs as an array of DirectMessageDto.",
@@ -174,7 +189,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("rooms")
-	@ApiOperation({ summary: "Get a user's rooms" })
+	@ApiOperation({
+		summary: "Get the user's rooms",
+		description: "Get all of the rooms that the user created.",
+		operationId: "getUserRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -194,7 +213,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Post("rooms")
-	@ApiOperation({ summary: "Create a new room" })
+	@ApiOperation({
+		summary: "Create a new room",
+		description: "Create a new room with the given information.",
+		operationId: "createRoom",
+	})
 	@ApiOkResponse({
 		description: "The newly created room as a RoomDto.",
 		type: RoomDto,
@@ -220,7 +243,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("rooms/recent")
-	@ApiOperation({ summary: "Get a user's recent rooms" })
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's recent rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -239,7 +266,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("rooms/foryou")
-	@ApiOperation({ summary: "Get a user's recommended rooms" })
+	@ApiOperation({
+		summary: "Get a user's recommended rooms",
+		description: "Get the rooms that are recommended for the user.",
+		operationId: "getRecommendedRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's recommended rooms as an array of RoomDto.",
 		type: RoomDto,
@@ -259,7 +290,9 @@ export class UsersController {
 	})
 	@Get("rooms/current")
 	@ApiOperation({
-		summary: "Get a user's current room (room that they are currently in)",
+		summary: "Get a user's current room",
+		description: "Get the room that the user is currently in.",
+		operationId: "getCurrentRoom",
 	})
 	@ApiOkResponse({
 		description:
@@ -279,7 +312,10 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("friends")
-	@ApiOperation({ summary: "Get a user's friends" })
+	@ApiOperation({
+		summary: "Get a user's friends",
+		operationId: "getUserFriends",
+	})
 	@ApiOkResponse({
 		description: "The user's friends as an array of UserDto.",
 		type: UserDto,
@@ -298,7 +334,10 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("friends/requests")
-	@ApiOperation({ summary: "Get a user's friend requests" })
+	@ApiOperation({
+		summary: "Get a user's friend requests",
+		operationId: "getFriendRequests",
+	})
 	@ApiOkResponse({
 		description: "The user's friend requests as an array of UserDto.",
 		type: UserDto,
@@ -317,7 +356,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("followers")
-	@ApiOperation({ summary: "Get a user's followers" })
+	@ApiOperation({
+		summary: "Get a user's followers",
+		description: "Get all of the users that follow the authenticated user.",
+		operationId: "getFollowers",
+	})
 	@ApiParam({ name: "none" })
 	@ApiOkResponse({
 		description: "The user's followers as an array of UserDto.",
@@ -337,7 +380,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("following")
-	@ApiOperation({ summary: "Get a user's following" })
+	@ApiOperation({
+		summary: "Get a user's following",
+		description: "Get all of the users that the authenticated user follows.",
+		operationId: "getFollowing",
+	})
 	@ApiOkResponse({
 		description: "The user's following as an array of UserDto.",
 		type: UserDto,
@@ -356,7 +403,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get("bookmarks")
-	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarks",
+	})
 	@ApiOkResponse({
 		description: "The user's bookmarks as an array of RoomDto.",
 		type: RoomDto,
@@ -375,7 +426,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Get(":username")
-	@ApiOperation({ summary: "Get user profile info by username" })
+	@ApiOperation({
+		summary: "Get user profile info by username",
+		description: "Get the profile info of the user with the given username.",
+		operationId: "getProfileByUsername",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to fetch profile info for.",
@@ -402,7 +457,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Post(":username/follow")
-	@ApiOperation({ summary: "Follow the given user" })
+	@ApiOperation({
+		summary: "Follow the given user",
+		description: "Follow the user with the given username.",
+		operationId: "followUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to follow.",
@@ -435,7 +494,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Post(":username/unfollow")
-	@ApiOperation({ summary: "Unfollow the given user" })
+	@ApiOperation({
+		summary: "Unfollow the given user",
+		description: "Unfollow the user with the given username.",
+		operationId: "unfollowUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to unfollow.",
@@ -468,7 +531,11 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	@Post(":username/befriend")
-	@ApiOperation({ summary: "Send a friend request to the given user" })
+	@ApiOperation({
+		summary: "Send a friend request to the given user",
+		description: "Send a friend request to the user with the given username.",
+		operationId: "befriendUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to send a friend request to.",
@@ -501,7 +568,11 @@ export class UsersController {
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
-	@ApiOperation({ summary: "End friendship with the given user" })
+	@ApiOperation({
+		summary: "End friendship with the given user",
+		description: "End friendship with the user with the given username.",
+		operationId: "unfriendUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to end friendship with.",
@@ -534,7 +605,12 @@ export class UsersController {
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
-	@ApiOperation({ summary: "Accept a friend request from the given user" })
+	@ApiOperation({
+		summary: "Accept a friend request from the given user",
+		description:
+			"Accept a friend request from the user with the given username.",
+		operationId: "acceptFriendRequest",
+	})
 	@ApiParam({
 		name: "username",
 		description:
@@ -568,7 +644,12 @@ export class UsersController {
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
-	@ApiOperation({ summary: "Reject a friend request from the given user" })
+	@ApiOperation({
+		summary: "Reject a friend request from the given user",
+		description:
+			"Reject a friend request from the user with the given username.",
+		operationId: "rejectFriendRequest",
+	})
 	@ApiParam({
 		name: "username",
 		description:

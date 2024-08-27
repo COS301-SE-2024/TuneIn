@@ -32,7 +32,7 @@ export class AppController {
 	) {}
 
 	@Get()
-	@ApiOperation({ summary: "Hello World!" })
+	@ApiOperation({ summary: "Hello World!", operationId: "getHello" })
 	@ApiOkResponse({
 		description: "Hello World!",
 		type: String,
@@ -52,7 +52,17 @@ export class AppController {
 		description: "Bearer token for authentication",
 	})
 	@Post("upload")
-	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
+	@ApiOperation({
+		summary: "Upload a file to our AWS S3 storage bucket",
+		description:
+			"This operation uploads a file to AWS S3 (the TuneIn bucket) and returns the URL of the uploaded file.",
+		operationId: "uploadFile",
+		tags: ["File Upload"],
+		externalDocs: {
+			description: "More about file uploads via HTTP POST requests",
+			url: "https://www.postman.com/postman/postman-answers/collection/t38ia1u/upload-a-file-via-post-request",
+		},
+	})
 	@ApiConsumes("multipart/form-data")
 	@ApiBody({
 		description: "A file to upload to our AWS S3 storage bucket",
