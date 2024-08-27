@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsBoolean, IsDateString, IsOptional } from "class-validator";
 
 export class CreateRoomDto {
@@ -10,47 +10,47 @@ export class CreateRoomDto {
 	@IsString()
 	description: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_temporary?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_private?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_scheduled?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDateString()
 	@IsOptional()
 	start_date?: Date;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDateString()
 	@IsOptional()
 	end_date?: Date;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	@IsOptional()
 	language?: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	has_explicit_content?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	has_nsfw_content?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	@IsOptional()
 	room_image?: string;

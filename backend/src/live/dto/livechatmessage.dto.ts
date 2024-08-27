@@ -1,5 +1,5 @@
 //LiveChatMessageDto
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsDateString } from "class-validator";
 import { UserDto } from "../../modules/users/dto/user.dto";
 
@@ -15,7 +15,7 @@ export class LiveChatMessageDto {
 	@IsString()
 	roomID: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDateString()
 	dateCreated?: Date;
 }

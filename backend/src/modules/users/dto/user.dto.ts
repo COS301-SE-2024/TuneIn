@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, ValidateNested, IsObject } from "class-validator";
 import { RoomDto } from "../../rooms/dto/room.dto";
 import { SongInfoDto } from "../../rooms/dto/songinfo.dto";
@@ -85,7 +85,7 @@ export class UserDto {
 		data: RoomDto[];
 	};
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsObject()
 	@ValidateNested()
 	friendship?: {

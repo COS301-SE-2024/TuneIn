@@ -1,11 +1,11 @@
 //PlaybackEventDto
 // a class that defines the structure of the PlaybackEventDto object
 //the object is used to define the structure of the data that is sent & received to the server when a media playback event is triggered (websocket event)
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsDateString } from "class-validator";
 
 export class PlaybackEventDto {
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDateString()
 	date_created?: Date;
 
@@ -25,7 +25,7 @@ export class PlaybackEventDto {
 	@IsString()
 	UTC_time: number | null;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	errorMessage?: string;
 }
