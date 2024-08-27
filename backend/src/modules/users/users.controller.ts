@@ -73,10 +73,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get()
 	@ApiOperation({
 		summary: "Get current user's profile info",
@@ -95,10 +97,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Put()
 	@ApiOperation({
 		summary: "Update user's profile info",
@@ -128,10 +132,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Patch()
 	@ApiOperation({
 		summary: "Update user's profile info",
@@ -161,10 +167,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("dms")
 	@ApiOperation({
 		summary: "Get the last DMs sent to or received from another user",
@@ -184,10 +192,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("rooms")
 	@ApiOperation({
 		summary: "Get the user's rooms",
@@ -208,10 +218,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Post("rooms")
 	@ApiOperation({
 		summary: "Create a new room",
@@ -238,10 +250,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("rooms/recent")
 	@ApiOperation({
 		summary: "Get a user's recent rooms",
@@ -261,10 +275,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("rooms/foryou")
 	@ApiOperation({
 		summary: "Get a user's recommended rooms",
@@ -284,10 +300,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("rooms/current")
 	@ApiOperation({
 		summary: "Get a user's current room",
@@ -307,10 +325,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("friends")
 	@ApiOperation({
 		summary: "Get a user's friends",
@@ -329,10 +349,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("friends/requests")
 	@ApiOperation({
 		summary: "Get a user's friend requests",
@@ -351,10 +373,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("followers")
 	@ApiOperation({
 		summary: "Get a user's followers",
@@ -375,10 +399,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("following")
 	@ApiOperation({
 		summary: "Get a user's following",
@@ -398,10 +424,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("bookmarks")
 	@ApiOperation({
 		summary: "Get the authorized user's bookmarks",
@@ -421,10 +449,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get(":username")
 	@ApiOperation({
 		summary: "Get user profile info by username",
@@ -452,10 +482,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Post(":username/follow")
 	@ApiOperation({
 		summary: "Follow the given user",
@@ -489,10 +521,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Post(":username/unfollow")
 	@ApiOperation({
 		summary: "Unfollow the given user",
@@ -526,10 +560,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Post(":username/befriend")
 	@ApiOperation({
 		summary: "Send a friend request to the given user",
@@ -564,10 +600,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@ApiOperation({
 		summary: "End friendship with the given user",
 		description: "End friendship with the user with the given username.",
@@ -601,10 +639,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@ApiOperation({
 		summary: "Accept a friend request from the given user",
 		description:
@@ -640,10 +680,12 @@ export class UsersController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@ApiOperation({
 		summary: "Reject a friend request from the given user",
 		description:

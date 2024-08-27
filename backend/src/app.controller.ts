@@ -47,10 +47,12 @@ export class AppController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Post("upload")
 	@ApiOperation({
 		summary: "Upload a file to our AWS S3 storage bucket",

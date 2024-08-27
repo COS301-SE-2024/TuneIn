@@ -137,10 +137,12 @@ export class SpotifyAuthController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("tokens")
 	@ApiTags("auth")
 	@ApiOperation({
@@ -167,10 +169,12 @@ export class SpotifyAuthController {
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
 	@ApiHeader({
 		name: "Authorization",
 		description: "Bearer token for authentication",
 	})
+	*/
 	@Get("refresh")
 	@ApiTags("auth")
 	@ApiOperation({
