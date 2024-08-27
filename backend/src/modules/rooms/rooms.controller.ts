@@ -915,36 +915,6 @@ export class RoomsController {
 	}
 
 	// define an endpoint for room song archival
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Post(":roomID/archive/playlist")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Archive a room's songs" })
-	@ApiParam({
-		name: "roomID",
-		description: "The ID of the room to archive songs for.",
-		required: true,
-		type: String,
-		format: "uuid",
-		example: "123e4567-e89b-12d3-a456-426614174000",
-		allowEmptyValue: false,
-	})
-	@ApiOkResponse({
-		description: "Room songs archived successfully",
-	})
-	@ApiNotFoundResponse({
-		description: "Room not found",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
 	async archiveRoomSongs(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -959,25 +929,6 @@ export class RoomsController {
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
 	}
 
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Get("archive/playlist")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get a user's archived songs" })
-	@ApiOkResponse({
-		description: "User's archived songs retrieved successfully",
-		isArray: true,
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
 	async getArchivedSongs(@Request() req: any): Promise<any> {
 		console.log("getting archived songs");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -985,28 +936,6 @@ export class RoomsController {
 	}
 
 	// define an endpoint for deleting a user's archived songs based on playlist id
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Delete("archive/playlist/:playlistID")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Delete a user's archived songs" })
-	@ApiParam({ name: "playlistID" })
-	@ApiOkResponse({
-		description: "User's archived songs deleted successfully",
-	})
-	@ApiNotFoundResponse({
-		description: "Playlist not found",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
 	async deleteArchivedSongs(
 		@Request() req: any,
 		@Param("playlistID") playlistID: string,
