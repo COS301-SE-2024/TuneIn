@@ -58,7 +58,7 @@ const Home: React.FC = () => {
 	const [currentUser, setCurrentUser] = useState<UserDto>();
 	if (authenticated && !currentUser) {
 		users
-			.usersControllerGetProfile()
+			.getProfile()
 			.then((user: AxiosResponse<UserDto>) => {
 				console.log("User: " + user);
 				if (user.status === 401) {

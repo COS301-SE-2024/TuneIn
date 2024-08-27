@@ -2,7 +2,7 @@ openapi: 3.0.0
 paths:
   /:
     get:
-      operationId: AppController_getHello
+      operationId: getHello
       summary: Hello World!
       parameters: []
       responses:
@@ -14,8 +14,17 @@ paths:
                 type: string
   /upload:
     post:
-      operationId: AppController_uploadFile
+      operationId: uploadFile
       summary: Upload a file to our AWS S3 storage bucket
+      description: >-
+        This operation uploads a file to AWS S3 (the TuneIn bucket) and returns
+        the URL of the uploaded file.
+      tags:
+        - File Upload
+      externalDocs:
+        description: More about file uploads via HTTP POST requests
+        url: >-
+          https://www.postman.com/postman/postman-answers/collection/t38ia1u/upload-a-file-via-post-request
       parameters: []
       requestBody:
         required: true
@@ -35,14 +44,14 @@ paths:
             application/json:
               schema:
                 type: string
-        '400':
-          description: Bad request. The file is not a .png or .jpg file.
       security:
+        - bearer: []
         - bearer: []
   /users:
     get:
-      operationId: UsersController_getProfile
+      operationId: getProfile
       summary: Get current user's profile info
+      description: Get the profile info of the currently authenticated user.
       parameters: []
       responses:
         '200':
@@ -55,12 +64,15 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
     put:
-      operationId: UsersController_putProfile
+      operationId: putProfile
       summary: Update user's profile info
+      description: Update the profile info of the currently authenticated user.
       parameters: []
       requestBody:
         required: true
+        description: The updated user profile info
         content:
           application/json:
             schema:
@@ -78,12 +90,15 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
     patch:
-      operationId: UsersController_patchProfile
+      operationId: patchProfile
       summary: Update user's profile info
+      description: Update the profile info of the currently authenticated user.
       parameters: []
       requestBody:
         required: true
+        description: The updated user profile info
         content:
           application/json:
             schema:
@@ -100,11 +115,13 @@ paths:
       tags:
         - users
       security:
+        - bearer: []
         - bearer: []
   /users/dms:
     get:
-      operationId: UsersController_getDMs
+      operationId: getDMs
       summary: Get the last DMs sent to or received from another user
+      description: Get all of the last DMs either sent to or received from another user
       parameters: []
       responses:
         '200':
@@ -117,10 +134,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/rooms:
     get:
-      operationId: UsersController_getUserRooms
-      summary: Get a user's rooms
+      operationId: getUserRooms
+      summary: Get the user's rooms
+      description: Get all of the rooms that the user created.
       parameters: []
       responses:
         '200':
@@ -135,12 +154,15 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
     post:
-      operationId: UsersController_createRoom
+      operationId: createRoom
       summary: Create a new room
+      description: Create a new room with the given information.
       parameters: []
       requestBody:
         required: true
+        description: The room to create
         content:
           application/json:
             schema:
@@ -156,10 +178,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/rooms/recent:
     get:
-      operationId: UsersController_getRecentRooms
+      operationId: getRecentRooms
       summary: Get a user's recent rooms
+      description: Get the user's most recently visited rooms.
       parameters: []
       responses:
         '200':
@@ -174,10 +198,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/rooms/foryou:
     get:
-      operationId: UsersController_getRecommendedRooms
+      operationId: getRecommendedRooms
       summary: Get a user's recommended rooms
+      description: Get the rooms that are recommended for the user.
       parameters: []
       responses:
         '200':
@@ -192,10 +218,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/rooms/current:
     get:
-      operationId: UsersController_getCurrentRoom
-      summary: Get a user's current room (room that they are currently in)
+      operationId: getCurrentRoom
+      summary: Get a user's current room
+      description: Get the room that the user is currently in.
       parameters: []
       responses:
         '200':
@@ -210,9 +238,10 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/friends:
     get:
-      operationId: UsersController_getUserFriends
+      operationId: getUserFriends
       summary: Get a user's friends
       parameters: []
       responses:
@@ -228,9 +257,10 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/friends/requests:
     get:
-      operationId: UsersController_getFriendRequests
+      operationId: getFriendRequests
       summary: Get a user's friend requests
       parameters: []
       responses:
@@ -246,10 +276,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/followers:
     get:
-      operationId: UsersController_getFollowers
+      operationId: getFollowers
       summary: Get a user's followers
+      description: Get all of the users that follow the authenticated user.
       parameters:
         - name: none
           required: true
@@ -268,10 +300,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/following:
     get:
-      operationId: UsersController_getFollowing
+      operationId: getFollowing
       summary: Get a user's following
+      description: Get all of the users that the authenticated user follows.
       parameters: []
       responses:
         '200':
@@ -286,10 +320,12 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/bookmarks:
     get:
-      operationId: UsersController_getBookmarks
+      operationId: getBookmarks
       summary: Get the authorized user's bookmarks
+      description: Get all of the rooms that the user has bookmarked.
       parameters: []
       responses:
         '200':
@@ -304,15 +340,19 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /users/{username}:
     get:
-      operationId: UsersController_getProfileByUsername
+      operationId: getProfileByUsername
       summary: Get user profile info by username
+      description: Get the profile info of the user with the given username.
       parameters:
         - name: username
           required: true
           in: path
           description: The username of the user to fetch profile info for.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -326,21 +366,21 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/follow:
+        - bearer: []
+  /users/{username}/follow:
     post:
-      operationId: UsersController_followUser
+      operationId: followUser
       summary: Follow the given user
+      description: Follow the user with the given username.
       parameters:
-        - name: userID
-          required: true
-          in: path
-          schema:
-            type: string
         - name: username
           required: true
           in: path
           description: The username of the user to follow.
-          schema: {}
+          example: johndoe
+          allowEmptyValue: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successfully followed the user.
@@ -358,21 +398,21 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/unfollow:
+        - bearer: []
+  /users/{username}/unfollow:
     post:
-      operationId: UsersController_unfollowUser
+      operationId: unfollowUser
       summary: Unfollow the given user
+      description: Unfollow the user with the given username.
       parameters:
-        - name: userID
-          required: true
-          in: path
-          schema:
-            type: string
         - name: username
           required: true
           in: path
           description: The username of the user to unfollow.
-          schema: {}
+          example: johndoe
+          allowEmptyValue: false
+          schema:
+            type: string
       responses:
         '200':
           description: Successfully unfollowed the user.
@@ -390,15 +430,19 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/befriend:
+        - bearer: []
+  /users/{username}/befriend:
     post:
-      operationId: UsersController_befriendUser
+      operationId: befriendUser
       summary: Send a friend request to the given user
+      description: Send a friend request to the user with the given username.
       parameters:
-        - name: userID
+        - name: username
           required: true
           in: path
-          description: The userID of the user to send a friend request to.
+          description: The username of the user to send a friend request to.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -418,15 +462,19 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/unfriend:
+        - bearer: []
+  /users/{username}/unfriend:
     post:
-      operationId: UsersController_unfriendUser
+      operationId: unfriendUser
       summary: End friendship with the given user
+      description: End friendship with the user with the given username.
       parameters:
-        - name: userID
+        - name: username
           required: true
           in: path
-          description: The userID of the user to end friendship with.
+          description: The username of the user to end friendship with.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -446,15 +494,21 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/accept:
+        - bearer: []
+  /users/{username}/accept:
     post:
-      operationId: UsersController_acceptFriendRequest
+      operationId: acceptFriendRequest
       summary: Accept a friend request from the given user
+      description: Accept a friend request from the user with the given username.
       parameters:
-        - name: userID
+        - name: username
           required: true
           in: path
-          description: The userID of the user whose friend request to accept.
+          description: >-
+            Our new friend. The username of the user to accept a friend request
+            from.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -474,15 +528,19 @@ paths:
         - users
       security:
         - bearer: []
-  /users/{userID}/reject:
+        - bearer: []
+  /users/{username}/reject:
     post:
-      operationId: UsersController_rejectFriendRequest
+      operationId: rejectFriendRequest
       summary: Reject a friend request from the given user
+      description: Reject a friend request from the user with the given username.
       parameters:
-        - name: userID
+        - name: username
           required: true
           in: path
-          description: The userID of the user whose friend request to reject.
+          description: The username of the user whose friend request we are rejecting.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -502,10 +560,15 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
   /auth/login:
     post:
-      operationId: AuthController_login
-      summary: Authenticate a user using the Cognito JWT token
+      operationId: login
+      summary: Authenticate a user using a Cognito JWT token
+      description: >-
+        This method will authenticate a user using a Cognito JWT token. The
+        token is decoded and verified, and a new JWT token is generated and
+        returned. See https://jwt.io/ for more information on JWT tokens.
       parameters: []
       requestBody:
         required: true
@@ -514,6 +577,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginBody'
+            examples:
+              token:
+                value: (see https://jwt.io/)
       responses:
         '200':
           description: User successfully logged in. JWT token returned.
@@ -527,16 +593,27 @@ paths:
         - auth
   /auth/register:
     post:
-      operationId: AuthController_register
+      operationId: register
       summary: Register a new user in the API using Cognito
+      description: >-
+        This method will register a new user in the API using Cognito. The
+        user's Cognito username, email, and Cognito sub ID are required. The
+        user will be created in the our database and will be able to
+        authenticate using the Cognito JWT token.
       parameters: []
       requestBody:
         required: true
-        description: User info
+        description: User's Cognito information
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterBody'
+            examples:
+              register:
+                value:
+                  username: cognito-username
+                  email: john@example.com
+                  userCognitoSub: cognito-sub-id
       responses:
         '200':
           description: User successfully registered.
@@ -550,8 +627,12 @@ paths:
         - auth
   /auth/refresh:
     post:
-      operationId: AuthController_refresh
+      operationId: refresh
       summary: Refresh an expired (or almost expired) JWT token
+      description: >-
+        This method will refresh an expired (or almost expired) JWT token. The
+        expired token is sent in the request body, and a new JWT token is
+        generated and returned. The new token will have a new expiration date.
       parameters: []
       requestBody:
         required: true
@@ -560,6 +641,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshBody'
+            examples:
+              register:
+                value:
+                  username: cognito-username
+                  email: john@example.com
+                  userCognitoSub: cognito-sub-id
       responses:
         '200':
           description: JWT token successfully refreshed.
@@ -575,17 +662,24 @@ paths:
         - auth
   /auth/spotify/redirect:
     get:
-      operationId: SpotifyAuthController_performRedirect
+      operationId: spotifyRedirect
       summary: Spotify OAuth Redirect
+      description: Redirects to the Expo app with the Spotify auth code
       parameters:
         - name: code
           required: true
           in: query
+          description: The authorization code returned by Spotify after user consent
+          example: NApCCg..BkWtQ
+          allowEmptyValue: false
           schema:
             type: string
         - name: state
           required: true
           in: query
+          description: A unique state value to prevent CSRF attacks
+          example: 34fFs29kd09
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -595,17 +689,26 @@ paths:
         - auth
   /auth/spotify/callback:
     get:
-      operationId: SpotifyAuthController_handleSpotifyAuthCallback
+      operationId: spotifyCallback
       summary: Callback for Spotify Auth
+      description: >-
+        Handles the Spotify auth callback, creates an account for the user (if
+        necessary), authenticates the user, and returns a JWT token
       parameters:
         - name: code
           required: true
           in: query
+          description: The authorization code returned by Spotify after user consent
+          example: NApCCg..BkWtQ
+          allowEmptyValue: false
           schema:
             type: string
         - name: state
           required: true
           in: query
+          description: A unique state value to prevent CSRF attacks
+          example: 34fFs29kd09
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -621,8 +724,9 @@ paths:
         - auth
   /auth/spotify/tokens:
     get:
-      operationId: SpotifyAuthController_handleSpotifyTokens
+      operationId: getSpotifyTokens
       summary: Get Spotify Auth Tokens
+      description: Returns the user's Spotify Auth Tokens
       parameters: []
       responses:
         '200':
@@ -635,12 +739,16 @@ paths:
           description: User not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - auth
   /auth/spotify/refresh:
     get:
-      operationId: SpotifyAuthController_handleSpotifyRefresh
-      summary: Manually Refresh Spotify Auth Token
+      operationId: refreshSpotifyTokens
+      summary: Manually Refresh Spotify Auth Tokens
+      description: >-
+        This method will manually refresh the user's Spotify Auth Tokens and
+        return the new tokens
       parameters: []
       responses:
         '200':
@@ -653,12 +761,14 @@ paths:
           description: User not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - auth
   /rooms/new:
     get:
-      operationId: RoomsController_getNewRooms
+      operationId: getNewRooms
       summary: Get newly created public rooms
+      description: Returns the new public rooms as an array of RoomDto.
       parameters:
         - name: none
           required: true
@@ -677,13 +787,18 @@ paths:
         - rooms
   /rooms/{roomID}:
     get:
-      operationId: RoomsController_getRoomInfo
+      operationId: getRoomInfo
       summary: Get room info
+      description: Returns the room info as a RoomDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get info for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -700,19 +815,25 @@ paths:
                 $ref: '#/components/schemas/RoomDto'
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
     patch:
-      operationId: RoomsController_updateRoomInfo
+      operationId: updateRoomInfo
       summary: Update room info
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to update.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       requestBody:
         required: true
+        description: The updated room info
         content:
           application/json:
             schema:
@@ -728,18 +849,25 @@ paths:
           description: Room not found.
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
     put:
-      operationId: RoomsController_updateRoom
+      operationId: putRoomInfo
+      summary: Update room info
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to update.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       requestBody:
         required: true
+        description: The updated room info
         content:
           application/json:
             schema:
@@ -749,16 +877,21 @@ paths:
           description: ''
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
     delete:
-      operationId: RoomsController_deleteRoom
+      operationId: deleteRoom
       summary: Delete a room
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to delete.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -775,17 +908,23 @@ paths:
                 type: boolean
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/join:
     post:
-      operationId: RoomsController_joinRoom
+      operationId: joinRoom
       summary: Join a room
+      description: Adds the current user as a participant to the room.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to join.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -802,17 +941,23 @@ paths:
                 type: boolean
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/leave:
     post:
-      operationId: RoomsController_leaveRoom
+      operationId: leaveRoom
       summary: Leave a room
+      description: Removes the current user as a participant to the room.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to leave.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -829,17 +974,23 @@ paths:
                 type: boolean
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/users:
     get:
-      operationId: RoomsController_getRoomUsers
+      operationId: getRoomUsers
       summary: Get users in a room
+      description: Returns the users in the room as an array of UserDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get users for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -854,13 +1005,18 @@ paths:
         - rooms
   /rooms/{roomID}/songs:
     get:
-      operationId: RoomsController_getRoomQueue
+      operationId: getRoomQueue
       summary: Get the queue of a room
+      description: Returns the queue of the room as an array of SongInfoDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get the queue for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -872,28 +1028,39 @@ paths:
       tags:
         - rooms
     delete:
-      operationId: RoomsController_clearRoomQueue
+      operationId: clearRoomQueue
+      summary: Clear the queue of a room
+      description: Clears the queue of the room except for the current song.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to clear the queue for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
           description: ''
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
     post:
-      operationId: RoomsController_addSongToQueue
+      operationId: addSongToQueue
       summary: Add a song to the queue of a room
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to add the song to.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       requestBody:
         required: true
@@ -910,16 +1077,23 @@ paths:
           description: Room not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/songs/current:
     get:
-      operationId: RoomsController_getCurrentSong
+      operationId: getCurrentSong
+      summary: Get the current song of a room
+      description: Get the song currently playing in the room.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get the current song for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -928,13 +1102,18 @@ paths:
         - rooms
   /rooms/{roomID}/chat/history:
     get:
-      operationId: RoomsController_getLiveChatHistory
-      summary: Get room's chat history
+      operationId: getLiveChatHistory
+      summary: Get the chat history of a room
+      description: Returns the chat history of the room as an array of LiveChatMessageDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get the chat history for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -947,17 +1126,23 @@ paths:
                   $ref: '#/components/schemas/LiveChatMessageDto'
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/bookmark:
     post:
-      operationId: RoomsController_bookmarkRoom
+      operationId: bookmarkRoom
       summary: Bookmark a room
+      description: Adds the room to the user's bookmarks.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to bookmark.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -968,17 +1153,23 @@ paths:
           description: Room not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/unbookmark:
     post:
-      operationId: RoomsController_unbookmarkRoom
+      operationId: unbookmarkRoom
       summary: Unbookmark a room
+      description: Removes the room from the user's bookmarks.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to unbookmark.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -989,17 +1180,23 @@ paths:
           description: Room not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/analytics:
     get:
-      operationId: RoomsController_getRoomAnalytics
+      operationId: getRoomAnalytics
       summary: Get room analytics
+      description: Returns the analytics of the room as a RoomAnalyticsDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1008,17 +1205,23 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/queue:
     get:
-      operationId: RoomsController_getRoomQueueAnalytics
+      operationId: getRoomQueueAnalytics
       summary: Get room queue analytics
+      description: Returns the queue analytics of the room as a RoomAnalyticsQueueDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get queue analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1027,17 +1230,25 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/participation:
     get:
-      operationId: RoomsController_getRoomParticipationAnalytics
+      operationId: getRoomParticipationAnalytics
       summary: Get room participation analytics
+      description: >-
+        Returns the participation analytics of the room as a
+        RoomAnalyticsParticipationDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get participation analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1048,17 +1259,25 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/interactions:
     get:
-      operationId: RoomsController_getRoomInteractionAnalytics
+      operationId: getRoomInteractionAnalytics
       summary: Get room interaction analytics
+      description: >-
+        Returns the interaction analytics of the room as a
+        RoomAnalyticsInteractionsDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get interaction analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1069,17 +1288,23 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/votes:
     get:
-      operationId: RoomsController_getRoomVotesAnalytics
+      operationId: getRoomVotesAnalytics
       summary: Get room voting analytics
+      description: Returns the voting analytics of the room as a RoomAnalyticsVotesDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get voting analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1088,17 +1313,23 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/songs:
     get:
-      operationId: RoomsController_getRoomSongsAnalytics
+      operationId: getRoomSongsAnalytics
       summary: Get room song analytics
+      description: Returns the song analytics of the room as a RoomAnalyticsSongsDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get song analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1107,17 +1338,25 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/{roomID}/analytics/contributors:
     get:
-      operationId: RoomsController_getRoomContributorsAnalytics
+      operationId: getRoomContributorsAnalytics
       summary: Get room contributor analytics
+      description: >-
+        Returns the contributor analytics of the room as a
+        RoomAnalyticsContributorsDto.
       parameters:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to get contributor analytics for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1128,12 +1367,16 @@ paths:
           description: Unauthorized
       security:
         - bearer: []
+        - bearer: []
       tags:
         - room analytics
   /rooms/analytics:
     get:
-      operationId: RoomsController_getKeyMetrics
+      operationId: getKeyMetrics
       summary: Get key metrics for user's rooms
+      description: >-
+        Returns the key metrics for the user's rooms as a
+        RoomAnalyticsKeyMetricsDto.
       parameters: []
       responses:
         '200':
@@ -1143,6 +1386,7 @@ paths:
         '401':
           description: Unauthorized
       security:
+        - bearer: []
         - bearer: []
       tags:
         - room analytics
@@ -1154,7 +1398,11 @@ paths:
         - name: roomID
           required: true
           in: path
+          description: The ID of the room to archive songs for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -1164,6 +1412,7 @@ paths:
         '404':
           description: Room not found
       security:
+        - bearer: []
         - bearer: []
       tags:
         - rooms
@@ -1178,6 +1427,7 @@ paths:
         '401':
           description: Unauthorized
       security:
+        - bearer: []
         - bearer: []
       tags:
         - rooms
@@ -1200,23 +1450,36 @@ paths:
           description: Playlist not found
       security:
         - bearer: []
+        - bearer: []
       tags:
         - rooms
   /search:
     get:
-      operationId: SearchController_combinedSearch
+      operationId: search
       summary: Search for rooms and users
+      description: Search for rooms and users by room name, creator name or username.
       parameters:
         - name: q
           required: true
           in: query
           description: A room name / username
+          example:
+            room_name:
+              value: Chill Room
+            username:
+              value: johndoe123
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator
           required: false
           in: query
           description: A room creator's profile name or username
+          examples:
+            profile_name:
+              value: John Doe
+            username:
+              value: johndoe123
           schema:
             type: string
       responses:
@@ -1232,19 +1495,28 @@ paths:
         - search
   /search/rooms:
     get:
-      operationId: SearchController_searchRooms
+      operationId: searchRooms
       summary: Search for rooms
+      description: Search for rooms by room name or creator name / username.
       parameters:
         - name: q
           required: true
           in: query
           description: A room name
+          example: Chill Room
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator
           required: false
           in: query
           description: A room creator's profile name / username
+          examples:
+            profile_name:
+              value: John Doe
+            username:
+              value: johndoe123
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -1256,7 +1528,7 @@ paths:
         - search
   /search/history:
     get:
-      operationId: SearchController_searchHistory
+      operationId: searchHistory
       summary: Get search history (including objects discovered from search)
       parameters: []
       responses:
@@ -1272,9 +1544,11 @@ paths:
         - search
       security:
         - bearer: []
+        - bearer: []
     delete:
-      operationId: SearchController_clearSearchHistory
+      operationId: clearSearchHistory
       summary: Clear search history
+      description: Clear search history for the user.
       parameters: []
       responses:
         '200':
@@ -1283,39 +1557,51 @@ paths:
         - search
       security:
         - bearer: []
+        - bearer: []
   /search/rooms/advanced:
     get:
-      operationId: SearchController_advancedSearchRooms
+      operationId: advancedSearchRooms
       summary: Advanced search for rooms
+      description: Advanced search for rooms by various parameters.
       parameters:
         - name: q
           required: true
           in: query
           description: A room name
+          example: Chill Room
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator_username
           required: false
           in: query
           description: A room creator's username
+          example: johndoe123
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator_name
           required: false
           in: query
           description: A room creator's profile name
+          example: John Doe
+          allowEmptyValue: false
           schema:
             type: string
         - name: participant_count
           required: false
           in: query
           description: Minimum number of participants
+          example: 5
+          allowEmptyValue: false
           schema:
             type: number
         - name: description
           required: false
           in: query
           description: A string to find in the room description
+          example: chill
+          allowEmptyValue: false
           schema:
             type: string
         - name: is_temp
@@ -1387,8 +1673,9 @@ paths:
         - search
   /search/rooms/history:
     get:
-      operationId: SearchController_searchRoomsHistory
+      operationId: searchRoomsHistory
       summary: Get recently searched rooms
+      description: Get recently searched rooms by the user.
       parameters: []
       responses:
         '200':
@@ -1405,9 +1692,11 @@ paths:
         - search
       security:
         - bearer: []
+        - bearer: []
     delete:
-      operationId: SearchController_clearRoomsHistory
+      operationId: clearRoomsHistory
       summary: Clear room search history
+      description: Clear room search history for the user.
       parameters: []
       responses:
         '200':
@@ -1416,15 +1705,23 @@ paths:
         - search
       security:
         - bearer: []
+        - bearer: []
   /search/users:
     get:
-      operationId: SearchController_searchUsers
+      operationId: searchUsers
       summary: Search for users
+      description: Search for users by username or profile name.
       parameters:
         - name: q
           required: true
           in: query
           description: A username or profile name
+          examples:
+            username:
+              value: johndoe123
+            profile_name:
+              value: John Doe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
@@ -1442,37 +1739,52 @@ paths:
         - search
   /search/users/advanced:
     get:
-      operationId: SearchController_advancedSearchUsers
+      operationId: advancedSearchUsers
       summary: Advanced search for users
+      description: Advanced search for users by various parameters.
       parameters:
         - name: q
           required: true
           in: query
           description: A username or profile name
+          examples:
+            username:
+              value: johndoe123
+            profile_name:
+              value: John Doe
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator_username
           required: false
           in: query
           description: A user's username
+          example: johndoe123
+          allowEmptyValue: false
           schema:
             type: string
         - name: creator_name
           required: false
           in: query
           description: A user's profile name
+          example: John Doe
+          allowEmptyValue: false
           schema:
             type: string
         - name: following
           required: false
           in: query
           description: Minimum number of following
+          example: 10
+          allowEmptyValue: false
           schema:
             type: number
         - name: followers
           required: false
           in: query
           description: Minimum number of followers
+          example: 10
+          allowEmptyValue: false
           schema:
             type: number
       responses:
@@ -1490,8 +1802,9 @@ paths:
         - search
   /search/users/history:
     get:
-      operationId: SearchController_searchUsersHistory
+      operationId: searchUsersHistory
       summary: Get recently searched users
+      description: Get recently searched users by the user.
       parameters: []
       responses:
         '200':
@@ -1508,9 +1821,11 @@ paths:
         - search
       security:
         - bearer: []
+        - bearer: []
     delete:
-      operationId: SearchController_clearUsersHistory
+      operationId: clearUsersHistory
       summary: Clear user search history
+      description: Clear user search history for the user.
       parameters: []
       responses:
         '200':
@@ -1518,6 +1833,7 @@ paths:
       tags:
         - search
       security:
+        - bearer: []
         - bearer: []
   /genres:
     get:
@@ -1627,7 +1943,6 @@ components:
         - fav_songs
         - fav_rooms
         - recent_rooms
-        - friendship
     UpdateUserDto:
       type: object
       properties:
@@ -1749,15 +2064,6 @@ components:
       required:
         - room_name
         - description
-        - is_temporary
-        - is_private
-        - is_scheduled
-        - start_date
-        - end_date
-        - language
-        - has_explicit_content
-        - has_nsfw_content
-        - room_image
         - tags
     LoginBody:
       type: object
@@ -1857,7 +2163,6 @@ components:
         - messageBody
         - sender
         - roomID
-        - dateCreated
     CombinedSearchResults:
       type: object
       properties:
