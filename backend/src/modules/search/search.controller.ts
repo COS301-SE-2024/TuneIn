@@ -36,7 +36,12 @@ export class SearchController {
 	) {}
 
 	@Get()
-	@ApiOperation({ summary: "Search for rooms and users" })
+	@ApiOperation({
+		summary: "Search for rooms and users",
+		description:
+			"Search for rooms and users by room name, creator name or username.",
+		operationId: "search",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of mixed UserDto and RoomDto.",
 		type: CombinedSearchResults,
@@ -94,7 +99,11 @@ export class SearchController {
 
 	/* ************************************************** */
 	@Get("rooms")
-	@ApiOperation({ summary: "Search for rooms" })
+	@ApiOperation({
+		summary: "Search for rooms",
+		description: "Search for rooms by room name or creator name / username.",
+		operationId: "searchRooms",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
 	})
@@ -157,6 +166,7 @@ export class SearchController {
 	@Get("history")
 	@ApiOperation({
 		summary: "Get search history (including objects discovered from search)",
+		operationId: "searchHistory",
 	})
 	@ApiOkResponse({
 		description:
@@ -180,7 +190,11 @@ export class SearchController {
 		description: "Bearer token for authentication",
 	})
 	@Delete("history")
-	@ApiOperation({ summary: "Clear search history" })
+	@ApiOperation({
+		summary: "Clear search history",
+		description: "Clear search history for the user.",
+		operationId: "clearSearchHistory",
+	})
 	@ApiOkResponse({ description: "Search history cleared" })
 	async clearSearchHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -190,7 +204,11 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("rooms/advanced")
-	@ApiOperation({ summary: "Advanced search for rooms" })
+	@ApiOperation({
+		summary: "Advanced search for rooms",
+		description: "Advanced search for rooms by various parameters.",
+		operationId: "advancedSearchRooms",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
 		type: [RoomDto],
@@ -335,7 +353,11 @@ export class SearchController {
 		description: "Bearer token for authentication",
 	})
 	@Get("rooms/history")
-	@ApiOperation({ summary: "Get recently searched rooms" })
+	@ApiOperation({
+		summary: "Get recently searched rooms",
+		description: "Get recently searched rooms by the user.",
+		operationId: "searchRoomsHistory",
+	})
 	@ApiOkResponse({
 		description: "Recently searched rooms as an array of SearchHistoryDto.",
 		type: [SearchHistoryDto],
@@ -358,7 +380,11 @@ export class SearchController {
 		description: "Bearer token for authentication",
 	})
 	@Delete("rooms/history")
-	@ApiOperation({ summary: "Clear room search history" })
+	@ApiOperation({
+		summary: "Clear room search history",
+		description: "Clear room search history for the user.",
+		operationId: "clearRoomsHistory",
+	})
 	@ApiOkResponse({ description: "Room search history cleared" })
 	async clearRoomsHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -368,7 +394,11 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("users")
-	@ApiOperation({ summary: "Search for users" })
+	@ApiOperation({
+		summary: "Search for users",
+		description: "Search for users by username or profile name.",
+		operationId: "searchUsers",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
 		type: [UserDto],
@@ -406,7 +436,11 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("users/advanced")
-	@ApiOperation({ summary: "Advanced search for users" })
+	@ApiOperation({
+		summary: "Advanced search for users",
+		description: "Advanced search for users by various parameters.",
+		operationId: "advancedSearchUsers",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
 		type: [UserDto],
@@ -486,7 +520,11 @@ export class SearchController {
 		description: "Bearer token for authentication",
 	})
 	@Get("users/history")
-	@ApiOperation({ summary: "Get recently searched users" })
+	@ApiOperation({
+		summary: "Get recently searched users",
+		description: "Get recently searched users by the user.",
+		operationId: "searchUsersHistory",
+	})
 	@ApiOkResponse({
 		description: "Recently searched users as an array of SearchHistoryDto.",
 		type: [SearchHistoryDto],
@@ -509,7 +547,11 @@ export class SearchController {
 		description: "Bearer token for authentication",
 	})
 	@Delete("users/history")
-	@ApiOperation({ summary: "Clear user search history" })
+	@ApiOperation({
+		summary: "Clear user search history",
+		description: "Clear user search history for the user.",
+		operationId: "clearUsersHistory",
+	})
 	@ApiOkResponse({ description: "User search history cleared" })
 	async clearUsersHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
