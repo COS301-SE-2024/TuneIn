@@ -65,7 +65,6 @@ const App: React.FC = () => {
 						live.initialiseSocket();
 					}
 				}
-
 				// Perform token validation if necessary
 				if (auth.authenticated()) {
 					// Redirect to the HomeScreen or appropriate route

@@ -26,7 +26,7 @@ import {
 	RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
-import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
+import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 
 @Injectable()
 export class RoomsService {
@@ -38,7 +38,7 @@ export class RoomsService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async getNewRooms(limit: number = -1): Promise<RoomDto[]> {
+	async getNewRooms(limit = -1): Promise<RoomDto[]> {
 		const r: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			orderBy: {
 				date_created: "desc",
@@ -247,10 +247,10 @@ export class RoomsService {
 			const _where: object = getFollowers
 				? {
 						follower: user_id,
-					}
+				  }
 				: {
 						followee: user_id,
-					};
+				  };
 			const followers: number = await this.prisma.follows.count({
 				where: _where,
 			});
@@ -436,8 +436,9 @@ export class RoomsService {
 	}
 
 	async getLiveChatHistoryDto(roomID: string): Promise<LiveChatMessageDto[]> {
-		const messages: PrismaTypes.message[] =
-			await this.getLiveChatHistory(roomID);
+		const messages: PrismaTypes.message[] = await this.getLiveChatHistory(
+			roomID,
+		);
 		const result: LiveChatMessageDto[] =
 			await this.dtogen.generateMultipleLiveChatMessageDto(messages);
 		return result;
@@ -640,8 +641,8 @@ export class RoomsService {
 	async getRoomJoinAnalytics(
 		roomID: string,
 	): Promise<RoomAnalyticsParticipationDto["joins"]> {
-		let total_joins: number = 0;
-		let unique_joins: number = 0;
+		let total_joins = 0;
+		let unique_joins = 0;
 		const joins: RoomAnalyticsParticipationDto["joins"] = {
 			per_day: {
 				total_joins: [],
@@ -746,9 +747,9 @@ export class RoomsService {
 	async getRoomSessionAnalytics(
 		roomID: string,
 	): Promise<RoomAnalyticsParticipationDto["session_data"]> {
-		let avg_duration: number = 0,
-			min_duration: number = 0,
-			max_duration: number = 0;
+		let avg_duration = 0,
+			min_duration = 0,
+			max_duration = 0;
 		const sessionData: RoomAnalyticsParticipationDto["session_data"] = {
 			all_time: {
 				avg_duration: 0,
@@ -924,8 +925,9 @@ export class RoomsService {
 			await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour =
 			await this.getHourlyParticipantAnalytics(roomID);
-		roomAnalyticsParticipation.room_previews =
-			await this.getRoomPreviews(roomID);
+		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(
+			roomID,
+		);
 		roomAnalyticsParticipation.return_visits =
 			await this.getReturnVisitsAnalytics(
 				roomID,
@@ -1099,10 +1101,12 @@ export class RoomsService {
 			new RoomAnalyticsInteractionsDto();
 		roomInteractionAnalytics.messages =
 			await this.getMessageInteractionsAnalytics(roomID);
-		roomInteractionAnalytics.bookmarked_count =
-			await this.getNumberOfBookmarks(roomID);
-		roomInteractionAnalytics.reactions_sent =
-			await this.getNumberOfReactions(roomID);
+		roomInteractionAnalytics.bookmarked_count = await this.getNumberOfBookmarks(
+			roomID,
+		);
+		roomInteractionAnalytics.reactions_sent = await this.getNumberOfReactions(
+			roomID,
+		);
 		return roomInteractionAnalytics;
 	}
 
@@ -1124,10 +1128,8 @@ export class RoomsService {
 
 		`;
 		console.log("Getting total votes for room", roomID, "and votes", votes);
-		const numOfUpvotes: number = Number(
-			votes.filter((v: any) => v.is_upvote)[0].count,
-		);
-		const numOfDownvotes: number = Number(
+		const numOfUpvotes = Number(votes.filter((v: any) => v.is_upvote)[0].count);
+		const numOfDownvotes = Number(
 			votes.filter((v: any) => !v.is_upvote)[0].count,
 		);
 		return {
@@ -1187,16 +1189,16 @@ export class RoomsService {
 			votesToday,
 			votesYesterday,
 		);
-		const numOfUpvotesToday: number = Number(
+		const numOfUpvotesToday = Number(
 			votesToday.filter((v: any) => v.is_upvote)[0].count,
 		);
-		const numOfDownvotesToday: number = Number(
+		const numOfDownvotesToday = Number(
 			votesToday.filter((v: any) => !v.is_upvote)[0].count,
 		);
-		const numOfUpvotesYesterday: number = Number(
+		const numOfUpvotesYesterday = Number(
 			votesYesterday.filter((v: any) => v.is_upvote)[0].count,
 		);
-		const numOfDownvotesYesterday: number = Number(
+		const numOfDownvotesYesterday = Number(
 			votesYesterday.filter((v: any) => !v.is_upvote)[0].count,
 		);
 		const upvoteChange: number = numOfUpvotesToday - numOfUpvotesYesterday;
@@ -1267,8 +1269,9 @@ export class RoomsService {
 			new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
 		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
-		keyMetrics.average_session_duration =
-			await this.getAverageSessionDuration(userID);
+		keyMetrics.average_session_duration = await this.getAverageSessionDuration(
+			userID,
+		);
 		return keyMetrics;
 	}
 
@@ -1343,8 +1346,8 @@ export class RoomsService {
 		// 	return uniqueVisitors;
 		// }
 
-		const countYesterday: number = Number(uniqueVisitorsYesterday.length);
-		const countToday: number = Number(uniqueVisitorsToday.length);
+		const countYesterday = Number(uniqueVisitorsYesterday.length);
+		const countToday = Number(uniqueVisitorsToday.length);
 		uniqueVisitors.count = countToday;
 		uniqueVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
@@ -1409,12 +1412,12 @@ export class RoomsService {
 		// 	return averageSessionDuration;
 		// }
 		// sum the durations and divide by the number of sessionser, b: number) => a + b, 0) / averageSessionDurationToday.length);
-		const totalDurationYesterday: number = Number(
+		const totalDurationYesterday = Number(
 			averageSessionDurationYesterday
 				.map((r: any) => Number(r.avg_duration))
 				.reduce((a: number, b: number) => a + b, 0),
 		);
-		const totalDurationToday: number = Number(
+		const totalDurationToday = Number(
 			averageSessionDurationToday
 				.map((r: any) => Number(r.avg_duration))
 				.reduce((a: number, b: number) => a + b, 0),
@@ -1493,8 +1496,8 @@ export class RoomsService {
 		// if (returningVisitorsYesterday.length === 0 || returningVisitorsToday.length === 0) {
 		// 	return returningVisitors;
 		// }
-		const countYesterday: number = Number(returningVisitorsYesterday.length);
-		const countToday: number = Number(returningVisitorsToday.length);
+		const countYesterday = Number(returningVisitorsYesterday.length);
+		const countToday = Number(returningVisitorsToday.length);
 		returningVisitors.count = countToday;
 		returningVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
@@ -1633,43 +1636,5 @@ export class RoomsService {
 			"Failed to delete playlist",
 			HttpStatus.INTERNAL_SERVER_ERROR,
 		);
-	}
-
-	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-		const room: any = await this.prisma.participate.findFirst({
-			where: {
-				user_id: userID,
-			},
-			include: {
-				room: true,
-			},
-		});
-		// if the user is in a room, get the join time from the user_activity table.
-		// do the query on user id and retrieve the activity with a leave date of null
-		// if the user is not in a room, return null
-		if (room === null) {
-			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
-		}
-		const userActivity: any = await this.prisma.user_activity.findFirst({
-			where: {
-				user_id: userID,
-				room_id: room.room_id,
-				room_leave_time: null,
-			},
-		});
-		// add the join date to the returned object
-		try {
-			room.room_join_time = userActivity.room_join_time;
-		} catch (error) {
-			console.error("Error getting room join time:", error);
-			throw new HttpException(
-				"Error getting room join time",
-				HttpStatus.INTERNAL_SERVER_ERROR,
-			);
-		}
-		return room;
 	}
 }

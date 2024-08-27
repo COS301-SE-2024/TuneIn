@@ -277,7 +277,7 @@ export class AuthService {
 	*/
 	getUserInfo(req: any): JWTPayload {
 		const result = req.user as JWTPayload;
-		// console.log(result);
+		console.log(result);
 		if (!result) {
 			throw new UnauthorizedException(
 				"No user found in JWT token. Please log in again",
