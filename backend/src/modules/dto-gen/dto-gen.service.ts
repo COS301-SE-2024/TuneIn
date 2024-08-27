@@ -155,10 +155,8 @@ export class DtoGenService {
 		}
 		const result: UserDto = this.generateBriefUserDto(friend);
 		const base = `/users/${result.username}`;
-		const usersAreFriends: boolean =
-			!friendship.is_pending && friendship.is_close_friend;
 		result.friendship = {
-			status: usersAreFriends,
+			status: !friendship.is_pending,
 			accept_url: friendship.is_pending ? "" : base + "/accept",
 			reject_url: friendship.is_pending ? "" : base + "/reject",
 		};

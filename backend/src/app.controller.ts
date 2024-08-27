@@ -59,7 +59,6 @@ export class AppController {
 		description:
 			"This operation uploads a file to AWS S3 (the TuneIn bucket) and returns the URL of the uploaded file.",
 		operationId: "uploadFile",
-		tags: ["File Upload"],
 		externalDocs: {
 			description: "More about file uploads via HTTP POST requests",
 			url: "https://www.postman.com/postman/postman-answers/collection/t38ia1u/upload-a-file-via-post-request",
