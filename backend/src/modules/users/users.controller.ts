@@ -521,7 +521,8 @@ export class UsersController {
 	@ApiOperation({ summary: "Accept a friend request from the given user" })
 	@ApiParam({
 		name: "username",
-		description: "Our new friend. The username of the user to accept a friend request from.",
+		description:
+			"Our new friend. The username of the user to accept a friend request from.",
 		required: true,
 		type: String,
 		example: "johndoe",
@@ -554,7 +555,8 @@ export class UsersController {
 	@ApiOperation({ summary: "Reject a friend request from the given user" })
 	@ApiParam({
 		name: "username",
-		description: "The username of the user whose friend request we are rejecting.",
+		description:
+			"The username of the user whose friend request we are rejecting.",
 		required: true,
 		type: String,
 		example: "johndoe",

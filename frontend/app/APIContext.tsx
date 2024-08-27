@@ -24,8 +24,8 @@ interface APIGroup {
 	auth: AuthApi;
 	default: DefaultApi;
 	genres: GenresApi;
-	rooms: RoomsApi;
 	roomAnalytics: RoomAnalyticsApi;
+	rooms: RoomsApi;
 	search: SearchApi;
 	users: UsersApi;
 	authenticated: boolean;

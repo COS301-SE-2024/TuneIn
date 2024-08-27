@@ -77,7 +77,15 @@ export class RoomsController {
 		description: "The room info as a RoomDto.",
 		type: RoomDto,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get info for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiBadRequestResponse({
 		description: "Room not found.",
 		type: RoomDto,
@@ -105,12 +113,18 @@ export class RoomsController {
 		description: "Room info updated successfully.",
 		type: RoomDto,
 	})
-	// response for when room is not found
 	@ApiNotFoundResponse({
 		description: "Room not found.",
 	})
-	@ApiParam({ name: "roomID", required: true })
-	// provide summary
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to update.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOperation({ summary: "Update room info" })
 	async updateRoomInfo(
 		@Request() req: any,
@@ -130,6 +144,15 @@ export class RoomsController {
 	})
 	@Put(":roomID")
 	@ApiTags("rooms")
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to update.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async updateRoom(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -155,7 +178,15 @@ export class RoomsController {
 		description: "User is not the creator of the room.",
 		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to delete.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOperation({ summary: "Delete a room" })
 	async deleteRoom(
 		@Request() req: any,
@@ -192,7 +223,15 @@ export class RoomsController {
 		description: "User already in room.",
 		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to join.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async joinRoom(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -225,7 +264,15 @@ export class RoomsController {
 		description: "User not in room.",
 		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to leave.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async leaveRoom(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -248,7 +295,15 @@ export class RoomsController {
 		isArray: true,
 	})
 	@ApiOperation({ summary: "Get users in a room" })
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async getRoomUsers(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -273,6 +328,15 @@ export class RoomsController {
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the queue for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
 	})
 	async getRoomQueue(
 		@Request() req: any,
@@ -299,6 +363,15 @@ export class RoomsController {
 	})
 	@Delete(":roomID/songs")
 	@ApiTags("rooms")
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to clear the queue for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	clearRoomQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -331,6 +404,15 @@ export class RoomsController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to add the song to.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	addSongToQueue(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -350,6 +432,15 @@ export class RoomsController {
     */
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the current song for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	getCurrentSong(
 		@Request() req: any,
 		@Param("roomID") roomID: string,
@@ -367,7 +458,15 @@ export class RoomsController {
 	@Get(":roomID/chat/history")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Get room's chat history" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the chat history for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The chat history as an array of LiveChatMessageDto.",
 		type: LiveChatMessageDto,
@@ -390,7 +489,15 @@ export class RoomsController {
 	@Post(":roomID/bookmark")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Bookmark a room" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to bookmark.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "Room bookmarked successfully",
 	})
@@ -418,7 +525,15 @@ export class RoomsController {
 	@Post(":roomID/unbookmark")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Unbookmark a room" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to unbookmark.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "Room unbookmarked successfully",
 	})
@@ -446,7 +561,15 @@ export class RoomsController {
 	@Get(":roomID/analytics")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The analytics of the room as a RoomAnalyticsDto.",
 	})
@@ -471,7 +594,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/queue")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room queue analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get queue analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The queue analytics of the room as a RoomAnalyticsQueueDto.",
 	})
@@ -496,7 +627,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/participation")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room participation analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get participation analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The participation analytics of the room as a RoomAnalyticsParticipationDto.",
@@ -522,7 +661,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/interactions")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room interaction analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get interaction analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The interaction analytics of the room as a RoomAnalyticsInteractionsDto.",
@@ -548,7 +695,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/votes")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room voting analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get voting analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The voting analytics of the room as a RoomAnalyticsVotesDto.",
 	})
@@ -573,7 +728,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/songs")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room song analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get song analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The song analytics of the room as a RoomAnalyticsSongsDto.",
 	})
@@ -598,7 +761,15 @@ export class RoomsController {
 	@Get(":roomID/analytics/contributors")
 	@ApiTags("room analytics")
 	@ApiOperation({ summary: "Get room contributor analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get contributor analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The contributor analytics of the room as a RoomAnalyticsContributorsDto.",
@@ -649,7 +820,15 @@ export class RoomsController {
 	@Post(":roomID/archive/playlist")
 	@ApiTags("rooms")
 	@ApiOperation({ summary: "Archive a room's songs" })
-	@ApiParam({ name: "roomID" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to archive songs for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "Room songs archived successfully",
 	})
@@ -672,6 +851,7 @@ export class RoomsController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
 	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
