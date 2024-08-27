@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useApi } from "../api/APIContext";
-import { Configuration, DefaultApi } from "../apiv2";
+import { Configuration, DefaultApi } from "../api";
 //import { Configuration, DefaultApi } from "../api-client";
 import * as utils from "./services/Utils";
 
