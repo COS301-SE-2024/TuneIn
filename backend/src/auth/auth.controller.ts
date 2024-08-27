@@ -21,7 +21,12 @@ export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	@Post("login")
-	@ApiOperation({ summary: "Authenticate a user using the Cognito JWT token" })
+	@ApiOperation({
+		summary: "Authenticate a user using a Cognito JWT token",
+		description:
+			"This method will authenticate a user using a Cognito JWT token. The token is decoded and verified, and a new JWT token is generated and returned. See https://jwt.io/ for more information on JWT tokens.",
+		operationId: "login",
+	})
 	@ApiBody({
 		type: LoginBody,
 		required: true,
@@ -72,7 +77,12 @@ export class AuthController {
 	}
 
 	@Post("register")
-	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiOperation({
+		summary: "Register a new user in the API using Cognito",
+		description:
+			"This method will register a new user in the API using Cognito. The user's Cognito username, email, and Cognito sub ID are required. The user will be created in the our database and will be able to authenticate using the Cognito JWT token.",
+		operationId: "register",
+	})
 	@ApiBody({ type: RegisterBody, required: true, description: "User info" })
 	@ApiBody({
 		type: RegisterBody,
@@ -112,7 +122,12 @@ export class AuthController {
 	}
 
 	@Post("refresh")
-	@ApiOperation({ summary: "Refresh an expired (or almost expired) JWT token" })
+	@ApiOperation({
+		summary: "Refresh an expired (or almost expired) JWT token",
+		description:
+			"This method will refresh an expired (or almost expired) JWT token. The expired token is sent in the request body, and a new JWT token is generated and returned. The new token will have a new expiration date.",
+		operationId: "refresh",
+	})
 	@ApiBody({
 		type: RefreshBody,
 		required: true,

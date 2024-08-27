@@ -54,7 +54,11 @@ export class SpotifyAuthController {
 		example: "34fFs29kd09",
 		allowEmptyValue: false,
 	})
-	@ApiOperation({ summary: "Spotify OAuth Redirect" })
+	@ApiOperation({
+		summary: "Spotify OAuth Redirect",
+		description: "Redirects to the Expo app with the Spotify auth code",
+		operationId: "spotifyRedirect",
+	})
 	async performRedirect(
 		@Request() req: Request,
 		@Query("code") code: string,
@@ -76,7 +80,12 @@ export class SpotifyAuthController {
 
 	@Get("callback")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Callback for Spotify Auth" })
+	@ApiOperation({
+		summary: "Callback for Spotify Auth",
+		description:
+			"Handles the Spotify auth callback, creates an account for the user (if necessary), authenticates the user, and returns a JWT token",
+		operationId: "spotifyCallback",
+	})
 	@ApiQuery({
 		name: "code",
 		description:
@@ -134,7 +143,11 @@ export class SpotifyAuthController {
 	})
 	@Get("tokens")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Get Spotify Auth Tokens" })
+	@ApiOperation({
+		summary: "Get Spotify Auth Tokens",
+		description: "Returns the user's Spotify Auth Tokens",
+		operationId: "getSpotifyTokens",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "The user's Spotify Auth Tokens",
@@ -160,7 +173,12 @@ export class SpotifyAuthController {
 	})
 	@Get("refresh")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Manually Refresh Spotify Auth Token" })
+	@ApiOperation({
+		summary: "Manually Refresh Spotify Auth Tokens",
+		description:
+			"This method will manually refresh the user's Spotify Auth Tokens and return the new tokens",
+		operationId: "refreshSpotifyTokens",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "The user's new Spotify Auth Tokens",
