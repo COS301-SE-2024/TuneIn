@@ -233,9 +233,9 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("friends/pending")
 	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's pending friend requests" })
+	@ApiOperation({ summary: "Get a user's sent friend requests" })
 	@ApiOkResponse({
-		description: "The user's pending friend requests as an array of UserDto.",
+		description: "The user's sent friend requests as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
