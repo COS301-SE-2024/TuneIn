@@ -35,8 +35,15 @@ export class RecommenderService implements OnModuleInit {
 		},
 	];
 
+	// constructor() {}
+	// constructor that takes in playlists and favoriteSongs
 	constructor() {}
-
+	setPlaylists(playlists: { [key: string]: any[] }) {
+		this.playlists = playlists;
+	}
+	setMockSongs(mockSongs: any[]) {
+		this.mockSongs = mockSongs;
+	}
 	async onModuleInit() {
 		await this.loadData();
 	}
