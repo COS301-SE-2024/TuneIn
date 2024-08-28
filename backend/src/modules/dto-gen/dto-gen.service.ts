@@ -39,7 +39,19 @@ export class DtoGenService {
 		const result: UserDto = this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
 		const preferences = await this.dbUtils.getPreferences(user);
-		result.fav_genres = preferences.fav_genres;
+		const fav_genres = await this.prisma.favorite_genres.findMany({
+			where: { user_id: userID },
+			include: { genre: true },
+		});
+
+		result.fav_genres = {
+			count: fav_genres.length,
+			data: fav_genres
+				.map((genre) => genre.genre?.genre)
+				.filter((name): name is string => name !== null),
+		};
+
+		
 		result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
