@@ -27,6 +27,7 @@ import { colors } from "../../styles/colors";
 import { Player } from "../../PlayerContext";
 import { formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -414,6 +415,16 @@ const ProfileScreen: React.FC = () => {
 
 	const renderFavRooms = () => {
 		if (primaryProfileData.fav_rooms.count > 0) {
+			const processedRooms = primaryProfileData.fav_rooms.data
+				.slice(0, 2)
+				.map((room) => {
+					const formattedRoom = preFormatRoomData(
+						room,
+						false,
+					);
+					return formattedRoom;
+				});
+
 			return (
 				<View
 					style={{ paddingHorizontal: 20, paddingTop: 10 }}
@@ -421,15 +432,8 @@ const ProfileScreen: React.FC = () => {
 				>
 					<Text style={styles.title}>Favorite Rooms</Text>
 					<View style={styles.roomCardsContainer}>
-						{primaryProfileData.fav_rooms.data.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.roomId}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-								imageUrl={room.room_image}
-							/>
+						{processedRooms.map((room, index) => (
+							<RoomCardWidget key={index} roomCard={room} />
 						))}
 					</View>
 				</View>
@@ -647,7 +651,7 @@ const ProfileScreen: React.FC = () => {
 						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
-				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
+				{/* <View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
@@ -663,9 +667,9 @@ const ProfileScreen: React.FC = () => {
 						isVisible={isMusicDialogVisible}
 						onClose={() => setMusicDialogVisible(false)}
 					/>
-				</View>
+				</View> */}
 				{renderFavRooms()}
-				{renderRecentRooms()}
+				{/* {renderRecentRooms()} */}
 				{primaryProfileData.current_room ? (
 					<View style={{ alignItems: "center", marginTop: 20 }}>
 						<TouchableOpacity style={styles.button} onPress={handleJoinLeave}>
