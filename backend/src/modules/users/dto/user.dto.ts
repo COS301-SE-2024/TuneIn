@@ -93,4 +93,8 @@ export class UserDto {
 		accept_url: string;
 		reject_url: string;
 	};
+
+	@ApiProperty()
+	@IsString()
+	relationship?: string;
 }
