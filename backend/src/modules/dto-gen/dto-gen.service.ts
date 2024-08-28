@@ -55,10 +55,23 @@ export class DtoGenService {
 		result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
-			const recent_rooms = await this.dbUtils.getActivity(user);
+			const recent_rooms = await await this.prisma.user_activity.findMany({
+				where: {
+					user_id: userID, // Filter by specific user ID
+				},
+				distinct: ["room_id"], // Ensure unique room IDs
+				orderBy: {
+					room_join_time: "desc", // Sort by most recent join time
+				},
+				take: 10, // Limit to the latest 10 entries
+				select: {
+					room_id: true, // Only select the room ID
+				},
+			});
+
 			result.recent_rooms = {
-				count: recent_rooms.count,
-				data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
+				count: recent_rooms.length,
+				data: (await this.generateMultipleRoomDto(recent_rooms.map((room => room.room_id)))) || [],
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
