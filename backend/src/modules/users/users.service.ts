@@ -386,41 +386,22 @@ export class UsersService {
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
-		// const recommender: RecommenderService = new RecommenderService();
-		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
-
-		const roomsWithSongs: any = await Promise.all(
-			rooms.map(async (room: any) => {
-				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
-				room.songs = songs;
-				return room;
-			}),
-		);
-
-		// create an object of all the room songs with the key being room_id and the value being the songs
-		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
-			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
-			return acc;
-		}, {});
-		console.log("roomSongs:", roomSongs);
-		const favoriteSongs: any = await this.dbUtils.getUserFavoriteSongs(userID);
-		// const favoriteSongs: any[] = [];
-		console.log("favoriteSongs:", favoriteSongs);
-		this.recommender.setMockSongs(
-			favoriteSongs.map((song: any) => song.audio_features),
-		);
-		this.recommender.setPlaylists(roomSongs);
-		const recommendedRooms = this.recommender.getTopPlaylists(5);
-		console.log("recommendedRooms:", recommendedRooms);
-		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-			recommendedRooms.map((room: any) => room.playlist),
-		);
-		return r === null ? [] : r;
-	}
-
-	async getCurrentRoom(userID: string): Promise<RoomDto | object> {
-		console.log("Getting current room for user " + userID);
-		return {};
+		console.log("Getting recommended rooms for user " + userID);
+		const r = await this.dbUtils.getRandomRooms(5);
+		if (!r || r === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+			);
+		}
+		const rooms: PrismaTypes.room[] = r;
+		const ids: string[] = rooms.map((room) => room.room_id);
+		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
+		if (!recommends || recommends === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+			);
+		}
+		return recommends;
 	}
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
@@ -769,6 +750,7 @@ export class UsersService {
 		if (!friendRequests) {
 			return [];
 		}
+
 		const ids: string[] = friendRequests.map((friend: any) => friend.friend1);
 		const result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
@@ -777,6 +759,48 @@ export class UsersService {
 			);
 		}
 		return result;
+	}
+	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const room: any = await this.prisma.participate.findFirst({
+			where: {
+				user_id: userID,
+			},
+			include: {
+				room: true,
+			},
+		});
+
+		if (room !== null) {
+			room.room = await this.dtogen.generateRoomDto(room.room.room_id);
+		}
+
+		// if the user is in a room, get the join time from the user_activity table.
+		// do the query on user id and retrieve the activity with a leave date of null
+		// if the user is not in a room, return null
+		if (room === null) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		const userActivity: any = await this.prisma.user_activity.findFirst({
+			where: {
+				user_id: userID,
+				room_id: room.room_id,
+				room_leave_time: null,
+			},
+		});
+		// add the join date to the returned object
+		try {
+			room.room_join_time = userActivity.room_join_time;
+		} catch (error) {
+			console.error("Error getting room join time:", error);
+			throw new HttpException(
+				"Error getting room join time",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+		return room;
 	}
 
 	async getPotentialFriends(userID: string): Promise<UserDto[]> {

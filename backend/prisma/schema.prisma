@@ -183,13 +183,6 @@ model room_message {
   message    message @relation(fields: [message_id], references: [message_id], onDelete: Cascade)
 }
 
-model room_previews {
-  room_id        String   @db.Uuid
-  user_id        String   @db.Uuid
-  date_previewed DateTime @default(now()) @db.Timestamptz(6)
-  preview_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-}
-
 model scheduled_room {
   room_id        String   @id @db.Uuid
   scheduled_date DateTime @db.Timestamptz(6)
