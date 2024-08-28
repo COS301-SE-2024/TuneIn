@@ -6,6 +6,7 @@ import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { UpdateUserDto } from "../users/dto/updateuser.dto";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
+import FavoriteSongs from '../../../../frontend/app/components/FavoriteSong';
 @Injectable()
 export class DbUtilsService {
 	private salt: string;
@@ -583,6 +584,21 @@ export class DbUtilsService {
 		}
 
 		return queue.map((q: any) => q.song);
+	}
+	async getUserFavoriteSongs(
+		userID: string,
+	): Promise<PrismaTypes.song[] | null> {
+		const favorites: PrismaTypes.favorite_songs[] | null =
+			await this.prisma.favorite_songs.findMany({
+				where: { user_id: userID },
+				include: { song: true },
+			});
+
+		if (!favorites || favorites === null) {
+			return null;
+		}
+
+		return favorites.map((f: any) => f.song);
 	}
 
 	async getRelationshipStatus(
