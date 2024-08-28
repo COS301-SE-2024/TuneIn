@@ -31,7 +31,6 @@ export class RecommenderService {
 		tempo: number;
 	}[] = [];
 
-	constructor() {}
 	setPlaylists(playlists: { [key: string]: any[] }) {
 		this.playlists = playlists;
 	}

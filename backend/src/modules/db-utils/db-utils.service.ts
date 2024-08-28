@@ -6,7 +6,6 @@ import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { UpdateUserDto } from "../users/dto/updateuser.dto";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
-import FavoriteSongs from '../../../../frontend/app/components/FavoriteSong';
 @Injectable()
 export class DbUtilsService {
 	private salt: string;
