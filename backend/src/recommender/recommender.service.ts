@@ -50,7 +50,7 @@ export class RecommenderService {
 		song2: any,
 		weights: any,
 	): number {
-		let weightedSimilarities: number = 0;
+		let weightedSimilarities = 0;
 		for (const song1 of favoriteSongs) {
 			const dotProduct = Object.keys(song1).reduce((sum, key) => {
 				if (key in weights) {
