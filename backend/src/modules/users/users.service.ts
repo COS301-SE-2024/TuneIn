@@ -402,16 +402,13 @@ export class UsersService {
 			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
 			return acc;
 		}, {});
-		console.log("roomSongs:", roomSongs);
 		const favoriteSongs: any = await this.dbUtils.getUserFavoriteSongs(userID);
-		// const favoriteSongs: any[] = [];
-		console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
 			favoriteSongs.map((song: any) => song.audio_features),
 		);
 		this.recommender.setPlaylists(roomSongs);
 		const recommendedRooms = this.recommender.getTopPlaylists(5);
-		console.log("recommendedRooms:", recommendedRooms);
+		// console.log("recommendedRooms:", recommendedRooms);
 		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
 			recommendedRooms.map((room: any) => room.playlist),
 		);
