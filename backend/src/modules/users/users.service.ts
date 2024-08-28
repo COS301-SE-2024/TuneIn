@@ -9,7 +9,6 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { DirectMessageDto } from "./dto/dm.dto";
 import { RecommenderService } from "src/recommender/recommender.service";
 
 @Injectable()
@@ -18,6 +17,7 @@ export class UsersService {
 		private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private recommender: RecommenderService,
 	) {}
 
 	// Tutorial CRUD operations
@@ -386,22 +386,36 @@ export class UsersService {
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
-		console.log("Getting recommended rooms for user " + userID);
-		const r = await this.dbUtils.getRandomRooms(5);
-		if (!r || r === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
-		}
-		const rooms: PrismaTypes.room[] = r;
-		const ids: string[] = rooms.map((room) => room.room_id);
-		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
-		if (!recommends || recommends === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
-		}
-		return recommends;
+		// const recommender: RecommenderService = new RecommenderService();
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
+
+		const roomsWithSongs: any = await Promise.all(
+			rooms.map(async (room: any) => {
+				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
+				room.songs = songs;
+				return room;
+			}),
+		);
+
+		// create an object of all the room songs with the key being room_id and the value being the songs
+		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
+			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
+			return acc;
+		}, {});
+		console.log("roomSongs:", roomSongs);
+		const favoriteSongs: any = await this.dbUtils.getUserFavoriteSongs(userID);
+		// const favoriteSongs: any[] = [];
+		console.log("favoriteSongs:", favoriteSongs);
+		this.recommender.setMockSongs(
+			favoriteSongs.map((song: any) => song.audio_features),
+		);
+		this.recommender.setPlaylists(roomSongs);
+		const recommendedRooms = this.recommender.getTopPlaylists(5);
+		console.log("recommendedRooms:", recommendedRooms);
+		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+			recommendedRooms.map((room: any) => room.playlist),
+		);
+		return r === null ? [] : r;
 	}
 
 	async getCurrentRoom(userID: string): Promise<RoomDto | object> {
@@ -411,7 +425,12 @@ export class UsersService {
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
-			where: { OR: [{ friend1: userID }, { friend2: userID }] },
+			where: {
+				AND: [
+					{ OR: [{ friend1: userID }, { friend2: userID }] },
+					{ is_pending: false },
+				],
+			},
 		});
 		console.log(f);
 		if (!f) {
@@ -426,7 +445,11 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		const r = await this.dtogen.generateMultipleUserDto(ids);
+		let r = await this.dtogen.generateMultipleUserDto(ids);
+		r = r.map((user) => {
+			user.relationship = "friend";
+			return user;
+		});
 		console.log(r);
 		return r;
 	}
@@ -438,12 +461,23 @@ export class UsersService {
 		}
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
 			);
 		}
+
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
@@ -454,12 +488,22 @@ export class UsersService {
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
 			);
 		}
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
@@ -646,6 +690,7 @@ export class UsersService {
 			},
 			data: {
 				is_pending: false,
+				date_friended: new Date(),
 			},
 		});
 		console.log("accepted friend request", result);
@@ -719,330 +764,100 @@ export class UsersService {
 			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
 			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
 		*/
-		return [];
-	}
 
-	async sendMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
-		//send message to user
-		try {
-			const newMessage = await this.prisma.message.create({
-				data: {
-					contents: message.messageBody,
-					date_sent: message.dateSent,
-					sender: message.sender.userID,
-				},
-			});
-			const m: PrismaTypes.private_message =
-				await this.prisma.private_message.create({
-					data: {
-						users: {
-							connect: {
-								user_id: message.recipient.userID,
-							},
-						},
-						message: {
-							connect: {
-								message_id: newMessage.message_id,
-							},
-						},
-					},
-				});
-			console.log("new DM: ");
-			console.log(m);
-			return await this.dtogen.generateDirectMessageDto(m.p_message_id);
-		} catch (e) {
-			throw new Error("Failed to send message");
+		const friendRequests = await this.dbUtils.getFriendRequests(userID);
+		if (!friendRequests) {
+			return [];
 		}
-	}
-
-	async getMessages(
-		userID: string,
-		recipientID: string,
-	): Promise<DirectMessageDto[]> {
-		//get messages between two users
-		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
-	}
-
-	async getUnreadMessages(
-		userID: string,
-		recipientID: string,
-	): Promise<DirectMessageDto[]> {
-		//get unread messages between two users
-		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID, true);
-	}
-
-	//count the number of chats with new messages
-	async getNewMessageCount(userID: string, min: Date): Promise<number> {
-		const dms: ({
-			message: PrismaTypes.message;
-		} & PrismaTypes.private_message)[] =
-			await this.prisma.private_message.findMany({
-				where: {
-					recipient: userID,
-					message: {
-						date_sent: {
-							gte: min,
-						},
-					},
-				},
-				include: {
-					message: true,
-				},
-			});
-
-		if (!dms || dms === null) {
+		const ids: string[] = friendRequests.map((friend: any) => friend.friend1);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
 			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+				"An unknown error occurred while generating UserDto for friend requests. Received null.",
 			);
-		}
-
-		//count number of unique senders
-		const senders: string[] = [];
-		for (let i = 0; i < dms.length; i++) {
-			const dm = dms[i];
-			if (dm && dm !== null) {
-				if (!senders.includes(dm.message.sender)) {
-					senders.push(dm.message.sender);
-				}
-			}
-		}
-		return senders.length;
-	}
-
-	async getUserNewMessages(
-		userID: string,
-		min: Date,
-	): Promise<DirectMessageDto[]> {
-		const self: UserDto = await this.dtogen.generateUserDto(userID);
-		const dms: ({
-			message: PrismaTypes.message;
-		} & PrismaTypes.private_message)[] =
-			await this.prisma.private_message.findMany({
-				where: {
-					recipient: userID,
-					message: {
-						date_sent: {
-							gt: min,
-						},
-					},
-				},
-				include: {
-					message: true,
-				},
-			});
-
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
-		}
-
-		//sort messages by date
-		dms.sort((a, b) => {
-			return a.message.date_sent.getTime() - b.message.date_sent.getTime();
-		});
-
-		const result: DirectMessageDto[] = [];
-		for (let i = 0; i < dms.length; i++) {
-			const dm = dms[i];
-			if (dm && dm !== null) {
-				const sender: UserDto = await this.dtogen.generateUserDto(
-					dm.message.sender,
-				);
-				const index: number = await this.dbUtils.getDMIndex(
-					userID,
-					dm.message.sender,
-					dm.p_message_id,
-				);
-				const message: DirectMessageDto = {
-					index: index,
-					messageBody: dm.message.contents,
-					sender: sender,
-					recipient: self,
-					dateSent: dm.message.date_sent,
-					dateRead: new Date(0),
-					isRead: false,
-					pID: dm.p_message_id,
-				};
-				result.push(message);
-			}
 		}
 		return result;
 	}
 
-	async getNewMessages(userID: string): Promise<DirectMessageDto[]> {
-		//get new messages for the user
-		const lastRead: Date = new Date(0);
-		return await this.getUserNewMessages(userID, lastRead);
-	}
-
-	async markMessagesAsRead(
-		userID: string,
-		messages: DirectMessageDto[],
-	): Promise<boolean> {
-		//mark multiple messages as read
-		try {
-			console.log(
-				`Marking ${messages.length} messages as read for user ` + userID,
-			);
-
-			/*
-			await this.prisma.private_message.updateMany({
-				where: {
-					recipient: userID,
-					message: {
-						message_id: {
-							in: messages.map((m) => m.pID),
-						},
-					},
-				},
-				data: {
-					is_read: true,
-				},
-			});
-			*/
-			return true;
-		} catch (e) {
-			console.error(e);
-			throw e;
+	async getPotentialFriends(userID: string): Promise<UserDto[]> {
+		//get all potential friends for the user
+		console.log("Getting potential friends for user " + userID);
+		const potentialFriends = await this.dbUtils.getPotentialFriends(userID);
+		if (!potentialFriends) {
+			return [];
 		}
-	}
-
-	async deleteMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<boolean> {
-		//delete a message
-		try {
-			await this.prisma.message.delete({
-				where: { message_id: message.pID },
-			});
-			return true;
-		} catch (e) {
-			console.error(e);
-			throw e;
-		}
-	}
-
-	async editMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
-		//edit a message
-		try {
-			const updatedMessage:
-				| ({
-						message: PrismaTypes.message;
-				  } & PrismaTypes.private_message)
-				| null = await this.prisma.private_message.update({
-				where: {
-					p_message_id: message.pID,
-				},
-				data: {
-					message: {
-						update: {
-							contents: message.messageBody,
-						},
-					},
-				},
-				include: {
-					message: true,
-				},
-			});
-			if (!updatedMessage || updatedMessage === null) {
-				throw new Error("Failed to update message");
-			}
-			return await this.dtogen.generateDirectMessageDto(
-				updatedMessage.p_message_id,
-			);
-		} catch (e) {
-			console.error(e);
-			throw e;
-		}
-	}
-
-	async generateChatHash(
-		userID: string,
-		recipientID: string,
-	): Promise<string[]> {
-		//generate a unique chat hash
-		const chatStr1 = userID + recipientID;
-		const chatStr2 = recipientID + userID;
-		const a = this.dbUtils.generateHash(chatStr1);
-		const b = this.dbUtils.generateHash(chatStr2);
-		return Promise.all([a, b]);
-	}
-
-	async getLastDMs(userID: string): Promise<DirectMessageDto[]> {
-		//get the last few messages for the user
-		const dms: ({
-			message: PrismaTypes.message;
-		} & PrismaTypes.private_message)[] =
-			await this.prisma.private_message.findMany({
-				where: {
-					OR: [
-						{
-							recipient: userID,
-						},
-						{
-							message: {
-								sender: userID,
-							},
-						},
-					],
-				},
-				include: {
-					message: true,
-				},
-			});
-
-		if (!dms || dms === null) {
+		const ids: string[] = potentialFriends.map((friend: any) => friend.user_id);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
 			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+				"An unknown error occurred while generating UserDto for potential friends. Received null.",
 			);
 		}
-
-		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
-		for (let i = 0; i < dms.length; i++) {
-			const dm = dms[i];
-			if (dm.message.sender !== userID) {
-				if (!uniqueUserIDs.has(dm.message.sender)) {
-					uniqueUserIDs.set(dm.message.sender, false);
-				}
-			} else if (dm.recipient !== userID) {
-				if (!uniqueUserIDs.has(dm.recipient)) {
-					uniqueUserIDs.set(dm.recipient, false);
-				}
-			}
-		}
-
-		//sort messages by date (newest first)
-		dms.sort((a, b) => {
-			return b.message.date_sent.getTime() - a.message.date_sent.getTime();
-		});
-
-		const chats: ({
-			message: PrismaTypes.message;
-		} & PrismaTypes.private_message)[] = [];
-		for (let i = 0; i < dms.length; i++) {
-			const dm = dms[i];
-			const recipient: string = dm.recipient;
-			const sender: string = dm.message.sender;
-			const r = uniqueUserIDs.get(recipient);
-			const s = uniqueUserIDs.get(sender);
-			if (r !== undefined && r === false) {
-				uniqueUserIDs.set(recipient, true);
-				chats.push(dm);
-			} else if (s !== undefined && s === false) {
-				uniqueUserIDs.set(sender, true);
-				chats.push(dm);
-			}
-		}
-		const result: DirectMessageDto[] =
-			await this.dtogen.generateMultipleDirectMessageDto(chats);
 		return result;
+	}
+
+	async getPendingRequests(userID: string): Promise<UserDto[]> {
+		//get all pending friend requests for the user
+		console.log("Getting pending friend requests for user " + userID);
+		const pendingRequests: PrismaTypes.friends[] | null =
+			await this.dbUtils.getPendingRequests(userID);
+		if (!pendingRequests) {
+			return [];
+		}
+		const ids: string[] = pendingRequests.map((friend) => friend.friend2);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for pending requests. Received null.",
+			);
+		}
+		return result;
+	}
+
+	async cancelFriendRequest(
+		userID: string,
+		friendUserID: string,
+	): Promise<boolean> {
+		//cancel friend request
+		console.log(
+			"user (" + userID + ") cancelled friend request to @" + friendUserID,
+		);
+		if (userID === friendUserID) {
+			throw new HttpException(
+				"You cannot cancel a friend request to yourself",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		// check if users exist
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		if (!(await this.dbUtils.userExists(friendUserID))) {
+			throw new HttpException(
+				"User (" + friendUserID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		const cancelledRequest = await this.prisma.friends.deleteMany({
+			where: {
+				friend1: userID,
+				friend2: friendUserID,
+				is_pending: true,
+			},
+		});
+		if (cancelledRequest.count === 0) {
+			throw new HttpException(
+				"User (" +
+					userID +
+					") has not sent a friend request to user (" +
+					friendUserID +
+					")",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		return true;
 	}
 }
