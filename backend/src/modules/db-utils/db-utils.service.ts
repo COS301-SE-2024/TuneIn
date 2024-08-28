@@ -490,4 +490,135 @@ export class DbUtilsService {
 		}
 		return true;
 	}
+
+	async getPendingRequests(
+		userID: string,
+	): Promise<PrismaTypes.friends[] | null> {
+		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				friend2: userID,
+				is_pending: true,
+			},
+		});
+		if (!friends || friends === null) {
+			return null;
+		}
+		if (friends.length === 0) {
+			return null;
+		}
+		return friends;
+	}
+
+	async getPotentialFriends(
+		userID: string,
+	): Promise<PrismaTypes.users[] | null> {
+		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				friend1: userID,
+				is_pending: true,
+			},
+		});
+		if (!friends || friends === null) {
+			return null;
+		}
+		if (friends.length === 0) {
+			return null;
+		}
+
+		const result: PrismaTypes.users[] = [];
+		for (let i = 0; i < friends.length; i++) {
+			const f = friends[i];
+			if (f && f !== null) {
+				const user: PrismaTypes.users | null =
+					await this.prisma.users.findUnique({
+						where: { user_id: f.friend2 },
+					});
+				if (user && user !== null) {
+					result.push(user);
+				}
+			}
+		}
+		return result;
+	}
+
+	async getFriendRequests(userID: string): Promise<PrismaTypes.users[] | null> {
+		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				friend2: userID,
+				is_pending: true,
+			},
+		});
+		if (!friends || friends === null) {
+			return null;
+		}
+		if (friends.length === 0) {
+			return null;
+		}
+
+		const result: PrismaTypes.users[] = [];
+		for (let i = 0; i < friends.length; i++) {
+			const f = friends[i];
+			if (f && f !== null) {
+				const user: PrismaTypes.users | null =
+					await this.prisma.users.findUnique({
+						where: { user_id: f.friend1 },
+					});
+				if (user && user !== null) {
+					result.push(user);
+				}
+			}
+		}
+		return result;
+	}
+
+	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[] | null> {
+		// console.log("getting room songs:", roomID);
+		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
+			where: { room_id: roomID },
+			include: { song: true },
+		});
+		// console.log("queue:", queue);
+		if (!queue || queue === null) {
+			throw new Error("Room not found. Probably doesn't exist fr.");
+		}
+
+		return queue.map((q: any) => q.song);
+	}
+
+	async getRelationshipStatus(
+		userID: string,
+		accountFriendId: string,
+	): Promise<string> {
+		// check if user is friends with accountFriendId
+		// userId can be friend1 or friend2, so check both
+		// additional condition, the is_pending field must be false
+
+		// query must look like this
+		// SELECT * FROM friends WHERE (friend1 = userID AND friend2 = accountFriendId) OR (friend1 = accountFriendId AND friend2 = userID) AND is_pending = false;
+		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{
+						friend1: userID,
+						friend2: accountFriendId,
+					},
+					{
+						friend1: accountFriendId,
+						friend2: userID,
+					},
+				],
+				is_pending: false,
+			},
+		});
+		if (!friends || friends === null) {
+			return "none";
+		}
+		if (friends.length === 0) {
+			return "none";
+		}
+		if (friends.length > 1) {
+			throw new Error("More than one friend found.");
+		}
+		return "friends";
+	}
 }
