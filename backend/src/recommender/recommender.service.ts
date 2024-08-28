@@ -19,19 +19,21 @@ export class RecommenderService implements OnModuleInit {
 	};
 
 	private playlists: { [key: string]: any[] } = {};
-	private mockSong = {
-		danceability: 0.626,
-		energy: 0.67,
-		key: 7,
-		loudness: -6.6,
-		mode: 0,
-		speechiness: 0.0944,
-		acousticness: 0.55,
-		instrumentalness: 0,
-		liveness: 0.116,
-		valence: 0.497,
-		tempo: 79.839,
-	};
+	private mockSongs = [
+		{
+			danceability: 0.626,
+			energy: 0.67,
+			key: 7,
+			loudness: -6.6,
+			mode: 0,
+			speechiness: 0.0944,
+			acousticness: 0.55,
+			instrumentalness: 0,
+			liveness: 0.116,
+			valence: 0.497,
+			tempo: 79.839,
+		},
+	];
 
 	constructor() {}
 
@@ -62,47 +64,76 @@ export class RecommenderService implements OnModuleInit {
 	}
 
 	private cosineSimilarityWeighted(
-		song1: any,
+		favoriteSongs: any,
 		song2: any,
 		weights: any,
 	): number {
-		const dotProduct = Object.keys(song1).reduce((sum, key) => {
-			if (key in weights) {
-				return sum + song1[key] * song2[key] * weights[key];
-			}
-			return sum;
-		}, 0);
-
-		const magnitude1 = Math.sqrt(
-			Object.keys(song1).reduce((sum, key) => {
+		let weightedSimilarities: number = 0;
+		for (const song1 of favoriteSongs) {
+			const dotProduct = Object.keys(song1).reduce((sum, key) => {
 				if (key in weights) {
-					return sum + song1[key] * song1[key] * weights[key];
+					return sum + song1[key] * song2[key] * weights[key];
 				}
 				return sum;
-			}, 0),
-		);
+			}, 0);
 
-		const magnitude2 = Math.sqrt(
-			Object.keys(song2).reduce((sum, key) => {
-				if (key in weights) {
-					return sum + song2[key] * song2[key] * weights[key];
-				}
-				return sum;
-			}, 0),
-		);
+			const magnitude1 = Math.sqrt(
+				Object.keys(song1).reduce((sum, key) => {
+					if (key in weights) {
+						return sum + song1[key] * song1[key] * weights[key];
+					}
+					return sum;
+				}, 0),
+			);
 
-		return dotProduct / (magnitude1 * magnitude2);
+			const magnitude2 = Math.sqrt(
+				Object.keys(song2).reduce((sum, key) => {
+					if (key in weights) {
+						return sum + song2[key] * song2[key] * weights[key];
+					}
+					return sum;
+				}, 0),
+			);
+
+			weightedSimilarities += dotProduct / (magnitude1 * magnitude2);
+		}
+		// const dotProduct = Object.keys(song1).reduce((sum, key) => {
+		// 	if (key in weights) {
+		// 		return sum + song1[key] * song2[key] * weights[key];
+		// 	}
+		// 	return sum;
+		// }, 0);
+
+		// const magnitude1 = Math.sqrt(
+		// 	Object.keys(song1).reduce((sum, key) => {
+		// 		if (key in weights) {
+		// 			return sum + song1[key] * song1[key] * weights[key];
+		// 		}
+		// 		return sum;
+		// 	}, 0),
+		// );
+
+		// const magnitude2 = Math.sqrt(
+		// 	Object.keys(song2).reduce((sum, key) => {
+		// 		if (key in weights) {
+		// 			return sum + song2[key] * song2[key] * weights[key];
+		// 		}
+		// 		return sum;
+		// 	}, 0),
+		// );
+
+		return weightedSimilarities / favoriteSongs.length;
 	}
 
 	getPlaylistSimilarityScores(): { [key: string]: number } {
 		const playlistScores: { [key: string]: number } = {};
-
+		console.log("Playlist: ", this.playlists);
 		for (const [playlistName, songs] of Object.entries(this.playlists)) {
 			const totalSimilarity = songs.reduce((sum, song) => {
 				return (
 					sum +
 					this.cosineSimilarityWeighted(
-						this.mockSong,
+						this.mockSongs,
 						song,
 						this.featureWeights,
 					)
@@ -118,8 +149,8 @@ export class RecommenderService implements OnModuleInit {
 		return playlistScores;
 	}
 	analyzeFeatureDistribution = (playlists: any[]) => {
-		console.log("Analyzing feature distribution");
-		console.log(playlists);
+		// console.log("Analyzing feature distribution");
+		// console.log(playlists);
 		const features = ["danceability", "energy", "loudness", "tempo", "valence"];
 		features.forEach((feature) => {
 			// console.log(
