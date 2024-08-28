@@ -1,10 +1,10 @@
 import psycopg2
 
 # Replace with your actual database credentials
-dbname = "initial_db"
-user = "postgres"
-password = "P6ppdnhCmw4nG8kU2a1K"
-host = "tunein-db.che0om0o6j54.af-south-1.rds.amazonaws.com"
+dbname = ""
+user = ""
+password = ""
+host = ""
 port = 5432  # Note: Port should be an integer, not a string
 
 try:
