@@ -1,29 +1,42 @@
-// CustomTopNavBar.tsx
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { Entypo } from "@expo/vector-icons"; // Make sure to install the icon library: expo install @expo/vector-icons
+import { useRouter } from "expo-router";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 
-interface CustomTopNavBarProps {
+interface RoomTabProps {
 	activeTab: string;
 	setActiveTab: (tab: string) => void;
 }
 
-const CustomTopNavBar: React.FC<CustomTopNavBarProps> = ({
-	activeTab,
-	setActiveTab,
-}) => {
-	const navigation = useNavigation<NavigationProp<any>>();
+const RoomTab: React.FC<RoomTabProps> = ({ activeTab, setActiveTab }) => {
+	const router = useRouter();
+
+	const handleTabChange = (tab: string) => {
+		setActiveTab(tab);
+		switch (tab) {
+			case "Chat":
+				router.push("/screens/rooms/ChatRoom");
+				break;
+			case "Room":
+				router.push("/screens/rooms/RoomPage");
+				break;
+			case "Queue":
+				router.push("/screens/rooms/Playlist");
+				break;
+			default:
+				break;
+		}
+	};
 
 	return (
 		<View style={styles.topBarContainer}>
 			{/* Back Button */}
 			<TouchableOpacity
-				onPress={() => navigation.goBack()}
+				onPress={() => router.back()}
 				style={styles.backButton}
 				testID="backButton"
 			>
-				<Entypo name="chevron-left" size={24} color="black" />
+				<Ionicons name="chevron-back" size={24} color="black" />
 			</TouchableOpacity>
 
 			{/* Tabs */}
@@ -31,7 +44,7 @@ const CustomTopNavBar: React.FC<CustomTopNavBarProps> = ({
 				{["Chat", "Room", "Queue"].map((tab) => (
 					<TouchableOpacity
 						key={tab}
-						onPress={() => setActiveTab(tab)}
+						onPress={() => handleTabChange(tab)}
 						style={styles.tabButton}
 					>
 						<Text
@@ -47,7 +60,7 @@ const CustomTopNavBar: React.FC<CustomTopNavBarProps> = ({
 				))}
 			</View>
 
-			{/* Menu Icon */}
+			{/* Menu Button */}
 			<TouchableOpacity
 				onPress={() => console.log("Menu pressed")}
 				style={styles.menuButton}
@@ -66,7 +79,6 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		borderBottomWidth: 1,
 		borderBottomColor: "#ddd",
-		paddingHorizontal: 10,
 	},
 	backButton: {
 		paddingRight: 20,
@@ -102,4 +114,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default CustomTopNavBar;
+export default RoomTab;

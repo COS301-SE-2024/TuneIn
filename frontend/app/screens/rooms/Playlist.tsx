@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import RoomTab from "../../components/RoomTab";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
+import CreateButton from "../../components/CreateButton";
 
 const Playlist = () => {
 	const router = useRouter();
@@ -66,6 +68,9 @@ const Playlist = () => {
 
 	return (
 		<View style={styles.container}>
+			{/* RoomTab component */}
+			<RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "}
+			{/* Set activeTab to "Queue" */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.backButton}
@@ -118,6 +123,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 16,
+		backgroundColor: "white",
 	},
 	header: {
 		flexDirection: "row",
