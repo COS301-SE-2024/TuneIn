@@ -80,8 +80,9 @@ model friends {
 }
 
 model genre {
-  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  genre    String?
+  genre_id        String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  genre           String?
+  favorite_genres favorite_genres[]
 }
 
 model message {
@@ -213,16 +214,18 @@ model search_suggestions {
 }
 
 model song {
-  song_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String
-  artist      String
-  genre       String?
-  lyrics_url  String?
-  duration    Int?     @default(0)
-  genres      String[]
-  artwork_url String?
-  spotify_id  String?
-  queue       queue[]
+  song_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name           String
+  genre          String?
+  lyrics_url     String?
+  duration       Int?             @default(0)
+  genres         String[]
+  artwork_url    String?
+  spotify_id     String           @unique
+  audio_features Json             @db.Json
+  artists        String[]
+  favorite_songs favorite_songs[]
+  queue          queue[]
 }
 
 model table_state {
@@ -261,6 +264,8 @@ model users {
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
   chat_reactions                  chat_reactions[]
+  favorite_genres                 favorite_genres[]
+  favorite_songs                  favorite_songs[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
   friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
@@ -283,4 +288,20 @@ model vote {
   vote_time DateTime @default(now()) @db.Timestamptz(6)
   queue     queue    @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
   users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+}
+
+model favorite_genres {
+  genre_id    String @db.Uuid
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String @db.Uuid
+  genre       genre  @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model favorite_songs {
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  song_id     String @db.Uuid
+  user_id     String @db.Uuid
+  song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
