@@ -8,7 +8,6 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
-import { CreateUserDto } from "./dto/create-user.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
 
 @Injectable()
@@ -20,14 +19,18 @@ export class UsersService {
 	) {}
 
 	// Tutorial CRUD operations
-	create(createUserDto: CreateUserDto) {
+	create(createUserDto: Partial<UserDto>) {
+		if (!createUserDto.username) {
+			throw new HttpException("Username is required", HttpStatus.BAD_REQUEST);
+		}
 		const user: Prisma.usersCreateInput = {
 			user_id: createUserDto.userID,
 			username: createUserDto.username,
 			bio: createUserDto.bio,
-			profile_picture: createUserDto.profile_picture,
-			activity: createUserDto.activity,
-			preferences: createUserDto.preferences,
+			profile_picture: createUserDto.profile_picture_url,
+			preferences: {
+				fav_genres: createUserDto.fav_genres,
+			},
 		};
 		return this.prisma.users.create({ data: user });
 	}
@@ -81,18 +84,71 @@ export class UsersService {
 			throw new Error("User not found");
 		}
 
-		const updateData = this.dbUtils.buildUpdateData(user, updateProfileDto);
+		const updatedUser: Prisma.usersUpdateInput = {
+			user_id: userId,
+		};
+
+		if (updateProfileDto.username) {
+			updatedUser.username = updateProfileDto.username;
+		}
+
+		if (updateProfileDto.bio) {
+			updatedUser.bio = updateProfileDto.bio;
+		}
+
+		if (updateProfileDto.email) {
+			updatedUser.email = updateProfileDto.email;
+		}
+
+		if (updateProfileDto.profile_name) {
+			updatedUser.full_name = updateProfileDto.profile_name;
+		}
+
+		if (updateProfileDto.profile_picture_url) {
+			updatedUser.profile_picture = updateProfileDto.profile_picture_url;
+		}
+
+		if (updateProfileDto.links) {
+			// console.log(updateProfileDto.links.data);
+			// updatedUser.external_links = { data: updateProfileDto.links.data };
+		}
+
+		// Merge the preferences if they exist in the updateProfileDto
+		if (updateProfileDto.fav_genres) {
+			let existingPreferences = user.preferences;
+
+			if (existingPreferences) {
+				if (
+					typeof existingPreferences === "object" &&
+					!Array.isArray(existingPreferences)
+				) {
+					if (updateProfileDto.fav_genres) {
+						existingPreferences.fav_genres = updateProfileDto.fav_genres
+							.data as Prisma.JsonArray;
+					}
+				} else {
+					existingPreferences = {
+						fav_genres: updateProfileDto.fav_genres.data,
+					};
+				}
+			} else {
+				existingPreferences = {
+					fav_genres: updateProfileDto.fav_genres.data,
+				};
+			}
+
+			updatedUser.preferences = existingPreferences as Prisma.InputJsonValue;
+		}
 
 		await this.prisma.users.update({
 			where: { user_id: userId },
-			data: updateData,
+			data: updatedUser,
 		});
 
 		const u = await this.dtogen.generateUserDto(userId);
 		if (!u) {
 			throw new Error("Failed to generate user profile");
 		}
-
 		return u;
 	}
 
