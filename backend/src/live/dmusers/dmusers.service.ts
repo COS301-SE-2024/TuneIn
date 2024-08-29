@@ -133,9 +133,8 @@ export class DmUsersService {
 			//disconnect & reconnect
 			this.disconnectChat(socketId);
 		}
-		const participant: UserDto = await this.dtogen.generateUserDto(
-			participantId,
-		);
+		const participant: UserDto =
+			await this.dtogen.generateUserDto(participantId);
 		const chatIDs: string[] = await this.usersService.generateChatHash(
 			u.user.userID,
 			participantId,

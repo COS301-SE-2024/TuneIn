@@ -152,9 +152,8 @@ export class SpotifyService {
 
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 
-		const playlists: Spotify.SimplifiedPlaylist[] = await this.getUserPlaylists(
-			tk,
-		);
+		const playlists: Spotify.SimplifiedPlaylist[] =
+			await this.getUserPlaylists(tk);
 		const likedSongs: Spotify.SavedTrack[] = await this.getAllLikedSongs(tk);
 
 		const foundSongs: Spotify.PlaylistedTrack[] = [];
