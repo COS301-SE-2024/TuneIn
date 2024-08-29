@@ -8,6 +8,11 @@ response: return UserDto
 input: UserDto
 output: updated UserDto
 
+### `/users/stats`
+#### GET: gets user's listening stats
+no input
+response: return UserListeningStatsDto
+
 ### `/users/dms`
 #### GET: gets the last DMs sent to or received from another user
 response: return DirectMessageDto[]

@@ -10,7 +10,7 @@ import {
 	Param,
 	RawBodyRequest,
 } from "@nestjs/common";
-import { UsersService } from "./users.service";
+import { UserListeningStatsDto, UsersService } from "./users.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
@@ -189,6 +189,31 @@ export class UsersController {
 	async getDMs(@Request() req: Request): Promise<DirectMessageDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getLastDMs(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("stats")
+	@ApiOperation({
+		summary: "Get a user's listening stats",
+		description:
+			"Get the listening stats of the authenticated user, including total time listened, and average listening time per day, most played songs, genres, and artists.",
+		operationId: "getListeningStats",
+	})
+	@ApiOkResponse({
+		description: "The user's listening stats as a UserListeningStatsDto.",
+		type: UserListeningStatsDto,
+	})
+	async getListeningStats(@Request() req: Request): Promise<UserListeningStatsDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getListeningStats(userInfo.id);
 	}
 
 	@ApiBearerAuth()

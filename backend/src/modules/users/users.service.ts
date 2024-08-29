@@ -9,6 +9,31 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
+import { IsNumber, IsObject } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+
+export class UserListeningStatsDto {
+	@ApiProperty({
+		description: "The total number of songs listened to by the user",
+		example: 100,
+	})
+	@IsNumber()
+	totalListenedSongs: number;
+
+	@ApiProperty({
+		description: "The total number of hours spent listening to music by room",
+		example: 10,
+	})
+	@IsObject()
+	listeningTimeByRoom: Record<string, number>;
+
+	@ApiProperty({
+		description: "The total number of hours spent listening to music by genre",
+		example: 10,
+	})
+	@IsObject()
+	listeningTimeByGenre: Record<string, number>;
+}
 
 @Injectable()
 export class UsersService {
@@ -1188,5 +1213,22 @@ export class UsersService {
 		}
 
 		//if user has been reported 5x, delete their account
+	}
+
+	async getListeningStats(userID: string): Promise<UserListeningStatsDto> {
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user) {
+			throw new Error("User does not exist");
+		}
+
+		const stats: UserListeningStatsDto = {
+			totalListenedSongs: 0,
+			listeningTimeByRoom: {} as Record<string, number>,
+			listeningTimeByGenre: {} as Record<string, number>,
+		};
+		return stats;
 	}
 }
