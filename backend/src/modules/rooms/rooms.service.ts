@@ -247,10 +247,10 @@ export class RoomsService {
 			const _where: object = getFollowers
 				? {
 						follower: user_id,
-				  }
+					}
 				: {
 						followee: user_id,
-				  };
+					};
 			const followers: number = await this.prisma.follows.count({
 				where: _where,
 			});
@@ -436,9 +436,8 @@ export class RoomsService {
 	}
 
 	async getLiveChatHistoryDto(roomID: string): Promise<LiveChatMessageDto[]> {
-		const messages: PrismaTypes.message[] = await this.getLiveChatHistory(
-			roomID,
-		);
+		const messages: PrismaTypes.message[] =
+			await this.getLiveChatHistory(roomID);
 		const result: LiveChatMessageDto[] =
 			await this.dtogen.generateMultipleLiveChatMessageDto(messages);
 		return result;
@@ -925,9 +924,8 @@ export class RoomsService {
 			await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour =
 			await this.getHourlyParticipantAnalytics(roomID);
-		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(
-			roomID,
-		);
+		roomAnalyticsParticipation.room_previews =
+			await this.getRoomPreviews(roomID);
 		roomAnalyticsParticipation.return_visits =
 			await this.getReturnVisitsAnalytics(
 				roomID,
@@ -1101,12 +1099,10 @@ export class RoomsService {
 			new RoomAnalyticsInteractionsDto();
 		roomInteractionAnalytics.messages =
 			await this.getMessageInteractionsAnalytics(roomID);
-		roomInteractionAnalytics.bookmarked_count = await this.getNumberOfBookmarks(
-			roomID,
-		);
-		roomInteractionAnalytics.reactions_sent = await this.getNumberOfReactions(
-			roomID,
-		);
+		roomInteractionAnalytics.bookmarked_count =
+			await this.getNumberOfBookmarks(roomID);
+		roomInteractionAnalytics.reactions_sent =
+			await this.getNumberOfReactions(roomID);
 		return roomInteractionAnalytics;
 	}
 
@@ -1269,9 +1265,8 @@ export class RoomsService {
 			new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
 		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
-		keyMetrics.average_session_duration = await this.getAverageSessionDuration(
-			userID,
-		);
+		keyMetrics.average_session_duration =
+			await this.getAverageSessionDuration(userID);
 		return keyMetrics;
 	}
 

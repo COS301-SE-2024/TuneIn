@@ -54,9 +54,8 @@ export class DtoGenService {
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
 
-			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
-				favRoomIDs,
-			);
+			const roomDtoArray: RoomDto[] | null =
+				await this.generateMultipleRoomDto(favRoomIDs);
 			if (roomDtoArray && roomDtoArray !== null) {
 				result.fav_rooms = {
 					count: roomDtoArray.length,
