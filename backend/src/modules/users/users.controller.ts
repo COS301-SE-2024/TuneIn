@@ -314,8 +314,7 @@ export class UsersController {
 		operationId: "getCurrentRoom",
 	})
 	@ApiOkResponse({
-		description:
-			"The user's current room as a RoomDto.",
+		description: "The user's current room as a RoomDto.",
 		type: RoomDto,
 	})
 	async getCurrentRoom(@Request() req: any): Promise<RoomDto> {
@@ -727,12 +726,15 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "User's current room retrieved successfully",
+		type: RoomDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	@ApiTags("rooms")
-	async getCurrentRoomByUserId(@Param("userId") userId: string): Promise<any> {
+	async getCurrentRoomByUserId(
+		@Param("userId") userId: string,
+	): Promise<RoomDto> {
 		return await this.usersService.getCurrentRoom(userId);
 	}
 

@@ -754,47 +754,30 @@ export class UsersService {
 		return [];
 	}
 
-	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
+	async getCurrentRoom(userID: string): Promise<RoomDto> {
 		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
 		}
-		const room: any = await this.prisma.participate.findFirst({
-			where: {
-				user_id: userID,
-			},
-			include: {
-				room: true,
-			},
-		});
+		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
+			await this.prisma.participate.findFirst({
+				where: {
+					user_id: userID,
+				},
+				include: {
+					room: true,
+				},
+			});
 
-		if (room !== null) {
-			room.room = await this.dtogen.generateRoomDto(room.room.room_id);
-		}
-
-		// if the user is in a room, get the join time from the user_activity table.
-		// do the query on user id and retrieve the activity with a leave date of null
-		// if the user is not in a room, return null
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const userActivity: any = await this.prisma.user_activity.findFirst({
-			where: {
-				user_id: userID,
-				room_id: room.room_id,
-				room_leave_time: null,
-			},
-		});
-		// add the join date to the returned object
-		try {
-			room.room_join_time = userActivity.room_join_time;
-		} catch (error) {
-			console.error("Error getting room join time:", error);
-			throw new HttpException(
-				"Error getting room join time",
-				HttpStatus.INTERNAL_SERVER_ERROR,
+		const result = await this.dtogen.generateRoomDto(room.room.room_id);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for current room. Received null.",
 			);
 		}
-		return room;
+		return result;
 	}
 
 	async sendMessage(
