@@ -82,6 +82,14 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
+	const navigateToMore = (items: any) => {
+		console.log("Navigate params: " + JSON.stringify( items));
+		router.push({
+			pathname: "./MorePage",
+			params: { type: "room", items: JSON.stringify(items) },
+		});
+	};
+
 	if (params && JSON.stringify(params) !== "{}") {
 		ownsProfile = false;
 	}
@@ -606,7 +614,7 @@ const ProfileScreen: React.FC = () => {
 						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
-				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
+				{/* <View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<Text style={styles.title}>Favorite Songs</Text>
 					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
@@ -622,10 +630,19 @@ const ProfileScreen: React.FC = () => {
 						isVisible={isMusicDialogVisible}
 						onClose={() => setMusicDialogVisible(false)}
 					/>
-				</View>
+				</View> */}
 				<Text style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}>
 					Favorite Rooms
 				</Text>
+				<TouchableOpacity
+					onPress={() => {navigateToMore(
+						primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
+						preFormatRoomData(room, false),
+					)
+					)}}
+				>
+					More
+				</TouchableOpacity>
 				<AppCarousel
 					data={primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
 						preFormatRoomData(room, false),
