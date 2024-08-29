@@ -19,6 +19,7 @@ import {
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
+	ApiProduces,
 	ApiSecurity,
 	ApiTags,
 	ApiUnauthorizedResponse,
@@ -1115,5 +1116,51 @@ export class RoomsController {
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.roomsService.undoBan(roomID, userInfo.id, user.userID);
+	}
+
+	@Get(":roomID/schedule")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Get scheduled room",
+		description: "Returns the scheduled room as a .ics file.",
+		operationId: "getCalendarFile",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the schedule for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The scheduled room as a .ics file.",
+		type: File,
+		content: {	
+			"application/octet-stream": {
+				schema: {
+					type: "string",
+					format: "binary",
+				},
+			},
+			"text/calendar": {
+				schema: {
+					type: "string",
+					format: "binary",
+				},
+			},
+		},
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not scheduled",
+	})
+	@ApiProduces("application/octet-stream")
+	@ApiProduces("text/calendar")
+	getScheduledRoom(@Param("roomID") roomID: string): File {
+		return this.roomsService.getCalendarFile(roomID);
 	}
 }

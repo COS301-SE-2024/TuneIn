@@ -1783,4 +1783,15 @@ export class RoomsService {
 			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	async getCalendarFile(roomID: string): Promise<File> {
+		// Implement the logic to get the calendar file for the room
+		if (true) { // room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		if (true) { // room does not have any events
+			throw new HttpException("Room does not have any events", HttpStatus.NOT_FOUND);
+		}
+		return new File();
+	}
 }

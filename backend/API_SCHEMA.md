@@ -193,6 +193,10 @@ query params
 - active: boolean
 response: array of UserDto
 
+### `/rooms/{room_id}/schedule`
+#### GET: returns a .ics file for the scheduled room
+response: a .ics file or 4xx for room that is not scheduled
+
 ### `/rooms/{room_id}/songs`
 #### GET: returns the queue
 no input
