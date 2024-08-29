@@ -57,6 +57,15 @@ export class SpotifyService {
 		return user;
 	}
 
+	async getAudioFeatures(
+		token: SpotifyTokenResponse,
+		songID: string,
+	): Promise<Spotify.AudioFeatures> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const audioFeatures = await api.tracks.audioFeatures(songID);
+		return audioFeatures;
+	}
+
 	async getUserPlaylists(
 		tk: SpotifyTokenPair,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
