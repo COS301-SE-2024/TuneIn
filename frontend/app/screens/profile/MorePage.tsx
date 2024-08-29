@@ -32,6 +32,8 @@ const Search: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+	const [displayedItems, setDisplayedItems] = useState(items.slice(0, 20)); // Initial load of 20 items
+	const [loadingMore, setLoadingMore] = useState(false);
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -60,6 +62,18 @@ const Search: React.FC = () => {
 		extrapolate: "clamp",
 	});
 
+	const loadMoreItems = () => {
+		if (!loadingMore) {
+			setLoadingMore(true);
+			const newItems = items.slice(
+				displayedItems.length,
+				displayedItems.length + 20,
+			);
+			setDisplayedItems((prevItems: any) => [...prevItems, ...newItems]);
+			setLoadingMore(false);
+		}
+	};
+
 	const renderResult = ({ item }: { item: any }) => {
 		console.log("Render Items: " + item);
 		if (params.type === "room") {
@@ -86,6 +100,24 @@ const Search: React.FC = () => {
 		return null;
 	};
 
+	const renderFooter = () => {
+		if (displayedItems.length < items.length) {
+			return (
+				<View
+					style={{ alignItems: "center", marginTop: 10, paddingBottom: 20 }}
+				>
+					<TouchableOpacity
+						style={styles.loadMoreButton}
+						onPress={loadMoreItems}
+					>
+						<Text style={styles.loadMoreText}>Load More</Text>
+					</TouchableOpacity>
+				</View>
+			);
+		}
+		return null;
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -98,10 +130,11 @@ const Search: React.FC = () => {
 				<Text style={styles.title}>{params.title}</Text>
 			</View>
 			<FlatList
-				data={items}
+				data={displayedItems}
 				renderItem={renderResult}
 				contentContainerStyle={styles.resultsContainer}
 				onScroll={handleScroll}
+				ListFooterComponent={renderFooter}
 			/>
 
 			<Animated.View
@@ -342,6 +375,18 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
+	},
+	loadMoreButton: {
+		width: 155,
+		height: 37,
+		backgroundColor: "rgba(158, 171, 184, 1)",
+		borderRadius: 18.5,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	loadMoreText: {
+		color: "#fff",
+		fontSize: 16,
 	},
 });
 
