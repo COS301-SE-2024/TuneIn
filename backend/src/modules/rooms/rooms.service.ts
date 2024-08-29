@@ -98,40 +98,77 @@ export class RoomsService {
 	}
 
 	async updateRoomInfo(
+		userID: string,
 		roomID: string,
 		updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		// TODO: Implement logic to update room info
-		const data = {
-			name: updateRoomDto.room_name!,
-			description: updateRoomDto.description!,
-			playlist_photo: updateRoomDto.room_image!,
-			explicit: updateRoomDto.has_explicit_content!,
-			nsfw: updateRoomDto.has_explicit_content!,
-			room_language: updateRoomDto.language!,
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const r: PrismaTypes.room | null = await this.prisma.room.findFirst({
+			where: {
+				room_id: roomID,
+			},
+		});
+
+		if (!r) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (r.room_creator !== userID) {
+			throw new HttpException(
+				"User is not the owner of the room",
+				HttpStatus.FORBIDDEN,
+			);
+		}
+
+		const updatedRoom: Prisma.roomUpdateInput = {
+			room_id: roomID,
 		};
 
-		Object.keys(data).forEach(
-			(key) =>
-				data[key as keyof typeof data] === undefined &&
-				delete data[key as keyof typeof data],
-		);
+		if (updateRoomDto.room_name) {
+			updatedRoom.name = updateRoomDto.room_name;
+		}
 
-		console.log("Updating room", roomID, "with data", data);
+		if (updateRoomDto.description) {
+			updatedRoom.description = updateRoomDto.description;
+		}
+
+		if (updateRoomDto.room_image) {
+			updatedRoom.playlist_photo = updateRoomDto.room_image;
+		}
+
+		if (updateRoomDto.has_explicit_content) {
+			updatedRoom.explicit = updateRoomDto.has_explicit_content;
+			updatedRoom.nsfw = updateRoomDto.has_explicit_content;
+		}
+
+		if (updateRoomDto.language) {
+			updatedRoom.room_language = updateRoomDto.language;
+		}
+
 		try {
-			const room = await this.prisma.room.update({
+			const room: PrismaTypes.room | null = await this.prisma.room.update({
 				where: {
 					room_id: roomID,
 				},
-				data: data,
+				data: updatedRoom,
 			});
-			const updatedRoom = room
-				? await this.dtogen.generateRoomDtoFromRoom(room)
-				: new RoomDto();
-			return updatedRoom ? updatedRoom : new RoomDto();
+
+			if (!room) {
+				throw new Error("Failed to update room");
+			}
+
+			const updatedRoomDto: RoomDto | null =
+				await this.dtogen.generateRoomDtoFromRoom(room);
+			if (!updatedRoomDto) {
+				throw new Error("Failed to generate updated room DTO");
+			}
+			return updatedRoomDto;
 		} catch (error) {
 			console.error("Error updating room info:", error);
-			return new RoomDto();
+			throw error;
 		}
 	}
 
@@ -334,7 +371,7 @@ export class RoomsService {
 		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
-	clearRoomQueue(roomID: string): boolean {
+	clearRoomQueue(userID: string, roomID: string): boolean {
 		// TODO: Implement logic to clear room queue
 		console.log(roomID);
 		return false;

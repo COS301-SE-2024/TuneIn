@@ -101,9 +101,7 @@ export class RoomsController {
 		description: "Returns the room info as a RoomDto.",
 		operationId: "getRoomInfo",
 	})
-	async getRoomInfo(
-		@Param("roomID") roomID: string,
-	): Promise<RoomDto> {
+	async getRoomInfo(@Param("roomID") roomID: string): Promise<RoomDto> {
 		console.log("getting room with ID", roomID);
 		return await this.roomsService.getRoomInfo(roomID);
 	}
@@ -150,7 +148,12 @@ export class RoomsController {
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
 		console.log("updating room with ID", roomID, "with data", updateRoomDto);
-		return await this.roomsService.updateRoomInfo(userID, roomID, updateRoomDto);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.updateRoomInfo(
+			userInfo.id,
+			roomID,
+			updateRoomDto,
+		);
 	}
 
 	@ApiBearerAuth()
@@ -187,7 +190,12 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		return await this.roomsService.updateRoomInfo(userID, roomID, updateRoomDto);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.updateRoomInfo(
+			userInfo.id,
+			roomID,
+			updateRoomDto,
+		);
 	}
 
 	@ApiBearerAuth()
@@ -336,9 +344,7 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
-	async getRoomUsers(
-		@Param("roomID") roomID: string,
-	): Promise<UserDto[]> {
+	async getRoomUsers(@Param("roomID") roomID: string): Promise<UserDto[]> {
 		return await this.roomsService.getRoomUsers(roomID);
 	}
 
@@ -405,7 +411,8 @@ export class RoomsController {
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): boolean {
-		return this.roomsService.clearRoomQueue(userID, roomID);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return this.roomsService.clearRoomQueue(userInfo.id, roomID);
 	}
 
 	@ApiBearerAuth()
@@ -467,9 +474,7 @@ export class RoomsController {
 		description: "Get the song currently playing in the room.",
 		operationId: "getCurrentSong",
 	})
-	getCurrentSong(
-		@Param("roomID") roomID: string,
-	): SongInfoDto {
+	getCurrentSong(@Param("roomID") roomID: string): SongInfoDto {
 		return this.roomsService.getCurrentSong(roomID);
 	}
 
