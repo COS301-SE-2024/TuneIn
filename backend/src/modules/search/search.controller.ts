@@ -78,7 +78,6 @@ export class SearchController {
 	})
 	async combinedSearch(
 		@Query("q") q: string,
-		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<CombinedSearchResults> {
 		const query_params = {
@@ -133,7 +132,6 @@ export class SearchController {
 	})
 	async searchRooms(
 		@Query("q") q: string,
-		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {

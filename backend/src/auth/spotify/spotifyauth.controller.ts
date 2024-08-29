@@ -60,7 +60,6 @@ export class SpotifyAuthController {
 		operationId: "spotifyRedirect",
 	})
 	async performRedirect(
-		@Request() req: Request,
 		@Query("code") code: string,
 		@Query("state") state: string,
 	) {
@@ -110,7 +109,6 @@ export class SpotifyAuthController {
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
 	async handleSpotifyAuthCallback(
-		@Request() req: Request,
 		@Query("code") code: string,
 		@Query("state") state: string,
 	) {

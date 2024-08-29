@@ -8,6 +8,7 @@ import {
 	UseGuards,
 	Request,
 	Param,
+	RawBodyRequest,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import {
@@ -90,7 +91,7 @@ export class UsersController {
 		description: "Successfully returned user profile info.",
 		type: UserDto,
 	})
-	getProfile(@Request() req: any): Promise<UserDto> {
+	getProfile(@Request() req: Request): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.usersService.getProfile(userInfo.id);
 	}
@@ -123,7 +124,7 @@ export class UsersController {
 		description: "The updated user profile info",
 	})
 	async putProfile(
-		@Request() req: any,
+		@Request() req: Request,
 		@Body() updateProfileDto: UpdateUserDto,
 	): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -158,7 +159,7 @@ export class UsersController {
 		description: "The updated user profile info",
 	})
 	async patchProfile(
-		@Request() req: any,
+		@Request() req: Request,
 		@Body() updateProfileDto: UpdateUserDto,
 	): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -185,7 +186,7 @@ export class UsersController {
 		description: "The last DMs as an array of DirectMessageDto.",
 		type: Object,
 	})
-	async getDMs(@Request() req: any): Promise<DirectMessageDto[]> {
+	async getDMs(@Request() req: Request): Promise<DirectMessageDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getLastDMs(userInfo.id);
 	}
@@ -210,7 +211,7 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
-	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+	async getUserRooms(@Request() req: Request): Promise<RoomDto[]> {
 		console.log("called /users/rooms");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserRooms(userInfo.id);
@@ -241,7 +242,7 @@ export class UsersController {
 		description: "The room to create",
 	})
 	async createRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -268,7 +269,7 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
-	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
+	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecentRooms(userInfo.id);
 	}
@@ -293,7 +294,7 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
-	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
+	async getRecommendedRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecommendedRooms(userInfo.id);
 	}
@@ -317,7 +318,7 @@ export class UsersController {
 		description: "The user's current room as a RoomDto.",
 		type: RoomDto,
 	})
-	async getCurrentRoom(@Request() req: any): Promise<RoomDto> {
+	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getCurrentRoom(userInfo.id);
 	}
@@ -341,7 +342,7 @@ export class UsersController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getUserFriends(@Request() req: any): Promise<UserDto[]> {
+	async getUserFriends(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserFriends(userInfo.id);
 	}
@@ -365,7 +366,7 @@ export class UsersController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getFriendRequests(@Request() req: any): Promise<UserDto[]> {
+	async getFriendRequests(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFriendRequests(userInfo.id);
 	}
@@ -390,7 +391,7 @@ export class UsersController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getFollowers(@Request() req: any): Promise<UserDto[]> {
+	async getFollowers(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowers(userInfo.id);
 	}
@@ -415,7 +416,7 @@ export class UsersController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getFollowing(@Request() req: any): Promise<UserDto[]> {
+	async getFollowing(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowing(userInfo.id);
 	}
@@ -440,7 +441,7 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
-	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
+	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getBookmarks(userInfo.id);
 	}
@@ -510,7 +511,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async followUser(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -549,7 +550,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async unfollowUser(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -588,7 +589,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async befriendUser(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -627,7 +628,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async unfriendUser(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -668,7 +669,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async acceptFriendRequest(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -709,7 +710,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async rejectFriendRequest(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);

@@ -102,7 +102,6 @@ export class RoomsController {
 		operationId: "getRoomInfo",
 	})
 	async getRoomInfo(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 	): Promise<RoomDto> {
 		console.log("getting room with ID", roomID);
@@ -146,12 +145,12 @@ export class RoomsController {
 		operationId: "updateRoomInfo",
 	})
 	async patchRoomInfo(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
 		console.log("updating room with ID", roomID, "with data", updateRoomDto);
-		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+		return await this.roomsService.updateRoomInfo(userID, roomID, updateRoomDto);
 	}
 
 	@ApiBearerAuth()
@@ -184,11 +183,11 @@ export class RoomsController {
 		operationId: "putRoomInfo",
 	})
 	async putRoomInfo(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+		return await this.roomsService.updateRoomInfo(userID, roomID, updateRoomDto);
 	}
 
 	@ApiBearerAuth()
@@ -224,7 +223,7 @@ export class RoomsController {
 		operationId: "deleteRoom",
 	})
 	async deleteRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<boolean> {
 		// check using jwt token whether the user is the creator of the room
@@ -268,7 +267,7 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	async joinRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<boolean> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
@@ -309,7 +308,7 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	async leaveRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<boolean> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
@@ -338,7 +337,6 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	async getRoomUsers(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 	): Promise<UserDto[]> {
 		return await this.roomsService.getRoomUsers(roomID);
@@ -370,7 +368,6 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	async getRoomQueue(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 		//): SongInfoDto[] {
 	): Promise<string> {
@@ -405,10 +402,10 @@ export class RoomsController {
 		operationId: "clearRoomQueue",
 	})
 	clearRoomQueue(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): boolean {
-		return this.roomsService.clearRoomQueue(roomID);
+		return this.roomsService.clearRoomQueue(userID, roomID);
 	}
 
 	@ApiBearerAuth()
@@ -445,7 +442,6 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	addSongToQueue(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 		//@Body() songInfoDto: SongInfoDto,
 		@Body() songInfoDto: string,
@@ -472,7 +468,6 @@ export class RoomsController {
 		operationId: "getCurrentSong",
 	})
 	getCurrentSong(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 	): SongInfoDto {
 		return this.roomsService.getCurrentSong(roomID);
@@ -510,7 +505,6 @@ export class RoomsController {
 		isArray: true,
 	})
 	async getLiveChatHistory(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 	): Promise<LiveChatMessageDto[]> {
 		return await this.roomsService.getLiveChatHistoryDto(roomID);
@@ -551,7 +545,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async bookmarkRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -593,7 +587,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async unbookmarkRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -632,7 +626,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -672,7 +666,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomQueueAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsQueueDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -713,7 +707,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomParticipationAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsParticipationDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -754,7 +748,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomInteractionAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsInteractionsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -794,7 +788,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomVotesAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsVotesDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -834,7 +828,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomSongsAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsSongsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -875,7 +869,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getRoomContributorsAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsContributorsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -907,7 +901,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getKeyMetrics(
-		@Request() req: any,
+		@Request() req: Request,
 	): Promise<RoomAnalyticsKeyMetricsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.roomsService.getKeyMetrics(userInfo.id);
@@ -915,7 +909,7 @@ export class RoomsController {
 
 	// define an endpoint for room song archival
 	async archiveRoomSongs(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 		// define the body of the request as a json with playlist name and description
 		@Body()
@@ -928,7 +922,7 @@ export class RoomsController {
 		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
 	}
 
-	async getArchivedSongs(@Request() req: any): Promise<any> {
+	async getArchivedSongs(@Request() req: Request): Promise<any> {
 		console.log("getting archived songs");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.roomsService.getArchivedSongs(userInfo.id);
@@ -936,7 +930,7 @@ export class RoomsController {
 
 	// define an endpoint for deleting a user's archived songs based on playlist id
 	async deleteArchivedSongs(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("playlistID") playlistID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);

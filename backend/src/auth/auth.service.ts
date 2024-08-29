@@ -271,7 +271,7 @@ export class AuthService {
 
 	// this funciton will be passed a Request object from the NestJS controller eg:
 	/*
-	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
+	getRoomInfo(@Request() req: Request, @Param("roomID") roomID: string): RoomDto {
 		return this.roomsService.getRoomInfo(roomID);
 	}
 	*/
