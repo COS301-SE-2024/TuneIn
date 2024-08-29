@@ -75,7 +75,7 @@ export class AuthService {
 
 	constructor(
 		private configService: ConfigService,
-		private prisma: PrismaService,
+		private readonly prisma: PrismaService,
 	) {
 		// Set the AWS credentials
 		const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
