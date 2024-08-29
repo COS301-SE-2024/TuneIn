@@ -82,11 +82,11 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
-	const navigateToMore = (type: string, items: any) => {
+	const navigateToMore = (type: string, items: any, title: string) => {
 		console.log("Navigate params: " + JSON.stringify( items));
 		router.push({
 			pathname: "./MorePage",
-			params: { type: type, items: JSON.stringify(items) },
+			params: { type: type, items: JSON.stringify(items), title: title },
 		});
 	};
 
@@ -614,8 +614,28 @@ const ProfileScreen: React.FC = () => {
 						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
-				{/* <View style={{ paddingHorizontal: 20 }} testID="fav-songs">
-					<Text style={styles.title}>Favorite Songs</Text>
+				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
+					<View style={styles.profileHeader}>
+						<Text style={styles.title}>Favorite Songs</Text>
+						<TouchableOpacity
+							onPress={() => {
+								navigateToMore(
+									"song",
+									primaryProfileData.fav_songs.data,
+									"Favorite Songs",
+								);
+							}}
+						>
+							<Text
+								style={{
+									fontWeight: "700",
+									textAlign: "center",
+								}}
+							>
+								More
+							</Text>
+						</TouchableOpacity>
+					</View>
 					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
 							key={song.id}
@@ -630,7 +650,7 @@ const ProfileScreen: React.FC = () => {
 						isVisible={isMusicDialogVisible}
 						onClose={() => setMusicDialogVisible(false)}
 					/>
-				</View> */}
+				</View>
 				<View style={styles.profileHeader}>
 					<Text
 						style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}
@@ -645,6 +665,7 @@ const ProfileScreen: React.FC = () => {
 									primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
 										preFormatRoomData(room, false),
 									),
+									"Favorite Rooms",
 								);
 							}}
 						>
@@ -671,7 +692,7 @@ const ProfileScreen: React.FC = () => {
 					>
 						Recent Rooms
 					</Text>
-					{primaryProfileData.recent_rooms.count > 9 && (
+					{primaryProfileData.recent_rooms.count > 10 && (
 						<TouchableOpacity
 							onPress={() => {
 								navigateToMore(
@@ -679,6 +700,7 @@ const ProfileScreen: React.FC = () => {
 									primaryProfileData.recent_rooms.data.map((room: RoomDto) =>
 										preFormatRoomData(room, false),
 									),
+									"Recent Rooms",
 								);
 							}}
 						>

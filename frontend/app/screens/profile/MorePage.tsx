@@ -16,8 +16,8 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import UserItem from "../../components/UserItem";
+import FavoriteSongs from "../../components/FavoriteSong";
 import { colors } from "../../styles/colors";
-
 
 const Search: React.FC = () => {
 	const router = useRouter();
@@ -26,7 +26,7 @@ const Search: React.FC = () => {
 		? JSON.parse(params.items[0])
 		: JSON.parse(params.items);
 
-		console.log("More Page: " + items);
+	console.log("More Page: " + items);
 
 	const navigation = useNavigation();
 	const [scrollY] = useState(new Animated.Value(0));
@@ -71,8 +71,17 @@ const Search: React.FC = () => {
 			);
 		}
 
-		if (item.type === "user" && item.userData) {
-			return <UserItem user={item.userData} />;
+		if (params.type === "song") {
+			return (
+				<FavoriteSongs
+					key={item.id}
+					songTitle={item.title}
+					artist={item.artists}
+					duration={item.duration}
+					albumArt={item.cover}
+					onPress={() => {}}
+				/>
+			);
 		}
 		return null;
 	};
@@ -86,14 +95,14 @@ const Search: React.FC = () => {
 				>
 					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.title}>Rooms </Text>
+				<Text style={styles.title}>{params.title}</Text>
 			</View>
-				<FlatList
-					data={ items }
-					renderItem={renderResult}
-					contentContainerStyle={styles.resultsContainer}
-					onScroll={handleScroll}
-				/>
+			<FlatList
+				data={items}
+				renderItem={renderResult}
+				contentContainerStyle={styles.resultsContainer}
+				onScroll={handleScroll}
+			/>
 
 			<Animated.View
 				style={[
