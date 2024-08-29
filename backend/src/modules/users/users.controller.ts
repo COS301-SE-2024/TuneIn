@@ -430,6 +430,31 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	*/
+	@Get("blocked")
+	@ApiOperation({
+		summary: "Get blocked users",
+		description: "Get all of the users that the authenticated user has blocked.",
+		operationId: "getBlocked",
+	})
+	@ApiOkResponse({
+		description: "The user's following as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getBlocked(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("bookmarks")
 	@ApiOperation({
 		summary: "Get the authorized user's bookmarks",
@@ -739,47 +764,120 @@ export class UsersController {
 		return await this.usersService.getCurrentRoom(userId);
 	}
 
+	@Post(":username/block")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	/*
-	### `/users/{username}/befriend`
-	#### POST: sends a friend request to user with given username
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/unfriend`
-	#### POST: ends friendship with user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/accept`
-	#### POST: accepts friend request from user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/reject`
-	#### POST: accepts user's friend request
-	no input
-	response: code (2xx for success, 4xx for error)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	*/
+	@ApiOperation({
+		summary: "Block a given user",
+		description: "Block the user with the given username.",
+		operationId: "blockUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to block.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully blocked the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error blocking the user.",
+		type: Boolean,
+	})
+	async blockUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.blockUser(userInfo.id, username);
+	}
 
+	@Post(":username/unblock")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	/*
-	### `/users/{username}/befriend`
-	#### POST: sends a friend request to user with given username
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/unfriend`
-	#### POST: ends friendship with user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/accept`
-	#### POST: accepts friend request from user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/reject`
-	#### POST: accepts user's friend request
-	no input
-	response: code (2xx for success, 4xx for error)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	*/
+	@ApiOperation({
+		summary: "Unblock a given user",
+		description: "Unblock the user with the given username.",
+		operationId: "unblockUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to unblock.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully unblocked the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error unblocking the user.",
+		type: Boolean,
+	})
+	async unblockUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.unblockUser(userInfo.id, username);
+	}
+
+	@Post(":username/report")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiOperation({
+		summary: "Report a given user",
+		description: "Report the user with the given username.",
+		operationId: "reportUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to report.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully reported the user.",
+		type: Boolean,
+	})
+	@ApiBadRequestResponse({
+		description: "Error reporting the user.",
+		type: Boolean,
+	})
+	async reportUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.reportUser(userInfo.id, username);
+	}
 }

@@ -24,7 +24,7 @@ import {
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
-import { RoomsService } from "./rooms.service";
+import { RoomsService, UserActionDto } from "./rooms.service";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserDto } from "../users/dto/user.dto";
@@ -912,33 +912,208 @@ export class RoomsController {
 		return this.roomsService.getKeyMetrics(userInfo.id);
 	}
 
-	// define an endpoint for room song archival
-	async archiveRoomSongs(
+	@Get(":roomID/kicked")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Get list of kicked users",
+		description: "Returns an array of UserDto representing users who were been kicked from the room.",
+		operationId: "getKickedUsers",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the kicked users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "An array of UserDto representing the kicked users in the room.",
+	})
+	async getKickedUsers(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
-		// define the body of the request as a json with playlist name and description
-		@Body()
-		archiveInfo: {
-			name: string;
-			description: string;
-		},
-	): Promise<void> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
+	): Promise<UserDto[]> {
+		return await this.roomsService.getKickedUsers(roomID);
 	}
 
-	async getArchivedSongs(@Request() req: Request): Promise<any> {
-		console.log("getting archived songs");
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.getArchivedSongs(userInfo.id);
-	}
-
-	// define an endpoint for deleting a user's archived songs based on playlist id
-	async deleteArchivedSongs(
+	@Post(":roomID/kicked")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Kick someone out of a room",
+		description: "Kicks a user out of the room.",
+		operationId: "kickUser",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to kick the user from.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to be kicked.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "User kicked successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async kickUser(
 		@Request() req: Request,
-		@Param("playlistID") playlistID: string,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
+		await this.roomsService.kickUser(roomID, userInfo.id, user.userID);
+	}
+
+	@Delete(":roomID/kicked")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Undo participant kick",
+		description: "Undoes the kick of a participant in the room.",
+		operationId: "undoKick",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to undo the kick in.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to undo the kick for.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "Kick undone successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async undoKick(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.undoKick(roomID, userInfo.id, user.userID);
+	}
+
+	@Get(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Get list of banned users",
+		description: "Returns an array of UserDto representing the banned users in the room.",
+		operationId: "getBannedUsers",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the banned users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "An array of UserDto representing the banned users in the room.",
+	})
+	async getBannedUsers(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<UserDto[]> {
+		return await this.roomsService.getBannedUsers(roomID);
+	}
+
+	@Post(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Perma ban someone from a room",
+		description: "Permanently bans a user from the room.",
+		operationId: "banUser",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to ban the user from.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to be banned.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "User banned successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async banUser(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.banUser(roomID, userInfo.id, user.userID);
+	}
+
+	@Delete(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Undo participant ban",
+		description: "Undoes the ban of a participant in the room.",
+		operationId: "undoBan",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to undo the ban in.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to undo the ban for.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "Ban undone successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async undoBan(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.undoBan(roomID, userInfo.id, user.userID);
 	}
 }
