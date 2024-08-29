@@ -8,6 +8,7 @@ import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { DmUsersModule } from "./dmusers/dmusers.module";
 import { UsersModule } from "../modules/users/users.module";
+import { AutoModerationModule } from './automod/automod.module';
 
 @Module({
 	imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from "../modules/users/users.module";
 		DtoGenModule,
 		RoomsModule,
 		UsersModule,
+		AutoModerationModule,
 	],
 	exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	providers: [LiveGateway, EventQueueService, LiveService],

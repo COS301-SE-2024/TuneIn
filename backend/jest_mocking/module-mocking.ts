@@ -61,6 +61,8 @@ import { SongsController } from "../src/modules/songs/songs.controller";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
 import { MyLogger } from "../src/logger/logger.service";
+import { AutoModerationService } from "src/live/automod/automod.service";
+import { AutoModerationModule } from "src/live/automod/automod.module";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -174,6 +176,7 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			DtoGenModule,
 			RoomsModule,
 			UsersModule,
+			AutoModerationModule,
 		],
 		exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	}).compile();
@@ -182,7 +185,7 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 //RoomUsersModule
 export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, DtoGenModule, DbUtilsModule],
+		imports: [PrismaModule, DtoGenModule, DbUtilsModule, AutoModerationModule],
 		providers: [
 			RoomUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -194,7 +197,13 @@ export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 //DmUsersModule
 export async function createDMUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, DtoGenModule, DbUtilsModule, UsersModule],
+		imports: [
+			PrismaModule,
+			DtoGenModule,
+			DbUtilsModule,
+			UsersModule,
+			AutoModerationModule,
+		],
 		providers: [
 			DmUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -330,5 +339,13 @@ export async function createSongsTestingModule(): Promise<TestingModule> {
 		providers: [SongsService],
 		controllers: [SongsController],
 		exports: [SongsService],
+	}).compile();
+}
+
+//AutoModerationModule
+export async function createAutoModerationTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		providers: [AutoModerationService],
+		exports: [AutoModerationService],
 	}).compile();
 }
