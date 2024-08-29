@@ -1690,108 +1690,152 @@ export class RoomsService {
 
 	async getKickedUsers(roomID: string): Promise<UserDto[]> {
 		// Implement the logic to get the kicked users for the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		return [];
 	}
 
-	async kickUser(roomID: string, initiatorID: string, kickedUserID: string): Promise<void> {
+	async kickUser(
+		roomID: string,
+		initiatorID: string,
+		kickedUserID: string,
+	): Promise<void> {
 		// Implement the logic to kick a user from the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not exist
+		if (true) {
+			// user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not have permission to kick
+		if (true) {
+			// user does not have permission to kick
 			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
 		}
 
-		if (true) { // user is not in the room
-			throw new HttpException("User is not in the room", HttpStatus.BAD_REQUEST);
+		if (true) {
+			// user is not in the room
+			throw new HttpException(
+				"User is not in the room",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
-		if (true) { // user is trying to kick themselves
+		if (true) {
+			// user is trying to kick themselves
 			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
 		}
 	}
 
-	async undoKick(roomID: string, initiatorID: string, kickedUserID: string): Promise<void> {
+	async undoKick(
+		roomID: string,
+		initiatorID: string,
+		kickedUserID: string,
+	): Promise<void> {
 		// Implement the logic to undo the kick of a participant in the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not exist
+		if (true) {
+			// user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not have permission to kick
+		if (true) {
+			// user does not have permission to kick
 			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
 		}
 
-		if (true) { // user is trying to undo their own kick
+		if (true) {
+			// user is trying to undo their own kick
 			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	async getBannedUsers(roomID: string): Promise<UserDto[]> {
 		// Implement the logic to get the banned users for the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		return [];
 	}
 
-	async banUser(roomID: string, initiatorID: string, bannedUserID: string): Promise<void> {
+	async banUser(
+		roomID: string,
+		initiatorID: string,
+		bannedUserID: string,
+	): Promise<void> {
 		// Implement the logic to ban a user from the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not exist
+		if (true) {
+			// user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not have permission to ban
+		if (true) {
+			// user does not have permission to ban
 			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
 		}
 
-		if (true) { // user is trying to ban themselves
+		if (true) {
+			// user is trying to ban themselves
 			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
 		}
 	}
 
-	async undoBan(roomID: string, initiatorID: string, bannedUserID: string): Promise<void> {
+	async undoBan(
+		roomID: string,
+		initiatorID: string,
+		bannedUserID: string,
+	): Promise<void> {
 		// Implement the logic to undo the ban of a participant in the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not exist
+		if (true) {
+			// user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) { // user does not have permission to ban
+		if (true) {
+			// user does not have permission to ban
 			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
 		}
 
-		if (true) { // user is trying to undo their own ban
+		if (true) {
+			// user is trying to undo their own ban
 			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	async getCalendarFile(roomID: string): Promise<File> {
 		// Implement the logic to get the calendar file for the room
-		if (true) { // room does not exist
+		if (true) {
+			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
-		if (true) { // room does not have any events
-			throw new HttpException("Room does not have any events", HttpStatus.NOT_FOUND);
+		if (true) {
+			// room does not have any events
+			throw new HttpException(
+				"Room does not have any events",
+				HttpStatus.NOT_FOUND,
+			);
 		}
-		return new File();
+		const bytes: BlobPart[] = [];
+		return new File(bytes, "calendar.ics");
 	}
 }

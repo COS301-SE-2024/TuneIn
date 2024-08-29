@@ -6,7 +6,7 @@ import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { AutoModerationModule } from "../automod/automod.module";
 
 @Module({
-	imports: [PrismaModule, DtoGenModule, DbUtilsModule, AutoModerationModule,
+	imports: [PrismaModule, DtoGenModule, DbUtilsModule, AutoModerationModule],
 	providers: [RoomUsersService],
 	exports: [RoomUsersService],
 })

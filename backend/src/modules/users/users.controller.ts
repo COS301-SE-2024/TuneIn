@@ -211,7 +211,9 @@ export class UsersController {
 		description: "The user's listening stats as a UserListeningStatsDto.",
 		type: UserListeningStatsDto,
 	})
-	async getListeningStats(@Request() req: Request): Promise<UserListeningStatsDto> {
+	async getListeningStats(
+		@Request() req: Request,
+	): Promise<UserListeningStatsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getListeningStats(userInfo.id);
 	}
@@ -458,7 +460,8 @@ export class UsersController {
 	@Get("blocked")
 	@ApiOperation({
 		summary: "Get blocked users",
-		description: "Get all of the users that the authenticated user has blocked.",
+		description:
+			"Get all of the users that the authenticated user has blocked.",
 		operationId: "getBlocked",
 	})
 	@ApiOkResponse({

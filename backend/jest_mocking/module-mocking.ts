@@ -61,8 +61,8 @@ import { SongsController } from "../src/modules/songs/songs.controller";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
 import { MyLogger } from "../src/logger/logger.service";
-import { AutoModerationService } from "src/live/automod/automod.service";
-import { AutoModerationModule } from "src/live/automod/automod.module";
+import { AutoModerationService } from "../src/live/automod/automod.service";
+import { AutoModerationModule } from "../src/live/automod/automod.module";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {

@@ -8,7 +8,7 @@ import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
 import { DmUsersModule } from "./dmusers/dmusers.module";
 import { UsersModule } from "../modules/users/users.module";
-import { AutoModerationModule } from './automod/automod.module';
+import { AutoModerationModule } from "./automod/automod.module";
 
 @Module({
 	imports: [

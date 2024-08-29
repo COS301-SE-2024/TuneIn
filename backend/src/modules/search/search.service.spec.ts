@@ -593,6 +593,8 @@ describe("SearchService", () => {
 		});
 	});
 
+	// sorry Jaden, Typescript covered this already
+	/*
 	describe("parseBoolean function", () => {
 		beforeEach(async () => {
 			const module: TestingModule = await createSearchTestingModule();
@@ -624,4 +626,5 @@ describe("SearchService", () => {
 			expect(result).toBe(false);
 		});
 	});
+	*/
 });

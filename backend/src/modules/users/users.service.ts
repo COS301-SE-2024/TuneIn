@@ -1186,29 +1186,42 @@ export class UsersService {
 	}
 
 	async blockUser(userID: string, usernameToBlock: string): Promise<void> {
-		console.log("Blocking user with id: " + userID + " is blocking " + usernameToBlock);
-		if (true){ //if user does not exist
+		console.log(
+			"Blocking user with id: " + userID + " is blocking " + usernameToBlock,
+		);
+		if (true) {
+			//if user does not exist
 			throw new HttpException("User is already blocked", HttpStatus.NOT_FOUND);
 		}
 	}
 
 	async unblockUser(userID: string, usernameToUnblock: string): Promise<void> {
-		console.log("Unblocking user with id: " + userID + " is unblocking " + usernameToUnblock);
-		if (true){ //if user does not exist
+		console.log(
+			"Unblocking user with id: " +
+				userID +
+				" is unblocking " +
+				usernameToUnblock,
+		);
+		if (true) {
+			//if user does not exist
 			throw new HttpException("User was not blocked", HttpStatus.NOT_FOUND);
 		}
 	}
 
 	async getBlockedUsers(userID: string): Promise<UserDto[]> {
-		if (true){ //if user does not exist
+		if (true) {
+			//if user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 		return [];
 	}
 
 	async reportUser(userID: string, usernameToReport: string): Promise<void> {
-		console.log("Reporting user with id: " + userID + " is reporting " + usernameToReport);
-		if (true){ //if user does not exist
+		console.log(
+			"Reporting user with id: " + userID + " is reporting " + usernameToReport,
+		);
+		if (true) {
+			//if user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 

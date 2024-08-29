@@ -917,7 +917,8 @@ export class RoomsController {
 	@ApiTags("room management")
 	@ApiOperation({
 		summary: "Get list of kicked users",
-		description: "Returns an array of UserDto representing users who were been kicked from the room.",
+		description:
+			"Returns an array of UserDto representing users who were been kicked from the room.",
 		operationId: "getKickedUsers",
 	})
 	@ApiParam({
@@ -930,7 +931,8 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
-		description: "An array of UserDto representing the kicked users in the room.",
+		description:
+			"An array of UserDto representing the kicked users in the room.",
 	})
 	async getKickedUsers(
 		@Request() req: Request,
@@ -1024,7 +1026,8 @@ export class RoomsController {
 	@ApiTags("room management")
 	@ApiOperation({
 		summary: "Get list of banned users",
-		description: "Returns an array of UserDto representing the banned users in the room.",
+		description:
+			"Returns an array of UserDto representing the banned users in the room.",
 		operationId: "getBannedUsers",
 	})
 	@ApiParam({
@@ -1037,7 +1040,8 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
-		description: "An array of UserDto representing the banned users in the room.",
+		description:
+			"An array of UserDto representing the banned users in the room.",
 	})
 	async getBannedUsers(
 		@Request() req: Request,
@@ -1137,7 +1141,7 @@ export class RoomsController {
 	@ApiOkResponse({
 		description: "The scheduled room as a .ics file.",
 		type: File,
-		content: {	
+		content: {
 			"application/octet-stream": {
 				schema: {
 					type: "string",
@@ -1160,7 +1164,7 @@ export class RoomsController {
 	})
 	@ApiProduces("application/octet-stream")
 	@ApiProduces("text/calendar")
-	getScheduledRoom(@Param("roomID") roomID: string): File {
-		return this.roomsService.getCalendarFile(roomID);
+	async getScheduledRoom(@Param("roomID") roomID: string): Promise<File> {
+		return await this.roomsService.getCalendarFile(roomID);
 	}
 }
