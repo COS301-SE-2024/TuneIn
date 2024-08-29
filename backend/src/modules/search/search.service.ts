@@ -162,20 +162,6 @@ export class SearchService {
 		return [new RoomDto()];
 	}
 
-	parseBoolean(value: any): boolean {
-		if (typeof value === "string") {
-			// Convert string to lower case to handle variations in casing
-			value = value.toLowerCase();
-			if (value === "true" || value === "1") {
-				return true;
-			} else if (value === "false" || value === "0") {
-				return false;
-			}
-		}
-		// Default to false if value is not recognized as a boolean string
-		return false;
-	}
-
 	advancedRoomSearchQueryBuilder(params: {
 		q: string;
 		creator_username?: string;
@@ -276,14 +262,14 @@ export class SearchService {
 			query += ` AND is_temporary = ${params.is_temp}`;
 		}
 		if (params.is_scheduled !== undefined) {
-			if (this.parseBoolean(params.is_scheduled)) {
+			if (params.is_scheduled) {
 				query += ` AND scheduled_date IS NOT NULL`;
 			} else {
 				query += ` AND scheduled_date IS NULL`;
 			}
 		}
 		if (params.is_priv !== undefined) {
-			if (this.parseBoolean(params.is_priv)) {
+			if (params.is_priv) {
 				query += ` AND is_listed IS NOT NULL`;
 			} else {
 				query += ` AND is_listed IS NULL`;
