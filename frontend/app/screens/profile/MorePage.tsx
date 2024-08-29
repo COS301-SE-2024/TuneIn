@@ -86,7 +86,7 @@ const Search: React.FC = () => {
 				>
 					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.title}>Search </Text>
+				<Text style={styles.title}>Rooms </Text>
 			</View>
 				<FlatList
 					data={ items }

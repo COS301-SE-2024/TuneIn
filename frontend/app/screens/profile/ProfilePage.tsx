@@ -82,11 +82,11 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
-	const navigateToMore = (items: any) => {
+	const navigateToMore = (type: string, items: any) => {
 		console.log("Navigate params: " + JSON.stringify( items));
 		router.push({
 			pathname: "./MorePage",
-			params: { type: "room", items: JSON.stringify(items) },
+			params: { type: type, items: JSON.stringify(items) },
 		});
 	};
 
@@ -631,31 +631,72 @@ const ProfileScreen: React.FC = () => {
 						onClose={() => setMusicDialogVisible(false)}
 					/>
 				</View> */}
-				<Text style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}>
-					Favorite Rooms
-				</Text>
-				<TouchableOpacity
-					onPress={() => {navigateToMore(
-						primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
-						preFormatRoomData(room, false),
-					)
-					)}}
-				>
-					More
-				</TouchableOpacity>
-				<AppCarousel
-					data={primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
-						preFormatRoomData(room, false),
+				<View style={styles.profileHeader}>
+					<Text
+						style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}
+					>
+						Favorite Rooms
+					</Text>
+					{primaryProfileData.fav_rooms.count > 10 && (
+						<TouchableOpacity
+							onPress={() => {
+								navigateToMore(
+									"room",
+									primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
+										preFormatRoomData(room, false),
+									),
+								);
+							}}
+						>
+							<Text
+								style={{
+									fontWeight: "700",
+									textAlign: "center",
+								}}
+							>
+								More
+							</Text>
+						</TouchableOpacity>
 					)}
+				</View>
+				<AppCarousel
+					data={primaryProfileData.fav_rooms.data
+						.slice(0, 10)
+						.map((room: RoomDto) => preFormatRoomData(room, false))}
 					renderItem={renderItem}
 				/>
-				<Text style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}>
-					Recent Rooms
-				</Text>
-				<AppCarousel
-					data={primaryProfileData.recent_rooms.data.map((room: RoomDto) =>
-						preFormatRoomData(room, false),
+				<View style={styles.profileHeader}>
+					<Text
+						style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}
+					>
+						Recent Rooms
+					</Text>
+					{primaryProfileData.recent_rooms.count > 9 && (
+						<TouchableOpacity
+							onPress={() => {
+								navigateToMore(
+									"room",
+									primaryProfileData.recent_rooms.data.map((room: RoomDto) =>
+										preFormatRoomData(room, false),
+									),
+								);
+							}}
+						>
+							<Text
+								style={{
+									fontWeight: "700",
+									textAlign: "center",
+								}}
+							>
+								More
+							</Text>
+						</TouchableOpacity>
 					)}
+				</View>
+				<AppCarousel
+					data={primaryProfileData.recent_rooms.data
+						.slice(0, 10)
+						.map((room: RoomDto) => preFormatRoomData(room, false))}
 					renderItem={renderItem}
 				/>
 				{primaryProfileData.current_room ? (
