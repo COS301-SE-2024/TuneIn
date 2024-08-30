@@ -186,6 +186,10 @@ export class RoomsController {
 		summary: "Update room info",
 		operationId: "putRoomInfo",
 	})
+	@ApiOkResponse({
+		description: "Room info updated successfully.",
+		type: RoomDto,
+	})
 	async putRoomInfo(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
@@ -212,11 +216,9 @@ export class RoomsController {
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "Room deleted successfully.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "User is not the creator of the room.",
-		type: Boolean,
 	})
 	@ApiParam({
 		name: "roomID",
@@ -234,12 +236,12 @@ export class RoomsController {
 	async deleteRoom(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		// check using jwt token whether the user is the creator of the room
 		// if not, return 403
 		// if yes, delete the room and return 200
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.deleteRoom(roomID, userInfo.id);
+		await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -278,9 +280,9 @@ export class RoomsController {
 	async joinRoom(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.joinRoom(roomID, userID.id);
+		await this.roomsService.joinRoom(roomID, userID.id);
 	}
 
 	@ApiBearerAuth()
@@ -296,7 +298,6 @@ export class RoomsController {
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "User left room successfully.",
-		type: Boolean,
 	})
 	@ApiOperation({
 		summary: "Leave a room",
@@ -319,9 +320,9 @@ export class RoomsController {
 	async leaveRoom(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.leaveRoom(roomID, userID.id);
+		await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
 	@Get(":roomID/users")
@@ -411,9 +412,9 @@ export class RoomsController {
 	clearRoomQueue(
 		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): boolean {
+	): void {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.clearRoomQueue(userInfo.id, roomID);
+		this.roomsService.clearRoomQueue(userInfo.id, roomID);
 	}
 
 	@ApiBearerAuth()
@@ -627,6 +628,7 @@ export class RoomsController {
 	})
 	@ApiOkResponse({
 		description: "The analytics of the room as a RoomAnalyticsDto.",
+		type: RoomAnalyticsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -667,6 +669,7 @@ export class RoomsController {
 	})
 	@ApiOkResponse({
 		description: "The queue analytics of the room as a RoomAnalyticsQueueDto.",
+		type: RoomAnalyticsQueueDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -708,6 +711,7 @@ export class RoomsController {
 	@ApiOkResponse({
 		description:
 			"The participation analytics of the room as a RoomAnalyticsParticipationDto.",
+		type: RoomAnalyticsParticipationDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -749,6 +753,7 @@ export class RoomsController {
 	@ApiOkResponse({
 		description:
 			"The interaction analytics of the room as a RoomAnalyticsInteractionsDto.",
+		type: RoomAnalyticsInteractionsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -789,6 +794,7 @@ export class RoomsController {
 	})
 	@ApiOkResponse({
 		description: "The voting analytics of the room as a RoomAnalyticsVotesDto.",
+		type: RoomAnalyticsVotesDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -829,6 +835,7 @@ export class RoomsController {
 	})
 	@ApiOkResponse({
 		description: "The song analytics of the room as a RoomAnalyticsSongsDto.",
+		type: RoomAnalyticsSongsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -870,6 +877,7 @@ export class RoomsController {
 	@ApiOkResponse({
 		description:
 			"The contributor analytics of the room as a RoomAnalyticsContributorsDto.",
+		type: RoomAnalyticsContributorsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -902,6 +910,7 @@ export class RoomsController {
 	@ApiOkResponse({
 		description:
 			"The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+		type: RoomAnalyticsKeyMetricsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
@@ -933,6 +942,8 @@ export class RoomsController {
 	@ApiOkResponse({
 		description:
 			"An array of UserDto representing the kicked users in the room.",
+		type: UserDto,
+		isArray: true,
 	})
 	async getKickedUsers(
 		@Request() req: Request,

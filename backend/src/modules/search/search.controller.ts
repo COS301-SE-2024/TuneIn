@@ -105,6 +105,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
@@ -171,7 +173,8 @@ export class SearchController {
 	@ApiOkResponse({
 		description:
 			"Search history as an array of strings or RoomDto, or UserDto.",
-		type: [CombinedSearchHistory],
+		type: CombinedSearchHistory,
+		isArray: true,
 	})
 	async searchHistory(
 		@Request() req: Request,
@@ -213,7 +216,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
-		type: [RoomDto],
+		type: RoomDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
@@ -364,7 +368,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Recently searched rooms as an array of SearchHistoryDto.",
-		type: [SearchHistoryDto],
+		type: SearchHistoryDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	async searchRoomsHistory(
@@ -407,7 +412,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
-		type: [UserDto],
+		type: UserDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
@@ -449,7 +455,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
-		type: [UserDto],
+		type: UserDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
@@ -535,7 +542,8 @@ export class SearchController {
 	})
 	@ApiOkResponse({
 		description: "Recently searched users as an array of SearchHistoryDto.",
-		type: [SearchHistoryDto],
+		type: SearchHistoryDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	async searchUsersHistory(

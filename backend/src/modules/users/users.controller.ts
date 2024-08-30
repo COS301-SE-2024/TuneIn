@@ -184,7 +184,8 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "The last DMs as an array of DirectMessageDto.",
-		type: Object,
+		type: DirectMessageDto,
+		isArray: true,
 	})
 	async getDMs(@Request() req: Request): Promise<DirectMessageDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -557,18 +558,16 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully followed the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error following the user.",
-		type: Boolean,
 	})
 	async followUser(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, username);
+		await this.usersService.followUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
@@ -596,18 +595,16 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully unfollowed the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error unfollowing the user.",
-		type: Boolean,
 	})
 	async unfollowUser(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, username);
+		await this.usersService.unfollowUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
@@ -635,18 +632,16 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully sent friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error sending friend request.",
-		type: Boolean,
 	})
 	async befriendUser(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.befriendUser(userInfo.id, username);
+		await this.usersService.befriendUser(userInfo.id, username);
 	}
 
 	@Post(":username/unfriend")
@@ -683,9 +678,9 @@ export class UsersController {
 	async unfriendUser(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfriendUser(userInfo.id, username);
+		await this.usersService.unfriendUser(userInfo.id, username);
 	}
 
 	@Post(":username/accept")
@@ -715,18 +710,16 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully accepted friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error accepting friend request.",
-		type: Boolean,
 	})
 	async acceptFriendRequest(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.acceptFriendRequest(userInfo.id, username);
+		await this.usersService.acceptFriendRequest(userInfo.id, username);
 	}
 
 	@Post(":username/reject")
@@ -756,18 +749,16 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully rejected friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error rejecting friend request.",
-		type: Boolean,
 	})
 	async rejectFriendRequest(
 		@Request() req: Request,
 		@Param("username") username: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.rejectFriendRequest(userInfo.id, username);
+		await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
@@ -817,11 +808,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully blocked the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error blocking the user.",
-		type: Boolean,
 	})
 	async blockUser(
 		@Request() req: Request,
@@ -856,11 +845,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully unblocked the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error unblocking the user.",
-		type: Boolean,
 	})
 	async unblockUser(
 		@Request() req: Request,

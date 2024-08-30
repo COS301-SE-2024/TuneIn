@@ -15,13 +15,17 @@ export class GenresController {
 	@Get()
 	@ApiOkResponse({
 		description: "List of all genres",
-		type: [String],
+		type: String,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({
 		description: "Something went wrong while fetching genres",
 		type: String,
 	})
-	@ApiOperation({ summary: "Get all genres" })
+	@ApiOperation({
+		summary: "Get all genres",
+		description: "Returns a list of all genres",
+	})
 	async getAllGenres(): Promise<string[]> {
 		return await this.genresService.getAllGenres();
 	}

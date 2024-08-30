@@ -59,6 +59,10 @@ export class SpotifyAuthController {
 		description: "Redirects to the Expo app with the Spotify auth code",
 		operationId: "spotifyRedirect",
 	})
+	@ApiResponse({
+		status: 302,
+		description: "Redirects to the Expo app with the Spotify auth code",
+	})
 	async performRedirect(
 		@Query("code") code: string,
 		@Query("state") state: string,
