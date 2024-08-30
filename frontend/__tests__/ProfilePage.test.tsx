@@ -7,11 +7,7 @@ import * as StorageService from "../app/services/StorageService";
 import ProfileScreen from "../app/screens/profile/ProfilePage";
 import { useLocalSearchParams } from "expo-router";
 import { Player } from "../app/PlayerContext";
-
-// Mock AsyncStorage
-jest.mock("@react-native-async-storage/async-storage", () => ({
-	getItem: jest.fn(),
-}));
+import { RoomDto } from "../api";
 
 // Mock axios GET request
 jest.mock("axios");
@@ -36,100 +32,47 @@ jest.mock("expo-router", () => {
 	};
 });
 
-const mockRoomData = {
-	user_id: "012c4238-e071-7031-cb6c-30881378722f",
-	room_id: "8f928675-5c95-497a-b8a7-917064cdb462",
-	participate_id: "9e1c0ece-ceb9-4dbc-8620-13fa146d5520",
-	room: {
-		creator: {
-			profile_name: "Jaden Moodley",
-			userID: "012c4238-e071-7031-cb6c-30881378722f",
-			username: "Jaden",
-			profile_picture_url:
-				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
-			followers: {
-				count: 0,
-				data: [],
-			},
-			following: {
-				count: 0,
-				data: [],
-			},
-			links: {
-				count: 2,
-				data: [
-					{
-						type: "Instagram",
-						links: "instagram.com/adventurous_epoch",
-					},
-					{
-						type: "Instagram",
-						links: "instagram.com/general_epoch",
-					},
-				],
-			},
-			bio: "Humanity is a boon",
-			current_song: {
-				title: "",
-				artists: [],
-				cover: "",
-				start_time: "2024-08-25T10:15:02.532Z",
-			},
-			fav_genres: {
-				count: 4,
-				data: ["j-pop", "rock", "jazz", "metal"],
-			},
-			fav_songs: {
-				count: 2,
-				data: [
-					{
-						title: "Faster",
-						artists: "Good Kid",
-						cover:
-							"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-						start_time: "",
-					},
-					{
-						title: "Bohemian Rhapsody",
-						artists: "Queen",
-						cover:
-							"https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
-						start_time: "",
-					},
-				],
-			},
-			fav_rooms: {
-				count: 0,
-				data: [],
-			},
-			recent_rooms: {
-				count: 0,
-				data: [],
-			},
-		},
-		roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
-		participant_count: 0,
-		room_name: "Abyssal Paradise",
-		description: "Submerge yourself in solace",
-		is_temporary: false,
-		is_private: true,
-		is_scheduled: false,
-		start_date: "2024-08-25T10:15:02.406Z",
-		end_date: "2024-08-25T10:15:02.406Z",
-		language: "English",
-		has_explicit_content: false,
-		has_nsfw_content: false,
-		room_image:
-			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
-		current_song: {
-			title: "",
-			artists: [],
-			cover: "",
-			start_time: "2024-08-25T10:15:02.406Z",
-		},
-		tags: [],
-	},
-	room_join_time: "2024-08-24T10:54:08.778Z",
+const mockRoomData: RoomDto = {
+    creator: {
+        profile_name: "Jaden Moodley",
+        userID: "012c4238-e071-7031-cb6c-30881378722f",
+        username: "Jaden",
+        profile_picture_url: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+        followers: [],
+        following: [],
+        links: [],
+        bio: "Humanity is a boon",
+        current_song: {
+            title: "",
+            artists: [],
+            cover: "",
+            start_time: new Date(),
+        },
+        fav_genres: {},
+        fav_songs: {},
+        fav_rooms: {},
+        recent_rooms: {},
+    },
+    roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+    participant_count: 0,
+    room_name: "Abyssal Paradise",
+    description: "Submerge yourself in solace",
+    is_temporary: false,
+    is_private: true,
+    is_scheduled: false,
+    start_date: "2024-08-25T10:15:02.406Z",
+    end_date: "2024-08-25T10:15:02.406Z",
+    language: "English",
+    has_explicit_content: false,
+    has_nsfw_content: false,
+    room_image: "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+    current_song: {
+        title: "",
+        artists: [],
+        cover: "",
+        start_time: new Date(),
+    },
+    tags: [],
 };
 
 const PlayerContextProviderMock = ({ children, value }) => {
