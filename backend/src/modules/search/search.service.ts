@@ -11,19 +11,38 @@ import * as sqlstring from "sqlstring";
 import { PrismaService } from "../../../prisma/prisma.service";
 
 export class CombinedSearchResults {
-	@ApiProperty({ type: [RoomDto], description: "List of rooms" })
+	@ApiProperty({
+		type: RoomDto,
+		description: "List of rooms",
+		isArray: true,
+	})
 	@IsArray({ message: "Rooms must be an array" })
 	@ValidateNested({ each: true, message: "Each room must be a valid RoomDto" })
 	rooms: RoomDto[];
 
-	@ApiProperty({ type: [UserDto], description: "List of users" })
+	@ApiProperty({
+		type: UserDto,
+		description: "List of users",
+		isArray: true,
+	})
 	@IsArray({ message: "Users must be an array" })
 	@ValidateNested({ each: true, message: "Each user must be a valid UserDto" })
 	users: UserDto[];
 }
 
 export class CombinedSearchHistory {
-	@ApiProperty({ description: "Mixed list of rooms, users, or strings" })
+	@ApiProperty({
+		description: "Mixed list of rooms, users, or strings",
+		isArray: true,
+		type: 'array',
+        items: {
+            oneOf: [
+                { $ref: '#/components/schemas/RoomDto' },
+                { $ref: '#/components/schemas/UserDto' },
+                { type: 'string' }
+            ],
+        },
+	})
 	@IsArray({ message: "Results must be an array" })
 	results: (RoomDto | UserDto | string)[];
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsBoolean, IsDateString, IsOptional } from "class-validator";
+import { IsString, IsBoolean, IsDateString, IsOptional, IsDate } from "class-validator";
 
 export class CreateRoomDto {
 	@ApiProperty()
@@ -26,12 +26,12 @@ export class CreateRoomDto {
 	is_scheduled?: boolean;
 
 	@ApiPropertyOptional()
-	@IsDateString()
+	@IsDate()
 	@IsOptional()
 	start_date?: Date;
 
 	@ApiPropertyOptional()
-	@IsDateString()
+	@IsDate()
 	@IsOptional()
 	end_date?: Date;
 
@@ -55,6 +55,10 @@ export class CreateRoomDto {
 	@IsOptional()
 	room_image?: string;
 
-	@ApiProperty({ type: [String] })
+	@ApiProperty({
+		description: "The tags that describe the room",
+		type: String,
+		isArray: true,
+	})
 	tags: string[];
 }

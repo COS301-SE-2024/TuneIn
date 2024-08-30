@@ -7,7 +7,7 @@ export class SearchHistoryDto {
 	search_term: string;
 
 	@ApiProperty()
-	@IsDateString()
+	@IsDate()
 	search_time: Date;
 
 	@ApiProperty()

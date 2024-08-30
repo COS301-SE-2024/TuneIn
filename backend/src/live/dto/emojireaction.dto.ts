@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import {
 	IsString,
 	IsDateString,
@@ -23,16 +24,22 @@ export interface Category {
 }
 
 export class EmojiReactionDto {
-	@ApiProperty()
-	@IsDateString()
+	@ApiProperty({
+		description: "The date the emoji was sent",
+	})
+	@IsDate()
 	date_created: Date;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The message body",
+	})
 	@IsObject()
 	@ValidateNested()
 	body: Emoji;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user that used the emoji",
+	})
 	@IsString()
 	userID: string;
 }

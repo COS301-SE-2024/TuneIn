@@ -9,7 +9,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
-import { IsNumber, IsObject } from "class-validator";
+import { IsNumber, IsObject, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UserListeningStatsDto {
@@ -22,16 +22,26 @@ export class UserListeningStatsDto {
 
 	@ApiProperty({
 		description: "The total number of hours spent listening to music by room",
-		example: 10,
+		example: { "room1_id": 5, "room2_id": 3 },
+		type: "object",
+		additionalProperties: {
+			type: "number",
+		},
 	})
 	@IsObject()
+	@ValidateNested()
 	listeningTimeByRoom: Record<string, number>;
 
 	@ApiProperty({
 		description: "The total number of hours spent listening to music by genre",
-		example: 10,
+		example: { "rock": 5, "pop": 3 },
+		type: "object",
+		additionalProperties: {
+			type: "number",
+		},
 	})
 	@IsObject()
+	@ValidateNested()
 	listeningTimeByGenre: Record<string, number>;
 }
 

@@ -8,11 +8,16 @@ import {
 	ValidateNested,
 } from "class-validator";
 import { UserDto } from "../../users/dto/user.dto";
+import { Type } from "class-transformer";
 export class RoomAnalyticsKeyMetricsDto {
 	// an object called unique visitors with two properties, count and percentage_change. both are numbers
 	@ApiProperty({
 		description: "Unique visitors to the user's rooms",
 		type: "object",
+		properties: {
+			count: { type: "number" },
+			percentage_change: { type: "number" },
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -20,10 +25,15 @@ export class RoomAnalyticsKeyMetricsDto {
 		count: number;
 		percentage_change: number;
 	};
+
 	// an object called returning_visitors with two properties, count and percentage_change. both are numbers
 	@ApiProperty({
 		description: "Returning visitors to the user's rooms",
 		type: "object",
+		properties: {
+			count: { type: "number" },
+			percentage_change: { type: "number" },
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -31,10 +41,15 @@ export class RoomAnalyticsKeyMetricsDto {
 		count: number;
 		percentage_change: number;
 	};
+
 	// an object called average_session_duration with two properties, duration and percentage_change. both are numbers
 	@ApiProperty({
 		description: "Average session duration in the user's rooms",
 		type: "object",
+		properties: {
+			duration: { type: "number" },
+			percentage_change: { type: "number" },
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -76,6 +91,40 @@ export class RoomAnalyticsParticipationDto {
 		description:
 			"Join statistics, including total and unique joins per day and all-time",
 		type: "object",
+		properties: {
+			per_day: {
+				type: "object",
+				properties: {
+					total_joins: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								count: { type: "number" },
+								day: { type: "Date" },
+							},
+						},
+					},
+					unique_joins: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								count: { type: "number" },
+								day: { type: "Date" },
+							},
+						},
+					},
+				},
+			},
+			all_time: {
+				type: "object",
+				properties: {
+					total_joins: { type: "number" },
+					unique_joins: { type: "number" },
+				},
+			},
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -92,16 +141,66 @@ export class RoomAnalyticsParticipationDto {
 
 	@ApiProperty({
 		description: "Participants per hour data",
-		type: [ParticipantsPerHourDto],
+		type: ParticipantsPerHourDto,
+		isArray: true,
 	})
-	@IsObject()
-	@ValidateNested()
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() => ParticipantsPerHourDto)
 	participants_per_hour: ParticipantsPerHourDto[];
 
 	@ApiProperty({
 		description:
 			"Session data including average, minimum, and maximum duration all-time and per day",
 		type: "object",
+		properties: {
+			all_time: {
+				type: "object",
+				properties: {
+					avg_duration: { type: "number" },
+					min_duration: { type: "number" },
+					max_duration: { type: "number" },
+				},
+			},
+			per_day: {
+				type: "array",
+				items: {
+					type: "object",
+					properties: {
+						avg_duration: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									duration: { type: "number" },
+									day: { type: "Date" },
+								},
+							},
+						},
+						min_duration: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									duration: { type: "number" },
+									day: { type: "Date" },
+								},
+							},
+						},
+						max_duration: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									duration: { type: "number" },
+									day: { type: "Date" },
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -122,6 +221,10 @@ export class RoomAnalyticsParticipationDto {
 	@ApiProperty({
 		description: "Expected return visits and probability of return",
 		type: "object",
+		properties: {
+			expected_return_count: { type: "number" },
+			probability_of_return: { type: "number" },
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -141,6 +244,19 @@ export class RoomAnalyticsInteractionsDto {
 	@ApiProperty({
 		description: "Total messages sent and messages sent per hour",
 		type: "object",
+		properties: {
+			total: { type: "number" },
+			per_hour: {
+				type: "array",
+				items: {
+					type: "object",
+					properties: {
+						count: { type: "number" },
+						hour: { type: "Date" },
+					},
+				},
+			},
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -159,41 +275,6 @@ export class RoomAnalyticsInteractionsDto {
 	@ApiProperty({ description: "Number of times the room was bookmarked" })
 	@IsNumber()
 	bookmarked_count: number;
-}
-
-export class RoomAnalyticsVotesDto {
-	@ApiProperty({ description: "Total number of upvotes for songs in the room" })
-	@IsNumber()
-	total_upvotes: number;
-
-	@ApiProperty({
-		description: "Total number of downvotes for songs in the room",
-	})
-	@IsNumber()
-	total_downvotes: number;
-
-	@ApiProperty({
-		description:
-			"Daily percentage change in upvotes for songs in the room. (last 24 hours)",
-	})
-	@IsNumber()
-	daily_percentage_change_in_upvotes: number;
-
-	@ApiProperty({
-		description:
-			"Daily percentage change in downvotes for songs in the room. (last 24 hours)",
-	})
-	@IsNumber()
-	daily_percentage_change_in_downvotes: number;
-
-	@ApiProperty({
-		description:
-			"Details of songs including Spotify ID, song ID, upvotes, and downvotes",
-		type: "array",
-	})
-	@IsArray()
-	@ValidateNested()
-	songs: SongAnalyticsDto[];
 }
 
 export class SongAnalyticsDto {
@@ -225,21 +306,62 @@ export class SongAnalyticsDto {
 	global_rank: number;
 }
 
+export class RoomAnalyticsVotesDto {
+	@ApiProperty({ description: "Total number of upvotes for songs in the room" })
+	@IsNumber()
+	total_upvotes: number;
+
+	@ApiProperty({
+		description: "Total number of downvotes for songs in the room",
+	})
+	@IsNumber()
+	total_downvotes: number;
+
+	@ApiProperty({
+		description:
+			"Daily percentage change in upvotes for songs in the room. (last 24 hours)",
+	})
+	@IsNumber()
+	daily_percentage_change_in_upvotes: number;
+
+	@ApiProperty({
+		description:
+			"Daily percentage change in downvotes for songs in the room. (last 24 hours)",
+	})
+	@IsNumber()
+	daily_percentage_change_in_downvotes: number;
+
+	@ApiProperty({
+		description:
+			"Details of songs including Spotify ID, song ID, upvotes, and downvotes",
+		type: SongAnalyticsDto,
+		isArray: true,
+	})
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() => SongAnalyticsDto)
+	songs: SongAnalyticsDto[];
+}
+
 export class RoomAnalyticsSongsDto {
 	@ApiProperty({
 		description: "Most played songs in the room",
-		type: [SongAnalyticsDto],
+		type: SongAnalyticsDto,
+		isArray: true,
 	})
 	@IsArray()
-	@ValidateNested()
+	@ValidateNested({ each: true })
+	@Type(() => SongAnalyticsDto)
 	most_played: SongAnalyticsDto[];
 
 	@ApiProperty({
 		description: "Top voted songs in the room",
-		type: [SongAnalyticsDto],
+		type: SongAnalyticsDto,
+		isArray: true,
 	})
 	@IsArray()
-	@ValidateNested()
+	@ValidateNested({ each: true })
+	@Type(() => SongAnalyticsDto)
 	top_voted: SongAnalyticsDto[];
 }
 
@@ -247,6 +369,12 @@ export class RoomAnalyticsContributorsDto {
 	@ApiProperty({
 		description: "Top contributors to the room's queue",
 		type: "object",
+		properties: {
+			user: { type: "UserDto" },
+			rank: { type: "number" },
+			num_songs: { type: "number" },
+			num_upvotes: { type: "number" },
+		},
 	})
 	@IsObject()
 	@ValidateNested()
@@ -262,6 +390,7 @@ export class RoomAnalyticsDto {
 	@ApiProperty({ description: "Queue analytics", type: RoomAnalyticsQueueDto })
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsQueueDto)
 	queue: RoomAnalyticsQueueDto;
 
 	@ApiProperty({
@@ -270,6 +399,7 @@ export class RoomAnalyticsDto {
 	})
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsParticipationDto)
 	participation: RoomAnalyticsParticipationDto;
 
 	@ApiProperty({
@@ -278,16 +408,19 @@ export class RoomAnalyticsDto {
 	})
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsInteractionsDto)
 	interactions: RoomAnalyticsInteractionsDto;
 
 	@ApiProperty({ description: "Votes analytics", type: RoomAnalyticsVotesDto })
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsVotesDto)
 	votes: RoomAnalyticsVotesDto;
 
 	@ApiProperty({ description: "Songs analytics", type: RoomAnalyticsSongsDto })
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsSongsDto)
 	songs: RoomAnalyticsSongsDto;
 
 	@ApiProperty({
@@ -296,5 +429,6 @@ export class RoomAnalyticsDto {
 	})
 	@IsObject()
 	@ValidateNested()
+	@Type(() => RoomAnalyticsContributorsDto)
 	contributors: RoomAnalyticsContributorsDto;
 }

@@ -22,7 +22,11 @@ export class SongInfoDto {
 	@IsString()
 	title: string;
 
-	@ApiProperty({ type: [String] })
+	@ApiProperty({ 
+		type: String,
+		description: "The artists that performed the song",
+		isArray: true,
+	})
 	@IsArray()
 	artists: string[];
 
@@ -30,7 +34,11 @@ export class SongInfoDto {
 	@IsString()
 	cover: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The time the song started playing",
+		type: Date,
+		nullable: true,
+	})
 	@IsDate()
 	start_time: Date | null;
 }
