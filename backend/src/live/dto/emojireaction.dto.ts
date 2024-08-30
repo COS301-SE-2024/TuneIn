@@ -5,6 +5,7 @@ import {
 	IsDateString,
 	IsObject,
 	ValidateNested,
+	IsDate,
 } from "class-validator";
 
 //for Emoji and Category, see: https://github.com/woodybury/rn-emoji-picker

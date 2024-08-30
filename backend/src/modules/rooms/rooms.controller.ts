@@ -43,11 +43,13 @@ import {
 	RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
+import { RoomAnalyticsService } from "./roomanalytics.service";
 
 @Controller("rooms")
 export class RoomsController {
 	constructor(
 		private readonly roomsService: RoomsService,
+		private readonly roomAnalytics: RoomAnalyticsService,
 		private readonly auth: AuthService,
 		private readonly dtogen: DtoGenService,
 	) {}
@@ -638,7 +640,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -679,7 +681,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsQueueDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomQueueAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomQueueAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -721,7 +723,10 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsParticipationDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomParticipationAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomParticipationAnalytics(
+			roomID,
+			userInfo.id,
+		);
 	}
 
 	@ApiBearerAuth()
@@ -763,7 +768,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsInteractionsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomInteractionAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomInteractionAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -804,7 +809,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsVotesDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomVotesAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomVotesAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -845,7 +850,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsSongsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomSongsAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomSongsAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -887,7 +892,7 @@ export class RoomsController {
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsContributorsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomContributorsAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomContributorsAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -919,7 +924,7 @@ export class RoomsController {
 		@Request() req: Request,
 	): Promise<RoomAnalyticsKeyMetricsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getKeyMetrics(userInfo.id);
+		return this.roomAnalytics.getKeyMetrics(userInfo.id);
 	}
 
 	@Get(":roomID/kicked")

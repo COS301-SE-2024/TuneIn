@@ -5,10 +5,11 @@ import { PrismaModule } from "../../../prisma/prisma.module";
 import { DtoGenModule } from "../dto-gen/dto-gen.module";
 import { DbUtilsModule } from "../db-utils/db-utils.module";
 import { AuthModule } from "../../auth/auth.module";
+import { RoomAnalyticsService } from "./roomanalytics.service";
 @Module({
 	imports: [PrismaModule, DtoGenModule, DbUtilsModule, AuthModule],
 	controllers: [RoomsController],
-	providers: [RoomsService],
-	exports: [RoomsService],
+	providers: [RoomsService, RoomAnalyticsService],
+	exports: [RoomsService, RoomAnalyticsService],
 })
 export class RoomsModule {}

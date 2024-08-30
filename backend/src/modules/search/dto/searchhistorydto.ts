@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsDateString } from "class-validator";
+import { IsString, IsDateString, IsDate } from "class-validator";
 
 export class SearchHistoryDto {
 	@ApiProperty()
