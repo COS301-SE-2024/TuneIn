@@ -34,14 +34,14 @@ export class CombinedSearchHistory {
 	@ApiProperty({
 		description: "Mixed list of rooms, users, or strings",
 		isArray: true,
-		type: 'array',
-        items: {
-            oneOf: [
-                { $ref: '#/components/schemas/RoomDto' },
-                { $ref: '#/components/schemas/UserDto' },
-                { type: 'string' }
-            ],
-        },
+		type: "array",
+		items: {
+			oneOf: [
+				{ $ref: "#/components/schemas/RoomDto" },
+				{ $ref: "#/components/schemas/UserDto" },
+				{ type: "string" },
+			],
+		},
 	})
 	@IsArray({ message: "Results must be an array" })
 	results: (RoomDto | UserDto | string)[];

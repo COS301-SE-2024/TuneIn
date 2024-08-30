@@ -22,7 +22,7 @@ export class SongInfoDto {
 	@IsString()
 	title: string;
 
-	@ApiProperty({ 
+	@ApiProperty({
 		type: String,
 		description: "The artists that performed the song",
 		isArray: true,

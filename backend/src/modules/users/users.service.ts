@@ -22,7 +22,7 @@ export class UserListeningStatsDto {
 
 	@ApiProperty({
 		description: "The total number of hours spent listening to music by room",
-		example: { "room1_id": 5, "room2_id": 3 },
+		example: { room1_id: 5, room2_id: 3 },
 		type: "object",
 		additionalProperties: {
 			type: "number",
@@ -34,7 +34,7 @@ export class UserListeningStatsDto {
 
 	@ApiProperty({
 		description: "The total number of hours spent listening to music by genre",
-		example: { "rock": 5, "pop": 3 },
+		example: { rock: 5, pop: 3 },
 		type: "object",
 		additionalProperties: {
 			type: "number",

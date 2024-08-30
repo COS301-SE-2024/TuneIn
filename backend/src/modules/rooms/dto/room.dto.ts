@@ -1,5 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsBoolean, IsNumber, IsDateString, IsObject, IsDate, ValidateNested } from "class-validator";
+import {
+	IsString,
+	IsBoolean,
+	IsNumber,
+	IsDateString,
+	IsObject,
+	IsDate,
+	ValidateNested,
+} from "class-validator";
 import { UserDto } from "../../users/dto/user.dto";
 import { SongInfoDto } from "./songinfo.dto";
 import { Type } from "class-transformer";

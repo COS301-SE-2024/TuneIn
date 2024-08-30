@@ -10,7 +10,8 @@ export class PlaybackEventDto {
 	date_created?: Date;
 
 	@ApiProperty({
-		description: "The userID that triggered the event, or null if emitted by the server",
+		description:
+			"The userID that triggered the event, or null if emitted by the server",
 		type: String,
 		nullable: true,
 	})
@@ -30,7 +31,8 @@ export class PlaybackEventDto {
 	songID: string | null;
 
 	@ApiProperty({
-		description: "The UTC time the event was triggered, or null if no time was recorded",
+		description:
+			"The UTC time the event was triggered, or null if no time was recorded",
 		type: Number,
 		nullable: true,
 	})
