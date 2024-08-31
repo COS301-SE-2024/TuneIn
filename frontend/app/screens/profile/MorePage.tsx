@@ -32,8 +32,11 @@ const Search: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const [displayedItems, setDisplayedItems] = useState(items.slice(0, 20)); // Initial load of 20 items
+	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
 	const [loadingMore, setLoadingMore] = useState(false);
+	const [currentPage, setCurrentPage] = useState(0);
+
+	const ITEMS_PER_PAGE = 5;
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -62,17 +65,17 @@ const Search: React.FC = () => {
 		extrapolate: "clamp",
 	});
 
-	const loadMoreItems = () => {
-		if (!loadingMore) {
-			setLoadingMore(true);
-			const newItems = items.slice(
-				displayedItems.length,
-				displayedItems.length + 20,
-			);
-			setDisplayedItems((prevItems: any) => [...prevItems, ...newItems]);
-			setLoadingMore(false);
-		}
-	};
+	// const loadMoreItems = () => {
+	// 	if (!loadingMore) {
+	// 		setLoadingMore(true);
+	// 		const newItems = items.slice(
+	// 			displayedItems.length,
+	// 			displayedItems.length + 20,
+	// 		);
+	// 		setDisplayedItems((prevItems: any) => [...prevItems, ...newItems]);
+	// 		setLoadingMore(false);
+	// 	}
+	// };
 
 	const renderResult = ({ item }: { item: any }) => {
 		console.log("Render Items: " + item);
@@ -100,22 +103,47 @@ const Search: React.FC = () => {
 		return null;
 	};
 
-	const renderFooter = () => {
-		if (displayedItems.length < items.length) {
-			return (
-				<View
-					style={{ alignItems: "center", marginTop: 10, paddingBottom: 20 }}
-				>
-					<TouchableOpacity
-						style={styles.loadMoreButton}
-						onPress={loadMoreItems}
-					>
-						<Text style={styles.loadMoreText}>Load More</Text>
-					</TouchableOpacity>
-				</View>
-			);
+	const startIndex = currentPage * ITEMS_PER_PAGE;
+	const endIndex = startIndex + ITEMS_PER_PAGE;
+	const displayedItems = items.slice(startIndex, endIndex);
+
+	const goToNextPage = () => {
+		if (endIndex < items.length) {
+			setCurrentPage(currentPage + 1);
 		}
-		return null;
+	};
+
+	const goToPreviousPage = () => {
+		if (currentPage > 0) {
+			setCurrentPage(currentPage - 1);
+		}
+	};
+
+	const renderFooter = () => {
+		return (
+			<View style={styles.paginationContainer}>
+				<TouchableOpacity
+					style={[
+						styles.paginationButton,
+						currentPage === 0 && styles.disabledButton,
+					]}
+					onPress={goToPreviousPage}
+					disabled={currentPage === 0}
+				>
+					<Text style={styles.paginationButtonText}>Previous</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={[
+						styles.paginationButton,
+						endIndex >= items.length && styles.disabledButton,
+					]}
+					onPress={goToNextPage}
+					disabled={endIndex >= items.length}
+				>
+					<Text style={styles.paginationButtonText}>Next</Text>
+				</TouchableOpacity>
+			</View>
+		);
 	};
 
 	return (
@@ -387,6 +415,26 @@ const styles = StyleSheet.create({
 	loadMoreText: {
 		color: "#fff",
 		fontSize: 16,
+	},
+	paginationContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingHorizontal: 30,
+		marginVertical: 20,
+	},
+	paginationButton: {
+		padding: 10,
+		backgroundColor: colors.secondary,
+		borderRadius: 20,
+		width: 120,
+		alignItems: "center",
+	},
+	paginationButtonText: {
+		color: "#fff",
+		fontSize: 16,
+	},
+	disabledButton: {
+		backgroundColor: colors.lightGray,
 	},
 });
 
