@@ -67,6 +67,31 @@ const SplittingRoomCard: React.FC<SplittingRoomCardProps> = ({
 					<Text style={styles.participants}>{numberOfParticipants}</Text>
 				</View>
 			</ImageBackground>
+			<ScrollView
+				style={[styles.lowerSection, { height: lowerSectionHeight }]}
+				contentContainerStyle={styles.scrollViewContent}
+				nestedScrollEnabled={true} // Allow the ScrollView to scroll independently
+				showsVerticalScrollIndicator={false} // Hide the vertical scroll indicator
+			>
+				{playlist.length > 0 ? (
+					playlist.map((track, index) => (
+						<SongList
+							key={track.id || index}
+							songNumber={index + 1}
+							track={track}
+							showVoting={false}
+							isCurrent={index === currentTrackIndex}
+							index={index}
+						/>
+					))
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty. Add some songs to get started!
+						</Text>
+					</View>
+				)}
+			</ScrollView>
 		</View>
 	);
 };
