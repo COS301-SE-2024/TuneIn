@@ -95,6 +95,7 @@ const ProfileScreen: React.FC = () => {
 	}
 
 	const preFormatRoomData = (room: any, mine: boolean) => {
+		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
 			id: room.roomID,
 			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -684,7 +685,7 @@ const ProfileScreen: React.FC = () => {
 				<AppCarousel
 					data={primaryProfileData.fav_rooms.data
 						.slice(0, 10)
-						.map((room: RoomDto) => preFormatRoomData(room, false))}
+						.map((room: RoomDto) => formatRoomData(preFormatRoomData(room, false)))}
 					renderItem={renderItem}
 				/>
 				<View style={styles.profileHeader}>
@@ -720,7 +721,7 @@ const ProfileScreen: React.FC = () => {
 				<AppCarousel
 					data={primaryProfileData.recent_rooms.data
 						.slice(0, 10)
-						.map((room: RoomDto) => preFormatRoomData(room, false))}
+						.map((room: RoomDto) => formatRoomData(preFormatRoomData(room, false)))}
 					renderItem={renderItem}
 				/>
 				{primaryProfileData.current_room ? (
