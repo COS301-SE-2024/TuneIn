@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import SongCard from "./Spotify/SongCard";
 import { useSpotifySearch } from "../hooks/useSpotifySearch";
+import { colors } from "../styles/colors";
 
 interface Track {
 	id: string;
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	saveButton: {
-		backgroundColor: "#8b8fa8",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",

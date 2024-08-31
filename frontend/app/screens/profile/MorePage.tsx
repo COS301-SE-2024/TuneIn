@@ -120,6 +120,11 @@ const Search: React.FC = () => {
 	};
 
 	const renderFooter = () => {
+		if (items.length <= ITEMS_PER_PAGE) {
+			// If there aren't enough items, don't show the pagination buttons
+			return null;
+		}
+
 		return (
 			<View style={styles.paginationContainer}>
 				<TouchableOpacity

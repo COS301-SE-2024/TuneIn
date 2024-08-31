@@ -643,13 +643,13 @@ const ProfileScreen: React.FC = () => {
 							artist={song.artists}
 							duration={song.duration}
 							albumArt={song.cover}
-							onPress={() => setMusicDialogVisible(true)}
+							onPress={() => {}}
 						/>
 					))}
-					<MusicBottomSheet
+					{/* <MusicBottomSheet
 						isVisible={isMusicDialogVisible}
 						onClose={() => setMusicDialogVisible(false)}
-					/>
+					/> */}
 				</View>
 				<View style={styles.profileHeader}>
 					<Text
@@ -673,6 +673,7 @@ const ProfileScreen: React.FC = () => {
 								style={{
 									fontWeight: "700",
 									textAlign: "center",
+									paddingRight: 15,
 								}}
 							>
 								More
@@ -708,6 +709,7 @@ const ProfileScreen: React.FC = () => {
 								style={{
 									fontWeight: "700",
 									textAlign: "center",
+									paddingRight: 15,
 								}}
 							>
 								More
@@ -755,7 +757,7 @@ const styles = StyleSheet.create({
 	button: {
 		width: 155,
 		height: 37,
-		backgroundColor: "rgba(158, 171, 184, 1)",
+		backgroundColor: colors.primary,
 		borderRadius: 18.5,
 		justifyContent: "center",
 		alignItems: "center",

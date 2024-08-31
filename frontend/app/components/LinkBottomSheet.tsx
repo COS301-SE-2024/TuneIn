@@ -9,6 +9,8 @@ import {
 	Animated,
 	Linking,
 } from "react-native";
+import { colors } from "../styles/colors";
+
 
 const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 	},
 	modal: {
-		backgroundColor: "rgba(158, 171, 184, 1)",
+		backgroundColor: colors.primary,
 		padding: 20,
 		borderTopLeftRadius: 40,
 		borderTopRightRadius: 40,
