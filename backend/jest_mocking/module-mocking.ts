@@ -60,6 +60,8 @@ import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
+import { RecommendationsService } from "../src/recommendations/recommendations.service";
+import { RecommendationsModule } from "../src/recommendations/recommendations.module";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -71,7 +73,10 @@ const JWT_SECRET_KEY: string = tmpSecret;
 export async function createAppTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		controllers: [AppController],
-		providers: [AppService],
+		providers: [
+			AppService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
 		imports: [
 			ConfigModule.forRoot({ isGlobal: true }),
 			PrismaModule,
@@ -114,6 +119,7 @@ export async function createAuthTestingModule(): Promise<TestingModule> {
 			AuthService,
 			{ provide: ConfigService, useValue: mockConfigService },
 			{ provide: UsersService, useValue: mockUsersService },
+			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 	}).compile();
 }
@@ -165,6 +171,7 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			{ provide: PrismaService, useValue: mockPrismaService },
 			EventQueueService,
 			LiveService,
+			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		imports: [
 			RoomUsersModule,
@@ -173,6 +180,7 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			DtoGenModule,
 			RoomsModule,
 			UsersModule,
+			PrismaModule,
 		],
 		exports: [RoomUsersModule, DmUsersModule, LiveGateway],
 	}).compile();
@@ -234,7 +242,7 @@ export async function createDtoGenTestingModule(): Promise<TestingModule> {
 export async function createRoomsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		controllers: [RoomsController],
-		imports: [PrismaModule],
+		imports: [PrismaModule, RecommendationsModule],
 		providers: [
 			RoomsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -266,7 +274,7 @@ export async function createSearchTestingModule(): Promise<TestingModule> {
 //UsersModule
 export async function createUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule],
+		imports: [PrismaModule, RecommendationsModule],
 		providers: [
 			UsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -293,7 +301,11 @@ export async function createS3TestingModule(): Promise<TestingModule> {
 export async function createSpotifyTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [HttpModule, PrismaModule, DbUtilsModule],
-		providers: [SpotifyService, ConfigService],
+		providers: [
+			SpotifyService,
+			ConfigService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
 	}).compile();
 }
 
@@ -309,6 +321,7 @@ export async function createTasksTestingModule(): Promise<TestingModule> {
 		providers: [
 			TasksService,
 			{ provide: "BullQueue_task-queue", useValue: mockBullQueue },
+			{ provide: PrismaService, useValue: mockPrismaService },
 		], // Provide the mock here
 	}).compile();
 }
@@ -317,7 +330,10 @@ export async function createTasksTestingModule(): Promise<TestingModule> {
 export async function createGenresTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [PrismaModule],
-		providers: [GenresService],
+		providers: [
+			GenresService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
 		controllers: [GenresController],
 	}).compile();
 }
@@ -326,8 +342,23 @@ export async function createGenresTestingModule(): Promise<TestingModule> {
 export async function createSongsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [PrismaModule, AuthModule],
-		providers: [SongsService],
+		providers: [
+			SongsService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
 		controllers: [SongsController],
 		exports: [SongsService],
+	}).compile();
+}
+
+//RecommendationsModule
+export async function createRecommendationsTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule],
+		providers: [
+			RecommendationsService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
+		exports: [RecommendationsService],
 	}).compile();
 }

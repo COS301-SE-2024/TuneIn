@@ -17,6 +17,7 @@ import {
 	ApiOperation,
 	ApiParam,
 	ApiTags,
+	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
@@ -196,23 +197,6 @@ export class UsersController {
 	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecommendedRooms(userInfo.id);
-	}
-
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get("rooms/current")
-	@ApiTags("users")
-	@ApiOperation({
-		summary: "Get a user's current room (room that they are currently in)",
-	})
-	@ApiOkResponse({
-		description:
-			"The user's current room as a RoomDto or {} if they are not in a room.",
-		type: RoomDto,
-	})
-	async getCurrentRoom(@Request() req: any): Promise<RoomDto | object> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getCurrentRoom(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -476,6 +460,42 @@ export class UsersController {
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.rejectFriendRequest(userInfo.id, userID);
+	}
+
+	// define an endpoint for getting a user's current room
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("rooms/current")
+	@ApiOperation({ summary: "Get a user's current room" })
+	@ApiOkResponse({
+		description: "User's current room retrieved successfully",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getCurrentRoom(@Request() req: any): Promise<any> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getCurrentRoom(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(":userId/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@ApiParam({
+		name: "userId",
+		description: "The user id of user's current room to search for.",
+	})
+	@ApiOkResponse({
+		description: "User's current room retrieved successfully",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("rooms")
+	async getCurrentRoomByUserId(@Param("userId") userId: string): Promise<any> {
+		return await this.usersService.getCurrentRoom(userId);
 	}
 
 	/*
