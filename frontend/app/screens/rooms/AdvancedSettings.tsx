@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
@@ -45,7 +46,8 @@ const AdvancedSettings = () => {
 		<View style={styles.container}>
 			<View style={styles.header}>
 				<TouchableOpacity onPress={() => router.back()}>
-					<Text style={styles.closeButton}>×</Text>
+					{/* <Text style={styles.closeButton}>×</Text> */}
+					<MaterialCommunityIcons name="window-close" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
 			</View>

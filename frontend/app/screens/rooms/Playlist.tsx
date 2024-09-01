@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+// import { Ionicons } from "@expo/vector-icons";
 import RoomTab from "../../components/RoomTab";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
@@ -76,7 +76,7 @@ const Playlist = () => {
 					style={styles.backButton}
 					onPress={() => router.back()}
 				>
-					<Ionicons name="chevron-back" size={24} color="black" />
+					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
 				</TouchableOpacity>
 				<Text style={styles.pageName}>Queue</Text>
 			</View>
@@ -108,13 +108,17 @@ const Playlist = () => {
 					</View>
 				)}
 			</View>
-			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+			{/* <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
 				{isMine ? (
 					<Text style={styles.addButtonText}>Manage queue</Text>
 				) : (
 					<Text style={styles.addButtonText}>Add Song</Text>
 				)}
-			</TouchableOpacity>
+			</TouchableOpacity> */}
+			<CreateButton
+				title={isMine ? "Manage queue" : "Add Song"}
+				onPress={navigateToAddSong}
+			/>
 		</View>
 	);
 };

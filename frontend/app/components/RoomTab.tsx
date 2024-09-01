@@ -11,11 +11,16 @@ interface RoomTabProps {
 const RoomTab: React.FC<RoomTabProps> = ({ activeTab, setActiveTab }) => {
 	const router = useRouter();
 
+	const navigateToAdavancedSettings = () => {
+		router.navigate("/screens/rooms/AdvancedSettings");
+	};
+
 	const handleTabChange = (tab: string) => {
 		setActiveTab(tab);
 		switch (tab) {
 			case "Chat":
 				router.push("/screens/rooms/ChatRoom");
+				// router.push("/screens/messaging/ChatRoom");
 				break;
 			case "Room":
 				router.push("/screens/rooms/RoomPage");
@@ -62,7 +67,7 @@ const RoomTab: React.FC<RoomTabProps> = ({ activeTab, setActiveTab }) => {
 
 			{/* Menu Button */}
 			<TouchableOpacity
-				onPress={() => console.log("Menu pressed")}
+				onPress={navigateToAdavancedSettings}
 				style={styles.menuButton}
 			>
 				<Entypo name="dots-three-vertical" size={20} color="black" />
