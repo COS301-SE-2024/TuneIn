@@ -36,7 +36,7 @@ const Search: React.FC = () => {
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
 
-	const ITEMS_PER_PAGE = 5;
+	const ITEMS_PER_PAGE = 10;
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -135,7 +135,7 @@ const Search: React.FC = () => {
 					onPress={goToPreviousPage}
 					disabled={currentPage === 0}
 				>
-					<Text style={styles.paginationButtonText}>Previous</Text>
+					<Ionicons name="chevron-back" size={30} color="#fff" />
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[
@@ -145,7 +145,7 @@ const Search: React.FC = () => {
 					onPress={goToNextPage}
 					disabled={endIndex >= items.length}
 				>
-					<Text style={styles.paginationButtonText}>Next</Text>
+					<Ionicons name="chevron-forward" size={30} color="#fff" />
 				</TouchableOpacity>
 			</View>
 		);
@@ -431,12 +431,8 @@ const styles = StyleSheet.create({
 		padding: 10,
 		backgroundColor: colors.secondary,
 		borderRadius: 20,
-		width: 120,
+		width: 60,
 		alignItems: "center",
-	},
-	paginationButtonText: {
-		color: "#fff",
-		fontSize: 16,
 	},
 	disabledButton: {
 		backgroundColor: colors.lightGray,
