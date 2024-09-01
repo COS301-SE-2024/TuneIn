@@ -33,6 +33,7 @@ import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";
 import TopNavBar from "../components/TopNavBar";
+import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 interface UserData {
 	username: string;
 	// Add other properties if needed
@@ -358,6 +359,7 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		backgroundColor: "white",
 	},
 	scrollViewContent: {
 		paddingTop: 40,

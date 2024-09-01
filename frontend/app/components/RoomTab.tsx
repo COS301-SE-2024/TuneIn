@@ -15,6 +15,10 @@ const RoomTab: React.FC<RoomTabProps> = ({ activeTab, setActiveTab }) => {
 		router.navigate("/screens/rooms/AdvancedSettings");
 	};
 
+	const navigateToHome = () => {
+		router.navigate("/screens/Home");
+	};
+
 	const handleTabChange = (tab: string) => {
 		setActiveTab(tab);
 		switch (tab) {
@@ -37,7 +41,8 @@ const RoomTab: React.FC<RoomTabProps> = ({ activeTab, setActiveTab }) => {
 		<View style={styles.topBarContainer}>
 			{/* Back Button */}
 			<TouchableOpacity
-				onPress={() => router.back()}
+				// onPress={() => router.back()}
+				onPress={navigateToHome}
 				style={styles.backButton}
 				testID="backButton"
 			>

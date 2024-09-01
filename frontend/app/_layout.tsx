@@ -9,7 +9,7 @@ const Layout = () => {
 		<PlayerContextProvider>
 			<StatusBar
 				barStyle="light-content"
-				backgroundColor={colors.backgroundColor}
+				// backgroundColor={colors.backgroundColor}
 			/>
 			<View style={styles.container}>
 				<Stack screenOptions={{ title: "Room", headerShown: false }}>
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 45,
-		backgroundColor: colors.backgroundColor,
+		// backgroundColor: colors.backgroundColor,
 	},
 });
 
