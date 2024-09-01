@@ -54,21 +54,6 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 		}),
 	);
 
-	// Function to group links by type
-	const groupLinksByType = (links) => {
-		const groupedLinks = {};
-		links.forEach((link) => {
-			if (!groupedLinks[link.type]) {
-				groupedLinks[link.type] = [];
-			}
-			groupedLinks[link.type].push(link);
-		});
-		return groupedLinks;
-	};
-
-	// Group links by type
-	const groupedLinks = groupLinksByType(links);
-
 	return (
 		<Modal
 			transparent={true}
@@ -83,13 +68,9 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 					<View style={styles.dragHandle} {...panResponder.panHandlers} />
 					<View style={styles.textContainer}>
 						<Text style={styles.modalTitle}>Links</Text>
-						{Object.keys(groupedLinks).map((type, index) => (
 							<Links
-								key={index}
-								mediaPlatform={type}
-								links={groupedLinks[type]}
+								links={links}
 							/>
-						))}
 					</View>
 				</Animated.View>
 			</View>
@@ -97,14 +78,13 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	);
 };
 
-const Links = ({ mediaPlatform, links }) => {
+const Links = ({ links }) => {
 	const handleLinkPress = (link) => {
 		Linking.openURL("https://www." + link); // Open the link in the device's default browser
 	};
 
 	return (
 		<View>
-			<Text style={styles.mediaHeader}>{mediaPlatform}</Text>
 			{links.map((link, index) => (
 				<TouchableOpacity
 					key={index}
