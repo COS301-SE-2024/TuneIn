@@ -44,6 +44,11 @@ export class DtoGenService {
 			include: { genre: true },
 		});
 
+		const fav_songs = await this.prisma.favorite_songs.findMany({
+			where: { user_id: userID },
+			include: { song: true },
+		});
+
 		result.fav_genres = {
 			count: fav_genres.length,
 			data: fav_genres
@@ -51,8 +56,18 @@ export class DtoGenService {
 				.filter((name): name is string => name !== null),
 		};
 
-		
-		result.fav_songs = preferences.fav_songs;
+		result.fav_songs = {
+			count: fav_songs.length,
+			data: fav_songs.map((song) => ({
+				title: song.song.name,
+				artists: song.song.artists,
+				cover: song.song.artwork_url as string,
+				spotify_id: song.song.spotify_id,
+				start_time: null,
+			})),
+		};
+
+		// result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
 			const recent_rooms = await await this.prisma.user_activity.findMany({
@@ -71,7 +86,10 @@ export class DtoGenService {
 
 			result.recent_rooms = {
 				count: recent_rooms.length,
-				data: (await this.generateMultipleRoomDto(recent_rooms.map((room => room.room_id)))) || [],
+				data:
+					(await this.generateMultipleRoomDto(
+						recent_rooms.map((room) => room.room_id),
+					)) || [],
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
@@ -216,6 +234,7 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
+				spotify_id: "",
 				start_time: new Date(),
 			},
 			fav_genres: {
@@ -310,6 +329,7 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
+				spotify_id: "",
 				start_time: new Date(),
 			},
 			tags: room.tags || [],
@@ -366,6 +386,7 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
+				spotify_id: "",
 				start_time: new Date(),
 			},
 			tags: room.tags || [],
@@ -448,6 +469,7 @@ export class DtoGenService {
 						title: "",
 						artists: [],
 						cover: "",
+						spotify_id: "",
 						start_time: new Date(),
 					},
 					tags: r.tags || [],
