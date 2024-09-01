@@ -83,7 +83,6 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToMore = (type: string, items: any, title: string) => {
-		console.log("Navigate params: " + JSON.stringify( items));
 		router.push({
 			pathname: "./MorePage",
 			params: { type: type, items: JSON.stringify(items), title: title },
@@ -618,24 +617,26 @@ const ProfileScreen: React.FC = () => {
 				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 					<View style={styles.profileHeader}>
 						<Text style={styles.title}>Favorite Songs</Text>
-						<TouchableOpacity
-							onPress={() => {
-								navigateToMore(
-									"song",
-									primaryProfileData.fav_songs.data,
-									"Favorite Songs",
-								);
-							}}
-						>
-							<Text
-								style={{
-									fontWeight: "700",
-									textAlign: "center",
+						{primaryProfileData.fav_songs.count > 2 && (
+							<TouchableOpacity
+								onPress={() => {
+									navigateToMore(
+										"song",
+										primaryProfileData.fav_songs.data,
+										"Favorite Songs",
+									);
 								}}
 							>
-								More
-							</Text>
-						</TouchableOpacity>
+								<Text
+									style={{
+										fontWeight: "700",
+										textAlign: "center",
+									}}
+								>
+									More
+								</Text>
+							</TouchableOpacity>
+						)}
 					</View>
 					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
 						<FavoriteSongs
@@ -685,7 +686,9 @@ const ProfileScreen: React.FC = () => {
 				<AppCarousel
 					data={primaryProfileData.fav_rooms.data
 						.slice(0, 10)
-						.map((room: RoomDto) => formatRoomData(preFormatRoomData(room, false)))}
+						.map((room: RoomDto) =>
+							formatRoomData(preFormatRoomData(room, false)),
+						)}
 					renderItem={renderItem}
 				/>
 				<View style={styles.profileHeader}>
@@ -721,7 +724,9 @@ const ProfileScreen: React.FC = () => {
 				<AppCarousel
 					data={primaryProfileData.recent_rooms.data
 						.slice(0, 10)
-						.map((room: RoomDto) => formatRoomData(preFormatRoomData(room, false)))}
+						.map((room: RoomDto) =>
+							formatRoomData(preFormatRoomData(room, false)),
+						)}
 					renderItem={renderItem}
 				/>
 				{primaryProfileData.current_room ? (
