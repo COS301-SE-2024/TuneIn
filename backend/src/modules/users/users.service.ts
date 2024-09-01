@@ -83,6 +83,13 @@ export class UsersService {
 
 		const updateData = this.dbUtils.buildUpdateData(user, updateProfileDto);
 
+		if (updateProfileDto.fav_genres) {
+			console.log("Profile update: " + updateProfileDto.fav_genres.data);
+
+			const genres: string[] = updateProfileDto.fav_genres.data;
+			this.updateFavoriteGenresByName(userId, genres);
+		}
+
 		await this.prisma.users.update({
 			where: { user_id: userId },
 			data: updateData,
@@ -94,6 +101,69 @@ export class UsersService {
 		}
 
 		return u;
+	}
+
+	private async updateFavoriteGenresByName(
+		userId: string,
+		newGenreNames: string[],
+	): Promise<void> {
+		await this.prisma.$transaction(async (prisma) => {
+			// Step 1: Fetch current genres associated with the user
+			const currentFavoriteGenres = await prisma.favorite_genres.findMany({
+				where: { user_id: userId },
+				include: { genre: true }, // Include genre details in the result
+			});
+
+			const genreNameToIdMap = new Map<string, string>(
+				currentFavoriteGenres.map((fg) => [
+					fg.genre.genre as string,
+					fg.genre.genre_id,
+				]),
+			);
+
+			const currentGenreNames = currentFavoriteGenres.map(
+				(fg) => fg.genre.genre,
+			);
+
+			// Step 2: Fetch genre IDs for the provided genre names
+			const genres = await prisma.genre.findMany({
+				where: { genre: { in: newGenreNames } },
+				select: { genre_id: true, genre: true },
+			});
+
+			const genreMap = new Map(
+				genres.map((genre) => [genre.genre, genre.genre_id as string]),
+			);
+
+			// Step 3: Determine genres to add and remove
+			const genresToAdd = newGenreNames.filter(
+				(name) => !currentGenreNames.includes(name) && genreMap.has(name),
+			);
+
+			const genresToRemove = currentGenreNames
+				.filter((name): name is string => name !== null)
+				.filter((name) => !newGenreNames.includes(name));
+
+			// Step 4: Delete removed genres
+			const resp = await prisma.favorite_genres.deleteMany({
+				where: {
+					user_id: userId,
+					genre_id: {
+						in: genresToRemove
+							.map((name) => genreNameToIdMap.get(name))
+							.filter((id) => id !== undefined) as string[],
+					},
+				},
+			});
+
+			// Step 5: Insert new genres
+			const resp2 = await prisma.favorite_genres.createMany({
+				data: genresToAdd.map((name) => ({
+					user_id: userId,
+					genre_id: genreMap.get(name)!,
+				})),
+			});
+		});
 	}
 
 	async getProfileByUsername(username: string): Promise<UserDto> {
