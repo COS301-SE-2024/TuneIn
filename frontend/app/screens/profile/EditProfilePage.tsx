@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import {
 	View,
 	Text,
@@ -23,6 +23,8 @@ import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
 
+type InputRef = TextInput | null;
+
 const EditProfileScreen = () => {
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -39,6 +41,7 @@ const EditProfileScreen = () => {
 		);
 	}
 
+	const inputRefs = useRef<InputRef[]>([]);
 	const { setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);
@@ -249,11 +252,19 @@ const EditProfileScreen = () => {
 			links: {
 				...prevProfileData.links,
 				data: [...prevProfileData.links.data, { links: link }],
+				count: prevProfileData.links.count + 1,
 			},
 		}));
 		setChanged(true);
 
-		setLinkAddDialogVisible(false);
+		// setLinkAddDialogVisible(false);
+
+		setTimeout(() => {
+			const lastIndex = inputRefs.current.length - 1;
+			if (inputRefs.current[lastIndex]) {
+				inputRefs.current[lastIndex]?.focus();
+			}
+		}, 0);
 	};
 
 	const handleLinkDeletion = (linkToDelete) => {
@@ -265,6 +276,7 @@ const EditProfileScreen = () => {
 					data: prevProfileData.links.data.filter(
 						(item) => item.links !== linkToDelete,
 					),
+					count: prevProfileData.links.count - 1,
 				},
 			}));
 			// console.log(profileData.links);
@@ -396,18 +408,11 @@ const EditProfileScreen = () => {
 			return (
 				<View style={styles.listItem}>
 					<TouchableOpacity
-						onPress={() => setLinkAddDialogVisible(true)}
+						onPress={() => handleLinkAddition("")}
 						style={styles.editButton}
 					>
 						<Text style={{ fontWeight: "600" }}>Add link</Text>
 					</TouchableOpacity>
-					<EditDialog
-						value="link"
-						title="Add Link"
-						visible={isLinkAddDialogVisible}
-						onClose={() => setLinkAddDialogVisible(false)}
-						onSave={handleLinkAddition}
-					/>
 				</View>
 			);
 		}
@@ -549,10 +554,16 @@ const EditProfileScreen = () => {
 							</TouchableOpacity> */}
 
 							<TextInput
+								ref={(ref) => (inputRefs.current[index] = ref)}
 								style={styles.editButton}
 								value={link.links}
 								onChangeText={(newLink) => {
 									handleLinkEdit(index, newLink);
+								}}
+								onBlur={() => {
+									if (link.links === "") {
+										handleLinkDeletion(link.links);
+									}
 								}}
 							/>
 

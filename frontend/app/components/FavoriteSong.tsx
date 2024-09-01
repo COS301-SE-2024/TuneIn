@@ -19,13 +19,13 @@ const FavoriteSongs = ({
 					<Text style={styles.artist}>{artist}</Text>
 				</View>
 				<Text style={styles.duration}>{duration}</Text>
-				{/* <TouchableOpacity onPress={onPress} style={styles.icon}>
+				<TouchableOpacity onPress={onPress} style={styles.icon}>
 					<MaterialIcons
 						name={toEdit ? "close" : "more-horiz"}
 						size={24}
 						color="black"
 					/>
-				</TouchableOpacity> */}
+				</TouchableOpacity>
 			</View>
 		</View>
 	);
