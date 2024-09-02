@@ -19,8 +19,6 @@ paths:
       description: >-
         This operation uploads a file to AWS S3 (the TuneIn bucket) and returns
         the URL of the uploaded file.
-      tags:
-        - File Upload
       externalDocs:
         description: More about file uploads via HTTP POST requests
         url: >-
@@ -129,7 +127,30 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectMessageDto'
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/stats:
+    get:
+      operationId: getListeningStats
+      summary: Get a user's listening stats
+      description: >-
+        Get the listening stats of the authenticated user, including total time
+        listened, and average listening time per day, most played songs, genres,
+        and artists.
+      parameters: []
+      responses:
+        '200':
+          description: The user's listening stats as a UserListeningStatsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListeningStatsDto'
       tags:
         - users
       security:
@@ -227,9 +248,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: >-
-            The user's current room as a RoomDto or {} if they are not in a
-            room.
+          description: The user's current room as a RoomDto.
           content:
             application/json:
               schema:
@@ -282,11 +301,7 @@ paths:
       operationId: getFollowers
       summary: Get a user's followers
       description: Get all of the users that follow the authenticated user.
-      parameters:
-        - name: none
-          required: true
-          in: path
-          schema: {}
+      parameters: []
       responses:
         '200':
           description: The user's followers as an array of UserDto.
@@ -306,6 +321,26 @@ paths:
       operationId: getFollowing
       summary: Get a user's following
       description: Get all of the users that the authenticated user follows.
+      parameters: []
+      responses:
+        '200':
+          description: The user's following as an array of UserDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/blocked:
+    get:
+      operationId: getBlocked
+      summary: Get blocked users
+      description: Get all of the users that the authenticated user has blocked.
       parameters: []
       responses:
         '200':
@@ -384,16 +419,8 @@ paths:
       responses:
         '200':
           description: Successfully followed the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error following the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -416,16 +443,8 @@ paths:
       responses:
         '200':
           description: Successfully unfollowed the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error unfollowing the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -448,16 +467,8 @@ paths:
       responses:
         '200':
           description: Successfully sent friend request.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error sending friend request.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -514,16 +525,8 @@ paths:
       responses:
         '200':
           description: Successfully accepted friend request.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error accepting friend request.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -546,12 +549,109 @@ paths:
       responses:
         '200':
           description: Successfully rejected friend request.
+        '400':
+          description: Error rejecting friend request.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{userId}/room/current:
+    get:
+      operationId: UsersController_getCurrentRoomByUserId
+      summary: Get a user's current room based on user id
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          description: The user id of user's current room to search for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User's current room retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - users
+        - rooms
+      security:
+        - bearer: []
+  /users/{username}/block:
+    post:
+      operationId: blockUser
+      summary: Block a given user
+      description: Block the user with the given username.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          description: The username of the user to block.
+          example: johndoe
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully blocked the user.
+        '400':
+          description: Error blocking the user.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/unblock:
+    post:
+      operationId: unblockUser
+      summary: Unblock a given user
+      description: Unblock the user with the given username.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          description: The username of the user to unblock.
+          example: johndoe
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully unblocked the user.
+        '400':
+          description: Error unblocking the user.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/report:
+    post:
+      operationId: reportUser
+      summary: Report a given user
+      description: Report the user with the given username.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          description: The username of the user to report.
+          example: johndoe
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully reported the user.
           content:
             application/json:
               schema:
                 type: boolean
         '400':
-          description: Error rejecting friend request.
+          description: Error reporting the user.
           content:
             application/json:
               schema:
@@ -683,8 +783,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: ''
+        '302':
+          description: Redirects to the Expo app with the Spotify auth code
       tags:
         - auth
   /auth/spotify/callback:
@@ -769,11 +869,7 @@ paths:
       operationId: getNewRooms
       summary: Get newly created public rooms
       description: Returns the new public rooms as an array of RoomDto.
-      parameters:
-        - name: none
-          required: true
-          in: path
-          schema: {}
+      parameters: []
       responses:
         '200':
           description: The new public rooms as an array of RoomDto.
@@ -874,7 +970,11 @@ paths:
               $ref: '#/components/schemas/UpdateRoomDto'
       responses:
         '200':
-          description: ''
+          description: Room info updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDto'
       security:
         - bearer: []
         - bearer: []
@@ -896,16 +996,8 @@ paths:
       responses:
         '200':
           description: Room deleted successfully.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: User is not the creator of the room.
-          content:
-            application/json:
-              schema:
-                type: boolean
       security:
         - bearer: []
         - bearer: []
@@ -962,10 +1054,6 @@ paths:
       responses:
         '200':
           description: User left room successfully.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: User not in room.
           content:
@@ -1201,6 +1289,10 @@ paths:
       responses:
         '200':
           description: The analytics of the room as a RoomAnalyticsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsDto'
         '401':
           description: Unauthorized
       security:
@@ -1226,6 +1318,10 @@ paths:
       responses:
         '200':
           description: The queue analytics of the room as a RoomAnalyticsQueueDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsQueueDto'
         '401':
           description: Unauthorized
       security:
@@ -1255,6 +1351,10 @@ paths:
           description: >-
             The participation analytics of the room as a
             RoomAnalyticsParticipationDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsParticipationDto'
         '401':
           description: Unauthorized
       security:
@@ -1284,6 +1384,10 @@ paths:
           description: >-
             The interaction analytics of the room as a
             RoomAnalyticsInteractionsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsInteractionsDto'
         '401':
           description: Unauthorized
       security:
@@ -1309,6 +1413,10 @@ paths:
       responses:
         '200':
           description: The voting analytics of the room as a RoomAnalyticsVotesDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsVotesDto'
         '401':
           description: Unauthorized
       security:
@@ -1334,6 +1442,10 @@ paths:
       responses:
         '200':
           description: The song analytics of the room as a RoomAnalyticsSongsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsSongsDto'
         '401':
           description: Unauthorized
       security:
@@ -1363,6 +1475,10 @@ paths:
           description: >-
             The contributor analytics of the room as a
             RoomAnalyticsContributorsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsContributorsDto'
         '401':
           description: Unauthorized
       security:
@@ -1383,6 +1499,10 @@ paths:
           description: >-
             The key metrics for the user's rooms as a
             RoomAnalyticsKeyMetricsDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAnalyticsKeyMetricsDto'
         '401':
           description: Unauthorized
       security:
@@ -1390,15 +1510,18 @@ paths:
         - bearer: []
       tags:
         - room analytics
-  /rooms/{roomID}/archive/playlist:
-    post:
-      operationId: RoomsController_archiveRoomSongs
-      summary: Archive a room's songs
+  /rooms/{roomID}/kicked:
+    get:
+      operationId: getKickedUsers
+      summary: Get list of kicked users
+      description: >-
+        Returns an array of UserDto representing users who were been kicked from
+        the room.
       parameters:
         - name: roomID
           required: true
           in: path
-          description: The ID of the room to archive songs for.
+          description: The ID of the room to get the kicked users for.
           example: 123e4567-e89b-12d3-a456-426614174000
           allowEmptyValue: false
           schema:
@@ -1406,51 +1529,177 @@ paths:
             type: string
       responses:
         '200':
-          description: Room songs archived successfully
-        '401':
-          description: Unauthorized
-        '404':
-          description: Room not found
-      security:
-        - bearer: []
-        - bearer: []
+          description: An array of UserDto representing the kicked users in the room.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
       tags:
-        - rooms
-  /rooms/archive/playlist:
-    get:
-      operationId: RoomsController_getArchivedSongs
-      summary: Get a user's archived songs
-      parameters: []
-      responses:
-        '200':
-          description: User's archived songs retrieved successfully
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - rooms
-  /rooms/archive/playlist/{playlistID}:
-    delete:
-      operationId: RoomsController_deleteArchivedSongs
-      summary: Delete a user's archived songs
+        - room management
+    post:
+      operationId: kickUser
+      summary: Kick someone out of a room
+      description: Kicks a user out of the room.
       parameters:
-        - name: playlistID
+        - name: roomID
           required: true
           in: path
+          description: The ID of the room to kick the user from.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
           schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user ID of the user to be kicked.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserActionDto'
+      responses:
+        '200':
+          description: User kicked successfully
+        '400':
+          description: Bad request
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - room management
+    delete:
+      operationId: undoKick
+      summary: Undo participant kick
+      description: Undoes the kick of a participant in the room.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to undo the kick in.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user ID of the user to undo the kick for.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserActionDto'
+      responses:
+        '200':
+          description: Kick undone successfully
+        '400':
+          description: Bad request
+      tags:
+        - room management
+  /rooms/{roomID}/banned:
+    get:
+      operationId: getBannedUsers
+      summary: Get list of banned users
+      description: Returns an array of UserDto representing the banned users in the room.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to get the banned users for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
             type: string
       responses:
         '200':
-          description: User's archived songs deleted successfully
-        '401':
-          description: Unauthorized
+          description: An array of UserDto representing the banned users in the room.
+      tags:
+        - room management
+    post:
+      operationId: banUser
+      summary: Perma ban someone from a room
+      description: Permanently bans a user from the room.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to ban the user from.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user ID of the user to be banned.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserActionDto'
+      responses:
+        '200':
+          description: User banned successfully
+        '400':
+          description: Bad request
+      tags:
+        - room management
+    delete:
+      operationId: undoBan
+      summary: Undo participant ban
+      description: Undoes the ban of a participant in the room.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to undo the ban in.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user ID of the user to undo the ban for.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserActionDto'
+      responses:
+        '200':
+          description: Ban undone successfully
+        '400':
+          description: Bad request
+      tags:
+        - room management
+  /rooms/{roomID}/schedule:
+    get:
+      operationId: getCalendarFile
+      summary: Get scheduled room
+      description: Returns the scheduled room as a .ics file.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to get the schedule for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The scheduled room as a .ics file.
+          content:
+            text/calendar:
+              schema:
+                $ref: '#/components/schemas/File'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/File'
         '404':
-          description: Playlist not found
-      security:
-        - bearer: []
-        - bearer: []
+          description: Room not found
       tags:
         - rooms
   /search:
@@ -1522,6 +1771,12 @@ paths:
       responses:
         '200':
           description: Search results as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
         '400':
           description: Invalid query parameters
       tags:
@@ -1839,6 +2094,7 @@ paths:
     get:
       operationId: GenresController_getAllGenres
       summary: Get all genres
+      description: Returns a list of all genres
       parameters: []
       responses:
         '200':
@@ -1886,13 +2142,17 @@ components:
         title:
           type: string
         artists:
+          description: The artists that performed the song
           type: array
           items:
             type: string
         cover:
           type: string
         start_time:
-          type: object
+          format: date-time
+          type: string
+          description: The time the song started playing
+          nullable: true
       required:
         - title
         - artists
@@ -1911,24 +2171,70 @@ components:
           type: string
         followers:
           type: object
+          description: The user's followers
         following:
           type: object
+          description: The user's following
         links:
           type: object
+          title: LinksWithCount
+          description: The user's links
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: string
         bio:
           type: string
         current_song:
-          $ref: '#/components/schemas/SongInfoDto'
+          description: >-
+            The current song the user is listening to, or null if no song is
+            playing
+          allOf:
+            - $ref: '#/components/schemas/SongInfoDto'
         fav_genres:
           type: object
+          title: GenresWithCount
+          description: The user's favorite genres
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: string
         fav_songs:
           type: object
+          title: SongInfosWithCount
+          description: The user's favorite songs
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: SongInfoDto
         fav_rooms:
           type: object
+          description: The user's favorite rooms
         recent_rooms:
           type: object
+          description: The user's recent rooms
         friendship:
           type: object
+          title: UserDtosWithCount
+          description: >-
+            The user's friendship status with the current user, or null if the
+            user is not friends with the current user
+          properties:
+            status:
+              type: boolean
+            accept_url:
+              type: string
+            reject_url:
+              type: string
       required:
         - profile_name
         - userID
@@ -1937,12 +2243,11 @@ components:
         - followers
         - following
         - links
-        - bio
-        - current_song
         - fav_genres
         - fav_songs
         - fav_rooms
         - recent_rooms
+        - friendship
     UpdateUserDto:
       type: object
       properties:
@@ -1956,29 +2261,138 @@ components:
           type: string
         followers:
           type: object
+          description: The user's followers
         following:
           type: object
+          description: The user's following
         links:
           type: object
+          title: LinksWithCount
+          description: The user's links
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: string
         bio:
           type: string
         current_song:
-          $ref: '#/components/schemas/SongInfoDto'
+          description: >-
+            The current song the user is listening to, or null if no song is
+            playing
+          allOf:
+            - $ref: '#/components/schemas/SongInfoDto'
         fav_genres:
           type: object
+          title: GenresWithCount
+          description: The user's favorite genres
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: string
         fav_songs:
           type: object
+          title: SongInfosWithCount
+          description: The user's favorite songs
+          properties:
+            count:
+              type: number
+            data:
+              type: array
+              items:
+                type: SongInfoDto
         fav_rooms:
           type: object
+          description: The user's favorite rooms
         recent_rooms:
           type: object
+          description: The user's recent rooms
         friendship:
           type: object
+          title: UserDtosWithCount
+          description: >-
+            The user's friendship status with the current user, or null if the
+            user is not friends with the current user
+          properties:
+            status:
+              type: boolean
+            accept_url:
+              type: string
+            reject_url:
+              type: string
+    DirectMessageDto:
+      type: object
+      properties:
+        index:
+          type: number
+        messageBody:
+          type: string
+        sender:
+          description: The sender of the message
+          allOf:
+            - $ref: '#/components/schemas/UserDto'
+        recipient:
+          description: The recipient of the message
+          allOf:
+            - $ref: '#/components/schemas/UserDto'
+        dateSent:
+          format: date-time
+          type: string
+        dateRead:
+          format: date-time
+          type: string
+        isRead:
+          type: boolean
+        pID:
+          type: string
+      required:
+        - index
+        - messageBody
+        - sender
+        - recipient
+        - dateSent
+        - dateRead
+        - isRead
+        - pID
+    UserListeningStatsDto:
+      type: object
+      properties:
+        totalListenedSongs:
+          type: number
+          description: The total number of songs listened to by the user
+          example: 100
+        listeningTimeByRoom:
+          type: object
+          description: The total number of hours spent listening to music by room
+          example:
+            room1_id: 5
+            room2_id: 3
+          additionalProperties:
+            type: number
+        listeningTimeByGenre:
+          type: object
+          description: The total number of hours spent listening to music by genre
+          example:
+            rock: 5
+            pop: 3
+          additionalProperties:
+            type: number
+      required:
+        - totalListenedSongs
+        - listeningTimeByRoom
+        - listeningTimeByGenre
     RoomDto:
       type: object
       properties:
         creator:
-          $ref: '#/components/schemas/UserDto'
+          description: The date the room was created
+          allOf:
+            - $ref: '#/components/schemas/UserDto'
         roomID:
           type: string
         participant_count:
@@ -2008,8 +2422,11 @@ components:
         room_image:
           type: string
         current_song:
-          $ref: '#/components/schemas/SongInfoDto'
+          description: The current song playing in the room
+          allOf:
+            - $ref: '#/components/schemas/SongInfoDto'
         tags:
+          description: The tags that describe the room
           type: array
           items:
             type: string
@@ -2058,6 +2475,7 @@ components:
         room_image:
           type: string
         tags:
+          description: The tags that describe the room
           type: array
           items:
             type: string
@@ -2144,6 +2562,7 @@ components:
         room_image:
           type: string
         tags:
+          description: The tags that describe the room
           type: array
           items:
             type: string
@@ -2163,6 +2582,291 @@ components:
         - messageBody
         - sender
         - roomID
+    RoomAnalyticsQueueDto:
+      type: object
+      properties:
+        total_songs_queued:
+          type: number
+          description: Total number of songs ever queued in the room
+        total_queue_exports:
+          type: number
+          description: Number of times the room's queue was exported as a playlist
+      required:
+        - total_songs_queued
+        - total_queue_exports
+    ParticipantsPerHourDto:
+      type: object
+      properties:
+        count:
+          type: number
+          description: The number of participants in the room at the given hour
+        instance:
+          format: date-time
+          type: string
+          description: The specific hour for participant count
+      required:
+        - count
+        - instance
+    RoomAnalyticsParticipationDto:
+      type: object
+      properties:
+        joins:
+          type: object
+          title: Joins
+          description: >-
+            Join statistics, including total and unique joins per day and
+            all-time
+          properties:
+            per_day:
+              type: JoinsPerDay
+            all_time:
+              title: JoinsAllTime
+              type: object
+              properties:
+                total_joins:
+                  type: number
+                unique_joins:
+                  type: number
+        participants_per_hour:
+          description: Participants per hour data
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantsPerHourDto'
+        session_data:
+          type: object
+          title: SessionData
+          description: >-
+            Session data including average, minimum, and maximum duration
+            all-time and per day
+          properties:
+            all_time:
+              type: AllTimeSessionDataDto
+            per_day:
+              type: array
+              items:
+                type: SessionDurationPerDayDto
+        return_visits:
+          type: object
+          title: ReturnVisits
+          description: Expected return visits and probability of return
+          properties:
+            expected_return_count:
+              type: number
+            probability_of_return:
+              type: number
+        room_previews:
+          type: number
+          description: Number of previews of the room, i.e. without joining
+      required:
+        - joins
+        - participants_per_hour
+        - session_data
+        - return_visits
+        - room_previews
+    RoomAnalyticsInteractionsDto:
+      type: object
+      properties:
+        messages:
+          type: object
+          title: Messages
+          description: Total messages sent and messages sent per hour
+          properties:
+            total:
+              type: number
+            per_hour:
+              type: array
+              items:
+                type: MessagesPerHour
+        reactions_sent:
+          type: number
+          description: Total number of reactions sent in the room
+        bookmarked_count:
+          type: number
+          description: Number of times the room was bookmarked
+      required:
+        - messages
+        - reactions_sent
+        - bookmarked_count
+    SongAnalyticsDto:
+      type: object
+      properties:
+        spotify_id:
+          type: string
+          description: Spotify ID of the song
+        song_id:
+          type: string
+          description: Internal song ID
+        plays:
+          type: number
+          description: Number of times the song was played
+        upvotes:
+          type: number
+          description: Number of upvotes the song received
+        downvotes:
+          type: number
+          description: Number of downvotes the song received
+        rank:
+          type: number
+          description: Rank of the song based on some criteria
+        global_rank:
+          type: number
+          description: Global rank of the song across all rooms
+      required:
+        - spotify_id
+        - song_id
+        - plays
+        - upvotes
+        - downvotes
+        - rank
+        - global_rank
+    RoomAnalyticsVotesDto:
+      type: object
+      properties:
+        total_upvotes:
+          type: number
+          description: Total number of upvotes for songs in the room
+        total_downvotes:
+          type: number
+          description: Total number of downvotes for songs in the room
+        daily_percentage_change_in_upvotes:
+          type: number
+          description: >-
+            Daily percentage change in upvotes for songs in the room. (last 24
+            hours)
+        daily_percentage_change_in_downvotes:
+          type: number
+          description: >-
+            Daily percentage change in downvotes for songs in the room. (last 24
+            hours)
+        songs:
+          description: >-
+            Details of songs including Spotify ID, song ID, upvotes, and
+            downvotes
+          type: array
+          items:
+            $ref: '#/components/schemas/SongAnalyticsDto'
+      required:
+        - total_upvotes
+        - total_downvotes
+        - daily_percentage_change_in_upvotes
+        - daily_percentage_change_in_downvotes
+        - songs
+    RoomAnalyticsSongsDto:
+      type: object
+      properties:
+        most_played:
+          title: MostPlayed
+          description: Most played songs in the room
+          type: array
+          items:
+            $ref: '#/components/schemas/SongAnalyticsDto'
+        top_voted:
+          description: Top voted songs in the room
+          type: array
+          items:
+            $ref: '#/components/schemas/SongAnalyticsDto'
+      required:
+        - most_played
+        - top_voted
+    RoomAnalyticsContributorsDto:
+      type: object
+      properties:
+        top_contributors:
+          type: object
+          title: TopContributors
+          description: Top contributors to the room's queue
+          properties:
+            user:
+              type: UserDto
+            rank:
+              type: number
+            num_songs:
+              type: number
+            num_upvotes:
+              type: number
+      required:
+        - top_contributors
+    RoomAnalyticsDto:
+      type: object
+      properties:
+        queue:
+          description: Queue analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsQueueDto'
+        participation:
+          description: Participation analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsParticipationDto'
+        interactions:
+          description: Interactions analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsInteractionsDto'
+        votes:
+          description: Votes analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsVotesDto'
+        songs:
+          description: Songs analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsSongsDto'
+        contributors:
+          description: Contributors analytics
+          allOf:
+            - $ref: '#/components/schemas/RoomAnalyticsContributorsDto'
+      required:
+        - queue
+        - participation
+        - interactions
+        - votes
+        - songs
+        - contributors
+    RoomAnalyticsKeyMetricsDto:
+      type: object
+      properties:
+        unique_visitors:
+          type: object
+          title: UniqueVisitors
+          description: Unique visitors to the user's rooms
+          properties:
+            count:
+              type: number
+            percentage_change:
+              type: number
+        returning_visitors:
+          type: object
+          title: ReturningVisitors
+          description: Returning visitors to the user's rooms
+          properties:
+            count:
+              type: number
+            percentage_change:
+              type: number
+        average_session_duration:
+          type: object
+          title: AverageSessionDuration
+          description: Average session duration in the user's rooms
+          properties:
+            duration:
+              type: number
+            percentage_change:
+              type: number
+      required:
+        - unique_visitors
+        - returning_visitors
+        - average_session_duration
+    UserActionDto:
+      type: object
+      properties:
+        userID:
+          type: string
+          description: The user ID of the user that the action was performed on
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+      required:
+        - userID
+    File:
+      type: object
+      properties: {}
     CombinedSearchResults:
       type: object
       properties:
@@ -2184,9 +2888,9 @@ components:
       properties:
         results:
           description: Mixed list of rooms, users, or strings
-          type: array
           items:
-            type: string
+            type: object
+          type: array
       required:
         - results
     SearchHistoryDto:

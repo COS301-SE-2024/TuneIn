@@ -12,6 +12,7 @@ import { Type } from "class-transformer";
 export class RoomAnalyticsKeyMetricsDto {
 	// an object called unique visitors with two properties, count and percentage_change. both are numbers
 	@ApiProperty({
+		title: "UniqueVisitors",
 		description: "Unique visitors to the user's rooms",
 		type: "object",
 		properties: {
@@ -28,6 +29,7 @@ export class RoomAnalyticsKeyMetricsDto {
 
 	// an object called returning_visitors with two properties, count and percentage_change. both are numbers
 	@ApiProperty({
+		title: "ReturningVisitors",
 		description: "Returning visitors to the user's rooms",
 		type: "object",
 		properties: {
@@ -44,6 +46,7 @@ export class RoomAnalyticsKeyMetricsDto {
 
 	// an object called average_session_duration with two properties, duration and percentage_change. both are numbers
 	@ApiProperty({
+		title: "AverageSessionDuration",
 		description: "Average session duration in the user's rooms",
 		type: "object",
 		properties: {
@@ -86,38 +89,73 @@ export class ParticipantsPerHourDto {
 	instance: Date;
 }
 
+class AllTimeSessionDataDto {
+	@ApiProperty({
+		description: "The average session duration of the room",
+	})
+	@IsNumber()
+	avg_duration: number;
+
+	@ApiProperty({
+		description: "The minimum session duration of the room",
+	})
+	@IsNumber()
+	min_duration: number;
+
+	@ApiProperty({
+		description: "The maximum session duration of the room",
+	})
+	@IsNumber()
+	max_duration: number;
+}
+
+class SessionDurationPerDayDto {
+	@ApiProperty({ type: "number" })
+	duration: number;
+
+	@ApiProperty({ type: "Date" })
+	day: Date;
+}
+
+export class SessionDataPerDayDto {
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() => SessionDurationPerDayDto)
+	avg_duration: SessionDurationPerDayDto[];
+
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() => SessionDurationPerDayDto)
+	min_duration: SessionDurationPerDayDto[];
+
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() => SessionDurationPerDayDto)
+	max_duration: SessionDurationPerDayDto[];
+}
+
+class JoinsCount {
+	@ApiProperty({ type: "number" })
+	count: number;
+
+	@ApiProperty({ type: "Date" })
+	day: Date;
+}
+
+class JoinsPerDay {
+	total_joins: JoinsCount[];
+	unique_joins: JoinsCount[];
+}
+
 export class RoomAnalyticsParticipationDto {
 	@ApiProperty({
+		title: "Joins",
 		description:
 			"Join statistics, including total and unique joins per day and all-time",
 		type: "object",
 		properties: {
 			per_day: {
-				type: "object",
-				properties: {
-					total_joins: {
-						type: "array",
-						items: {
-							type: "object",
-							properties: {
-								count: { type: "number" },
-								day: { type: "Date" },
-							},
-						},
-					},
-					unique_joins: {
-						type: "array",
-						items: {
-							type: "object",
-							properties: {
-								count: { type: "number" },
-								day: { type: "Date" },
-							},
-						},
-					},
-				},
+				type: "JoinsPerDay",
 			},
 			all_time: {
+				title: "JoinsAllTime",
 				type: "object",
 				properties: {
 					total_joins: { type: "number" },
@@ -129,10 +167,7 @@ export class RoomAnalyticsParticipationDto {
 	@IsObject()
 	@ValidateNested()
 	joins: {
-		per_day: {
-			total_joins: { count: number; day: Date }[];
-			unique_joins: { count: number; day: Date }[];
-		};
+		per_day: JoinsPerDay;
 		all_time: {
 			total_joins: number;
 			unique_joins: number;
@@ -150,54 +185,18 @@ export class RoomAnalyticsParticipationDto {
 	participants_per_hour: ParticipantsPerHourDto[];
 
 	@ApiProperty({
+		title: "SessionData",
 		description:
 			"Session data including average, minimum, and maximum duration all-time and per day",
 		type: "object",
 		properties: {
 			all_time: {
-				type: "object",
-				properties: {
-					avg_duration: { type: "number" },
-					min_duration: { type: "number" },
-					max_duration: { type: "number" },
-				},
+				type: "AllTimeSessionDataDto",
 			},
 			per_day: {
 				type: "array",
 				items: {
-					type: "object",
-					properties: {
-						avg_duration: {
-							type: "array",
-							items: {
-								type: "object",
-								properties: {
-									duration: { type: "number" },
-									day: { type: "Date" },
-								},
-							},
-						},
-						min_duration: {
-							type: "array",
-							items: {
-								type: "object",
-								properties: {
-									duration: { type: "number" },
-									day: { type: "Date" },
-								},
-							},
-						},
-						max_duration: {
-							type: "array",
-							items: {
-								type: "object",
-								properties: {
-									duration: { type: "number" },
-									day: { type: "Date" },
-								},
-							},
-						},
-					},
+					type: "SessionDurationPerDayDto",
 				},
 			},
 		},
@@ -205,20 +204,12 @@ export class RoomAnalyticsParticipationDto {
 	@IsObject()
 	@ValidateNested()
 	session_data: {
-		all_time: {
-			avg_duration: number;
-			min_duration: number;
-			max_duration: number;
-		};
-
-		per_day: {
-			avg_duration: { duration: number; day: Date }[];
-			min_duration: { duration: number; day: Date }[];
-			max_duration: { duration: number; day: Date }[];
-		}[];
+		all_time: AllTimeSessionDataDto;
+		per_day: SessionDurationPerDayDto[];
 	};
 
 	@ApiProperty({
+		title: "ReturnVisits",
 		description: "Expected return visits and probability of return",
 		type: "object",
 		properties: {
@@ -240,8 +231,17 @@ export class RoomAnalyticsParticipationDto {
 	room_previews: number;
 }
 
+class MessagesPerHour {
+	@ApiProperty({ type: "number" })
+	count: number;
+
+	@ApiProperty({ type: "Date" })
+	hour: Date;
+}
+
 export class RoomAnalyticsInteractionsDto {
 	@ApiProperty({
+		title: "Messages",
 		description: "Total messages sent and messages sent per hour",
 		type: "object",
 		properties: {
@@ -249,11 +249,7 @@ export class RoomAnalyticsInteractionsDto {
 			per_hour: {
 				type: "array",
 				items: {
-					type: "object",
-					properties: {
-						count: { type: "number" },
-						hour: { type: "Date" },
-					},
+					type: "MessagesPerHour",
 				},
 			},
 		},
@@ -262,10 +258,7 @@ export class RoomAnalyticsInteractionsDto {
 	@ValidateNested()
 	messages: {
 		total: number;
-		per_hour: {
-			count: number;
-			hour: Date;
-		}[];
+		per_hour: MessagesPerHour[];
 	};
 
 	@ApiProperty({ description: "Total number of reactions sent in the room" })
@@ -345,6 +338,7 @@ export class RoomAnalyticsVotesDto {
 
 export class RoomAnalyticsSongsDto {
 	@ApiProperty({
+		title: "MostPlayed",
 		description: "Most played songs in the room",
 		type: SongAnalyticsDto,
 		isArray: true,
@@ -367,6 +361,7 @@ export class RoomAnalyticsSongsDto {
 
 export class RoomAnalyticsContributorsDto {
 	@ApiProperty({
+		title: "TopContributors",
 		description: "Top contributors to the room's queue",
 		type: "object",
 		properties: {

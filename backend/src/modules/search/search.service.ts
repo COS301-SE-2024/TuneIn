@@ -34,7 +34,7 @@ export class CombinedSearchHistory {
 	@ApiProperty({
 		description: "Mixed list of rooms, users, or strings",
 		isArray: true,
-		type: "array",
+		type: "object",
 		items: {
 			oneOf: [
 				{ $ref: "#/components/schemas/RoomDto" },
