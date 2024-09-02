@@ -4,7 +4,6 @@ import {
 	Text,
 	StyleSheet,
 	Dimensions,
-	FlatList,
 	ImageBackground,
 	Animated,
 	PanResponder,
@@ -38,13 +37,24 @@ const TestPage: React.FC = () => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const scrollX = useRef(new Animated.Value(0)).current;
 	const animatedHeight = useRef(new Animated.Value(0)).current;
-	const firstRoom = useRef(true); // Changed to useRef
 
 	// Define the rooms and their respective queues
 	const rooms = useMemo(
 		() => [
-			{ id: 1, name: "Room One" },
-			{ id: 2, name: "Room Two" },
+			{
+				id: 1,
+				name: "Room One",
+				TopGenre: "smooth jazz",
+				BackgroundImage: "https://example.com/album1.jpg",
+				participents: 25,
+			},
+			{
+				id: 2,
+				name: "Room Two",
+				TopGenre: "smooth jazz",
+				BackgroundImage: "https://example.com/album1.jpg",
+				participents: 30,
+			},
 		],
 		[],
 	);
@@ -90,11 +100,11 @@ const TestPage: React.FC = () => {
 	);
 
 	const { width, height } = Dimensions.get("window");
-	const cardWidth = width * 0.7;
-	const cardHeight = height * 0.6;
+	const cardWidth = width * 0.75;
+	const cardHeight = height * 0.55;
 	const collapsedHeight = height * 0.3;
 	const expandedHeight = height * 0.6;
-	const spacing = 20;
+	const spacing = 25;
 
 	const playlist = queues[rooms[currentRoomIndex]?.id] || []; // Get the queue for the current room
 
@@ -105,16 +115,14 @@ const TestPage: React.FC = () => {
 			duration: 300,
 			useNativeDriver: false,
 		}).start();
-	}, [isCollapsed, currentRoomIndex]);
-
-	const switchRoom = () => {
-		firstRoom.current = !firstRoom.current; // Use useRef instead of boolean variable
-		if (firstRoom.current) {
-			setCurrentRoomIndex(0);
-		} else {
-			setCurrentRoomIndex(1);
-		}
-	};
+	}, [
+		isCollapsed,
+		currentRoomIndex,
+		animatedHeight,
+		collapsedHeight,
+		expandedHeight,
+		rooms,
+	]);
 
 	const panResponder = PanResponder.create({
 		onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -143,13 +151,15 @@ const TestPage: React.FC = () => {
 				keyExtractor={(item) => `room-${item.id}`}
 				snapToInterval={cardWidth + spacing}
 				decelerationRate="fast"
-				contentContainerStyle={{ paddingHorizontal: spacing / 2 }}
+				contentContainerStyle={styles.flatListContentContainer}
+				ListHeaderComponent={<View style={styles.flatListPadding} />}
+				ListFooterComponent={<View style={styles.flatListPadding} />}
 				onScroll={Animated.event(
 					[{ nativeEvent: { contentOffset: { x: scrollX } } }],
 					{
 						useNativeDriver: true,
 						listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-							let newIndex: number; // Corrected the syntax here
+							let newIndex: number;
 							if (event.nativeEvent.contentOffset.x >= 180) {
 								newIndex = 1;
 							} else {
@@ -171,7 +181,7 @@ const TestPage: React.FC = () => {
 					];
 					const translateY = scrollX.interpolate({
 						inputRange,
-						outputRange: [0, -50, 0],
+						outputRange: [35, -10, 35],
 					});
 
 					return (
@@ -181,35 +191,32 @@ const TestPage: React.FC = () => {
 								height: cardHeight,
 								transform: [{ translateY }],
 								marginHorizontal: spacing / 2,
+								elevation: 10,
+								borderRadius: 20,
+								marginTop: 25,
+								overflow: "hidden", // Ensure children respect the rounded borders
 							}}
 						>
-							<View
-								style={[styles.card, { height: cardHeight, width: cardWidth }]}
+							<ImageBackground
+								source={{ uri: rooms[index]?.BackgroundImage }} // Use correct image URL
+								style={styles.upperSection}
+								imageStyle={styles.backgroundImage} // Apply border radius to image
 							>
-								<ImageBackground
-									source={require("../assets/jazzBackground.png")}
-									style={[
-										styles.upperSection,
-										{ height: cardHeight, width: cardWidth },
-									]}
-									imageStyle={styles.backgroundImage}
-								>
-									<LinearGradient
-										colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
-										style={styles.gradientOverlay}
-									/>
+								<LinearGradient
+									colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
+									style={styles.gradientOverlay}
+								/>
+								<View style={styles.cardContent}>
 									<Text style={styles.roomName}>{rooms[index]?.name}</Text>
-									<Text style={styles.topGenre}>
-										{index === 0 ? "Smooth Jazz" : "Chill Beats"}
-									</Text>
+									<Text style={styles.topGenre}>{rooms[index]?.TopGenre}</Text>
 									<View style={styles.peopleCountContainer}>
-										<Icon name="users" size={20} color="#000" />
+										<Icon name="users" size={20} color="#fff" />
 										<Text style={styles.participants}>
-											{index === 0 ? 25 : 30}
+											{rooms[index]?.participents}
 										</Text>
 									</View>
-								</ImageBackground>
-							</View>
+								</View>
+							</ImageBackground>
 						</Animated.View>
 					);
 				}}
@@ -264,26 +271,28 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		backgroundColor: colors.backgroundColor,
-		padding: 20,
 	},
-	card: {
-		alignItems: "center",
-		backgroundColor: "#2C2C2C",
-		borderRadius: 10,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
-		elevation: 5,
-		overflow: "hidden",
+	flatListContentContainer: {
+		paddingHorizontal: 18, // Add padding on both sides
+	},
+	flatListPadding: {
+		width: 10, // Adjust this value as needed
 	},
 	upperSection: {
 		justifyContent: "center",
 		alignItems: "center",
-		position: "relative",
+		width: "100%",
+		height: "100%",
 	},
 	backgroundImage: {
 		resizeMode: "cover",
+		borderRadius: 20, // Apply border radius to ImageBackground
+	},
+	cardContent: {
+		flex: 1,
+		justifyContent: "flex-end",
+		alignItems: "center",
+		padding: 20,
 	},
 	roomName: {
 		fontSize: 24,
@@ -305,7 +314,7 @@ const styles = StyleSheet.create({
 	},
 	participants: {
 		fontSize: 16,
-		color: "#000",
+		color: "#fff",
 		marginLeft: 5,
 	},
 	gradientOverlay: {
@@ -314,7 +323,7 @@ const styles = StyleSheet.create({
 	drawerContainer: {
 		position: "absolute",
 		bottom: 0,
-		width: "100%",
+		width: "98%",
 		backgroundColor: "#333",
 		borderTopLeftRadius: 15,
 		borderTopRightRadius: 15,
