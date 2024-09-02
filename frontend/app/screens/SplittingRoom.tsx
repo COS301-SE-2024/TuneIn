@@ -12,10 +12,12 @@ import {
 	NativeSyntheticEvent,
 	NativeScrollEvent,
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../styles/colors";
 import SongList from "../components/SongList"; // Assuming you have this component
+import { Room, formatRoomData } from "../models/Room"; // Importing Room type and formatter
 
 interface Track {
 	id: number;
@@ -29,75 +31,49 @@ interface Track {
 }
 
 type Queues = {
-	[key: number]: Track[];
+	[key: string]: Track[];
 };
 
-const TestPage: React.FC = () => {
+const SplittingRoom: React.FC = () => {
+	const { queues: queuesParam, rooms: roomsParam } = useLocalSearchParams();
 	const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const scrollX = useRef(new Animated.Value(0)).current;
 	const animatedHeight = useRef(new Animated.Value(0)).current;
+	const [playlist, setPlaylist] = useState<Track[]>([]);
+	const [queues, setQueues] = useState<Queues>({});
 
-	// Define the rooms and their respective queues
-	const rooms = useMemo(
-		() => [
-			{
-				id: 1,
-				name: "Room One",
-				TopGenre: "smooth jazz",
-				BackgroundImage: "https://example.com/album1.jpg",
-				participents: 25,
-			},
-			{
-				id: 2,
-				name: "Room Two",
-				TopGenre: "smooth jazz",
-				BackgroundImage: "https://example.com/album1.jpg",
-				participents: 30,
-			},
-		],
-		[],
-	);
+	// Get room data from searchParams and format it
+	const rooms: Room[] = useMemo(() => {
+		try {
+			const parsedRooms = JSON.parse(roomsParam as string);
+			return parsedRooms.map((room: any) => formatRoomData(room));
+		} catch (error) {
+			console.error("Failed to parse rooms:", error);
+			return [];
+		}
+	}, [roomsParam]);
 
-	const queues: Queues = useMemo(
-		() => ({
-			1: [
-				{
-					id: 1,
-					name: "Song One",
-					artists: [{ name: "Artist A" }],
-					album: { images: [{ url: "https://example.com/album1.jpg" }] },
-					explicit: false,
-					preview_url: "https://example.com/preview1.mp3",
-					uri: "spotify:track:1",
-					duration_ms: 210000,
-				},
-				{
-					id: 2,
-					name: "Song Two",
-					artists: [{ name: "Artist B" }],
-					album: { images: [{ url: "https://example.com/album2.jpg" }] },
-					explicit: true,
-					preview_url: "https://example.com/preview2.mp3",
-					uri: "spotify:track:2",
-					duration_ms: 180000,
-				},
-			],
-			2: [
-				{
-					id: 3,
-					name: "Song Three",
-					artists: [{ name: "Artist C" }],
-					album: { images: [{ url: "https://example.com/album3.jpg" }] },
-					explicit: false,
-					preview_url: "https://example.com/preview3.mp3",
-					uri: "spotify:track:3",
-					duration_ms: 200000,
-				},
-			],
-		}),
-		[],
-	);
+	// Set queues from searchParams
+	useEffect(() => {
+		try {
+			const parsedQueues = JSON.parse(queuesParam as string);
+			if (typeof parsedQueues === "object" && parsedQueues !== null) {
+				const formattedQueues: Queues = Object.fromEntries(
+					Object.entries(parsedQueues).map(([key, queue]) => {
+						if (Array.isArray(queue)) {
+							return [key, queue.slice(0, 2)]; // Ensure size 2 for each queue
+						}
+						return [key, []]; // Default to empty array if not an array
+					}),
+				);
+				setQueues(formattedQueues);
+				setPlaylist(formattedQueues[Object.keys(formattedQueues)[0]] || []); // Initialize with the first queue
+			}
+		} catch (error) {
+			console.error("Failed to parse queues:", error);
+		}
+	}, [queuesParam]);
 
 	const { width, height } = Dimensions.get("window");
 	const cardWidth = width * 0.75;
@@ -106,23 +82,13 @@ const TestPage: React.FC = () => {
 	const expandedHeight = height * 0.6;
 	const spacing = 25;
 
-	const playlist = queues[rooms[currentRoomIndex]?.id] || []; // Get the queue for the current room
-
 	useEffect(() => {
-		console.log("Room in focus:", rooms[currentRoomIndex]?.name);
 		Animated.timing(animatedHeight, {
 			toValue: isCollapsed ? collapsedHeight : expandedHeight,
 			duration: 300,
 			useNativeDriver: false,
 		}).start();
-	}, [
-		isCollapsed,
-		currentRoomIndex,
-		animatedHeight,
-		collapsedHeight,
-		expandedHeight,
-		rooms,
-	]);
+	}, [isCollapsed, animatedHeight, collapsedHeight, expandedHeight]);
 
 	const panResponder = PanResponder.create({
 		onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -148,7 +114,7 @@ const TestPage: React.FC = () => {
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				pagingEnabled
-				keyExtractor={(item) => `room-${item.id}`}
+				keyExtractor={(item) => `room-${item.roomID}`}
 				snapToInterval={cardWidth + spacing}
 				decelerationRate="fast"
 				contentContainerStyle={styles.flatListContentContainer}
@@ -159,14 +125,16 @@ const TestPage: React.FC = () => {
 					{
 						useNativeDriver: true,
 						listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-							let newIndex: number;
-							if (event.nativeEvent.contentOffset.x >= 180) {
-								newIndex = 1;
-							} else {
-								newIndex = 0;
-							}
+							const newIndex = Math.round(
+								event.nativeEvent.contentOffset.x / (cardWidth + spacing),
+							);
 							if (newIndex !== currentRoomIndex) {
 								setCurrentRoomIndex(newIndex);
+								if (rooms[newIndex]?.roomID && queues[rooms[newIndex].roomID]) {
+									setPlaylist(queues[rooms[newIndex].roomID]);
+								} else {
+									setPlaylist([]); // Default to empty playlist
+								}
 							}
 						},
 					},
@@ -194,13 +162,13 @@ const TestPage: React.FC = () => {
 								elevation: 10,
 								borderRadius: 20,
 								marginTop: 25,
-								overflow: "hidden", // Ensure children respect the rounded borders
+								overflow: "hidden",
 							}}
 						>
 							<ImageBackground
-								source={{ uri: rooms[index]?.BackgroundImage }} // Use correct image URL
+								source={{ uri: rooms[index]?.backgroundImage }}
 								style={styles.upperSection}
-								imageStyle={styles.backgroundImage} // Apply border radius to image
+								imageStyle={styles.backgroundImage}
 							>
 								<LinearGradient
 									colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
@@ -208,11 +176,11 @@ const TestPage: React.FC = () => {
 								/>
 								<View style={styles.cardContent}>
 									<Text style={styles.roomName}>{rooms[index]?.name}</Text>
-									<Text style={styles.topGenre}>{rooms[index]?.TopGenre}</Text>
+									<Text style={styles.topGenre}>{rooms[index]?.genre}</Text>
 									<View style={styles.peopleCountContainer}>
 										<Icon name="users" size={20} color="#fff" />
 										<Text style={styles.participants}>
-											{rooms[index]?.participents}
+											{rooms[index]?.roomSize || 0}
 										</Text>
 									</View>
 								</View>
@@ -273,10 +241,10 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.backgroundColor,
 	},
 	flatListContentContainer: {
-		paddingHorizontal: 18, // Add padding on both sides
+		paddingHorizontal: 18,
 	},
 	flatListPadding: {
-		width: 10, // Adjust this value as needed
+		width: 10,
 	},
 	upperSection: {
 		justifyContent: "center",
@@ -286,7 +254,7 @@ const styles = StyleSheet.create({
 	},
 	backgroundImage: {
 		resizeMode: "cover",
-		borderRadius: 20, // Apply border radius to ImageBackground
+		borderRadius: 20,
 	},
 	cardContent: {
 		flex: 1,
@@ -301,54 +269,48 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	topGenre: {
-		fontSize: 15,
-		fontWeight: "bold",
-		color: "#D3D3D3",
-		textAlign: "center",
-		marginVertical: 10,
+		fontSize: 18,
+		color: "#fff",
+		marginBottom: 10,
 	},
 	peopleCountContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: 5,
 	},
 	participants: {
-		fontSize: 16,
+		fontSize: 18,
+		fontWeight: "bold",
 		color: "#fff",
 		marginLeft: 5,
 	},
-	gradientOverlay: {
-		...StyleSheet.absoluteFillObject,
-	},
 	drawerContainer: {
+		width: "100%",
 		position: "absolute",
 		bottom: 0,
-		width: "98%",
-		backgroundColor: "#333",
-		borderTopLeftRadius: 15,
-		borderTopRightRadius: 15,
+		backgroundColor: colors.primary,
+		borderTopLeftRadius: 30,
+		borderTopRightRadius: 30,
 		overflow: "hidden",
 	},
 	drawerHeader: {
-		backgroundColor: "#444",
-		padding: 10,
 		flexDirection: "row",
-		justifyContent: "space-between",
 		alignItems: "center",
-		borderBottomColor: "#555",
-		borderBottomWidth: 1,
+		justifyContent: "center",
+		padding: 20,
 	},
 	drawerTitle: {
-		fontSize: 18,
 		color: "#fff",
+		fontSize: 24,
+		fontWeight: "bold",
+		textAlign: "center",
+		marginRight: 10,
 	},
 	lowerSection: {
 		flex: 1,
-		padding: 15,
+		width: "100%",
 	},
 	scrollViewContent: {
-		flexGrow: 1,
-		justifyContent: "center",
+		paddingBottom: 80,
 	},
 	emptyQueueContainer: {
 		flex: 1,
@@ -356,10 +318,14 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	emptyQueueText: {
-		color: "#D3D3D3",
-		fontSize: 16,
+		fontSize: 18,
+		color: "#fff",
 		textAlign: "center",
+	},
+	gradientOverlay: {
+		...StyleSheet.absoluteFillObject,
+		borderRadius: 20,
 	},
 });
 
-export default TestPage;
+export default SplittingRoom;
