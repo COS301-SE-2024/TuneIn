@@ -45,7 +45,6 @@ const CreateRoomScreen: React.FC = () => {
 	};
 
 	const navigateToRoomDetails = () => {
-		console.log("Navigating to RoomDetails screen");
 		if (isSwitched) {
 			const currentDate = moment(date).format("MM/DD/YYYY");
 			const currentTime = moment(time).format("HH:mm");

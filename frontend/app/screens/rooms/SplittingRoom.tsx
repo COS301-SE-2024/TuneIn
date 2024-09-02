@@ -100,7 +100,6 @@ const SplittingRoom: React.FC = () => {
 	});
 
 	const navigateToRoomPage = (room: Room) => {
-		console.log("Room:", room);
 		router.navigate({
 			pathname: "/screens/rooms/RoomPage",
 			params: { room: JSON.stringify(room) },
@@ -111,6 +110,7 @@ const SplittingRoom: React.FC = () => {
 		<View style={styles.container}>
 			<Animated.FlatList
 				data={rooms}
+				testID="rooms-flat-list"
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				pagingEnabled
@@ -142,7 +142,6 @@ const SplittingRoom: React.FC = () => {
 				bounces={false}
 				scrollEventThrottle={16}
 				renderItem={({ item, index }) => {
-					console.log(item);
 					const inputRange = [
 						(index - 1) * (cardWidth + spacing),
 						index * (cardWidth + spacing),
@@ -216,6 +215,7 @@ const SplittingRoom: React.FC = () => {
 						name={isCollapsed ? "chevron-up" : "chevron-down"}
 						size={20}
 						color="#fff"
+						testID="drawer-icon"
 					/>
 				</TouchableOpacity>
 				<ScrollView
