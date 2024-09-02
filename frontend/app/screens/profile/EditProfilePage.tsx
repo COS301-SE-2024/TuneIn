@@ -42,7 +42,7 @@ const EditProfileScreen = () => {
 	}
 
 	const inputRefs = useRef<InputRef[]>([]);
-	const { setUserData } = playerContext;
+	const { userData, setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
@@ -71,9 +71,12 @@ const EditProfileScreen = () => {
 		getTokenAndData();
 	}, []);
 
-	const updateProfile = async (changed) => {
-		// console.log("Changed: " + JSON.stringify(profileData));
-		if (changed) {
+	const handleUpdate = async () => {
+		await updateProfile();
+		setUserData(null);
+	};
+
+	const updateProfile = async () => {
 			try {
 				const response = await axios.patch(
 					`${utils.API_BASE_URL}/users`,
@@ -91,10 +94,15 @@ const EditProfileScreen = () => {
 				console.error("Error updating profile info:", error);
 				return [];
 			}
-		}
 	};
 
-	const handleImageUpload = async (uri) => {
+	useEffect(() => {
+		if (userData === null) {
+			router.navigate("screens/profile/ProfilePage");
+		}
+	}, [userData]);
+
+	const handleImageUpload = async (uri: string) => {
 		// console.log(uri);
 		try {
 			// Fetch the file from the URI
@@ -430,13 +438,19 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Edit Profile</Text>
 					<TouchableOpacity
 						onPress={() => {
-							updateProfile(changed);
-							setUserData(null);
-							router.navigate("screens/profile/ProfilePage");
+							if(changed){
+								handleUpdate();
+							}							
 						}}
 						style={styles.saveButton}
 					>
-						<Text style={styles.saveButtonText}>Save</Text>
+						<Text
+							style={
+								changed ? styles.activeSaveButtonText : styles.saveButtonText
+							}
+						>
+							Save
+						</Text>
 					</TouchableOpacity>
 				</View>
 				{/* Fetch data */}
@@ -705,6 +719,9 @@ const styles = StyleSheet.create({
 	},
 	saveButtonText: {
 		color: "grey",
+	},
+	activeSaveButtonText: {
+		color: "black",
 	},
 	profilePictureContainer: {
 		alignItems: "center",
