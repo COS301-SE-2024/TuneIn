@@ -12,7 +12,7 @@ import {
 	NativeSyntheticEvent,
 	NativeScrollEvent,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router"; // Import useRouter
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../styles/colors";
@@ -35,6 +35,7 @@ type Queues = {
 };
 
 const SplittingRoom: React.FC = () => {
+	const router = useRouter(); // Initialize the router
 	const { queues: queuesParam, rooms: roomsParam } = useLocalSearchParams();
 	const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -107,6 +108,14 @@ const SplittingRoom: React.FC = () => {
 		},
 	});
 
+	const navigateToRoomPage = (room: Room) => {
+		console.log("Room:", room);
+		router.navigate({
+			pathname: "/screens/rooms/RoomPage",
+			params: { room: JSON.stringify(room) },
+		});
+	};
+
 	return (
 		<View style={styles.container}>
 			<Animated.FlatList
@@ -141,7 +150,7 @@ const SplittingRoom: React.FC = () => {
 				)}
 				bounces={false}
 				scrollEventThrottle={16}
-				renderItem={({ index }) => {
+				renderItem={({ item, index }) => {
 					const inputRange = [
 						(index - 1) * (cardWidth + spacing),
 						index * (cardWidth + spacing),
@@ -153,11 +162,11 @@ const SplittingRoom: React.FC = () => {
 					});
 
 					return (
-						<Animated.View
+						<TouchableOpacity
+							onPress={() => navigateToRoomPage(item)} // Navigate on press
 							style={{
 								width: cardWidth,
 								height: cardHeight,
-								transform: [{ translateY }],
 								marginHorizontal: spacing / 2,
 								elevation: 10,
 								borderRadius: 20,
@@ -165,27 +174,35 @@ const SplittingRoom: React.FC = () => {
 								overflow: "hidden",
 							}}
 						>
-							<ImageBackground
-								source={{ uri: rooms[index]?.backgroundImage }}
-								style={styles.upperSection}
-								imageStyle={styles.backgroundImage}
+							<Animated.View
+								style={{
+									width: cardWidth,
+									height: cardHeight,
+									transform: [{ translateY }],
+								}}
 							>
-								<LinearGradient
-									colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
-									style={styles.gradientOverlay}
-								/>
-								<View style={styles.cardContent}>
-									<Text style={styles.roomName}>{rooms[index]?.name}</Text>
-									<Text style={styles.topGenre}>{rooms[index]?.genre}</Text>
-									<View style={styles.peopleCountContainer}>
-										<Icon name="users" size={20} color="#fff" />
-										<Text style={styles.participants}>
-											{rooms[index]?.roomSize || 0}
-										</Text>
+								<ImageBackground
+									source={{ uri: item?.backgroundImage }}
+									style={styles.upperSection}
+									imageStyle={styles.backgroundImage}
+								>
+									<LinearGradient
+										colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
+										style={styles.gradientOverlay}
+									/>
+									<View style={styles.cardContent}>
+										<Text style={styles.roomName}>{item?.name}</Text>
+										<Text style={styles.topGenre}>{item?.genre}</Text>
+										<View style={styles.peopleCountContainer}>
+											<Icon name="users" size={20} color="#fff" />
+											<Text style={styles.participants}>
+												{item?.roomSize || 0}
+											</Text>
+										</View>
 									</View>
-								</View>
-							</ImageBackground>
-						</Animated.View>
+								</ImageBackground>
+							</Animated.View>
+						</TouchableOpacity>
 					);
 				}}
 			/>
@@ -223,7 +240,7 @@ const SplittingRoom: React.FC = () => {
 					) : (
 						<View style={styles.emptyQueueContainer}>
 							<Text style={styles.emptyQueueText}>
-								The queue is empty. Add some songs to get started!
+								The queue is empty. Add some songs to start the fun!
 							</Text>
 						</View>
 					)}
@@ -236,12 +253,10 @@ const SplittingRoom: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
 		backgroundColor: colors.backgroundColor,
 	},
 	flatListContentContainer: {
-		paddingHorizontal: 18,
+		paddingHorizontal: 15,
 	},
 	flatListPadding: {
 		width: 10,
