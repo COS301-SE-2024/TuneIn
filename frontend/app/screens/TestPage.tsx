@@ -6,7 +6,8 @@ import { useRouter } from "expo-router";
 const testRooms = [
 	{
 		id: "1",
-		backgroundImage: "https://example.com/background1.jpg",
+		backgroundImage:
+			"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCy16nhIbV3pI1qLYHMJKwbH2458oiC9EmA&s",
 		name: "Test Room One",
 		description: "This is a description for Test Room One.",
 		userID: "user1",
@@ -20,7 +21,8 @@ const testRooms = [
 	},
 	{
 		id: "2",
-		backgroundImage: "https://example.com/background2.jpg",
+		backgroundImage:
+			"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_FWF2judaujT30K9sMf-tZFhMWpgP6xCemw&s",
 		name: "Test Room Two",
 		description: "This is a description for Test Room Two.",
 		userID: "user2",

@@ -158,7 +158,7 @@ const SplittingRoom: React.FC = () => {
 					];
 					const translateY = scrollX.interpolate({
 						inputRange,
-						outputRange: [45, -10, 45],
+						outputRange: [40, -10, 40],
 					});
 
 					return (
@@ -168,7 +168,6 @@ const SplittingRoom: React.FC = () => {
 								width: cardWidth,
 								height: cardHeight,
 								marginHorizontal: spacing / 2,
-								elevation: 10,
 								borderRadius: 20,
 								marginTop: 25,
 								overflow: "hidden",
@@ -239,9 +238,7 @@ const SplittingRoom: React.FC = () => {
 						))
 					) : (
 						<View style={styles.emptyQueueContainer}>
-							<Text style={styles.emptyQueueText}>
-								The queue is empty. Add some songs to start the fun!
-							</Text>
+							<Text style={styles.emptyQueueText}>The queue is empty</Text>
 						</View>
 					)}
 				</ScrollView>
@@ -301,7 +298,7 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	drawerContainer: {
-		width: "98%",
+		width: "99%",
 		position: "absolute",
 		bottom: 0,
 		backgroundColor: colors.primary,
