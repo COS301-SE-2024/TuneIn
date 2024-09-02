@@ -62,7 +62,7 @@ export class SpotifyService {
 		songID: string,
 	): Promise<Spotify.AudioFeatures> {
 		const api = SpotifyApi.withAccessToken(this.clientId, token);
-		const audioFeatures = await api.tracks.audioFeatures(songID);
+		const audioFeatures = await api?.tracks?.audioFeatures(songID);
 		return audioFeatures;
 	}
 
