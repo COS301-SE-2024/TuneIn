@@ -97,6 +97,15 @@ export class UserDto {
 	@Type(() => SongInfoDto)
 	current_song?: SongInfoDto;
 
+	@ApiPropertyOptional({
+		description: "The room that the user is currently in, if applicable",
+		type: RoomDto,
+	})
+	@IsObject()
+	@ValidateNested()
+	@Type(() => RoomDto)
+	current_room?: RoomDto;
+
 	@ApiProperty({
 		title: "GenresWithCount",
 		description: "The user's favorite genres",
