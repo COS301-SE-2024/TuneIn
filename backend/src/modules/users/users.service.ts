@@ -10,6 +10,7 @@ import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
+import { RecommendationsService } from "src/recommendations/recommendations.service";
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,7 @@ export class UsersService {
 		private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private recommender: RecommendationsService,
 	) {}
 
 	// Tutorial CRUD operations
@@ -385,22 +387,33 @@ export class UsersService {
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
-		console.log("Getting recommended rooms for user " + userID);
-		const r = await this.dbUtils.getRandomRooms(5);
-		if (!r || r === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
-		}
-		const rooms: PrismaTypes.room[] = r;
-		const ids: string[] = rooms.map((room) => room.room_id);
-		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
-		if (!recommends || recommends === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
-		}
-		return recommends;
+		// const recommender: RecommenderService = new RecommenderService();
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
+
+		const roomsWithSongs: any = await Promise.all(
+			rooms.map(async (room: any) => {
+				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
+				room.songs = songs;
+				return room;
+			}),
+		);
+
+		// create an object of all the room songs with the key being room_id and the value being the songs
+		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
+			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
+			return acc;
+		}, {});
+		const favoriteSongs: any = await this.dbUtils.getUserFavoriteSongs(userID);
+		this.recommender.setMockSongs(
+			favoriteSongs.map((song: any) => song.audio_features),
+		);
+		this.recommender.setPlaylists(roomSongs);
+		const recommendedRooms = this.recommender.getTopPlaylists(5);
+		// console.log("recommendedRooms:", recommendedRooms);
+		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+			recommendedRooms.map((room: any) => room.playlist),
+		);
+		return r === null ? [] : r;
 	}
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
