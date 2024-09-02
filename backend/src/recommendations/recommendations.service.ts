@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "./../../prisma/prisma.service";
 @Injectable()
 export class RecommendationsService {
-	constructor(private prisma: PrismaService) {}
 	private featureWeights = {
 		danceability: 1,
 		energy: 1,
@@ -33,17 +31,17 @@ export class RecommendationsService {
 	}[] = [];
 
 	setPlaylists(playlists: { [key: string]: any[] }) {
+		// check whether the individual songs in playlists are not null or undefined
+		for (const [playlistName, songs] of Object.entries(playlists)) {
+			if (songs.some((song) => !song)) {
+				throw new Error("Invalid song in playlist");
+			}
+		}
+
 		this.playlists = playlists;
 	}
 	setMockSongs(mockSongs: any[]) {
 		this.mockSongs = mockSongs;
-	}
-
-	private flattenPlaylists(playlists: { [key: string]: any[] }): {
-		[key: string]: any[];
-	} {
-		// JSON is already flattened. No need to do anything
-		return playlists;
 	}
 
 	private cosineSimilarityWeighted(
@@ -106,21 +104,25 @@ export class RecommendationsService {
 
 		return playlistScores;
 	}
-	analyzeFeatureDistribution = (playlists: any[]) => {
-		const features = ["danceability", "energy", "loudness", "tempo", "valence"];
-		features.forEach((feature) => {
-			const values = playlists.map((p) => {
-				return p[0][feature];
-			});
-			const min = Math.min(...values);
-			const max = Math.max(...values);
-			console.log(`${feature}: min=${min}, max=${max}`);
-		});
-	};
+	// analyzeFeatureDistribution = (playlists: any[]) => {
+	// 	console.log("Analyzing feature distribution");
+	// 	const features = ["danceability", "energy", "loudness", "tempo", "valence"];
+	// 	features.forEach((feature) => {
+	// 		const values = playlists.map((p) => {
+	// 			console.log(p[0]);
+	// 			console.log(p[0][feature]);
+	// 			return p[0][feature];
+	// 		});
+	// 		const min = Math.min(...values);
+	// 		const max = Math.max(...values);
+	// 		console.log(`${feature}: min=${min}, max=${max}`);
+	// 	});
+	// };
 
 	getTopPlaylists(topN: number): { playlist: string; score: number }[] {
 		// eslint-disable-next-line prettier/prettier
-        this.analyzeFeatureDistribution(Object.values(this.playlists));
+        // this.analyzeFeatureDistribution(Object.values(this.playlists));
+		// console.log("Analyzing feature distribution");
 		const playlistScores = this.getPlaylistSimilarityScores();
 		return Object.entries(playlistScores)
 			.map(([playlist, score]) => ({ playlist, score }))

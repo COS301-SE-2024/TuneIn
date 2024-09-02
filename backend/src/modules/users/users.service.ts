@@ -390,20 +390,28 @@ export class UsersService {
 		// const recommender: RecommenderService = new RecommenderService();
 		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
 
-		const roomsWithSongs: any = await Promise.all(
+		const roomsWithSongs = await Promise.all(
 			rooms.map(async (room: any) => {
 				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
 				room.songs = songs;
 				return room;
 			}),
 		);
-
-		// create an object of all the room songs with the key being room_id and the value being the songs
 		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
 			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
 			return acc;
 		}, {});
-		const favoriteSongs: any = await this.dbUtils.getUserFavoriteSongs(userID);
+		const favoriteSongs: PrismaTypes.song[] | null =
+			await this.dbUtils.getUserFavoriteSongs(userID);
+		if (!favoriteSongs) {
+			// return random rooms if the user has no favorite songs
+			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
+			const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+				randomRooms.map((room: any) => room.room_id),
+			);
+			return r === null ? [] : r;
+		}
+		// console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
 			favoriteSongs.map((song: any) => song.audio_features),
 		);

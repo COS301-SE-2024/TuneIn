@@ -12,7 +12,7 @@ export class DbUtilsService {
 
 	constructor(
 		private configService: ConfigService,
-		private readonly prisma: PrismaService,
+		private prisma: PrismaService,
 	) {
 		// Set the salt for hashing
 		const salt = this.configService.get<string>("SALT");

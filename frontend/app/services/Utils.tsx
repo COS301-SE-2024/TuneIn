@@ -1,17 +1,17 @@
-import localhost from "react-native-localhost";
+// import localhost from "react-native-localhost";
 import { Buffer } from "buffer";
-import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
+// import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
 
-let shouldUseProductionServer: boolean = false;
-if (USE_PRODUCTION_SERVER !== undefined && USE_PRODUCTION_SERVER === "true") {
-	shouldUseProductionServer = true;
-}
-
+// let shouldUseProductionServer: boolean = false;
+// if (USE_PRODUCTION_SERVER !== undefined && USE_PRODUCTION_SERVER === "true") {
+// 	shouldUseProductionServer = true;
+// }
+const localhost = "10.32.211.255";
 function getAPIBase(): string {
-	if (!shouldUseProductionServer) {
-		console.log("Using production API base URL");
-		return "http://tunein.co.za:3000";
-	}
+	// if (!shouldUseProductionServer) {
+	// 	console.log("Using production API base URL");
+	// 	return "http://tunein.co.za:3000";
+	// }
 	console.log("Local IP Address: ", localhost);
 	return `http://${localhost}:3000`;
 }

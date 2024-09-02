@@ -125,6 +125,51 @@ const Search: React.FC = () => {
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
+	useEffect(() => {
+		const getRecommendedRooms = async () => {
+			setLoading(true);
+			try {
+				const token = await auth.getToken();
+				console.log("Recommendations token: " + token);
+				console.log("Base url: " + utils.API_BASE_URL);
+				if (token) {
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/users/rooms/foryou`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						},
+					);
+					const recommendedRooms: SearchResult[] = response.data.map(
+						(item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+							},
+						}),
+					);
+					console.log("recommended rooms:", recommendedRooms);
+					console.log("Recommended rooms length: " + recommendedRooms.length);
+					setResults(recommendedRooms);
+				}
+			} catch (error) {
+				console.error("Error fetching recommended rooms:", error);
+			}
+			setLoading(false);
+		};
+		if (searchTerm === "") {
+			getRecommendedRooms();
+			console.log("Recommended rooms: " + results);
+		}
+	}, [searchTerm]);
 	const mockResults: SearchResult[] = [
 		{
 			id: "1",
@@ -700,9 +745,9 @@ const Search: React.FC = () => {
 					<View style={styles.roomCardPadding}>
 						{filter === "room" ? (
 							<>
-								{/* <SkeletonRoomCard />
 								<SkeletonRoomCard />
-								<SkeletonRoomCard /> */}
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
 							</>
 						) : (
 							<>
