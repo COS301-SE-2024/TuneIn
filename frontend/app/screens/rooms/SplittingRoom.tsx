@@ -18,17 +18,8 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../../styles/colors";
 import SongList from "../../components/SongList"; // Assuming you have this component
 import { Room, formatRoomData } from "../../models/Room"; // Importing Room type and formatter
-
-interface Track {
-	id: number;
-	name: string;
-	artists: { name: string }[];
-	album: { images: { url: string }[] };
-	explicit: boolean;
-	preview_url: string;
-	uri: string;
-	duration_ms: number;
-}
+import { Track } from "../../models/Track";
+const placeholderImage = require("../../../assets/imageholder.jpg");
 
 type Queues = {
 	[key: string]: Track[];
@@ -151,6 +142,7 @@ const SplittingRoom: React.FC = () => {
 				bounces={false}
 				scrollEventThrottle={16}
 				renderItem={({ item, index }) => {
+					console.log(item);
 					const inputRange = [
 						(index - 1) * (cardWidth + spacing),
 						index * (cardWidth + spacing),
@@ -181,7 +173,11 @@ const SplittingRoom: React.FC = () => {
 								}}
 							>
 								<ImageBackground
-									source={{ uri: item?.backgroundImage }}
+									source={
+										item?.backgroundImage
+											? { uri: item.backgroundImage }
+											: placeholderImage
+									}
 									style={styles.upperSection}
 									imageStyle={styles.backgroundImage}
 								>
@@ -191,7 +187,9 @@ const SplittingRoom: React.FC = () => {
 									/>
 									<View style={styles.cardContent}>
 										<Text style={styles.roomName}>{item?.name}</Text>
-										<Text style={styles.topGenre}>{item?.genre}</Text>
+										<Text style={styles.topGenre}>
+											{item?.genre ? item.genre : item.tags[0]}
+										</Text>
 										<View style={styles.peopleCountContainer}>
 											<Icon name="users" size={20} color="#fff" />
 											<Text style={styles.participants}>
@@ -277,15 +275,16 @@ const styles = StyleSheet.create({
 		padding: 20,
 	},
 	roomName: {
-		fontSize: 24,
+		fontSize: 25,
 		fontWeight: "bold",
 		color: "#fff",
 		textAlign: "center",
 	},
 	topGenre: {
 		fontSize: 18,
-		color: "#fff",
+		color: "#a1a1a1",
 		marginBottom: 10,
+		fontWeight: "bold",
 	},
 	peopleCountContainer: {
 		flexDirection: "row",

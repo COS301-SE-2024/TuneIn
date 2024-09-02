@@ -34,6 +34,7 @@ export const formatRoomData = (room: any): Room => {
 			: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg",
 		username: room.username ? room.username : "Unknown",
 		roomSize: 55,
+		genre: room.genre ? room.genre : null,
 		tags: room.tags ? room.tags : [],
 		mine: room.mine,
 		isNsfw: room.isNsfw,

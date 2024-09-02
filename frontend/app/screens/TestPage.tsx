@@ -21,8 +21,6 @@ const testRooms = [
 	},
 	{
 		id: "2",
-		backgroundImage:
-			"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_FWF2judaujT30K9sMf-tZFhMWpgP6xCemw&s",
 		name: "Test Room Two",
 		description: "This is a description for Test Room Two.",
 		userID: "user2",
