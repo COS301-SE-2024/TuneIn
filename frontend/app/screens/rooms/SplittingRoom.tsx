@@ -15,9 +15,9 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router"; // Import useRouter
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { colors } from "../styles/colors";
-import SongList from "../components/SongList"; // Assuming you have this component
-import { Room, formatRoomData } from "../models/Room"; // Importing Room type and formatter
+import { colors } from "../../styles/colors";
+import SongList from "../../components/SongList"; // Assuming you have this component
+import { Room, formatRoomData } from "../../models/Room"; // Importing Room type and formatter
 
 interface Track {
 	id: number;
@@ -158,7 +158,7 @@ const SplittingRoom: React.FC = () => {
 					];
 					const translateY = scrollX.interpolate({
 						inputRange,
-						outputRange: [35, -10, 35],
+						outputRange: [45, -10, 45],
 					});
 
 					return (
@@ -253,6 +253,8 @@ const SplittingRoom: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
 		backgroundColor: colors.backgroundColor,
 	},
 	flatListContentContainer: {
@@ -299,13 +301,15 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	drawerContainer: {
-		width: "100%",
+		width: "98%",
 		position: "absolute",
 		bottom: 0,
 		backgroundColor: colors.primary,
-		borderTopLeftRadius: 30,
-		borderTopRightRadius: 30,
+		borderTopLeftRadius: 15,
+		borderTopRightRadius: 15,
 		overflow: "hidden",
+		paddingLeft: 10,
+		paddingRight: 10,
 	},
 	drawerHeader: {
 		flexDirection: "row",
