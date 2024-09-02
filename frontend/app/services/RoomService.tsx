@@ -10,6 +10,7 @@ export const createRoom = async (
 	image: string | null,
 	navigate: (route: { pathname: string; params?: any }) => void,
 ) => {
+	console.log("Create a new room object");
 	// Create a new room object
 	const newRoom: any = {
 		has_nsfw_content: roomDetails.isNsfw,
@@ -40,23 +41,23 @@ export const createRoom = async (
 	newRoom["room_image"] = imageURL;
 	// Get user authentication token
 	const token = await auth.getToken();
-
+	console.log("room object :" + JSON.stringify(newRoom));
 	// Make the API request to create a room
-	try {
-		const response = await fetch(`${utils.API_BASE_URL}/users/rooms`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}` || "",
-			},
-			body: JSON.stringify(newRoom),
-		});
-		const data = await response.json();
-		navigate({
-			pathname: "/screens/Home",
-			params: data,
-		});
-	} catch (error) {
-		console.error("Error:", error);
-	}
+	// try {
+	// 	const response = await fetch(`${utils.API_BASE_URL}/users/rooms`, {
+	// 		method: "POST",
+	// 		headers: {
+	// 			"Content-Type": "application/json",
+	// 			Authorization: `Bearer ${token}` || "",
+	// 		},
+	// 		body: JSON.stringify(newRoom),
+	// 	});
+	// 	const data = await response.json();
+	// 	navigate({
+	// 		pathname: "/screens/Home",
+	// 		params: data,
+	// 	});
+	// } catch (error) {
+	// 	console.error("Error:", error);
+	// }
 };
