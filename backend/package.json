@@ -108,13 +108,13 @@
     "webpack": "^5.93.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "jest": {
+   "jest": {
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -122,7 +122,7 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "./coverage",
     "coverageReporters": [
       "json",
       "text-summary",
@@ -131,8 +131,16 @@
     ],
     "testEnvironment": "node",
     "setupFiles": [
-      "../jest.setup.js"
-    ]
+      "./jest.setup.js"
+    ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
   },
   "engines": {
     "node": "20.16.0",

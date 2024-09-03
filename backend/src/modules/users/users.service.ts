@@ -307,7 +307,7 @@ export class UsersService {
 		//TODO: implement scheduled room creation
 		/*
 		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;		
+		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
 		if (createRoomDto.is_scheduled) {
 			newRoom.
 				connect: {
