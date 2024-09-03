@@ -65,6 +65,7 @@ import { AutoModerationService } from "../src/live/automod/automod.service";
 import { AutoModerationModule } from "../src/live/automod/automod.module";
 import { RecommendationsService } from "../src/recommendations/recommendations.service";
 import { RecommendationsModule } from "../src/recommendations/recommendations.module";
+import { RoomAnalyticsService } from "../src/modules/rooms/roomanalytics.service";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -252,16 +253,24 @@ export async function createDtoGenTestingModule(): Promise<TestingModule> {
 //RoomsModule
 export async function createRoomsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
+		imports: [
+			PrismaModule,
+			DtoGenModule,
+			DbUtilsModule,
+			AuthModule,
+			RecommendationsModule,
+		],
 		controllers: [RoomsController],
-		imports: [PrismaModule, RecommendationsModule],
 		providers: [
 			RoomsService,
+			RoomAnalyticsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 			{ provide: ConfigService, useValue: mockConfigService },
 			DtoGenService,
 			DbUtilsService,
 			AuthService,
 		],
+		exports: [RoomsService, RoomAnalyticsService],
 	}).compile();
 }
 

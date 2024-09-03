@@ -38,21 +38,26 @@ export class TasksProcessor {
 		const existingSongs: Spotify.SavedTrack[] = [];
 
 		for (const track of likedSongs) {
+			const artists: string[] = track.track.artists.map((a) => {
+				return a.name;
+			});
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
-				artist: track.track.artists[0].name,
+				artists: artists,
 				genre:
 					track.track.album.genres && track.track.album.genres.length > 0
 						? track.track.album.genres[0]
 						: "Unknown",
+				audio_features: {},
+				spotify_id: "",
 			};
 
 			const search = await this.prisma.song.findFirst({
 				where: {
 					name: song.name,
 					duration: song.duration,
-					artist: song.artist,
+					// artists: song.artists,
 					genre: song.genre,
 				},
 			});

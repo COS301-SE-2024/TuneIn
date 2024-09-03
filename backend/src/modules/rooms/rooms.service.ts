@@ -371,8 +371,8 @@ export class RoomsService {
 		const songInfoDtos: SongInfoDto[] = [];
 		for (const song of queue) {
 			songInfoDto.title = song.song.name;
-			songInfoDto.cover = song.song.artwork_url!;
-			songInfoDto.artists = song.song.artist.split(",");
+			songInfoDto.cover = song.song.artwork_url || "";
+			songInfoDto.artists = song.song.artists;
 			songInfoDto.start_time = song.start_time;
 			songInfoDtos.push(songInfoDto);
 		}
