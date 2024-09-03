@@ -84,7 +84,6 @@ export async function createAppTestingModule(): Promise<TestingModule> {
 		],
 		imports: [
 			ConfigModule.forRoot({ isGlobal: true }),
-			PrismaModule,
 			UsersModule,
 			AuthModule,
 			RoomsModule,
@@ -102,7 +101,12 @@ export async function createAppTestingModule(): Promise<TestingModule> {
 			TasksModule,
 			BullConfigModule,
 		],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //AuthModule
@@ -115,7 +119,7 @@ export async function createAuthTestingModule(): Promise<TestingModule> {
 				signOptions: { expiresIn: "2h" },
 			}),
 			ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
-			PrismaModule,
+
 			SpotifyModule,
 			SpotifyAuthModule,
 		],
@@ -126,7 +130,12 @@ export async function createAuthTestingModule(): Promise<TestingModule> {
 			{ provide: UsersService, useValue: mockUsersService },
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //SpotifyAuthModule
@@ -136,7 +145,7 @@ export async function createSpotifyAuthTestingModule(): Promise<TestingModule> {
 
 		imports: [
 			HttpModule,
-			PrismaModule,
+
 			DbUtilsModule,
 			SpotifyModule,
 			TasksModule,
@@ -149,7 +158,12 @@ export async function createSpotifyAuthTestingModule(): Promise<TestingModule> {
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		exports: [SpotifyAuthService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //BullBoardModule
@@ -186,80 +200,89 @@ export async function createLiveTestingModule(): Promise<TestingModule> {
 			RoomsModule,
 			UsersModule,
 			AutoModerationModule,
-			PrismaModule,
 		],
 		exports: [RoomUsersModule, DmUsersModule, LiveGateway],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //RoomUsersModule
 export async function createRoomUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, DtoGenModule, DbUtilsModule, AutoModerationModule],
+		imports: [DtoGenModule, DbUtilsModule, AutoModerationModule],
 		providers: [
 			RoomUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		exports: [RoomUsersService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //DmUsersModule
 export async function createDMUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [
-			PrismaModule,
-			DtoGenModule,
-			DbUtilsModule,
-			UsersModule,
-			AutoModerationModule,
-		],
+		imports: [DtoGenModule, DbUtilsModule, UsersModule, AutoModerationModule],
 		providers: [
 			DmUsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		exports: [DmUsersService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //DbUtilsModule
 export async function createDbUtilsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
+		imports: [ConfigModule.forRoot({ isGlobal: true })],
 		providers: [
 			DbUtilsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		exports: [DbUtilsService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //DtoGenModule
 export async function createDtoGenTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [
-			PrismaModule,
-			DbUtilsModule,
-			ConfigModule.forRoot({ isGlobal: true }),
-		],
+		imports: [DbUtilsModule, ConfigModule.forRoot({ isGlobal: true })],
 		providers: [
 			{ provide: PrismaService, useValue: mockPrismaService },
 			{ provide: ConfigService, useValue: mockConfigService },
 			DtoGenService,
 		],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //RoomsModule
 export async function createRoomsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [
-			PrismaModule,
-			DtoGenModule,
-			DbUtilsModule,
-			AuthModule,
-			RecommendationsModule,
-		],
+		imports: [DtoGenModule, DbUtilsModule, AuthModule, RecommendationsModule],
 		controllers: [RoomsController],
 		providers: [
 			RoomsService,
@@ -271,13 +294,18 @@ export async function createRoomsTestingModule(): Promise<TestingModule> {
 			AuthService,
 		],
 		exports: [RoomsService, RoomAnalyticsService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //SearchModule
 export async function createSearchTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
+		imports: [ConfigModule.forRoot({ isGlobal: true })],
 		controllers: [SearchController],
 		providers: [
 			SearchService,
@@ -288,13 +316,18 @@ export async function createSearchTestingModule(): Promise<TestingModule> {
 			DbUtilsService,
 		],
 		exports: [SearchService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //UsersModule
 export async function createUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, RecommendationsModule],
+		imports: [RecommendationsModule],
 		providers: [
 			UsersService,
 			{ provide: PrismaService, useValue: mockPrismaService },
@@ -303,7 +336,12 @@ export async function createUsersTestingModule(): Promise<TestingModule> {
 			AuthService,
 			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
 		],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //S3Module
@@ -314,19 +352,27 @@ export async function createS3TestingModule(): Promise<TestingModule> {
 			S3Service,
 			{ provide: ConfigService, useValue: mockConfigService },
 		],
-	}).compile();
+	})
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //SpotifyModule
 export async function createSpotifyTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [HttpModule, PrismaModule, DbUtilsModule],
+		imports: [HttpModule, DbUtilsModule],
 		providers: [
 			SpotifyService,
-			ConfigService,
+			{ provide: ConfigService, useValue: mockConfigService },
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+		.overrideProvider(ConfigService)
+		.useValue(mockConfigService)
+		.compile();
 }
 
 //TasksModule
@@ -337,13 +383,17 @@ export async function createTasksTestingModule(): Promise<TestingModule> {
 	};
 
 	return await Test.createTestingModule({
-		imports: [PrismaModule, SpotifyModule, BullBoardModule],
+		imports: [SpotifyModule, BullBoardModule],
 		providers: [
 			TasksService,
 			{ provide: "BullQueue_task-queue", useValue: mockBullQueue },
 			{ provide: PrismaService, useValue: mockPrismaService },
 		], // Provide the mock here
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //GenresModule
@@ -355,20 +405,28 @@ export async function createGenresTestingModule(): Promise<TestingModule> {
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		controllers: [GenresController],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //SongsModule
 export async function createSongsTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [PrismaModule, AuthModule],
+		imports: [AuthModule],
 		providers: [
 			SongsService,
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		controllers: [SongsController],
 		exports: [SongsService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
 
 //AutoModerationModule
@@ -388,5 +446,9 @@ export async function createRecommendationsTestingModule(): Promise<TestingModul
 			{ provide: PrismaService, useValue: mockPrismaService },
 		],
 		exports: [RecommendationsService],
-	}).compile();
+	})
+		.overrideProvider(PrismaService)
+		.useValue(mockPrismaService)
+
+		.compile();
 }
