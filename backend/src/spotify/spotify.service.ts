@@ -217,8 +217,8 @@ export class SpotifyService {
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		for (const track of newLikedSongs) {
-			const audioFeatures: Spotify.AudioFeatures =
-				await api.tracks.audioFeatures(track.track.id);
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await api.tracks.audioFeatures(track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
@@ -226,7 +226,8 @@ export class SpotifyService {
 				genres: track.track.album.genres ? track.track.album.genres : [],
 				artwork_url: this.getLargestImage(track.track.album.images).url,
 				spotify_id: track.track.id,
-				audio_features: JSON.stringify(audioFeatures),
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
 			};
 			dbLikedSongs.push(song);
 		}

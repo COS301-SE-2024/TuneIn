@@ -14,9 +14,11 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiQuery,
+	ApiSecurity,
 	ApiTags,
 } from "@nestjs/swagger";
 import { UserDto } from "../users/dto/user.dto";
@@ -24,19 +26,22 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "./../../auth/auth.service";
-import { createRealContext } from "../../../context";
 
 @Controller("search")
+@ApiTags("search")
 export class SearchController {
 	constructor(
 		private readonly searchService: SearchService,
 		private readonly auth: AuthService,
 	) {}
 
-	@UseGuards(JwtAuthGuard)
 	@Get()
-	@ApiTags("search")
-	@ApiOperation({ summary: "Search for rooms and users" })
+	@ApiOperation({
+		summary: "Search for rooms and users",
+		description:
+			"Search for rooms and users by room name, creator name or username.",
+		operationId: "search",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of mixed UserDto and RoomDto.",
 		type: CombinedSearchResults,
@@ -46,25 +51,40 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A room name / username",
-		type: "string",
+		type: String,
+		example: {
+			room_name: {
+				value: "Chill Room",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator",
 		required: false,
 		description: "A room creator's profile name or username",
-		type: "string",
+		type: String,
+		examples: {
+			profile_name: {
+				value: "John Doe",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
 	})
 	async combinedSearch(
 		@Query("q") q: string,
-		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<CombinedSearchResults> {
 		const query_params = {
 			q,
 			creator,
 		};
-		const ctx = createRealContext();
-		const result = await this.searchService.combinedSearch(query_params, ctx);
+		const result = await this.searchService.combinedSearch(query_params);
 		// const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		// this.searchService.insertSearchHistory(
 		// 	"/search",
@@ -77,37 +97,50 @@ export class SearchController {
 	}
 
 	/* ************************************************** */
-	@UseGuards(JwtAuthGuard)
 	@Get("rooms")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Search for rooms" })
+	@ApiOperation({
+		summary: "Search for rooms",
+		description: "Search for rooms by room name or creator name / username.",
+		operationId: "searchRooms",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
 		name: "q",
 		required: true,
 		description: "A room name",
-		type: "string",
+		type: String,
+		example: "Chill Room",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator",
 		required: false,
 		description: "A room creator's profile name / username",
-		type: "string",
+		type: String,
+		examples: {
+			profile_name: {
+				value: "John Doe",
+			},
+			username: {
+				value: "johndoe123",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	async searchRooms(
 		@Query("q") q: string,
-		@Request() req: any,
 		@Query("creator") creator?: string,
 	): Promise<RoomDto[]> {
 		const query_params = {
 			q,
 			creator,
 		};
-		const ctx = createRealContext();
-		const result = await this.searchService.searchRooms(query_params, ctx);
+		const result = await this.searchService.searchRooms(query_params);
 		// const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result" + typeof result);
 
@@ -124,16 +157,24 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("history")
-	@ApiTags("search")
 	@ApiOperation({
 		summary: "Get search history (including objects discovered from search)",
+		operationId: "searchHistory",
 	})
 	@ApiOkResponse({
 		description:
 			"Search history as an array of strings or RoomDto, or UserDto.",
-		type: [CombinedSearchHistory],
+		type: CombinedSearchHistory,
+		isArray: true,
 	})
 	async searchHistory(
 		@Request() req: Request,
@@ -145,10 +186,20 @@ export class SearchController {
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Delete("history")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Clear search history" })
+	@ApiOperation({
+		summary: "Clear search history",
+		description: "Clear search history for the user.",
+		operationId: "clearSearchHistory",
+	})
 	@ApiOkResponse({ description: "Search history cleared" })
 	async clearSearchHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -158,42 +209,56 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("rooms/advanced")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Advanced search for rooms" })
+	@ApiOperation({
+		summary: "Advanced search for rooms",
+		description: "Advanced search for rooms by various parameters.",
+		operationId: "advancedSearchRooms",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of RoomDto.",
-		type: [RoomDto],
+		type: RoomDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
 		name: "q",
 		required: true,
 		description: "A room name",
-		type: "string",
+		type: String,
+		example: "Chill Room",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_username",
 		required: false,
 		description: "A room creator's username",
-		type: "string",
+		type: String,
+		example: "johndoe123",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_name",
 		required: false,
 		description: "A room creator's profile name",
-		type: "string",
+		type: String,
+		example: "John Doe",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "participant_count",
 		required: false,
 		description: "Minimum number of participants",
 		type: "number",
+		example: 5,
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "description",
 		required: false,
 		description: "A string to find in the room description",
-		type: "string",
+		type: String,
+		example: "chill",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "is_temp",
@@ -217,19 +282,19 @@ export class SearchController {
 		name: "start_date",
 		required: false,
 		description: "Only if scheduled, the start date",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "end_date",
 		required: false,
 		description: "Only if scheduled, the end date",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "lang",
 		required: false,
 		description: "The room language (as a ISO 639-1 code)",
-		type: "string",
+		type: String,
 	})
 	@ApiQuery({
 		name: "explicit",
@@ -246,8 +311,8 @@ export class SearchController {
 	@ApiQuery({
 		name: "tags",
 		required: false,
-		description: "An array of tags to compare",
-		type: "array",
+		description: "A comma separated list of tags to compare",
+		type: String,
 	})
 	async advancedSearchRooms(
 		@Query("q") q: string,
@@ -281,37 +346,56 @@ export class SearchController {
 			nsfw,
 			tags,
 		};
-		const ctx = createRealContext();
-		return await this.searchService.advancedSearchRooms(query_params, ctx);
+		return await this.searchService.advancedSearchRooms(query_params);
 	}
 
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("rooms/history")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Get recently searched rooms" })
+	@ApiOperation({
+		summary: "Get recently searched rooms",
+		description: "Get recently searched rooms by the user.",
+		operationId: "searchRoomsHistory",
+	})
 	@ApiOkResponse({
 		description: "Recently searched rooms as an array of SearchHistoryDto.",
-		type: [SearchHistoryDto],
+		type: SearchHistoryDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	async searchRoomsHistory(
 		@Request() req: Request,
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const ctx = createRealContext();
-		return await this.searchService.searchRoomsHistory(userInfo.id, ctx);
+		return await this.searchService.searchRoomsHistory(userInfo.id);
 	}
 
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Delete("rooms/history")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Clear room search history" })
+	@ApiOperation({
+		summary: "Clear room search history",
+		description: "Clear room search history for the user.",
+		operationId: "clearRoomsHistory",
+	})
 	@ApiOkResponse({ description: "Room search history cleared" })
 	async clearRoomsHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -320,24 +404,35 @@ export class SearchController {
 
 	/* ************************************************** */
 
-	@UseGuards(JwtAuthGuard)
 	@Get("users")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Search for users" })
+	@ApiOperation({
+		summary: "Search for users",
+		description: "Search for users by username or profile name.",
+		operationId: "searchUsers",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
-		type: [UserDto],
+		type: UserDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
 		name: "q",
 		required: true,
 		description: "A username or profile name",
-		type: "string",
+		type: String,
+		examples: {
+			username: {
+				value: "johndoe123",
+			},
+			profile_name: {
+				value: "John Doe",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	async searchUsers(@Query("q") q: string): Promise<UserDto[]> {
-		const ctx = createRealContext();
-		const result = await this.searchService.searchUsers(q, ctx);
+		const result = await this.searchService.searchUsers(q);
 		// const userInfo: JWTPayload = this.auth.getUserInfo(req);
 
 		// this.searchService.insertSearchHistory(
@@ -353,42 +448,63 @@ export class SearchController {
 	/* ************************************************** */
 
 	@Get("users/advanced")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Advanced search for users" })
+	@ApiOperation({
+		summary: "Advanced search for users",
+		description: "Advanced search for users by various parameters.",
+		operationId: "advancedSearchUsers",
+	})
 	@ApiOkResponse({
 		description: "Search results as an array of UserDto.",
-		type: [UserDto],
+		type: UserDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	@ApiQuery({
 		name: "q",
 		required: true,
 		description: "A username or profile name",
-		type: "string",
+		type: String,
+		examples: {
+			username: {
+				value: "johndoe123",
+			},
+			profile_name: {
+				value: "John Doe",
+			},
+		},
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_username",
 		required: false,
 		description: "A user's username",
-		type: "string",
+		type: String,
+		example: "johndoe123",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "creator_name",
 		required: false,
 		description: "A user's profile name",
-		type: "string",
+		type: String,
+		example: "John Doe",
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "following",
 		required: false,
 		description: "Minimum number of following",
 		type: "number",
+		example: 10,
+		allowEmptyValue: false,
 	})
 	@ApiQuery({
 		name: "followers",
 		required: false,
 		description: "Minimum number of followers",
 		type: "number",
+		example: 10,
+		allowEmptyValue: false,
 	})
 	async advancedSearchUsers(
 		@Query("q") q: string,
@@ -404,37 +520,56 @@ export class SearchController {
 			following,
 			followers,
 		};
-		const ctx = createRealContext();
-		return await this.searchService.advancedSearchUsers(query_params, ctx);
+		return await this.searchService.advancedSearchUsers(query_params);
 	}
 
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("users/history")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Get recently searched users" })
+	@ApiOperation({
+		summary: "Get recently searched users",
+		description: "Get recently searched users by the user.",
+		operationId: "searchUsersHistory",
+	})
 	@ApiOkResponse({
 		description: "Recently searched users as an array of SearchHistoryDto.",
-		type: [SearchHistoryDto],
+		type: SearchHistoryDto,
+		isArray: true,
 	})
 	@ApiBadRequestResponse({ description: "Invalid query parameters" })
 	async searchUsersHistory(
 		@Request() req: Request,
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const ctx = createRealContext();
-		return await this.searchService.searchUsersHistory(userInfo.id, ctx);
+		return await this.searchService.searchUsersHistory(userInfo.id);
 	}
 
 	/* ************************************************** */
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Delete("users/history")
-	@ApiTags("search")
-	@ApiOperation({ summary: "Clear user search history" })
+	@ApiOperation({
+		summary: "Clear user search history",
+		description: "Clear user search history for the user.",
+		operationId: "clearUsersHistory",
+	})
 	@ApiOkResponse({ description: "User search history cleared" })
 	async clearUsersHistory(@Request() req: Request): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -444,7 +579,6 @@ export class SearchController {
 	/* ************************************************** */
 	/*
 	@Get("genres")
-	@ApiTags("search")
 	@ApiOperation({ summary: "Search for genres" })
 	@ApiOkResponse({
 		description: "Search results as an array of strings.",
@@ -455,7 +589,7 @@ export class SearchController {
 		name: "q",
 		required: true,
 		description: "A genre name",
-		type: "string",
+		type: String,
 	})
 	async searchGenres(@Query("q") q: string): Promise<string[]> {
 		return await this.searchService.searchGenres(q);

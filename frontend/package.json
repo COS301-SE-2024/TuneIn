@@ -53,6 +53,7 @@
     "expo-web-browser": "~13.0.3",
     "fuse.js": "^7.0.0",
     "isomorphic-fetch": "^3.0.0",
+    "jest-expo": "~51.0.4",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",
     "react": "^18.2.0",
@@ -78,8 +79,7 @@
     "rn-emoji-picker": "^1.1.6",
     "socket.io-client": "^4.7.5",
     "stream-browserify": "^3.0.0",
-    "url": "^0.11.3",
-    "jest-expo": "~51.0.4"
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
