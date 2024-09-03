@@ -280,6 +280,7 @@ export async function createUsersTestingModule(): Promise<TestingModule> {
 			{ provide: PrismaService, useValue: mockPrismaService },
 			DtoGenService,
 			DbUtilsService,
+			RecommendationsService,
 			AuthService,
 			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
 		],
