@@ -299,7 +299,8 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRooms(userInfo.id);
+		const ids: string[] = await this.usersService.getRecentRooms(userInfo.id);
+		return await this.dtogen.generateMultipleRoomDto(ids);
 	}
 
 	@ApiBearerAuth()
@@ -348,7 +349,7 @@ export class UsersController {
 	})
 	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getCurrentRoom(userInfo.id);
+		return await this.usersService.getCurrentRoomDto(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -780,7 +781,7 @@ export class UsersController {
 	async getCurrentRoomByUserId(
 		@Param("userId") userId: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoom(userId);
+		return await this.usersService.getCurrentRoomDto(userId);
 	}
 
 	@Post(":username/block")

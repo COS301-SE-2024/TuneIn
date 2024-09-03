@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsArray, IsDate } from "class-validator";
+import { IsString, IsArray, IsDate, IsNumber } from "class-validator";
 
 /*
 CREATE TABLE IF NOT EXISTS public.song
@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS public.song
 */
 
 export class SongInfoDto {
+	@ApiProperty()
+	@IsString()
+	songID: string;
+
 	@ApiProperty()
 	@IsString()
 	title: string;
@@ -41,4 +45,8 @@ export class SongInfoDto {
 	})
 	@IsDate()
 	start_time: Date | null;
+
+	@ApiProperty()
+	@IsNumber()
+	duration: number;
 }

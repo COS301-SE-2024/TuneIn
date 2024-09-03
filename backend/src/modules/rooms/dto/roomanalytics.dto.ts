@@ -113,7 +113,7 @@ class SessionDurationPerDayDto {
 	@ApiProperty({ type: "number" })
 	duration: number;
 
-	@ApiProperty({ type: "Date" })
+	@ApiProperty({ type: Date })
 	day: Date;
 }
 
@@ -135,7 +135,7 @@ class JoinsCount {
 	@ApiProperty({ type: "number" })
 	count: number;
 
-	@ApiProperty({ type: "Date" })
+	@ApiProperty({ type: Date })
 	day: Date;
 }
 
@@ -152,7 +152,8 @@ export class RoomAnalyticsParticipationDto {
 		type: "object",
 		properties: {
 			per_day: {
-				type: "JoinsPerDay",
+				title: "JoinsPerDay",
+				type: "object",
 			},
 			all_time: {
 				title: "JoinsAllTime",
@@ -191,12 +192,14 @@ export class RoomAnalyticsParticipationDto {
 		type: "object",
 		properties: {
 			all_time: {
-				type: "AllTimeSessionDataDto",
+				type: "object",
+				title: "AllTimeSessionDataDto",
 			},
 			per_day: {
 				type: "array",
 				items: {
-					type: "SessionDurationPerDayDto",
+					type: "object",
+					title: "SessionDurationPerDayDto",
 				},
 			},
 		},
@@ -235,7 +238,7 @@ class MessagesPerHour {
 	@ApiProperty({ type: "number" })
 	count: number;
 
-	@ApiProperty({ type: "Date" })
+	@ApiProperty({ type: Date })
 	hour: Date;
 }
 
@@ -249,7 +252,8 @@ export class RoomAnalyticsInteractionsDto {
 			per_hour: {
 				type: "array",
 				items: {
-					type: "MessagesPerHour",
+					title: "MessagesPerHour",
+					type: "object",
 				},
 			},
 		},
@@ -365,7 +369,7 @@ export class RoomAnalyticsContributorsDto {
 		description: "Top contributors to the room's queue",
 		type: "object",
 		properties: {
-			user: { type: "UserDto" },
+			user: { title: "UserDto", type: "object" },
 			rank: { type: "number" },
 			num_songs: { type: "number" },
 			num_upvotes: { type: "number" },

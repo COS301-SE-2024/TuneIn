@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
 	IsString,
 	IsBoolean,
@@ -74,14 +74,14 @@ export class RoomDto {
 	@IsString()
 	room_image: string;
 
-	@ApiProperty({
+	@ApiPropertyOptional({
 		description: "The current song playing in the room",
 		type: SongInfoDto,
 	})
 	@IsObject()
 	@ValidateNested()
 	@Type(() => SongInfoDto)
-	current_song: SongInfoDto;
+	current_song?: SongInfoDto;
 
 	@ApiProperty({
 		description: "The tags that describe the room",

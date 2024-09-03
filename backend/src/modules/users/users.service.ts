@@ -20,29 +20,7 @@ export class UserListeningStatsDto {
 	@IsNumber()
 	totalListenedSongs: number;
 
-	@ApiProperty({
-		description: "The total number of hours spent listening to music by room",
-		example: { room1_id: 5, room2_id: 3 },
-		type: "object",
-		additionalProperties: {
-			type: "number",
-		},
-	})
-	@IsObject()
-	@ValidateNested()
-	listeningTimeByRoom: Record<string, number>;
-
-	@ApiProperty({
-		description: "The total number of hours spent listening to music by genre",
-		example: { rock: 5, pop: 3 },
-		type: "object",
-		additionalProperties: {
-			type: "number",
-		},
-	})
-	@IsObject()
-	@ValidateNested()
-	listeningTimeByGenre: Record<string, number>;
+	/* whatever else you want */
 }
 
 @Injectable()
@@ -64,7 +42,7 @@ export class UsersService {
 			bio: createUserDto.bio,
 			profile_picture: createUserDto.profile_picture_url,
 			preferences: {
-				fav_genres: createUserDto.fav_genres,
+				fav_genres: createUserDto.fav_genres?.data || undefined,
 			},
 		};
 		return this.prisma.users.create({ data: user });
@@ -422,7 +400,7 @@ export class UsersService {
 		return result;
 	}
 
-	async getRecentRooms(userID: string): Promise<RoomDto[]> {
+	async getRecentRooms(userID: string): Promise<string[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
@@ -466,6 +444,8 @@ export class UsersService {
 					);
 				}
 			}
+			return recentRooms;
+			/*
 			const r = await this.dtogen.generateMultipleRoomDto(recentRooms);
 			if (!r || r === null) {
 				throw new Error(
@@ -473,6 +453,7 @@ export class UsersService {
 				);
 			}
 			return r;
+			*/
 		} catch (e) {
 			throw new Error(
 				"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
@@ -845,7 +826,7 @@ export class UsersService {
 		return [];
 	}
 
-	async getCurrentRoom(userID: string): Promise<RoomDto> {
+	async getCurrentRoomDto(userID: string): Promise<RoomDto> {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
 		}
@@ -1249,8 +1230,6 @@ export class UsersService {
 
 		const stats: UserListeningStatsDto = {
 			totalListenedSongs: 0,
-			listeningTimeByRoom: {} as Record<string, number>,
-			listeningTimeByGenre: {} as Record<string, number>,
 		};
 		return stats;
 	}
