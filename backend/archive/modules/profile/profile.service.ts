@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+// import { DtoGenService } from "../dto-gen/dto-gen.service";
+// import { DbUtilsService } from "../db-utils/db-utils.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
+import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
+import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 
 @Injectable()
 export class ProfileService {
@@ -14,7 +16,7 @@ export class ProfileService {
 	) {}
 
 	async getProfile(uid: string): Promise<UserProfileDto> {
-		const user = await this.dtogen.generateUserProfileDto(uid);
+		const user = await this.dtogen.generateUserDto(uid);
 		return user;
 	}
 
@@ -40,7 +42,7 @@ export class ProfileService {
 			data: updateData,
 		});
 
-		const userProfile = await this.dtogen.generateUserProfileDto(userId);
+		const userProfile = await this.dtogen.generateUserDto(userId);
 		if (!userProfile) {
 			throw new Error("Failed to generate user profile");
 		}
@@ -56,7 +58,7 @@ export class ProfileService {
 		if (!userData) {
 			throw new Error("User not found");
 		} else {
-			const user = await this.dtogen.generateUserProfileDto(userData.user_id);
+			const user = await this.dtogen.generateUserDto(userData.user_id);
 			if (user) {
 				return user;
 			}
