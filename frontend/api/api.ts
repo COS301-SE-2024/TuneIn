@@ -209,7 +209,26 @@ export interface DirectMessageDto {
     'pID': string;
 }
 /**
- * The user\'s favorite genres
+ * 
+ * @export
+ * @interface FollowersAndFollowing
+ */
+export interface FollowersAndFollowing {
+    /**
+     * 
+     * @type {number}
+     * @memberof FollowersAndFollowing
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<UserDto>}
+     * @memberof FollowersAndFollowing
+     */
+    'data': Array<UserDto>;
+}
+/**
+ * 
  * @export
  * @interface GenresWithCount
  */
@@ -219,13 +238,13 @@ export interface GenresWithCount {
      * @type {number}
      * @memberof GenresWithCount
      */
-    'count'?: number;
+    'count': number;
     /**
      * 
      * @type {Array<string>}
      * @memberof GenresWithCount
      */
-    'data'?: Array<string>;
+    'data': Array<string>;
 }
 /**
  * Join statistics, including total and unique joins per day and all-time
@@ -235,10 +254,10 @@ export interface GenresWithCount {
 export interface Joins {
     /**
      * 
-     * @type {JoinsPerDay}
+     * @type {object}
      * @memberof Joins
      */
-    'per_day'?: JoinsPerDay;
+    'per_day'?: object;
     /**
      * 
      * @type {JoinsAllTime}
@@ -266,7 +285,7 @@ export interface JoinsAllTime {
     'unique_joins'?: number;
 }
 /**
- * The user\'s links
+ * 
  * @export
  * @interface LinksWithCount
  */
@@ -276,13 +295,13 @@ export interface LinksWithCount {
      * @type {number}
      * @memberof LinksWithCount
      */
-    'count'?: number;
+    'count': number;
     /**
      * 
      * @type {Array<string>}
      * @memberof LinksWithCount
      */
-    'data'?: Array<string>;
+    'data': Array<string>;
 }
 /**
  * 
@@ -342,10 +361,10 @@ export interface Messages {
     'total'?: number;
     /**
      * 
-     * @type {Array<MessagesPerHour>}
+     * @type {Array<object>}
      * @memberof Messages
      */
-    'per_hour'?: Array<MessagesPerHour>;
+    'per_hour'?: Array<object>;
 }
 /**
  * 
@@ -755,13 +774,32 @@ export interface RoomDto {
      * @type {SongInfoDto}
      * @memberof RoomDto
      */
-    'current_song': SongInfoDto;
+    'current_song'?: SongInfoDto;
     /**
      * The tags that describe the room
      * @type {Array<string>}
      * @memberof RoomDto
      */
     'tags': Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface RoomsData
+ */
+export interface RoomsData {
+    /**
+     * 
+     * @type {number}
+     * @memberof RoomsData
+     */
+    'count': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof RoomsData
+     */
+    'data': Array<string>;
 }
 /**
  * 
@@ -796,16 +834,16 @@ export interface SearchHistoryDto {
 export interface SessionData {
     /**
      * 
-     * @type {AllTimeSessionDataDto}
+     * @type {object}
      * @memberof SessionData
      */
-    'all_time'?: AllTimeSessionDataDto;
+    'all_time'?: object;
     /**
      * 
-     * @type {Array<SessionDurationPerDayDto>}
+     * @type {Array<object>}
      * @memberof SessionData
      */
-    'per_day'?: Array<SessionDurationPerDayDto>;
+    'per_day'?: Array<object>;
 }
 /**
  * 
@@ -867,6 +905,12 @@ export interface SongInfoDto {
      * @type {string}
      * @memberof SongInfoDto
      */
+    'songID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SongInfoDto
+     */
     'title': string;
     /**
      * The artists that performed the song
@@ -886,9 +930,15 @@ export interface SongInfoDto {
      * @memberof SongInfoDto
      */
     'start_time': string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof SongInfoDto
+     */
+    'duration': number;
 }
 /**
- * The user\'s favorite songs
+ * 
  * @export
  * @interface SongInfosWithCount
  */
@@ -898,13 +948,13 @@ export interface SongInfosWithCount {
      * @type {number}
      * @memberof SongInfosWithCount
      */
-    'count'?: number;
+    'count': number;
     /**
      * 
      * @type {Array<SongInfoDto>}
      * @memberof SongInfosWithCount
      */
-    'data'?: Array<SongInfoDto>;
+    'data': Array<SongInfoDto>;
 }
 /**
  * 
@@ -951,10 +1001,10 @@ export interface SpotifyTokenResponse {
 export interface TopContributors {
     /**
      * 
-     * @type {UserDto}
+     * @type {object}
      * @memberof TopContributors
      */
-    'user'?: UserDto;
+    'user'?: object;
     /**
      * 
      * @type {number}
@@ -1104,18 +1154,18 @@ export interface UpdateUserDto {
     'profile_picture_url'?: string;
     /**
      * The user\'s followers
-     * @type {object}
+     * @type {FollowersAndFollowing}
      * @memberof UpdateUserDto
      */
-    'followers'?: object;
+    'followers'?: FollowersAndFollowing;
     /**
      * The user\'s following
-     * @type {object}
+     * @type {FollowersAndFollowing}
      * @memberof UpdateUserDto
      */
-    'following'?: object;
+    'following'?: FollowersAndFollowing;
     /**
-     * 
+     * The user\'s links
      * @type {LinksWithCount}
      * @memberof UpdateUserDto
      */
@@ -1127,41 +1177,47 @@ export interface UpdateUserDto {
      */
     'bio'?: string;
     /**
-     * The current song the user is listening to, or null if no song is playing
+     * The current song the user is listening to, if applicable
      * @type {SongInfoDto}
      * @memberof UpdateUserDto
      */
     'current_song'?: SongInfoDto;
     /**
-     * 
+     * The roomID of the room that the user is currently in, if applicable
+     * @type {string}
+     * @memberof UpdateUserDto
+     */
+    'current_room_id'?: string;
+    /**
+     * The user\'s favorite genres
      * @type {GenresWithCount}
      * @memberof UpdateUserDto
      */
     'fav_genres'?: GenresWithCount;
     /**
-     * 
+     * The user\'s favorite songs
      * @type {SongInfosWithCount}
      * @memberof UpdateUserDto
      */
     'fav_songs'?: SongInfosWithCount;
     /**
      * The user\'s favorite rooms
-     * @type {object}
+     * @type {RoomsData}
      * @memberof UpdateUserDto
      */
-    'fav_rooms'?: object;
+    'fav_rooms'?: RoomsData;
     /**
      * The user\'s recent rooms
-     * @type {object}
+     * @type {RoomsData}
      * @memberof UpdateUserDto
      */
-    'recent_rooms'?: object;
+    'recent_rooms'?: RoomsData;
     /**
-     * 
-     * @type {UserDtosWithCount}
+     * The user\'s friendship status with the current user, or null if the user is not friends with the current user
+     * @type {UserFriendship}
      * @memberof UpdateUserDto
      */
-    'friendship'?: UserDtosWithCount;
+    'friendship'?: UserFriendship;
 }
 /**
  * 
@@ -1208,18 +1264,18 @@ export interface UserDto {
     'profile_picture_url': string;
     /**
      * The user\'s followers
-     * @type {object}
+     * @type {FollowersAndFollowing}
      * @memberof UserDto
      */
-    'followers': object;
+    'followers': FollowersAndFollowing;
     /**
      * The user\'s following
-     * @type {object}
+     * @type {FollowersAndFollowing}
      * @memberof UserDto
      */
-    'following': object;
+    'following': FollowersAndFollowing;
     /**
-     * 
+     * The user\'s links
      * @type {LinksWithCount}
      * @memberof UserDto
      */
@@ -1231,66 +1287,72 @@ export interface UserDto {
      */
     'bio'?: string;
     /**
-     * The current song the user is listening to, or null if no song is playing
+     * The current song the user is listening to, if applicable
      * @type {SongInfoDto}
      * @memberof UserDto
      */
     'current_song'?: SongInfoDto;
     /**
-     * 
+     * The roomID of the room that the user is currently in, if applicable
+     * @type {string}
+     * @memberof UserDto
+     */
+    'current_room_id'?: string;
+    /**
+     * The user\'s favorite genres
      * @type {GenresWithCount}
      * @memberof UserDto
      */
     'fav_genres': GenresWithCount;
     /**
-     * 
+     * The user\'s favorite songs
      * @type {SongInfosWithCount}
      * @memberof UserDto
      */
     'fav_songs': SongInfosWithCount;
     /**
      * The user\'s favorite rooms
-     * @type {object}
+     * @type {RoomsData}
      * @memberof UserDto
      */
-    'fav_rooms': object;
+    'fav_rooms': RoomsData;
     /**
      * The user\'s recent rooms
-     * @type {object}
+     * @type {RoomsData}
      * @memberof UserDto
      */
-    'recent_rooms': object;
+    'recent_rooms': RoomsData;
     /**
-     * 
-     * @type {UserDtosWithCount}
+     * The user\'s friendship status with the current user, or null if the user is not friends with the current user
+     * @type {UserFriendship}
      * @memberof UserDto
      */
-    'friendship': UserDtosWithCount;
+    'friendship'?: UserFriendship;
 }
 /**
- * The user\'s friendship status with the current user, or null if the user is not friends with the current user
+ * 
  * @export
- * @interface UserDtosWithCount
+ * @interface UserFriendship
  */
-export interface UserDtosWithCount {
+export interface UserFriendship {
     /**
      * 
      * @type {boolean}
-     * @memberof UserDtosWithCount
+     * @memberof UserFriendship
      */
-    'status'?: boolean;
+    'status': boolean;
     /**
      * 
      * @type {string}
-     * @memberof UserDtosWithCount
+     * @memberof UserFriendship
      */
-    'accept_url'?: string;
+    'accept_url': string;
     /**
      * 
      * @type {string}
-     * @memberof UserDtosWithCount
+     * @memberof UserFriendship
      */
-    'reject_url'?: string;
+    'reject_url': string;
 }
 /**
  * 
@@ -1304,18 +1366,6 @@ export interface UserListeningStatsDto {
      * @memberof UserListeningStatsDto
      */
     'totalListenedSongs': number;
-    /**
-     * The total number of hours spent listening to music by room
-     * @type {{ [key: string]: number; }}
-     * @memberof UserListeningStatsDto
-     */
-    'listeningTimeByRoom': { [key: string]: number; };
-    /**
-     * The total number of hours spent listening to music by genre
-     * @type {{ [key: string]: number; }}
-     * @memberof UserListeningStatsDto
-     */
-    'listeningTimeByGenre': { [key: string]: number; };
 }
 
 /**

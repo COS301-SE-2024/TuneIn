@@ -2136,9 +2136,23 @@ components:
       type: http
       in: Header
   schemas:
+    LinksWithCount:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            type: string
+      required:
+        - count
+        - data
     SongInfoDto:
       type: object
       properties:
+        songID:
+          type: string
         title:
           type: string
         artists:
@@ -2153,11 +2167,64 @@ components:
           type: string
           description: The time the song started playing
           nullable: true
+        duration:
+          type: number
       required:
+        - songID
         - title
         - artists
         - cover
         - start_time
+        - duration
+    GenresWithCount:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            type: string
+      required:
+        - count
+        - data
+    SongInfosWithCount:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SongInfoDto'
+      required:
+        - count
+        - data
+    RoomsData:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            type: string
+      required:
+        - count
+        - data
+    UserFriendship:
+      type: object
+      properties:
+        status:
+          type: boolean
+        accept_url:
+          type: string
+        reject_url:
+          type: string
+      required:
+        - status
+        - accept_url
+        - reject_url
     UserDto:
       type: object
       properties:
@@ -2170,71 +2237,50 @@ components:
         profile_picture_url:
           type: string
         followers:
-          type: object
           description: The user's followers
+          title: FollowersAndFollowing
+          allOf:
+            - $ref: '#/components/schemas/FollowersAndFollowing'
         following:
-          type: object
           description: The user's following
+          title: FollowersAndFollowing
+          allOf:
+            - $ref: '#/components/schemas/FollowersAndFollowing'
         links:
-          type: object
-          title: LinksWithCount
           description: The user's links
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: string
+          allOf:
+            - $ref: '#/components/schemas/LinksWithCount'
         bio:
           type: string
         current_song:
-          description: >-
-            The current song the user is listening to, or null if no song is
-            playing
+          description: The current song the user is listening to, if applicable
           allOf:
             - $ref: '#/components/schemas/SongInfoDto'
+        current_room_id:
+          type: string
+          description: The roomID of the room that the user is currently in, if applicable
         fav_genres:
-          type: object
-          title: GenresWithCount
           description: The user's favorite genres
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: string
+          allOf:
+            - $ref: '#/components/schemas/GenresWithCount'
         fav_songs:
-          type: object
-          title: SongInfosWithCount
           description: The user's favorite songs
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: SongInfoDto
+          allOf:
+            - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          type: object
           description: The user's favorite rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         recent_rooms:
-          type: object
           description: The user's recent rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         friendship:
-          type: object
-          title: UserDtosWithCount
           description: >-
             The user's friendship status with the current user, or null if the
             user is not friends with the current user
-          properties:
-            status:
-              type: boolean
-            accept_url:
-              type: string
-            reject_url:
-              type: string
+          allOf:
+            - $ref: '#/components/schemas/UserFriendship'
       required:
         - profile_name
         - userID
@@ -2247,7 +2293,18 @@ components:
         - fav_songs
         - fav_rooms
         - recent_rooms
-        - friendship
+    FollowersAndFollowing:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+      required:
+        - count
+        - data
     UpdateUserDto:
       type: object
       properties:
@@ -2260,71 +2317,50 @@ components:
         profile_picture_url:
           type: string
         followers:
-          type: object
           description: The user's followers
+          title: FollowersAndFollowing
+          allOf:
+            - $ref: '#/components/schemas/FollowersAndFollowing'
         following:
-          type: object
           description: The user's following
+          title: FollowersAndFollowing
+          allOf:
+            - $ref: '#/components/schemas/FollowersAndFollowing'
         links:
-          type: object
-          title: LinksWithCount
           description: The user's links
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: string
+          allOf:
+            - $ref: '#/components/schemas/LinksWithCount'
         bio:
           type: string
         current_song:
-          description: >-
-            The current song the user is listening to, or null if no song is
-            playing
+          description: The current song the user is listening to, if applicable
           allOf:
             - $ref: '#/components/schemas/SongInfoDto'
+        current_room_id:
+          type: string
+          description: The roomID of the room that the user is currently in, if applicable
         fav_genres:
-          type: object
-          title: GenresWithCount
           description: The user's favorite genres
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: string
+          allOf:
+            - $ref: '#/components/schemas/GenresWithCount'
         fav_songs:
-          type: object
-          title: SongInfosWithCount
           description: The user's favorite songs
-          properties:
-            count:
-              type: number
-            data:
-              type: array
-              items:
-                type: SongInfoDto
+          allOf:
+            - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          type: object
           description: The user's favorite rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         recent_rooms:
-          type: object
           description: The user's recent rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         friendship:
-          type: object
-          title: UserDtosWithCount
           description: >-
             The user's friendship status with the current user, or null if the
             user is not friends with the current user
-          properties:
-            status:
-              type: boolean
-            accept_url:
-              type: string
-            reject_url:
-              type: string
+          allOf:
+            - $ref: '#/components/schemas/UserFriendship'
     DirectMessageDto:
       type: object
       properties:
@@ -2366,26 +2402,8 @@ components:
           type: number
           description: The total number of songs listened to by the user
           example: 100
-        listeningTimeByRoom:
-          type: object
-          description: The total number of hours spent listening to music by room
-          example:
-            room1_id: 5
-            room2_id: 3
-          additionalProperties:
-            type: number
-        listeningTimeByGenre:
-          type: object
-          description: The total number of hours spent listening to music by genre
-          example:
-            rock: 5
-            pop: 3
-          additionalProperties:
-            type: number
       required:
         - totalListenedSongs
-        - listeningTimeByRoom
-        - listeningTimeByGenre
     RoomDto:
       type: object
       properties:
@@ -2445,7 +2463,6 @@ components:
         - has_explicit_content
         - has_nsfw_content
         - room_image
-        - current_song
         - tags
     CreateRoomDto:
       type: object
@@ -2618,7 +2635,8 @@ components:
             all-time
           properties:
             per_day:
-              type: JoinsPerDay
+              title: JoinsPerDay
+              type: object
             all_time:
               title: JoinsAllTime
               type: object
@@ -2640,11 +2658,13 @@ components:
             all-time and per day
           properties:
             all_time:
-              type: AllTimeSessionDataDto
+              type: object
+              title: AllTimeSessionDataDto
             per_day:
               type: array
               items:
-                type: SessionDurationPerDayDto
+                type: object
+                title: SessionDurationPerDayDto
         return_visits:
           type: object
           title: ReturnVisits
@@ -2676,7 +2696,8 @@ components:
             per_hour:
               type: array
               items:
-                type: MessagesPerHour
+                title: MessagesPerHour
+                type: object
         reactions_sent:
           type: number
           description: Total number of reactions sent in the room
@@ -2777,7 +2798,8 @@ components:
           description: Top contributors to the room's queue
           properties:
             user:
-              type: UserDto
+              title: UserDto
+              type: object
             rank:
               type: number
             num_songs:
