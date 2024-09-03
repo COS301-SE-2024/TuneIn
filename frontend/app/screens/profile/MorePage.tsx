@@ -27,8 +27,6 @@ const Search: React.FC = () => {
 		? JSON.parse(params.items[0])
 		: JSON.parse(params.items);
 
-	console.log("More Page: " + items);
-
 	const navigation = useNavigation();
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
@@ -36,9 +34,12 @@ const Search: React.FC = () => {
 	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
+	const [itemsPerPage, setItemsPerPage] = useState(5);
 	const flatListRef = useRef<FlatList<any>>(null);
 
-	const ITEMS_PER_PAGE = 10;
+	if (params.type === "song") {
+		setItemsPerPage(20);
+	}
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -67,22 +68,8 @@ const Search: React.FC = () => {
 		extrapolate: "clamp",
 	});
 
-	// const loadMoreItems = () => {
-	// 	if (!loadingMore) {
-	// 		setLoadingMore(true);
-	// 		const newItems = items.slice(
-	// 			displayedItems.length,
-	// 			displayedItems.length + 20,
-	// 		);
-	// 		setDisplayedItems((prevItems: any) => [...prevItems, ...newItems]);
-	// 		setLoadingMore(false);
-	// 	}
-	// };
-
 	const renderResult = ({ item }: { item: any }) => {
-		console.log("Render Items: " + item);
 		if (params.type === "room") {
-			// console.log("Render Called");
 			return (
 				<View style={styles.roomCardPadding}>
 					<RoomCardWidget roomCard={item} />
@@ -105,8 +92,8 @@ const Search: React.FC = () => {
 		return null;
 	};
 
-	const startIndex = currentPage * ITEMS_PER_PAGE;
-	const endIndex = startIndex + ITEMS_PER_PAGE;
+	const startIndex = currentPage * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
 	const displayedItems = items.slice(startIndex, endIndex);
 
 	const goToNextPage = () => {
@@ -124,7 +111,7 @@ const Search: React.FC = () => {
 	};
 
 	const renderFooter = () => {
-		if (items.length <= ITEMS_PER_PAGE) {
+		if (items.length <= itemsPerPage) {
 			// If there aren't enough items, don't show the pagination buttons
 			return null;
 		}
