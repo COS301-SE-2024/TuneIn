@@ -41,7 +41,7 @@ export class UserDto {
 	@ValidateNested()
 	links: {
 		count: number;
-		data: string[];
+		data: Record<string, any>;
 	};
 
 	@ApiProperty()

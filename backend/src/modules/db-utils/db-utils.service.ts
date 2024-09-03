@@ -103,20 +103,21 @@ export class DbUtilsService {
 	async getLinks(
 		user: PrismaTypes.users,
 	): Promise<{ count: number; data: string[] }> {
-		if (!user.external_links) {
+		if (JSON.stringify(user.external_links || {}) === "{}") {
 			return { count: 0, data: [] };
 		}
 
 		try {
 			// Parse the JSON string
 			const links = JSON.parse(JSON.stringify(user.external_links));
-			// console.log(links);
+			console.log("Links: " + JSON.stringify(links));
+			const totalLinks = Object.values(links).flat().length; // Flatten the arrays into a single array
 
 			// Ensure the parsed object has the required properties
-			if (links && typeof links === "object" && "data" in links) {
+			if (links && typeof links === "object") {
 				return {
-					count: links.data.length,
-					data: links.data,
+					count: totalLinks,
+					data: links,
 				};
 			} else {
 				throw new Error("Invalid links format");
@@ -249,29 +250,8 @@ export class DbUtilsService {
 
 		if (updateProfileDto.links) {
 			// console.log(updateProfileDto.links.data);
-			updateData.external_links = { data: updateProfileDto.links.data };
+			updateData.external_links = updateProfileDto.links.data;
 		}
-
-		// Merge the preferences if they exist in the updateProfileDto
-		if (updateProfileDto.fav_genres || updateProfileDto.fav_songs) {
-			const existingPreferences = user.preferences
-				? JSON.parse(JSON.stringify(user.preferences))
-				: {};
-
-			if (updateProfileDto.fav_genres) {
-				existingPreferences.fav_genres = updateProfileDto.fav_genres.data;
-			}
-
-			if (updateProfileDto.fav_songs) {
-				existingPreferences.fav_songs = updateProfileDto.fav_songs.data;
-			}
-
-			updateData.preferences = existingPreferences;
-		}
-
-		// if(updateProfileDto.recent_rooms){
-		//   updateData.activity = {recent_rooms: updateProfileDto.recent_rooms.data};
-		// }
 
 		return updateData;
 	}
