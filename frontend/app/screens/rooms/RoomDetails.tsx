@@ -1,4 +1,3 @@
-// RoomDetails.tsx
 import React, { useState } from "react";
 import {
 	View,
@@ -20,9 +19,11 @@ import { colors } from "../../styles/colors";
 const RoomDetails: React.FC = () => {
 	const router = useRouter();
 	const { room } = useLocalSearchParams();
-	const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
-	console.log("Room: " + room);
 
+	// Parse room from local search params
+	const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
+
+	// State for room details
 	const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
 		name: "",
 		description: "",
@@ -34,12 +35,15 @@ const RoomDetails: React.FC = () => {
 	});
 
 	const [image, setImage] = useState<string | null>(null);
-
 	const screenWidth = Dimensions.get("window").width;
 
 	const handleCreateRoom = async () => {
-		console.log("handleCreateRoom");
-		await createRoom(roomDetails, image, router.navigate);
+		const combinedRoom = {
+			...newRoom,
+			...roomDetails,
+			image: image,
+		};
+		await createRoom(combinedRoom, image, router.navigate);
 	};
 
 	const pickImage = async () => {
@@ -55,6 +59,7 @@ const RoomDetails: React.FC = () => {
 		}
 	};
 
+	// Function to handle input changes
 	const handleInputChange = (
 		field: keyof RoomDetailsProps,
 		value: string | boolean,
@@ -151,6 +156,7 @@ const RoomDetails: React.FC = () => {
 	);
 };
 
+// Helper functions to build input fields and toggles
 const _buildInputField = (
 	labelText: string,
 	value: string,
