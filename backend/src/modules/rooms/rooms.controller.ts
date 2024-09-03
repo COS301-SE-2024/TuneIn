@@ -1186,7 +1186,7 @@ export class RoomsController {
 
 	/**
 	 * Save room as a playlist
-	 * 
+	 *
 	 * @param roomID - The ID of the room to save as a playlist.
 	 * @returns The playlist ID as a string.
 	 */
@@ -1221,9 +1221,7 @@ export class RoomsController {
 	@ApiBadRequestResponse({
 		description: "Bad request",
 	})
-	async saveRoomAsPlaylist(
-		@Param("roomID") roomID: string,
-	): Promise<string> {
+	async saveRoomAsPlaylist(@Param("roomID") roomID: string): Promise<string> {
 		return "";
 	}
 }
