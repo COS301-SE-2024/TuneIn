@@ -18,6 +18,7 @@ import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import UserItem from "../../components/UserItem";
 import FavoriteSongs from "../../components/FavoriteSong";
 import { colors } from "../../styles/colors";
+import { color } from "react-native-elements/dist/helpers";
 
 const Search: React.FC = () => {
 	const router = useRouter();
@@ -36,7 +37,7 @@ const Search: React.FC = () => {
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
 
-	const ITEMS_PER_PAGE = 10;
+	const ITEMS_PER_PAGE = 5;
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -135,7 +136,11 @@ const Search: React.FC = () => {
 					onPress={goToPreviousPage}
 					disabled={currentPage === 0}
 				>
-					<Ionicons name="chevron-back" size={30} color="#fff" />
+					<Ionicons
+						name="chevron-back"
+						size={30}
+						color={currentPage === 0 ? colors.lightGray : "#000"}
+					/>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[
@@ -145,7 +150,11 @@ const Search: React.FC = () => {
 					onPress={goToNextPage}
 					disabled={endIndex >= items.length}
 				>
-					<Ionicons name="chevron-forward" size={30} color="#fff" />
+					<Ionicons
+						name="chevron-forward"
+						size={30}
+						color={endIndex >= items.length ? colors.lightGray : "#000"}
+					/>
 				</TouchableOpacity>
 			</View>
 		);
@@ -429,13 +438,11 @@ const styles = StyleSheet.create({
 	},
 	paginationButton: {
 		padding: 10,
-		backgroundColor: colors.secondary,
-		borderRadius: 20,
-		width: 60,
+		justifyContent: "center",
 		alignItems: "center",
 	},
 	disabledButton: {
-		backgroundColor: colors.lightGray,
+		// You can keep this empty or adjust it if you need more specific styling for disabled buttons
 	},
 });
 
