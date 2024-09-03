@@ -50,13 +50,13 @@ export class RoomDto {
 	@IsBoolean()
 	is_scheduled: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDate()
-	start_date: Date;
+	start_date?: Date;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsDate()
-	end_date: Date;
+	end_date?: Date;
 
 	@ApiProperty()
 	@IsString()
