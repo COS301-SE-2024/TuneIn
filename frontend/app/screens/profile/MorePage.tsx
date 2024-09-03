@@ -36,8 +36,9 @@ const Search: React.FC = () => {
 	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
+	const flatListRef = useRef<FlatList<any>>(null);
 
-	const ITEMS_PER_PAGE = 5;
+	const ITEMS_PER_PAGE = 10;
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -111,12 +112,14 @@ const Search: React.FC = () => {
 	const goToNextPage = () => {
 		if (endIndex < items.length) {
 			setCurrentPage(currentPage + 1);
+			flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
 		}
 	};
 
 	const goToPreviousPage = () => {
 		if (currentPage > 0) {
 			setCurrentPage(currentPage - 1);
+			flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
 		}
 	};
 
@@ -172,6 +175,7 @@ const Search: React.FC = () => {
 				<Text style={styles.title}>{params.title}</Text>
 			</View>
 			<FlatList
+				ref={flatListRef}
 				data={displayedItems}
 				renderItem={renderResult}
 				contentContainerStyle={styles.resultsContainer}
