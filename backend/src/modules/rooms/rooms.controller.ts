@@ -1183,4 +1183,47 @@ export class RoomsController {
 	async getScheduledRoom(@Param("roomID") roomID: string): Promise<File> {
 		return await this.roomsService.getCalendarFile(roomID);
 	}
+
+	/**
+	 * Save room as a playlist
+	 * 
+	 * @param roomID - The ID of the room to save as a playlist.
+	 * @returns The playlist ID as a string.
+	 */
+	@Post(":roomID/save")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Save room as a playlist",
+		operationId: "saveRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to save as a playlist.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The playlist ID as a string.",
+		type: String,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async saveRoomAsPlaylist(
+		@Param("roomID") roomID: string,
+	): Promise<string> {
+		return "";
+	}
 }
