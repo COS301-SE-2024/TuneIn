@@ -1,7 +1,7 @@
 import { createBullBoard } from "@bull-board/api";
 import { BullAdapter } from "@bull-board/api/bullAdapter";
 import { ExpressAdapter } from "@bull-board/express";
-import * as express from "express";
+import express from "express";
 import { Queue } from "bull";
 import { InjectQueue } from "@nestjs/bull";
 import { Injectable, OnModuleInit } from "@nestjs/common";
@@ -32,7 +32,7 @@ export class BullBoardService implements OnModuleInit {
 		app
 			.listen(port, () => {
 				console.log(
-					`Bull Board is running on http://localhost:${port}/admin/queues`,
+					`Bull Board is running on https://localhost:${port}/admin/queues`,
 				);
 				BullBoardService.serverStarted = true; // Mark server as started
 			})

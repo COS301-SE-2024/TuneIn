@@ -10,6 +10,7 @@ import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
 import "../polyfills";
+import { APIProvider } from "./APIContext";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -87,9 +88,11 @@ const App: React.FC = () => {
 	}, [router]);
 
 	return (
-		<PlayerContextProvider>
-			<WelcomeScreen />
-		</PlayerContextProvider>
+		<APIProvider>
+			<PlayerContextProvider>
+				<WelcomeScreen />
+			</PlayerContextProvider>
+		</APIProvider>
 	);
 };
 

@@ -12,6 +12,29 @@ jobs:
     - name: Checkout "${{ github.repository }}"
       uses: actions/checkout@v3
 
+    - name: Set up Node (stable)
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.16
+
+    - name: Install dependencies
+      run:  |
+        cd frontend && npm ci
+
+    - name: Last linting check before deployment
+      run: npm run lint
+
+    - name: Last tests before deployment
+      run: npm run test
+
+    - name: Verify Build before deployment
+      run: |
+        npm run build:swc
+        if [ ! -f "backend/dist/src/main.js" ]; then
+          echo "Build failed: main.js not found!"
+          exit 1
+        fi
+
     - name: Install SSH Key
       uses: webfactory/ssh-agent@v0.7.0
       with:
@@ -29,16 +52,18 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=512"
 
           cd TuneIn/
-          echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+          git checkout develop
           git fetch
           git pull
           cd backend
+          echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
+          chmod +x start_backend.sh
           nvm use default
           npm i
-          npm run build
-          pm2 startOrRestart ecosystem.config.js
+          npm run build:swc
+          ./start_backend.sh
         EOF
 
     - name: Health Check
       run: |
-        curl --fail "http://tunein.co.za:3000/" || exit 1
+        curl --fail "https://tunein.co.za:3000/" || exit 1

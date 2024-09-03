@@ -38,14 +38,11 @@ const AnalyticsPage: React.FC = () => {
 	useEffect(() => {
 		const fetchKeyMetrics = async () => {
 			const accessToken: string | null = await AuthManagement.getToken();
-			const response = await fetch(
-				`${API_BASE_URL}/rooms/analytics/keymetrics`,
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
+			const response = await fetch(`${API_BASE_URL}/rooms/analytics`, {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
 				},
-			);
+			});
 			const data = await response.json();
 			setKeyMetrics(data);
 		};

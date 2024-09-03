@@ -37,8 +37,8 @@ export class TasksProcessor {
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		const existingSongs: Spotify.SavedTrack[] = [];
 		for (const track of likedSongs) {
-			const audioFeatures: Spotify.AudioFeatures =
-				await this.spotifyService.getAudioFeatures(tk.tokens, track.track.id);
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await this.spotifyService.getAudioFeatures(tk.tokens, track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
@@ -47,16 +47,13 @@ export class TasksProcessor {
 					track.track.album.genres && track.track.album.genres.length > 0
 						? track.track.album.genres[0]
 						: "Unknown",
-				audio_features: JSON.stringify(audioFeatures),
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
 				spotify_id: track.track.id,
 			};
 
 			const search = await this.prisma.song.findFirst({
 				where: {
-					// name: song.name,
-					// duration: song.duration,
-					// artists: song.artists,
-					// genre: song.genre,
 					spotify_id: song.spotify_id,
 				},
 			});
