@@ -235,7 +235,7 @@ const ProfileScreen: React.FC = () => {
 				// console.log("Fetching profile info data: " + JSON.stringify(response));
 				setUserData(response.data);
 				if (ownsProfile) {
-					// console.log("Profile return: " + JSON.stringify(response.data));
+					// console.log("Profile return: " + JSON.stringify(response.data.fav_genres));
 					return response.data;
 				}
 			}
@@ -358,8 +358,13 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const renderLinks = () => {
+		console.log("Link Count: " + primaryProfileData.links.count);
 		if (primaryProfileData.links.count && primaryProfileData.links.count > 1) {
-			const firstLink = primaryProfileData.links.data[0].links;
+			console.log("Wrong call");
+			const firstKey = Object.keys(primaryProfileData.links.data)[0];
+			const firstLinkArray = primaryProfileData.links.data[firstKey];
+			const firstLink = firstLinkArray ? firstLinkArray[0] : null;
+
 			const remainingCount = primaryProfileData.links.count - 1;
 
 			return (
@@ -373,12 +378,16 @@ const ProfileScreen: React.FC = () => {
 				</View>
 			);
 		} else if (primaryProfileData.links.count === 1) {
+			console.log("Right call");
+			const firstKey = Object.keys(primaryProfileData.links.data)[0];
+			const firstLinkArray = primaryProfileData.links.data[firstKey];
+			const firstLink = firstLinkArray ? firstLinkArray[0] : null;
 			return (
 				<View>
 					<Text
 						style={{ fontWeight: "700", textAlign: "center", marginTop: 30 }}
 					>
-						{primaryProfileData.links.data[0].links}
+						{firstLink}
 					</Text>
 				</View>
 			);
@@ -474,7 +483,11 @@ const ProfileScreen: React.FC = () => {
 		<ScrollView
 			showsVerticalScrollIndicator={false}
 			refreshControl={
-				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				<RefreshControl
+					refreshing={refreshing}
+					onRefresh={onRefresh}
+					testID="refresh-control"
+				/>
 			}
 		>
 			<View style={{ padding: 15 }} testID="profile-screen">
@@ -614,121 +627,133 @@ const ProfileScreen: React.FC = () => {
 						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
-				<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
-					<View style={styles.profileHeader}>
-						<Text style={styles.title}>Favorite Songs</Text>
-						{primaryProfileData.fav_songs.count > 2 && (
-							<TouchableOpacity
-								onPress={() => {
-									navigateToMore(
-										"song",
-										primaryProfileData.fav_songs.data,
-										"Favorite Songs",
-									);
-								}}
-							>
-								<Text
-									style={{
-										fontWeight: "700",
-										textAlign: "center",
+				{primaryProfileData.fav_songs.count > 2 && (
+					<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
+						<View style={styles.profileHeader}>
+							<Text style={styles.title}>Favorite Songs</Text>
+							{primaryProfileData.fav_songs.count > 0 && (
+								<TouchableOpacity
+									onPress={() => {
+										navigateToMore(
+											"song",
+											primaryProfileData.fav_songs.data,
+											"Favorite Songs",
+										);
 									}}
 								>
-									More
-								</Text>
-							</TouchableOpacity>
-						)}
+									<Text
+										style={{
+											fontWeight: "700",
+											textAlign: "center",
+										}}
+									>
+										More
+									</Text>
+								</TouchableOpacity>
+							)}
+						</View>
+						{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
+							<FavoriteSongs
+								key={song.id}
+								songTitle={song.title}
+								artist={song.artists}
+								duration={song.duration}
+								albumArt={song.cover}
+								onPress={() => {}}
+							/>
+						))}
 					</View>
-					{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
-						<FavoriteSongs
-							key={song.id}
-							songTitle={song.title}
-							artist={song.artists}
-							duration={song.duration}
-							albumArt={song.cover}
-							onPress={() => {}}
+				)}
+				{primaryProfileData.fav_rooms.count > 0 && (
+					<>
+						<View style={styles.profileHeader} testID="fav-rooms">
+							<Text
+								style={[
+									styles.title,
+									{ paddingHorizontal: 20, paddingTop: 10 },
+								]}
+							>
+								Favorite Rooms
+							</Text>
+							{primaryProfileData.fav_rooms.count > 10 && (
+								<TouchableOpacity
+									onPress={() => {
+										navigateToMore(
+											"room",
+											primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
+												preFormatRoomData(room, false),
+											),
+											"Favorite Rooms",
+										);
+									}}
+								>
+									<Text
+										style={{
+											fontWeight: "700",
+											textAlign: "center",
+											paddingRight: 15,
+										}}
+									>
+										More
+									</Text>
+								</TouchableOpacity>
+							)}
+						</View>
+						<AppCarousel
+							data={primaryProfileData.fav_rooms.data
+								.slice(0, 10)
+								.map((room: RoomDto) =>
+									formatRoomData(preFormatRoomData(room, false)),
+								)}
+							renderItem={renderItem}
 						/>
-					))}
-					{/* <MusicBottomSheet
-						isVisible={isMusicDialogVisible}
-						onClose={() => setMusicDialogVisible(false)}
-					/> */}
-				</View>
-				<View style={styles.profileHeader}>
-					<Text
-						style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}
-					>
-						Favorite Rooms
-					</Text>
-					{primaryProfileData.fav_rooms.count > 10 && (
-						<TouchableOpacity
-							onPress={() => {
-								navigateToMore(
-									"room",
-									primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
-										preFormatRoomData(room, false),
-									),
-									"Favorite Rooms",
-								);
-							}}
-						>
+					</>
+				)}
+				{primaryProfileData.recent_rooms.count > 0 && (
+					<>
+						<View style={styles.profileHeader} testID="recent-rooms">
 							<Text
-								style={{
-									fontWeight: "700",
-									textAlign: "center",
-									paddingRight: 15,
-								}}
+								style={[
+									styles.title,
+									{ paddingHorizontal: 20, paddingTop: 10 },
+								]}
 							>
-								More
+								Recent Rooms
 							</Text>
-						</TouchableOpacity>
-					)}
-				</View>
-				<AppCarousel
-					data={primaryProfileData.fav_rooms.data
-						.slice(0, 10)
-						.map((room: RoomDto) =>
-							formatRoomData(preFormatRoomData(room, false)),
-						)}
-					renderItem={renderItem}
-				/>
-				<View style={styles.profileHeader}>
-					<Text
-						style={[styles.title, { paddingHorizontal: 20, paddingTop: 10 }]}
-					>
-						Recent Rooms
-					</Text>
-					{primaryProfileData.recent_rooms.count > 10 && (
-						<TouchableOpacity
-							onPress={() => {
-								navigateToMore(
-									"room",
-									primaryProfileData.recent_rooms.data.map((room: RoomDto) =>
-										preFormatRoomData(room, false),
-									),
-									"Recent Rooms",
-								);
-							}}
-						>
-							<Text
-								style={{
-									fontWeight: "700",
-									textAlign: "center",
-									paddingRight: 15,
-								}}
-							>
-								More
-							</Text>
-						</TouchableOpacity>
-					)}
-				</View>
-				<AppCarousel
-					data={primaryProfileData.recent_rooms.data
-						.slice(0, 10)
-						.map((room: RoomDto) =>
-							formatRoomData(preFormatRoomData(room, false)),
-						)}
-					renderItem={renderItem}
-				/>
+							{primaryProfileData.recent_rooms.count > 10 && (
+								<TouchableOpacity
+									onPress={() => {
+										navigateToMore(
+											"room",
+											primaryProfileData.recent_rooms.data.map(
+												(room: RoomDto) => preFormatRoomData(room, false),
+											),
+											"Recent Rooms",
+										);
+									}}
+								>
+									<Text
+										style={{
+											fontWeight: "700",
+											textAlign: "center",
+											paddingRight: 15,
+										}}
+									>
+										More
+									</Text>
+								</TouchableOpacity>
+							)}
+						</View>
+						<AppCarousel
+							data={primaryProfileData.recent_rooms.data
+								.slice(0, 10)
+								.map((room: RoomDto) =>
+									formatRoomData(preFormatRoomData(room, false)),
+								)}
+							renderItem={renderItem}
+						/>
+					</>
+				)}
 				{primaryProfileData.current_room ? (
 					<View style={{ alignItems: "center", marginTop: 20 }}>
 						<TouchableOpacity style={styles.button} onPress={handleJoinLeave}>

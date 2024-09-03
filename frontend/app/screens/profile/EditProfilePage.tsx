@@ -7,6 +7,7 @@ import {
 	ScrollView,
 	StyleSheet,
 	TextInput,
+	ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
@@ -22,6 +23,7 @@ import * as utils from "../../services/Utils"; // Import Utils
 import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
+import { colors } from "../../styles/colors";
 
 type InputRef = TextInput | null;
 
@@ -46,8 +48,10 @@ const EditProfileScreen = () => {
 
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
+	let [flatLinks, setFlatLinks] = useState<string[]>(
+		Object.values(profileData.links.data).flat() as unknown as string[],
+	);
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
 	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);
@@ -56,6 +60,7 @@ const EditProfileScreen = () => {
 	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -72,28 +77,29 @@ const EditProfileScreen = () => {
 	}, []);
 
 	const handleUpdate = async () => {
+		setLoading(true);
 		await updateProfile();
 		setUserData(null);
 	};
 
 	const updateProfile = async () => {
-			try {
-				const response = await axios.patch(
-					`${utils.API_BASE_URL}/users`,
-					profileData,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
+		try {
+			const response = await axios.patch(
+				`${utils.API_BASE_URL}/users`,
+				profileData,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
 					},
-				);
+				},
+			);
 
-				// console.log(response.data);
-				return response.data;
-			} catch (error) {
-				console.error("Error updating profile info:", error);
-				return [];
-			}
+			// console.log(response.data);
+			return response.data;
+		} catch (error) {
+			console.error("Error updating profile info:", error);
+			return [];
+		}
 	};
 
 	useEffect(() => {
@@ -103,31 +109,11 @@ const EditProfileScreen = () => {
 	}, [userData]);
 
 	const handleImageUpload = async (uri: string) => {
-		// console.log(uri);
 		try {
-			// Fetch the file from the URI
-			// const response = await fetch(uri);
-			// const blob = await response.blob();
-			// const fileName = uri.split('/').pop(); // Extract filename from URI
-
-			// Append the file to the FormData
-			// form.append("file", new File([blob], fileName, { type: blob.type }));
 			const t = await auth.getToken();
 			setToken(t);
 
-			/*
-			const uploadResponse = await axios.post(
-				`${utils.API_BASE_URL}/upload`,
-				form,
-				{ headers },
-			);
-			*/
-			// console.log(profileData);
-			// console.log("Uploading image...", uri);
 			const imageLink = await uploadImage(uri, "image");
-			// console.log("image link:", imageLink);
-			// console.log("File uploaded successfully", uploadResponse.data);
-			return imageLink; // Assuming response.data has the URL
 		} catch (error) {
 			console.error("Error uploading file", error);
 			throw error;
@@ -212,19 +198,6 @@ const EditProfileScreen = () => {
 				...prevChangedFields,
 				bio: text,
 			}));
-			// console.log("Changed: " + JSON.stringify(changedFields));
-			// } else if (value === "instagramLink") {
-			// 	setProfileData((prevProfileData) => ({
-			// 		...prevProfileData,
-			// 		links: { data: text },
-			// 	}));
-			// 	setChanged(true);
-
-			// 	setChangedFields((prevChangedFields) => ({
-			// 		...prevChangedFields,
-			// 		links: { data: text },
-			// 	}));
-			// 	console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "genres") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -252,20 +225,92 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const handleLinkAddition = (link) => {
-		// setLinks((prevLinks) => [...prevLinks, link]);
+	type ExternalLinks = Record<string, string[]>;
 
-		setProfileData((prevProfileData) => ({
-			...prevProfileData,
-			links: {
-				...prevProfileData.links,
-				data: [...prevProfileData.links.data, { links: link }],
-				count: prevProfileData.links.count + 1,
-			},
-		}));
+	function categorizeLinks(links: string[]): ExternalLinks {
+		// Define regex patterns for popular social and music platforms
+		const platformPatterns = {
+			instagram: /instagram\.com/i,
+			tiktok: /tiktok\.com/i,
+			twitter: /twitter\.com/i,
+			facebook: /facebook\.com/i,
+			youtube: /youtube\.com/i,
+			linkedin: /linkedin\.com/i,
+			spotify: /spotify\.com/i,
+			soundcloud: /soundcloud\.com/i,
+			appleMusic: /music\.apple\.com/i,
+			deezer: /deezer\.com/i,
+			// Add more patterns as needed
+		};
+
+		// Initialize the external links object with an "other" category
+		const categorizedLinks: { [key: string]: string[] } = {};
+
+		// Iterate through each link and categorize it
+		links.forEach((link) => {
+			let categorized = false;
+
+			for (const [platform, pattern] of Object.entries(platformPatterns)) {
+				if (pattern.test(link)) {
+					if (!categorizedLinks[platform]) {
+						categorizedLinks[platform] = []; // Initialize array if not already present
+					}
+					categorizedLinks[platform].push(link);
+					categorized = true;
+					break; // Stop after finding the first match
+				}
+			}
+
+			// If no platform matches, categorize as "other"
+			if (!categorized) {
+				if (!categorizedLinks["other"]) {
+					categorizedLinks["other"] = [];
+				}
+				categorizedLinks.other.push(link);
+			}
+		});
+
+		// Remove any keys that have empty arrays
+		Object.keys(categorizedLinks).forEach((key) => {
+			if (categorizedLinks[key].length === 0) {
+				delete categorizedLinks[key];
+			}
+		});
+
+		return categorizedLinks as ExternalLinks;
+	}
+
+	const updateLinks = (links: string[]) => {
+		if (links.length !== 0) {
+			const categorizedLinks = categorizeLinks(links);
+
+			setProfileData((prevProfileData: any) => ({
+				...prevProfileData,
+				links: {
+					data: categorizedLinks,
+					count: links.length,
+				},
+			}));
+		} else {
+			setProfileData((prevProfileData: any) => ({
+				...prevProfileData,
+				links: {
+					data: {},
+					count: 0,
+				},
+			}));
+		}
+
+		console.log("Update links: " + JSON.stringify(profileData.links));
 		setChanged(true);
+	};
 
-		// setLinkAddDialogVisible(false);
+	const handleLinkAddition = (link: string) => {
+		setFlatLinks((prevLinks) => {
+			const updatedLinks = [...prevLinks, link];
+			updateLinks(updatedLinks); // Pass the updated links to updateLinks
+			return updatedLinks;
+		});
 
 		setTimeout(() => {
 			const lastIndex = inputRefs.current.length - 1;
@@ -275,21 +320,12 @@ const EditProfileScreen = () => {
 		}, 0);
 	};
 
-	const handleLinkDeletion = (linkToDelete) => {
-		if (profileData.links && Array.isArray(profileData.links.data)) {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				links: {
-					...prevProfileData.links,
-					data: prevProfileData.links.data.filter(
-						(item) => item.links !== linkToDelete,
-					),
-					count: prevProfileData.links.count - 1,
-				},
-			}));
-			// console.log(profileData.links);
-			setChanged(true);
-		}
+	const handleLinkDeletion = (linkToDelete: string) => {
+		setFlatLinks((prevLinks) => {
+			const updatedLinks = prevLinks.filter((link) => link !== linkToDelete);
+			updateLinks(updatedLinks); // Pass the updated links to updateLinks
+			return updatedLinks;
+		});
 	};
 
 	const getGenres = async () => {
@@ -324,24 +360,18 @@ const EditProfileScreen = () => {
 		setLinkEditDialogVisible(true);
 	};
 
-	const handleLinkEdit = (index, newLink) => {
-		if (profileData.links && Array.isArray(profileData.links.data)) {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				links: {
-					...prevProfileData.links,
-					data: prevProfileData.links.data.map((item, i) =>
-						i === index ? { ...item, links: newLink } : item,
-					),
-				},
-			}));
-			// console.log(profileData.links);
-			setLinkEditDialogVisible(false);
-			setChanged(true);
-		}
+	const handleLinkEdit = (index: number, newLink: string) => {
+		setFlatLinks((prevLinks) => {
+			const updatedLinks = prevLinks.map((link, i) =>
+				i === index ? newLink : link,
+			);
+			updateLinks(updatedLinks); // Pass the updated links to updateLinks
+			return updatedLinks;
+		});
+		setChanged(true);
 	};
 
-	const removeGenre = (genreToRemove) => {
+	const removeGenre = (genreToRemove: string) => {
 		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
@@ -412,7 +442,7 @@ const EditProfileScreen = () => {
 	};
 
 	const renderAddLink = () => {
-		if (profileData.links.count < 3) {
+		if (flatLinks.length < 3) {
 			return (
 				<View style={styles.listItem}>
 					<TouchableOpacity
@@ -426,6 +456,17 @@ const EditProfileScreen = () => {
 		}
 	};
 
+	if (loading) {
+		return (
+			<View
+				style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+				testID="loading-indicator"
+			>
+				<ActivityIndicator size={100} color={colors.primary} />
+			</View>
+		);
+	}
+
 	return (
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
@@ -438,9 +479,10 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Edit Profile</Text>
 					<TouchableOpacity
 						onPress={() => {
-							if(changed){
+							if (changed) {
+								console.log("Update called");
 								handleUpdate();
-							}							
+							}
 						}}
 						style={styles.saveButton}
 					>
@@ -475,12 +517,6 @@ const EditProfileScreen = () => {
 				{/* Name */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Name</Text>
-					{/* <TouchableOpacity
-						onPress={() => setNameDialogVisible(true)}
-						style={styles.editButton}
-						testID="name-button"
-					> */}
-					{/* <Text style={{ marginLeft: 42 }}>{profileData.profile_name}</Text> */}
 					<TextInput
 						style={{ marginLeft: 42 }}
 						value={profileData.profile_name}
@@ -488,24 +524,10 @@ const EditProfileScreen = () => {
 							handleSave(newName, "name");
 						}}
 					/>
-					{/* </TouchableOpacity>
-					<EditDialog
-						initialText={profileData.profile_name}
-						value="name"
-						visible={isNameDialogVisible}
-						onClose={() => setNameDialogVisible(false)}
-						onSave={handleSave}
-					/> */}
 				</View>
 				{/* Username */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Username</Text>
-					{/* <TouchableOpacity
-						onPress={() => setUsernameDialogVisible(true)}
-						style={styles.editButton}
-						testID="username-button"
-					> */}
-					{/* <Text style={{ marginLeft: 15 }}>@{profileData.username}</Text> */}
 					<TextInput
 						style={{ marginLeft: 11 }}
 						value={`@${profileData.username.toLowerCase()}`}
@@ -513,34 +535,10 @@ const EditProfileScreen = () => {
 							handleSave(newName, "username");
 						}}
 					/>
-					{/* </TouchableOpacity> */}
-					{/* <EditDialog
-						initialText={profileData.username}
-						maxLines={1}
-						value="username"
-						visible={isUsernameDialogVisible}
-						onClose={() => setUsernameDialogVisible(false)}
-						onSave={handleSave}
-					/> */}
 				</View>
 				{/* Bio */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
-					{/* <TouchableOpacity
-						onPress={() => setBioDialogVisible(true)}
-						style={styles.editButton}
-						testID="bio-button"
-					>
-						<Text style={{ marginLeft: 60 }}>{profileData.bio}</Text>
-					</TouchableOpacity>
-					<EditDialog
-						initialText={profileData.bio}
-						value="bio"
-						isBio={true}
-						visible={isBioDialogVisible}
-						onClose={() => setBioDialogVisible(false)}
-						onSave={handleSave}
-					/> */}
 					<TextInput
 						style={{ marginLeft: 60 }}
 						value={profileData.bio}
@@ -556,8 +554,7 @@ const EditProfileScreen = () => {
 				</View>
 				{profileData &&
 					profileData.links &&
-					profileData.links.data &&
-					profileData.links.data.map((link, index) => (
+					flatLinks.map((link, index) => (
 						<View key={index} style={styles.listItem}>
 							{/* <TouchableOpacity
 								onPress={() => openEditDialog(index, link.links)}
@@ -570,18 +567,18 @@ const EditProfileScreen = () => {
 							<TextInput
 								ref={(ref) => (inputRefs.current[index] = ref)}
 								style={styles.editButton}
-								value={link.links}
+								value={link}
 								onChangeText={(newLink) => {
 									handleLinkEdit(index, newLink);
 								}}
-								onBlur={() => {
-									if (link.links === "") {
-										handleLinkDeletion(link.links);
+								onBlur={async () => {
+									if (link === "") {
+										handleLinkDeletion(link);
 									}
 								}}
 							/>
 
-							<TouchableOpacity onPress={() => handleLinkDeletion(link.links)}>
+							<TouchableOpacity onPress={() => handleLinkDeletion(link)}>
 								<Ionicons
 									name="close"
 									size={16}
@@ -589,14 +586,6 @@ const EditProfileScreen = () => {
 									style={styles.icon}
 								/>
 							</TouchableOpacity>
-							<EditDialog
-								initialText={currentLinkEditText}
-								index={currentLinkIndex}
-								maxLines={1}
-								visible={isLinkEditDialogVisible}
-								onClose={() => setLinkEditDialogVisible(false)}
-								onSave={handleLinkEdit}
-							/>
 						</View>
 					))}
 				{renderAddLink()}

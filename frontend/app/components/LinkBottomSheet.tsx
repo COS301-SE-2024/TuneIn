@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { colors } from "../styles/colors";
 
-
 const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 	const [visible, setVisible] = useState(isVisible); // State to manage visibility
@@ -54,6 +53,21 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 		}),
 	);
 
+	// // Function to group links by type
+	// const groupLinksByType = (links) => {
+	// 	const groupedLinks = {};
+	// 	links.forEach((link) => {
+	// 		if (!groupedLinks[link.type]) {
+	// 			groupedLinks[link.type] = [];
+	// 		}
+	// 		groupedLinks[link.type].push(link);
+	// 	});
+	// 	return groupedLinks;
+	// };
+
+	// // Group links by type
+	// const groupedLinks = groupLinksByType(links);
+
 	return (
 		<Modal
 			transparent={true}
@@ -68,9 +82,13 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 					<View style={styles.dragHandle} {...panResponder.panHandlers} />
 					<View style={styles.textContainer}>
 						<Text style={styles.modalTitle}>Links</Text>
+						{Object.keys(links).map((type, index) => (
 							<Links
-								links={links}
+								key={index}
+								mediaPlatform={type}
+								links={links[type]}
 							/>
+						))}
 					</View>
 				</Animated.View>
 			</View>
@@ -78,19 +96,25 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	);
 };
 
-const Links = ({ links }) => {
+const capitalizeFirstLetter = (string) => {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+const Links = ({ mediaPlatform, links }) => {
+	console.log("Links: " + links + " Type: " + mediaPlatform);
 	const handleLinkPress = (link) => {
 		Linking.openURL("https://www." + link); // Open the link in the device's default browser
 	};
 
 	return (
 		<View>
+			<Text style={styles.mediaHeader}>{capitalizeFirstLetter(mediaPlatform)}</Text>
 			{links.map((link, index) => (
 				<TouchableOpacity
 					key={index}
-					onPress={() => handleLinkPress(link.links)}
+					onPress={() => handleLinkPress(link)}
 				>
-					<Text style={styles.link}>{link.links}</Text>
+					<Text style={styles.link}>{link}</Text>
 				</TouchableOpacity>
 			))}
 		</View>
