@@ -25,8 +25,8 @@ import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import { Player } from "../../PlayerContext";
+import { formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
-import { RoomDto } from "../../../api";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -60,7 +60,7 @@ const ProfileScreen: React.FC = () => {
 	const [profileInfo, setProfileInfo] = useState<any>(null);
 	const [refreshing] = React.useState(false);
 	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
-	const [roomData, setRoomData] = useState<RoomDto | undefined>();
+	const [roomData, setRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
 
 	const playerContext = useContext(Player);
@@ -140,7 +140,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (roomData === null) {
-							fetchUserCurrentRoom(data.username);
+							fetchRoomInfo(data.userID);
 						}
 					}
 				} catch (error) {
@@ -161,48 +161,7 @@ const ProfileScreen: React.FC = () => {
 					setPrimProfileData(userData);
 				}
 				if (roomData === null) {
-					setRoomData({
-						roomID: currentRoom?.roomID || "",
-						room_image: currentRoom?.backgroundImage || "",
-						room_name: currentRoom?.name || "",
-						description: currentRoom?.description || "",
-						creator: {
-							userID: currentRoom?.userID || "",
-							username: currentRoom?.username || "",
-							profile_picture_url: "",
-							followers: [],
-							following: [],
-							profile_name: currentRoom?.userProfile || "",
-							bio: "",
-							links: {},
-							current_song: {
-								title: currentRoom?.songName || "",
-								artists: [currentRoom?.artistName || ""],
-								cover: "",
-								start_time: {},
-							},
-							fav_genres: [],
-							fav_songs: [],
-							fav_rooms: [],
-							recent_rooms: [],
-						},
-						participant_count: 5,
-						is_temporary: false,
-						is_private: false,
-						is_scheduled: false,
-						start_date: "2021-10-10T00:00:00Z",
-						end_date: "2021-10-10T00:00:00Z",
-						language: "English",
-						has_explicit_content: false,
-						has_nsfw_content: false,
-						current_song: {
-							title: currentRoom?.songName || "",
-							artists: [currentRoom?.artistName || ""],
-							cover: "",
-							start_time: {},
-						},
-						tags: [],
-					});
+					setRoomData(currentRoom);
 					setRoomCheck(true);
 				}
 			}
@@ -232,7 +191,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchUserCurrentRoom(primaryProfileData.username);
+				fetchRoomInfo(primaryProfileData.userID);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
@@ -242,50 +201,9 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (ownsProfile) {
 			if (currentRoom) {
-				setRoomData({
-					roomID: currentRoom?.roomID || "",
-					room_image: currentRoom?.backgroundImage || "",
-					room_name: currentRoom?.name || "",
-					description: currentRoom?.description || "",
-					creator: {
-						userID: currentRoom?.userID || "",
-						username: currentRoom?.username || "",
-						profile_picture_url: "",
-						followers: [],
-						following: [],
-						profile_name: currentRoom?.userProfile || "",
-						bio: "",
-						links: {},
-						current_song: {
-							title: currentRoom?.songName || "",
-							artists: [currentRoom?.artistName || ""],
-							cover: "",
-							start_time: {},
-						},
-						fav_genres: [],
-						fav_songs: [],
-						fav_rooms: [],
-						recent_rooms: [],
-					},
-					participant_count: 5,
-					is_temporary: false,
-					is_private: false,
-					is_scheduled: false,
-					start_date: "2021-10-10T00:00:00Z",
-					end_date: "2021-10-10T00:00:00Z",
-					language: "English",
-					has_explicit_content: false,
-					has_nsfw_content: false,
-					current_song: {
-						title: currentRoom?.songName || "",
-						artists: [currentRoom?.artistName || ""],
-						cover: "",
-						start_time: {},
-					},
-					tags: [],
-				});
+				setRoomData(currentRoom);
 			} else {
-				setRoomData(undefined);
+				setRoomData(null);
 			}
 		}
 	}, [currentRoom, ownsProfile]);
@@ -328,27 +246,30 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchUserCurrentRoom = async (username: string) => {
+	const fetchRoomInfo = async (userID: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${username}/room/current`,
+					`${utils.API_BASE_URL}/users/${userID}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
 						},
 					},
 				);
-				const r: RoomDto = response.data;
-				const hasRoom = await ownsRoom(r.roomID);
-				setRoomData(r);
+				const hasRoom = await ownsRoom(response.data.room.roomID);
+				const formattedRoomData = preFormatRoomData(
+					response.data.room,
+					hasRoom,
+				);
+				setRoomData(formatRoomData(formattedRoomData));
 				setRoomCheck(true);
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
 			if (error.response && error.response.status === 404) {
-				setRoomData(undefined);
+				setRoomData(null);
 				setRoomCheck(true);
 			} else {
 				console.error("Error fetching room info:", error);
@@ -362,7 +283,7 @@ const ProfileScreen: React.FC = () => {
 		if (storedToken) {
 			if (following) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/unfollow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/unfollow`,
 					{},
 					{
 						headers: {
@@ -380,7 +301,7 @@ const ProfileScreen: React.FC = () => {
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/follow`,
 					{},
 					{
 						headers: {
@@ -710,9 +631,9 @@ const ProfileScreen: React.FC = () => {
 						testID="now-playing"
 					>
 						<NowPlaying
-							name={roomData?.room_name}
-							creator={roomData?.creator.username}
-							art={roomData?.room_image}
+							name={roomData.name}
+							creator={roomData.username}
+							art={roomData.backgroundImage}
 						/>
 					</TouchableOpacity>
 				)}
