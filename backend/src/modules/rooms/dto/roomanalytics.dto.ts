@@ -89,7 +89,7 @@ export class ParticipantsPerHourDto {
 	instance: Date;
 }
 
-class AllTimeSessionDataDto {
+export class AllTimeSessionDataDto {
 	@ApiProperty({
 		description: "The average session duration of the room",
 	})
@@ -109,7 +109,7 @@ class AllTimeSessionDataDto {
 	max_duration: number;
 }
 
-class SessionDurationPerDayDto {
+export class SessionDurationPerDayDto {
 	@ApiProperty({ type: "number" })
 	duration: number;
 
@@ -131,7 +131,7 @@ export class SessionDataPerDayDto {
 	max_duration: SessionDurationPerDayDto[];
 }
 
-class JoinsCount {
+export class JoinsCount {
 	@ApiProperty({ type: "number" })
 	count: number;
 
@@ -139,7 +139,7 @@ class JoinsCount {
 	day: Date;
 }
 
-class JoinsPerDay {
+export class JoinsPerDay {
 	total_joins: JoinsCount[];
 	unique_joins: JoinsCount[];
 }
@@ -234,7 +234,7 @@ export class RoomAnalyticsParticipationDto {
 	room_previews: number;
 }
 
-class MessagesPerHour {
+export class MessagesPerHour {
 	@ApiProperty({ type: "number" })
 	count: number;
 
