@@ -9,9 +9,10 @@ import {
 	Platform,
 	ScrollView,
 	Alert,
+	StyleSheet,
 } from "react-native";
-import { useRouter } from "expo-router"; // Import useRouter from 'expo-router'
-import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import path as needed
+import { useRouter } from "expo-router";
+import MyToggleWidget from "../../components/ToggleWidget";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import CyanButton from "../../components/CyanButton";
@@ -19,9 +20,11 @@ import CyanButton from "../../components/CyanButton";
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
 	const [isSwitched, setIsSwitched] = useState(false);
-	const [newRoom] = useState({
+	const [newRoom, setNewRoom] = useState({
 		is_permanent: true,
 		is_private: false,
+		is_scheduled: false,
+		start_date: new Date(), // Initialize with default date
 	});
 	const [date, setDate] = useState(new Date());
 	const [time, setTime] = useState(new Date());
@@ -29,7 +32,10 @@ const CreateRoomScreen: React.FC = () => {
 	const [showTimePicker, setShowTimePicker] = useState(false);
 
 	const handleToggleChange = (isFirstOptionSelected: boolean) => {
-		newRoom["is_permanent"] = isFirstOptionSelected;
+		setNewRoom((prevRoom) => ({
+			...prevRoom,
+			is_permanent: isFirstOptionSelected,
+		}));
 		console.log(
 			isFirstOptionSelected ? "Permanent selected" : "Temporary selected",
 			newRoom,
@@ -37,7 +43,10 @@ const CreateRoomScreen: React.FC = () => {
 	};
 
 	const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
-		newRoom["is_private"] = !isFirstOptionSelected;
+		setNewRoom((prevRoom) => ({
+			...prevRoom,
+			is_private: !isFirstOptionSelected,
+		}));
 		console.log(
 			isFirstOptionSelected ? "Public selected" : "Private selected",
 			newRoom,
@@ -45,18 +54,15 @@ const CreateRoomScreen: React.FC = () => {
 	};
 
 	const navigateToRoomDetails = () => {
-		if (isSwitched) {
-			const currentDate = moment(date).format("MM/DD/YYYY");
-			const currentTime = moment(time).format("HH:mm");
-			console.log("Date before:", date);
-			const newDate = new Date(
-				date.getFullYear(),
-				date.getMonth(),
-				date.getDate(),
-				time.getHours(),
-				time.getMinutes(),
-			);
+		const newDate = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate(),
+			time.getHours(),
+			time.getMinutes(),
+		);
 
+		if (isSwitched) {
 			if (newDate < new Date()) {
 				Alert.alert(
 					"Invalid Date",
@@ -66,25 +72,39 @@ const CreateRoomScreen: React.FC = () => {
 				);
 				return;
 			}
+
 			Alert.alert(
 				"Scheduled Room",
-				`Room will be scheduled for ${currentDate} at ${currentTime}.`,
+				`Room will be scheduled for ${moment(date).format(
+					"MM/DD/YYYY",
+				)} at ${moment(time).format("HH:mm")}.`,
 				[{ text: "OK" }],
 				{ cancelable: false },
 			);
-			newRoom["start_date"] = newDate;
+
+			setNewRoom((prevRoom) => ({
+				...prevRoom,
+				is_scheduled: true,
+				start_date: newDate,
+			}));
+		} else {
+			setNewRoom((prevRoom) => ({
+				...prevRoom,
+				is_scheduled: false,
+				start_date: new Date(), // Set default date if not scheduled
+			}));
 		}
-		newRoom["is_scheduled"] = isSwitched;
+
 		const room = JSON.stringify(newRoom);
-		router.navigate({
+		router.push({
 			pathname: "/screens/rooms/RoomDetails",
 			params: { room: room },
 		});
 	};
 
-	const handleDateChange = (event, selectedDate) => {
+	const handleDateChange = (event: any, selectedDate?: Date) => {
 		const currentDate = selectedDate || date;
-		setShowDatePicker(Platform.OS === "ios");
+		setShowDatePicker(false);
 		setDate(currentDate);
 		console.log(
 			"Selected date:",
@@ -92,12 +112,11 @@ const CreateRoomScreen: React.FC = () => {
 			currentDate,
 			moment(currentDate).format("MM/DD/YYYY"),
 		);
-		currentDate.setHours(time.getHours());
 	};
 
-	const handleTimeChange = (event, selectedTime) => {
+	const handleTimeChange = (event: any, selectedTime?: Date) => {
 		const currentTime = selectedTime || time;
-		setShowTimePicker(Platform.OS === "ios");
+		setShowTimePicker(false);
 		setTime(currentTime);
 		console.log(
 			"Selected time:",
@@ -187,7 +206,7 @@ const CreateRoomScreen: React.FC = () => {
 	);
 };
 
-const styles = {
+const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
 		backgroundColor: "white",
@@ -201,9 +220,9 @@ const styles = {
 		paddingTop: 20,
 	},
 	header: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
+		flexDirection: "row" as const,
+		alignItems: "center" as const,
+		justifyContent: "space-between" as const,
 		padding: 10,
 	},
 	closeButton: {
@@ -226,9 +245,9 @@ const styles = {
 		marginBottom: 20,
 	},
 	scheduleContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
+		flexDirection: "row" as const,
+		alignItems: "center" as const,
+		justifyContent: "space-between" as const,
 		marginBottom: 20,
 	},
 	scheduleText: {
@@ -248,6 +267,6 @@ const styles = {
 		padding: 10,
 		backgroundColor: "#F9FAFB",
 	},
-};
+});
 
 export default CreateRoomScreen;

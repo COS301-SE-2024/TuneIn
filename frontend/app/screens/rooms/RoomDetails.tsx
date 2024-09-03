@@ -21,6 +21,7 @@ const RoomDetails: React.FC = () => {
 	const router = useRouter();
 	const { room } = useLocalSearchParams();
 	const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
+	console.log("Room: " + room);
 
 	const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
 		name: "",
