@@ -51,13 +51,7 @@ const EditProfileScreen = () => {
 	let [flatLinks, setFlatLinks] = useState<string[]>(
 		Object.values(profileData.links.data).flat() as unknown as string[],
 	);
-	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
-	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
-	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
-	const [isLinkAddDialogVisible, setLinkAddDialogVisible] = useState(false);
-	const [isLinkEditDialogVisible, setLinkEditDialogVisible] = useState(false);
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -143,25 +137,19 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const dialogs = {
-		name: setNameDialogVisible,
-		username: setUsernameDialogVisible,
-		bio: setBioDialogVisible,
-		photo: setPhotoDialogVisible,
-		link: setLinkAddDialogVisible,
+	const createTimeString = (seconds: number) => {
+		// Calculate minutes and seconds
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+
+		// Format the result as "minutes:seconds"
+		const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+		return timeString;
 	};
 
-	const [changedFields, setChangedFields] = useState({});
 	const [changed, setChanged] = useState(false);
 
 	const handleSave = (text, value) => {
-		// console.log("Saved:", text);
-		if (dialogs[value]) {
-			dialogs[value](false);
-		} else {
-			console.error(`No dialog setter found for value: ${value}`);
-		}
-
 		// Update the appropriate property in profileData
 		if (value === "name") {
 			setProfileData((prevProfileData) => ({
@@ -169,11 +157,6 @@ const EditProfileScreen = () => {
 				profile_name: text,
 			}));
 
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				profile_name: text,
-			}));
-			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "username") {
 			setProfileData((prevProfileData) => ({
@@ -181,11 +164,6 @@ const EditProfileScreen = () => {
 				username: text,
 			}));
 
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				username: text,
-			}));
-			// console.log("Changed: " + JSON.stringify(changedFields));
 			setChanged(true);
 		} else if (value === "bio") {
 			setProfileData((prevProfileData) => ({
@@ -193,35 +171,12 @@ const EditProfileScreen = () => {
 				bio: text,
 			}));
 			setChanged(true);
-
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				bio: text,
-			}));
-		} else if (value === "genres") {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				fav_genres: text,
-			}));
-			setChanged(true);
-
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				fav_genres: text,
-			}));
-			// console.log("Changed: " + JSON.stringify(changedFields));
 		} else if (value === "favoriteSongs") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				fav_songs: text,
 			}));
 			setChanged(true);
-
-			setChangedFields((prevChangedFields) => ({
-				...prevChangedFields,
-				fav_songs: text,
-			}));
-			// console.log("Changed: " + JSON.stringify(changedFields));
 		}
 	};
 
@@ -301,7 +256,6 @@ const EditProfileScreen = () => {
 			}));
 		}
 
-		console.log("Update links: " + JSON.stringify(profileData.links));
 		setChanged(true);
 	};
 
@@ -348,17 +302,7 @@ const EditProfileScreen = () => {
 
 	useEffect(() => {
 		getGenres();
-		console.log("Genres: " + genres[0]);
 	}, []);
-
-	const [currentLinkIndex, setCurrentLinkIndex] = useState(null);
-	const [currentLinkEditText, setCurrentLinkEditText] = useState("");
-
-	const openEditDialog = (index, text) => {
-		setCurrentLinkIndex(index);
-		setCurrentLinkEditText(text);
-		setLinkEditDialogVisible(true);
-	};
 
 	const handleLinkEdit = (index: number, newLink: string) => {
 		setFlatLinks((prevLinks) => {
@@ -415,9 +359,6 @@ const EditProfileScreen = () => {
 			};
 		});
 		setChanged(true);
-		setChangedFields((prevChangedFields) => ({
-			...prevChangedFields,
-		}));
 	};
 
 	const addSong = (newSongs: any) => {
@@ -432,11 +373,8 @@ const EditProfileScreen = () => {
 			};
 		});
 		setChanged(true);
-		setChangedFields((prevChangedFields) => ({
-			...prevChangedFields,
-		}));
 
-		console.log("Fav Songs: " + JSON.stringify(profileData.fav_songs));
+		// console.log("Fav Songs: " + JSON.stringify(profileData.fav_songs));
 
 		setIsSongDialogVisible(false);
 	};
@@ -480,7 +418,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => {
 							if (changed) {
-								console.log("Update called");
+								// console.log("Update called");
 								handleUpdate();
 							}
 						}}
@@ -498,7 +436,7 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={{uri: profileData.profile_picture_url}}
+						source={{ uri: profileData.profile_picture_url }}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 					<TouchableOpacity
@@ -556,14 +494,6 @@ const EditProfileScreen = () => {
 					profileData.links &&
 					flatLinks.map((link, index) => (
 						<View key={index} style={styles.listItem}>
-							{/* <TouchableOpacity
-								onPress={() => openEditDialog(index, link.links)}
-								style={styles.editButton}
-								testID="link-edit-button"
-							>
-								<Text>{link.links}</Text>
-							</TouchableOpacity> */}
-
 							<TextInput
 								ref={(ref) => (inputRefs.current[index] = ref)}
 								style={styles.editButton}
@@ -578,7 +508,10 @@ const EditProfileScreen = () => {
 								}}
 							/>
 
-							<TouchableOpacity onPress={() => handleLinkDeletion(link)}>
+							<TouchableOpacity
+								onPress={() => handleLinkDeletion(link)}
+								testID={`${link}-close`}
+							>
 								<Ionicons
 									name="close"
 									size={16}
@@ -606,6 +539,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={toggleGenreSelector}
 						style={styles.addGenreButton}
+						testID="add-genre"
 					>
 						<Text
 							style={{
@@ -636,7 +570,7 @@ const EditProfileScreen = () => {
 							key={index}
 							songTitle={song.title}
 							artist={song.artists}
-							duration={song.duration}
+							duration={song.duration ? createTimeString(song.duration) : null}
 							albumArt={song.cover}
 							toEdit={true}
 							onPress={() => removeSong(index)}
