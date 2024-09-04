@@ -17,7 +17,7 @@ export class ProfileService {
 
 	async getProfile(uid: string): Promise<UserProfileDto> {
 		const user = await this.dtogen.generateUserDto(uid);
-		return user;
+		return new UserProfileDto();
 	}
 
 	async updateProfile(
@@ -32,22 +32,22 @@ export class ProfileService {
 			throw new Error("User not found");
 		}
 
-		const updateData = this.dbUtilsService.buildUpdateData(
-			user,
-			updateProfileDto,
-		);
+		// const updateData = this.dbUtilsService.buildUpdateData(
+		// 	user,
+		// 	updateProfileDto,
+		// );
 
-		await this.prisma.users.update({
-			where: { user_id: userId },
-			data: updateData,
-		});
+		// await this.prisma.users.update({
+		// 	where: { user_id: userId },
+		// 	data: updateData,
+		// });
 
 		const userProfile = await this.dtogen.generateUserDto(userId);
 		if (!userProfile) {
 			throw new Error("Failed to generate user profile");
 		}
 
-		return userProfile;
+		return new UserProfileDto();
 	}
 
 	async getProfileByUsername(username: string): Promise<UserProfileDto> {
@@ -60,7 +60,7 @@ export class ProfileService {
 		} else {
 			const user = await this.dtogen.generateUserDto(userData.user_id);
 			if (user) {
-				return user;
+				return new UserProfileDto();
 			}
 		}
 
