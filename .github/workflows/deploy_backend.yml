@@ -19,17 +19,17 @@ jobs:
 
     - name: Install dependencies
       run:  |
-        cd frontend && npm ci
+        cd backend && npm ci
 
     - name: Last linting check before deployment
-      run: npm run lint
+      run: cd backend && npm run lint
 
     - name: Last tests before deployment
-      run: npm run test
+      run: cd backend && npm run test
 
     - name: Verify Build before deployment
       run: |
-        npm run build:swc
+        cd backend && npm run build:swc
         if [ ! -f "backend/dist/src/main.js" ]; then
           echo "Build failed: main.js not found!"
           exit 1
