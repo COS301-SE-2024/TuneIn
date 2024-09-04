@@ -11,6 +11,7 @@ import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
 import { IsNumber, IsObject, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { RecommendationsService } from "../../recommendations/recommendations.service";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -22,8 +23,6 @@ export class UserListeningStatsDto {
 
 	/* whatever else you want */
 }
-import { RecommendationsService } from "src/recommendations/recommendations.service";
-
 @Injectable()
 export class UsersService {
 	constructor(

@@ -149,6 +149,6 @@ describe("RecommendationsService", () => {
 		service.setMockSongs(mockSongs);
 		const topPlaylists = service.getTopPlaylists(1);
 		expect(topPlaylists.length).toBe(1);
-		expect(topPlaylists[0].playlist).toBe("playlist1");
+		expect(topPlaylists[0]?.playlist).toBe("playlist1");
 	});
 });
