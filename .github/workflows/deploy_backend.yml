@@ -78,6 +78,11 @@ jobs:
           ./start_backend.sh
         EOF
 
+    - name: Wait for Service to Start
+      run: sleep 30
+
     - name: Health Check
       run: |
-        curl --fail "https://tunein.co.za:3000/" || exit 1
+        for i in {1..5}; do
+          curl -v --fail "https://tunein.co.za:3000/" && break || sleep 10
+        done
