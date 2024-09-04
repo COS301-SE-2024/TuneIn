@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	TextInput,
@@ -45,6 +45,11 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
+	const [sResults, setSResults] = useState<SimplifiedTrack[]>(searchResults);
+
+	useEffect(() => {
+		setSResults(searchResults);
+	}, [searchResults]);
 
 	const addToPlaylist = (track: Track) => {
 		const simplifiedTrack: SimplifiedTrack = {
@@ -77,9 +82,10 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			duration_ms: song.duration_ms,
 			startTime: "",
 		}));
-		console.log(currentPlaylist);
-		console.log(songInfo);
 		handleSave(songInfo);
+		setPlaylist([]);
+		setSResults([]);
+		setSearchQuery("");
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -137,7 +143,7 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 
 				{/* Search Results Section */}
 				<ScrollView style={styles.resultsContainer}>
-					{searchResults.map((track) => (
+					{sResults.map((track) => (
 						<SongCard
 							key={track.id}
 							track={track}
