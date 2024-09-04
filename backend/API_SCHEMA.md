@@ -190,7 +190,7 @@ response: (2xx for success, 4xx for error)
 
 ### `/rooms/{room_id}/save`
 #### POST: save room as a playlist
-response: (2xx for success, 4xx for error)
+response: `playlistID: string`
 
 ### `/rooms/{room_id}/users`
 #### GET: returns people currently (and previously in room)
@@ -201,6 +201,12 @@ response: array of UserDto
 ### `/rooms/{room_id}/schedule`
 #### GET: returns a .ics file for the scheduled room
 response: a .ics file or 4xx for room that is not scheduled
+
+### `/rooms/{room_id}/split`
+#### GET: evaluate if a room can be split
+response: an array of the possible genres (if possible) or 4xx if not possible
+#### POST: returns a RoomDto with info about it's split children
+response: the RoomDto
 
 ### `/rooms/{room_id}/songs`
 #### GET: returns the queue
