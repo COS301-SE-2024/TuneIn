@@ -36,7 +36,7 @@ jobs:
     - name: Verify Build before deployment
       run: |
         cd backend && npm run build:swc
-        if [ ! -f "backend/dist/src/main.js" ]; then
+        if [ ! -f "dist/src/main.js" ]; then
           echo "Build failed: main.js not found!"
           exit 1
         fi
