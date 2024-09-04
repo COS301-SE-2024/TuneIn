@@ -6,6 +6,8 @@ import { DtoGenModule } from "../dto-gen/dto-gen.module";
 import { DbUtilsModule } from "../db-utils/db-utils.module";
 import { AuthModule } from "../../auth/auth.module";
 import { RoomQueueModule } from "./roomqueue/roomqueue.module";
+import { RoomAnalyticsService } from "./roomanalytics.service";
+import { RecommendationsModule } from "../../recommendations/recommendations.module";
 
 @Module({
 	imports: [
@@ -14,9 +16,10 @@ import { RoomQueueModule } from "./roomqueue/roomqueue.module";
 		DbUtilsModule,
 		AuthModule,
 		RoomQueueModule,
+		RecommendationsModule,
 	],
 	controllers: [RoomsController],
-	providers: [RoomsService],
-	exports: [RoomsService],
+	providers: [RoomsService, RoomAnalyticsService],
+	exports: [RoomsService, RoomAnalyticsService],
 })
 export class RoomsModule {}

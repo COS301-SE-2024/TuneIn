@@ -6,6 +6,8 @@ import {
 } from "@nestjs/common";
 import {
 	AdminInitiateAuthCommandInput,
+	AttributeType,
+	AuthenticationResultType,
 	CognitoIdentityProvider,
 	ListUsersCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
@@ -75,7 +77,7 @@ export class AuthService {
 
 	constructor(
 		private configService: ConfigService,
-		private prisma: PrismaService,
+		private readonly prisma: PrismaService,
 	) {
 		// Set the AWS credentials
 		const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
@@ -116,7 +118,14 @@ export class AuthService {
 		});
 	}
 
-	async validateUser(username: string, password: string): Promise<any> {
+	async validateUser(
+		username: string,
+		password: string,
+	): Promise<{
+		username: string;
+		attributes: AttributeType[];
+		authenticationResult: AuthenticationResultType;
+	}> {
 		if (!this.userPoolId || !this.clientId) {
 			throw new Error("Missing Cognito configuration");
 		}
@@ -140,12 +149,17 @@ export class AuthService {
 					Username: username,
 				});
 
+				if (!user || !user.Username || !user.UserAttributes) {
+					throw new UnauthorizedException("Invalid credentials");
+				}
+
 				return {
 					username: user.Username,
 					attributes: user.UserAttributes,
 					authenticationResult: authResponse.AuthenticationResult,
 				};
 			}
+			throw new UnauthorizedException("Invalid credentials");
 		} catch (error) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
@@ -271,7 +285,7 @@ export class AuthService {
 
 	// this funciton will be passed a Request object from the NestJS controller eg:
 	/*
-	getRoomInfo(@Request() req: any, @Param("roomID") roomID: string): RoomDto {
+	getRoomInfo(@Request() req: Request, @Param("roomID") roomID: string): RoomDto {
 		return this.roomsService.getRoomInfo(roomID);
 	}
 	*/

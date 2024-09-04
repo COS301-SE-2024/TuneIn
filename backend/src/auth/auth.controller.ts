@@ -14,17 +14,28 @@ import {
 	RefreshBody,
 } from "./auth.service";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+
 @Controller("auth")
+@ApiTags("auth")
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
 	@Post("login")
-	@ApiTags("auth")
-	@ApiOperation({ summary: "Authenticate a user using the Cognito JWT token" })
+	@ApiOperation({
+		summary: "Authenticate a user using a Cognito JWT token",
+		description:
+			"This method will authenticate a user using a Cognito JWT token. The token is decoded and verified, and a new JWT token is generated and returned. See https://jwt.io/ for more information on JWT tokens.",
+		operationId: "login",
+	})
 	@ApiBody({
 		type: LoginBody,
 		required: true,
 		description: "Cognito JWT token",
+		examples: {
+			token: {
+				value: "(see https://jwt.io/)",
+			},
+		},
 	})
 	@ApiResponse({
 		status: 200,
@@ -46,8 +57,9 @@ export class AuthController {
 		const userID: string = authInfo.username;
 		console.log("authInfo", authInfo);
 
-		const { username, email } =
-			await this.authService.getUsernameAndEmail(userID);
+		const { username, email } = await this.authService.getUsernameAndEmail(
+			userID,
+		);
 
 		const payload: JWTPayload = {
 			id: authInfo.username,
@@ -65,9 +77,27 @@ export class AuthController {
 	}
 
 	@Post("register")
-	@ApiTags("auth")
-	@ApiOperation({ summary: "Register a new user in the API using Cognito" })
+	@ApiOperation({
+		summary: "Register a new user in the API using Cognito",
+		description:
+			"This method will register a new user in the API using Cognito. The user's Cognito username, email, and Cognito sub ID are required. The user will be created in the our database and will be able to authenticate using the Cognito JWT token.",
+		operationId: "register",
+	})
 	@ApiBody({ type: RegisterBody, required: true, description: "User info" })
+	@ApiBody({
+		type: RegisterBody,
+		required: true,
+		description: "User's Cognito information",
+		examples: {
+			register: {
+				value: {
+					username: "cognito-username",
+					email: "john@example.com",
+					userCognitoSub: "cognito-sub-id",
+				},
+			},
+		},
+	})
 	@ApiResponse({
 		status: 200,
 		description: "User successfully registered.",
@@ -91,14 +121,26 @@ export class AuthController {
 		throw new HttpException("Successfully created user.", HttpStatus.CREATED);
 	}
 
-	//TODO: Add a POST method to refresh an expired JWT token
 	@Post("refresh")
-	@ApiTags("auth")
-	@ApiOperation({ summary: "Refresh an expired (or almost expired) JWT token" })
+	@ApiOperation({
+		summary: "Refresh an expired (or almost expired) JWT token",
+		description:
+			"This method will refresh an expired (or almost expired) JWT token. The expired token is sent in the request body, and a new JWT token is generated and returned. The new token will have a new expiration date.",
+		operationId: "refresh",
+	})
 	@ApiBody({
 		type: RefreshBody,
 		required: true,
 		description: "The expired JWT token",
+		examples: {
+			register: {
+				value: {
+					username: "cognito-username",
+					email: "john@example.com",
+					userCognitoSub: "cognito-sub-id",
+				},
+			},
+		},
 	})
 	@ApiResponse({
 		status: 200,

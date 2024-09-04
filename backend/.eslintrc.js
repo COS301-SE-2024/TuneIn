@@ -1,4 +1,4 @@
-const { rules } = require("eslint-config-prettier");
+const { prettierRules } = require("eslint-config-prettier");
 
 module.exports = {
   parser: "@typescript-eslint/parser",
@@ -42,7 +42,12 @@ module.exports = {
     "no-var": "error",
 
     // Prevent conflicts with Prettier
-    ...rules,
-    "prettier/prettier": "error",
+    ...prettierRules,
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
   },
 };

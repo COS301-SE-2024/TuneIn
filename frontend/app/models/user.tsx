@@ -3,4 +3,5 @@ export interface User {
 	profile_picture_url: string;
 	profile_name: string;
 	username: string;
+	followers: any;
 }

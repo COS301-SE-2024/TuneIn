@@ -13,6 +13,17 @@ model authentication {
   users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
 }
 
+model banned {
+  banned_id String @id(map: "banned_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id   String @db.Uuid
+  room_id   String @db.Uuid
+  room      room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+  users     users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+
+  @@index([room_id], map: "fki_room_id")
+  @@index([user_id], map: "fki_user_id")
+}
+
 model blocked {
   blocker                      String   @db.Uuid
   blockee                      String   @db.Uuid
@@ -32,6 +43,15 @@ model bookmark {
   timestamp   DateTime? @default(now()) @db.Timestamptz(6)
   users       users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   room        room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+}
+
+model chat_reactions {
+  reaction_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String @db.Uuid
+  room_id     String @db.Uuid
+  reaction    String
+  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
 }
 
 model follows {
@@ -59,6 +79,12 @@ model friends {
   @@index([friend2], map: "fki_friend2")
 }
 
+model genre {
+  genre_id        String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  genre           String?
+  favorite_genres favorite_genres[]
+}
+
 model message {
   message_id      String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   contents        String
@@ -69,6 +95,7 @@ model message {
   room_message    room_message?
 }
 
+/// This table has subclasses and requires additional setup for migrations. Visit https://pris.ly/d/table-inheritance for more info.
 model participate {
   user_id        String @db.Uuid
   room_id        String @db.Uuid
@@ -164,17 +191,54 @@ model scheduled_room {
   @@index([room_id], map: "fki_scheduled_room ")
 }
 
+model search_history {
+  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String   @db.Uuid
+  search_term String
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  url         String?
+  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
+}
+
+model search_suggestions {
+  suggestion_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  term          String
+  popularity    Int    @default(1)
+}
+
 model song {
-  song_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String
-  artist      String
-  genre       String?
-  lyrics_url  String?
-  duration    Int?     @default(0)
-  genres      String[]
-  artwork_url String?
-  spotify_id  String?
-  queue       queue[]
+  song_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name           String
+  genre          String?
+  lyrics_url     String?
+  duration       Int?             @default(0)
+  genres         String[]
+  artwork_url    String?
+  spotify_id     String           @unique
+  audio_features Json             @db.Json
+  artists        String[]
+  favorite_songs favorite_songs[]
+  queue          queue[]
+}
+
+model table_state {
+  room_id   String    @id @db.Uuid
+  index     Int?
+  is_active Boolean?
+  time      DateTime? @default(now()) @db.Timestamptz(6)
+  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
+}
+
+model user_activity {
+  user_id         String    @db.Uuid
+  room_id         String    @db.Uuid
+  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
+  room_leave_time DateTime? @db.Timestamptz(6)
+  activity_id     String    @id(map: "activity_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
+  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+
+  @@index([user_id], map: "fki_user")
 }
 
 model users {
@@ -193,6 +257,8 @@ model users {
   blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
   bookmark                        bookmark[]
   chat_reactions                  chat_reactions[]
+  favorite_genres                 favorite_genres[]
+  favorite_songs                  favorite_songs[]
   follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
   follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
   friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
@@ -217,66 +283,25 @@ model vote {
   users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
 }
 
-model genre {
-  genre_id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  genre    String?
+model room_previews {
+  room_id        String   @db.Uuid
+  user_id        String   @db.Uuid
+  date_previewed DateTime @default(now()) @db.Timestamptz(6)
+  preview_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
 }
 
-model search_history {
-  search_id   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String   @db.Uuid
-  search_term String
-  timestamp   DateTime @default(now()) @db.Timestamptz(6)
-  url         String?
-  users       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-}
-
-model table_state {
-  room_id   String    @id @db.Uuid
-  index     Int?
-  is_active Boolean?
-  time      DateTime? @default(now()) @db.Timestamptz(6)
-  room      room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-}
-
-model banned {
-  banned_id String @id(map: "banned_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id   String @db.Uuid
-  room_id   String @db.Uuid
-  room      room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room_id")
-  users     users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_id")
-
-  @@index([room_id], map: "fki_room_id")
-  @@index([user_id], map: "fki_user_id")
-}
-
-model chat_reactions {
-  reaction_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+model favorite_genres {
+  genre_id    String @db.Uuid
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   user_id     String @db.Uuid
-  room_id     String @db.Uuid
-  reaction    String
-  room        room   @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
-  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
+  genre       genre  @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-// model room_previews {
-// }
-
-model search_suggestions {
-  suggestion_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  term          String
-  popularity    Int    @default(1)
-}
-
-model user_activity {
-  user_id         String    @db.Uuid
-  room_id         String    @db.Uuid
-  room_join_time  DateTime  @default(now()) @db.Timestamptz(6)
-  room_leave_time DateTime? @db.Timestamptz(6)
-  activity_id     String    @id(map: "activity_id") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  room            room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "room")
-  users           users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
-
-  @@index([user_id], map: "fki_user")
+model favorite_songs {
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  song_id     String @db.Uuid
+  user_id     String @db.Uuid
+  song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }

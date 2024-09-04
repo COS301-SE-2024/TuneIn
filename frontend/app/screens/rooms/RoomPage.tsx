@@ -29,10 +29,11 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
+import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
+import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
-import { live, Message } from "../../services/Live";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
@@ -54,13 +55,21 @@ type EmojiReaction = {
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
+	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
 	} else if (room) {
 		roomData = JSON.parse(room);
 	}
-	const roomID = roomData.id;
+
+	let roomID: string;
+	if (roomData.id !== undefined) {
+		roomID = roomData.id;
+	} else {
+		roomID = roomData.roomID;
+	}
+
 	const playerContext = useContext(Player);
 	if (!playerContext) {
 		throw new Error(
@@ -91,7 +100,7 @@ const RoomPage = () => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [messages, setMessages] = useState<LiveMessage[]>([]);
 	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
@@ -101,7 +110,9 @@ const RoomPage = () => {
 
 	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
-		return username.length > 10 ? username.slice(0, 8) + "..." : username;
+		if (username) {
+			return username.length > 10 ? username.slice(0, 8) + "..." : username;
+		}
 	};
 
 	//Emoji picker
@@ -425,6 +436,41 @@ const RoomPage = () => {
 		};
 	}, [isPlaying]);
 
+	// const handleJoinLeave = async () => {
+	// 	console.log("Joining/Leaving room...", joined);
+	// 	setJoined((prevJoined) => !prevJoined);
+	// 	if (!joined) {
+	// 		// joinRoom();
+	// 		const token = await auth.getToken();
+	// 		currentRoom.leaveJoinRoom(token as string, roomID, false);
+	// 		setJoined(true);
+	// 		live.joinRoom(roomID, setJoined, setMessages, setMessage);
+	// 		//setJoined(true);
+	// 		setJoinedSongIndex(currentTrackIndex);
+	// 		setJoinedSecondsPlayed(secondsPlayed);
+	// 		console.log(
+	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+	// 		);
+	// 	} else {
+	// 		const token = await auth.getToken();
+	// 		currentRoom.leaveJoinRoom(token as string, roomID, true);
+	// 		// leaveRoom();
+	// 		setJoined(false);
+	// 		playbackManager.pause();
+	// 		//leaveRoom();
+	// 		live.leaveRoom();
+	// 		//setJoined(false);
+	// 		setJoinedSongIndex(null);
+	// 		setJoinedSecondsPlayed(null);
+	// 		//playbackManager.pause();
+	// 		const deviceID = await playback.getFirstDevice();
+	// 		if (deviceID && deviceID !== null) {
+	// 			playback.handlePlayback(deviceID, "pause");
+	// 		}
+	// 		setIsPlaying(false);
+	// 	}
+	// };
+
 	const playPauseTrack = useCallback(
 		async (index: number = currentTrackIndex, offset: number = 0) => {
 			/*
@@ -496,10 +542,18 @@ const RoomPage = () => {
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
 		setJoined(!joined);
+		const token = await auth.getToken();
+		console.log("Token fr fr:", token);
 		if (!joined) {
+			if (!token) {
+				throw new Error("No token found");
+			}
+			console.log("Joining room........", roomID, token);
+			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
 			await live.joinRoom(roomID, setJoined, setMessages, setMessage);
 			live.fetchRoomQueue(setQueue);
+			setJoined(true);
 			setJoinedSongIndex(currentTrackIndex);
 			setJoinedSecondsPlayed(secondsPlayed);
 			console.log(
@@ -507,6 +561,8 @@ const RoomPage = () => {
 			);
 		} else {
 			leaveRoom();
+			setJoined(false);
+			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			live.leaveRoom();
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
@@ -535,7 +591,8 @@ const RoomPage = () => {
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
-		live.sendMessage(message, setIsSending);
+		live.sendLiveChatMessage(message, setIsSending);
+		setMessage("");
 	};
 
 	return (
@@ -724,13 +781,13 @@ const RoomPage = () => {
 				{isChatExpanded && (
 					<>
 						<View style={styles.container}>
-							<ScrollView style={styles.scrollView}>
+							<ScrollView style={{ flex: 1, marginTop: 10 }}>
 								{messages.map((msg, index) => (
 									<MemoizedCommentWidget
 										key={index}
 										username={msg.message.sender.username}
 										message={msg.message.messageBody}
-										profilePictureUrl={msg.message.sender.profilePictureUrl}
+										profilePictureUrl={msg.message.sender.profile_picture_url}
 										me={msg.me}
 									/>
 								))}

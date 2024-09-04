@@ -1,0 +1,70 @@
+name: Lint Codebase
+on:
+  pull_request:
+    branches: [ main, develop ]
+    #types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [ main, develop ]
+permissions:
+  contents: read
+
+jobs:
+  start:
+    name: Initial Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Starting Job
+        run: |
+          echo "Beginning to lint ${{ github.repository }}"
+
+  lint_frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    needs: start
+    steps:
+      - name: Checkout "${{ github.repository }}"
+        uses: actions/checkout@v3
+      - name: Set up Node (stable)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.18
+
+      - name: Install dependencies
+        run:  |
+          cd frontend && npm ci
+
+      - name: Run Frontend Linting
+        run: |
+          cd frontend && npm run lint
+
+  lint_backend:
+    name: Lint Backend
+    runs-on: ubuntu-latest
+    needs: start
+    steps:
+      - name: Checkout "${{ github.repository }}"
+        uses: actions/checkout@v3
+      - name: Set up Node (stable)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.16
+
+      - name: Install dependencies
+        run:  |
+          cd backend && npm ci
+
+      - name: Run Backend Linting
+        run:  |
+          cd backend && npm run lint
+
+  end:
+    name: The end
+    runs-on: ubuntu-latest
+    needs: [lint_frontend, lint_backend]
+    steps:
+      - name: Ending
+        id: init
+        run: |
+          echo "Linting on ${{ github.repository }} has successfully completed"

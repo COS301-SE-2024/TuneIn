@@ -11,4 +11,5 @@ declare module "react-native-dotenv" {
 	export const JWT_SECRET_KEY: string;
 	export const AWS_S3_REGION: string;
 	export const AWS_S3_ENDPOINT: string;
+	export const USE_PRODUCTION_SERVER: string;
 }

@@ -4,6 +4,7 @@ import { Job } from "bull";
 import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
 import { SpotifyService } from "../spotify/spotify.service";
 import { Prisma } from "@prisma/client";
+// import * as PrismaTypes from "@prisma/client";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { PrismaService } from "../../prisma/prisma.service";
 
@@ -35,24 +36,25 @@ export class TasksProcessor {
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		const existingSongs: Spotify.SavedTrack[] = [];
-
 		for (const track of likedSongs) {
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await this.spotifyService.getAudioFeatures(tk.tokens, track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
-				artist: track.track.artists[0].name,
+				artists: track.track.artists.map((artist) => artist.name),
 				genre:
 					track.track.album.genres && track.track.album.genres.length > 0
 						? track.track.album.genres[0]
 						: "Unknown",
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
+				spotify_id: track.track.id,
 			};
 
 			const search = await this.prisma.song.findFirst({
 				where: {
-					name: song.name,
-					duration: song.duration,
-					artist: song.artist,
-					genre: song.genre,
+					spotify_id: song.spotify_id,
 				},
 			});
 
@@ -64,12 +66,12 @@ export class TasksProcessor {
 		}
 
 		const ids: string[] = [];
-		for (const track of existingSongs) {
-			const song = await this.spotifyService.findSavedSongInDB(track);
-			if (song) {
-				dbLikedSongs.push(song);
-			}
-		}
+		// for (const track of existingSongs) {
+		// 	const song: PrismaTypes.song | null = await this.spotifyService.findSavedSongInDB(track);
+		// 	if (song) {
+		// 		dbLikedSongs.push(song);
+		// 	}
+		// }
 
 		const newSongs = await this.prisma.song.createManyAndReturn({
 			data: dbLikedSongs,

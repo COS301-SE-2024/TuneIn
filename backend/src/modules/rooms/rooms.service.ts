@@ -10,6 +10,13 @@ import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import {
+	subHours,
+	addHours,
+	isBefore,
+	startOfHour,
+	startOfDay,
+} from "date-fns";
+import {
 	RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
 	RoomAnalyticsInteractionsDto,
@@ -17,8 +24,22 @@ import {
 	RoomAnalyticsSongsDto,
 	RoomAnalyticsContributorsDto,
 	RoomAnalyticsDto,
+	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
-import { EmojiReactionDto } from "src/live/dto/emojireaction.dto";
+import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString } from "class-validator";
+
+export class UserActionDto {
+	@ApiProperty({
+		description: "The user ID of the user that the action was performed on",
+		type: "string",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		format: "uuid",
+	})
+	@IsString()
+	userID: string;
+}
 
 @Injectable()
 export class RoomsService {
@@ -30,7 +51,7 @@ export class RoomsService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async getNewRooms(limit: number = -1): Promise<RoomDto[]> {
+	async getNewRooms(limit = -1): Promise<RoomDto[]> {
 		const r: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			orderBy: {
 				date_created: "desc",
@@ -70,15 +91,7 @@ export class RoomsService {
 	}
 
 	async getRoomInfo(roomID: string): Promise<RoomDto> {
-		// TODO: Implement logic to get room info
-		// an an example to generate a RoomDto
-		/*
-		const roomID = "xxxx"
-		const room = await this.dtogen.generateRoomDto(roomID);
-		if (room) {
-			return room;
-		}
-		*/
+		console.log("Getting room info for room", roomID);
 		try {
 			const room = await this.prisma.room.findFirst({
 				where: {
@@ -95,54 +108,80 @@ export class RoomsService {
 			console.error("Error getting room info:", error);
 			return new RoomDto();
 		}
-		// const room = await this.prisma.room.findFirst({
-		// 	where: {
-		// 		room_id: roomID
-		// 	}
-		// });
-		// if (!room) {
-		// 	return new RoomDto();
-		// }
-		// // filter out null values
-		// const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-		// return roomDto? roomDto : new RoomDto();
 	}
 
 	async updateRoomInfo(
+		userID: string,
 		roomID: string,
 		updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		// TODO: Implement logic to update room info
-		const data = {
-			name: updateRoomDto.room_name!,
-			description: updateRoomDto.description!,
-			playlist_photo: updateRoomDto.room_image!,
-			explicit: updateRoomDto.has_explicit_content!,
-			nsfw: updateRoomDto.has_explicit_content!,
-			room_language: updateRoomDto.language!,
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const r: PrismaTypes.room | null = await this.prisma.room.findFirst({
+			where: {
+				room_id: roomID,
+			},
+		});
+
+		if (!r) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (r.room_creator !== userID) {
+			throw new HttpException(
+				"User is not the owner of the room",
+				HttpStatus.FORBIDDEN,
+			);
+		}
+
+		const updatedRoom: Prisma.roomUpdateInput = {
+			room_id: roomID,
 		};
 
-		Object.keys(data).forEach(
-			(key) =>
-				data[key as keyof typeof data] === undefined &&
-				delete data[key as keyof typeof data],
-		);
+		if (updateRoomDto.room_name) {
+			updatedRoom.name = updateRoomDto.room_name;
+		}
 
-		console.log("Updating room", roomID, "with data", data);
+		if (updateRoomDto.description) {
+			updatedRoom.description = updateRoomDto.description;
+		}
+
+		if (updateRoomDto.room_image) {
+			updatedRoom.playlist_photo = updateRoomDto.room_image;
+		}
+
+		if (updateRoomDto.has_explicit_content) {
+			updatedRoom.explicit = updateRoomDto.has_explicit_content;
+			updatedRoom.nsfw = updateRoomDto.has_explicit_content;
+		}
+
+		if (updateRoomDto.language) {
+			updatedRoom.room_language = updateRoomDto.language;
+		}
+
 		try {
-			const room = await this.prisma.room.update({
+			const room: PrismaTypes.room | null = await this.prisma.room.update({
 				where: {
 					room_id: roomID,
 				},
-				data: data,
+				data: updatedRoom,
 			});
-			const updatedRoom = room
-				? await this.dtogen.generateRoomDtoFromRoom(room)
-				: new RoomDto();
-			return updatedRoom ? updatedRoom : new RoomDto();
+
+			if (!room) {
+				throw new Error("Failed to update room");
+			}
+
+			const updatedRoomDto: RoomDto | null =
+				await this.dtogen.generateRoomDtoFromRoom(room);
+			if (!updatedRoomDto) {
+				throw new Error("Failed to generate updated room DTO");
+			}
+			return updatedRoomDto;
 		} catch (error) {
 			console.error("Error updating room info:", error);
-			return new RoomDto();
+			throw error;
 		}
 	}
 
@@ -166,13 +205,12 @@ export class RoomsService {
 		}
 	}
 
-	async joinRoom(room_id: string, user_id: string): Promise<boolean> {
-		console.log("user", user_id, "joining room", room_id);
+	async joinRoom(_room_id: string, user_id: string): Promise<boolean> {
+		console.log("user", user_id, "joining room", _room_id);
 		try {
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
 				where: {
-					room_id: room_id,
 					user_id: user_id,
 				},
 			});
@@ -183,14 +221,21 @@ export class RoomsService {
 			// Add the user to the room
 			await this.prisma.participate.create({
 				data: {
-					room_id: room_id,
+					room_id: _room_id,
 					user_id: user_id,
 				},
 			});
-
+			// add user to the user_activity table
+			await this.prisma.user_activity.create({
+				data: {
+					room_id: _room_id,
+					user_id: user_id,
+					room_join_time: new Date(),
+				},
+			});
 			return true;
 		} catch (error) {
-			console.error("Error joining room:");
+			console.error("Error joining room:", error);
 			return false;
 		}
 	}
@@ -218,10 +263,28 @@ export class RoomsService {
 					participate_id: room.participate_id,
 				},
 			});
-
+			const user = await this.prisma.user_activity.findFirst({
+				where: {
+					room_id: room_id,
+					user_id: user_id,
+					room_leave_time: null,
+				},
+			});
+			if (user === null) {
+				return false;
+			}
+			// if the user has been successfully remove from the room, then update the room_leave_time to the user_activity table
+			await this.prisma.user_activity.update({
+				where: {
+					activity_id: user.activity_id,
+				},
+				data: {
+					room_leave_time: new Date(),
+				},
+			});
 			return true;
 		} catch (error) {
-			console.error("Error leaving room:");
+			console.error("Error leaving room:", error);
 			return false;
 		}
 	}
@@ -234,10 +297,10 @@ export class RoomsService {
 			const _where: object = getFollowers
 				? {
 						follower: user_id,
-					}
+				  }
 				: {
 						followee: user_id,
-					};
+				  };
 			const followers: number = await this.prisma.follows.count({
 				where: _where,
 			});
@@ -293,10 +356,27 @@ export class RoomsService {
 		}
 	}
 
-	getRoomQueue(roomID: string): SongInfoDto[] {
+	async getRoomQueue(roomID: string): Promise<SongInfoDto[]> {
 		// TODO: Implement logic to get room queue
-		console.log(roomID);
-		return [];
+		const songInfoDto: SongInfoDto = new SongInfoDto();
+		// get queue from db
+		const queue = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+			include: {
+				song: true,
+			},
+		});
+		const songInfoDtos: SongInfoDto[] = [];
+		for (const song of queue) {
+			songInfoDto.title = song.song.name;
+			songInfoDto.cover = song.song.artwork_url || "";
+			songInfoDto.artists = song.song.artists;
+			songInfoDto.start_time = song.start_time;
+			songInfoDtos.push(songInfoDto);
+		}
+		return songInfoDtos;
 	}
 
 	getRoomQueueDUMBVERSION(roomID: string): string {
@@ -304,7 +384,7 @@ export class RoomsService {
 		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
-	clearRoomQueue(roomID: string): boolean {
+	clearRoomQueue(userID: string, roomID: string): boolean {
 		// TODO: Implement logic to clear room queue
 		console.log(roomID);
 		return false;
@@ -406,8 +486,9 @@ export class RoomsService {
 	}
 
 	async getLiveChatHistoryDto(roomID: string): Promise<LiveChatMessageDto[]> {
-		const messages: PrismaTypes.message[] =
-			await this.getLiveChatHistory(roomID);
+		const messages: PrismaTypes.message[] = await this.getLiveChatHistory(
+			roomID,
+		);
 		const result: LiveChatMessageDto[] =
 			await this.dtogen.generateMultipleLiveChatMessageDto(messages);
 		return result;
@@ -576,97 +657,6 @@ export class RoomsService {
 		}
 	}
 
-	async getRoomAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsDto();
-	}
-
-	async getRoomQueueAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsQueueDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsQueueDto();
-	}
-
-	async getRoomParticipationAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsParticipationDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsParticipationDto();
-	}
-
-	async getRoomInteractionAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsInteractionsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsInteractionsDto();
-	}
-
-	async getRoomVotesAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsVotesDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsVotesDto();
-	}
-
-	async getRoomSongsAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsSongsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsSongsDto();
-	}
-
-	async getRoomContributorsAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsContributorsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsContributorsDto();
-	}
-
 	async saveReaction(
 		roomID: string,
 		emojiReactionDto: EmojiReactionDto,
@@ -693,5 +683,283 @@ export class RoomsService {
 				"Failed to save reaction. Database returned null after insert.",
 			);
 		}
+	}
+
+	// define a function that will archive all the songs in a room
+	async archiveRoomSongs(
+		roomID: string,
+		userID: string,
+		archiveInfo: any,
+	): Promise<void> {
+		// get all the songs in the room from the queue table
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (!(await this.dbUtils.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const songs: any = await this.prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		// if there are no songs in the room, return false
+		if (!songs || songs === null) {
+			throw new HttpException("No songs in the room", HttpStatus.NOT_FOUND);
+		}
+		// create a playlist as an array of song ids
+		const playlist: string[] = [];
+		for (const song of songs) {
+			playlist.push(song.song_id);
+		}
+
+		// add the songs to the playlist table
+		const result = await this.prisma.playlist.create({
+			data: {
+				name: archiveInfo.name,
+				description: archiveInfo.description,
+				user_id: userID,
+				playlist: playlist,
+			},
+		});
+
+		// if the playlist is created, return true
+		if (result) {
+			throw new HttpException("Playlist created", HttpStatus.OK);
+		}
+		throw new HttpException(
+			"Failed to create playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
+	}
+
+	async getArchivedSongs(userID: string): Promise<any> {
+		// get all the playlists created by the user
+		console.log("User ID: ", userID, " is getting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlists: any = await this.prisma.playlist.findMany({
+			where: {
+				user_id: userID,
+			},
+		});
+		// if there are no playlists, return false
+		console.log("Playlists: ", playlists);
+		if (!playlists || playlists === null) {
+			throw new HttpException("No playlists found", HttpStatus.NOT_FOUND);
+		}
+		return playlists;
+	}
+
+	async deleteArchivedSongs(userID: string, playlistID: string): Promise<void> {
+		// delete the playlist created by the user
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		console.log("User ID: ", userID, " is deleting archived songs");
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		const playlist: any = await this.prisma.playlist.findFirst({
+			where: {
+				user_id: userID,
+				playlist_id: playlistID,
+			},
+		});
+		// if the playlist does not exist, return false
+		if (!playlist || playlist === null) {
+			throw new HttpException("Playlist not found", HttpStatus.NOT_FOUND);
+		}
+		// delete the playlist
+		const result = await this.prisma.playlist.delete({
+			where: {
+				playlist_id: playlistID,
+			},
+		});
+		// if the playlist is deleted, return true
+		if (result) {
+			throw new HttpException("Playlist deleted", HttpStatus.OK);
+		}
+		throw new HttpException(
+			"Failed to delete playlist",
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
+	}
+
+	async getKickedUsers(roomID: string): Promise<UserDto[]> {
+		// Implement the logic to get the kicked users for the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		return [];
+	}
+
+	async kickUser(
+		roomID: string,
+		initiatorID: string,
+		kickedUserID: string,
+	): Promise<void> {
+		// Implement the logic to kick a user from the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not have permission to kick
+			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		}
+
+		if (true) {
+			// user is not in the room
+			throw new HttpException(
+				"User is not in the room",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+
+		if (true) {
+			// user is trying to kick themselves
+			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async undoKick(
+		roomID: string,
+		initiatorID: string,
+		kickedUserID: string,
+	): Promise<void> {
+		// Implement the logic to undo the kick of a participant in the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not have permission to kick
+			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		}
+
+		if (true) {
+			// user is trying to undo their own kick
+			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async getBannedUsers(roomID: string): Promise<UserDto[]> {
+		// Implement the logic to get the banned users for the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		return [];
+	}
+
+	async banUser(
+		roomID: string,
+		initiatorID: string,
+		bannedUserID: string,
+	): Promise<void> {
+		// Implement the logic to ban a user from the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not have permission to ban
+			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		}
+
+		if (true) {
+			// user is trying to ban themselves
+			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async undoBan(
+		roomID: string,
+		initiatorID: string,
+		bannedUserID: string,
+	): Promise<void> {
+		// Implement the logic to undo the ban of a participant in the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		if (true) {
+			// user does not have permission to ban
+			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		}
+
+		if (true) {
+			// user is trying to undo their own ban
+			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	async getCalendarFile(roomID: string): Promise<File> {
+		// Implement the logic to get the calendar file for the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		if (true) {
+			// room does not have any events
+			throw new HttpException(
+				"Room does not have any events",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		const bytes: BlobPart[] = [];
+		return new File(bytes, "calendar.ics");
+	}
+
+	async splitRoom(roomID: string): Promise<RoomDto> {
+		// Implement the logic to split the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		//split the room
+		//set the children ids to RoomDto.children
+		//return RoomDto
+	}
+
+	async canSplitRoom(roomID: string): Promise<string[]> {
+		// Implement the logic to check if the room can be split
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		const childGenres: string[] = [];
+		return childGenres;
 	}
 }

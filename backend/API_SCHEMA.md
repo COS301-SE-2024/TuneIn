@@ -8,6 +8,15 @@ response: return UserDto
 input: UserDto
 output: updated UserDto
 
+### `/users/stats`
+#### GET: gets user's listening stats
+no input
+response: return UserListeningStatsDto
+
+### `/users/dms`
+#### GET: gets the last DMs sent to or received from another user
+response: return DirectMessageDto[]
+
 ### `/users/{username}`
 #### GET: gets profile info for given username✅
 no input
@@ -58,6 +67,11 @@ response: code (2xx for success, 4xx for error)
 no input
 response: code (2xx for success, 4xx for error)
 
+### `/users/{username}/chat`
+#### GET: gets the chat history between self and given user✅
+no input
+response: DirectMessageDto[]
+
 ### `/users/rooms`
 related to a user's own rooms
 #### GET: get a user's rooms✅
@@ -100,6 +114,11 @@ response: an array of UserDto
 no input
 response: an array of UserDto
 
+### `/users/blocked`
+#### GET: get list of people user has blocked
+no input
+response: an array of UserDto
+
 ## Rooms
 ### `/rooms`
 
@@ -131,19 +150,47 @@ response: (2xx for success, 4xx for error)
 no input
 response: (2xx for success, 4xx for error)
 
-### `/rooms/{room_id}/kick`
+### `/rooms/{room_id}/kicked`
+#### GET: get list of kicked users
+response: an array of UserDto
 #### POST: kick someone out of a room
-q={username}
+```
+{
+	userID: string;
+}
+```
+response: (2xx for success, 4xx for error)
+#### DELETE: undo participant kick
+body: 
+```
+{
+	userID: string;
+}
+```
 response: (2xx for success, 4xx for error)
 
-### `/rooms/{room_id}/ban`
-#### POST: ban someone from a room
-q={username}
+### `/rooms/{room_id}/banned`
+#### GET: get list of banned users
+response: an array of UserDto
+#### POST: perma ban someone from a room
+```
+{
+	userID: string;
+}
+```
+response: (2xx for success, 4xx for error)
+#### DELETE: undo participant ban
+body: 
+```
+{
+	userID: string;
+}
+```
 response: (2xx for success, 4xx for error)
 
 ### `/rooms/{room_id}/save`
 #### POST: save room as a playlist
-response: (2xx for success, 4xx for error)
+response: `playlistID: string`
 
 ### `/rooms/{room_id}/users`
 #### GET: returns people currently (and previously in room)
@@ -151,17 +198,15 @@ query params
 - active: boolean
 response: array of UserDto
 
-### `/rooms/{room_id}/kicked`
-#### GET: returns people kicked from room
-query params
-- active: boolean
-response: array of UserDto
+### `/rooms/{room_id}/schedule`
+#### GET: returns a .ics file for the scheduled room
+response: a .ics file or 4xx for room that is not scheduled
 
-### `/rooms/{room_id}/banned`
-#### GET: returns people banned from room
-query params
-- active: boolean
-response: array of UserDto
+### `/rooms/{room_id}/split`
+#### GET: evaluate if a room can be split
+response: an array of the possible genres (if possible) or 4xx if not possible
+#### POST: returns a RoomDto with info about it's split children
+response: the RoomDto
 
 ### `/rooms/{room_id}/songs`
 #### GET: returns the queue

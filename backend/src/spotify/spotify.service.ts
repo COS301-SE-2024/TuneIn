@@ -13,7 +13,7 @@ import { PrismaService } from "./../../prisma/prisma.service";
 import { sleep } from "../common/utils";
 import { MurLockService } from "murlock";
 
-const NUMBER_OF_RETRIES: number = 3;
+const NUMBER_OF_RETRIES = 3;
 
 @Injectable()
 export class SpotifyService {
@@ -57,6 +57,15 @@ export class SpotifyService {
 		const api = SpotifyApi.withAccessToken(this.clientId, token);
 		const user = await api.currentUser.profile();
 		return user;
+	}
+
+	async getAudioFeatures(
+		token: SpotifyTokenResponse,
+		songID: string,
+	): Promise<Spotify.AudioFeatures> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const audioFeatures = await api?.tracks?.audioFeatures(songID);
+		return audioFeatures;
 	}
 
 	async getUserPlaylists(
@@ -145,8 +154,9 @@ export class SpotifyService {
 
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 
-		const playlists: Spotify.SimplifiedPlaylist[] =
-			await this.getUserPlaylists(tk);
+		const playlists: Spotify.SimplifiedPlaylist[] = await this.getUserPlaylists(
+			tk,
+		);
 		const likedSongs: Spotify.SavedTrack[] = await this.getAllLikedSongs(tk);
 
 		const foundSongs: Spotify.PlaylistedTrack[] = [];
@@ -209,13 +219,17 @@ export class SpotifyService {
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		for (const track of newLikedSongs) {
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await api.tracks.audioFeatures(track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
-				artist: track.track.artists[0].name,
+				artists: track.track.artists.map((artist) => artist.name),
 				genres: track.track.album.genres ? track.track.album.genres : [],
 				artwork_url: this.getLargestImage(track.track.album.images).url,
 				spotify_id: track.track.id,
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
 			};
 			dbLikedSongs.push(song);
 		}

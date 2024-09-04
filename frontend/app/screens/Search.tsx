@@ -375,7 +375,7 @@ const Search: React.FC = () => {
 								},
 							},
 						);
-						// console.log("Search: " + JSON.stringify(response));
+						// console.log("Search: " + JSON.stringify(response.data.followers));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.id,
 							type: "user",
@@ -385,6 +385,7 @@ const Search: React.FC = () => {
 								profile_picture_url: item.profile_picture_url,
 								profile_name: item.profile_name,
 								username: item.username,
+								followers: item.followers.data,
 							},
 						}));
 						setResults(results);

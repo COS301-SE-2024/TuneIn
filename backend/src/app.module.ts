@@ -22,6 +22,9 @@ import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
 import { MurLockModule } from "murlock";
+import { MyLogger } from "./logger/logger.service";
+import { RecommendationsModule } from "./recommendations/recommendations.module";
+
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true }),
@@ -53,8 +56,9 @@ import { MurLockModule } from "murlock";
 			logLevel: "log",
 			ignoreUnlockFail: false,
 		}),
+		RecommendationsModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, MyLogger],
 })
 export class AppModule {}

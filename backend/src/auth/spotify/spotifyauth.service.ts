@@ -8,12 +8,13 @@ import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
-import { IsNumber, IsObject, IsString } from "class-validator";
+import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
+import { Type } from "class-transformer";
 
 export class SpotifyTokenResponse {
 	@ApiProperty()
@@ -67,6 +68,8 @@ export class SpotifyCallbackResponse {
 
 	@ApiProperty()
 	@IsObject()
+	@Type(() => SpotifyTokenResponse)
+	@ValidateNested()
 	spotifyTokens: SpotifyTokenResponse;
 }
 
@@ -122,7 +125,7 @@ export class SpotifyAuthService {
 		const state = {
 			"unique-pre-padding": generateRandom(10),
 			"expo-redirect": redirectURI,
-			"ip-address": utils.LOCALHOST,
+			"ip-address": utils.API_BASE_NO_PORT,
 			"redirect-used": SPOTIFY_REDIRECT_TARGET,
 			"unique-post-padding": generateRandom(10),
 		};
