@@ -1,5 +1,11 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsBoolean, IsDateString, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+	IsString,
+	IsBoolean,
+	IsDateString,
+	IsOptional,
+	IsDate,
+} from "class-validator";
 
 export class CreateRoomDto {
 	@ApiProperty()
@@ -10,51 +16,55 @@ export class CreateRoomDto {
 	@IsString()
 	description: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_temporary?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_private?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	is_scheduled?: boolean;
 
-	@ApiProperty()
-	@IsDateString()
+	@ApiPropertyOptional()
+	@IsDate()
 	@IsOptional()
 	start_date?: Date;
 
-	@ApiProperty()
-	@IsDateString()
+	@ApiPropertyOptional()
+	@IsDate()
 	@IsOptional()
 	end_date?: Date;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	@IsOptional()
 	language?: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	has_explicit_content?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsBoolean()
 	@IsOptional()
 	has_nsfw_content?: boolean;
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	@IsOptional()
 	room_image?: string;
 
-	@ApiProperty({ type: [String] })
+	@ApiProperty({
+		description: "The tags that describe the room",
+		type: String,
+		isArray: true,
+	})
 	tags: string[];
 }

@@ -28,7 +28,7 @@ import { EmojiReactionDto } from "./dto/emojireaction.dto";
 	namespace: "/live",
 	transports: ["websocket"],
 	cors: {
-		origin: "http://localhost:3000",
+		origin: "*",
 		methods: ["GET", "POST"],
 	},
 })
@@ -54,14 +54,18 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async handleDisconnect(client: Socket) {
-		this.handOverSocketServer(this.server);
-		console.log("Client (id: " + client.id + ") disconnected");
-		if (this.roomUsers.getConnectedUser(client.id) !== null) {
-			this.roomUsers.leaveRoom(client.id);
+		try {
+			this.handOverSocketServer(this.server);
+			console.log("Client (id: " + client.id + ") disconnected");
+			if (this.roomUsers.getConnectedUser(client.id) !== null) {
+				this.roomUsers.leaveRoom(client.id);
+			}
+			this.roomUsers.removeConnectedUser(client.id);
+			this.dmUsers.disconnectChat(client.id);
+			this.dmUsers.removeConnectedUser(client.id);
+		} catch (error) {
+			console.error(error);
 		}
-		this.roomUsers.removeConnectedUser(client.id);
-		this.dmUsers.disconnectChat(client.id);
-		this.dmUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
