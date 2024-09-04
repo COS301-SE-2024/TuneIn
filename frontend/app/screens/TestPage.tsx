@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import SplittingRoomPopUp from "../components/rooms/SplittingRoomPopUp"; // Adjust the path to where SplittingPopUp is located
 
 // Example room and queue data
 const testRooms = [
@@ -82,6 +83,7 @@ const testQueues = [
 ];
 
 const TestPage: React.FC = () => {
+	const [isPopupVisible, setPopupVisible] = useState(false);
 	const router = useRouter();
 
 	const navigateToSplittingRoom = () => {
@@ -94,10 +96,37 @@ const TestPage: React.FC = () => {
 		});
 	};
 
+	const handleOpenPopup = () => {
+		setPopupVisible(true);
+	};
+
+	const handleClosePopup = () => {
+		setPopupVisible(false);
+	};
+
+	const handleUserDecision = async (choice: true | false) => {
+		if (choice) {
+			console.log("Branching rooms created");
+			// Here you can perform any additional actions, like calling an API to split rooms
+		} else {
+			console.log("User chose not to create branching rooms");
+			// Perform any necessary clean-up actions or state updates here
+		}
+		setPopupVisible(false);
+	};
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Test Page</Text>
 			<Button title="Go to SplittingRoom" onPress={navigateToSplittingRoom} />
+			{/* Button to open the popup */}
+			<Button title="Test Popup" onPress={handleOpenPopup} />
+			{/* Popup component */}
+			<SplittingRoomPopUp
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+				onConfirm={handleUserDecision} // Pass the updated handling function
+			/>
 		</View>
 	);
 };
