@@ -32,6 +32,10 @@ export class SongInfoDto {
 
 	@ApiProperty()
 	@IsString()
+	duration: number;
+
+	@ApiProperty()
+	@IsString()
 	spotify_id: string;
 
 	@ApiProperty()

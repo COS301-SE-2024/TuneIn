@@ -431,6 +431,16 @@ const ProfileScreen: React.FC = () => {
 		);
 	};
 
+	const createTimeString = (seconds: number) => {
+		// Calculate minutes and seconds
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+
+		// Format the result as "minutes:seconds"
+		const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+		return timeString;
+	};
+
 	const renderItem = ({ item }: { item: Room }) => (
 		<RoomCardWidget roomCard={item} />
 	);
@@ -657,12 +667,12 @@ const ProfileScreen: React.FC = () => {
 								</TouchableOpacity>
 							)}
 						</View>
-						{primaryProfileData.fav_songs.data.slice(0, 2).map((song) => (
+						{primaryProfileData.fav_songs.data.slice(0, 2).map((song: any) => (
 							<FavoriteSongs
-								key={song.id}
+								key={song.spotify_id}
 								songTitle={song.title}
 								artist={song.artists}
-								duration={song.duration}
+								duration={song.duration ? createTimeString(song.duration) : null}
 								albumArt={song.cover}
 								onPress={() => {}}
 							/>
