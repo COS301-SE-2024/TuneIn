@@ -34,13 +34,18 @@ const Search: React.FC = () => {
 	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
-	const [itemsPerPage, setItemsPerPage] = useState(5);
 	const flatListRef = useRef<FlatList<any>>(null);
 
-	if (params.type === "song") {
-		setItemsPerPage(20);
-	}
+	const itemsPerPage = params.type === "song" ? 20 : 10;
+	const createTimeString = (seconds: number) => {
+		// Calculate minutes and seconds
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
 
+		// Format the result as "minutes:seconds"
+		const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+		return timeString;
+	};
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
@@ -83,7 +88,7 @@ const Search: React.FC = () => {
 					key={item.id}
 					songTitle={item.title}
 					artist={item.artists}
-					duration={item.duration}
+					duration={item.duration ? createTimeString(item.duration) : null}
 					albumArt={item.cover}
 					onPress={() => {}}
 				/>
