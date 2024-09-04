@@ -37,13 +37,13 @@ jest.mock("expo-router", () => {
 });
 
 const mockRoomData = {
-	user_id: "012c4238-e071-7031-cb6c-30881378722f",
-	room_id: "8f928675-5c95-497a-b8a7-917064cdb462",
-	participate_id: "9e1c0ece-ceb9-4dbc-8620-13fa146d5520",
+	user_id: "id",
+	room_id: "id",
+	participate_id: "id",
 	room: {
 		creator: {
 			profile_name: "Jaden Moodley",
-			userID: "012c4238-e071-7031-cb6c-30881378722f",
+			userID: "id",
 			username: "Jaden",
 			profile_picture_url:
 				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
@@ -161,9 +161,10 @@ describe("ProfileScreen", () => {
 
 		const mockPlayerContextValue = {
 			userData: {
-				profile_picture_url: "https://example.com/profile-pic.jpg",
 				profile_name: "John Doe",
 				username: "johndoe",
+				profile_picture_url:
+					"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
 				followers: { count: 10 },
 				following: { count: 20 },
 				bio: "Mock bio",
@@ -172,7 +173,18 @@ describe("ProfileScreen", () => {
 					data: [{ type: "example", links: "https://example.com" }],
 				},
 				fav_genres: { count: 1, data: [] },
-				fav_songs: { data: [] },
+				fav_songs: {
+					count: 1,
+					data: [
+						{
+							title: "Scherzo No. 3 in C-Sharp Minor, Op. 39",
+							artists: ["Frédéric Chopin", "Arthur Rubinstein"],
+							cover: null,
+							spotify_id: "5AnNbtnz54r94cd2alxg5I",
+							start_time: null,
+						},
+					],
+				},
 				fav_rooms: { count: 0, data: [] },
 				recent_rooms: { count: 0, data: [] },
 			},
@@ -192,6 +204,15 @@ describe("ProfileScreen", () => {
 		});
 	});
 
+	it("throws player context error", async () => {
+		const renderProfileScreen = () => render(<ProfileScreen />);
+
+		// Check that the error is thrown
+		expect(renderProfileScreen).toThrow(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	});
+
 	it("fetches profile data and renders profile information", async () => {
 		// Mock AsyncStorage.getItem to return a token
 		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
@@ -206,7 +227,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -243,18 +264,296 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
 			});
 		});
 
-		console.log(
-			"1st axios.get was called:",
-			(axios.get as jest.Mock).mock.calls.length,
-			"times",
+		// console.log(
+		// 	"1st axios.get was called:",
+		// 	(axios.get as jest.Mock).mock.calls.length,
+		// 	"times",
+		// );
+	});
+
+	it("fetches profile data and renders songs", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_name: "John Doe",
+			username: "johndoe",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			followers: { count: 10 },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: { other: ["https://example.com"] },
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: {
+				count: 3,
+				data: [
+					{
+						title: "Scherzo No. 3 in C-Sharp Minor, Op. 39",
+						artists: ["Frédéric Chopin", "Arthur Rubinstein"],
+						cover: null,
+						duration: 200,
+						spotify_id: "5AnNbtnz54r94cd2alxg5I",
+						start_time: null,
+					},
+				],
+			},
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
 		);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("More")).toBeTruthy();
+				expect(getByText("3:20")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+	});
+
+	it("fetches profile data and renders fav_rooms", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_name: "John Doe",
+			username: "johndoe",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			followers: { count: 10 },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: { other: ["https://example.com"] },
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: {
+				count: 0,
+				data: [],
+			},
+			fav_rooms: {
+				count: 11,
+				data: [
+					{
+						creator: "id",
+						roomID: "b9b4aebd-36cd-40bb-b329-f394fdefa0f5",
+						participant_count: 0,
+						room_name: "More M's",
+						description: "We only talk about those M's",
+						is_temporary: false,
+						is_private: false,
+						is_scheduled: false,
+						start_date: "2024-09-02T16:35:22.185Z",
+						end_date: "2024-09-02T16:35:22.185Z",
+						language: "English",
+						has_explicit_content: false,
+						has_nsfw_content: true,
+						room_image:
+							"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T04%3A46%3A34.382Z-more-m%27s.jpeg",
+					},
+					{
+						creator: "id",
+						roomID: "b9b4aebd-36cd-40bb-b329-f394fdefa0f5",
+						participant_count: 0,
+						room_name: "More M's",
+						description: "We only talk about those M's",
+						is_temporary: false,
+						is_private: false,
+						is_scheduled: false,
+						start_date: "2024-09-02T16:35:22.185Z",
+						end_date: "2024-09-02T16:35:22.185Z",
+						language: "English",
+						has_explicit_content: false,
+						has_nsfw_content: true,
+						room_image:
+							"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T04%3A46%3A34.382Z-more-m%27s.jpeg",
+					},
+				],
+			},
+			recent_rooms: { count: 0, data: [] },
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("More")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
+				expect(getByTestId("fav-rooms")).toBeTruthy();
+				// expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
+	});
+
+	it("fetches profile data and renders recent_rooms", async () => {
+		// Mock AsyncStorage.getItem to return a token
+		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
+
+		// Mock axios.get to return mock profile data
+		const mockProfileData = {
+			profile_name: "John Doe",
+			username: "johndoe",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			followers: { count: 10 },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: { other: ["https://example.com"] },
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: {
+				count: 0,
+				data: [],
+			},
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: {
+				count: 11,
+				data: [
+					{
+						creator: "id",
+						roomID: "b9b4aebd-36cd-40bb-b329-f394fdefa0f5",
+						participant_count: 0,
+						room_name: "More M's",
+						description: "We only talk about those M's",
+						is_temporary: false,
+						is_private: false,
+						is_scheduled: false,
+						start_date: "2024-09-02T16:35:22.185Z",
+						end_date: "2024-09-02T16:35:22.185Z",
+						language: "English",
+						has_explicit_content: false,
+						has_nsfw_content: true,
+						room_image:
+							"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T04%3A46%3A34.382Z-more-m%27s.jpeg",
+					},
+					{
+						creator: "id",
+						roomID: "b9b4aebd-36cd-40bb-b329-f394fdefa0f5",
+						participant_count: 0,
+						room_name: "More M's",
+						description: "We only talk about those M's",
+						is_temporary: false,
+						is_private: false,
+						is_scheduled: false,
+						start_date: "2024-09-02T16:35:22.185Z",
+						end_date: "2024-09-02T16:35:22.185Z",
+						language: "English",
+						has_explicit_content: false,
+						has_nsfw_content: true,
+						room_image:
+							"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T04%3A46%3A34.382Z-more-m%27s.jpeg",
+					},
+				],
+			},
+		};
+
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(useLocalSearchParams as jest.Mock).mockReturnValue({});
+
+		// Render the ProfileScreen component
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<ProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+		// Wait for async operations to complete
+		await act(async () => {
+			await waitFor(() => {
+				// Assert profile information is rendered
+				expect(getByText("John Doe")).toBeTruthy();
+				expect(getByText("@johndoe")).toBeTruthy();
+				expect(getByText("Followers")).toBeTruthy();
+				expect(getByText("Following")).toBeTruthy();
+				expect(getByText("Mock bio")).toBeTruthy();
+				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
+				expect(getByText("More")).toBeTruthy();
+
+				expect(getByTestId("profile-pic")).toBeTruthy();
+				expect(getByTestId("bio")).toBeTruthy();
+				expect(getByTestId("genres")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-rooms")).toBeTruthy();
+				expect(getByTestId("recent-rooms")).toBeTruthy();
+				// expect(getByTestId("links")).toBeFalsy();
+			});
+		});
 	});
 
 	it("fetches profile data and renders profile information if user data is null", async () => {
@@ -271,7 +570,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -313,7 +612,7 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
@@ -335,7 +634,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -352,7 +651,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -403,7 +702,7 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
@@ -428,7 +727,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -445,7 +744,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -489,7 +788,7 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
@@ -511,7 +810,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -528,7 +827,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -572,7 +871,7 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
@@ -594,7 +893,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -611,7 +910,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ type: "example", links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: { data: [] },
@@ -655,7 +954,7 @@ describe("ProfileScreen", () => {
 				expect(getByTestId("profile-pic")).toBeTruthy();
 				expect(getByTestId("bio")).toBeTruthy();
 				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("fav-songs")).toBeTruthy();
+				// expect(getByTestId("fav-songs")).toBeTruthy();
 				// expect(getByTestId("fav-rooms")).toBeTruthy();
 				// expect(getByTestId("recent-rooms")).toBeTruthy();
 				// expect(getByTestId("links")).toBeFalsy();
@@ -833,11 +1132,13 @@ describe("ProfileScreen", () => {
 				bio: "Mock bio",
 				links: {
 					count: 3,
-					data: [
-						{ type: "example", links: "https://example.com/link1" },
-						{ type: "example", links: "https://example.com/link2" },
-						{ type: "example", links: "https://example.com/link3" },
-					],
+					data: {
+						other: ["https://example.com"],
+						instagram: [
+							"http://instagram.com/test",
+							"https://instagram.com/testing",
+						],
+					},
 				},
 				fav_genres: { data: [] },
 				fav_songs: { data: [] },
@@ -866,7 +1167,7 @@ describe("ProfileScreen", () => {
 				await waitFor(() => {
 					// Assert profile information is rendered
 					const firstLinkText = getByText(
-						"https://example.com/link1 and 2 more links",
+						"https://example.com and 2 more links",
 					);
 					expect(firstLinkText).toBeTruthy();
 				});
@@ -887,7 +1188,7 @@ describe("ProfileScreen", () => {
 				bio: "Mock bio",
 				links: {
 					count: 1,
-					data: [{ type: "example", links: "https://example.com/single-link" }],
+					data: { other: ["https://example.com"] },
 				},
 				fav_genres: { data: [] },
 				fav_songs: { data: [] },
@@ -916,7 +1217,7 @@ describe("ProfileScreen", () => {
 			// Wait for async operations to complete
 			await act(async () => {
 				await waitFor(() => {
-					const singleLinkText = getByText("https://example.com/single-link");
+					const singleLinkText = getByText("https://example.com");
 					expect(singleLinkText).toBeTruthy();
 				});
 			});
@@ -1549,7 +1850,7 @@ describe("ProfileScreen", () => {
 			bio: "Mock bio",
 			links: {
 				count: 1,
-				data: [{ links: "https://example.com" }],
+				data: { other: ["https://example.com"] },
 			},
 			fav_genres: { data: [] },
 			fav_songs: { data: [] },
