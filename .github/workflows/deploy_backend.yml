@@ -41,6 +41,12 @@ jobs:
           exit 1
         fi
 
+    - name: Ensure Prisma Client works before deployment
+      run: |
+        cd backend
+        npm run prisma-read
+        npm run prisma-gen
+
     - name: Install SSH Key
       uses: webfactory/ssh-agent@v0.7.0
       with:
@@ -66,6 +72,8 @@ jobs:
           chmod +x start_backend.sh
           nvm use default
           npm i
+          npm run prisma-read
+          npm run prisma-gen
           npm run build:swc
           ./start_backend.sh
         EOF
