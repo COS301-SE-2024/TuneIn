@@ -149,12 +149,12 @@ const styles = StyleSheet.create({
 		marginTop: 20, // More spacing above buttons
 	},
 	button: {
-		flex: 1,
+		width: "48%", // Fixed width for buttons
 		paddingVertical: 15,
-		marginHorizontal: 10,
+		marginHorizontal: 5, // Adjusted margin to align buttons properly
 		alignItems: "center",
 		backgroundColor: "#E0E0E0", // Grey background for buttons
-		borderRadius: 20,
+		borderRadius: 25,
 	},
 	yesText: {
 		color: colors.primary, // Colored text instead of button
