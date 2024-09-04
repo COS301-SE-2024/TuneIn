@@ -15,6 +15,7 @@ import { Devices } from "../models/Devices";
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import * as spotifyAuth from "../services/SpotifyAuth";
 import { colors } from "../styles/colors";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const DevicePicker = () => {
 	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
@@ -139,9 +140,11 @@ const DevicePicker = () => {
 			<TouchableOpacity
 				onPress={handleOpenPopup}
 				testID="Speaker-button"
-				style={{ marginLeft: 10 }}
+				style={{ marginLeft: 0 }}
 			>
-				<SpeakerIcon />
+				{/* <SpeakerIcon /> */}
+				<MaterialIcons name="speaker" size={34} color="black" />
+				{/* <MaterialIcons name="devices" size={34} color="black" /> */}
 			</TouchableOpacity>
 			<View style={styles.container}>
 				<Modal visible={isVisible} transparent={true} animationType="fade">
