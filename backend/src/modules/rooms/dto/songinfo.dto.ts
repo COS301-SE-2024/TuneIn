@@ -31,6 +31,10 @@ export class SongInfoDto {
 	cover: string;
 
 	@ApiProperty()
+	@IsString()
+	spotify_id: string;
+
+	@ApiProperty()
 	@IsDate()
 	start_time: Date | null;
 }

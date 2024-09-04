@@ -110,7 +110,6 @@ export class DbUtilsService {
 		try {
 			// Parse the JSON string
 			const links = JSON.parse(JSON.stringify(user.external_links));
-			console.log("Links: " + JSON.stringify(links));
 			const totalLinks = Object.values(links).flat().length; // Flatten the arrays into a single array
 
 			// Ensure the parsed object has the required properties

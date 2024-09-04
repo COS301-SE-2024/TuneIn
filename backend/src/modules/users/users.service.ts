@@ -91,10 +91,10 @@ export class UsersService {
 		}
 
 		if (updateProfileDto.fav_songs) {
-			console.log("Profile update: " + updateProfileDto.fav_songs.data);
+			// console.log("Profile update: " + JSON.stringify(updateProfileDto.fav_songs.data));
 
 			const songs: string[] = updateProfileDto.fav_songs.data.map((song) => song.spotify_id);
-			this.updateFavoriteSongsByName(userId, songs);
+			this.updateFavoriteSongsByID(userId, updateProfileDto.fav_songs.data);
 		}
 
 		await this.prisma.users.update({
@@ -173,15 +173,16 @@ export class UsersService {
 		});
 	}
 
-	private async updateFavoriteSongsByName(
+	private async updateFavoriteSongsByID(
 		userId: string,
-		newSongsIds: string[],
+		newSongs: any[],
 	): Promise<void> {
 		await this.prisma.$transaction(async (prisma) => {
-			// Step 1: Fetch current genres associated with the user
+			const newSongIds = newSongs.map((song) => song.spotify_id);
+			// Step 1: Fetch current songs associated with the user
 			const currentFavoriteSongs = await prisma.favorite_songs.findMany({
 				where: { user_id: userId },
-				include: { song: true }, // Include genre details in the result
+				include: { song: true }, // Include song details in the result
 			});
 
 			const spotifyIdToSongIdMap = new Map<string, string>(
@@ -195,9 +196,9 @@ export class UsersService {
 				(fg) => fg.song.spotify_id,
 			);
 
-			// Step 2: Fetch genre IDs for the provided genre names
+			// Step 2: Fetch song IDs for the provided song namespotify ids
 			const songs = await prisma.song.findMany({
-				where: { spotify_id: { in: newSongsIds } },
+				where: { spotify_id: { in: newSongIds } },
 				select: { song_id: true, spotify_id: true },
 			});
 
@@ -205,16 +206,45 @@ export class UsersService {
 				songs.map((song) => [song.spotify_id, song.song_id as string]),
 			);
 
-			// Step 3: Determine genres to add and remove
-			const songsToAdd = newSongsIds.filter(
+			const missingSongs = newSongs.filter((song) => !songMap.has(song.spotify_id));
+
+
+			// Step 3: Insert missing songs into the database
+			if (missingSongs.length > 0) {
+				const newSongs = await prisma.song.createMany({
+					data: missingSongs.map((song) => ({
+						spotify_id: song.spotify_id,
+						name: song.title,
+						duration: (song.duration_ms/1000),
+						artwork_url: song.cover,
+						audio_features: {},
+						artists: song.artists.split(", "),
+					})),
+					skipDuplicates: true, // Prevents errors if a song was added in parallel by another transaction
+				});
+
+				// Re-fetch the newly added songs to update the songMap
+				const newlyInsertedSongs = await prisma.song.findMany({
+					where: { spotify_id: { in: missingSongs.map((song) => song.spotify_id) } },
+					select: { song_id: true, spotify_id: true },
+				});
+
+				// Add newly inserted songs to the songMap
+				newlyInsertedSongs.forEach((song) => {
+					songMap.set(song.spotify_id, song.song_id as string);
+				});
+			}
+
+			// Step 3: Determine songs to add and remove
+			const songsToAdd = newSongIds.filter(
 				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
 			);
 
 			const songsToRemove = currentSongSpotifyId
 				.filter((id): id is string => id !== null)
-				.filter((id) => !newSongsIds.includes(id));
+				.filter((id) => !newSongIds.includes(id));
 
-			// Step 4: Delete removed genres
+			// Step 4: Delete removed songs
 			const resp = await prisma.favorite_songs.deleteMany({
 				where: {
 					user_id: userId,
@@ -226,7 +256,7 @@ export class UsersService {
 				},
 			});
 
-			// Step 5: Insert new genres
+			// Step 5: Insert new songs
 			const resp2 = await prisma.favorite_songs.createMany({
 				data: songsToAdd.map((id) => ({
 					user_id: userId,

@@ -70,9 +70,11 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 	const savePlaylist = async () => {
 		const currentPlaylist = [...playlist];
 		const songInfo = currentPlaylist.map((song) => ({
+			spotify_id: song.id,
 			title: song.name,
 			artists: song.artistNames,
 			cover: song.albumArtUrl,
+			duration_ms: song.duration_ms,
 			startTime: "",
 		}));
 		console.log(currentPlaylist);
