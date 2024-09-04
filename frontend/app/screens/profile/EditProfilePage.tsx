@@ -498,7 +498,7 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={profileData.profile_picture_url}
+						source={{uri: profileData.profile_picture_url}}
 						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 					/>
 					<TouchableOpacity
