@@ -46,23 +46,17 @@ export class DtoGenService {
 			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
 				count: recent_rooms.count,
-				data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [],
+				data: recent_rooms.data || [],
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
 				where: { user_id: userID },
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-
-			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
-				favRoomIDs,
-			);
-			if (roomDtoArray && roomDtoArray !== null) {
-				result.fav_rooms = {
-					count: roomDtoArray.length,
-					data: roomDtoArray,
-				};
-			}
+			result.fav_rooms = {
+				count: favRoomIDs.length,
+				data: favRoomIDs,
+			};
 		}
 
 		const following: PrismaTypes.users[] | null =
@@ -125,6 +119,13 @@ export class DtoGenService {
 		// 		}
 		// 	}
 		// }
+
+		try {
+			const currentRoomID = await this.dbUtils.getCurrentRoomID(userID);
+			result.current_room_id = currentRoomID;
+		} catch {
+			//error will be thrown if not applicable
+		}
 		return result;
 	}
 
@@ -155,10 +156,8 @@ export class DtoGenService {
 		}
 		const result: UserDto = this.generateBriefUserDto(friend);
 		const base = `/users/${result.username}`;
-		const usersAreFriends: boolean =
-			!friendship.is_pending && friendship.is_close_friend;
 		result.friendship = {
-			status: usersAreFriends,
+			status: !friendship.is_pending,
 			accept_url: friendship.is_pending ? "" : base + "/accept",
 			reject_url: friendship.is_pending ? "" : base + "/reject",
 		};
@@ -188,10 +187,12 @@ export class DtoGenService {
 			},
 			bio: user.bio || "",
 			current_song: {
+				songID: "",
 				title: "",
 				artists: [],
 				cover: "",
 				start_time: new Date(),
+				duration: 0,
 			},
 			fav_genres: {
 				count: 0,
@@ -281,13 +282,8 @@ export class DtoGenService {
 			has_explicit_content: room.explicit || false,
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
-			current_song: {
-				title: "",
-				artists: [],
-				cover: "",
-				start_time: new Date(),
-			},
 			tags: room.tags || [],
+			childrenRoomIDs: [],
 		};
 
 		if (scheduledRoom && scheduledRoom !== null) {
@@ -338,12 +334,15 @@ export class DtoGenService {
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
 			current_song: {
+				songID: "",
 				title: "",
 				artists: [],
 				cover: "",
 				start_time: new Date(),
+				duration: 0,
 			},
 			tags: room.tags || [],
+			childrenRoomIDs: [],
 		};
 
 		const creator = await this.generateUserDto(room.room_creator, false);
@@ -367,13 +366,13 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[] | null> {
+	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: { room_id: { in: room_ids } },
 		});
 
 		if (!rooms || rooms === null) {
-			return null;
+			throw new Error("Unknown error. DB returned null");
 		}
 
 		const userIds: string[] = rooms.map((r) => r.room_creator);
@@ -419,13 +418,8 @@ export class DtoGenService {
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
-					current_song: {
-						title: "",
-						artists: [],
-						cover: "",
-						start_time: new Date(),
-					},
 					tags: r.tags || [],
+					childrenRoomIDs: [],
 				};
 				result.push(room);
 			}
@@ -481,8 +475,11 @@ export class DtoGenService {
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
 		const senders: Map<string, UserDto> = new Map<string, UserDto>();
 		for (let i = 0; i < uniqueSenderIDs.length; i++) {
-			const sender: UserDto = await this.generateUserDto(uniqueSenderIDs[i]);
-			senders.set(uniqueSenderIDs[i], sender);
+			const id = uniqueSenderIDs[i];
+			if (id) {
+				const sender: UserDto = await this.generateUserDto(id);
+				senders.set(id, sender);
+			}
 		}
 
 		const roomIDs = await this.prisma.room_message.findMany({
@@ -592,7 +589,31 @@ export class DtoGenService {
 							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
 						);
 					}
-					return { user1: users[0], user2: users[1] };
+					if (
+						!users[0] ||
+						users[0] === null ||
+						!users[1] ||
+						users[1] === null
+					) {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
+						);
+					}
+					if (
+						users[0].userID === participant1 &&
+						users[1].userID === participant2
+					) {
+						return { user1: users[0], user2: users[1] };
+					} else if (
+						users[0].userID === participant2 &&
+						users[1].userID === participant1
+					) {
+						return { user1: users[1], user2: users[0] };
+					} else {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
+						);
+					}
 				},
 			);
 
