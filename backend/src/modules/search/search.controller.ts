@@ -80,10 +80,15 @@ export class SearchController {
 		@Query("q") q: string,
 		@Query("creator") creator?: string,
 	): Promise<CombinedSearchResults> {
-		const query_params = {
+		const query_params: {
+			q: string;
+			creator?: string;
+		} = {
 			q,
-			creator,
 		};
+		if (creator) {
+			query_params.creator = creator;
+		}
 		const result = await this.searchService.combinedSearch(query_params);
 		// const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		// this.searchService.insertSearchHistory(
@@ -136,10 +141,15 @@ export class SearchController {
 		@Query("q") q: string,
 		@Query("creator") creator?: string,
 	): Promise<RoomDto[]> {
-		const query_params = {
+		const query_params: {
+			q: string;
+			creator?: string;
+		} = {
 			q,
-			creator,
 		};
+		if (creator) {
+			query_params.creator = creator;
+		}
 		const result = await this.searchService.searchRooms(query_params);
 		// const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result" + typeof result);
@@ -330,22 +340,63 @@ export class SearchController {
 		@Query("nsfw") nsfw?: boolean,
 		@Query("tags") tags?: string,
 	): Promise<RoomDto[]> {
-		const query_params = {
+		const query_params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		} = {
 			q,
-			creator_username,
-			creator_name,
-			participant_count,
-			description,
-			is_temp,
-			is_priv,
-			is_scheduled,
-			start_date,
-			end_date,
-			lang,
-			explicit,
-			nsfw,
-			tags,
 		};
+		if (creator_username) {
+			query_params.creator_name = creator_username;
+		}
+		if (creator_name) {
+			query_params.creator_name = creator_name;
+		}
+		if (participant_count) {
+			query_params.participant_count = participant_count;
+		}
+		if (description) {
+			query_params.description = description;
+		}
+		if (is_temp) {
+			query_params.is_temp = is_temp;
+		}
+		if (is_priv) {
+			query_params.is_priv = is_priv;
+		}
+		if (is_scheduled) {
+			query_params.is_scheduled = is_scheduled;
+		}
+		if (start_date) {
+			query_params.start_date = start_date;
+		}
+		if (end_date) {
+			query_params.end_date = end_date;
+		}
+		if (lang) {
+			query_params.lang = lang;
+		}
+		if (explicit) {
+			query_params.explicit = explicit;
+		}
+		if (nsfw) {
+			query_params.nsfw = nsfw;
+		}
+		if (tags) {
+			query_params.tags = tags;
+		}
 		return await this.searchService.advancedSearchRooms(query_params);
 	}
 
@@ -513,13 +564,27 @@ export class SearchController {
 		@Query("following") following?: number,
 		@Query("followers") followers?: number,
 	): Promise<UserDto[]> {
-		const query_params = {
+		const query_params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			following?: number;
+			followers?: number;
+		} = {
 			q,
-			creator_username,
-			creator_name,
-			following,
-			followers,
 		};
+		if (creator_username) {
+			query_params.creator_name = creator_username;
+		}
+		if (creator_name) {
+			query_params.creator_name = creator_name;
+		}
+		if (following) {
+			query_params.following = following;
+		}
+		if (followers) {
+			query_params.followers = followers;
+		}
 		return await this.searchService.advancedSearchUsers(query_params);
 	}
 

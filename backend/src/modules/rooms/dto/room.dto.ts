@@ -89,4 +89,18 @@ export class RoomDto {
 		isArray: true,
 	})
 	tags: string[];
+
+	@ApiPropertyOptional({
+		description:
+			"The parent of this room, if this room was created by splitting another",
+		type: String,
+	})
+	parentRoomID?: string;
+
+	@ApiProperty({
+		description: "Rooms created by splitting this room.",
+		type: String,
+		isArray: true,
+	})
+	childrenRoomIDs: string[];
 }
