@@ -12,6 +12,7 @@ import { DirectMessageDto } from "../models/DmDto";
 import { LiveChatMessageDto } from "../models/LiveChatMessageDto";
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
+import { Room } from "../models/Room";
 
 const TIMEOUT = 5000000;
 
@@ -24,6 +25,7 @@ export type DirectMessage = {
 	message: DirectMessageDto;
 	me?: boolean;
 	messageSent: boolean;
+	room?: Room;
 };
 
 // How to integrate Emoji Reactions

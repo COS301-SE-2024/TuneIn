@@ -1,4 +1,3 @@
-// src/services/RoomService.ts
 import { Alert } from "react-native";
 import uploadImage from "./ImageUpload";
 import auth from "./AuthManagement";

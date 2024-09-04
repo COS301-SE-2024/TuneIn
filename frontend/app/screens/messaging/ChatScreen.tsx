@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import MessageItem from "../../components/MessageItem";
+import MessageItem from "../../components/messaging/MessageItem"; // Assuming you have a component to render each message
 import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
@@ -18,222 +18,8 @@ import { live, DirectMessage, instanceExists } from "../../services/Live";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
+import { Room } from "../../models/Room"; // Assuming you have a Room type defined
 
-/*
-const dummyMessages: Message[] = [
-	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
-	{ id: "2", text: "Hi! How are you?", sender: "Me", me: true },
-	{ id: "3", text: "I'm good, thanks!", sender: "John Doe", me: false },
-	{ id: "4", text: "What are you up to?", sender: "John Doe", me: false },
-	{ id: "5", text: "Just working on a new project", sender: "Me", me: true },
-	{
-		id: "6",
-		text: "That's great! I'd love to hear more about it",
-		sender: "John Doe",
-		me: false,
-	},
-	{
-		id: "7",
-		text: "Sure! I'll tell you more about it later",
-		sender: "Me",
-		me: true,
-	},
-	{ id: "8", text: "Sounds good!", sender: "John Doe", me: false },
-	{ id: "9", text: "Bye!", sender: "John Doe", me: false },
-	{ id: "10", text: "Bye!", sender: "Me", me: true },
-	// Add more messages here
-];
-*/
-
-const defaultUser: UserDto = {
-	profile_name: "John Doe",
-	userID: "1",
-	username: "johndoe",
-	profile_picture_url:
-		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-	followers: { count: 0, data: [] },
-	following: { count: 0, data: [] },
-	links: { count: 0, data: [] },
-	bio: "Hello, I'm John Doe",
-	current_song: {
-		title: "Song Title",
-		artists: ["Artist 1", "Artist 2"],
-		cover: "https://via.placeholder.com/150",
-		start_time: new Date(),
-	},
-	fav_genres: { count: 0, data: [] },
-	fav_songs: { count: 0, data: [] },
-	fav_rooms: { count: 0, data: [] },
-	recent_rooms: { count: 0, data: [] },
-};
-
-const defaultMe: UserDto = {
-	profile_name: "Me",
-	userID: "0",
-	username: "me",
-	profile_picture_url:
-		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-	followers: { count: 0, data: [] },
-	following: { count: 0, data: [] },
-	links: { count: 0, data: [] },
-	bio: "Hello, I'm Me",
-	current_song: {
-		title: "Song Title",
-		artists: ["Artist 1", "Artist 2"],
-		cover: "https://via.placeholder.com/150",
-		start_time: new Date(),
-	},
-	fav_genres: { count: 0, data: [] },
-	fav_songs: { count: 0, data: [] },
-	fav_rooms: { count: 0, data: [] },
-	recent_rooms: { count: 0, data: [] },
-};
-
-const dummyMessages: DirectMessage[] = [
-	{
-		message: {
-			index: 1,
-			messageBody: "Hey there!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p1",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 2,
-			messageBody: "Hi! How are you?",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p2",
-		},
-		me: true,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 3,
-			messageBody: "I'm good, thanks!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p3",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 4,
-			messageBody: "What are you up to?",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p4",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 5,
-			messageBody: "Just working on a new project",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p5",
-		},
-		me: true,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 6,
-			messageBody: "That's great! I'd love to hear more about it",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p6",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 7,
-			messageBody: "Sure! I'll tell you more about it later",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p7",
-		},
-		me: true,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 8,
-			messageBody: "Sounds good!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p8",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 9,
-			messageBody: "Bye!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p9",
-		},
-		me: false,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 10,
-			messageBody: "Bye!",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "p10",
-		},
-		me: true,
-		messageSent: true,
-	},
-	// Add more messages here if needed
-];
-
-//path: http://localhost:8081/screens/messaging/ChatScreen?friend=8xbbie
 const ChatScreen = () => {
 	const [self, setSelf] = useState<UserDto>();
 	const [otherUser, setOtherUser] = useState<UserDto>();
@@ -246,6 +32,7 @@ const ChatScreen = () => {
 	const u: string = Array.isArray(username) ? username[0] : username;
 	console.log("Username:", u);
 
+	// Function to get users
 	const getUsers = async () => {
 		try {
 			const token = await auth.getToken();
@@ -265,6 +52,7 @@ const ChatScreen = () => {
 		}
 	};
 
+	// Clean up function
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
 		if (connected) {
@@ -273,6 +61,7 @@ const ChatScreen = () => {
 		}
 	};
 
+	// Fetch messages
 	useEffect(() => {
 		if (instanceExists()) {
 			if (!messages || messages.length === 0) {
@@ -284,7 +73,7 @@ const ChatScreen = () => {
 		}
 	}, [messages]);
 
-	//on component mount
+	// Initialize users and messaging setup
 	useEffect(() => {
 		const initialize = async () => {
 			try {
@@ -322,6 +111,7 @@ const ChatScreen = () => {
 		};
 	}, []);
 
+	// Function to send a standard message
 	const handleSend = () => {
 		if (!self || !otherUser || isSending) return;
 		const newMessage: DirectMessage = {
@@ -345,6 +135,91 @@ const ChatScreen = () => {
 		});
 	};
 
+	// Function to send a test room object message
+	const handleSendRoom = () => {
+		if (!self || !otherUser || isSending) return;
+		const roomData: Room = {
+			roomID: "room-002",
+			backgroundImage: "https://example.com/background2.jpg",
+			name: "Rock On",
+			songName: "Electric Surge",
+			artistName: "Rock Legends",
+			description:
+				"A room for rock enthusiasts to share their favorite tracks.",
+			userProfile: "https://example.com/profile2.jpg",
+			userID: "user-002",
+			username: "rock_legend",
+			mine: false,
+			tags: ["rock", "music", "energetic"],
+			playlist: ["song3", "song4"],
+			genre: "Rock",
+			language: "English",
+			roomSize: 20,
+			isExplicit: true,
+			isNsfw: false,
+		};
+
+		const newMessage: DirectMessage = {
+			message: {
+				index: messages.length,
+				messageBody: "Check out this room!",
+				sender: self,
+				recipient: otherUser,
+				dateSent: new Date(),
+				dateRead: new Date(0),
+				isRead: false,
+				room: roomData,
+				pID: "",
+			},
+			me: true,
+			messageSent: false,
+		};
+
+		setMessages((prevMessages) => [...prevMessages, newMessage]);
+	};
+
+	// Function to simulate receiving a room object message
+	const handleReceiveRoom = () => {
+		if (!self || !otherUser) return;
+		const roomData: Room = {
+			roomID: "room-001",
+			backgroundImage: "https://example.com/background1.jpg",
+			name: "Chill Vibes",
+			songName: "Sunset Chill",
+			artistName: "DJ Relax",
+			description: "A room for relaxing and enjoying some chill music.",
+			userProfile: "https://example.com/profile1.jpg",
+			userID: "user-001",
+			username: "chill_master",
+			mine: false,
+			tags: ["chill", "relax", "music"],
+			playlist: ["song1", "song2"],
+			genre: "Chill",
+			language: "English",
+			roomSize: 10,
+			isExplicit: false,
+			isNsfw: false,
+		};
+
+		const receivedMessage: DirectMessage = {
+			message: {
+				index: messages.length,
+				messageBody: "You received a room!",
+				sender: otherUser,
+				recipient: self,
+				dateSent: new Date(),
+				dateRead: new Date(0),
+				isRead: false,
+				room: roomData,
+				pID: "",
+			},
+			me: false,
+			messageSent: true,
+		};
+
+		setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -366,9 +241,7 @@ const ChatScreen = () => {
 				</TouchableOpacity>
 				{otherUser && otherUser.profile_picture_url && (
 					<Image
-						source={{
-							uri: otherUser.profile_picture_url,
-						}}
+						source={{ uri: otherUser.profile_picture_url }}
 						style={styles.avatar}
 					/>
 				)}
@@ -376,12 +249,22 @@ const ChatScreen = () => {
 					{otherUser?.profile_name || "Loading..."}
 				</Text>
 			</View>
+
 			<FlatList
 				data={messages}
-				keyExtractor={(item) => item.message.index.toString()}
+				keyExtractor={(item) => {
+					// Ensure the keyExtractor always returns a string
+					if (item.message.index !== undefined) {
+						return item.message.index.toString();
+					} else if (item.message.room?.roomID) {
+						return item.message.room.roomID;
+					}
+					return ""; // Fallback to an empty string or some unique identifier
+				}}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
 			/>
+
 			<View style={styles.inputContainer}>
 				<TextInput
 					placeholder="Message..."
@@ -399,11 +282,34 @@ const ChatScreen = () => {
 					<Feather name="send" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
+
+			{/* Test Buttons for Sending and Receiving Room Messages */}
+			<View style={styles.testButtonContainer}>
+				<TouchableOpacity style={styles.testButton} onPress={handleSendRoom}>
+					<Text>Send Room Object</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={styles.testButton} onPress={handleReceiveRoom}>
+					<Text>Receive Room Object</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	testButtonContainer: {
+		flexDirection: "row", // Align buttons horizontally
+		justifyContent: "center", // Center the buttons horizontally
+		margin: 10, // Add some margin around the container
+	},
+	testButton: {
+		backgroundColor: "#007BFF", // Button background color
+		padding: 10, // Add padding inside the button
+		margin: 5, // Add margin between buttons
+		borderRadius: 5, // Rounded corners
+		alignItems: "center", // Center the text inside the button
+		justifyContent: "center", // Center the text inside the button
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "#FFFFFF",

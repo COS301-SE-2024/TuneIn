@@ -1,7 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	Button,
+	StyleSheet,
+	Modal,
+	ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
 import SplittingRoomPopUp from "../components/rooms/SplittingRoomPopUp"; // Adjust the path to where SplittingPopUp is located
+import RoomLink from "../components/messaging/RoomLink"; // Adjust the path to where RoomCard is located
+import { formatRoomData } from "../models/Room"; // Adjust the path to where formatRoomData is located
 
 // Example room and queue data
 const testRooms = [
@@ -84,6 +93,7 @@ const testQueues = [
 
 const TestPage: React.FC = () => {
 	const [isPopupVisible, setPopupVisible] = useState(false);
+	const [isRoomCardVisible, setRoomCardVisible] = useState(false);
 	const router = useRouter();
 
 	const navigateToSplittingRoom = () => {
@@ -115,18 +125,47 @@ const TestPage: React.FC = () => {
 		setPopupVisible(false);
 	};
 
+	const handleShowRoomCard = () => {
+		setRoomCardVisible(true);
+	};
+
+	const handleHideRoomCard = () => {
+		setRoomCardVisible(false);
+	};
+
+	const sampleRoomData = formatRoomData(testRooms[0]); // Use one of the sample rooms for demonstration
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Test Page</Text>
 			<Button title="Go to SplittingRoom" onPress={navigateToSplittingRoom} />
 			{/* Button to open the popup */}
 			<Button title="Test Popup" onPress={handleOpenPopup} />
+			{/* Button to test RoomCard component */}
+			<Button title="Test Room Card" onPress={handleShowRoomCard} />
+
 			{/* Popup component */}
 			<SplittingRoomPopUp
 				isVisible={isPopupVisible}
 				onClose={handleClosePopup}
 				onConfirm={handleUserDecision} // Pass the updated handling function
 			/>
+
+			{/* Modal for RoomCard testing */}
+			<Modal
+				visible={isRoomCardVisible}
+				transparent={true}
+				animationType="slide"
+			>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalContent}>
+						<ScrollView>
+							<RoomLink room={sampleRoomData} />
+							<Button title="Close" onPress={handleHideRoomCard} />
+						</ScrollView>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 };
@@ -142,6 +181,24 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 		marginBottom: 20,
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	modalContent: {
+		width: "90%",
+		backgroundColor: "#fff",
+		borderRadius: 10,
+		padding: 20,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
 	},
 });
 

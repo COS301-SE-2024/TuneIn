@@ -33,10 +33,6 @@ import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";
 import TopNavBar from "../components/TopNavBar";
-interface UserData {
-	username: string;
-	// Add other properties if needed
-}
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -46,9 +42,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom, userData, setUserData } = playerContext;
-
-	console.log("currentRoom: " + currentRoom);
+	const { userData, setUserData } = playerContext;
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -85,8 +79,6 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-
-			// console.log("Friends: " + JSON.stringify(response.data));
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
@@ -158,7 +150,6 @@ const Home: React.FC = () => {
 
 	const refreshData = useCallback(async () => {
 		// await StorageService.clear();
-		// console.log("CLEARED STORAGE");
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		console.log("Stored token:", storedToken);
@@ -211,9 +202,6 @@ const Home: React.FC = () => {
 				: [];
 
 			setFriends(formattedFriends);
-
-			console.log("Friends after format: " + JSON.stringify(formattedFriends));
-
 			await StorageService.setItem(
 				"cachedFriends",
 				JSON.stringify(formattedFriends),
