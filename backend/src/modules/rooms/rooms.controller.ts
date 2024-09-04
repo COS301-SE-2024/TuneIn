@@ -1224,4 +1224,62 @@ export class RoomsController {
 	async saveRoomAsPlaylist(@Param("roomID") roomID: string): Promise<string> {
 		return "";
 	}
+
+	/**
+	 * Evaluate if a room can be split
+	 *
+	 * @param roomID - The ID of the room to evaluate.
+	 * @returns An array of the possible genres (if possible) or 4xx if not possible.
+	 */
+	@Get(":roomID/split")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Evaluate if a room can be split",
+		operationId: "checkRoomSplit",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to evaluate.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description:
+			"An array of the possible genres (if possible) or an empty array if not possible.",
+	})
+	async checkRoomSplit(@Param("roomID") roomID: string): Promise<string[]> {
+		return await this.roomsService.canSplitRoom(roomID);
+	}
+
+	/**
+	 * Returns a RoomDto with info about its split children
+	 *
+	 * @param roomID - The ID of the room to get the split children for.
+	 * @returns The RoomDto.
+	 */
+	@Post(":roomID/split")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Returns a RoomDto with info about its split children",
+		operationId: "splitRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the split children for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The RoomDto.",
+		type: RoomDto,
+	})
+	async splitRoom(@Param("roomID") roomID: string): Promise<RoomDto> {
+		return await this.roomsService.splitRoom(roomID);
+	}
 }

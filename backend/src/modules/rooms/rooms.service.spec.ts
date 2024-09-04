@@ -122,6 +122,7 @@ describe("RoomsService", () => {
 					is_scheduled: false,
 					is_temporary: false,
 					tags: [],
+					childrenRoomIDs: [],
 				});
 
 			// Act
@@ -209,6 +210,7 @@ describe("RoomsService", () => {
 				is_private: false,
 				is_scheduled: false,
 				tags: [],
+				childrenRoomIDs: [],
 			};
 			expect(result).toEqual(response);
 		});

@@ -941,4 +941,25 @@ export class RoomsService {
 		const bytes: BlobPart[] = [];
 		return new File(bytes, "calendar.ics");
 	}
+
+	async splitRoom(roomID: string): Promise<RoomDto> {
+		// Implement the logic to split the room
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		//split the room
+		//set the children ids to RoomDto.children
+		//return RoomDto
+	}
+
+	async canSplitRoom(roomID: string): Promise<string[]> {
+		// Implement the logic to check if the room can be split
+		if (true) {
+			// room does not exist
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		const childGenres: string[] = [];
+		return childGenres;
+	}
 }

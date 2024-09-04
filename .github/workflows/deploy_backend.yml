@@ -17,23 +17,35 @@ jobs:
       with:
         node-version: 20.16
 
+    - name: Create backend env file
+      run: |
+        touch backend/.env
+        echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+      shell: bash
+
     - name: Install dependencies
       run:  |
-        cd frontend && npm ci
+        cd backend && npm ci
 
     - name: Last linting check before deployment
-      run: npm run lint
+      run: cd backend && npm run lint
 
     - name: Last tests before deployment
-      run: npm run test
+      run: cd backend && npm run test
 
     - name: Verify Build before deployment
       run: |
-        npm run build:swc
-        if [ ! -f "backend/dist/src/main.js" ]; then
+        cd backend && npm run build:swc
+        if [ ! -f "dist/src/main.js" ]; then
           echo "Build failed: main.js not found!"
           exit 1
         fi
+
+    - name: Ensure Prisma Client works before deployment
+      run: |
+        cd backend
+        npm run prisma-read > /dev/null
+        npm run prisma-gen
 
     - name: Install SSH Key
       uses: webfactory/ssh-agent@v0.7.0
@@ -49,7 +61,7 @@ jobs:
           [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
           # Set memory limit manually
-          export NODE_OPTIONS="--max-old-space-size=512"
+          export NODE_OPTIONS="--max-old-space-size=2048"
 
           cd TuneIn/
           git checkout develop
@@ -60,10 +72,17 @@ jobs:
           chmod +x start_backend.sh
           nvm use default
           npm i
+          npm run prisma-read > /dev/null
+          npm run prisma-gen
           npm run build:swc
           ./start_backend.sh
         EOF
 
+    - name: Wait for Service to Start
+      run: sleep 30
+
     - name: Health Check
       run: |
-        curl --fail "https://tunein.co.za:3000/" || exit 1
+        for i in {1..5}; do
+          curl -v --fail "https://tunein.co.za:3000/" && break || sleep 10
+        done
