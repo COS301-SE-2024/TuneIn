@@ -218,8 +218,9 @@ export class DbUtilsService {
 		const result: PrismaTypes.room[] = [];
 		while (result.length < count) {
 			const random = Math.floor(Math.random() * rooms.length);
-			if (!result.includes(rooms[random])) {
-				result.push(rooms[random]);
+			const randomRoom = rooms[random];
+			if (randomRoom && !result.includes(randomRoom)) {
+				result.push(randomRoom);
 			}
 		}
 		return rooms;
