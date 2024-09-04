@@ -41,6 +41,8 @@ import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
 const MemoizedCommentWidget = memo(CommentWidget);
 
 type EmojiReaction = {
@@ -75,6 +77,7 @@ const RoomPage = () => {
 
 	const { currentRoom, setCurrentRoom } = playerContext;
 	const [joined, setJoined] = useState(false);
+	const [activeTab, setActiveTab] = useState("Room");
 
 	useEffect(() => {
 		console.log("Room ID: " + currentRoom?.roomID);
@@ -573,17 +576,17 @@ const RoomPage = () => {
 				<Ionicons name="chevron-back" size={24} color="black" />
 			</TouchableOpacity>
 
-			<Image
+			{/* <Image
 				source={{ uri: roomData.backgroundImage }}
 				style={styles.backgroundImage}
-			/>
-			<LinearGradient
+			/> */}
+			{/* <LinearGradient
 				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
 				style={styles.gradientOverlay}
-			/>
+			/> */}
 
 			<View style={styles.contentContainer}>
-				<View style={styles.roomDetails}>
+				{/* <View style={styles.roomDetails}>
 					<Text style={styles.roomName}>{roomData.name}</Text>
 					<Text style={styles.description}>{roomData.description}</Text>
 					<View style={styles.tagsContainer}>
@@ -593,19 +596,13 @@ const RoomPage = () => {
 							</Text>
 						))}
 					</View>
-				</View>
+				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						<Image
-							source={{ uri: roomData.userProfile }}
-							style={styles.userImage}
-						/>
-						<Text style={styles.username}>
-							{truncateUsername(roomData.username)}
-						</Text>
+						<Ionicons name="people" size={30} color="black" />
+						<Text>134 Particpants</Text>
 					</View>
-
 					{/* Right side */}
 					<View style={styles.joinLeaveButtonContainer}>
 						<TouchableOpacity
@@ -618,19 +615,6 @@ const RoomPage = () => {
 						</TouchableOpacity>
 					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
-				</View>
-				<View style={styles.sideBySideClose}>
-					<TouchableOpacity
-						onPress={handleBookmark}
-						style={styles.bookmarkButton}
-					>
-						<Icon
-							name={isBookmarked ? "bookmark" : "bookmark-border"}
-							size={34}
-							color={isBookmarked ? "gold" : "black"}
-						/>
-					</TouchableOpacity>
-					<DevicePicker />
 				</View>
 				<View style={styles.trackDetails}>
 					<Image
@@ -658,7 +642,7 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
 						>
-							<FontAwesome5 name="step-backward" size={24} color="black" />
+							<FontAwesome5 name="step-backward" size={30} color="black" />
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
@@ -666,7 +650,7 @@ const RoomPage = () => {
 						>
 							<FontAwesome5
 								name={isPlaying ? "pause" : "play"}
-								size={24}
+								size={30}
 								color="black"
 							/>
 						</TouchableOpacity>
@@ -674,7 +658,7 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playNextTrack}
 						>
-							<FontAwesome5 name="step-forward" size={24} color="black" />
+							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
 					</View>
 				) : (
@@ -724,7 +708,36 @@ const RoomPage = () => {
 				))}
 			</Animated.ScrollView>
 
-			<Animated.View
+			<View style={styles.sideBySideTwo}>
+				{/* Left side */}
+				<View style={styles.userInfoContainer}>
+					<Image
+						source={{ uri: roomData.userProfile }}
+						style={styles.userImage}
+					/>
+					<Text style={styles.username}>
+						{truncateUsername(roomData.username)}
+					</Text>
+				</View>
+				{/* Right side */}
+				<View style={styles.joinLeaveButtonContainer}>
+					<View style={styles.sideBySideClose}>
+						<TouchableOpacity
+							onPress={handleBookmark}
+							style={styles.bookmarkButton}
+						>
+							<Icon
+								name={isBookmarked ? "bookmark" : "bookmark-border"}
+								size={34}
+								color={isBookmarked ? colors.primary : "black"}
+							/>
+						</TouchableOpacity>
+						<DevicePicker />
+					</View>
+				</View>
+			</View>
+
+			{/* <Animated.View
 				style={{
 					position: "absolute",
 					bottom: 0,
@@ -818,7 +831,7 @@ const RoomPage = () => {
 						</KeyboardAvoidingView>
 					</>
 				)}
-			</Animated.View>
+			</Animated.View> */}
 		</View>
 	);
 };
@@ -827,6 +840,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		position: "relative",
+		marginHorizontal: 10,
 	},
 	scrollView: {
 		flex: 1,
@@ -879,7 +893,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "flex-end",
 	},
-
 	userInfoContainer: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -887,16 +900,16 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	userImage: {
-		width: 30,
-		height: 30,
+		width: 50,
+		height: 50,
 		borderRadius: 25,
 		marginRight: 10,
 		borderWidth: 2,
 		borderColor: "blue",
 	},
 	username: {
-		fontSize: 18,
-		color: "white",
+		fontSize: 20,
+		color: "black",
 		fontWeight: "bold",
 	},
 	roomDetails: {
@@ -967,6 +980,12 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 	},
+	sideBySideTwo: {
+		marginTop: 600,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+	},
 	sideBySideClose: {
 		marginTop: 15,
 		flexDirection: "row",
@@ -988,7 +1007,7 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	controlButton: {
-		marginHorizontal: 20,
+		marginHorizontal: 40,
 	},
 	queueButton: {
 		marginTop: 20,
@@ -1029,13 +1048,14 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		marginVertical: 10,
 		paddingVertical: 8,
-		paddingHorizontal: 16,
+		paddingHorizontal: 30,
 		backgroundColor: colors.primary,
 		borderRadius: 20,
 	},
 	joinLeaveButtonText: {
 		color: "white",
 		fontSize: 16,
+		fontWeight: "bold",
 	},
 });
 

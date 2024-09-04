@@ -69,7 +69,7 @@ const Playlist = () => {
 	return (
 		<View style={styles.container}>
 			{/* RoomTab component */}
-			<RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "}
+			{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
 			{/* Set activeTab to "Queue" */}
 			<View style={styles.header}>
 				<TouchableOpacity
@@ -78,7 +78,7 @@ const Playlist = () => {
 				>
 					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
 				</TouchableOpacity>
-				<Text style={styles.pageName}>Queue</Text>
+				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
 				{playlist.length > 0 ? (

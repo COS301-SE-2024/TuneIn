@@ -339,7 +339,7 @@ const Home: React.FC = () => {
 				{loading ? (
 					<ActivityIndicator
 						size={60}
-						color={colors.backgroundColor}
+						// color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
 				) : (
