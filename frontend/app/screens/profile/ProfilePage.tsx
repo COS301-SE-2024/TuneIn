@@ -14,10 +14,8 @@ import {
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
 import GenreList from "../../components/GenreList";
-import RoomCard from "../../components/rooms/RoomCard";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
-import MusicBottomSheet from "../../components/MusicBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
 import axios from "axios";
 import auth from "../../services/AuthManagement";
@@ -45,6 +43,10 @@ const ProfileScreen: React.FC = () => {
 
 	const navigateToHelp = () => {
 		router.navigate("/screens/help/HelpScreen");
+	};
+
+	const navigateToFollowerStack = () => {
+		router.push("/screens/followers/FollowerStack");
 	};
 
 	let ownsProfile: boolean = true;
@@ -358,9 +360,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const renderLinks = () => {
-		console.log("Link Count: " + primaryProfileData.links.count);
 		if (primaryProfileData.links.count && primaryProfileData.links.count > 1) {
-			console.log("Wrong call");
 			const firstKey = Object.keys(primaryProfileData.links.data)[0];
 			const firstLinkArray = primaryProfileData.links.data[firstKey];
 			const firstLink = firstLinkArray ? firstLinkArray[0] : null;
@@ -378,7 +378,6 @@ const ProfileScreen: React.FC = () => {
 				</View>
 			);
 		} else if (primaryProfileData.links.count === 1) {
-			console.log("Right call");
 			const firstKey = Object.keys(primaryProfileData.links.data)[0];
 			const firstLinkArray = primaryProfileData.links.data[firstKey];
 			const firstLink = firstLinkArray ? firstLinkArray[0] : null;
@@ -575,18 +574,24 @@ const ProfileScreen: React.FC = () => {
 						marginTop: 10,
 					}}
 				>
-					<View style={{ alignItems: "center" }}>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>
-							{primaryProfileData.followers.count}
-						</Text>
-						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
-					</View>
-					<View style={{ marginLeft: 60, alignItems: "center" }}>
+					<TouchableOpacity
+						style={{ alignItems: "center" }}
+						onPress={navigateToFollowerStack}
+					>
 						<Text style={{ fontSize: 20, fontWeight: "600" }}>
 							{primaryProfileData.following.count}
 						</Text>
 						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
-					</View>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={{ marginLeft: 60, alignItems: "center" }}
+						onPress={navigateToFollowerStack}
+					>
+						<Text style={{ fontSize: 20, fontWeight: "600" }}>
+							{primaryProfileData.followers.count}
+						</Text>
+						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
+					</TouchableOpacity>
 				</View>
 				<TouchableOpacity
 					onPress={() => {
@@ -627,11 +632,11 @@ const ProfileScreen: React.FC = () => {
 						<GenreList items={primaryProfileData.fav_genres.data} />
 					</View>
 				)}
-				{primaryProfileData.fav_songs.count > 2 && (
+				{primaryProfileData.fav_songs.count > 0 && (
 					<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 						<View style={styles.profileHeader}>
 							<Text style={styles.title}>Favorite Songs</Text>
-							{primaryProfileData.fav_songs.count > 0 && (
+							{primaryProfileData.fav_songs.count > 2 && (
 								<TouchableOpacity
 									onPress={() => {
 										navigateToMore(
@@ -720,7 +725,7 @@ const ProfileScreen: React.FC = () => {
 							>
 								Recent Rooms
 							</Text>
-							{primaryProfileData.recent_rooms.count > 10 && (
+							{primaryProfileData.recent_rooms.count > 9 && (
 								<TouchableOpacity
 									onPress={() => {
 										navigateToMore(
