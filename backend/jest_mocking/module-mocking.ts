@@ -278,6 +278,20 @@ export async function createUsersTestingModule(): Promise<TestingModule> {
 	}).compile();
 }
 
+export async function createUsersUpdateTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule],
+		providers: [
+			UsersService,
+			PrismaService,
+			DtoGenService,
+			DbUtilsService,
+			AuthService,
+			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
+		],
+	}).compile();
+}
+
 //S3Module
 export async function createS3TestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
