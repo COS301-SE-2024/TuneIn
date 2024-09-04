@@ -100,6 +100,7 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			transparent={true}
 			animationType="slide"
 			onRequestClose={() => {}}
+			testID="song-dialog"
 		>
 			<View style={styles.container}>
 				<TextInput

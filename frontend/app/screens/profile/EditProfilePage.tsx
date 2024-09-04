@@ -171,12 +171,6 @@ const EditProfileScreen = () => {
 				bio: text,
 			}));
 			setChanged(true);
-		} else if (value === "favoriteSongs") {
-			setProfileData((prevProfileData) => ({
-				...prevProfileData,
-				fav_songs: text,
-			}));
-			setChanged(true);
 		}
 	};
 
@@ -237,6 +231,7 @@ const EditProfileScreen = () => {
 
 	const updateLinks = (links: string[]) => {
 		if (links.length !== 0) {
+			
 			const categorizedLinks = categorizeLinks(links);
 
 			setProfileData((prevProfileData: any) => ({
@@ -386,6 +381,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => handleLinkAddition("")}
 						style={styles.editButton}
+						testID="add-link"
 					>
 						<Text style={{ fontWeight: "600" }}>Add link</Text>
 					</TouchableOpacity>
@@ -423,6 +419,7 @@ const EditProfileScreen = () => {
 							}
 						}}
 						style={styles.saveButton}
+						testID="save-button"
 					>
 						<Text
 							style={
@@ -587,6 +584,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => setIsSongDialogVisible(true)}
 						style={styles.container2}
+						testID="add-song"
 					>
 						<Text style={styles.text}>
 							Add Song <Icons name="plus" size={14} color="black" />
