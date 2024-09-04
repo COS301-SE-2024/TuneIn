@@ -135,91 +135,6 @@ const ChatScreen = () => {
 		});
 	};
 
-	// Function to send a test room object message
-	const handleSendRoom = () => {
-		if (!self || !otherUser || isSending) return;
-		const roomData: Room = {
-			roomID: "room-002",
-			backgroundImage: "https://example.com/background2.jpg",
-			name: "Rock On",
-			songName: "Electric Surge",
-			artistName: "Rock Legends",
-			description:
-				"A room for rock enthusiasts to share their favorite tracks.",
-			userProfile: "https://example.com/profile2.jpg",
-			userID: "user-002",
-			username: "rock_legend",
-			mine: false,
-			tags: ["rock", "music", "energetic"],
-			playlist: ["song3", "song4"],
-			genre: "Rock",
-			language: "English",
-			roomSize: 20,
-			isExplicit: true,
-			isNsfw: false,
-		};
-
-		const newMessage: DirectMessage = {
-			message: {
-				index: messages.length,
-				messageBody: "Check out this room!",
-				sender: self,
-				recipient: otherUser,
-				dateSent: new Date(),
-				dateRead: new Date(0),
-				isRead: false,
-				room: roomData,
-				pID: "",
-			},
-			me: true,
-			messageSent: false,
-		};
-
-		setMessages((prevMessages) => [...prevMessages, newMessage]);
-	};
-
-	// Function to simulate receiving a room object message
-	const handleReceiveRoom = () => {
-		if (!self || !otherUser) return;
-		const roomData: Room = {
-			roomID: "room-001",
-			backgroundImage: "https://example.com/background1.jpg",
-			name: "Chill Vibes",
-			songName: "Sunset Chill",
-			artistName: "DJ Relax",
-			description: "A room for relaxing and enjoying some chill music.",
-			userProfile: "https://example.com/profile1.jpg",
-			userID: "user-001",
-			username: "chill_master",
-			mine: false,
-			tags: ["chill", "relax", "music"],
-			playlist: ["song1", "song2"],
-			genre: "Chill",
-			language: "English",
-			roomSize: 10,
-			isExplicit: false,
-			isNsfw: false,
-		};
-
-		const receivedMessage: DirectMessage = {
-			message: {
-				index: messages.length,
-				messageBody: "You received a room!",
-				sender: otherUser,
-				recipient: self,
-				dateSent: new Date(),
-				dateRead: new Date(0),
-				isRead: false,
-				room: roomData,
-				pID: "",
-			},
-			me: false,
-			messageSent: true,
-		};
-
-		setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-	};
-
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -280,16 +195,6 @@ const ChatScreen = () => {
 					onPress={handleSend}
 				>
 					<Feather name="send" size={24} color="black" />
-				</TouchableOpacity>
-			</View>
-
-			{/* Test Buttons for Sending and Receiving Room Messages */}
-			<View style={styles.testButtonContainer}>
-				<TouchableOpacity style={styles.testButton} onPress={handleSendRoom}>
-					<Text>Send Room Object</Text>
-				</TouchableOpacity>
-				<TouchableOpacity style={styles.testButton} onPress={handleReceiveRoom}>
-					<Text>Receive Room Object</Text>
 				</TouchableOpacity>
 			</View>
 		</View>

@@ -19,10 +19,8 @@ const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 
 	const navigateToRoom = () => {
 		router.push({
-			pathname: "/screens/rooms/RoomDetail", // Update this path to match your room detail screen
-			params: {
-				roomID: room.roomID,
-			},
+			pathname: "/screens/rooms/RoomPage",
+			params: { room: JSON.stringify(room) },
 		});
 	};
 
