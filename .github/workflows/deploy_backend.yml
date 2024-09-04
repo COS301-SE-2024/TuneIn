@@ -44,7 +44,7 @@ jobs:
     - name: Ensure Prisma Client works before deployment
       run: |
         cd backend
-        npm run prisma-read
+        npm run prisma-read > /dev/null
         npm run prisma-gen
 
     - name: Install SSH Key
@@ -72,7 +72,7 @@ jobs:
           chmod +x start_backend.sh
           nvm use default
           npm i
-          npm run prisma-read
+          npm run prisma-read > /dev/null
           npm run prisma-gen
           npm run build:swc
           ./start_backend.sh
