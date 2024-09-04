@@ -17,6 +17,12 @@ jobs:
       with:
         node-version: 20.16
 
+    - name: Create backend env file
+      run: |
+        touch backend/.env
+        echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+      shell: bash
+
     - name: Install dependencies
       run:  |
         cd backend && npm ci
