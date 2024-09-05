@@ -7,9 +7,17 @@ import { ConfigService } from "@nestjs/config";
 import {
 	mockPrismaService,
 	mockDtoGenService,
+	mockDbUtilsService,
 } from "../../../jest_mocking/service-mocking";
 import { RoomDto } from "../rooms/dto/room.dto";
-import { UserDto } from "./dto/user.dto";
+import {
+	GenresWithCount,
+	RoomsData,
+	SongInfosWithCount,
+	UserDto,
+	UserFriendship,
+} from "./dto/user.dto";
+import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 
 describe("UsersService follow function", () => {
 	let usersService: UsersService;
@@ -28,10 +36,7 @@ describe("UsersService follow function", () => {
 				},
 				{
 					provide: DbUtilsService,
-					useValue: {
-						userExists: jest.fn(),
-						isFollowing: jest.fn(),
-					},
+					useValue: mockDbUtilsService,
 				},
 				{
 					provide: DtoGenService,
@@ -398,6 +403,69 @@ describe("UsersService follow function", () => {
 
 			const result = await usersService.getUserRooms("userID");
 			expect(result).toEqual(mockRoomDtos);
+		});
+	});
+	describe("getFriendRequests", () => {
+		it("should be defined", () => {
+			expect(usersService).toBeDefined();
+		});
+
+		it("should return an empty array if no friend requests are found", async () => {
+			jest
+				.spyOn(dbUtilsService, "getFriendRequests")
+				.mockResolvedValueOnce(null);
+
+			const result = await usersService.getFriendRequests("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should return UserDto array if friend requests are found and generateMultipleUserDto succeeds", async () => {
+			jest.spyOn(dbUtilsService, "getFriendRequests").mockResolvedValueOnce([
+				{
+					friend_id: "friendID1",
+					friend1: "friendID1",
+					friend2: "userID",
+					is_pending: true,
+					is_close_friend: false,
+					date_friended: new Date(),
+					date_requested: new Date(),
+				},
+			]);
+			const mockUserDtos: UserDto[] = [
+				{
+					profile_name: "username",
+					userID: "friendID1",
+					username: "username",
+					profile_picture_url: "",
+					followers: {
+						count: 0,
+						data: [],
+					},
+					following: {
+						count: 0,
+						data: [],
+					},
+					links: {
+						count: 0,
+						data: [],
+					},
+					bio: "",
+					current_song: new SongInfoDto(),
+					current_room_id: "",
+					fav_genres: new GenresWithCount(),
+					fav_songs: new SongInfosWithCount(),
+					fav_rooms: new RoomsData(),
+					recent_rooms: new RoomsData(),
+					friendship: new UserFriendship(),
+					relationship: "pending",
+				},
+			];
+			jest
+				.spyOn(dtoGenService, "generateMultipleUserDto")
+				.mockResolvedValueOnce(mockUserDtos);
+
+			const result = await usersService.getFriendRequests("userID");
+			expect(result).toEqual(mockUserDtos);
 		});
 	});
 });

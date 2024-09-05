@@ -400,6 +400,7 @@ export const mockPrismaService = {
 
 export const mockDtoGenService = {
 	generateMultipleRoomDto: jest.fn(),
+	generateMultipleUserDto: jest.fn(),
 	// mock properties and methods as needed
 };
 
@@ -412,5 +413,8 @@ export const mockUsersService = {
 };
 
 export const mockDbUtilsService = {
+	getFriendRequests: jest.fn(),
+	userExists: jest.fn(),
+	isFollowing: jest.fn(),
 	// mock properties and methods as needed
 };
