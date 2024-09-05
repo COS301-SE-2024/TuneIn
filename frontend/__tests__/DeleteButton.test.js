@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import DeleteButton from "../app/components/DeleteButton"; // Adjust the import path if necessary

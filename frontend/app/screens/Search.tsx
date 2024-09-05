@@ -26,7 +26,7 @@ import Dropdown from "../components/Dropdown";
 // import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
-import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
+// import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
 
 type SearchResult = {
@@ -37,21 +37,21 @@ type SearchResult = {
 	userData?: User;
 };
 
-const roomFilterCategories = [
-	{ id: "roomName", label: "Room Name" },
-	{ id: "username", label: "Host" },
-	{ id: "participationCount", label: "Participation Count" },
-	{ id: "description", label: "Description" },
-	{ id: "isTemporary", label: "Temporary" },
-	{ id: "isPrivate", label: "Private" },
-	{ id: "isScheduled", label: "Scheduled" },
-	{ id: "startDate", label: "Start Date" },
-	//   { id: 'endDate', label: 'End Date' },
-	{ id: "language", label: "Language" },
-	{ id: "explicit", label: "Explicit" },
-	{ id: "nsfw", label: "NSFW" },
-	{ id: "tags", label: "Tags" },
-];
+// const roomFilterCategories = [
+// 	{ id: "roomName", label: "Room Name" },
+// 	{ id: "username", label: "Host" },
+// 	{ id: "participationCount", label: "Participation Count" },
+// 	{ id: "description", label: "Description" },
+// 	{ id: "isTemporary", label: "Temporary" },
+// 	{ id: "isPrivate", label: "Private" },
+// 	{ id: "isScheduled", label: "Scheduled" },
+// 	{ id: "startDate", label: "Start Date" },
+// 	//   { id: 'endDate', label: 'End Date' },
+// 	{ id: "language", label: "Language" },
+// 	{ id: "explicit", label: "Explicit" },
+// 	{ id: "nsfw", label: "NSFW" },
+// 	{ id: "tags", label: "Tags" },
+// ];
 // Sample genre data with additional genres
 let genres: string[] = [
 	"Rock",
@@ -106,7 +106,7 @@ const Search: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	// const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [filter, setFilter] = useState("room"); // Default to "room"
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
 	const [explicit, setExplicit] = useState(false);
@@ -125,60 +125,60 @@ const Search: React.FC = () => {
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
-	const mockResults: SearchResult[] = [
-		{
-			id: "1",
-			type: "room",
-			name: "Room 1",
-			roomData: {
-				roomID: "1",
-				backgroundImage:
-					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-				name: "Room 1",
-				description: "Description 1",
-				userID: "1",
-				tags: [],
-			},
-		},
-		{
-			id: "2",
-			type: "user",
-			name: "User 1",
-			userData: {
-				id: "1",
-				profile_picture_url:
-					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-				profile_name: "User 1",
-				username: "user1",
-			},
-		},
-		{
-			id: "3",
-			type: "room",
-			name: "Room 2",
-			roomData: {
-				roomID: "2",
-				backgroundImage:
-					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-				name: "Room 2",
-				description: "Description 2",
-				userID: "2",
-				tags: [],
-			},
-		},
-		{
-			id: "4",
-			type: "user",
-			name: "User 2",
-			userData: {
-				id: "2",
-				profile_picture_url:
-					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-				profile_name: "User 2",
-				username: "user2",
-			},
-		},
-	];
+	// const mockResults: SearchResult[] = [
+	// 	{
+	// 		id: "1",
+	// 		type: "room",
+	// 		name: "Room 1",
+	// 		roomData: {
+	// 			roomID: "1",
+	// 			backgroundImage:
+	// 				"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
+	// 			name: "Room 1",
+	// 			description: "Description 1",
+	// 			userID: "1",
+	// 			tags: [],
+	// 		},
+	// 	},
+	// 	{
+	// 		id: "2",
+	// 		type: "user",
+	// 		name: "User 1",
+	// 		userData: {
+	// 			id: "1",
+	// 			profile_picture_url:
+	// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+	// 			profile_name: "User 1",
+	// 			username: "user1",
+	// 		},
+	// 	},
+	// 	{
+	// 		id: "3",
+	// 		type: "room",
+	// 		name: "Room 2",
+	// 		roomData: {
+	// 			roomID: "2",
+	// 			backgroundImage:
+	// 				"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
+	// 			name: "Room 2",
+	// 			description: "Description 2",
+	// 			userID: "2",
+	// 			tags: [],
+	// 		},
+	// 	},
+	// 	{
+	// 		id: "4",
+	// 		type: "user",
+	// 		name: "User 2",
+	// 		userData: {
+	// 			id: "2",
+	// 			profile_picture_url:
+	// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+	// 			profile_name: "User 2",
+	// 			username: "user2",
+	// 		},
+	// 	},
+	// ];
 
 	const handleSearch = async () => {
 		console.log("Search Filter: " + filter);

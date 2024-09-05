@@ -3,9 +3,9 @@ import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
-import Fuse from "fuse.js";
+// import Fuse from "fuse.js";
 
 // Mocking modules
 jest.mock("expo-router", () => ({
@@ -96,32 +96,32 @@ const roomMock = [
 	},
 ];
 
-const userMock = [
-	{
-		id: "2",
-		type: "user",
-		name: "User 1",
-		userData: {
-			id: "1",
-			profile_picture_url:
-				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-			profile_name: "User 1",
-			username: "user1",
-		},
-	},
-	{
-		id: "4",
-		type: "user",
-		name: "User 2",
-		userData: {
-			id: "2",
-			profile_picture_url:
-				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-			profile_name: "User 2",
-			username: "user2",
-		},
-	},
-];
+// const userMock = [
+// 	{
+// 		id: "2",
+// 		type: "user",
+// 		name: "User 1",
+// 		userData: {
+// 			id: "1",
+// 			profile_picture_url:
+// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+// 			profile_name: "User 1",
+// 			username: "user1",
+// 		},
+// 	},
+// 	{
+// 		id: "4",
+// 		type: "user",
+// 		name: "User 2",
+// 		userData: {
+// 			id: "2",
+// 			profile_picture_url:
+// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+// 			profile_name: "User 2",
+// 			username: "user2",
+// 		},
+// 	},
+// ];
 
 describe("Search Component", () => {
 	beforeEach(() => {
@@ -242,7 +242,7 @@ describe("Search Component", () => {
 	it("should search with all room filters", async () => {
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: ["jazz", "rock"] });
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
-		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
 		// Simulate filter switches

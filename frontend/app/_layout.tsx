@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
 import { StatusBar, View, StyleSheet } from "react-native";
-import TopNavBar from "../app/components/TopNavBar";
+// import TopNavBar from "../app/components/TopNavBar";
 import { colors } from "../app/styles/colors";
 import { APIProvider } from "./APIContext";
 
