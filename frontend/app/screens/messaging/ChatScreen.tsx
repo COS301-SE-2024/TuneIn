@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -18,7 +18,6 @@ import { live, DirectMessage, instanceExists } from "../../services/Live";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
-import { Room } from "../../models/Room"; // Assuming you have a Room type defined
 
 const ChatScreen = () => {
 	const [self, setSelf] = useState<UserDto>();
@@ -32,34 +31,14 @@ const ChatScreen = () => {
 	const u: string = Array.isArray(username) ? username[0] : username;
 	console.log("Username:", u);
 
-	// Function to get users
-	const getUsers = async () => {
-		try {
-			const token = await auth.getToken();
-			const userPromises = [
-				axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-				axios.get(`${utils.API_BASE_URL}/users/${u}`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			];
-			const [selfResponse, otherUserResponse] = await Promise.all(userPromises);
-			return [selfResponse.data as UserDto, otherUserResponse.data as UserDto];
-		} catch (error) {
-			console.error("Error fetching users' information", error);
-			throw error;
-		}
-	};
-
 	// Clean up function
-	const cleanup = async () => {
+	const cleanup = useCallback(async () => {
 		console.log("Cleaning up DM");
 		if (connected) {
 			console.log("Leaving DM");
 			await live.leaveDM();
 		}
-	};
+	}, [connected]); // Dependency array for cleanup
 
 	// Fetch messages
 	useEffect(() => {
@@ -71,35 +50,57 @@ const ChatScreen = () => {
 				live.requestDMHistory(u);
 			}
 		}
-	}, [messages]);
+	}, [messages, u]);
 
 	// Initialize users and messaging setup
 	useEffect(() => {
-		const initialize = async () => {
+		const getUsers = async () => {
 			try {
-				if (instanceExists()) {
-					await live.initialiseSocket();
-				}
-				const [fetchedSelf, fetchedOtherUser] = await getUsers();
-				setSelf(fetchedSelf);
-				setOtherUser(fetchedOtherUser);
-				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
-				console.log(self);
-				console.log(otherUser);
+				const token = await auth.getToken();
+				const userPromises = [
+					axios.get(`${utils.API_BASE_URL}/users`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+					axios.get(`${utils.API_BASE_URL}/users/${u}`, {
+						headers: { Authorization: `Bearer ${token}` },
+					}),
+				];
+				const [selfResponse, otherUserResponse] =
+					await Promise.all(userPromises);
+				setSelf(selfResponse.data as UserDto);
+				setOtherUser(otherUserResponse.data as UserDto);
+				console.log(
+					"Fetched users:",
+					selfResponse.data,
+					otherUserResponse.data,
+				);
 				await live.enterDM(
-					fetchedSelf.userID,
-					fetchedOtherUser.userID,
+					selfResponse.data.userID,
+					otherUserResponse.data.userID,
 					setMessages,
 					setConnected,
 				);
 				if (!live.receivedDMHistory()) {
-					live.requestDMHistory(fetchedOtherUser.userID);
+					live.requestDMHistory(otherUserResponse.data.userID);
 				}
 			} catch (error) {
 				console.error("Failed to setup DM", error);
 			}
 		};
+
+		const initialize = async () => {
+			try {
+				if (instanceExists()) {
+					await live.initialiseSocket();
+				}
+				await getUsers();
+			} catch (error) {
+				console.error("Failed to setup DM", error);
+			}
+		};
+
 		initialize();
+
 		return () => {
 			cleanup()
 				.then(() => {
@@ -109,7 +110,7 @@ const ChatScreen = () => {
 					console.error("Failed to clean up DM", error);
 				});
 		};
-	}, []);
+	}, [u, cleanup]); // Ensure that `u` and `cleanup` are dependencies
 
 	// Function to send a standard message
 	const handleSend = () => {
@@ -168,7 +169,6 @@ const ChatScreen = () => {
 			<FlatList
 				data={messages}
 				keyExtractor={(item) => {
-					// Ensure the keyExtractor always returns a string
 					if (item.message.index !== undefined) {
 						return item.message.index.toString();
 					} else if (item.message.room?.roomID) {
