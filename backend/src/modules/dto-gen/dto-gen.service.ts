@@ -80,7 +80,7 @@ export class DtoGenService {
 				orderBy: {
 					room_join_time: "desc", // Sort by most recent join time
 				},
-				take: 10, // Limit to the latest 10 entries
+				take: 50, // Limit to the latest 10 entries
 				select: {
 					room_id: true, // Only select the room ID
 				},
