@@ -234,7 +234,7 @@ const ProfileScreen: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				// console.log("Fetching profile info data: " + JSON.stringify(response));
+				console.log("Fetching profile info data: " + JSON.stringify(response));
 				setUserData(response.data);
 				if (ownsProfile) {
 					// console.log("Profile return: " + JSON.stringify(response.data.fav_genres));
@@ -671,8 +671,10 @@ const ProfileScreen: React.FC = () => {
 							<FavoriteSongs
 								key={song.spotify_id}
 								songTitle={song.title}
-								artist={song.artists}
-								duration={song.duration ? createTimeString(song.duration) : null}
+								artist={song.artists.join(", ")}
+								duration={
+									song.duration ? createTimeString(song.duration) : null
+								}
 								albumArt={song.cover}
 								onPress={() => {}}
 							/>
@@ -735,7 +737,7 @@ const ProfileScreen: React.FC = () => {
 							>
 								Recent Rooms
 							</Text>
-							{primaryProfileData.recent_rooms.count > 9 && (
+							{primaryProfileData.recent_rooms.count > 10 && (
 								<TouchableOpacity
 									onPress={() => {
 										navigateToMore(
