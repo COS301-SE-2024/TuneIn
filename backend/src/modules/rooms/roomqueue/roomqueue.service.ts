@@ -147,11 +147,20 @@ export class RoomSong {
 
 	swapVote(userID: string, swapTime: Date): boolean {
 		const index = this.votes.findIndex((v) => v.userID === userID);
-		if (index === -1) {
+		if (
+			index === -1 ||
+			this.votes[index] === null ||
+			this.votes[index] === undefined
+		) {
 			return false;
 		}
-		this.votes[index].isUpvote = !this.votes[index].isUpvote;
-		this.votes[index].createdAt = swapTime;
+		const vote = this.votes[index];
+		if (!vote || vote === null) {
+			return false;
+		}
+		vote.isUpvote = !vote.isUpvote;
+		vote.createdAt = swapTime;
+		this.votes[index] = vote;
 		this._score = this.calculateScore();
 		return true;
 	}
@@ -278,15 +287,17 @@ export class ActiveRoom {
 		this.initQueues();
 		for (let i = 0; i < songs.length; i++) {
 			const song = songs[i];
-			if (song.spotifyID === null) {
-				throw new Error("Song does not have a spotify id");
-			}
+			if (song) {
+				if (song.spotifyID === null) {
+					throw new Error("Song does not have a spotify id");
+				}
 
-			const startTime = song.getPlaybackStartTime();
-			if (startTime !== null && startTime.valueOf() < Date.now().valueOf()) {
-				this.historicQueue.enqueue(song);
-			} else {
-				this.queue.enqueue(song);
+				const startTime = song.getPlaybackStartTime();
+				if (startTime !== null && startTime.valueOf() < Date.now().valueOf()) {
+					this.historicQueue.enqueue(song);
+				} else {
+					this.queue.enqueue(song);
+				}
 			}
 		}
 		this.getCurrentOrNextSong();
@@ -318,28 +329,30 @@ export class ActiveRoom {
 				// assign song to room owner
 				songEnqueuers.push(this.room.creator.userID);
 			} else {
-				const enqueuer = queueItem.vote[0].user_id;
-				songEnqueuers.push(enqueuer);
+				if (queueItem.vote[0]) {
+					const enqueuer = queueItem.vote[0].user_id;
+					songEnqueuers.push(enqueuer);
+				}
 			}
 		}
 
 		const rs: RoomSong[] = [];
 		for (let i = 0; i < queueItems.length; i++) {
 			const queueItem = queueItems[i];
-			const songEnqueuer = songEnqueuers[i];
-			if (queueItem.song.spotify_id === null) {
-				throw new Error("Song does not have a spotify id");
+			if (queueItem) {
+				const songEnqueuer = songEnqueuers[i];
+				if (queueItem.song.spotify_id && songEnqueuer) {
+					const song = new RoomSong(
+						queueItem.song.spotify_id,
+						songEnqueuer,
+						queueItem.song_id,
+						queueItem.insert_time,
+						queueItem.start_time,
+					);
+					song.addVotes(queueItem.vote);
+					rs.push(song);
+				}
 			}
-
-			const song = new RoomSong(
-				queueItem.song.spotify_id,
-				songEnqueuer,
-				queueItem.song_id,
-				queueItem.insert_time,
-				queueItem.start_time,
-			);
-			song.addVotes(queueItem.vote);
-			rs.push(song);
 		}
 		await this.reflushRoomSongs(rs);
 	}
@@ -360,6 +373,7 @@ export class ActiveRoom {
 		murLockService: MurLockService,
 	) {
 		//flush queue to db
+		/*
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			5000,
@@ -498,6 +512,7 @@ export class ActiveRoom {
 				});
 			},
 		);
+		*/
 	}
 
 	async getCurrentOrNextSong(): Promise<RoomSong | null> {
@@ -548,7 +563,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-				if (index === -1) {
+				if (index === -1 || !songs[index]) {
 					result = false;
 					return;
 				}
@@ -571,7 +586,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-				if (index === -1) {
+				if (index === -1 || songs[index] === null || !songs[index]) {
 					result = false;
 					return;
 				}
@@ -596,7 +611,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-				if (index === -1) {
+				if (index === -1 || songs[index] === null || !songs[index]) {
 					result = false;
 					return;
 				}
@@ -644,7 +659,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-				if (index === -1) {
+				if (index === -1 || songs[index] === null || !songs[index]) {
 					result = false;
 					return;
 				}
@@ -692,25 +707,30 @@ export class ActiveRoom {
 				//get spotify info for all songs
 				this.updateQueue();
 				const songs = this.queue.toArray();
-				const songsWithoutInfo: number[] = [];
+				const songsWithoutInfo: RoomSong[] = [];
 				for (let i = 0, n = songs.length; i < n; i++) {
-					if (!songs[i].spotifyInfo) {
-						songsWithoutInfo.push(i);
+					const s = songs[i];
+					if (s && s.spotifyInfo === null) {
+						songsWithoutInfo.push(s);
 					}
 				}
 				if (songsWithoutInfo.length > 0) {
-					const songIDs: string[] = songsWithoutInfo.map(
-						(i) => songs[i].spotifyID,
-					);
+					const songIDs: string[] = [];
+					for (const song of songsWithoutInfo) {
+						if (song && song.spotifyID !== null) {
+							songIDs.push(song.spotifyID);
+						}
+					}
 					const songInfo: Spotify.Track[] = [];
 					for (let i = 0, n = songIDs.length; i < n; i += 50) {
 						const ids = songIDs.slice(i, i + 50);
 						const info = await api.tracks.get(ids);
 						songInfo.push(...info);
 					}
-					for (const i of songsWithoutInfo) {
-						const info = songInfo.find((s) => s.id === songs[i].spotifyID);
-						if (info) {
+					for (let i = 0, n = songs.length; i < n; i++) {
+						const song = songs[i];
+						const info = songInfo.find((s) => song && s.id === song.spotifyID);
+						if (info && songs[i]) {
 							songs[i].spotifyInfo = info;
 						}
 					}
