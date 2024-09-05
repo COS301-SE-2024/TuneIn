@@ -18,9 +18,13 @@ const FavoriteSongs = ({
 					<Text style={styles.songTitle}>{songTitle}</Text>
 					<Text style={styles.artist}>{artist}</Text>
 				</View>
-				{duration && (<Text style={styles.duration}>{duration}</Text>)}
+				{duration && <Text style={styles.duration}>{duration}</Text>}
 				{toEdit && (
-					<TouchableOpacity onPress={onPress} style={styles.icon} testID={`${songTitle}-song-close`}>
+					<TouchableOpacity
+						onPress={onPress}
+						style={styles.icon}
+						testID={`${songTitle}-song-close`}
+					>
 						<MaterialIcons name={"close"} size={24} color="black" />
 					</TouchableOpacity>
 				)}

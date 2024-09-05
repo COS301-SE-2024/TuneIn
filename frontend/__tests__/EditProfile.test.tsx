@@ -91,8 +91,10 @@ describe("ProfileScreen", () => {
 			fav_rooms: { count: 0, data: [] },
 			recent_rooms: { count: 0, data: [] },
 		};
-		(useLocalSearchParams as jest.Mock).mockReturnValue(({ profile: JSON.stringify(mockProfileData) }));
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			profile: JSON.stringify(mockProfileData),
+		});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const mockPlayerContextValue = {
 			userData: {
@@ -133,12 +135,12 @@ describe("ProfileScreen", () => {
 			</PlayerContextProviderMock>,
 		);
 
-			expect(getByDisplayValue("John Doe")).toBeTruthy;
-			expect(getByDisplayValue("johndoe")).toBeTruthy;
-			expect(getByDisplayValue("Mock bio")).toBeTruthy;
-			expect(getByDisplayValue("https://example.com")).toBeTruthy;
-			expect(getByText("j-pop")).toBeTruthy;
-			expect(getByText("STYX HELIX")).toBeTruthy;
+		expect(getByDisplayValue("John Doe")).toBeTruthy;
+		expect(getByDisplayValue("johndoe")).toBeTruthy;
+		expect(getByDisplayValue("Mock bio")).toBeTruthy;
+		expect(getByDisplayValue("https://example.com")).toBeTruthy;
+		expect(getByText("j-pop")).toBeTruthy;
+		expect(getByText("STYX HELIX")).toBeTruthy;
 	});
 
 	it("handles update", async () => {
@@ -209,7 +211,7 @@ describe("ProfileScreen", () => {
 		};
 
 		(axios.patch as jest.Mock).mockImplementation(jest.fn());
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const { getByTestId, getByDisplayValue } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
@@ -260,7 +262,7 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			profile: JSON.stringify(mockProfileData),
 		});
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const mockPlayerContextValue = {
 			userData: {
@@ -306,10 +308,10 @@ describe("ProfileScreen", () => {
 		const bio = getByDisplayValue("Mock bio");
 		const link = getByDisplayValue("https://example.com");
 
-		fireEvent.changeText(name, "Jane Doe" );
-		fireEvent.changeText(username, "janedoe" );
-		fireEvent.changeText(bio, "New bio" );
-		fireEvent.changeText(link, "https://newexample.com" );
+		fireEvent.changeText(name, "Jane Doe");
+		fireEvent.changeText(username, "janedoe");
+		fireEvent.changeText(bio, "New bio");
+		fireEvent.changeText(link, "https://newexample.com");
 
 		expect(getByDisplayValue("Jane Doe")).toBeTruthy();
 		expect(getByDisplayValue("janedoe")).toBeTruthy();
@@ -435,7 +437,7 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			profile: JSON.stringify(mockProfileData),
 		});
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const mockPlayerContextValue = {
 			userData: {
@@ -603,7 +605,7 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			profile: JSON.stringify(mockProfileData),
 		});
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const mockPlayerContextValue = {
 			userData: {
@@ -684,7 +686,7 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			profile: JSON.stringify(mockProfileData),
 		});
-		(axios.get as jest.Mock).mockResolvedValue({data: ["genre"]});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
 
 		const mockPlayerContextValue = {
 			userData: {

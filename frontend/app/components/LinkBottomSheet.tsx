@@ -83,11 +83,7 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 					<View style={styles.textContainer}>
 						<Text style={styles.modalTitle}>Links</Text>
 						{Object.keys(links).map((type, index) => (
-							<Links
-								key={index}
-								mediaPlatform={type}
-								links={links[type]}
-							/>
+							<Links key={index} mediaPlatform={type} links={links[type]} />
 						))}
 					</View>
 				</Animated.View>
@@ -108,12 +104,11 @@ const Links = ({ mediaPlatform, links }) => {
 
 	return (
 		<View>
-			<Text style={styles.mediaHeader}>{capitalizeFirstLetter(mediaPlatform)}</Text>
+			<Text style={styles.mediaHeader}>
+				{capitalizeFirstLetter(mediaPlatform)}
+			</Text>
 			{links.map((link, index) => (
-				<TouchableOpacity
-					key={index}
-					onPress={() => handleLinkPress(link)}
-				>
+				<TouchableOpacity key={index} onPress={() => handleLinkPress(link)}>
 					<Text style={styles.link}>{link}</Text>
 				</TouchableOpacity>
 			))}

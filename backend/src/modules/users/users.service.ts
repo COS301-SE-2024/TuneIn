@@ -252,8 +252,9 @@ export class UsersService {
 				songs.map((song) => [song.spotify_id, song.song_id as string]),
 			);
 
-			const missingSongs = newSongs.filter((song) => !songMap.has(song.spotify_id));
-
+			const missingSongs = newSongs.filter(
+				(song) => !songMap.has(song.spotify_id),
+			);
 
 			// Step 3: Insert missing songs into the database
 			if (missingSongs.length > 0) {
@@ -271,7 +272,9 @@ export class UsersService {
 
 				// Re-fetch the newly added songs to update the songMap
 				const newlyInsertedSongs = await prisma.song.findMany({
-					where: { spotify_id: { in: missingSongs.map((song) => song.spotify_id) } },
+					where: {
+						spotify_id: { in: missingSongs.map((song) => song.spotify_id) },
+					},
 					select: { song_id: true, spotify_id: true },
 				});
 

@@ -4,7 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 
 const EditGenreBubble = ({ text, onPress }) => {
 	return (
-		<TouchableOpacity style={styles.container} onPress={onPress} testID={`${text}-genre-close`}>
+		<TouchableOpacity
+			style={styles.container}
+			onPress={onPress}
+			testID={`${text}-genre-close`}
+		>
 			<Text style={styles.text}>{text}</Text>
 			<Ionicons name="close" size={16} color="black" style={styles.icon} />
 		</TouchableOpacity>

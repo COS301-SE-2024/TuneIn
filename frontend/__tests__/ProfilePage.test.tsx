@@ -297,7 +297,7 @@ describe("ProfileScreen", () => {
 			},
 			fav_genres: { count: 1, data: [] },
 			fav_songs: {
-				count: 3,
+				count: 5,
 				data: [
 					{
 						title: "Scherzo No. 3 in C-Sharp Minor, Op. 39",
