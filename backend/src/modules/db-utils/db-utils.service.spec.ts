@@ -545,4 +545,36 @@ describe("DbUtilsService", () => {
 			expect(result).toBe(true);
 		});
 	});
+	describe("getFriendRequests", () => {
+		it("should return null if no friend requests are found", async () => {
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(null);
+
+			const result = await service.getFriendRequests("userID");
+			expect(result).toBeNull();
+		});
+
+		it("should return an array of friend requests if found", async () => {
+			const mockFriendRequests = [
+				{ friend1: "friendID1", friend2: "userID", is_pending: true },
+				{ friend1: "friendID2", friend2: "userID", is_pending: true },
+			];
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(mockFriendRequests);
+
+			const result = await service.getFriendRequests("userID");
+			expect(result).toEqual(mockFriendRequests);
+		});
+
+		it("should return an empty array if the result is an empty array", async () => {
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce([]);
+
+			const result = await service.getFriendRequests("userID");
+			expect(result).toEqual([]);
+		});
+	});
 });
