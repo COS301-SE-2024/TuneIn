@@ -1227,7 +1227,7 @@ export class RoomsController {
 
 	/**
 	 * Evaluate if a room can be split
-	 * 
+	 *
 	 * @param roomID - The ID of the room to evaluate.
 	 * @returns An array of the possible genres (if possible) or 4xx if not possible.
 	 */
@@ -1247,15 +1247,16 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
-		description: "An array of the possible genres (if possible) or an empty array if not possible.",
+		description:
+			"An array of the possible genres (if possible) or an empty array if not possible.",
 	})
 	async checkRoomSplit(@Param("roomID") roomID: string): Promise<string[]> {
-		await this.roomsService.canSplitRoom(roomID);
+		return await this.roomsService.canSplitRoom(roomID);
 	}
 
 	/**
 	 * Returns a RoomDto with info about its split children
-	 * 
+	 *
 	 * @param roomID - The ID of the room to get the split children for.
 	 * @returns The RoomDto.
 	 */

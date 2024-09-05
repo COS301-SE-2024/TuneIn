@@ -17,5 +17,8 @@ if [ ! -f "$MAIN_FILE" ]; then
   exit 1
 fi
 
+# Allow the application to use more memory
+export NODE_OPTIONS="--max-old-space-size=2048"
+
 # Start the application with PM2
 pm2 startOrRestart ecosystem.config.js --update-env

@@ -36,15 +36,22 @@ export class UsersService {
 		if (!createUserDto.username) {
 			throw new HttpException("Username is required", HttpStatus.BAD_REQUEST);
 		}
+		if (!createUserDto.bio) {
+			throw new HttpException("Bio is required", HttpStatus.BAD_REQUEST);
+		}
 		const user: Prisma.usersCreateInput = {
-			user_id: createUserDto.userID,
 			username: createUserDto.username,
 			bio: createUserDto.bio,
-			profile_picture: createUserDto.profile_picture_url,
-			preferences: {
-				fav_genres: createUserDto.fav_genres?.data || undefined,
-			},
 		};
+		if (createUserDto.userID) {
+			user.user_id = createUserDto.userID;
+		}
+		if (createUserDto.profile_picture_url) {
+			user.profile_picture = createUserDto.profile_picture_url;
+		}
+		if (createUserDto.profile_name) {
+			user.full_name = createUserDto.profile_name;
+		}
 		return this.prisma.users.create({ data: user });
 	}
 
@@ -1138,13 +1145,15 @@ export class UsersService {
 		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			if (dm.message.sender !== userID) {
-				if (!uniqueUserIDs.has(dm.message.sender)) {
-					uniqueUserIDs.set(dm.message.sender, false);
-				}
-			} else if (dm.recipient !== userID) {
-				if (!uniqueUserIDs.has(dm.recipient)) {
-					uniqueUserIDs.set(dm.recipient, false);
+			if (dm) {
+				if (dm.message.sender !== userID) {
+					if (!uniqueUserIDs.has(dm.message.sender)) {
+						uniqueUserIDs.set(dm.message.sender, false);
+					}
+				} else if (dm.recipient !== userID) {
+					if (!uniqueUserIDs.has(dm.recipient)) {
+						uniqueUserIDs.set(dm.recipient, false);
+					}
 				}
 			}
 		}
@@ -1159,16 +1168,18 @@ export class UsersService {
 		} & PrismaTypes.private_message)[] = [];
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			const recipient: string = dm.recipient;
-			const sender: string = dm.message.sender;
-			const r = uniqueUserIDs.get(recipient);
-			const s = uniqueUserIDs.get(sender);
-			if (r !== undefined && r === false) {
-				uniqueUserIDs.set(recipient, true);
-				chats.push(dm);
-			} else if (s !== undefined && s === false) {
-				uniqueUserIDs.set(sender, true);
-				chats.push(dm);
+			if (dm) {
+				const recipient: string = dm.recipient;
+				const sender: string = dm.message.sender;
+				const r = uniqueUserIDs.get(recipient);
+				const s = uniqueUserIDs.get(sender);
+				if (r !== undefined && r === false) {
+					uniqueUserIDs.set(recipient, true);
+					chats.push(dm);
+				} else if (s !== undefined && s === false) {
+					uniqueUserIDs.set(sender, true);
+					chats.push(dm);
+				}
 			}
 		}
 		const result: DirectMessageDto[] =
