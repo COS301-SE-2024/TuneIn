@@ -306,11 +306,18 @@ export class SpotifyService {
 	getLargestImage(images: Spotify.Image[]): Spotify.Image {
 		let largest = 0;
 		for (let i = 0; i < images.length; i++) {
-			if (images[i].height * images[i].width > largest) {
-				largest = i;
+			const img = images[i];
+			if (img) {
+				if (img.height * img.width > largest) {
+					largest = i;
+				}
 			}
 		}
-		return images[largest];
+		const result = images[largest];
+		if (!result) {
+			throw new Error("Failed to find largest image");
+		}
+		return result;
 	}
 
 	async addTrackToDB(track: Spotify.Track): Promise<PrismaTypes.song> {

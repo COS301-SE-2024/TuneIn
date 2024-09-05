@@ -7,7 +7,7 @@ import * as PrismaTypes from "@prisma/client";
 
 interface liveChatUser {
 	user: UserDto;
-	roomID?: string;
+	roomID: string | undefined;
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class RoomUsersService {
 			}
 			this.connectedUsers.set(socketId, { user, roomID });
 		} else {
-			this.connectedUsers.set(socketId, { user });
+			this.connectedUsers.set(socketId, { user, roomID: undefined });
 		}
 
 		console.log("Added connected user: " + user);

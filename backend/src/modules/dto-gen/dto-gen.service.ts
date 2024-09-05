@@ -283,6 +283,7 @@ export class DtoGenService {
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
 			tags: room.tags || [],
+			childrenRoomIDs: [],
 		};
 
 		if (scheduledRoom && scheduledRoom !== null) {
@@ -341,6 +342,7 @@ export class DtoGenService {
 				duration: 0,
 			},
 			tags: room.tags || [],
+			childrenRoomIDs: [],
 		};
 
 		const creator = await this.generateUserDto(room.room_creator, false);
@@ -416,15 +418,8 @@ export class DtoGenService {
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
-					current_song: {
-						songID: "",
-						title: "",
-						artists: [],
-						cover: "",
-						start_time: new Date(),
-						duration: 0,
-					},
 					tags: r.tags || [],
+					childrenRoomIDs: [],
 				};
 				result.push(room);
 			}
@@ -480,8 +475,11 @@ export class DtoGenService {
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
 		const senders: Map<string, UserDto> = new Map<string, UserDto>();
 		for (let i = 0; i < uniqueSenderIDs.length; i++) {
-			const sender: UserDto = await this.generateUserDto(uniqueSenderIDs[i]);
-			senders.set(uniqueSenderIDs[i], sender);
+			const id = uniqueSenderIDs[i];
+			if (id) {
+				const sender: UserDto = await this.generateUserDto(id);
+				senders.set(id, sender);
+			}
 		}
 
 		const roomIDs = await this.prisma.room_message.findMany({
@@ -591,7 +589,31 @@ export class DtoGenService {
 							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
 						);
 					}
-					return { user1: users[0], user2: users[1] };
+					if (
+						!users[0] ||
+						users[0] === null ||
+						!users[1] ||
+						users[1] === null
+					) {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
+						);
+					}
+					if (
+						users[0].userID === participant1 &&
+						users[1].userID === participant2
+					) {
+						return { user1: users[0], user2: users[1] };
+					} else if (
+						users[0].userID === participant2 &&
+						users[1].userID === participant1
+					) {
+						return { user1: users[1], user2: users[0] };
+					} else {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
+						);
+					}
 				},
 			);
 

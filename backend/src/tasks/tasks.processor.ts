@@ -39,14 +39,12 @@ export class TasksProcessor {
 		for (const track of likedSongs) {
 			// const audioFeatures: Spotify.AudioFeatures =
 			// 	await this.spotifyService.getAudioFeatures(tk.tokens, track.track.id);
+			const genre = track.track.album.genres[0];
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
 				artists: track.track.artists.map((artist) => artist.name),
-				genre:
-					track.track.album.genres && track.track.album.genres.length > 0
-						? track.track.album.genres[0]
-						: "Unknown",
+				genre: genre !== undefined && genre !== null ? genre : "Unknown",
 				// audio_features: JSON.stringify(audioFeatures),
 				audio_features: {},
 				spotify_id: track.track.id,
