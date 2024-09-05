@@ -382,14 +382,17 @@ export class DbUtilsService {
 			}
 		}
 
-		const mutualFollowers: string[] = followingIDs.filter((id) =>
-			followerIDs.includes(id),
+		const mutualFollowers: string[] = followingIDs.filter(
+			(id) => followerIDs.includes(id) && id !== userID,
 		);
 
 		// potential friends are users who are mutual followers but not friends
 		const potentialFriends: PrismaTypes.users[] = [];
 		for (let i = 0; i < mutualFollowers.length; i++) {
-			const id = mutualFollowers[i];
+			const id: string | undefined = mutualFollowers[i];
+			if (id === undefined) {
+				continue;
+			}
 			console.log("ID: ", id);
 			if (!(await this.isFriendsOrPending(userID, id))) {
 				console.log("Not friends nor pending with: ", id);
@@ -549,20 +552,24 @@ export class DbUtilsService {
 
 		// query must look like this
 		// SELECT * FROM friends WHERE (friend1 = userID AND friend2 = accountFriendId) OR (friend1 = accountFriendId AND friend2 = userID) AND is_pending = false;
+		const where: any = {
+			OR: [
+				{
+					friend1: userID,
+					friend2: accountFriendId,
+				},
+				{
+					friend1: accountFriendId,
+					friend2: userID,
+				},
+			],
+		};
+
+		if (isPending !== undefined) {
+			where.is_pending = isPending;
+		}
 		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
-			where: {
-				OR: [
-					{
-						friend1: userID,
-						friend2: accountFriendId,
-					},
-					{
-						friend1: accountFriendId,
-						friend2: userID,
-					},
-				],
-				is_pending: isPending,
-			},
+			where: where,
 		});
 		console.log("Friends: ", friends);
 		if (!friends || friends === null) {
