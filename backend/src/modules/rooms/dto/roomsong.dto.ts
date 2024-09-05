@@ -16,6 +16,10 @@ export class RoomSongDto {
 	score?: number;
 
 	@ApiProperty()
+	@IsNumber()
+	index: number;
+
+	@ApiProperty()
 	@IsDate()
 	startTime?: Date;
 

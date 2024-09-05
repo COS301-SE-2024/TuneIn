@@ -1111,6 +1111,7 @@ class LiveSocketService {
 			song: {
 				spotifyID: "123",
 				userID: this.currentUser.userID,
+				index: -1,
 			},
 			roomID: this.currentRoom.roomID,
 			createdAt: new Date(),

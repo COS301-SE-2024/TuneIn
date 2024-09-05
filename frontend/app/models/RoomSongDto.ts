@@ -81,6 +81,7 @@ export type RoomSongDto = {
 	spotifyID: string;
 	userID: string;
 	score?: number;
+	index: number;
 	startTime?: Date;
 	track?: Track;
 };

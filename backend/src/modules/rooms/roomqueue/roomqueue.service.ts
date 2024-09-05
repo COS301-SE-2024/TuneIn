@@ -188,6 +188,7 @@ export class RoomSong {
 			spotifyID: this.spotifyID,
 			userID: this.userID,
 			score: this._score,
+			index: -1,
 		};
 		if (this.playbackStartTime) {
 			result.startTime = this.playbackStartTime;
@@ -319,6 +320,7 @@ export class ActiveRoom {
 	initQueues() {
 		//const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
 		//this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
+		this.queue = new PriorityQueue<RoomSong>(this.compareRoomSongs);
 		const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
 			const playbackTime: Date | null = song.getPlaybackStartTime();
 			if (!playbackTime || playbackTime === null) {
@@ -609,6 +611,7 @@ export class ActiveRoom {
 			5000,
 			async () => {
 				this.updateQueue();
+				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 				if (index === -1 || !songs[index]) {
@@ -636,6 +639,7 @@ export class ActiveRoom {
 			5000,
 			async () => {
 				this.updateQueue();
+				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
 				if (index === -1 || songs[index] === null || !songs[index]) {
@@ -647,6 +651,7 @@ export class ActiveRoom {
 					sortRoomSongs(songs),
 					this.compareRoomSongs,
 				);
+				this.printQueueBrief();
 			},
 		);
 		return result;
@@ -664,6 +669,7 @@ export class ActiveRoom {
 			5000,
 			async () => {
 				this.updateQueue();
+				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
 				if (index === -1 || songs[index] === null || !songs[index]) {
@@ -675,6 +681,7 @@ export class ActiveRoom {
 					sortRoomSongs(songs),
 					this.compareRoomSongs,
 				);
+				this.printQueueBrief();
 			},
 		);
 		return result;
@@ -735,15 +742,26 @@ export class ActiveRoom {
 
 	queueAsRoomSongDto(): RoomSongDto[] {
 		this.updateQueue();
-		return this.queue.toArray().map((s) => s.asRoomSongDto());
+		const tempQueue: RoomSong[] = this.queue.toArray();
+		const result: RoomSongDto[] = tempQueue.map((rs) => {
+			const i = tempQueue.indexOf(rs);
+			const s: RoomSongDto = rs.asRoomSongDto();
+			s.index = i;
+			return s;
+		});
+		return result;
 	}
 
 	songAsRoomSongDto(spotifyID: string): RoomSongDto | null {
-		const song = this.queue.toArray().find((s) => s.spotifyID === spotifyID);
+		const tempQueue: RoomSong[] = this.queue.toArray();
+		const song = tempQueue.find((s) => s.spotifyID === spotifyID);
 		if (!song || song === null) {
 			return null;
 		}
-		return song.asRoomSongDto();
+		const result: RoomSongDto = song.asRoomSongDto();
+		const i = tempQueue.indexOf(song);
+		result.index = i;
+		return result;
 	}
 
 	allVotes(): VoteDto[] {
@@ -856,6 +874,20 @@ export class ActiveRoom {
 	isEmpty(): boolean {
 		return this.queue.isEmpty();
 	}
+
+	printQueueBrief() {
+		const songs = this.queue.toArray();
+		console.log("Queue:");
+		for (const song of songs) {
+			console.log(
+				song.spotifyID +
+					" - score: " +
+					song.score +
+					" - insertTime: " +
+					song.insertTime,
+			);
+		}
+	}
 }
 
 @Injectable()
@@ -957,6 +989,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.upvoteSong",
 			);
 		}
+		console.log("upvoteSong for spotifyID: ", spotifyID);
 		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
@@ -981,6 +1014,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.downvoteSong",
 			);
 		}
+		console.log("upvoteSong for spotifyID: ", spotifyID);
 		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
