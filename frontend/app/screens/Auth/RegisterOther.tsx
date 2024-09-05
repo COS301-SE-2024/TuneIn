@@ -124,7 +124,7 @@ const RegisterOtherScreen: React.FC = () => {
 	console.log(promptAsync);
 
 	React.useEffect(() => {
-		console.log("Response:", response);
+		console.log("Response 2:", response);
 		if (response && response !== null) {
 			if (response?.type === "success") {
 				if (response.params.error) {
