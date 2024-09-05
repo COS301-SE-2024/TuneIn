@@ -68,6 +68,7 @@ const Selector: React.FC<SelectorProps> = ({
 									style={styles.filterOption}
 									onPress={() => {
 										onSelect(item);
+										setSearchQuery("");
 										onClose();
 									}}
 									testID={`${item}-genre-option`}
@@ -77,7 +78,13 @@ const Selector: React.FC<SelectorProps> = ({
 							)}
 						/>
 					</ScrollView>
-					<TouchableOpacity style={styles.closeButton} onPress={onClose}>
+					<TouchableOpacity
+						style={styles.closeButton}
+						onPress={() => {
+							setSearchQuery("");
+							onClose();
+						}}
+					>
 						<Text style={styles.filterText}>Close</Text>
 					</TouchableOpacity>
 				</View>
