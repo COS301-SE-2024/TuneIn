@@ -8,6 +8,8 @@ import {
 	MinPriorityQueue,
 	MaxPriorityQueue,
 	IGetCompareValue,
+	PriorityQueue,
+	ICompare,
 } from "@datastructures-js/priority-queue";
 import { RoomDto } from "../dto/room.dto";
 import { VoteDto } from "../dto/vote.dto";
@@ -260,10 +262,54 @@ export class RoomSong {
 	}
 }
 
+function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
+	console.log("###################################");
+	console.log("===================================");
+	console.log("SORTING QUEUE");
+	console.log("Pre-sorted queue:");
+	for (const song of queue) {
+		console.log(
+			song.spotifyID +
+				" - score: " +
+				song.score +
+				" - insertTime: " +
+				song.insertTime,
+		);
+	}
+	const tempQueue: RoomSong[] = queue;
+	tempQueue.sort((a, b) => {
+		if (a.score === b.score) {
+			return a.insertTime.valueOf() - b.insertTime.valueOf();
+		}
+		return b.score - a.score;
+	});
+	console.log("===================================");
+	console.log("Sorted queue:");
+	for (const song of tempQueue) {
+		console.log(
+			song.spotifyID +
+				" - score: " +
+				song.score +
+				" - insertTime: " +
+				song.insertTime,
+		);
+	}
+	console.log("===================================");
+	console.log("###################################");
+	return tempQueue;
+}
+
 export class ActiveRoom {
 	public readonly room: RoomDto;
-	private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
+	//private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
+	private queue: PriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
 	private historicQueue: MinPriorityQueue<RoomSong>; //priority queue of songs that have already been played
+	private compareRoomSongs: ICompare<RoomSong> = (a: RoomSong, b: RoomSong) => {
+		if (a.score === b.score) {
+			return a.insertTime.valueOf() - b.insertTime.valueOf();
+		}
+		return b.score - a.score;
+	};
 
 	constructor(room: RoomDto) {
 		this.room = room;
@@ -271,8 +317,8 @@ export class ActiveRoom {
 	}
 
 	initQueues() {
-		const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
-		this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
+		//const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
+		//this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
 		const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
 			const playbackTime: Date | null = song.getPlaybackStartTime();
 			if (!playbackTime || playbackTime === null) {
@@ -300,7 +346,6 @@ export class ActiveRoom {
 				}
 			}
 		}
-		this.getCurrentOrNextSong();
 	}
 
 	async reloadQueue(prisma: PrismaService) {
@@ -359,7 +404,10 @@ export class ActiveRoom {
 
 	updateQueue() {
 		//update queue
-		this.queue = MaxPriorityQueue.fromArray(this.queue.toArray());
+		this.queue = PriorityQueue.fromArray(
+			sortRoomSongs(this.queue.toArray()),
+			this.compareRoomSongs,
+		);
 	}
 
 	getQueueLockName(): string {
@@ -568,7 +616,11 @@ export class ActiveRoom {
 					return;
 				}
 				result = songs[index].addVote(vote);
-				this.queue = MaxPriorityQueue.fromArray(songs);
+				this.queue = PriorityQueue.fromArray(
+					sortRoomSongs(songs),
+					this.compareRoomSongs,
+				);
+				this.printQueueBrief();
 			},
 		);
 		return result;
@@ -591,7 +643,10 @@ export class ActiveRoom {
 					return;
 				}
 				result = songs[index].removeVote(vote);
-				this.queue = MaxPriorityQueue.fromArray(songs);
+				this.queue = PriorityQueue.fromArray(
+					sortRoomSongs(songs),
+					this.compareRoomSongs,
+				);
 			},
 		);
 		return result;
@@ -616,7 +671,10 @@ export class ActiveRoom {
 					return;
 				}
 				result = songs[index].swapVote(userID, swapTime);
-				this.queue = MaxPriorityQueue.fromArray(songs);
+				this.queue = PriorityQueue.fromArray(
+					sortRoomSongs(songs),
+					this.compareRoomSongs,
+				);
 			},
 		);
 		return result;
@@ -668,7 +726,7 @@ export class ActiveRoom {
 					return;
 				}
 				songs.splice(index, 1);
-				this.queue = MaxPriorityQueue.fromArray(songs);
+				this.queue = PriorityQueue.fromArray(songs, this.compareRoomSongs);
 				result = true;
 			},
 		);
@@ -735,7 +793,10 @@ export class ActiveRoom {
 						}
 					}
 					//update queue
-					this.queue = MaxPriorityQueue.fromArray(songs);
+					this.queue = PriorityQueue.fromArray(
+						sortRoomSongs(songs),
+						this.compareRoomSongs,
+					);
 				}
 
 				// Now the lock will be released.
