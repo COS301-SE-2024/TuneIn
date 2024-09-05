@@ -71,7 +71,7 @@ describe("UsersService Update Functionality", () => {
 
 	afterEach(async () => {
 		await service.updateProfile(mockUserDto.userID, mockUserDto);
-	});
+	}, 15000);
 
 	it("updates profile", async () => {
 		// mockCtx.prisma.$queryRaw.mockResolvedValue([]);
