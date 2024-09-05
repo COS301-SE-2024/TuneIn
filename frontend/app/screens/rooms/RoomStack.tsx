@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {
+	useState,
+	useEffect,
+	useContext,
+	useCallback,
+	useRef,
+} from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
@@ -8,6 +14,8 @@ import { colors } from "../../styles/colors";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
+import { formatRoomData } from "../../models/Room";
+import { live, LiveMessage } from "../../services/Live";
 // import { useRouter } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as utils from "../../services/Utils";
@@ -17,6 +25,7 @@ import { ChatEventDto } from "../../models/ChatEventDto";
 import { RoomDto } from "../../models/RoomDto";
 import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
 import CurrentRoom from "./functions/CurrentRoom";
+import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -24,6 +33,15 @@ function MyRoomTabs() {
 	const navigation = useNavigation();
 	const router = useRouter();
 	const [joined, setJoined] = useState(false); // Track if the user has joined the room
+	const [messages, setMessages] = useState<LiveMessage[]>([]);
+	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
+	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
+		null,
+	);
+	const [secondsPlayed, setSecondsPlayed] = useState(0);
+	const playback = useRef(new SimpleSpotifyPlayback()).current;
+	const [isPlaying, setIsPlaying] = useState(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -35,7 +53,7 @@ function MyRoomTabs() {
 	const { currentRoom, setCurrentRoom } = playerContext;
 
 	const { room } = useLocalSearchParams();
-	// const roomCurrent = new CurrentRoom();
+	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -57,6 +75,16 @@ function MyRoomTabs() {
 		}
 	}, [currentRoom, roomID]);
 
+	const joinRoom = useCallback(() => {
+		const formattedRoom = formatRoomData(roomData);
+		setJoined(true);
+		setCurrentRoom(formattedRoom);
+	}, [roomData, setCurrentRoom]);
+
+	const leaveRoom = () => {
+		setCurrentRoom(null);
+	};
+
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
 		setJoined(!joined);
@@ -66,34 +94,46 @@ function MyRoomTabs() {
 			if (!token) {
 				throw new Error("No token found");
 			}
-			// console.log("Joining room........", roomID, token);
-			// 	roomCurrent.leaveJoinRoom(token, roomID, false);
-			// 	joinRoom();
-			// 	live.joinRoom(roomID, setJoined, setMessages);
-			// 	setJoined(true);
-			// 	setJoinedSongIndex(currentTrackIndex);
-			// 	setJoinedSecondsPlayed(secondsPlayed);
-			// 	console.log(
-			// 		`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			// 	);
+			console.log("Joining room........", roomID, token);
+			roomCurrent.leaveJoinRoom(token, roomID, false);
+			joinRoom();
+			live.joinRoom(roomID, setJoined, setMessages);
+			setJoined(true);
+			setJoinedSongIndex(currentTrackIndex);
+			setJoinedSecondsPlayed(secondsPlayed);
+			console.log(
+				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+			);
 		} else {
-			// 	leaveRoom();
-			// 	setJoined(false);
-			// 	roomCurrent.leaveJoinRoom(token as string, roomID, true);
-			// 	live.leaveRoom();
-			// 	setJoinedSongIndex(null);
-			// 	setJoinedSecondsPlayed(null);
+			leaveRoom();
+			setJoined(false);
+			roomCurrent.leaveJoinRoom(token as string, roomID, true);
+			live.leaveRoom();
+			setJoinedSongIndex(null);
+			setJoinedSecondsPlayed(null);
 			// 	//playbackManager.pause();
-			// 	const deviceID = await playback.getFirstDevice();
-			// 	if (deviceID && deviceID !== null) {
-			// 		playback.handlePlayback("pause", deviceID);
-			// 	}
-			// 	setIsPlaying(false);
+			const deviceID = await playback.getFirstDevice();
+			if (deviceID && deviceID !== null) {
+				playback.handlePlayback("pause", deviceID);
+			}
+			setIsPlaying(false);
 		}
 	};
 
 	const navigateToAdvancedSettings = () => {
 		router.navigate("/screens/rooms/AdvancedSettings");
+	};
+
+	const navigateToRoomInfo = () => {
+		router.navigate("/screens/rooms/RoomInfo");
+	};
+
+	const navigateBasedOnOwnership = () => {
+		if (roomData.mine) {
+			router.navigate("/screens/rooms/AdvancedSettings");
+		} else {
+			router.navigate("/screens/rooms/RoomInfo");
+		}
 	};
 
 	return (
@@ -109,13 +149,13 @@ function MyRoomTabs() {
 				</TouchableOpacity>
 
 				{/* Header Title */}
-				{/* <Text style={styles.headerTitle}>Room Name</Text> */}
+
 				<Text style={styles.headerTitle}>{roomData.name}</Text>
 
 				{/* Menu Button */}
 				<TouchableOpacity
 					style={styles.menuButton}
-					onPress={navigateToAdvancedSettings}
+					onPress={navigateBasedOnOwnership}
 					testID="menu-button"
 				>
 					<Entypo name="dots-three-vertical" size={20} color="black" />

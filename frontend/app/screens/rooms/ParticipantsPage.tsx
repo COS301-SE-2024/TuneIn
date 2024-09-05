@@ -100,7 +100,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 					style={styles.backButton}
 					onPress={() => navigation.goBack()}
 				>
-					<Ionicons name="arrow-back" size={24} color="black" />
+					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
