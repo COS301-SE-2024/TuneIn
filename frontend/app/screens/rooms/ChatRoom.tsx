@@ -77,7 +77,6 @@ const RoomPage = () => {
 
 	const { currentRoom, setCurrentRoom } = playerContext;
 	const [joined, setJoined] = useState(false);
-	const [activeTab, setActiveTab] = useState("Room");
 
 	useEffect(() => {
 		console.log("Room ID: " + currentRoom?.roomID);
@@ -471,46 +470,6 @@ const RoomPage = () => {
 		[playback, roomID],
 	);
 
-	const playNextTrack = () => {
-		/*
-		playbackManager.playPreviousTrack();
-		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
-		*/
-		if (live.canControlRoom()) {
-		}
-	};
-
-	const playPreviousTrack = () => {
-		/*
-		playbackManager.playPreviousTrack();
-		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
-		*/
-		if (live.canControlRoom()) {
-		}
-	};
-
-	const toggleChat = () => {
-		Animated.timing(animatedHeight, {
-			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
-			duration: 300,
-			easing: Easing.ease,
-			useNativeDriver: false,
-		}).start();
-		setChatExpanded(!isChatExpanded);
-	};
-
-	const navigateToPlaylist = () => {
-		router.navigate({
-			pathname: "/screens/rooms/Playlist",
-			params: {
-				queue: JSON.stringify(queue),
-				currentTrackIndex,
-				Room_id: roomID,
-				mine: roomData.mine,
-			},
-		});
-	};
-
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
 		setJoined(!joined);
@@ -568,39 +527,8 @@ const RoomPage = () => {
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-
-			{/* <Image
-				source={{ uri: roomData.backgroundImage }}
-				style={styles.backgroundImage}
-			/> */}
-			{/* <LinearGradient
-				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
-				style={styles.gradientOverlay}
-			/> */}
-
 			<View style={styles.contentContainer}>
-				{/* <View style={styles.roomDetails}>
-					<Text style={styles.roomName}>{roomData.name}</Text>
-					<Text style={styles.description}>{roomData.description}</Text>
-					<View style={styles.tagsContainer}>
-						{roomData.tags.map((tag: string, index: number) => (
-							<Text key={index} style={styles.tag}>
-								{tag}
-							</Text>
-						))}
-					</View>
-				</View> */}
 				<View style={styles.sideBySide}>
-					{/* Left side */}
-
-					{/* Right side */}
 					<View style={styles.joinLeaveButtonContainer}>
 						<TouchableOpacity
 							style={styles.joinLeaveButton}
@@ -650,25 +578,6 @@ const RoomPage = () => {
 					paddingTop: 10,
 				}}
 			>
-				{/* <TouchableOpacity
-					onPress={toggleChat}
-					style={{
-						flexDirection: "row",
-						justifyContent: "space-between",
-						alignItems: "center",
-						paddingBottom: 10,
-					}}
-				>
-					<Text style={{ fontSize: 18, fontWeight: "bold" }}>
-						{isChatExpanded ? "Hide Chat" : "Show Chat"}
-					</Text>
-					<MaterialIcons
-						name={isChatExpanded ? "keyboard-arrow-down" : "keyboard-arrow-up"}
-						size={34}
-						style={{ marginLeft: 10 }}
-					/>
-				</TouchableOpacity> */}
-
 				<>
 					<View style={styles.container}>
 						<ScrollView style={{ flex: 1, marginTop: 10 }}>
@@ -750,12 +659,6 @@ const styles = StyleSheet.create({
 		right: 10, // Adjust this value as needed
 		width: 150,
 		height: 200,
-	},
-	backButton: {
-		position: "absolute",
-		top: 40,
-		left: 20,
-		zIndex: 1,
 	},
 	bookmarkButton: {
 		marginLeft: 10,

@@ -42,6 +42,7 @@ import EmojiPicker, {
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import SongRoomWidget from "../../components/SongRoomWidget";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -50,7 +51,13 @@ type EmojiReaction = {
 	userId: string; // Add more properties if needed
 };
 
-const RoomPage = () => {
+interface RoomPageProps {
+	joined: boolean;
+	handleJoinLeave: () => Promise<void>;
+}
+
+// const RoomPage = () => {
+const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -76,7 +83,7 @@ const RoomPage = () => {
 	}
 
 	const { currentRoom, setCurrentRoom } = playerContext;
-	const [joined, setJoined] = useState(false);
+	const [joineds, setJoined] = useState(false);
 	const [activeTab, setActiveTab] = useState("Room");
 
 	useEffect(() => {
@@ -511,40 +518,40 @@ const RoomPage = () => {
 		});
 	};
 
-	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined(!joined);
-		const token = await auth.getToken();
-		console.log("Token fr fr:", token);
-		if (!joined) {
-			if (!token) {
-				throw new Error("No token found");
-			}
-			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
-			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages);
-			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			leaveRoom();
-			setJoined(false);
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
-			live.leaveRoom();
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			//playbackManager.pause();
-			const deviceID = await playback.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				playback.handlePlayback("pause", deviceID);
-			}
-			setIsPlaying(false);
-		}
-	};
+	// const handleJoinLeave = async () => {
+	// 	console.log("joined", joined);
+	// 	setJoined(!joined);
+	// 	const token = await auth.getToken();
+	// 	console.log("Token fr fr:", token);
+	// 	if (!joined) {
+	// 		if (!token) {
+	// 			throw new Error("No token found");
+	// 		}
+	// 		console.log("Joining room........", roomID, token);
+	// 		roomCurrent.leaveJoinRoom(token, roomID, false);
+	// 		joinRoom();
+	// 		live.joinRoom(roomID, setJoined, setMessages);
+	// 		setJoined(true);
+	// 		setJoinedSongIndex(currentTrackIndex);
+	// 		setJoinedSecondsPlayed(secondsPlayed);
+	// 		console.log(
+	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+	// 		);
+	// 	} else {
+	// 		leaveRoom();
+	// 		setJoined(false);
+	// 		roomCurrent.leaveJoinRoom(token as string, roomID, true);
+	// 		live.leaveRoom();
+	// 		setJoinedSongIndex(null);
+	// 		setJoinedSecondsPlayed(null);
+	// 		//playbackManager.pause();
+	// 		const deviceID = await playback.getFirstDevice();
+	// 		if (deviceID && deviceID !== null) {
+	// 			playback.handlePlayback("pause", deviceID);
+	// 		}
+	// 		setIsPlaying(false);
+	// 	}
+	// };
 
 	if (!readyToJoinRoom) {
 		setReadyToJoinRoom(true);
@@ -566,16 +573,20 @@ const RoomPage = () => {
 		setMessage("");
 	};
 
+	const exampleTrack: SongRoomWidget = {
+		name: "Song Title",
+		artists: [{ name: "Artist Name" }],
+		album: {
+			images: [
+				{
+					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
+				},
+			],
+		},
+	};
+
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-
 			{/* <Image
 				source={{ uri: roomData.backgroundImage }}
 				style={styles.backgroundImage}
@@ -622,6 +633,9 @@ const RoomPage = () => {
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
+				<View style={styles.songRoomWidget}>
+				<SongRoomWidget track={exampleTrack} />
+				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
 						{queue[currentTrackIndex]?.name}
@@ -635,6 +649,14 @@ const RoomPage = () => {
 						))}
 					</Text>
 				</View>
+				{/* <SongRoomWidget
+					songName="Eternal Sunshine"
+					artist="Ariana Grande"
+					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
+					progress={0.5}
+					time1="1:30"
+					time2="3:00"
+				/> */}
 
 				{roomData.mine ? (
 					<View style={styles.controls}>
@@ -665,13 +687,13 @@ const RoomPage = () => {
 					<View></View>
 				)}
 
-				<TouchableOpacity
+				{/* <TouchableOpacity
 					style={styles.queueButton}
 					onPress={navigateToPlaylist}
 				>
 					<MaterialIcons name="queue-music" size={55} color="Black" />
 					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -840,7 +862,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		position: "relative",
-		marginHorizontal: 10,
+		// marginHorizontal: 10,
+		backgroundColor: "white",
 	},
 	scrollView: {
 		flex: 1,
@@ -852,12 +875,6 @@ const styles = StyleSheet.create({
 		right: 10, // Adjust this value as needed
 		width: 150,
 		height: 200,
-	},
-	backButton: {
-		position: "absolute",
-		top: 40,
-		left: 20,
-		zIndex: 1,
 	},
 	bookmarkButton: {
 		marginLeft: 10,
@@ -884,7 +901,8 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 		right: 0,
-		paddingTop: 40,
+		paddingTop: 10,
+		marginHorizontal: 20,
 	},
 	joinLeaveButtonContainer: {
 		position: "absolute",
@@ -981,10 +999,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	sideBySideTwo: {
-		marginTop: 600,
+		position: "absolute",
+		bottom: 10,
+		left: 0,
+		right: 0,
+		marginHorizontal: 20,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
+		marginBottom: 20,
 	},
 	sideBySideClose: {
 		marginTop: 15,
@@ -1004,7 +1027,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
-		marginTop: 10,
+		marginTop: 50,
 	},
 	controlButton: {
 		marginHorizontal: 40,
@@ -1056,6 +1079,9 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 16,
 		fontWeight: "bold",
+	},
+	songRoomWidget: {
+		marginTop: -50,
 	},
 });
 
