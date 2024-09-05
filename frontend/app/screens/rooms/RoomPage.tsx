@@ -518,6 +518,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		});
 	};
 
+	const handleViewParticipants = () => {
+		router.navigate("screens/rooms/ParticipantsPage"); // Change this to the correct page for participants
+	};
+
 	// const handleJoinLeave = async () => {
 	// 	console.log("joined", joined);
 	// 	setJoined(!joined);
@@ -611,8 +615,15 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						<Ionicons name="people" size={30} color="black" />
-						<Text>134 Particpants</Text>
+						{/* <Ionicons name="people" size={30} color="black" />
+						<Text>134 Particpants</Text> */}
+						<TouchableOpacity
+							style={styles.userInfoContainer}
+							onPress={handleViewParticipants}
+						>
+							<Ionicons name="people" size={30} color="black" />
+							<Text>134 Participants</Text>
+						</TouchableOpacity>
 					</View>
 					{/* Right side */}
 					<View style={styles.joinLeaveButtonContainer}>
@@ -634,7 +645,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					/>
 				</View>
 				<View style={styles.songRoomWidget}>
-				<SongRoomWidget track={exampleTrack} />
+					<SongRoomWidget track={exampleTrack} />
 				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
