@@ -27,12 +27,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 					style={styles.avatar}
 				/>
 			)}
-			<View
-				style={[
-					styles.bubble,
-					message.me ? styles.bubbleMe : styles.bubbleOther,
-				]}
-			>
+			<View style={[styles.bubble, styles.bubbleOther]}>
 				{room ? (
 					<RoomLink room={room} /> // Render the RoomLink component if room is available
 				) : (
