@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "black",
 		marginBottom: 8,
-		marginTop: 20,
+		marginTop: 8,
 	},
 	artist: {
 		fontSize: 16,
