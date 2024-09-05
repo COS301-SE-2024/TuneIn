@@ -55,6 +55,7 @@ const EditProfileScreen = () => {
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string>("");
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -163,6 +164,20 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				username: text,
 			}));
+
+			const regex = /^[a-z0-9]+$/;
+			if (!regex.test(text)) {
+				setErrorMessage(
+					"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
+				);
+				setChanged(false);
+				return;
+			}
+			else{
+				setErrorMessage(
+					"",
+				);
+			}
 
 			setChanged(true);
 		} else if (value === "bio") {
@@ -465,12 +480,13 @@ const EditProfileScreen = () => {
 					<Text style={styles.title}>Username</Text>
 					<TextInput
 						style={{ marginLeft: 11 }}
-						value={`@${profileData.username.toLowerCase()}`}
+						value={`${profileData.username}`}
 						onChangeText={(newName: string) => {
 							handleSave(newName, "username");
 						}}
 					/>
 				</View>
+				{errorMessage !== "" && (<Text style={[styles.errorMessage]}>{errorMessage}</Text>)}
 				{/* Bio */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
@@ -655,6 +671,11 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		marginTop: 10,
+	},
+	errorMessage: {
+		marginTop: 10,
+		// marginLeft: 85,
+		color: "red",
 	},
 	listItemTitle: {
 		fontWeight: "bold",
