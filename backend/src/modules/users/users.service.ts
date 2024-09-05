@@ -199,10 +199,10 @@ export class UsersService {
 		}
 
 		const followee = await this.prisma.users.findFirst({
-			where: { username: usernameToFollow },
+			where: { user_id: usernameToFollow },
 		});
 		if (!followee) {
-			throw new Error("User (@" + usernameToFollow + ") does not exist");
+			throw new Error("User (" + usernameToFollow + ") does not exist");
 		}
 
 		if (selfID === followee.user_id) {
@@ -241,10 +241,10 @@ export class UsersService {
 		}
 
 		const followee = await this.prisma.users.findFirst({
-			where: { username: usernameToUnfollow },
+			where: { user_id: usernameToUnfollow },
 		});
 		if (!followee) {
-			throw new Error("User (@" + usernameToUnfollow + ") does not exist");
+			throw new Error("User (" + usernameToUnfollow + ") does not exist");
 		}
 
 		if (selfID === followee.user_id) {
@@ -614,7 +614,7 @@ export class UsersService {
 		}
 
 		const potentialFriend = await this.prisma.users.findFirst({
-			where: { username: newPotentialFriendUsername },
+			where: { user_id: newPotentialFriendUsername },
 		});
 		if (!potentialFriend) {
 			throw new Error(
@@ -699,7 +699,7 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { username: friendUsername },
+			where: { user_id: friendUsername },
 		});
 		if (!friend) {
 			throw new Error("User (@" + friendUsername + ") does not exist");
@@ -760,7 +760,7 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { username: friendUsername },
+			where: { user_id: friendUsername },
 		});
 		if (!friend) {
 			throw new Error("User (@" + friendUsername + ") does not exist");
@@ -817,7 +817,7 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { username: rejectedUsername },
+			where: { user_id: rejectedUsername },
 		});
 		if (!friend) {
 			throw new Error("User (@" + rejectedUsername + ") does not exist");
