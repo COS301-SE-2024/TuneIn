@@ -7,7 +7,7 @@ import * as PrismaTypes from "@prisma/client";
 
 interface liveChatUser {
 	user: UserDto;
-	roomID?: string;
+	roomID: string | undefined;
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class RoomUsersService {
 			}
 			this.connectedUsers.set(socketId, { user, roomID });
 		} else {
-			this.connectedUsers.set(socketId, { user });
+			this.connectedUsers.set(socketId, { user, roomID: undefined });
 		}
 
 		console.log("Added connected user: " + user);
@@ -180,7 +180,11 @@ export class RoomUsersService {
 		if (queue.length === 0) {
 			return null;
 		}
-		return queue[0].song_id;
+		const q = queue[0];
+		if (q === null || !q) {
+			throw new Error("Queue is null");
+		}
+		return q.song_id;
 	}
 
 	async getCurrentSongStartTime(roomID: string): Promise<Date | null> {
@@ -227,7 +231,10 @@ export class RoomUsersService {
 		}
 		const queueIDs: string[] = [];
 		for (let i = 0; i < queueItems.length; i++) {
-			queueIDs.push(queueItems[i].queue_id);
+			const q = queueItems[i];
+			if (q) {
+				queueIDs.push(q.queue_id);
+			}
 		}
 
 		//SELECT * from vote where vote.queue_id in queueIDs
@@ -246,33 +253,35 @@ export class RoomUsersService {
 		const songVotes: Map<string, number> = new Map<string, number>();
 		for (let i = 0; i < votes.length; i++) {
 			const vote = votes[i];
-			const songInQueue: PrismaTypes.queue | undefined = queueItems.find(
-				(queueItem) => queueItem.queue_id === vote.queue_id,
-			);
-			if (!songInQueue || songInQueue === undefined) {
-				throw new Error(
-					"Vote somehow does not correspond to a song in the queue",
+			if (vote) {
+				const songInQueue: PrismaTypes.queue | undefined = queueItems.find(
+					(queueItem) => queueItem.queue_id === vote.queue_id,
 				);
-			}
-
-			const songID = songInQueue.song_id;
-			if (songVotes.has(songID)) {
-				const sv: number | undefined = songVotes.get(songID);
-				if (!sv || sv === undefined) {
+				if (!songInQueue || songInQueue === undefined) {
 					throw new Error(
-						"Song vote is somehow undefined (it shouldn't be because we checked. blame typescript)",
+						"Vote somehow does not correspond to a song in the queue",
 					);
 				}
-				if (vote.is_upvote) {
-					songVotes.set(songID, sv + 1);
+
+				const songID = songInQueue.song_id;
+				if (songVotes.has(songID)) {
+					const sv: number | undefined = songVotes.get(songID);
+					if (!sv || sv === undefined) {
+						throw new Error(
+							"Song vote is somehow undefined (it shouldn't be because we checked. blame typescript)",
+						);
+					}
+					if (vote.is_upvote) {
+						songVotes.set(songID, sv + 1);
+					} else {
+						songVotes.set(songID, sv - 1);
+					}
 				} else {
-					songVotes.set(songID, sv - 1);
-				}
-			} else {
-				if (vote.is_upvote) {
-					songVotes.set(songID, 1);
-				} else {
-					songVotes.set(songID, -1);
+					if (vote.is_upvote) {
+						songVotes.set(songID, 1);
+					} else {
+						songVotes.set(songID, -1);
+					}
 				}
 			}
 		}
@@ -307,7 +316,11 @@ export class RoomUsersService {
 		if (queue.length === 0) {
 			return null;
 		}
-		return queue[0].songID;
+		const q = queue[0];
+		if (!q || q === null) {
+			throw new Error("Queue is null");
+		}
+		return q.songID;
 	}
 
 	async playSongNow(roomID: string, songID: string): Promise<Date> {

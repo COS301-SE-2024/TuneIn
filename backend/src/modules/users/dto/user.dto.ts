@@ -1,7 +1,93 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, ValidateNested, IsObject } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+	IsString,
+	ValidateNested,
+	IsObject,
+	IsNumber,
+	IsArray,
+	IsBoolean,
+} from "class-validator";
 import { RoomDto } from "../../rooms/dto/room.dto";
 import { SongInfoDto } from "../../rooms/dto/songinfo.dto";
+import { Type } from "class-transformer";
+
+export class FollowersAndFollowing {
+	@ApiProperty()
+	@IsNumber()
+	count: number;
+
+	@ApiProperty({ type: () => UserDto, isArray: true })
+	@IsArray()
+	@ValidateNested()
+	@Type(() => UserDto)
+	data: UserDto[];
+}
+
+export class RoomsData {
+	@ApiProperty()
+	@IsNumber()
+	count: number;
+
+	/*
+	@ApiProperty({ type: () => RoomDto, isArray: true })
+	@IsArray()
+	@ValidateNested()
+	@Type(() => RoomDto)
+	data: RoomDto[];
+	*/
+	@ApiProperty({ type: String, isArray: true })
+	@IsArray()
+	@IsString({ each: true })
+	data: string[];
+}
+
+export class SongInfosWithCount {
+	@ApiProperty()
+	@IsNumber()
+	count: number;
+
+	@ApiProperty({ type: () => SongInfoDto, isArray: true })
+	@IsArray()
+	@ValidateNested()
+	@Type(() => SongInfoDto)
+	data: SongInfoDto[];
+}
+
+export class LinksWithCount {
+	@ApiProperty()
+	@IsNumber()
+	count: number;
+
+	@ApiProperty({ type: String, isArray: true })
+	@IsArray()
+	@IsString({ each: true })
+	data: string[];
+}
+
+export class GenresWithCount {
+	@ApiProperty()
+	@IsNumber()
+	count: number;
+
+	@ApiProperty({ type: String, isArray: true })
+	@IsArray()
+	@IsString({ each: true })
+	data: string[];
+}
+
+export class UserFriendship {
+	@ApiProperty()
+	@IsBoolean()
+	status: boolean;
+
+	@ApiProperty()
+	@IsString()
+	accept_url: string;
+
+	@ApiProperty()
+	@IsString()
+	reject_url: string;
+}
 
 export class UserDto {
 	@ApiProperty()
@@ -20,79 +106,104 @@ export class UserDto {
 	@IsString()
 	profile_picture_url: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's followers",
+		title: "FollowersAndFollowing",
+		type: FollowersAndFollowing,
+	})
 	@IsObject()
 	@ValidateNested()
-	followers: {
-		count: number;
-		data: UserDto[];
-	};
+	@Type(() => FollowersAndFollowing)
+	followers: FollowersAndFollowing;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's following",
+		title: "FollowersAndFollowing",
+		type: FollowersAndFollowing,
+	})
 	@IsObject()
 	@ValidateNested()
-	following: {
-		count: number;
-		data: UserDto[];
-	};
+	@Type(() => FollowersAndFollowing)
+	following: FollowersAndFollowing;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's links",
+		type: LinksWithCount,
+	})
 	@IsObject()
 	@ValidateNested()
+	@Type(() => LinksWithCount)
 	links: {
 		count: number;
 		data: string[];
 	};
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	bio: string;
 
-	@ApiProperty()
+	@ApiPropertyOptional({
+		description: "The current song the user is listening to, if applicable",
+		type: SongInfoDto,
+	})
 	@IsObject()
 	@ValidateNested()
-	current_song: SongInfoDto;
+	@Type(() => SongInfoDto)
+	current_song?: SongInfoDto;
 
-	@ApiProperty()
-	@IsObject()
+	@ApiPropertyOptional({
+		description:
+			"The roomID of the room that the user is currently in, if applicable",
+	})
+	@IsString()
 	@ValidateNested()
-	fav_genres: {
-		count: number;
-		data: string[];
-	};
+	current_room_id?: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's favorite genres",
+		type: GenresWithCount,
+	})
 	@IsObject()
 	@ValidateNested()
-	fav_songs: {
-		count: number;
-		data: SongInfoDto[];
-	};
+	@Type(() => GenresWithCount)
+	fav_genres: GenresWithCount;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's favorite songs",
+		type: SongInfosWithCount,
+	})
 	@IsObject()
 	@ValidateNested()
-	fav_rooms: {
-		count: number;
-		data: RoomDto[];
-	};
+	@Type(() => SongInfosWithCount)
+	fav_songs: SongInfosWithCount;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's favorite rooms",
+		type: RoomsData,
+	})
 	@IsObject()
 	@ValidateNested()
-	recent_rooms: {
-		count: number;
-		data: RoomDto[];
-	};
+	@Type(() => RoomsData)
+	fav_rooms: RoomsData;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's recent rooms",
+		type: RoomsData,
+	})
 	@IsObject()
 	@ValidateNested()
-	friendship?: {
-		status: boolean;
-		accept_url: string;
-		reject_url: string;
-	};
+	@Type(() => RoomsData)
+	recent_rooms: RoomsData;
+
+	@ApiPropertyOptional({
+		description:
+			"The user's friendship status with the current user, or null if the user is not friends with the current user",
+		type: UserFriendship,
+	})
+	@IsObject()
+	@ValidateNested()
+	@Type(() => UserFriendship)
+	friendship?: UserFriendship;
 
 	// optional field for relationship status
 	@ApiProperty()

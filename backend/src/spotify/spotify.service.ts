@@ -57,6 +57,15 @@ export class SpotifyService {
 		return user;
 	}
 
+	async getAudioFeatures(
+		token: SpotifyTokenResponse,
+		songID: string,
+	): Promise<Spotify.AudioFeatures> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const audioFeatures = await api?.tracks?.audioFeatures(songID);
+		return audioFeatures;
+	}
+
 	async getUserPlaylists(
 		tk: SpotifyTokenPair,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
@@ -208,13 +217,17 @@ export class SpotifyService {
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		for (const track of newLikedSongs) {
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await api.tracks.audioFeatures(track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
-				artist: track.track.artists[0].name,
+				artists: track.track.artists.map((artist) => artist.name),
 				genres: track.track.album.genres ? track.track.album.genres : [],
 				artwork_url: this.getLargestImage(track.track.album.images).url,
 				spotify_id: track.track.id,
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
 			};
 			dbLikedSongs.push(song);
 		}
@@ -291,10 +304,17 @@ export class SpotifyService {
 	getLargestImage(images: Spotify.Image[]): Spotify.Image {
 		let largest = 0;
 		for (let i = 0; i < images.length; i++) {
-			if (images[i].height * images[i].width > largest) {
-				largest = i;
+			const img = images[i];
+			if (img) {
+				if (img.height * img.width > largest) {
+					largest = i;
+				}
 			}
 		}
-		return images[largest];
+		const result = images[largest];
+		if (!result) {
+			throw new Error("Failed to find largest image");
+		}
+		return result;
 	}
 }
