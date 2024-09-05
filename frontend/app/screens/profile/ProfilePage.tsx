@@ -153,7 +153,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (roomData === null) {
-							fetchRoomInfo(data.username);
+							fetchRoomInfo(data.userID);
 						}
 					}
 				} catch (error) {
@@ -204,7 +204,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchRoomInfo(primaryProfileData.username);
+				fetchRoomInfo(primaryProfileData.userID);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
