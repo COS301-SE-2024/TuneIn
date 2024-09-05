@@ -46,7 +46,7 @@ export class DtoGenService {
 			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
 				count: recent_rooms.count,
-				data: recent_rooms.data || [],
+				data: (await this.generateMultipleRoomDto(recent_rooms.data)) || [], // I'm assuming that recent_rooms.data is an array of room IDs
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
