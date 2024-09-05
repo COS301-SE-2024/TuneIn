@@ -43,11 +43,6 @@ import EmojiPicker, {
 import { colors } from "../../styles/colors";
 const MemoizedCommentWidget = memo(CommentWidget);
 
-type EmojiReaction = {
-	emoji: string;
-	userId: string; // Add more properties if needed
-};
-
 const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
@@ -93,7 +88,7 @@ const RoomPage = () => {
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
+	const [joinedsogIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
 	);

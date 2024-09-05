@@ -42,8 +42,6 @@ const EditProfileScreen = () => {
 
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
-	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-
 	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
 	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
 	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);

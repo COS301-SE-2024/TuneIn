@@ -9,8 +9,6 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LineGraphCard from "../../components/LineGraphCard";
-import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
-import TableCard from "../../components/TableCard";
 import IconProgressCard from "../../components/IconProgressCard";
 import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
@@ -62,7 +60,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 		if (selectedRoom === null) fetchUserRooms();
 		console.log("selectedRoom", selectedRoom);
-	}, [selectedRoom]);
+	}, [selectedRoom, userRooms]);
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
@@ -83,7 +81,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 		fetchInteractionAnalytics();
 		console.log("interaction analytics", interactionAnalytics);
-	}, [interactionAnalytics]);
+	}, [interactionAnalytics, selectedRoom?.roomID]);
 
 	const rooms = userRooms?.map((room) => room.room_name as string);
 	console.log("rooms", rooms);
@@ -126,29 +124,6 @@ const InteractionsAnalytics: React.FC = () => {
 		};
 	});
 	console.log("data", data);
-
-	const datah = [
-		{ label: "Room A", value: 57 },
-		{ label: "Room B", value: 75 },
-		{ label: "Room C", value: 18 },
-		{ label: "Room D", value: 48 },
-		{ label: "Room E", value: 6 },
-	];
-
-	const headers = ["User", "Songs", "Upvotes"];
-	const dataTable = [
-		["User A", "50", "200"],
-		["User B", "35", "165"],
-		["User C", "23", "155"],
-	];
-
-	const datah2 = [
-		{ label: "Room A", value: 12 },
-		{ label: "Room B", value: 57 },
-		{ label: "Room C", value: 38 },
-		{ label: "Room D", value: 48 },
-		// { label: "Room E", value: 75 },
-	];
 
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>

@@ -48,7 +48,6 @@ type stateSetDirectMessages = React.Dispatch<
 >;
 type stateSetJoined = React.Dispatch<React.SetStateAction<boolean>>;
 type stateSetConnected = React.Dispatch<React.SetStateAction<boolean>>;
-type stateSetMessage = React.Dispatch<React.SetStateAction<string>>;
 type stateSetIsSending = React.Dispatch<React.SetStateAction<boolean>>;
 
 let playback: SimpleSpotifyPlayback | null = null;
@@ -124,7 +123,6 @@ class LiveSocketService {
 		});
 
 		return new Promise<void>((resolve, reject) => {
-			const startTime = Date.now();
 			this.pingSent = true;
 
 			// Set up a timeout
@@ -157,8 +155,6 @@ class LiveSocketService {
 
 	//function to find latency from NTP
 	public async getTimeOffset() {
-		let t0 = Date.now();
-
 		/* Note: (server code)
 			// for determining client and server clock latency
 			@SubscribeMessage("time_sync")
@@ -473,7 +469,6 @@ class LiveSocketService {
 					return;
 				}
 
-				const onlineUser = data;
 				if (data.userID === this.currentUser.userID) {
 					if (this.setConnected) {
 						this.setConnected(true);

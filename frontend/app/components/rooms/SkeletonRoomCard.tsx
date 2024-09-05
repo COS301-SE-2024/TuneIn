@@ -1,16 +1,5 @@
 import React from "react";
-import {
-	View,
-	Text,
-	ImageBackground,
-	Image,
-	StyleSheet,
-	TouchableOpacity,
-	Animated,
-	ViewStyle,
-} from "react-native";
-import { Room } from "../../models/Room";
-import { useRouter } from "expo-router";
+import { ImageBackground, StyleSheet, Animated } from "react-native";
 
 // interface SkeletonRoomCardProps {
 // 	roomCard: Room;
@@ -19,13 +8,6 @@ import { useRouter } from "expo-router";
 
 const SkeletonRoomCard: React.FC<{}> = () => {
 	const cardWidth = 320;
-
-	const truncateText = (text: string, maxLength: number) => {
-		if (text.length > maxLength) {
-			return text.substring(0, maxLength - 3) + "...";
-		}
-		return text;
-	};
 
 	return (
 		<Animated.View style={[styles.container, { width: cardWidth }]}>

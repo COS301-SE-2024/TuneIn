@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { DirectMessage } from "../../services/Live";
 import { colors } from "../../styles/colors";
-import { Room } from "../../models/Room";
 import RoomLink from "./RoomLink"; // Adjust the path as necessary
-import axios from "axios";
-import * as utils from "../../services/Utils";
 
 interface MessageItemProps {
 	message: DirectMessage;
@@ -16,6 +12,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
 	return (
 		<View
+			testID="message-container" // Add testID for container
 			style={[
 				styles.container,
 				message.me ? styles.containerMe : styles.containerOther,
@@ -23,13 +20,19 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 		>
 			{!message.me && (
 				<Image
+					testID="profile-pic" // Add testID for profile picture
 					source={{ uri: sender.profile_picture_url }}
 					style={styles.avatar}
 				/>
 			)}
-			<View style={[styles.bubble, styles.bubbleOther]}>
+			<View
+				style={[
+					styles.bubble,
+					message.me ? styles.bubbleMe : styles.bubbleOther,
+				]}
+			>
 				{room ? (
-					<RoomLink room={room} /> // Render the RoomLink component if room is available
+					<RoomLink room={room} />
 				) : (
 					<Text style={styles.text}>{messageBody}</Text>
 				)}

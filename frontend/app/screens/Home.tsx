@@ -209,7 +209,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, []);
+	}, [setUserData, userData]);
 
 	const [refreshing] = React.useState(false);
 

@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Player } from "../../PlayerContext";
-import Icon from "react-native-vector-icons/FontAwesome";
 
 const Miniplayer: React.FC = () => {
 	const windowWidth = Dimensions.get("window").width;
@@ -25,7 +24,7 @@ const Miniplayer: React.FC = () => {
 			"PlayerContext must be used within a PlayerContextProvider",
 		);
 	}
-	const { NumberOfPeople, currentRoom } = playerContext;
+	const { currentRoom } = playerContext;
 
 	const combinedLength =
 		(currentRoom?.songName?.length || 0) +

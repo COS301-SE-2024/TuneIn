@@ -1,12 +1,9 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import ChatScreen from "../app/screens/messaging/ChatScreen";
+import ChatScreen from "../../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { TextInput } from "react-native";
-import { UserDto } from "../app/models/UserDto";
-import { DirectMessageDto } from "../app/models/DmDto";
+import { UserDto } from "../../app/models/UserDto";
 import axios from "axios";
-import { DirectMessage } from "../app/services/Live";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -112,38 +109,6 @@ const mockOtherUser: UserDto = {
 	friendship: undefined,
 };
 
-const initialMessages: DirectMessage[] = [
-	{
-		message: {
-			index: 0,
-			messageBody: "Hey there!",
-			sender: mockSelf,
-			recipient: mockOtherUser,
-			dateSent: new Date(),
-			dateRead: new Date(0),
-			isRead: false,
-			pID: "0",
-		},
-		me: true,
-		messageSent: true,
-	},
-	{
-		message: {
-			index: 1,
-			messageBody: "What's up?",
-			sender: mockOtherUser,
-			recipient: mockSelf,
-			dateSent: new Date(),
-			dateRead: new Date(0),
-			isRead: false,
-			pID: "1",
-		},
-		me: false,
-		messageSent: true,
-	},
-	// Add more dummy messages
-];
-
 jest.mock("axios");
 (axios.get as jest.Mock).mockImplementation((url: string) => {
 	if (url.includes(":3000/users/")) {
@@ -180,7 +145,6 @@ jest.mock("@spotify/web-api-ts-sdk", () => ({
 }));
 
 describe("ChatScreen", () => {
-	const mockSetState = jest.fn();
 	const mockRouter = {
 		back: jest.fn(),
 	};

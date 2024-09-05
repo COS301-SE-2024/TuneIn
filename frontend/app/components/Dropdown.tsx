@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	Modal,
-	FlatList,
-	TextInput,
-	StyleSheet,
-	ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../styles/colors";
-import Fuse from "fuse.js";
 import Selector from "./Selector";
 
 interface DropdownProps {
@@ -29,7 +19,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 	setSelectedOption,
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
 	const [items, setItems] = useState(options);
 
 	useEffect(() => {

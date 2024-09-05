@@ -55,6 +55,7 @@ const SplittingPopUp: React.FC<SplittingPopUpProps> = ({
 
 	return (
 		<Modal
+			testID="modal"
 			transparent={true}
 			animationType="none"
 			visible={isVisible}
