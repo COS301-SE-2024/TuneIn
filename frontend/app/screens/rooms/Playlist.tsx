@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 // import { Ionicons } from "@expo/vector-icons";
-import RoomTab from "../../components/RoomTab";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
 import CreateButton from "../../components/CreateButton";
