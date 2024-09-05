@@ -56,13 +56,15 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		marginRight: 10,
 		marginBottom: 5,
+		borderColor: "black",
+		borderWidth: 1,
 	},
 	bubble: {
 		paddingVertical: 10,
 		paddingHorizontal: 15,
 		borderRadius: 25,
 		elevation: 2,
-		maxWidth: "75%",
+		maxWidth: "80%",
 	},
 	bubbleMe: {
 		backgroundColor: colors.primary,

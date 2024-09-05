@@ -17,6 +17,10 @@ interface RoomLinkProps {
 const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 	const router = useRouter();
 
+	// Default local images
+	const defaultBackgroundImage = require("../../../assets/imageholder.jpg");
+	const defaultProfileImage = require("../../../assets/DefaultProfileIcon.webp");
+
 	const navigateToRoom = () => {
 		router.push({
 			pathname: "/screens/rooms/RoomPage",
@@ -27,14 +31,22 @@ const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 	return (
 		<TouchableOpacity style={styles.card} onPress={navigateToRoom}>
 			<ImageBackground
-				source={{ uri: room.backgroundImage }}
+				source={
+					room.backgroundImage
+						? { uri: room.backgroundImage }
+						: defaultBackgroundImage
+				}
 				style={styles.backgroundImage}
 				imageStyle={styles.backgroundImageStyle}
 			>
 				<View style={styles.overlay}>
 					<View style={styles.header}>
 						<Image
-							source={{ uri: room.userProfile }}
+							source={
+								room.userProfile
+									? { uri: room.userProfile }
+									: defaultProfileImage
+							}
 							style={styles.profileImage}
 						/>
 						<Text style={styles.username}>{room.username}</Text>
@@ -54,11 +66,13 @@ const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 
 const styles = StyleSheet.create({
 	card: {
+		width: "100%",
+		height: 200,
 		marginBottom: 20,
 		borderRadius: 15,
 		overflow: "hidden",
 		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
+		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.3,
 		shadowRadius: 4,
 		elevation: 5,
@@ -85,6 +99,8 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderRadius: 20,
 		marginRight: 10,
+		borderColor: "black",
+		borderWidth: 1,
 	},
 	username: {
 		color: "#fff",
