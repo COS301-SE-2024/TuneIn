@@ -577,4 +577,92 @@ describe("DbUtilsService", () => {
 			expect(result).toEqual([]);
 		});
 	});
+	describe("getPotentialFriends", () => {
+		it("should return an empty array if there are no mutual followers", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{
+					follower: "userID",
+					followee: "userA",
+					follows_id: "followsID",
+					date_followed: new Date(),
+				},
+				{
+					follower: "userA",
+					followee: "userID",
+					follows_id: "followsID",
+					date_followed: new Date(),
+				},
+			]);
+
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getPotentialFriends("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should return potential friends if mutual followers are found and they are not friends or pending", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{
+					follower: "userID",
+					followee: "userA",
+					follows_id: "followsID",
+					date_followed: new Date(),
+				},
+				{
+					follower: "userA",
+					followee: "userID",
+					follows_id: "followsID",
+					date_followed: new Date(),
+				},
+			]);
+
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(mockPrismaService.users, "findUnique").mockResolvedValueOnce({
+				user_id: "userA",
+			});
+
+			const result = await service.getPotentialFriends("userID");
+			expect(result).toEqual([
+				{
+					user_id: "userA",
+				},
+			]);
+		});
+
+		it("should not include users who are already friends or pending", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{ follower: "userID", followee: "userA" },
+				{ follower: "userA", followee: "userID" },
+			]);
+
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(true);
+
+			const result = await service.getPotentialFriends("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should handle multiple mutual followers correctly", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{ follower: "userID", followee: "userA" },
+				{ follower: "userA", followee: "userID" },
+				{ follower: "userID", followee: "userB" },
+				{ follower: "userB", followee: "userID" },
+			]);
+
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest
+				.spyOn(mockPrismaService.users, "findUnique")
+				.mockImplementation((params) => {
+					if (params.where.user_id === "userA") {
+						return Promise.resolve({ user_id: "userA" });
+					} else if (params.where.user_id === "userB") {
+						return Promise.resolve({ user_id: "userB" });
+					}
+					return Promise.resolve(null);
+				});
+
+			const result = await service.getPotentialFriends("userID");
+			expect(result).toEqual([{ user_id: "userA" }, { user_id: "userB" }]);
+		});
+	});
 });

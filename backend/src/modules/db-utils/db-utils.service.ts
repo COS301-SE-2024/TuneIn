@@ -395,7 +395,6 @@ export class DbUtilsService {
 			}
 			console.log("ID: ", id);
 			if (!(await this.isFriendsOrPending(userID, id))) {
-				console.log("Not friends nor pending with: ", id);
 				const user: PrismaTypes.users | null =
 					await this.prisma.users.findUnique({
 						where: { user_id: id },
@@ -405,7 +404,6 @@ export class DbUtilsService {
 				}
 			}
 		}
-		console.log("Potential friends: ", potentialFriends);
 		return potentialFriends;
 	}
 
