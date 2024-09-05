@@ -420,4 +420,56 @@ describe("DbUtilsService", () => {
 			expect(result).toBe("none");
 		});
 	});
+	describe("isMutualFollow", () => {
+		it("should return false if no follows are found", async () => {
+			jest
+				.spyOn(mockPrismaService.follows, "findMany")
+				.mockResolvedValueOnce([]);
+
+			const result = await service.isMutualFollow(
+				"userID",
+				"accountFollowedId",
+			);
+			expect(result).toBe(false);
+		});
+
+		it("should return false if only one follow is found", async () => {
+			jest
+				.spyOn(mockPrismaService.follows, "findMany")
+				.mockResolvedValueOnce([
+					{ follower: "userID", followee: "accountFollowedId" },
+				]);
+
+			const result = await service.isMutualFollow(
+				"userID",
+				"accountFollowedId",
+			);
+			expect(result).toBe(false);
+		});
+
+		it("should throw an error if more than two follows are found", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{ follower: "userID", followee: "accountFollowedId" },
+				{ follower: "accountFollowedId", followee: "userID" },
+				{ follower: "userID", followee: "accountFollowedId" },
+			]);
+
+			await expect(
+				service.isMutualFollow("userID", "accountFollowedId"),
+			).rejects.toThrow("More than two follows found.");
+		});
+
+		it("should return true if mutual follows are found", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{ follower: "userID", followee: "accountFollowedId" },
+				{ follower: "accountFollowedId", followee: "userID" },
+			]);
+
+			const result = await service.isMutualFollow(
+				"userID",
+				"accountFollowedId",
+			);
+			expect(result).toBe(true);
+		});
+	});
 });
