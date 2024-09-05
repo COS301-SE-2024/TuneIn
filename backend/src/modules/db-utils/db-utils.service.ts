@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import Prisma from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
@@ -12,7 +12,7 @@ export class DbUtilsService {
 
 	constructor(
 		private configService: ConfigService,
-		private prisma: PrismaService,
+		private readonly prisma: PrismaService,
 	) {
 		// Set the salt for hashing
 		const salt = this.configService.get<string>("SALT");
@@ -218,62 +218,12 @@ export class DbUtilsService {
 		const result: PrismaTypes.room[] = [];
 		while (result.length < count) {
 			const random = Math.floor(Math.random() * rooms.length);
-			if (!result.includes(rooms[random])) {
-				result.push(rooms[random]);
+			const randomRoom = rooms[random];
+			if (randomRoom && !result.includes(randomRoom)) {
+				result.push(randomRoom);
 			}
 		}
 		return rooms;
-	}
-
-	// Merge preferences if they exist in updateProfileDto
-	buildUpdateData(
-		user: PrismaTypes.users,
-		updateProfileDto: UpdateUserDto,
-	): any {
-		const allowedFields = ["username", "bio", "email"];
-
-		const updateData: any = {};
-		for (const field of allowedFields) {
-			if (updateProfileDto[field] !== undefined) {
-				updateData[field] = updateProfileDto[field];
-			}
-		}
-
-		if (updateProfileDto.profile_name) {
-			updateData.full_name = updateProfileDto.profile_name;
-		}
-
-		if (updateProfileDto.profile_picture_url) {
-			updateData.profile_picture = updateProfileDto.profile_picture_url;
-		}
-
-		if (updateProfileDto.links) {
-			// console.log(updateProfileDto.links.data);
-			updateData.external_links = { data: updateProfileDto.links.data };
-		}
-
-		// Merge the preferences if they exist in the updateProfileDto
-		if (updateProfileDto.fav_genres || updateProfileDto.fav_songs) {
-			const existingPreferences = user.preferences
-				? JSON.parse(JSON.stringify(user.preferences))
-				: {};
-
-			if (updateProfileDto.fav_genres) {
-				existingPreferences.fav_genres = updateProfileDto.fav_genres.data;
-			}
-
-			if (updateProfileDto.fav_songs) {
-				existingPreferences.fav_songs = updateProfileDto.fav_songs.data;
-			}
-
-			updateData.preferences = existingPreferences;
-		}
-
-		// if(updateProfileDto.recent_rooms){
-		//   updateData.activity = {recent_rooms: updateProfileDto.recent_rooms.data};
-		// }
-
-		return updateData;
 	}
 
 	async isRoomPublic(roomID: string): Promise<boolean> {
@@ -489,5 +439,25 @@ export class DbUtilsService {
 			throw new Error("More than one friend found.");
 		}
 		return true;
+	}
+
+	async getCurrentRoomID(userID: string): Promise<string> {
+		if (!(await this.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
+		}
+		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
+			await this.prisma.participate.findFirst({
+				where: {
+					user_id: userID,
+				},
+				include: {
+					room: true,
+				},
+			});
+
+		if (room === null) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return room.room.room_id;
 	}
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -20,6 +20,7 @@ import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
+import { Player } from "../../PlayerContext";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -29,6 +30,15 @@ const EditProfileScreen = () => {
 		? params.profile[0]
 		: params.profile;
 	const profileInfo = JSON.parse(profile as string);
+
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
@@ -415,6 +425,7 @@ const EditProfileScreen = () => {
 					<TouchableOpacity
 						onPress={() => {
 							updateProfile(changed);
+							setUserData(null);
 							router.navigate("screens/profile/ProfilePage");
 						}}
 						style={styles.saveButton}

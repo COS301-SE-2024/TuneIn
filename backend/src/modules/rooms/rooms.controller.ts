@@ -13,15 +13,19 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiBody,
+	ApiHeader,
 	ApiNotFoundResponse,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
+	ApiProduces,
+	ApiSecurity,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { SongInfoDto } from "./dto/songinfo.dto";
-import { RoomsService } from "./rooms.service";
+import { RoomsService, UserActionDto } from "./rooms.service";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
 import { UserDto } from "../users/dto/user.dto";
@@ -39,176 +43,290 @@ import {
 	RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
+import { RoomAnalyticsService } from "./roomanalytics.service";
 
 @Controller("rooms")
 export class RoomsController {
 	constructor(
 		private readonly roomsService: RoomsService,
+		private readonly roomAnalytics: RoomAnalyticsService,
 		private readonly auth: AuthService,
 		private readonly dtogen: DtoGenService,
 	) {}
 
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get("new")
-	@ApiOperation({ summary: "Get newly created public rooms" })
-	@ApiParam({ name: "none" })
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Get newly created public rooms",
+		description: "Returns the new public rooms as an array of RoomDto.",
+		operationId: "getNewRooms",
+	})
 	@ApiOkResponse({
 		description: "The new public rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	@ApiTags("rooms")
 	async getNewRooms(): Promise<RoomDto[]> {
 		console.log("getting new rooms");
 		return await this.roomsService.getNewRooms();
 	}
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "The room info as a RoomDto.",
 		type: RoomDto,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get info for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiBadRequestResponse({
 		description: "Room not found.",
 		type: RoomDto,
 	})
-	// generate summary
-	@ApiOperation({ summary: "Get room info" })
-	async getRoomInfo(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): Promise<RoomDto> {
+	@ApiOperation({
+		summary: "Get room info",
+		description: "Returns the room info as a RoomDto.",
+		operationId: "getRoomInfo",
+	})
+	async getRoomInfo(@Param("roomID") roomID: string): Promise<RoomDto> {
 		console.log("getting room with ID", roomID);
 		return await this.roomsService.getRoomInfo(roomID);
 	}
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Patch(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "Room info updated successfully.",
 		type: RoomDto,
 	})
-	// response for when room is not found
 	@ApiNotFoundResponse({
 		description: "Room not found.",
 	})
-	@ApiParam({ name: "roomID", required: true })
-	// provide summary
-	@ApiOperation({ summary: "Update room info" })
-	async updateRoomInfo(
-		@Request() req: any,
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to update.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UpdateRoomDto,
+		required: true,
+		description: "The updated room info",
+	})
+	@ApiOperation({
+		summary: "Update room info",
+		operationId: "updateRoomInfo",
+	})
+	async patchRoomInfo(
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
 		console.log("updating room with ID", roomID, "with data", updateRoomDto);
-		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.updateRoomInfo(
+			userInfo.id,
+			roomID,
+			updateRoomDto,
+		);
 	}
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Put(":roomID")
 	@ApiTags("rooms")
-	async updateRoom(
-		@Request() req: any,
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to update.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UpdateRoomDto,
+		required: true,
+		description: "The updated room info",
+	})
+	@ApiOperation({
+		summary: "Update room info",
+		operationId: "putRoomInfo",
+	})
+	@ApiOkResponse({
+		description: "Room info updated successfully.",
+		type: RoomDto,
+	})
+	async putRoomInfo(
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 		@Body() updateRoomDto: UpdateRoomDto,
 	): Promise<RoomDto> {
-		return await this.roomsService.updateRoomInfo(roomID, updateRoomDto);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.updateRoomInfo(
+			userInfo.id,
+			roomID,
+			updateRoomDto,
+		);
 	}
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Delete(":roomID")
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "Room deleted successfully.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "User is not the creator of the room.",
-		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
-	@ApiBearerAuth()
-	@ApiOperation({ summary: "Delete a room" })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to delete.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: "Delete a room",
+		operationId: "deleteRoom",
+	})
 	async deleteRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		// check using jwt token whether the user is the creator of the room
 		// if not, return 403
 		// if yes, delete the room and return 200
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.deleteRoom(roomID, userInfo.id);
+		await this.roomsService.deleteRoom(roomID, userInfo.id);
 	}
 
-	/*
-    POST /rooms/{roomID}/join
-    adds current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post(":roomID/join")
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "User joined room successfully.",
 		type: Boolean,
 	})
-	@ApiOperation({ summary: "Join a room" })
+	@ApiOperation({
+		summary: "Join a room",
+		description: "Adds the current user as a participant to the room.",
+		operationId: "joinRoom",
+	})
 	@ApiBadRequestResponse({
 		description: "User already in room.",
 		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to join.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async joinRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.joinRoom(roomID, userID.id);
+		await this.roomsService.joinRoom(roomID, userID.id);
 	}
 
-	/*
-    POST /rooms/{roomID}/leave
-    remove current user as a participant to the room
-    no input
-    response: (2xx for success, 4xx for error)
-    */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post(":roomID/leave")
 	@ApiTags("rooms")
 	@ApiOkResponse({
 		description: "User left room successfully.",
-		type: Boolean,
 	})
-	@ApiOperation({ summary: "Leave a room" })
+	@ApiOperation({
+		summary: "Leave a room",
+		description: "Removes the current user as a participant to the room.",
+		operationId: "leaveRoom",
+	})
 	@ApiBadRequestResponse({
 		description: "User not in room.",
 		type: Boolean,
 	})
-	@ApiParam({ name: "roomID", required: true })
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to leave.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async leaveRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): Promise<boolean> {
+	): Promise<void> {
 		const userID: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.leaveRoom(roomID, userID.id);
+		await this.roomsService.leaveRoom(roomID, userID.id);
 	}
 
-	/*
-    GET /rooms/{roomID}/users
-    returns people currently (and previously in room)
-    no input
-    response: array of UserDto
-    */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/users")
 	@ApiTags("rooms")
 	@ApiOkResponse({
@@ -216,26 +334,31 @@ export class RoomsController {
 		type: UserDto,
 		isArray: true,
 	})
-	@ApiOperation({ summary: "Get users in a room" })
-	@ApiParam({ name: "roomID", required: true })
-	async getRoomUsers(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): Promise<UserDto[]> {
+	@ApiOperation({
+		summary: "Get users in a room",
+		description: "Returns the users in the room as an array of UserDto.",
+		operationId: "getRoomUsers",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	async getRoomUsers(@Param("roomID") roomID: string): Promise<UserDto[]> {
 		return await this.roomsService.getRoomUsers(roomID);
 	}
 
-	/*
-    GET /rooms/{roomID}/songs
-    returns the queue
-    no input
-    response: array of SongInfoDto
-    */
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get the queue of a room" })
+	@ApiOperation({
+		summary: "Get the queue of a room",
+		description: "Returns the queue of the room as an array of SongInfoDto.",
+		operationId: "getRoomQueue",
+	})
 	@ApiOkResponse({
 		description: "The queue of the room as an array of SongInfoDto.",
 	})
@@ -245,8 +368,16 @@ export class RoomsController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the queue for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	async getRoomQueue(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 		//): SongInfoDto[] {
 	): Promise<string> {
@@ -255,33 +386,54 @@ export class RoomsController {
 		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
 	}
 
-	/*
-    DELETE /rooms/{roomID}/songs
-    clears the queue (except for current song, if playing)
-    no input
-    response: (2xx for success, 4xx for error)
-    */
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Delete(":roomID/songs")
 	@ApiTags("rooms")
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to clear the queue for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: "Clear the queue of a room",
+		description: "Clears the queue of the room except for the current song.",
+		operationId: "clearRoomQueue",
+	})
 	clearRoomQueue(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
-	): boolean {
-		return this.roomsService.clearRoomQueue(roomID);
+	): void {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		this.roomsService.clearRoomQueue(userInfo.id, roomID);
 	}
 
-	/*
-    POST /rooms/{roomID}/songs
-    add a song to queue
-    input: SongInfoDto
-    response: array of SongInfoDto (room queue)
-    */
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post(":roomID/songs")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Add a song to the queue of a room" })
+	@ApiOperation({
+		summary: "Add a song to the queue of a room",
+		operationId: "addSongToQueue",
+	})
 	@ApiOkResponse({
 		description: "The queue of the room as an array of SongInfoDto.",
 	})
@@ -291,8 +443,16 @@ export class RoomsController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to add the song to.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	addSongToQueue(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 		//@Body() songInfoDto: SongInfoDto,
 		@Body() songInfoDto: string,
@@ -302,46 +462,88 @@ export class RoomsController {
 		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
 	}
 
-	/*
-    GET /rooms/{roomID}/songs/current
-    returns the current playing song
-    no input
-    response: SongInfoDto
-    */
-	@UseGuards(JwtAuthGuard)
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
-	getCurrentSong(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-	): SongInfoDto {
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the current song for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: "Get the current song of a room",
+		description: "Get the song currently playing in the room.",
+		operationId: "getCurrentSong",
+	})
+	getCurrentSong(@Param("roomID") roomID: string): SongInfoDto {
 		return this.roomsService.getCurrentSong(roomID);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/chat/history")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room's chat history" })
-	@ApiParam({ name: "roomID" })
+	@ApiOperation({
+		summary: "Get the chat history of a room",
+		description:
+			"Returns the chat history of the room as an array of LiveChatMessageDto.",
+		operationId: "getLiveChatHistory",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the chat history for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The chat history as an array of LiveChatMessageDto.",
 		type: LiveChatMessageDto,
 		isArray: true,
 	})
 	async getLiveChatHistory(
-		@Request() req: any,
 		@Param("roomID") roomID: string,
 	): Promise<LiveChatMessageDto[]> {
 		return await this.roomsService.getLiveChatHistoryDto(roomID);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post(":roomID/bookmark")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Bookmark a room" })
-	@ApiParam({ name: "roomID" })
+	@ApiOperation({
+		summary: "Bookmark a room",
+		description: "Adds the room to the user's bookmarks.",
+		operationId: "bookmarkRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to bookmark.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "Room bookmarked successfully",
 	})
@@ -352,7 +554,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async bookmarkRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -360,11 +562,30 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post(":roomID/unbookmark")
 	@ApiTags("rooms")
-	@ApiOperation({ summary: "Unbookmark a room" })
-	@ApiParam({ name: "roomID" })
+	@ApiOperation({
+		summary: "Unbookmark a room",
+		description: "Removes the room from the user's bookmarks.",
+		operationId: "unbookmarkRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to unbookmark.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "Room unbookmarked successfully",
 	})
@@ -375,7 +596,7 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async unbookmarkRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -383,256 +604,682 @@ export class RoomsController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room analytics",
+		description: "Returns the analytics of the room as a RoomAnalyticsDto.",
+		operationId: "getRoomAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The analytics of the room as a RoomAnalyticsDto.",
+		type: RoomAnalyticsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/queue")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room queue analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room queue analytics",
+		description:
+			"Returns the queue analytics of the room as a RoomAnalyticsQueueDto.",
+		operationId: "getRoomQueueAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get queue analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The queue analytics of the room as a RoomAnalyticsQueueDto.",
+		type: RoomAnalyticsQueueDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomQueueAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsQueueDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomQueueAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomQueueAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/participation")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room participation analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room participation analytics",
+		description:
+			"Returns the participation analytics of the room as a RoomAnalyticsParticipationDto.",
+		operationId: "getRoomParticipationAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get participation analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The participation analytics of the room as a RoomAnalyticsParticipationDto.",
+		type: RoomAnalyticsParticipationDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomParticipationAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsParticipationDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomParticipationAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomParticipationAnalytics(
+			roomID,
+			userInfo.id,
+		);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/interactions")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room interaction analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room interaction analytics",
+		description:
+			"Returns the interaction analytics of the room as a RoomAnalyticsInteractionsDto.",
+		operationId: "getRoomInteractionAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get interaction analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The interaction analytics of the room as a RoomAnalyticsInteractionsDto.",
+		type: RoomAnalyticsInteractionsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomInteractionAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsInteractionsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomInteractionAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomInteractionAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/votes")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room voting analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room voting analytics",
+		description:
+			"Returns the voting analytics of the room as a RoomAnalyticsVotesDto.",
+		operationId: "getRoomVotesAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get voting analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The voting analytics of the room as a RoomAnalyticsVotesDto.",
+		type: RoomAnalyticsVotesDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomVotesAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsVotesDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomVotesAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomVotesAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/songs")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room song analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room song analytics",
+		description:
+			"Returns the song analytics of the room as a RoomAnalyticsSongsDto.",
+		operationId: "getRoomSongsAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get song analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description: "The song analytics of the room as a RoomAnalyticsSongsDto.",
+		type: RoomAnalyticsSongsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomSongsAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsSongsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomSongsAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomSongsAnalytics(roomID, userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":roomID/analytics/contributors")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get room contributor analytics" })
-	@ApiParam({ name: "roomID" })
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get room contributor analytics",
+		description:
+			"Returns the contributor analytics of the room as a RoomAnalyticsContributorsDto.",
+		operationId: "getRoomContributorsAnalytics",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get contributor analytics for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
 		description:
 			"The contributor analytics of the room as a RoomAnalyticsContributorsDto.",
+		type: RoomAnalyticsContributorsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getRoomContributorsAnalytics(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("roomID") roomID: string,
 	): Promise<RoomAnalyticsContributorsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getRoomContributorsAnalytics(roomID, userInfo.id);
+		return this.roomAnalytics.getRoomContributorsAnalytics(roomID, userInfo.id);
 	}
 
-	// create an endpoint to get the keymetrics for a user's rooms
-	// make it a get request
-	// /rooms/analytics/keymetrics
-	// input: none`
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Get("analytics/keymetrics")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Get key metrics for user's rooms" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("analytics")
+	@ApiTags("room analytics")
+	@ApiOperation({
+		summary: "Get key metrics for user's rooms",
+		description:
+			"Returns the key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+		operationId: "getKeyMetrics",
+	})
 	@ApiOkResponse({
 		description:
 			"The key metrics for the user's rooms as a RoomAnalyticsKeyMetricsDto.",
+		type: RoomAnalyticsKeyMetricsDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
 	async getKeyMetrics(
-		@Request() req: any,
+		@Request() req: Request,
 	): Promise<RoomAnalyticsKeyMetricsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomsService.getKeyMetrics(userInfo.id);
+		return this.roomAnalytics.getKeyMetrics(userInfo.id);
 	}
 
-	// define an endpoint for room song archival
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Post(":roomID/archive/playlist")
-	@ApiTags("rooms")
-	@ApiOperation({ summary: "Archive a room's songs" })
-	@ApiParam({ name: "roomID" })
+	@Get(":roomID/kicked")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Get list of kicked users",
+		description:
+			"Returns an array of UserDto representing users who were been kicked from the room.",
+		operationId: "getKickedUsers",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the kicked users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
 	@ApiOkResponse({
-		description: "Room songs archived successfully",
+		description:
+			"An array of UserDto representing the kicked users in the room.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getKickedUsers(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<UserDto[]> {
+		return await this.roomsService.getKickedUsers(roomID);
+	}
+
+	@Post(":roomID/kicked")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Kick someone out of a room",
+		description: "Kicks a user out of the room.",
+		operationId: "kickUser",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to kick the user from.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to be kicked.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "User kicked successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async kickUser(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.kickUser(roomID, userInfo.id, user.userID);
+	}
+
+	@Delete(":roomID/kicked")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Undo participant kick",
+		description: "Undoes the kick of a participant in the room.",
+		operationId: "undoKick",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to undo the kick in.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to undo the kick for.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "Kick undone successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async undoKick(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.undoKick(roomID, userInfo.id, user.userID);
+	}
+
+	@Get(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Get list of banned users",
+		description:
+			"Returns an array of UserDto representing the banned users in the room.",
+		operationId: "getBannedUsers",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the banned users for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description:
+			"An array of UserDto representing the banned users in the room.",
+	})
+	async getBannedUsers(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<UserDto[]> {
+		return await this.roomsService.getBannedUsers(roomID);
+	}
+
+	@Post(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Perma ban someone from a room",
+		description: "Permanently bans a user from the room.",
+		operationId: "banUser",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to ban the user from.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to be banned.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "User banned successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async banUser(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.banUser(roomID, userInfo.id, user.userID);
+	}
+
+	@Delete(":roomID/banned")
+	@ApiTags("room management")
+	@ApiOperation({
+		summary: "Undo participant ban",
+		description: "Undoes the ban of a participant in the room.",
+		operationId: "undoBan",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to undo the ban in.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		type: UserActionDto,
+		description: "The user ID of the user to undo the ban for.",
+		required: true,
+	})
+	@ApiOkResponse({
+		description: "Ban undone successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async undoBan(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() user: UserActionDto,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.undoBan(roomID, userInfo.id, user.userID);
+	}
+
+	@Get(":roomID/schedule")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Get scheduled room",
+		description: "Returns the scheduled room as a .ics file.",
+		operationId: "getCalendarFile",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the schedule for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The scheduled room as a .ics file.",
+		type: File,
+		content: {
+			"application/octet-stream": {
+				schema: {
+					type: "string",
+					format: "binary",
+				},
+			},
+			"text/calendar": {
+				schema: {
+					type: "string",
+					format: "binary",
+				},
+			},
+		},
 	})
 	@ApiNotFoundResponse({
 		description: "Room not found",
 	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	async archiveRoomSongs(
-		@Request() req: any,
-		@Param("roomID") roomID: string,
-		// define the body of the request as a json with playlist name and description
-		@Body()
-		archiveInfo: {
-			name: string;
-			description: string;
-		},
-	): Promise<void> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		await this.roomsService.archiveRoomSongs(roomID, userInfo.id, archiveInfo);
-	}
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get("archive/playlist")
-	@ApiOperation({ summary: "Get a user's archived songs" })
-	@ApiOkResponse({
-		description: "User's archived songs retrieved successfully",
-		isArray: true,
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiTags("rooms")
-	async getArchivedSongs(@Request() req: any): Promise<any> {
-		console.log("getting archived songs");
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.getArchivedSongs(userInfo.id);
-	}
-
-	// define an endpoint for deleting a user's archived songs based on playlist id
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Delete("archive/playlist/:playlistID")
-	@ApiOperation({ summary: "Delete a user's archived songs" })
-	@ApiParam({ name: "playlistID" })
-	@ApiOkResponse({
-		description: "User's archived songs deleted successfully",
-	})
 	@ApiNotFoundResponse({
-		description: "Playlist not found",
+		description: "Room not scheduled",
 	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiTags("rooms")
-	async deleteArchivedSongs(
-		@Request() req: any,
-		@Param("playlistID") playlistID: string,
-	): Promise<void> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		await this.roomsService.deleteArchivedSongs(userInfo.id, playlistID);
+	@ApiProduces("application/octet-stream")
+	@ApiProduces("text/calendar")
+	async getScheduledRoom(@Param("roomID") roomID: string): Promise<File> {
+		return await this.roomsService.getCalendarFile(roomID);
 	}
 
-	// define an endpoint for getting a user's current room
+	/**
+	 * Save room as a playlist
+	 *
+	 * @param roomID - The ID of the room to save as a playlist.
+	 * @returns The playlist ID as a string.
+	 */
+	@Post(":roomID/save")
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Get("current/room")
-	@ApiOperation({ summary: "Get a user's current room" })
-	@ApiOkResponse({
-		description: "User's current room retrieved successfully",
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
 	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
+	*/
 	@ApiTags("rooms")
-	async getCurrentRoom(@Request() req: any): Promise<any> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.roomsService.getCurrentRoom(userInfo.id);
+	@ApiOperation({
+		summary: "Save room as a playlist",
+		operationId: "saveRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to save as a playlist.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The playlist ID as a string.",
+		type: String,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async saveRoomAsPlaylist(@Param("roomID") roomID: string): Promise<string> {
+		return "";
+	}
+
+	/**
+	 * Evaluate if a room can be split
+	 *
+	 * @param roomID - The ID of the room to evaluate.
+	 * @returns An array of the possible genres (if possible) or 4xx if not possible.
+	 */
+	@Get(":roomID/split")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Evaluate if a room can be split",
+		operationId: "checkRoomSplit",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to evaluate.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description:
+			"An array of the possible genres (if possible) or an empty array if not possible.",
+	})
+	async checkRoomSplit(@Param("roomID") roomID: string): Promise<string[]> {
+		return await this.roomsService.canSplitRoom(roomID);
+	}
+
+	/**
+	 * Returns a RoomDto with info about its split children
+	 *
+	 * @param roomID - The ID of the room to get the split children for.
+	 * @returns The RoomDto.
+	 */
+	@Post(":roomID/split")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Returns a RoomDto with info about its split children",
+		operationId: "splitRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to get the split children for.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "The RoomDto.",
+		type: RoomDto,
+	})
+	async splitRoom(@Param("roomID") roomID: string): Promise<RoomDto> {
+		return await this.roomsService.splitRoom(roomID);
 	}
 }
