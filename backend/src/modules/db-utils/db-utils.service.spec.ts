@@ -341,4 +341,83 @@ describe("DbUtilsService", () => {
 			});
 		});
 	});
+	describe("getRelationshipStatus", () => {
+		it('should return "friend" if the users are friends', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(true);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("friend");
+		});
+
+		it('should return "pending" if there is a pending friend request', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(true);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("pending");
+		});
+
+		it('should return "mutual" if both users are following each other', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(true);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(true);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("mutual");
+		});
+
+		it('should return "following" if the user is following the accountFriendId', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(true);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("following");
+		});
+
+		it('should return "follower" if the accountFriendId is following the user', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(true);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("follower");
+		});
+
+		it('should return "none" if there is no relationship', async () => {
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFollowing").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+			jest.spyOn(service, "isFriendsOrPending").mockResolvedValueOnce(false);
+
+			const result = await service.getRelationshipStatus(
+				"userID",
+				"accountFriendId",
+			);
+			expect(result).toBe("none");
+		});
+	});
 });
