@@ -335,13 +335,15 @@ export class SpotifyService {
 					result = song;
 					return;
 				}
-
+				const genre = track.album.genres[0];
 				const s: Prisma.songCreateInput = {
 					name: track.name,
-					artist: track.artists[0].name,
+					artists: track.artists.map((artist) => artist.name),
 					duration: track.duration_ms,
-					genres: track.album.genres ? track.album.genres : [],
+					genre: genre !== undefined && genre !== null ? genre : "Unknown",
 					artwork_url: this.getLargestImage(track.album.images).url,
+					// audio_features: JSON.stringify(audioFeatures),
+					audio_features: {},
 					spotify_id: track.id,
 				};
 				result = await this.prisma.song.create({
@@ -380,23 +382,31 @@ export class SpotifyService {
 				const editListIDs: string[] = [];
 				for (const track of tracks) {
 					if (track.id !== null) {
+						const genre = track.album.genres[0];
 						if (!foundIDs.includes(track.id)) {
 							const song: Prisma.songCreateInput = {
 								name: track.name,
-								artist: track.artists[0].name,
+								artists: track.artists.map((artist) => artist.name),
 								duration: track.duration_ms,
-								genres: track.album.genres ? track.album.genres : [],
+								genre:
+									genre !== undefined && genre !== null ? genre : "Unknown",
 								artwork_url: this.getLargestImage(track.album.images).url,
+								// audio_features: JSON.stringify(audioFeatures),
+								audio_features: {},
 								spotify_id: track.id,
 							};
 							createList.push(song);
 						} else {
 							const song: Prisma.songUpdateInput = {
 								name: track.name,
-								artist: track.artists[0].name,
+								artists: track.artists.map((artist) => artist.name),
 								duration: track.duration_ms,
-								genres: track.album.genres ? track.album.genres : [],
+								genre:
+									genre !== undefined && genre !== null ? genre : "Unknown",
 								artwork_url: this.getLargestImage(track.album.images).url,
+								// audio_features: JSON.stringify(audioFeatures),
+								audio_features: {},
+								spotify_id: track.id,
 							};
 							editList.push(song);
 							editListIDs.push(track.id);
