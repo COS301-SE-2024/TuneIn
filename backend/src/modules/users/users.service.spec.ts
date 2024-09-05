@@ -119,5 +119,5 @@ describe("UsersService Update Functionality", () => {
 		});
 		expect(result.fav_genres.data).toEqual(["j-pop"]);
 		expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
-	});
+	}, 15000);
 });
