@@ -504,4 +504,45 @@ describe("DbUtilsService", () => {
 			expect(result).toEqual([]);
 		});
 	});
+	describe("isFollowing", () => {
+		it("should return false if no follows are found", async () => {
+			jest
+				.spyOn(mockPrismaService.follows, "findMany")
+				.mockResolvedValueOnce([]);
+
+			const result = await service.isFollowing("userID", "accountFollowedId");
+			expect(result).toBe(false);
+		});
+
+		it("should return false if the follow array is null", async () => {
+			jest
+				.spyOn(mockPrismaService.follows, "findMany")
+				.mockResolvedValueOnce(null);
+
+			const result = await service.isFollowing("userID", "accountFollowedId");
+			expect(result).toBe(false);
+		});
+
+		it("should throw an error if more than one follow is found", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValueOnce([
+				{ follower: "userID", followee: "accountFollowedId" },
+				{ follower: "userID", followee: "accountFollowedId" },
+			]);
+
+			await expect(
+				service.isFollowing("userID", "accountFollowedId"),
+			).rejects.toThrow("More than one follow found.");
+		});
+
+		it("should return true if exactly one follow is found", async () => {
+			jest
+				.spyOn(mockPrismaService.follows, "findMany")
+				.mockResolvedValueOnce([
+					{ follower: "userID", followee: "accountFollowedId" },
+				]);
+
+			const result = await service.isFollowing("userID", "accountFollowedId");
+			expect(result).toBe(true);
+		});
+	});
 });
