@@ -583,6 +583,8 @@ class LiveSocketService {
 
 					this.currentRoomQueue = response.songs;
 					if (this.setQueues.length > 0) {
+						// sort songs by index
+						this.currentRoomQueue.sort((a, b) => a.index - b.index);
 						for (const setQueue of this.setQueues) {
 							setQueue(this.currentRoomQueue);
 						}
