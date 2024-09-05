@@ -646,7 +646,7 @@ const ProfileScreen: React.FC = () => {
 					<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
 						<View style={styles.profileHeader}>
 							<Text style={styles.title}>Favorite Songs</Text>
-							{primaryProfileData.fav_songs.count > 2 && (
+							{primaryProfileData.fav_songs.count > 4 && (
 								<TouchableOpacity
 									onPress={() => {
 										navigateToMore(
@@ -667,7 +667,7 @@ const ProfileScreen: React.FC = () => {
 								</TouchableOpacity>
 							)}
 						</View>
-						{primaryProfileData.fav_songs.data.slice(0, 2).map((song: any) => (
+						{primaryProfileData.fav_songs.data.slice(0, 4).map((song: any) => (
 							<FavoriteSongs
 								key={song.spotify_id}
 								songTitle={song.title}
