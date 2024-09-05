@@ -134,7 +134,7 @@ describe("ProfileScreen", () => {
 		);
 
 			expect(getByDisplayValue("John Doe")).toBeTruthy;
-			expect(getByDisplayValue("@johndoe")).toBeTruthy;
+			expect(getByDisplayValue("johndoe")).toBeTruthy;
 			expect(getByDisplayValue("Mock bio")).toBeTruthy;
 			expect(getByDisplayValue("https://example.com")).toBeTruthy;
 			expect(getByText("j-pop")).toBeTruthy;
@@ -302,7 +302,7 @@ describe("ProfileScreen", () => {
 		);
 
 		const name = getByDisplayValue("John Doe");
-		const username = getByDisplayValue("@johndoe");
+		const username = getByDisplayValue("johndoe");
 		const bio = getByDisplayValue("Mock bio");
 		const link = getByDisplayValue("https://example.com");
 
@@ -312,9 +312,94 @@ describe("ProfileScreen", () => {
 		fireEvent.changeText(link, "https://newexample.com" );
 
 		expect(getByDisplayValue("Jane Doe")).toBeTruthy();
-		expect(getByDisplayValue("@janedoe")).toBeTruthy();
+		expect(getByDisplayValue("janedoe")).toBeTruthy();
 		expect(getByDisplayValue("New bio")).toBeTruthy();
 		expect(getByDisplayValue("https://newexample.com")).toBeTruthy();
+	});
+
+	it("changes shows error message when username is invalid", async () => {
+		const mockProfileData = {
+			profile_picture_url: "https://example.com/profile-pic.jpg",
+			profile_name: "John Doe",
+			username: "johndoe",
+			followers: { count: 0 },
+			following: { count: 0 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: { other: ["https://example.com"] },
+			},
+			fav_genres: { count: 1, data: ["j-pop"] },
+			fav_songs: {
+				count: 1,
+				data: [
+					{
+						title: "STYX HELIX",
+						artists: ["MYTH & ROID"],
+						cover:
+							"https://i.scdn.co/image/ab67616d0000b273bf97b2acaf967bb8ee7aa2f6",
+						spotify_id: "2tcSz3bcJqriPg9vetvJLs",
+						duration: 289,
+						start_time: null,
+					},
+				],
+			},
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			profile: JSON.stringify(mockProfileData),
+		});
+		(axios.get as jest.Mock).mockResolvedValue({ data: ["genre"] });
+
+		const mockPlayerContextValue = {
+			userData: {
+				profile_name: "John Doe",
+				username: "johndoe",
+				profile_picture_url:
+					"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+				followers: { count: 10 },
+				following: { count: 20 },
+				bio: "Mock bio",
+				links: {
+					count: 1,
+					data: [{ type: "example", links: "https://example.com" }],
+				},
+				fav_genres: { count: 1, data: [] },
+				fav_songs: {
+					count: 1,
+					data: [
+						{
+							title: "Scherzo No. 3 in C-Sharp Minor, Op. 39",
+							artists: ["Frédéric Chopin", "Arthur Rubinstein"],
+							cover: null,
+							spotify_id: "5AnNbtnz54r94cd2alxg5I",
+							start_time: null,
+						},
+					],
+				},
+				fav_rooms: { count: 0, data: [] },
+				recent_rooms: { count: 0, data: [] },
+			},
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
+
+		const { getByDisplayValue, getByText } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<EditProfileScreen />
+			</PlayerContextProviderMock>,
+		);
+
+		const username = getByDisplayValue("johndoe");
+
+		fireEvent.changeText(username, "Janedoe");
+
+		expect(
+			getByText(
+				"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
+			),
+		).toBeTruthy();
 	});
 
 	it("deletes items", async () => {

@@ -390,7 +390,7 @@ const EditProfileScreen = () => {
 	};
 
 	const renderAddLink = () => {
-		if (flatLinks.length < 3) {
+		if (flatLinks.length < 5) {
 			return (
 				<View style={styles.listItem}>
 					<TouchableOpacity
