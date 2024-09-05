@@ -8,12 +8,13 @@ import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
-import { IsNumber, IsObject, IsString } from "class-validator";
+import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
+import { Type } from "class-transformer";
 
 export class SpotifyTokenResponse {
 	@ApiProperty()
@@ -67,6 +68,8 @@ export class SpotifyCallbackResponse {
 
 	@ApiProperty()
 	@IsObject()
+	@Type(() => SpotifyTokenResponse)
+	@ValidateNested()
 	spotifyTokens: SpotifyTokenResponse;
 }
 
@@ -288,7 +291,14 @@ export class SpotifyAuthService {
 			throw new Error("Failed to find user");
 		}
 		if (existingUser && existingUser.length > 0) {
-			return existingUser[0];
+			if (existingUser.length > 1) {
+				throw new Error("Multiple users with the same username");
+			}
+			if (!existingUser[0] || existingUser[0] === null) {
+				throw new Error("Failed to find user");
+			}
+			const e = existingUser[0];
+			return e;
 		}
 
 		const user: Prisma.usersCreateInput = {
@@ -302,19 +312,32 @@ export class SpotifyAuthService {
 
 		if (spotifyUser.images && spotifyUser.images.length > 0) {
 			//find largest profile picture
-			let largest = 0;
+			let largest = -1;
 			for (let i = 0; i < spotifyUser.images.length; i++) {
-				if (spotifyUser.images[i].height > largest) {
+				const img = spotifyUser.images[i];
+				if (
+					img !== undefined &&
+					img.height !== undefined &&
+					img.height > largest
+				) {
 					largest = i;
 				}
+			}
+			let imageURL = "";
+			if (
+				largest >= 0 &&
+				spotifyUser.images[largest] !== undefined &&
+				spotifyUser.images[largest] !== undefined
+			) {
+				imageURL = spotifyUser.images[largest]?.url || "";
 			}
 
 			console.log("spotifyUser image : " + spotifyUser.images);
 			console.log("\nimage size: " + largest);
 
 			user.profile_picture =
-				largest > 0
-					? spotifyUser.images[largest]?.url
+				imageURL !== ""
+					? imageURL
 					: "https://example.com/default-profile-picture.png";
 		}
 

@@ -1,25 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useApi } from "../api/APIContext";
+import { Configuration, DefaultApi } from "../api";
+//import { Configuration, DefaultApi } from "../api-client";
+import * as utils from "./services/Utils";
 
 const ApiTest: React.FC = () => {
-	const api = useApi();
-	const [data, setData] = useState<any>(null);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				console.log("Starting API call"); // Debugging log
-				const response = await api.appControllerGetHello(); // Adjust method call based on your API
-				console.log("API call response:", response); // Debugging log
-				setData(response);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchData();
-	}, [api]);
+	const config = new Configuration({ basePath: utils.API_BASE_URL });
+	const apiService = new DefaultApi(config);
+	console.log("API service:", apiService);
+	apiService.appControllerGetHello().then((response) => {
+		console.log("API service response:", response);
+	});
 
 	return (
 		<View style={styles.container}>

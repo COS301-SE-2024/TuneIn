@@ -153,7 +153,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (roomData === null) {
-							fetchRoomInfo(data.userID);
+							fetchRoomInfo(data.username);
 						}
 					}
 				} catch (error) {
@@ -204,7 +204,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchRoomInfo(primaryProfileData.userID);
+				fetchRoomInfo(primaryProfileData.username);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
@@ -259,12 +259,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchRoomInfo = async (userID: string) => {
+	const fetchRoomInfo = async (username: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${userID}/room/current`,
+					`${utils.API_BASE_URL}/users/${username}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -296,7 +296,7 @@ const ProfileScreen: React.FC = () => {
 		if (storedToken) {
 			if (following) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/unfollow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/unfollow`,
 					{},
 					{
 						headers: {
@@ -314,7 +314,7 @@ const ProfileScreen: React.FC = () => {
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.userID}/follow`,
+					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
 					{},
 					{
 						headers: {

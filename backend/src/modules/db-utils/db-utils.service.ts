@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import Prisma from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
@@ -12,7 +12,7 @@ export class DbUtilsService {
 
 	constructor(
 		private configService: ConfigService,
-		private prisma: PrismaService,
+		private readonly prisma: PrismaService,
 	) {
 		// Set the salt for hashing
 		const salt = this.configService.get<string>("SALT");
@@ -218,8 +218,9 @@ export class DbUtilsService {
 		const result: PrismaTypes.room[] = [];
 		while (result.length < count) {
 			const random = Math.floor(Math.random() * rooms.length);
-			if (!result.includes(rooms[random])) {
-				result.push(rooms[random]);
+			const randomRoom = rooms[random];
+			if (randomRoom && !result.includes(randomRoom)) {
+				result.push(randomRoom);
 			}
 		}
 		return rooms;
@@ -468,5 +469,25 @@ export class DbUtilsService {
 			throw new Error("More than one friend found.");
 		}
 		return true;
+	}
+
+	async getCurrentRoomID(userID: string): Promise<string> {
+		if (!(await this.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
+		}
+		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
+			await this.prisma.participate.findFirst({
+				where: {
+					user_id: userID,
+				},
+				include: {
+					room: true,
+				},
+			});
+
+		if (room === null) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return room.room.room_id;
 	}
 }
