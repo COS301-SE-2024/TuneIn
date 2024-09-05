@@ -129,35 +129,8 @@ export class UsersService {
 		}
 
 		if (updateProfileDto.links) {
-			// console.log(updateProfileDto.links.data);
-			// updatedUser.external_links = { data: updateProfileDto.links.data };
-		}
-
-		// Merge the preferences if they exist in the updateProfileDto
-		if (updateProfileDto.fav_genres) {
-			let existingPreferences = user.preferences;
-
-			if (existingPreferences) {
-				if (
-					typeof existingPreferences === "object" &&
-					!Array.isArray(existingPreferences)
-				) {
-					if (updateProfileDto.fav_genres) {
-						existingPreferences.fav_genres = updateProfileDto.fav_genres
-							.data as Prisma.JsonArray;
-					}
-				} else {
-					existingPreferences = {
-						fav_genres: updateProfileDto.fav_genres.data,
-					};
-				}
-			} else {
-				existingPreferences = {
-					fav_genres: updateProfileDto.fav_genres.data,
-				};
-			}
-
-			updatedUser.preferences = existingPreferences as Prisma.InputJsonValue;
+			console.log(updateProfileDto.links.data);
+			updatedUser.external_links = updateProfileDto.links.data;
 		}
 
 		if (updateProfileDto.fav_genres) {
@@ -168,9 +141,6 @@ export class UsersService {
 		}
 
 		if (updateProfileDto.fav_songs) {
-			// console.log("Profile update: " + JSON.stringify(updateProfileDto.fav_songs.data));
-
-			const songs: string[] = updateProfileDto.fav_songs.data.map((song) => song.spotify_id);
 			this.updateFavoriteSongsByID(userId, updateProfileDto.fav_songs.data);
 		}
 
@@ -291,10 +261,10 @@ export class UsersService {
 					data: missingSongs.map((song) => ({
 						spotify_id: song.spotify_id,
 						name: song.title,
-						duration: (song.duration_ms/1000),
+						duration: song.duration,
 						artwork_url: song.cover,
 						audio_features: {},
-						artists: song.artists.split(", "),
+						artists: song.artists,
 					})),
 					skipDuplicates: true, // Prevents errors if a song was added in parallel by another transaction
 				});

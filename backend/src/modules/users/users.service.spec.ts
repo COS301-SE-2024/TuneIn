@@ -4,7 +4,7 @@ import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-moc
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import { MockContext, Context, createMockContext } from "../../../context";
+// import { MockContext, Context, createMockContext } from "../../../context";
 import { PrismaService } from "prisma/prisma.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 
@@ -33,6 +33,7 @@ const mockUserDto: UserDto = {
 	},
 	bio: "",
 	current_song: {
+		songID: "",
 		title: "",
 		artists: [],
 		cover: "",
@@ -61,13 +62,9 @@ const mockUserDto: UserDto = {
 describe("UsersService Update Functionality", () => {
 	let service: UsersService;
 	let dtoGen: DtoGenService;
-	let mockCtx: MockContext;
-	let ctx: Context;
 	let prisma: PrismaService;
 
 	beforeEach(async () => {
-		mockCtx = createMockContext();
-		ctx = mockCtx as unknown as Context;
 		const module: TestingModule = await createUsersUpdateTestingModule();
 		service = module.get<UsersService>(UsersService);
 		dtoGen = module.get<DtoGenService>(DtoGenService);
@@ -100,6 +97,7 @@ describe("UsersService Update Functionality", () => {
 				count: 1,
 				data: [
 					{
+						songID: "token",
 						title: "STYX HELIX",
 						artists: ["MYTH & ROID"],
 						cover:
@@ -121,6 +119,6 @@ describe("UsersService Update Functionality", () => {
 			instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
 		});
 		expect(result.fav_genres.data).toEqual(["j-pop"]);
-		expect(result.fav_songs.data[0].title).toBe("STYX HELIX");
+		expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
 	});
 });
