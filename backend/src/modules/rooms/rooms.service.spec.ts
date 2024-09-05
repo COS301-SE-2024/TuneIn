@@ -109,7 +109,7 @@ describe("RoomsService", () => {
 				.spyOn(dtogen, "generateRoomDtoFromRoom")
 				.mockResolvedValueOnce({
 					roomID: roomID,
-					creator: user,
+					creator: { userID: userID, username: "", profile_picture_url: "" },
 					room_name: updateRoomDto.room_name,
 					description: updateRoomDto.description,
 					room_image: updateRoomDto.room_image,
@@ -171,37 +171,7 @@ describe("RoomsService", () => {
 				has_nsfw_content: updateRoomDto.has_explicit_content,
 				language: updateRoomDto.language,
 				creator: {
-					bio: "",
-					fav_genres: {
-						count: 0,
-						data: [],
-					},
-					fav_rooms: {
-						count: 0,
-						data: [],
-					},
-					fav_songs: {
-						count: 0,
-						data: [],
-					},
-					followers: {
-						count: 0,
-						data: [],
-					},
-					following: {
-						count: 0,
-						data: [],
-					},
-					links: {
-						count: 0,
-						data: [],
-					},
-					profile_name: "",
 					profile_picture_url: "",
-					recent_rooms: {
-						count: 0,
-						data: [],
-					},
 					userID: "user123",
 					username: "",
 				},

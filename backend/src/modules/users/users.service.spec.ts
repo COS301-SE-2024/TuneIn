@@ -4,7 +4,6 @@ import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-moc
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
-// import { MockContext, Context, createMockContext } from "../../../context";
 import { PrismaService } from "prisma/prisma.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 
