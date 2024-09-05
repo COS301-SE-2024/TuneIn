@@ -1,4 +1,3 @@
-// WhiteButton.tsx
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
@@ -17,7 +16,6 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ title, onPress }) => {
 
 const styles = StyleSheet.create({
 	button: {
-		// width: "92%",
 		height: 52,
 		justifyContent: "center",
 		alignItems: "center",
