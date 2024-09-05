@@ -79,6 +79,7 @@ const EditProfileScreen = () => {
 
 	const updateProfile = async () => {
 		try {
+			console.log("Profile data: " + JSON.stringify(profileData));
 			const response = await axios.patch(
 				`${utils.API_BASE_URL}/users`,
 				profileData,
@@ -109,6 +110,7 @@ const EditProfileScreen = () => {
 			setToken(t);
 
 			const imageLink = await uploadImage(uri, "image");
+			return imageLink;
 		} catch (error) {
 			console.error("Error uploading file", error);
 			throw error;
@@ -172,11 +174,8 @@ const EditProfileScreen = () => {
 				);
 				setChanged(false);
 				return;
-			}
-			else{
-				setErrorMessage(
-					"",
-				);
+			} else {
+				setErrorMessage("");
 			}
 
 			setChanged(true);
@@ -246,7 +245,6 @@ const EditProfileScreen = () => {
 
 	const updateLinks = (links: string[]) => {
 		if (links.length !== 0) {
-			
 			const categorizedLinks = categorizeLinks(links);
 
 			setProfileData((prevProfileData: any) => ({
@@ -486,7 +484,9 @@ const EditProfileScreen = () => {
 						}}
 					/>
 				</View>
-				{errorMessage !== "" && (<Text style={[styles.errorMessage]}>{errorMessage}</Text>)}
+				{errorMessage !== "" && (
+					<Text style={[styles.errorMessage]}>{errorMessage}</Text>
+				)}
 				{/* Bio */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
@@ -582,7 +582,7 @@ const EditProfileScreen = () => {
 						<FavoriteSongs
 							key={index}
 							songTitle={song.title}
-							artist={song.artists}
+							artist={song.artists.join(", ")}
 							duration={song.duration ? createTimeString(song.duration) : null}
 							albumArt={song.cover}
 							toEdit={true}
