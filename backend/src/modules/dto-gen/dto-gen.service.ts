@@ -37,7 +37,7 @@ export class DtoGenService {
 
 		//get user info
 		const result: UserDto = this.generateBriefUserDto(user);
-		result.links = await this.dbUtils.getLinks(user);
+		//result.links = await this.dbUtils.getLinks(user);
 		const preferences = await this.dbUtils.getPreferences(user);
 		result.fav_genres = preferences.fav_genres;
 		result.fav_songs = preferences.fav_songs;

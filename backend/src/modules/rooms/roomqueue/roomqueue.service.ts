@@ -752,7 +752,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const song = this.queue.dequeue();
 				if (!song || song === null) {
-					return null;
+					return;
 				}
 				song.setPlaybackStartTime(new Date());
 				this.historicQueue.enqueue(song);
@@ -771,7 +771,7 @@ export class ActiveRoom {
 				this.updateQueue();
 				const song = this.queue.dequeue();
 				if (!song || song === null) {
-					return null;
+					return;
 				}
 				this.historicQueue.enqueue(song);
 				result = song;
@@ -837,7 +837,7 @@ export class RoomQueueService {
 		insertTime: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -864,7 +864,7 @@ export class RoomQueueService {
 		userID: string,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -882,7 +882,7 @@ export class RoomQueueService {
 		createdAt: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: true,
@@ -906,7 +906,7 @@ export class RoomQueueService {
 		createdAt: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: false,
@@ -929,7 +929,7 @@ export class RoomQueueService {
 		userID: string,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const vote: VoteDto = {
 			isUpvote: true,
@@ -953,7 +953,7 @@ export class RoomQueueService {
 		insertTime: Date,
 	): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -969,13 +969,13 @@ export class RoomQueueService {
 		);
 	}
 
-	getQueueState(roomID: string): {
+	async getQueueState(roomID: string): Promise<{
 		room: RoomDto;
 		songs: RoomSongDto[];
 		votes: VoteDto[];
-	} {
+	}> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -990,9 +990,12 @@ export class RoomQueueService {
 		};
 	}
 
-	getSongAsRoomSongDto(roomID: string, spotifyID: string): RoomSongDto | null {
+	async getSongAsRoomSongDto(
+		roomID: string,
+		spotifyID: string,
+	): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -1005,7 +1008,7 @@ export class RoomQueueService {
 
 	async initiatePlayback(roomID: string): Promise<boolean> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -1036,7 +1039,7 @@ export class RoomQueueService {
 
 	async getCurrentOrNextSong(roomID: string): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -1077,7 +1080,7 @@ export class RoomQueueService {
 		console.log(`room (${roomID}) is never paused`);
 		return false;
 		// if (!this.roomQueues.has(roomID)) {
-		// 	this.createRoomQueue(roomID);
+		// await this.createRoomQueue(roomID);
 		// }
 		// const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		// if (!activeRoom || activeRoom === undefined) {
@@ -1088,7 +1091,7 @@ export class RoomQueueService {
 
 	async playSongNow(roomID: string): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -1106,7 +1109,7 @@ export class RoomQueueService {
 	/*
 	async pauseSong(roomID: string): Promise<void> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
@@ -1146,7 +1149,7 @@ export class RoomQueueService {
 
 	async skipSong(roomID: string): Promise<void> {
 		if (!this.roomQueues.has(roomID)) {
-			this.createRoomQueue(roomID);
+			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
