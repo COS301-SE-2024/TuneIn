@@ -347,7 +347,6 @@ describe("ProfileScreen", () => {
 		const { queryByText } = render(<MorePage />);
 
 		expect(queryByText("Dramaturgy")).toBeNull();
-
 	});
 
 	it("it paginates", () => {

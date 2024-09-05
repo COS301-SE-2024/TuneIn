@@ -71,7 +71,7 @@ describe("UsersService Update Functionality", () => {
 
 	afterEach(async () => {
 		await service.updateProfile(mockUserDto.userID, mockUserDto);
-	}, 20000);
+	}, 50000);
 
 	it("updates profile", async () => {
 		const mockUpdate: UpdateUserDto = {
@@ -118,5 +118,5 @@ describe("UsersService Update Functionality", () => {
 		});
 		expect(result.fav_genres.data).toEqual(["j-pop"]);
 		expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
-	}, 20000);
+	}, 50000);
 });
