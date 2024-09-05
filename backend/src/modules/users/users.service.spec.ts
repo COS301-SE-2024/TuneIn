@@ -4,7 +4,12 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { ConfigService } from "@nestjs/config";
-import { mockPrismaService } from "../../../jest_mocking/service-mocking";
+import {
+	mockPrismaService,
+	mockDtoGenService,
+} from "../../../jest_mocking/service-mocking";
+import { RoomDto } from "../rooms/dto/room.dto";
+import { UserDto } from "./dto/user.dto";
 
 describe("UsersService follow function", () => {
 	let usersService: UsersService;
@@ -30,9 +35,7 @@ describe("UsersService follow function", () => {
 				},
 				{
 					provide: DtoGenService,
-					useValue: {
-						// Mock DtoGenService methods if needed
-					},
+					useValue: mockDtoGenService,
 				},
 				{
 					provide: ConfigService,
@@ -280,6 +283,121 @@ describe("UsersService follow function", () => {
 			await expect(
 				usersService.unfollowUser("selfID", "followeeID"),
 			).rejects.toThrow("Failed to unfollow user with id: (followeeID)");
+		});
+	});
+	describe("getUserRooms", () => {
+		it("should be defined", () => {
+			expect(usersService).toBeDefined();
+		});
+
+		it("should throw an error if the user does not exist", async () => {
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValueOnce(null);
+
+			await expect(usersService.getUserRooms("userID")).rejects.toThrow(
+				"User does not exist",
+			);
+		});
+
+		it("should return an empty array if no rooms are found", async () => {
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValueOnce({
+				user_id: "userID",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			});
+			jest.spyOn(prismaService.room, "findMany").mockResolvedValueOnce([]);
+			jest
+				.spyOn(dtoGenService, "generateMultipleRoomDto")
+				.mockResolvedValueOnce([]);
+			const result = await usersService.getUserRooms("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should return RoomDto array if rooms are found and generateMultipleRoomDto succeeds", async () => {
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValueOnce({
+				user_id: "userID",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			});
+			jest.spyOn(prismaService.room, "findMany").mockResolvedValueOnce([
+				{
+					room_id: "roomID1",
+					room_creator: "userID",
+					name: "Room 1",
+					playlist_photo: null,
+					description: "Description 1",
+					is_temporary: false,
+					room_language: "English",
+					explicit: false,
+					date_created: new Date(),
+					nsfw: false,
+					tags: [],
+				},
+				{
+					room_id: "roomID2",
+					room_creator: "userID",
+					name: "Room 2",
+					playlist_photo: null,
+					description: "Description 2",
+					is_temporary: false,
+					room_language: "English",
+					explicit: false,
+					date_created: new Date(),
+					nsfw: false,
+					tags: [],
+				},
+			]);
+			const mockRoomDtos: RoomDto[] = [
+				{
+					creator: new UserDto(),
+					roomID: "roomID1",
+					participant_count: 0,
+					room_name: "Room 1",
+					description: "Description 1",
+					is_temporary: false,
+					is_private: false,
+					is_scheduled: false,
+					language: "English",
+					has_explicit_content: false,
+					has_nsfw_content: false,
+					room_image: "",
+					tags: [],
+					childrenRoomIDs: [],
+				},
+				{
+					creator: new UserDto(),
+					roomID: "roomID2",
+					participant_count: 0,
+					room_name: "Room 2",
+					description: "Description 2",
+					is_temporary: false,
+					is_private: false,
+					is_scheduled: false,
+					language: "English",
+					has_explicit_content: false,
+					has_nsfw_content: false,
+					room_image: "",
+					tags: [],
+					childrenRoomIDs: [],
+				},
+			];
+			jest
+				.spyOn(dtoGenService, "generateMultipleRoomDto")
+				.mockResolvedValueOnce(mockRoomDtos);
+
+			const result = await usersService.getUserRooms("userID");
+			expect(result).toEqual(mockRoomDtos);
 		});
 	});
 });

@@ -398,6 +398,11 @@ export const mockPrismaService = {
 	},
 };
 
+export const mockDtoGenService = {
+	generateMultipleRoomDto: jest.fn(),
+	// mock properties and methods as needed
+};
+
 export const mockAuthService = {
 	// mock properties and methods as needed
 };
