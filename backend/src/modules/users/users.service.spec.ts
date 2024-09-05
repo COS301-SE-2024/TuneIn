@@ -71,53 +71,52 @@ describe("UsersService Update Functionality", () => {
 
 	afterEach(async () => {
 		await service.updateProfile(mockUserDto.userID, mockUserDto);
-	});
+	}, 20000);
 
 	it("updates profile", async () => {
-		// mockCtx.prisma.$queryRaw.mockResolvedValue([]);
-		// const mockUpdate: UpdateUserDto = {
-		// 	profile_name: "Tester",
-		// 	userID: "812cd228-0031-70f9-4b63-e95752e43dad",
-		// 	username: "Testing",
-		// 	profile_picture_url:
-		// 		"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
-		// 	links: {
-		// 		count: 2,
-		// 		data: {
-		// 			instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
-		// 		},
-		// 	},
-		// 	bio: "",
-		// 	fav_genres: {
-		// 		count: 1,
-		// 		data: ["j-pop"],
-		// 	},
-		// 	fav_songs: {
-		// 		count: 1,
-		// 		data: [
-		// 			{
-		// 				songID: "token",
-		// 				title: "STYX HELIX",
-		// 				artists: ["MYTH & ROID"],
-		// 				cover:
-		// 					"https://i.scdn.co/image/ab67616d0000b273bf97b2acaf967bb8ee7aa2f6",
-		// 				spotify_id: "2tcSz3bcJqriPg9vetvJLs",
-		// 				duration: 289,
-		// 				start_time: null,
-		// 			},
-		// 		],
-		// 	},
-		// };
+		const mockUpdate: UpdateUserDto = {
+			profile_name: "Tester",
+			userID: "812cd228-0031-70f9-4b63-e95752e43dad",
+			username: "Testing",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			links: {
+				count: 2,
+				data: {
+					instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
+				},
+			},
+			bio: "",
+			fav_genres: {
+				count: 1,
+				data: ["j-pop"],
+			},
+			fav_songs: {
+				count: 1,
+				data: [
+					{
+						songID: "token",
+						title: "STYX HELIX",
+						artists: ["MYTH & ROID"],
+						cover:
+							"https://i.scdn.co/image/ab67616d0000b273bf97b2acaf967bb8ee7aa2f6",
+						spotify_id: "2tcSz3bcJqriPg9vetvJLs",
+						duration: 289,
+						start_time: null,
+					},
+				],
+			},
+		};
 
-		// await service.updateProfile(mockUserDto.userID, mockUpdate);
-		// const result = await dtoGen.generateUserDto(mockUserDto.userID);
+		await service.updateProfile(mockUserDto.userID, mockUpdate);
+		const result = await dtoGen.generateUserDto(mockUserDto.userID);
 
-		// expect(result.profile_name).toBe("Tester");
-		// expect(result.username).toBe("Testing");
-		// expect(result.links.data).toEqual({
-		// 	instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
-		// });
-		// expect(result.fav_genres.data).toEqual(["j-pop"]);
-		// expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
-	});
+		expect(result.profile_name).toBe("Tester");
+		expect(result.username).toBe("Testing");
+		expect(result.links.data).toEqual({
+			instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
+		});
+		expect(result.fav_genres.data).toEqual(["j-pop"]);
+		expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
+	}, 20000);
 });
