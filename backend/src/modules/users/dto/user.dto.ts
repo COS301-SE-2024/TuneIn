@@ -38,7 +38,7 @@ export class RoomsData {
 	@ApiProperty({ type: String, isArray: true })
 	@IsArray()
 	@IsString({ each: true })
-	data: string[];
+	data: RoomDto[];
 }
 
 export class SongInfosWithCount {
