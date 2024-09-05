@@ -405,3 +405,7 @@ export const mockAuthService = {
 export const mockUsersService = {
 	// mock properties and methods as needed
 };
+
+export const mockDbUtilsService = {
+	// mock properties and methods as needed
+};
