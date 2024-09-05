@@ -1702,6 +1702,77 @@ paths:
           description: Room not found
       tags:
         - rooms
+  /rooms/{roomID}/save:
+    post:
+      operationId: saveRoom
+      summary: Save room as a playlist
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to save as a playlist.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The playlist ID as a string.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
+  /rooms/{roomID}/split:
+    get:
+      operationId: checkRoomSplit
+      summary: Evaluate if a room can be split
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to evaluate.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: >-
+            An array of the possible genres (if possible) or an empty array if
+            not possible.
+      tags:
+        - rooms
+    post:
+      operationId: splitRoom
+      summary: Returns a RoomDto with info about its split children
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to get the split children for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The RoomDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDto'
+      tags:
+        - rooms
   /search:
     get:
       operationId: search
@@ -2142,9 +2213,11 @@ components:
         count:
           type: number
         data:
-          type: array
-          items:
-            type: string
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
       required:
         - count
         - data
@@ -2152,7 +2225,7 @@ components:
       type: object
       properties:
         songID:
-          type: string
+          type: object
         title:
           type: string
         artists:
@@ -2161,21 +2234,24 @@ components:
           items:
             type: string
         cover:
+          type: object
+        duration:
+          type: number
+        spotify_id:
           type: string
         start_time:
           format: date-time
           type: string
           description: The time the song started playing
           nullable: true
-        duration:
-          type: number
       required:
         - songID
         - title
         - artists
         - cover
-        - start_time
         - duration
+        - spotify_id
+        - start_time
     GenresWithCount:
       type: object
       properties:
@@ -2197,18 +2273,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SongInfoDto'
-      required:
-        - count
-        - data
-    RoomsData:
-      type: object
-      properties:
-        count:
-          type: number
-        data:
-          type: array
-          items:
-            type: string
       required:
         - count
         - data
@@ -2268,13 +2332,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          description: The user's favorite rooms
-          allOf:
-            - $ref: '#/components/schemas/RoomsData'
+          type: object
         recent_rooms:
-          description: The user's recent rooms
-          allOf:
-            - $ref: '#/components/schemas/RoomsData'
+          type: object
         friendship:
           description: >-
             The user's friendship status with the current user, or null if the
@@ -2348,13 +2408,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          description: The user's favorite rooms
-          allOf:
-            - $ref: '#/components/schemas/RoomsData'
+          type: object
         recent_rooms:
-          description: The user's recent rooms
-          allOf:
-            - $ref: '#/components/schemas/RoomsData'
+          type: object
         friendship:
           description: >-
             The user's friendship status with the current user, or null if the
@@ -2404,13 +2460,26 @@ components:
           example: 100
       required:
         - totalListenedSongs
+    RoomCreator:
+      type: object
+      properties:
+        userID:
+          type: string
+        username:
+          type: string
+        profile_picture_url:
+          type: string
+      required:
+        - userID
+        - username
+        - profile_picture_url
     RoomDto:
       type: object
       properties:
         creator:
-          description: The date the room was created
+          description: The creator of the room with basic information
           allOf:
-            - $ref: '#/components/schemas/UserDto'
+            - $ref: '#/components/schemas/RoomCreator'
         roomID:
           type: string
         participant_count:
@@ -2448,6 +2517,16 @@ components:
           type: array
           items:
             type: string
+        parentRoomID:
+          type: string
+          description: >-
+            The parent of this room, if this room was created by splitting
+            another
+        childrenRoomIDs:
+          description: Rooms created by splitting this room.
+          type: array
+          items:
+            type: string
       required:
         - creator
         - roomID
@@ -2457,13 +2536,12 @@ components:
         - is_temporary
         - is_private
         - is_scheduled
-        - start_date
-        - end_date
         - language
         - has_explicit_content
         - has_nsfw_content
         - room_image
         - tags
+        - childrenRoomIDs
     CreateRoomDto:
       type: object
       properties:

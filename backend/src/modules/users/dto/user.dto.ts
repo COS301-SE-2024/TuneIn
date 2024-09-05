@@ -58,10 +58,15 @@ export class LinksWithCount {
 	@IsNumber()
 	count: number;
 
-	@ApiProperty({ type: String, isArray: true })
-	@IsArray()
-	@IsString({ each: true })
-	data: string[];
+	@ApiProperty({
+		type: "object",
+		additionalProperties: {
+			type: "array",
+			items: { type: "string" },
+		},
+	})
+	@IsObject()
+	data: Record<string, string[]>;
 }
 
 export class GenresWithCount {
@@ -177,23 +182,21 @@ export class UserDto {
 	@Type(() => SongInfosWithCount)
 	fav_songs: SongInfosWithCount;
 
-	@ApiProperty({
-		description: "The user's favorite rooms",
-		type: RoomsData,
-	})
+	@ApiProperty()
 	@IsObject()
 	@ValidateNested()
-	@Type(() => RoomsData)
-	fav_rooms: RoomsData;
+	fav_rooms: {
+		count: number;
+		data: RoomDto[];
+	};
 
-	@ApiProperty({
-		description: "The user's recent rooms",
-		type: RoomsData,
-	})
+	@ApiProperty()
 	@IsObject()
 	@ValidateNested()
-	@Type(() => RoomsData)
-	recent_rooms: RoomsData;
+	recent_rooms: {
+		count: number;
+		data: RoomDto[];
+	};
 
 	@ApiPropertyOptional({
 		description:
