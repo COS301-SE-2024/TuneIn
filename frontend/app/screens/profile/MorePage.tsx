@@ -2,25 +2,20 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
-	TextInput,
 	TouchableOpacity,
 	Animated,
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
-	Switch,
-	ScrollView,
 	FlatList,
 } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
-import UserItem from "../../components/UserItem";
 import FavoriteSongs from "../../components/FavoriteSong";
 import { colors } from "../../styles/colors";
-import { color } from "react-native-elements/dist/helpers";
 
-const Search: React.FC = () => {
+const MorePage: React.FC = () => {
 	const router = useRouter();
 	const params = useLocalSearchParams();
 	const items = Array.isArray(params.items)
@@ -130,6 +125,7 @@ const Search: React.FC = () => {
 					]}
 					onPress={goToPreviousPage}
 					disabled={currentPage === 0}
+					testID="prev-button"
 				>
 					<Ionicons
 						name="chevron-back"
@@ -144,6 +140,7 @@ const Search: React.FC = () => {
 					]}
 					onPress={goToNextPage}
 					disabled={endIndex >= items.length}
+					testID="next-button"
 				>
 					<Ionicons
 						name="chevron-forward"
@@ -173,6 +170,7 @@ const Search: React.FC = () => {
 				contentContainerStyle={styles.resultsContainer}
 				onScroll={handleScroll}
 				ListFooterComponent={renderFooter}
+				testID="flatlist"
 			/>
 
 			<Animated.View
@@ -442,4 +440,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default Search;
+export default MorePage;
