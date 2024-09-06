@@ -66,7 +66,7 @@ const AdvancedSettings = () => {
 		setTimeout(() => {
 			setShowSaveModal(false);
 			router.back(); // Go back after showing save confirmation
-		}, 5000); // Display the modal for 1.5 seconds before navigating
+		}, 1000); // Display the modal for 1.5 seconds before navigating
 	};
 
 	return (

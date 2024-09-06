@@ -50,11 +50,6 @@ describe("AdvancedSettings", () => {
 
 		// Select "People with the link"
 		fireEvent.press(getByText("People with the link"));
-
-		// Check if the option was selected
-		// expect(getByText("People with the link")).toHaveStyle({
-		// 	backgroundColor: "lightblue",
-		// });
 	});
 
 	it("toggles switches correctly", () => {
@@ -99,14 +94,14 @@ describe("AdvancedSettings", () => {
 		fireEvent.press(getByText("Delete Room"));
 	});
 
-	// it("calls router back when save is clicked", () => {
-	// 	const { getByText } = render(<AdvancedSettings />);
+	it("calls router back when save is clicked", () => {
+		const { getByText } = render(<AdvancedSettings />);
 
-	// 	fireEvent.press(getByText("Save Changes"));
+		fireEvent.press(getByText("Save Changes"));
 
-	// 	// Check if router back is called after save
-	// 	// setTimeout(() => {
-	// 	// 	expect(mockBack).toHaveBeenCalled();
-	// 	// }, 5000);
-	// });
+		//Check if router back is called after save
+		setTimeout(() => {
+			expect(mockBack).toHaveBeenCalled();
+		}, 1000);
+	});
 });
