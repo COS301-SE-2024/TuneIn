@@ -20,8 +20,10 @@ import {
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { ProfileService } from "./profile.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
-import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { AuthService, JWTPayload } from "../../auth/auth.service";
+// import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
+// import { AuthService, JWTPayload } from "../../auth/auth.service";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { AuthService, JWTPayload } from "src/auth/auth.service";
 
 @Controller("profile")
 export class ProfileController {
