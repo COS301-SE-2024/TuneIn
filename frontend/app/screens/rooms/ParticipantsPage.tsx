@@ -99,6 +99,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => navigation.goBack()}
+					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
