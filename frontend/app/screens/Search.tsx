@@ -26,7 +26,7 @@ import Dropdown from "../components/Dropdown";
 // import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
-// import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
+import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
 
 type SearchResult = {
