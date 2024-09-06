@@ -299,9 +299,7 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRoomsById(
-			userInfo.id,
-		);
+		return await this.usersService.getRecentRoomsById(userInfo.id);
 	}
 
 	@ApiBearerAuth()
