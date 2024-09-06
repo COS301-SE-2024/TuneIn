@@ -1127,7 +1127,7 @@ describe("ProfileScreen", () => {
 			.mockResolvedValueOnce({ data: mockProfileData })
 			.mockResolvedValueOnce({ data: mockRoomData })
 			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });;
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -1212,7 +1212,7 @@ describe("ProfileScreen", () => {
 			.mockResolvedValueOnce({ data: mockProfileData })
 			.mockResolvedValueOnce({ data: mockRoomData })
 			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });;
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -1288,7 +1288,7 @@ describe("ProfileScreen", () => {
 			.mockResolvedValueOnce({ data: mockProfileData })
 			.mockResolvedValueOnce({ data: mockRoomData })
 			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });;
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -1412,7 +1412,7 @@ describe("ProfileScreen", () => {
 				.mockResolvedValue({ data: mockProfileData })
 				.mockResolvedValueOnce({ data: mockRoomData })
 				.mockResolvedValueOnce({ data: mockRoomData })
-				.mockResolvedValueOnce({ data: mockCurrRoomData });;
+				.mockResolvedValueOnce({ data: mockCurrRoomData });
 
 			// Render the ProfileScreen component
 			const { getByText } = render(
@@ -1679,7 +1679,7 @@ describe("ProfileScreen", () => {
 				.mockResolvedValue({ data: mockProfileData })
 				.mockResolvedValueOnce({ data: mockRoomData })
 				.mockResolvedValueOnce({ data: mockRoomData })
-				.mockResolvedValueOnce({ data: mockCurrRoomData });;
+				.mockResolvedValueOnce({ data: mockCurrRoomData });
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
@@ -1974,7 +1974,7 @@ describe("ProfileScreen", () => {
 				.mockResolvedValue({ data: mockProfileData })
 				.mockResolvedValueOnce({ data: mockRoomData })
 				.mockResolvedValueOnce({ data: mockRoomData })
-				.mockResolvedValueOnce({ data: mockCurrRoomData });;
+				.mockResolvedValueOnce({ data: mockCurrRoomData });
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(
@@ -2086,7 +2086,7 @@ describe("ProfileScreen", () => {
 			.mockResolvedValue({ data: mockProfileData })
 			.mockResolvedValueOnce({ data: mockRoomData })
 			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });;
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		const { getByTestId, queryByTestId, getByText } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />

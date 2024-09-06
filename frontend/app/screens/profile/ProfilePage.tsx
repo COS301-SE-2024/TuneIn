@@ -28,6 +28,7 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
+import RoomCard from "../../components/RoomCard";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -148,7 +149,7 @@ const ProfileScreen: React.FC = () => {
 						);
 						setPrimProfileData(data);
 
-						if(recentRoomData === null) {
+						if (recentRoomData === null) {
 							fetchRecentRoomInfo(data.userID);
 						}
 						if (favoriteRoomData === null) {
@@ -184,7 +185,6 @@ const ProfileScreen: React.FC = () => {
 				}
 
 				if (recentRoomData === null && userData !== null) {
-					
 					fetchRecentRoomInfo(userData.userID);
 				}
 				if (favoriteRoomData === null && userData !== null) {
@@ -368,7 +368,6 @@ const ProfileScreen: React.FC = () => {
 			return null;
 		}
 	};
-
 
 	const followHandler = async () => {
 		const storedToken = await auth.getToken();
@@ -571,8 +570,8 @@ const ProfileScreen: React.FC = () => {
 
 	const renderItem = ({ item }: { item: Room }) => {
 		// console.log("Render item: " + JSON.stringify(favoriteRoomData));
-		return <RoomCardWidget roomCard={item} />
-	}; 	
+		return <RoomCardWidget roomCard={item} />;
+	};
 
 	const onRefresh = React.useCallback(async () => {
 		setLoading(true);
@@ -826,11 +825,7 @@ const ProfileScreen: React.FC = () => {
 							{primaryProfileData.fav_rooms.count > 10 && (
 								<TouchableOpacity
 									onPress={() => {
-										navigateToMore(
-											"room",
-											favoriteRoomData,
-											"Favorite Rooms",
-										);
+										navigateToMore("room", favoriteRoomData, "Favorite Rooms");
 									}}
 								>
 									<Text
@@ -846,10 +841,7 @@ const ProfileScreen: React.FC = () => {
 							)}
 						</View>
 						<AppCarousel
-							data={favoriteRoomData
-								.slice(0, 10)
-								.map((room: RoomDto) =>
-									room)}
+							data={favoriteRoomData.slice(0, 10).map((room: RoomDto) => room)}
 							renderItem={renderItem}
 						/>
 					</>
@@ -868,11 +860,7 @@ const ProfileScreen: React.FC = () => {
 							{primaryProfileData.recent_rooms.count > 10 && (
 								<TouchableOpacity
 									onPress={() => {
-										navigateToMore(
-											"room",
-											recentRoomData,
-											"Recent Rooms",
-										);
+										navigateToMore("room", recentRoomData, "Recent Rooms");
 									}}
 								>
 									<Text
@@ -888,10 +876,7 @@ const ProfileScreen: React.FC = () => {
 							)}
 						</View>
 						<AppCarousel
-							data={recentRoomData
-								.slice(0, 10)
-								.map((room: RoomDto) =>
-									room)}
+							data={recentRoomData.slice(0, 10).map((room: RoomDto) => room)}
 							renderItem={renderItem}
 						/>
 					</>
