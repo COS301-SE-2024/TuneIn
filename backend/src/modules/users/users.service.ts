@@ -11,6 +11,7 @@ import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
 import { IsNumber, IsObject, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { RecommendationsService } from "../../recommendations/recommendations.service";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -22,13 +23,13 @@ export class UserListeningStatsDto {
 
 	/* whatever else you want */
 }
-
 @Injectable()
 export class UsersService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private recommender: RecommendationsService,
 	) {}
 
 	// Tutorial CRUD operations
@@ -388,7 +389,7 @@ export class UsersService {
 		//TODO: implement scheduled room creation
 		/*
 		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;		
+		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
 		if (createRoomDto.is_scheduled) {
 			newRoom.
 				connect: {
@@ -471,22 +472,41 @@ export class UsersService {
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
-		console.log("Getting recommended rooms for user " + userID);
-		const r = await this.dbUtils.getRandomRooms(5);
-		if (!r || r === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+		// const recommender: RecommenderService = new RecommenderService();
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
+
+		const roomsWithSongs = await Promise.all(
+			rooms.map(async (room: any) => {
+				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
+				room.songs = songs;
+				return room;
+			}),
+		);
+		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
+			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
+			return acc;
+		}, {});
+		const favoriteSongs: PrismaTypes.song[] | null =
+			await this.dbUtils.getUserFavoriteSongs(userID);
+		if (!favoriteSongs) {
+			// return random rooms if the user has no favorite songs
+			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
+			const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+				randomRooms.map((room: any) => room.room_id),
 			);
+			return r === null ? [] : r;
 		}
-		const rooms: PrismaTypes.room[] = r;
-		const ids: string[] = rooms.map((room) => room.room_id);
-		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
-		if (!recommends || recommends === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
-		}
-		return recommends;
+		// console.log("favoriteSongs:", favoriteSongs);
+		this.recommender.setMockSongs(
+			favoriteSongs.map((song: any) => song.audio_features),
+		);
+		this.recommender.setPlaylists(roomSongs);
+		const recommendedRooms = this.recommender.getTopPlaylists(5);
+		// console.log("recommendedRooms:", recommendedRooms);
+		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+			recommendedRooms.map((room: any) => room.playlist),
+		);
+		return r === null ? [] : r;
 	}
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
