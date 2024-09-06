@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { UserProfileDto } from "./dto/userprofile.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+// import { DtoGenService } from "../dto-gen/dto-gen.service";
+// import { DbUtilsService } from "../db-utils/db-utils.service";
 import { UpdateUserProfileDto } from "./dto/updateuserprofile.dto";
+import { DbUtilsService } from "src/modules/db-utils/db-utils.service";
+import { DtoGenService } from "src/modules/dto-gen/dto-gen.service";
 
 @Injectable()
 export class ProfileService {
@@ -14,8 +16,8 @@ export class ProfileService {
 	) {}
 
 	async getProfile(uid: string): Promise<UserProfileDto> {
-		const user = await this.dtogen.generateUserProfileDto(uid);
-		return user;
+		const user = await this.dtogen.generateUserDto(uid);
+		return new UserProfileDto();
 	}
 
 	async updateProfile(
@@ -30,22 +32,22 @@ export class ProfileService {
 			throw new Error("User not found");
 		}
 
-		const updateData = this.dbUtilsService.buildUpdateData(
-			user,
-			updateProfileDto,
-		);
+		// const updateData = this.dbUtilsService.buildUpdateData(
+		// 	user,
+		// 	updateProfileDto,
+		// );
 
-		await this.prisma.users.update({
-			where: { user_id: userId },
-			data: updateData,
-		});
+		// await this.prisma.users.update({
+		// 	where: { user_id: userId },
+		// 	data: updateData,
+		// });
 
-		const userProfile = await this.dtogen.generateUserProfileDto(userId);
+		const userProfile = await this.dtogen.generateUserDto(userId);
 		if (!userProfile) {
 			throw new Error("Failed to generate user profile");
 		}
 
-		return userProfile;
+		return new UserProfileDto();
 	}
 
 	async getProfileByUsername(username: string): Promise<UserProfileDto> {
@@ -56,9 +58,9 @@ export class ProfileService {
 		if (!userData) {
 			throw new Error("User not found");
 		} else {
-			const user = await this.dtogen.generateUserProfileDto(userData.user_id);
+			const user = await this.dtogen.generateUserDto(userData.user_id);
 			if (user) {
-				return user;
+				return new UserProfileDto();
 			}
 		}
 
