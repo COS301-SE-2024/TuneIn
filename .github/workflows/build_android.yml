@@ -1,7 +1,7 @@
 name: 🛠️ Build Android
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, hotfix/apk-builds ]
 
   pull_request:
     branches: [ main, develop ]
