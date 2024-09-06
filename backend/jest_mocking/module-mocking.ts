@@ -289,6 +289,7 @@ export async function createUsersUpdateTestingModule(): Promise<TestingModule> {
 			DtoGenService,
 			DbUtilsService,
 			AuthService,
+			RecommendationsService,
 			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
 		],
 	}).compile();
