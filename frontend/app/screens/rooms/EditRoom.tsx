@@ -119,23 +119,42 @@ const EditRoom: React.FC = () => {
 				newRoom.backgroundImage = newImage;
 			}
 		}
+		console.log("newRoom:", newRoom);
 		const token = await auth.getToken();
 		try {
-			const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
+			const data = await fetch(`${utils.API_BASE_URL}/rooms/${roomData.id}`, {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: "Bearer " + token,
 				},
-				body: JSON.stringify(newRoom),
+				body: JSON.stringify({
+					room_name: newRoom.name,
+					description: newRoom.description,
+					has_explicit_content: newRoom.isExplicit,
+					has_nsfw_content: newRoom.isNsfw,
+					room_image: newRoom.backgroundImage,
+					language: newRoom.language,
+				}),
 			});
+			if (!data.ok) {
+				console.log("Error:", data);
+				Alert.alert(
+					"Error",
+					"An error occurred while saving your changes.",
+					[{ text: "OK" }],
+					{ cancelable: false },
+				);
+				alert("An error occurred while saving your changes.");
+				return;
+			}
 			Alert.alert(
 				"Changes Saved",
 				"Your changes have been saved successfully.",
 				[{ text: "OK" }],
 				{ cancelable: false },
 			);
-			router.navigate("/screens/Room");
+			router.navigate("/screens/Home");
 		} catch (error) {
 			console.error("Error:", error);
 		}
@@ -159,7 +178,7 @@ const EditRoom: React.FC = () => {
 						"Description",
 						roomDetails.description,
 						(value) => handleInputChange("description", value),
-						4,
+						2,
 					)}
 					{buildInputField("Genre", roomDetails.genre ?? "", (value) =>
 						handleInputChange("genre", value),
