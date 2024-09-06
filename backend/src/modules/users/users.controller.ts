@@ -297,6 +297,9 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
+	@ApiBadRequestResponse({
+		description: "Invalid request parameters or missing required headers.",
+	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecentRoomsById(userInfo.id);
@@ -321,6 +324,9 @@ export class UsersController {
 		description: "The user's recent rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
 	})
 	async getRecentRoomsByUsername(
 		@Param("username") username: string,
@@ -536,6 +542,9 @@ export class UsersController {
 		description: "The user's bookmarks as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
 	})
 	async getBookmarksByUsername(
 		@Param("username") username: string,
@@ -818,6 +827,9 @@ export class UsersController {
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
 	})
 	@ApiTags("rooms")
 	async getCurrentRoomByUserId(
