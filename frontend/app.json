@@ -6,10 +6,10 @@
     "scheme": "tunein-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.jpg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/logo.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
