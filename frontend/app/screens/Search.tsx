@@ -125,60 +125,105 @@ const Search: React.FC = () => {
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
-	// const mockResults: SearchResult[] = [
-	// 	{
-	// 		id: "1",
-	// 		type: "room",
-	// 		name: "Room 1",
-	// 		roomData: {
-	// 			roomID: "1",
-	// 			backgroundImage:
-	// 				"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-	// 			name: "Room 1",
-	// 			description: "Description 1",
-	// 			userID: "1",
-	// 			tags: [],
-	// 		},
-	// 	},
-	// 	{
-	// 		id: "2",
-	// 		type: "user",
-	// 		name: "User 1",
-	// 		userData: {
-	// 			id: "1",
-	// 			profile_picture_url:
-	// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-	// 			profile_name: "User 1",
-	// 			username: "user1",
-	// 		},
-	// 	},
-	// 	{
-	// 		id: "3",
-	// 		type: "room",
-	// 		name: "Room 2",
-	// 		roomData: {
-	// 			roomID: "2",
-	// 			backgroundImage:
-	// 				"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-	// 			name: "Room 2",
-	// 			description: "Description 2",
-	// 			userID: "2",
-	// 			tags: [],
-	// 		},
-	// 	},
-	// 	{
-	// 		id: "4",
-	// 		type: "user",
-	// 		name: "User 2",
-	// 		userData: {
-	// 			id: "2",
-	// 			profile_picture_url:
-	// 				"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-	// 			profile_name: "User 2",
-	// 			username: "user2",
-	// 		},
-	// 	},
-	// ];
+	useEffect(() => {
+		const getRecommendedRooms = async () => {
+			setLoading(true);
+			try {
+				const token = await auth.getToken();
+				console.log("Recommendations token: " + token);
+				console.log("Base url: " + utils.API_BASE_URL);
+				if (token) {
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/users/rooms/foryou`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
+						},
+					);
+					const recommendedRooms: SearchResult[] = response.data.map(
+						(item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
+								name: item.room_name,
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
+							},
+						}),
+					);
+					console.log("recommended rooms:", recommendedRooms);
+					console.log("Recommended rooms length: " + recommendedRooms.length);
+					setResults(recommendedRooms);
+				}
+			} catch (error) {
+				console.error("Error fetching recommended rooms:", error);
+			}
+			setLoading(false);
+		};
+		if (searchTerm === "") {
+			getRecommendedRooms();
+			console.log("Recommended rooms: " + results);
+		}
+	}, [searchTerm]);
+	const mockResults: SearchResult[] = [
+		{
+			id: "1",
+			type: "room",
+			name: "Room 1",
+			roomData: {
+				roomID: "1",
+				backgroundImage:
+					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
+				name: "Room 1",
+				description: "Description 1",
+				userID: "1",
+				tags: [],
+			},
+		},
+		{
+			id: "2",
+			type: "user",
+			name: "User 1",
+			userData: {
+				id: "1",
+				profile_picture_url:
+					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+				profile_name: "User 1",
+				username: "user1",
+			},
+		},
+		{
+			id: "3",
+			type: "room",
+			name: "Room 2",
+			roomData: {
+				roomID: "2",
+				backgroundImage:
+					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
+				name: "Room 2",
+				description: "Description 2",
+				userID: "2",
+				tags: [],
+			},
+		},
+		{
+			id: "4",
+			type: "user",
+			name: "User 2",
+			userData: {
+				id: "2",
+				profile_picture_url:
+					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
+				profile_name: "User 2",
+				username: "user2",
+			},
+		},
+	];
 
 	const handleSearch = async () => {
 		console.log("Search Filter: " + filter);
@@ -700,9 +745,9 @@ const Search: React.FC = () => {
 					<View style={styles.roomCardPadding}>
 						{filter === "room" ? (
 							<>
-								{/* <SkeletonRoomCard />
 								<SkeletonRoomCard />
-								<SkeletonRoomCard /> */}
+								<SkeletonRoomCard />
+								<SkeletonRoomCard />
 							</>
 						) : (
 							<>

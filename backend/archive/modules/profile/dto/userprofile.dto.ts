@@ -1,7 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, ValidateNested, IsObject } from "class-validator";
-import { RoomDto } from "../../../modules/rooms/dto/room.dto";
-import { SongInfoDto } from "../../../modules/rooms/dto/songinfo.dto";
+import { RoomDto } from "src/modules/rooms/dto/room.dto";
+import { SongInfoDto } from "src/modules/rooms/dto/songinfo.dto";
+// import { RoomDto } from "../../../modules/rooms/dto/room.dto";
+// import { SongInfoDto } from "../../../modules/rooms/dto/songinfo.dto";
 
 export class UserProfileDto {
 	@ApiProperty()

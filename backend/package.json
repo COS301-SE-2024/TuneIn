@@ -117,7 +117,7 @@
     "webpack": "^5.93.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "jest": {
+   "jest": {
     "moduleFileExtensions": [
       "js",
       "json",
