@@ -12,29 +12,15 @@ import { UserDto } from "../../users/dto/user.dto";
 import { SongInfoDto } from "./songinfo.dto";
 import { Type } from "class-transformer";
 
-export class RoomCreator {
-	@ApiProperty()
-	@IsString()
-	userID: string;
-
-	@ApiProperty()
-	@IsString()
-	username: string;
-
-	@ApiProperty()
-	@IsString()
-	profile_picture_url: string;
-}
-
 export class RoomDto {
 	@ApiProperty({
-		description: "The creator of the room with basic information",
-		type: RoomCreator,
+		description: "The date the room was created",
+		type: UserDto,
 	})
 	@IsObject()
 	@ValidateNested()
-	@Type(() => RoomCreator)
-	creator: RoomCreator;
+	@Type(() => UserDto)
+	creator: UserDto;
 
 	@ApiProperty()
 	@IsString()

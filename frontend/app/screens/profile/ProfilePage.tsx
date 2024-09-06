@@ -65,7 +65,9 @@ const ProfileScreen: React.FC = () => {
 	const [profileInfo, setProfileInfo] = useState<any>(null);
 	const [refreshing] = React.useState(false);
 	const [primaryProfileData, setPrimProfileData] = useState<any>(null);
-	const [roomData, setRoomData] = useState<any>(null);
+	const [currentRoomData, setCurrentRoomData] = useState<any>(null);
+	const [recentRoomData, setRecentRoomData] = useState<any>(null);
+	const [favoriteRoomData, setFavoriteRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
 
 	const playerContext = useContext(Player);
@@ -80,7 +82,7 @@ const ProfileScreen: React.FC = () => {
 	const navigateToRoomPage = () => {
 		router.push({
 			pathname: "/screens/rooms/RoomPage",
-			params: { room: JSON.stringify(roomData) },
+			params: { room: JSON.stringify(currentRoomData) },
 		});
 	};
 
@@ -146,14 +148,21 @@ const ProfileScreen: React.FC = () => {
 						);
 						setPrimProfileData(data);
 
+						if(recentRoomData === null) {
+							fetchRecentRoomInfo(data.userID);
+						}
+						if (favoriteRoomData === null) {
+							fetchFavRoomInfo(data.userID);
+						}
+
 						if (userData !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
 								(item: any) => item.username === userData.username,
 							);
 							setFollowing(isFollowing);
 						}
-						if (roomData === null) {
-							fetchRoomInfo(data.userID);
+						if (currentRoomData === null) {
+							fetchCurrentRoomInfo(data.userID);
 						}
 					}
 				} catch (error) {
@@ -173,8 +182,18 @@ const ProfileScreen: React.FC = () => {
 				} else {
 					setPrimProfileData(userData);
 				}
-				if (roomData === null) {
-					setRoomData(currentRoom);
+
+				if (recentRoomData === null && userData !== null) {
+					
+					fetchRecentRoomInfo(userData.userID);
+				}
+				if (favoriteRoomData === null && userData !== null) {
+					// console.log("fav Id: " + JSON.stringify(userData.userID));
+					fetchFavRoomInfo(userData.userID);
+				}
+
+				if (currentRoomData === null) {
+					setCurrentRoomData(currentRoom);
 					setRoomCheck(true);
 				}
 			}
@@ -204,7 +223,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchRoomInfo(primaryProfileData.userID);
+				fetchCurrentRoomInfo(primaryProfileData.username);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
@@ -214,9 +233,9 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (ownsProfile) {
 			if (currentRoom) {
-				setRoomData(currentRoom);
+				setCurrentRoomData(currentRoom);
 			} else {
-				setRoomData(null);
+				setCurrentRoomData(null);
 			}
 		}
 	}, [currentRoom, ownsProfile]);
@@ -234,7 +253,7 @@ const ProfileScreen: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				console.log("Fetching profile info data: " + JSON.stringify(response));
+				// console.log("Fetching profile info data: " + JSON.stringify(response));
 				setUserData(response.data);
 				if (ownsProfile) {
 					// console.log("Profile return: " + JSON.stringify(response.data.fav_genres));
@@ -259,12 +278,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchRoomInfo = async (username: string) => {
+	const fetchCurrentRoomInfo = async (id: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${username}/room/current`,
+					`${utils.API_BASE_URL}/users/${id}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -276,19 +295,80 @@ const ProfileScreen: React.FC = () => {
 					response.data.room,
 					hasRoom,
 				);
-				setRoomData(formatRoomData(formattedRoomData));
+				setCurrentRoomData(formatRoomData(formattedRoomData));
 				setRoomCheck(true);
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
 			if (error.response && error.response.status === 404) {
-				setRoomData(null);
+				setCurrentRoomData(null);
 				setRoomCheck(true);
 			} else {
-				console.error("Error fetching room info:", error);
+				console.error("Error fetching current room info:", error);
 			}
 		}
 	};
+
+	const fetchRecentRoomInfo = async (id: string) => {
+		try {
+			const storedToken = await auth.getToken();
+			if (storedToken) {
+				const recentResponse = await axios.get(
+					`${utils.API_BASE_URL}/users/${id}/rooms/recent`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				const recentRoomsPromises = recentResponse.data.map(
+					async (room: any) => {
+						const hasRoom = await ownsRoom(room.roomID);
+						const pre = preFormatRoomData(room, hasRoom);
+						return formatRoomData(pre);
+					},
+				);
+
+				const recentRooms = await Promise.all(recentRoomsPromises);
+
+				setRecentRoomData(recentRooms);
+			}
+		} catch (error) {
+			console.error("Error fetching recent room info:", error);
+			return null;
+		}
+	};
+
+	const fetchFavRoomInfo = async (id: string) => {
+		try {
+			const storedToken = await auth.getToken();
+			if (storedToken) {
+				const favResponse = await axios.get(
+					`${utils.API_BASE_URL}/users/bookmarks`,
+					{
+						headers: {
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				const favRoomsPromises = favResponse.data.map(async (room: any) => {
+					const hasRoom = await ownsRoom(room.roomID);
+					const pre = preFormatRoomData(room, hasRoom);
+					return formatRoomData(pre);
+				});
+
+				const favRooms = await Promise.all(favRoomsPromises);
+
+				setFavoriteRoomData(favRooms);
+			}
+		} catch (error) {
+			console.error("Error fetching fav room info:", error);
+			return null;
+		}
+	};
+
 
 	const followHandler = async () => {
 		const storedToken = await auth.getToken();
@@ -441,9 +521,58 @@ const ProfileScreen: React.FC = () => {
 		return timeString;
 	};
 
-	const renderItem = ({ item }: { item: Room }) => (
-		<RoomCardWidget roomCard={item} />
-	);
+	const renderFavRooms = () => {
+		if (primaryProfileData.fav_rooms.count > 0) {
+			return (
+				<View
+					style={{ paddingHorizontal: 20, paddingTop: 10 }}
+					testID="fav-rooms"
+				>
+					<Text style={styles.title}>Favorite Rooms</Text>
+					<View style={styles.roomCardsContainer}>
+						{favoriteRoomData.slice(0, 2).map((room) => (
+							<RoomCard
+								key={room.roomId}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists}
+								username={room.creator.username}
+								imageUrl={room.room_image}
+							/>
+						))}
+					</View>
+				</View>
+			);
+		}
+	};
+
+	const renderRecentRooms = () => {
+		if (primaryProfileData.recent_rooms.count > 0) {
+			// console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
+			return (
+				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
+					<Text style={styles.title}>Recently Visited</Text>
+					<View style={styles.roomCardsContainer}>
+						{recentRoomData.slice(0, 2).map((room) => (
+							<RoomCard
+								key={room.roomId}
+								roomName={room.room_name}
+								songName={room.current_song.title}
+								artistName={room.current_song.artists}
+								username={room.creator.username}
+								imageUrl={room.room_image}
+							/>
+						))}
+					</View>
+				</View>
+			);
+		}
+	};
+
+	const renderItem = ({ item }: { item: Room }) => {
+		// console.log("Render item: " + JSON.stringify(favoriteRoomData));
+		return <RoomCardWidget roomCard={item} />
+	}; 	
 
 	const onRefresh = React.useCallback(async () => {
 		setLoading(true);
@@ -464,7 +593,9 @@ const ProfileScreen: React.FC = () => {
 		ownsProfile === null ||
 		userData === null ||
 		primaryProfileData === null ||
-		!roomCheck
+		!roomCheck ||
+		recentRoomData === null ||
+		favoriteRoomData === null
 	) {
 		// console.log(
 		// 	"loading: " +
@@ -619,16 +750,16 @@ const ProfileScreen: React.FC = () => {
 					links={primaryProfileData.links.data}
 				/>
 				{renderFollowOrEdit()}
-				{roomData !== null && (
+				{currentRoomData !== null && (
 					<TouchableOpacity
 						onPress={navigateToRoomPage}
 						style={{ paddingHorizontal: 20 }}
 						testID="now-playing"
 					>
 						<NowPlaying
-							name={roomData.name}
-							creator={roomData.username}
-							art={roomData.backgroundImage}
+							name={currentRoomData.name}
+							creator={currentRoomData.username}
+							art={currentRoomData.backgroundImage}
 						/>
 					</TouchableOpacity>
 				)}
@@ -697,9 +828,7 @@ const ProfileScreen: React.FC = () => {
 									onPress={() => {
 										navigateToMore(
 											"room",
-											primaryProfileData.fav_rooms.data.map((room: RoomDto) =>
-												preFormatRoomData(room, false),
-											),
+											favoriteRoomData,
 											"Favorite Rooms",
 										);
 									}}
@@ -717,11 +846,10 @@ const ProfileScreen: React.FC = () => {
 							)}
 						</View>
 						<AppCarousel
-							data={primaryProfileData.fav_rooms.data
+							data={favoriteRoomData
 								.slice(0, 10)
 								.map((room: RoomDto) =>
-									formatRoomData(preFormatRoomData(room, false)),
-								)}
+									room)}
 							renderItem={renderItem}
 						/>
 					</>
@@ -742,9 +870,7 @@ const ProfileScreen: React.FC = () => {
 									onPress={() => {
 										navigateToMore(
 											"room",
-											primaryProfileData.recent_rooms.data.map(
-												(room: RoomDto) => preFormatRoomData(room, false),
-											),
+											recentRoomData,
 											"Recent Rooms",
 										);
 									}}
@@ -762,11 +888,10 @@ const ProfileScreen: React.FC = () => {
 							)}
 						</View>
 						<AppCarousel
-							data={primaryProfileData.recent_rooms.data
+							data={recentRoomData
 								.slice(0, 10)
 								.map((room: RoomDto) =>
-									formatRoomData(preFormatRoomData(room, false)),
-								)}
+									room)}
 							renderItem={renderItem}
 						/>
 					</>

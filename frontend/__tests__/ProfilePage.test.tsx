@@ -36,7 +36,7 @@ jest.mock("expo-router", () => {
 	};
 });
 
-const mockRoomData = {
+const mockCurrRoomData = {
 	user_id: "id",
 	room_id: "id",
 	participate_id: "id",
@@ -131,6 +131,198 @@ const mockRoomData = {
 	},
 	room_join_time: "2024-08-24T10:54:08.778Z",
 };
+
+const mockRoomData = [
+	{
+		creator: {
+			profile_name: "Nin",
+			userID: "db893b11-0a3f-443e-a113-40c2b7ab6ccc",
+			username: "Nin",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg",
+			followers: {
+				count: 0,
+				data: [],
+			},
+			following: {
+				count: 0,
+				data: [],
+			},
+			links: {
+				count: 0,
+				data: [],
+			},
+			bio: "Her for vibes",
+			current_song: {
+				songID: "",
+				title: "",
+				artists: [],
+				cover: "",
+				spotify_id: "",
+				duration: 0,
+				start_time: "2024-09-06T10:57:29.676Z",
+			},
+			fav_genres: {
+				count: 0,
+				data: [],
+			},
+			fav_songs: {
+				count: 0,
+				data: [],
+			},
+			fav_rooms: {
+				count: 0,
+				data: [],
+			},
+			recent_rooms: {
+				count: 0,
+				data: [],
+			},
+		},
+		roomID: "3abae5ed-7de7-4f4f-833c-07de8a117479",
+		participant_count: 0,
+		room_name: "Marvel",
+		description: "This room has no description.",
+		is_temporary: false,
+		is_private: false,
+		is_scheduled: false,
+		start_date: "2024-09-06T10:57:29.677Z",
+		end_date: "2024-09-06T10:57:29.677Z",
+		language: "English",
+		has_explicit_content: false,
+		has_nsfw_content: false,
+		room_image:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-11T22%3A55%3A31.445Z-marvel.jpeg",
+		tags: [],
+		childrenRoomIDs: [],
+	},
+	{
+		creator: {
+			profile_name: "Jaden Moodley",
+			userID: "012c4238-e071-7031-cb6c-30881378722f",
+			username: "jadenm",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-05T15:34:24.912Z-image.jpeg",
+			followers: {
+				count: 0,
+				data: [],
+			},
+			following: {
+				count: 0,
+				data: [],
+			},
+			links: {
+				count: 0,
+				data: [],
+			},
+			bio: "Hello there stranger",
+			current_song: {
+				songID: "",
+				title: "",
+				artists: [],
+				cover: "",
+				spotify_id: "",
+				duration: 0,
+				start_time: "2024-09-06T10:57:29.676Z",
+			},
+			fav_genres: {
+				count: 0,
+				data: [],
+			},
+			fav_songs: {
+				count: 0,
+				data: [],
+			},
+			fav_rooms: {
+				count: 0,
+				data: [],
+			},
+			recent_rooms: {
+				count: 0,
+				data: [],
+			},
+		},
+		roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+		participant_count: 0,
+		room_name: "Abyssal Paradise",
+		description: "Submerge yourself in solace",
+		is_temporary: false,
+		is_private: false,
+		is_scheduled: false,
+		start_date: "2024-09-06T10:57:29.677Z",
+		end_date: "2024-09-06T10:57:29.677Z",
+		language: "English",
+		has_explicit_content: false,
+		has_nsfw_content: false,
+		room_image:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+		tags: [],
+		childrenRoomIDs: [],
+	},
+	{
+		creator: {
+			profile_name: "Thabiso Matau",
+			userID: "711c5238-3081-7008-9055-510a6bebc7e9",
+			username: "8xbbie",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg",
+			followers: {
+				count: 0,
+				data: [],
+			},
+			following: {
+				count: 0,
+				data: [],
+			},
+			links: {
+				count: 0,
+				data: [],
+			},
+			bio: "Pure OPIUM🔥",
+			current_song: {
+				songID: "",
+				title: "",
+				artists: [],
+				cover: "",
+				spotify_id: "",
+				duration: 0,
+				start_time: "2024-09-06T10:57:29.676Z",
+			},
+			fav_genres: {
+				count: 0,
+				data: [],
+			},
+			fav_songs: {
+				count: 0,
+				data: [],
+			},
+			fav_rooms: {
+				count: 0,
+				data: [],
+			},
+			recent_rooms: {
+				count: 0,
+				data: [],
+			},
+		},
+		roomID: "b9b4aebd-36cd-40bb-b329-f394fdefa0f5",
+		participant_count: 0,
+		room_name: "More M's",
+		description: "We only talk about those M's (type shiiii)",
+		is_temporary: false,
+		is_private: false,
+		is_scheduled: false,
+		start_date: "2024-09-06T10:57:29.677Z",
+		end_date: "2024-09-06T10:57:29.677Z",
+		language: "English",
+		has_explicit_content: true,
+		has_nsfw_content: false,
+		room_image:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-06T08%3A57%3A28.273Z-more-m%27s.jpeg",
+		tags: [],
+		childrenRoomIDs: [],
+	},
+];
 
 const PlayerContextProviderMock = ({ children, value }) => {
 	const [userData, setUserData] = useState(value.userData);
@@ -240,7 +432,7 @@ describe("ProfileScreen", () => {
 			setUserData: jest.fn(),
 			currentRoom: "Room 1",
 		};
-		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -318,7 +510,7 @@ describe("ProfileScreen", () => {
 			setUserData: jest.fn(),
 			currentRoom: "Room 1",
 		};
-		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -421,7 +613,7 @@ describe("ProfileScreen", () => {
 			setUserData: jest.fn(),
 			currentRoom: "Room 1",
 		};
-		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -523,7 +715,7 @@ describe("ProfileScreen", () => {
 			setUserData: jest.fn(),
 			currentRoom: "Room 1",
 		};
-		// (axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -584,6 +776,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 		// Render the ProfileScreen component
@@ -666,6 +859,8 @@ describe("ProfileScreen", () => {
 		};
 
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockProfileData });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+		(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
 
 		(axios.get as jest.Mock).mockRejectedValueOnce({
 			response: {
@@ -760,7 +955,9 @@ describe("ProfileScreen", () => {
 
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -843,7 +1040,9 @@ describe("ProfileScreen", () => {
 
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -926,7 +1125,9 @@ describe("ProfileScreen", () => {
 
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });;
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
@@ -1009,7 +1210,9 @@ describe("ProfileScreen", () => {
 
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });;
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -1083,7 +1286,9 @@ describe("ProfileScreen", () => {
 
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });;
 		(axios.post as jest.Mock).mockResolvedValue(true);
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
@@ -1152,7 +1357,7 @@ describe("ProfileScreen", () => {
 				currentRoom: "Room 1",
 			};
 
-			(axios.get as jest.Mock).mockResolvedValueOnce({ data: mockRoomData });
+			(axios.get as jest.Mock).mockResolvedValue({ data: mockRoomData });
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
@@ -1205,7 +1410,9 @@ describe("ProfileScreen", () => {
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 			(axios.get as jest.Mock)
 				.mockResolvedValue({ data: mockProfileData })
-				.mockResolvedValueOnce({ data: mockRoomData });
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockCurrRoomData });;
 
 			// Render the ProfileScreen component
 			const { getByText } = render(
@@ -1470,7 +1677,9 @@ describe("ProfileScreen", () => {
 
 			(axios.get as jest.Mock)
 				.mockResolvedValue({ data: mockProfileData })
-				.mockResolvedValueOnce({ data: mockRoomData });
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockCurrRoomData });;
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
@@ -1487,10 +1696,10 @@ describe("ProfileScreen", () => {
 					expect(titleElement).toBeTruthy();
 
 					// Assert that room cards are rendered for each room in profileData
-					const room1Name = getByText("Room 1");
+					const room1Name = getByText("Marvel");
 					expect(room1Name).toBeTruthy();
 
-					const room2Name = getByText("Room 2");
+					const room2Name = getByText("Abyssal Paradise");
 					expect(room2Name).toBeTruthy();
 
 					// Assert the presence of the testID on the container view
@@ -1763,7 +1972,9 @@ describe("ProfileScreen", () => {
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 			(axios.get as jest.Mock)
 				.mockResolvedValue({ data: mockProfileData })
-				.mockResolvedValueOnce({ data: mockRoomData });
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockRoomData })
+				.mockResolvedValueOnce({ data: mockCurrRoomData });;
 
 			// Render the ProfileScreen component
 			const { getByText, getByTestId } = render(
@@ -1779,10 +1990,10 @@ describe("ProfileScreen", () => {
 					expect(titleElement).toBeTruthy();
 
 					// Assert that room cards are rendered for each room in profileData
-					const room1Name = getByText("Room 1");
+					const room1Name = getByText("Marvel");
 					expect(room1Name).toBeTruthy();
 
-					const room2Name = getByText("Room 2");
+					const room2Name = getByText("Abyssal Paradise");
 					expect(room2Name).toBeTruthy();
 
 					// Assert the presence of the testID on the container view
@@ -1873,7 +2084,9 @@ describe("ProfileScreen", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({});
 		(axios.get as jest.Mock)
 			.mockResolvedValue({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: mockRoomData });
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockRoomData })
+			.mockResolvedValueOnce({ data: mockCurrRoomData });;
 		const { getByTestId, queryByTestId, getByText } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<ProfileScreen />

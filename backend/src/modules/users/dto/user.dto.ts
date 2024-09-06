@@ -182,21 +182,23 @@ export class UserDto {
 	@Type(() => SongInfosWithCount)
 	fav_songs: SongInfosWithCount;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's favorite rooms",
+		type: RoomsData,
+	})
 	@IsObject()
 	@ValidateNested()
-	fav_rooms: {
-		count: number;
-		data: RoomDto[];
-	};
+	@Type(() => RoomsData)
+	fav_rooms: RoomsData;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The user's recent rooms",
+		type: RoomsData,
+	})
 	@IsObject()
 	@ValidateNested()
-	recent_rooms: {
-		count: number;
-		data: RoomDto[];
-	};
+	@Type(() => RoomsData)
+	recent_rooms: RoomsData;
 
 	@ApiPropertyOptional({
 		description:

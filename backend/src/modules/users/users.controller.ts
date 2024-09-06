@@ -299,8 +299,33 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const ids: string[] = await this.usersService.getRecentRooms(userInfo.id);
-		return await this.dtogen.generateMultipleRoomDto(ids);
+		return await this.usersService.getRecentRoomDtos(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":userId/rooms/recent")
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRoomsById",
+	})
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getRecentRoomsByUserId(
+		@Param("userId") userId: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getRecentRoomDtos(userId);
 	}
 
 	@ApiBearerAuth()
@@ -499,6 +524,21 @@ export class UsersController {
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getBookmarks(userInfo.id);
+	}
+
+	@Get(":userId/bookmarks")
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksById",
+	})
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	async getBookmarksById(@Param("userId") userId: string): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarks(userId);
 	}
 
 	@ApiBearerAuth()

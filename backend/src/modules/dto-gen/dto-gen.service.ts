@@ -72,42 +72,20 @@ export class DtoGenService {
 		// result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
-			const recent_rooms = await await this.prisma.user_activity.findMany({
-				where: {
-					user_id: userID, // Filter by specific user ID
-				},
-				distinct: ["room_id"], // Ensure unique room IDs
-				orderBy: {
-					room_join_time: "desc", // Sort by most recent join time
-				},
-				take: 50, // Limit to the latest 10 entries
-				select: {
-					room_id: true, // Only select the room ID
-				},
-			});
-
+			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
-				count: recent_rooms.length,
-				data:
-					(await this.generateMultipleRoomDto(
-						recent_rooms.map((room) => room.room_id),
-					)) || [],
+				count: recent_rooms.count,
+				data: recent_rooms.data || [],
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
 				where: { user_id: userID },
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-
-			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
-				favRoomIDs,
-			);
-			if (roomDtoArray && roomDtoArray !== null) {
-				result.fav_rooms = {
-					count: roomDtoArray.length,
-					data: roomDtoArray,
-				};
-			}
+			result.fav_rooms = {
+				count: favRoomIDs.length,
+				data: favRoomIDs,
+			};
 		}
 
 		const following: PrismaTypes.users[] | null =
@@ -347,13 +325,8 @@ export class DtoGenService {
 		}
 
 		const creator = await this.generateUserDto(room.room_creator, false);
-
 		if (creator && creator !== null) {
-			result.creator = {
-				userID: creator.userID,
-				username: creator.username,
-				profile_picture_url: creator.profile_picture_url,
-			};
+			result.creator = creator;
 		}
 
 		//participant count will be added later
@@ -376,7 +349,7 @@ export class DtoGenService {
 		});
 
 		const result: RoomDto = {
-			creator: { userID: "", username: "", profile_picture_url: "" },
+			creator: new UserDto(),
 			roomID: room.room_id,
 			participant_count: 0,
 			room_name: room.name,
@@ -405,11 +378,10 @@ export class DtoGenService {
 
 		const creator = await this.generateUserDto(room.room_creator, false);
 		if (creator && creator !== null) {
-			result.creator = {
-				userID: creator.userID,
-				username: creator.username,
-				profile_picture_url: creator.profile_picture_url,
-			};
+			const creator = await this.generateUserDto(room.room_creator, false);
+			if (creator && creator !== null) {
+				result.creator = creator;
+			}
 		}
 
 		if (scheduledRoom && scheduledRoom !== null) {
@@ -466,11 +438,7 @@ export class DtoGenService {
 					);
 				}
 				const room: RoomDto = {
-					creator: {
-						userID: u.userID,
-						username: u.username,
-						profile_picture_url: u.profile_picture_url,
-					} || { userID: "", username: "", profile_picture_url: "" },
+					creator: u || new UserDto(),
 					roomID: r.room_id,
 					participant_count: 0, //to fix soon
 					room_name: r.name,
