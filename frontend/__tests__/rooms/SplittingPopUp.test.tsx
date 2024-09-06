@@ -2,6 +2,15 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import SplittingPopUp from "../../app/components/rooms/SplittingRoomPopUp"; // Update the import path as needed
 
+// Mock animation or any asynchronous effect if it's there.
+jest.mock("react-native-reanimated", () => {
+	const Reanimated = require("react-native-reanimated/mock");
+
+	// Mock the call to `runOnUI` to avoid asynchronous updates
+	Reanimated.runOnUI = jest.fn((fn) => fn());
+	return Reanimated;
+});
+
 describe("SplittingPopUp Component", () => {
 	const mockOnClose = jest.fn();
 	const mockOnConfirm = jest.fn().mockResolvedValue(undefined);
@@ -10,7 +19,7 @@ describe("SplittingPopUp Component", () => {
 		jest.clearAllMocks();
 	});
 
-	it("renders correctly when visible", async () => {
+	it("renders correctly when visible", () => {
 		const { getByText } = render(
 			<SplittingPopUp
 				isVisible={true}
@@ -28,7 +37,7 @@ describe("SplittingPopUp Component", () => {
 		).toBeTruthy();
 	});
 
-	it("does not render when not visible", async () => {
+	it("does not render when not visible", () => {
 		const { queryByText } = render(
 			<SplittingPopUp
 				isVisible={false}
@@ -77,7 +86,7 @@ describe("SplittingPopUp Component", () => {
 		expect(mockOnClose).toHaveBeenCalled();
 	});
 
-	it("calls onClose when modal request close is triggered", async () => {
+	it("calls onClose when modal request close is triggered", () => {
 		const { getByTestId } = render(
 			<SplittingPopUp
 				isVisible={true}
