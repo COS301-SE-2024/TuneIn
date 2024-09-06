@@ -133,7 +133,7 @@ describe("createRoom", () => {
 			},
 		);
 		expect(navigate).toHaveBeenCalledWith({
-			pathname: "/screens/Home",
+			pathname: "/screens/(tabs)/Home",
 			params: { someData: "value" },
 		});
 	});
