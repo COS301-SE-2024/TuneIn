@@ -150,10 +150,10 @@ const ProfileScreen: React.FC = () => {
 						setPrimProfileData(data);
 
 						if (recentRoomData === null) {
-							fetchRecentRoomInfo(data.userID);
+							fetchRecentRoomInfo(data.username);
 						}
 						if (favoriteRoomData === null) {
-							fetchFavRoomInfo(data.userID);
+							fetchFavRoomInfo(data.username);
 						}
 
 						if (userData !== null && data.followers.count > 0) {
@@ -163,7 +163,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.userID);
+							fetchCurrentRoomInfo(data.username);
 						}
 					}
 				} catch (error) {
@@ -185,11 +185,11 @@ const ProfileScreen: React.FC = () => {
 				}
 
 				if (recentRoomData === null && userData !== null) {
-					fetchRecentRoomInfo(userData.userID);
+					fetchRecentRoomInfo(userData.username);
 				}
 				if (favoriteRoomData === null && userData !== null) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
-					fetchFavRoomInfo(userData.userID);
+					fetchFavRoomInfo(userData.username);
 				}
 
 				if (currentRoomData === null) {
@@ -278,12 +278,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchCurrentRoomInfo = async (id: string) => {
+	const fetchCurrentRoomInfo = async (username: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${id}/room/current`,
+					`${utils.API_BASE_URL}/users/${username}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -309,12 +309,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchRecentRoomInfo = async (id: string) => {
+	const fetchRecentRoomInfo = async (username: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const recentResponse = await axios.get(
-					`${utils.API_BASE_URL}/users/${id}/rooms/recent`,
+					`${utils.API_BASE_URL}/users/${username}/rooms/recent`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -340,12 +340,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchFavRoomInfo = async (id: string) => {
+	const fetchFavRoomInfo = async (username: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const favResponse = await axios.get(
-					`${utils.API_BASE_URL}/users/bookmarks`,
+					`${utils.API_BASE_URL}/users/${username}/bookmarks`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,

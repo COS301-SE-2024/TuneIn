@@ -552,7 +552,7 @@ export class UsersService {
 		return result;
 	}
 
-	async getRecentRooms(userID: string): Promise<string[]> {
+	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
@@ -566,60 +566,41 @@ export class UsersService {
 			throw new Error("User does not exist");
 		}
 
-		const user: PrismaTypes.users = u;
-		const activity: Prisma.JsonValue = user.activity;
-		console.log(user);
-		console.log(activity);
-		if (!activity || activity === null) {
-			return [];
-		}
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
 
-		if (typeof activity !== "object") {
-			throw new Error(
-				"An unknown error occurred while parsing the 'activity' field in 'users'. Expected object, received " +
-					typeof activity,
-			);
-		}
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+			)) || [];
 
-		//if (!"recent_rooms" in activity) {
-		if (!("recent_rooms" in activity)) {
-			return [];
-		}
-
-		try {
-			const recentRooms: string[] = activity["recent_rooms"] as string[];
-			for (const roomID of recentRooms) {
-				if (typeof roomID !== "string") {
-					throw new Error(
-						"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-							typeof roomID,
-					);
-				}
-			}
-			return recentRooms;
-			/*
-			const r = await this.dtogen.generateMultipleRoomDto(recentRooms);
-			if (!r || r === null) {
-				throw new Error(
-					"An unknown error occurred while generating RoomDto for recent rooms. Received null.",
-				);
-			}
-			return r;
-			*/
-		} catch (e) {
-			throw new Error(
-				"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-					typeof activity["recent_rooms"],
-			);
-		}
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
 	}
 
-	async getRecentRoomDtos(userID: string): Promise<RoomDto[]> {
+	async getRecentRoomByUsername(username: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
 		*/
 		// get the recent rooms from the user's activity field
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		const u = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
@@ -748,7 +729,9 @@ export class UsersService {
 		return result;
 	}
 
-	async getBookmarks(userID: string): Promise<RoomDto[]> {
+	async getBookmarks(username: string): Promise<RoomDto[]> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
@@ -1038,7 +1021,9 @@ export class UsersService {
 		return [];
 	}
 
-	async getCurrentRoomDto(userID: string): Promise<RoomDto> {
+	async getCurrentRoomDto(username: string): Promise<RoomDto> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
 		}

@@ -212,7 +212,7 @@ export class DtoGenService {
 			},
 			links: {
 				count: 0,
-				data: [],
+				data: {},
 			},
 			bio: user.bio || "",
 			current_song: {

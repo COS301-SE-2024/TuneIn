@@ -102,9 +102,9 @@ export class DbUtilsService {
 
 	async getLinks(
 		user: PrismaTypes.users,
-	): Promise<{ count: number; data: string[] }> {
+	): Promise<{ count: number; data: Record<string, string[]> }> {
 		if (JSON.stringify(user.external_links || {}) === "{}") {
-			return { count: 0, data: [] };
+			return { count: 0, data: {} };
 		}
 
 		try {
@@ -123,7 +123,7 @@ export class DbUtilsService {
 			}
 		} catch (error) {
 			console.error("Failed to parse external_links: ", error);
-			return { count: 0, data: [] };
+			return { count: 0, data: {} };
 		}
 	}
 
@@ -224,36 +224,6 @@ export class DbUtilsService {
 			}
 		}
 		return rooms;
-	}
-
-	// Merge preferences if they exist in updateProfileDto
-	buildUpdateData(
-		user: PrismaTypes.users,
-		updateProfileDto: UpdateUserDto,
-	): any {
-		const allowedFields = ["username", "bio", "email"];
-
-		const updateData: any = {};
-		for (const field of allowedFields) {
-			if (updateProfileDto[field] !== undefined) {
-				updateData[field] = updateProfileDto[field];
-			}
-		}
-
-		if (updateProfileDto.profile_name) {
-			updateData.full_name = updateProfileDto.profile_name;
-		}
-
-		if (updateProfileDto.profile_picture_url) {
-			updateData.profile_picture = updateProfileDto.profile_picture_url;
-		}
-
-		if (updateProfileDto.links) {
-			// console.log(updateProfileDto.links.data);
-			updateData.external_links = updateProfileDto.links.data;
-		}
-
-		return updateData;
 	}
 
 	async isRoomPublic(roomID: string): Promise<boolean> {

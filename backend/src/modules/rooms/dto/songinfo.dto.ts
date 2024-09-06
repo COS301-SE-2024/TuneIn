@@ -25,9 +25,8 @@ CREATE TABLE IF NOT EXISTS public.song
 
 export class SongInfoDto {
 	@ApiProperty()
-	@IsOptional()
 	@IsString()
-	songID: string | null;
+	songID?: string;
 
 	@ApiProperty()
 	@IsString()

@@ -299,7 +299,9 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRoomDtos(userInfo.id);
+		return await this.usersService.getRecentRoomsById(
+			userInfo.id,
+		);
 	}
 
 	@ApiBearerAuth()
@@ -311,21 +313,21 @@ export class UsersController {
 		description: "Bearer token for authentication",
 	})
 	*/
-	@Get(":userId/rooms/recent")
+	@Get(":username/rooms/recent")
 	@ApiOperation({
 		summary: "Get a user's recent rooms",
 		description: "Get the user's most recently visited rooms.",
-		operationId: "getRecentRoomsById",
+		operationId: "getRecentRoomsByUsername",
 	})
 	@ApiOkResponse({
 		description: "The user's recent rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getRecentRoomsByUserId(
-		@Param("userId") userId: string,
+	async getRecentRoomsByUsername(
+		@Param("username") username: string,
 	): Promise<RoomDto[]> {
-		return await this.usersService.getRecentRoomDtos(userId);
+		return await this.usersService.getRecentRoomByUsername(username);
 	}
 
 	@ApiBearerAuth()
@@ -526,19 +528,21 @@ export class UsersController {
 		return await this.usersService.getBookmarks(userInfo.id);
 	}
 
-	@Get(":userId/bookmarks")
+	@Get(":username/bookmarks")
 	@ApiOperation({
 		summary: "Get the authorized user's bookmarks",
 		description: "Get all of the rooms that the user has bookmarked.",
-		operationId: "getBookmarksById",
+		operationId: "getBookmarksByUsername",
 	})
 	@ApiOkResponse({
 		description: "The user's bookmarks as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getBookmarksById(@Param("userId") userId: string): Promise<RoomDto[]> {
-		return await this.usersService.getBookmarks(userId);
+	async getBookmarksByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarks(username);
 	}
 
 	@ApiBearerAuth()
@@ -804,11 +808,11 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":userId/room/current")
-	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@Get(":username/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on username" })
 	@ApiParam({
-		name: "userId",
-		description: "The user id of user's current room to search for.",
+		name: "username",
+		description: "The username of user's current room to search for.",
 	})
 	@ApiOkResponse({
 		description: "User's current room retrieved successfully",
@@ -819,9 +823,9 @@ export class UsersController {
 	})
 	@ApiTags("rooms")
 	async getCurrentRoomByUserId(
-		@Param("userId") userId: string,
+		@Param("username") username: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoomDto(userId);
+		return await this.usersService.getCurrentRoomDto(username);
 	}
 
 	@Post(":username/block")

@@ -138,10 +138,7 @@ export class UserDto {
 	@IsObject()
 	@ValidateNested()
 	@Type(() => LinksWithCount)
-	links: {
-		count: number;
-		data: Record<string, any>;
-	};
+	links: LinksWithCount;
 
 	@ApiPropertyOptional()
 	@IsString()
