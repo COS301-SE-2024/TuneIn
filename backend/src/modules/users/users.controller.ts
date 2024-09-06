@@ -405,13 +405,20 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get("friends/pending")
 	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's sent friend requests" })
+	@ApiOperation({
+		summary: "Get a user's sent friend requests",
+		operationId: "getPendingRequests",
+	})
 	@ApiOkResponse({
 		description: "The user's sent friend requests as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
-	async getPendingRequests(@Request() req: any): Promise<UserDto[]> {
+	@ApiBadRequestResponse({
+		description: "Error getting pending friend requests.",
+		type: Boolean,
+	})
+	async getPendingRequests(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getPendingRequests(userInfo.id);
 	}
@@ -419,12 +426,15 @@ export class UsersController {
 	// add an endpoint for cancelling a friend request
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Post("friends/:userID/cancel")
+	@Post("friends/:username/cancel")
 	@ApiTags("users")
-	@ApiOperation({ summary: "Cancel a friend request to the given user" })
+	@ApiOperation({
+		summary: "Cancel a friend request to the given user",
+		operationId: "cancelFriendRequest",
+	})
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user to cancel the friend request to.",
+		name: "username",
+		description: "The username of the user to cancel the friend request to.",
 	})
 	@ApiOkResponse({
 		description: "Successfully cancelled friend request.",
@@ -436,10 +446,10 @@ export class UsersController {
 	})
 	async cancelFriendRequest(
 		@Request() req: any,
-		@Param("userID") userID: string,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.cancelFriendRequest(userInfo.id, userID);
+		return await this.usersService.cancelFriendRequest(userInfo.id, username);
 	}
 
 	// add an endpoint to get potential friends
@@ -453,7 +463,11 @@ export class UsersController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getPotentialFriends(@Request() req: any): Promise<UserDto[]> {
+	@ApiBadRequestResponse({
+		description: "Error getting potential friends.",
+		type: Boolean,
+	})
+	async getPotentialFriends(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getPotentialFriends(userInfo.id);
 	}

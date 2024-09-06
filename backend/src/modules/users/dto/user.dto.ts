@@ -38,7 +38,7 @@ export class RoomsData {
 	@ApiProperty({ type: String, isArray: true })
 	@IsArray()
 	@IsString({ each: true })
-	data: RoomDto[];
+	data: string[];
 }
 
 export class SongInfosWithCount {
@@ -206,7 +206,12 @@ export class UserDto {
 	friendship?: UserFriendship;
 
 	// optional field for relationship status
-	@ApiProperty()
+	@ApiPropertyOptional({
+		description:
+			"The relationship status between the current user and the user in question",
+		type: String,
+	})
+	@Type(() => String)
 	@IsString()
 	relationship?:
 		| "following"

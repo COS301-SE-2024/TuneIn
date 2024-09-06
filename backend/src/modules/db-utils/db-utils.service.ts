@@ -550,24 +550,38 @@ export class DbUtilsService {
 
 		// query must look like this
 		// SELECT * FROM friends WHERE (friend1 = userID AND friend2 = accountFriendId) OR (friend1 = accountFriendId AND friend2 = userID) AND is_pending = false;
-		const where: any = {
-			OR: [
-				{
-					friend1: userID,
-					friend2: accountFriendId,
-				},
-				{
-					friend1: accountFriendId,
-					friend2: userID,
-				},
-			],
-		};
+		const getWhere = (isPending?: boolean) => {
+			if (isPending !== undefined) {
+				return {
+					OR: [
+						{
+							friend1: userID,
+							friend2: accountFriendId,
+						},
+						{
+							friend1: accountFriendId,
+							friend2: userID,
+						},
+					],
+					is_pending: isPending,
+				};
+			}
 
-		if (isPending !== undefined) {
-			where.is_pending = isPending;
-		}
+			return {
+				OR: [
+					{
+						friend1: userID,
+						friend2: accountFriendId,
+					},
+					{
+						friend1: accountFriendId,
+						friend2: userID,
+					},
+				],
+			};
+		};
 		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
-			where: where,
+			where: getWhere(isPending),
 		});
 		console.log("Friends: ", friends);
 		if (!friends || friends === null) {

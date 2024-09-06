@@ -388,7 +388,7 @@ export class UsersService {
 		//TODO: implement scheduled room creation
 		/*
 		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;		
+		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
 		if (createRoomDto.is_scheduled) {
 			newRoom.
 				connect: {
@@ -735,7 +735,7 @@ export class UsersService {
 
 		if (!result || result === null) {
 			throw new Error(
-				"Failed to unfriend user (@ " + friendUsername + "). Database error.",
+				"Failed to unfriend user (" + friendUsername + "). Database error.",
 			);
 		}
 
@@ -883,7 +883,9 @@ export class UsersService {
 		if (!potentialFriends) {
 			return [];
 		}
-		const ids: string[] = potentialFriends.map((friend: any) => friend.user_id);
+		const ids: string[] = potentialFriends.map(
+			(friend: PrismaTypes.users) => friend.user_id,
+		);
 		const result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
