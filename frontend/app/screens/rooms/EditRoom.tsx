@@ -121,7 +121,7 @@ const EditRoom: React.FC = () => {
 		// 		{ cancelable: false },
 		// 	);
 		// 	router.navigate({
-		// 		pathname: "/screens/Home",
+		// 		pathname: "/screens/(tabs)/Home",
 		// 	});
 		// } catch (error) {
 		// 	console.error("Error:", error);

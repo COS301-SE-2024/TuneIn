@@ -14,19 +14,19 @@ import {
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import UserItem from "../components/UserItem";
-import { colors } from "../styles/colors";
-import { Room } from "../models/Room";
-import { User } from "../models/user";
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import UserItem from "../../components/UserItem";
+import { colors } from "../../styles/colors";
+import { Room } from "../../models/Room";
+import { User } from "../../models/user";
 import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
-import Dropdown from "../components/Dropdown";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import Dropdown from "../../components/Dropdown";
 // import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
-import ToggleButton from "../components/ToggleButton";
-import SkeletonUserItem from "../components/SkeletonUserItem";
+import ToggleButton from "../../components/ToggleButton";
+import SkeletonUserItem from "../../components/SkeletonUserItem";
 
 type SearchResult = {
 	id: string;
@@ -365,12 +365,6 @@ const Search: React.FC = () => {
 		[scrollY],
 	);
 
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	const renderResult = ({ item }: { item: SearchResult }) => {
 		if (item.type === "room" && item.roomData) {
 			// console.log("Render Called");
@@ -671,13 +665,6 @@ const Search: React.FC = () => {
 					onScroll={handleScroll}
 				/>
 			)}
-
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			></Animated.View>
 		</View>
 	);
 };
@@ -831,13 +818,6 @@ const styles = StyleSheet.create({
 	closeButtonText: {
 		color: "white",
 		fontSize: 16,
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 	resultsContainer: {
 		paddingVertical: 10,

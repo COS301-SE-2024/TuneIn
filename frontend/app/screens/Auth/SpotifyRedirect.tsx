@@ -49,7 +49,7 @@ const RedirectSuccessScreen: React.FC = () => {
 			</View>
 			<TouchableOpacity
 				style={styles.button}
-				onPress={() => router.navigate("screens/Home")}
+				onPress={() => router.navigate("/screens/(tabs)/Home")}
 			>
 				<FontAwesome name="home" size={24} color="#000" style={styles.icon} />
 				<Text style={styles.buttonText}>Go to Home</Text>

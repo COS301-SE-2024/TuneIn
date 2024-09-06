@@ -16,11 +16,7 @@ const Layout = () => {
 					/>
 					<SafeAreaView style={styles.container}>
 						<Stack screenOptions={{ title: "Room", headerShown: false }}>
-							<Stack.Screen name="screens/Home" />
-							<Stack.Screen
-								name="screens/rooms/RoomPage"
-								options={{ title: "Room", headerShown: false }}
-							/>
+							<Stack.Screen name="screens/(tabs)" />
 						</Stack>
 					</SafeAreaView>
 				</SafeAreaProvider>

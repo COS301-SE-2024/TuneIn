@@ -69,7 +69,7 @@ const App: React.FC = () => {
 				// Perform token validation if necessary
 				if (auth.authenticated()) {
 					// Redirect to the HomeScreen or appropriate route
-					router.push("/screens/Home");
+					router.push("/screens/(tabs)/Home");
 				} else {
 					// Redirect to the WelcomeScreen or appropriate route
 					console.log("clearing from index");

@@ -45,7 +45,7 @@ const RoomOptions = () => {
 	};
 
 	const goToHome = () => {
-		router.navigate("/screens/Home");
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	return (

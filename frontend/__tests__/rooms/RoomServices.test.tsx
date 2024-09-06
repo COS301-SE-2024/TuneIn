@@ -88,7 +88,7 @@ describe("createRoom", () => {
 			expect.any(Object),
 		);
 		expect(navigate).toHaveBeenCalledWith({
-			pathname: "/screens/Home",
+			pathname: "/screens/(tabs)/Home",
 			params: {},
 		});
 	});

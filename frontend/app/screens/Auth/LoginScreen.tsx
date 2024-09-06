@@ -59,7 +59,7 @@ const LoginScreen: React.FC = () => {
 					initialiseSocket,
 					instanceExists(),
 				);
-				router.navigate("/screens/Home");
+				router.navigate("/screens/(tabs)/Home");
 				setIsLoading(false);
 			},
 			onFailure: function (err) {

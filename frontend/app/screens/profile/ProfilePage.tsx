@@ -41,7 +41,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToHelp = () => {
-		router.navigate("/screens/help/HelpScreen");
+		router.navigate("/screens/(tabs)/HelpScreen");
 	};
 
 	let ownsProfile: boolean = true;

@@ -51,7 +51,7 @@ export const createRoom = async (
 		});
 		const data = await response.json();
 		navigate({
-			pathname: "/screens/Home",
+			pathname: "/screens/(tabs)/Home",
 			params: data,
 		});
 	} catch (error) {

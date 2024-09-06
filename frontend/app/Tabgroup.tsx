@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../app/screens/Home";
-import Search from "../app/screens/Search";
-import Help from "../app/screens/help/HelpScreen";
+import Home from "./screens/(tabs)/Home";
+import Search from "./screens/(tabs)/Search";
+import Help from "./screens/(tabs)/HelpScreen";
 import RoomPage from "../app/screens/rooms/RoomPage";
 const Tab = createBottomTabNavigator();
 

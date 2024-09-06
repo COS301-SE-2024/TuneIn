@@ -155,7 +155,7 @@ const EditPlaylist: React.FC = () => {
 		} catch (error) {
 			console.error("Error saving playlist:", error);
 		}
-		router.navigate("/screens/Home");
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	const playPreview = (previewUrl: string) => {
