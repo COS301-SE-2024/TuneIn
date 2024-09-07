@@ -17,26 +17,33 @@ import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
 import * as StorageService from "../../services/StorageService";
 
+// create an interface class for user rooms
+interface UserRoom {
+	room_name: string;
+	roomID: string;
+}
+
+// create an interface class for interaction analytics
+interface InteractionAnalytics {
+	messages: {
+		per_hour: {
+			count: number;
+			hour: Date;
+		}[];
+		total: number;
+	};
+	bookmarked_count: number;
+	reactions_sent: number;
+}
+
 const InteractionsAnalytics: React.FC = () => {
 	const router = useRouter();
 
-	const [selectedRoom, setSelectedRoom] = useState<{
-		room_name: string;
-		roomID: string;
-	} | null>(null);
-	const [userRooms, setRooms] = useState<any[]>();
+	const [selectedRoom, setSelectedRoom] = useState<UserRoom | null>(null);
+	const [userRooms, setRooms] = useState<UserRoom[] | null>(null);
 
-	const [interactionAnalytics, setInteractionAnalytics] = useState<{
-		messages: {
-			per_hour: {
-				count: number;
-				hour: Date;
-			}[];
-			total: number;
-		};
-		bookmarked_count: number;
-		reactions_sent: number;
-	} | null>(null);
+	const [interactionAnalytics, setInteractionAnalytics] =
+		useState<InteractionAnalytics | null>(null);
 
 	useEffect(() => {
 		const fetchUserRooms = async () => {
@@ -97,12 +104,10 @@ const InteractionsAnalytics: React.FC = () => {
 
 	// function that will be called when the user selects a room
 	const handleRoomSelect = async (room: string) => {
-		const selected = userRooms?.find((r) => r.room_name === room);
-		const current = await StorageService.getItem("currentRoom");
-		console.log("current room", current);
+		const selected: UserRoom | null =
+			userRooms?.find((r: UserRoom) => r.room_name === room) ?? null;
 		const accessToken: string | null = await AuthManagement.getToken();
 		setSelectedRoom(selected);
-		console.log("selected room", selectedRoom?.roomID);
 		const roomID: string = selectedRoom?.roomID ?? "";
 		try {
 			const response = await fetch(
