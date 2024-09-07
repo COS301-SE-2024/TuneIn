@@ -120,7 +120,7 @@ export class SpotifyAuthService {
 			"unique-pre-padding": generateRandom(10),
 			"expo-redirect": redirectURI,
 			"ip-address": utils.API_BASE_NO_PORT,
-			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"redirect-used": SPOTIFY_REDIRECT_URI,
 			"unique-post-padding": generateRandom(10),
 		};
 		const bytes = new TextEncoder().encode(JSON.stringify(state));

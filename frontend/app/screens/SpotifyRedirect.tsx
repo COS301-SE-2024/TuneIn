@@ -11,7 +11,7 @@ import * as StorageService from "../services/StorageService";
 import {
 	SPOTIFY_CLIENT_ID,
 	SPOTIFY_CLIENT_SECRET,
-	SPOTIFY_REDIRECT_TARGET,
+	SPOTIFY_REDIRECT_URI,
 } from "react-native-dotenv";
 import { colors } from "../styles/colors";
 
@@ -29,10 +29,10 @@ if (!clientSecret) {
 	);
 }
 
-const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = SPOTIFY_REDIRECT_URI;
 if (!redirectTarget) {
 	throw new Error(
-		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
+		"No redirect URI (SPOTIFY_REDIRECT_URI) provided in environment variables",
 	);
 }
 
