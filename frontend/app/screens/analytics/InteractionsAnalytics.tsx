@@ -42,33 +42,39 @@ const InteractionsAnalytics: React.FC = () => {
 		const fetchUserRooms = async () => {
 			// make an axios request with the API_BASE_URL and the auth token
 			const accessToken: string | null = await AuthManagement.getToken();
-			console.log("access token fr", accessToken);
+			if (!accessToken) {
+				console.error("No access token found");
+				return;
+			}
 			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 				},
 			});
-			const data = await response.json();
-			console.log(data);
-			setRooms(data);
 
-			console.log("user rooms", userRooms);
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current room", currentRoom);
-			const room = userRooms?.find((room) => room.room_name === currentRoom);
-			if (room !== undefined) setSelectedRoom(room);
-			console.log("selected room", selectedRoom);
+			if (response.ok) {
+				const data = await response.json();
+				console.log("data", data);
+				setRooms(data);
+				setSelectedRoom(data[0]);
+			} else {
+				console.error("Failed to fetch user rooms");
+			}
 		};
 
-		if (selectedRoom === null) fetchUserRooms();
+		fetchUserRooms();
 		console.log("selectedRoom", selectedRoom);
-	}, [selectedRoom]);
+	}, []);
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
 			const accessToken: string | null = await AuthManagement.getToken();
 			const currentRoom = await StorageService.getItem("currentRoom");
 			console.log("current roooooom", currentRoom);
+			if (!accessToken || !selectedRoom) {
+				console.error("Cannot fetch interaction analytics without a room");
+				return;
+			}
 			const response = await fetch(
 				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
 				{
@@ -77,47 +83,46 @@ const InteractionsAnalytics: React.FC = () => {
 					},
 				},
 			);
-			const data = await response.json();
-			if (interactionAnalytics === null) setInteractionAnalytics(data);
+			if (response.ok) {
+				const data = await response.json();
+				setInteractionAnalytics(data);
+			} else {
+				console.error("Failed to fetch interaction analytics");
+			}
 		};
 
 		fetchInteractionAnalytics();
 		console.log("interaction analytics", interactionAnalytics);
-	}, [interactionAnalytics]);
+	}, [selectedRoom]);
 
-	const rooms = userRooms?.map((room) => room.room_name as string);
-	console.log("rooms", rooms);
-	console.log("current room", selectedRoom);
 	// function that will be called when the user selects a room
 	const handleRoomSelect = async (room: string) => {
-		// find the room object that matches the selected room
 		const selected = userRooms?.find((r) => r.room_name === room);
+		const current = await StorageService.getItem("currentRoom");
+		console.log("current room", current);
 		const accessToken: string | null = await AuthManagement.getToken();
-		// set the selected room to the room object
 		setSelectedRoom(selected);
 		console.log("selected room", selectedRoom?.roomID);
 		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(
-			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
-			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				},
-			},
-		);
-		const data = await response.json();
-		// if (data.statusCode !== 200) {
-		// 	console.log("error fetching interaction analytics");
-		// 	return;
-		// }
-		if (interactionAnalytics?.bookmarked_count === undefined)
-			setInteractionAnalytics(data);
-		console.log("interaction analytics", interactionAnalytics);
-		// close the dropdown
+			);
+			if (response.ok) {
+				const data = await response.json();
+				setInteractionAnalytics(data);
+			} else {
+				console.error("Failed to fetch interaction analytics");
+			}
+		} catch (error) {
+			console.error(error);
+		}
 	};
-
-	// Sample data for the past seven days
-	console.log("interaction stuffs", interactionAnalytics);
 
 	const data = interactionAnalytics?.messages?.per_hour?.map((hour) => {
 		return {
@@ -125,30 +130,6 @@ const InteractionsAnalytics: React.FC = () => {
 			value: hour.count,
 		};
 	});
-	console.log("data", data);
-
-	const datah = [
-		{ label: "Room A", value: 57 },
-		{ label: "Room B", value: 75 },
-		{ label: "Room C", value: 18 },
-		{ label: "Room D", value: 48 },
-		{ label: "Room E", value: 6 },
-	];
-
-	const headers = ["User", "Songs", "Upvotes"];
-	const dataTable = [
-		["User A", "50", "200"],
-		["User B", "35", "165"],
-		["User C", "23", "155"],
-	];
-
-	const datah2 = [
-		{ label: "Room A", value: 12 },
-		{ label: "Room B", value: 57 },
-		{ label: "Room C", value: 38 },
-		{ label: "Room D", value: 48 },
-		// { label: "Room E", value: 75 },
-	];
 
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>
@@ -161,7 +142,9 @@ const InteractionsAnalytics: React.FC = () => {
 					<View style={styles.headerSpacer} />
 				</View>
 				<RoomDropdown
-					initialRooms={rooms ?? []}
+					initialRooms={
+						userRooms?.map((room) => room.room_name as string) ?? []
+					}
 					onRoomPick={handleRoomSelect}
 				/>
 				<LineGraphCard data={data ?? []} title="Daily Messages" />
