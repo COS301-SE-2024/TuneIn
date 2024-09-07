@@ -714,7 +714,9 @@ export class RoomAnalyticsService {
 				room_creator: userID,
 			},
 		});
-		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
+		const roomIDs: Prisma.Sql[] = rooms.map(
+			(r) => Prisma.sql`${r.room_id}::UUID`,
+		);
 		console.log(
 			"Getting unique visitors for user",
 			userID,
@@ -739,7 +741,8 @@ export class RoomAnalyticsService {
 		 *
 		 * PROVIDE THE PRISMA QUERY FOR THIS
 		 */
-		const uniqueVisitorsYesterday: any = await this.prisma.$queryRaw(Prisma.sql`
+		const uniqueVisitorsYesterday: { count: number }[] = await this.prisma
+			.$queryRaw(Prisma.sql`
 			SELECT
 				COUNT(DISTINCT user_id) as count
 			FROM
@@ -751,7 +754,8 @@ export class RoomAnalyticsService {
 				user_id;
 		`);
 
-		const uniqueVisitorsToday: any = await this.prisma.$queryRaw(Prisma.sql`
+		const uniqueVisitorsToday: { count: number }[] = await this.prisma
+			.$queryRaw(Prisma.sql`
 			SELECT
 				COUNT(DISTINCT user_id) as count
 			FROM
@@ -774,7 +778,7 @@ export class RoomAnalyticsService {
 
 		const countYesterday = Number(uniqueVisitorsYesterday.length);
 		const countToday = Number(uniqueVisitorsToday.length);
-		uniqueVisitors.count = countToday;
+		uniqueVisitors.count = countToday + countYesterday;
 		uniqueVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
 		return uniqueVisitors;
@@ -794,7 +798,9 @@ export class RoomAnalyticsService {
 				room_creator: userID,
 			},
 		});
-		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
+		const roomIDs: Prisma.Sql[] = rooms.map(
+			(r) => Prisma.sql`${r.room_id}::UUID`,
+		);
 		console.log(
 			"Getting average session duration for user",
 			userID,
@@ -804,8 +810,8 @@ export class RoomAnalyticsService {
 		// get the average session duration from more than 24 hours ago, then get the average session duration from the last 24 hours to calculate the percentage change
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
-		const averageSessionDurationYesterday: any = await this.prisma
-			.$queryRaw(Prisma.sql`
+		const averageSessionDurationYesterday: { avg_duration: number }[] =
+			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
 				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
 			FROM
@@ -813,11 +819,9 @@ export class RoomAnalyticsService {
 			WHERE
 				room_id IN (${Prisma.join(roomIDs)})
 				AND room_join_time < ${yesterday}
-			GROUP BY
-				user_id;
 		`);
-		const averageSessionDurationToday: any = await this.prisma
-			.$queryRaw(Prisma.sql`
+		const averageSessionDurationToday: { avg_duration: number }[] = await this
+			.prisma.$queryRaw(Prisma.sql`
 			SELECT
 				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
 			FROM
@@ -825,8 +829,16 @@ export class RoomAnalyticsService {
 			WHERE
 				room_id IN (${Prisma.join(roomIDs)})
 				AND room_join_time > ${yesterday}
-			GROUP BY
-				user_id;
+		`);
+
+		const averageSessionDurationAllTime: { avg_duration: number }[] = await this
+			.prisma.$queryRaw(Prisma.sql`
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)});
 		`);
 		console.log(
 			"Average session duration yesterday",
@@ -834,33 +846,15 @@ export class RoomAnalyticsService {
 			"Average session duration today",
 			averageSessionDurationToday,
 		);
-		// if (averageSessionDurationYesterday.length === 0 || averageSessionDurationToday.length === 0) {
-		// 	return averageSessionDuration;
-		// }
-		// sum the durations and divide by the number of sessionser, b: number) => a + b, 0) / averageSessionDurationToday.length);
-		const totalDurationYesterday = Number(
-			averageSessionDurationYesterday
-				.map((r: any) => Number(r.avg_duration))
-				.reduce((a: number, b: number) => a + b, 0),
+		averageSessionDuration.duration = Number(
+			averageSessionDurationAllTime[0]?.avg_duration,
 		);
-		const totalDurationToday = Number(
-			averageSessionDurationToday
-				.map((r: any) => Number(r.avg_duration))
-				.reduce((a: number, b: number) => a + b, 0),
-		);
-		const durationYesterday: number =
-			averageSessionDurationYesterday.length === 0
-				? 0
-				: totalDurationYesterday / averageSessionDurationYesterday.length;
-		const durationToday: number =
-			averageSessionDurationToday.length === 0
-				? 0
-				: totalDurationToday / averageSessionDurationToday.length;
-		averageSessionDuration.duration = (durationToday + durationYesterday) / 2;
 		averageSessionDuration.percentage_change =
-			durationYesterday === 0
+			averageSessionDurationYesterday[0]?.avg_duration === 0
 				? 0
-				: (durationToday - durationYesterday) / durationYesterday;
+				: (Number(averageSessionDurationToday[0]?.avg_duration) -
+						Number(averageSessionDurationYesterday[0]?.avg_duration)) /
+				  Number(averageSessionDurationYesterday[0]?.avg_duration);
 		return averageSessionDuration;
 	}
 	async getReturningVisitors(
@@ -924,7 +918,7 @@ export class RoomAnalyticsService {
 		// }
 		const countYesterday = Number(returningVisitorsYesterday.length);
 		const countToday = Number(returningVisitorsToday.length);
-		returningVisitors.count = countToday;
+		returningVisitors.count = countToday + countYesterday;
 		returningVisitors.percentage_change =
 			countYesterday === 0 ? 0 : (countToday - countYesterday) / countYesterday;
 		return returningVisitors;
