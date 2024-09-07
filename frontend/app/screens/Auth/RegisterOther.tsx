@@ -22,10 +22,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import {
-	SPOTIFY_CLIENT_ID,
-	SPOTIFY_REDIRECT_URI,
-} from "react-native-dotenv";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
 import {
 	exchangeCodeWithBackend,
 	SpotifyCallbackResponse,

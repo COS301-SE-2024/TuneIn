@@ -61,10 +61,6 @@ let playback: SimpleSpotifyPlayback | null = null;
 class LiveSocketService {
 	private static instance: LiveSocketService;
 	private socket: Socket;
-	private currentUser: UserDto | null = null;
-	private currentRoom: RoomDto | null = null;
-	private currentRoomVotes: VoteDto[] = [];
-	private currentRoomQueue: RoomSongDto[] = [];
 	private initialised = false;
 	private isConnecting = false;
 	private requestingLiveChatHistory = false;
@@ -185,10 +181,6 @@ class LiveSocketService {
 	public async pollLatency() {
 		await this.sendPing();
 		await this.getTimeOffset();
-	}
-
-	public getSelf(): UserDto | null {
-		return this.currentUser;
 	}
 
 	public async initialiseSocket() {
