@@ -904,7 +904,7 @@ export class RoomsController {
 		description: "Bearer token for authentication",
 	})
 	*/
-	@Get("analytics")
+	@Get("analytics/keymetrics")
 	@ApiTags("room analytics")
 	@ApiOperation({
 		summary: "Get key metrics for user's rooms",
