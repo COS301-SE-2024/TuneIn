@@ -556,7 +556,7 @@ export class UsersController {
 	@ApiOperation({
 		summary: "Check if a username is taken",
 		description: "Get all of the rooms that the user has bookmarked.",
-		operationId: "getBookmarksByUsername",
+		operationId: "isUsernameTaken",
 	})
 	@ApiOkResponse({
 		description: "True if taken, false if not.",
