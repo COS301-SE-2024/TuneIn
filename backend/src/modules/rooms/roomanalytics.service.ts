@@ -872,7 +872,9 @@ export class RoomAnalyticsService {
 				room_creator: userID,
 			},
 		});
-		const roomIDs: any[] = rooms.map((r) => Prisma.sql`${r.room_id}::UUID`);
+		const roomIDs: Prisma.Sql[] = rooms.map(
+			(r) => Prisma.sql`${r.room_id}::UUID`,
+		);
 		console.log(
 			"Getting returning visitors for user",
 			userID,
@@ -884,8 +886,8 @@ export class RoomAnalyticsService {
 		// returning visitors are users who have joined a room more than once
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
-		const returningVisitorsYesterday: any = await this.prisma
-			.$queryRaw(Prisma.sql`
+		const returningVisitorsYesterday: { count: number; user_id: string }[] =
+			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
 				COUNT(user_id) as count,
 				user_id
@@ -899,7 +901,8 @@ export class RoomAnalyticsService {
 			HAVING
 				COUNT(user_id) > 1;
 		`);
-		const returningVisitorsToday: any = await this.prisma.$queryRaw(Prisma.sql`
+		const returningVisitorsToday: { count: number; user_id: string }[] =
+			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
 				COUNT(user_id) as count,
 				user_id
@@ -916,6 +919,7 @@ export class RoomAnalyticsService {
 		// if (returningVisitorsYesterday.length === 0 || returningVisitorsToday.length === 0) {
 		// 	return returningVisitors;
 		// }
+		console.log(returningVisitorsYesterday, returningVisitorsToday);
 		const countYesterday = Number(returningVisitorsYesterday.length);
 		const countToday = Number(returningVisitorsToday.length);
 		returningVisitors.count = countToday + countYesterday;
