@@ -8,6 +8,7 @@ import {
 	mockPrismaService,
 	mockDtoGenService,
 	mockDbUtilsService,
+	mockRecommendationsService,
 } from "../../../jest_mocking/service-mocking";
 import { RoomDto } from "../rooms/dto/room.dto";
 import {
@@ -18,6 +19,7 @@ import {
 	UserFriendship,
 } from "./dto/user.dto";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
+import { RecommendationsService } from "../../recommendations/recommendations.service";
 
 describe("UsersService follow function", () => {
 	let usersService: UsersService;
@@ -37,6 +39,10 @@ describe("UsersService follow function", () => {
 				{
 					provide: DbUtilsService,
 					useValue: mockDbUtilsService,
+				},
+				{
+					provide: RecommendationsService,
+					useValue: mockRecommendationsService,
 				},
 				{
 					provide: DtoGenService,
@@ -537,6 +543,62 @@ describe("UsersService follow function", () => {
 
 			const result = await usersService.getPotentialFriends("userID");
 			expect(result).toEqual(mockUserDtos);
+		});
+	});
+	describe("getRecommendedRooms", () => {
+		it("should return random rooms if the user has no favorite songs", async () => {
+			const mockRooms = [{ room_id: "1" }, { room_id: "2" }];
+			const mockRoomSongs = [
+				{ audio_features: "feature1" },
+				{ audio_features: "feature2" },
+			];
+			const mockRoomDtos = [{ id: "1" }, { id: "2" }];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as any);
+			jest
+				.spyOn(dbUtilsService, "getRoomSongs")
+				.mockResolvedValue(mockRoomSongs as any);
+			jest
+				.spyOn(dbUtilsService, "getUserFavoriteSongs")
+				.mockResolvedValue(null);
+			jest
+				.spyOn(dtoGenService, "generateMultipleRoomDto")
+				.mockResolvedValue(mockRoomDtos as any);
+
+			const result = await usersService.getRecommendedRooms("user1");
+			expect(result).toEqual(mockRoomDtos);
+		});
+
+		it("should return recommended rooms if the user has favorite songs", async () => {
+			const mockRooms = [{ room_id: "1" }, { room_id: "2" }];
+			const mockRoomSongs = [
+				{ audio_features: "feature1" },
+				{ audio_features: "feature2" },
+			];
+			const mockFavoriteSongs = [{ audio_features: "feature1" }];
+			const mockRecommendedRooms = [{ playlist: "1" }];
+			const mockRoomDtos = [{ id: "1" }];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as any);
+			jest
+				.spyOn(dbUtilsService, "getRoomSongs")
+				.mockResolvedValue(mockRoomSongs as any);
+			jest
+				.spyOn(dbUtilsService, "getUserFavoriteSongs")
+				.mockResolvedValue(mockFavoriteSongs as any);
+			jest
+				.spyOn(mockRecommendationsService, "getTopPlaylists")
+				.mockReturnValue(mockRecommendedRooms as any);
+			jest
+				.spyOn(dtoGenService, "generateMultipleRoomDto")
+				.mockResolvedValue(mockRoomDtos as any);
+
+			const result = await usersService.getRecommendedRooms("user1");
+			expect(result).toEqual(mockRoomDtos);
 		});
 	});
 });
