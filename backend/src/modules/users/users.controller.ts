@@ -552,6 +552,20 @@ export class UsersController {
 		return await this.usersService.getBookmarksByUsername(username);
 	}
 
+	@Get(":username/taken")
+	@ApiOperation({
+		summary: "Check if a username is taken",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksByUsername",
+	})
+	@ApiOkResponse({
+		description: "True if taken, false if not.",
+		type: Boolean,
+	})
+	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
+		return await this.usersService.usernameTaken(username);
+	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)

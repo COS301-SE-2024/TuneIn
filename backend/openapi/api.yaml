@@ -215,6 +215,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Invalid request parameters or missing required headers.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/rooms/recent:
+    get:
+      operationId: getRecentRoomsByUsername
+      summary: Get a user's recent rooms
+      description: Get the user's most recently visited rooms.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's recent rooms as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
       tags:
         - users
       security:
@@ -376,6 +405,50 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/{username}/bookmarks:
+    get:
+      operationId: getBookmarksByUsername
+      summary: Get the authorized user's bookmarks
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's bookmarks as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
+        - users
+  /users/{username}/taken:
+    get:
+      operationId: getBookmarksByUsername
+      summary: Check if a username is taken
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: True if taken, false if not.
+          content:
+            application/json:
+              schema:
+                type: boolean
+      tags:
+        - users
   /users/{username}:
     get:
       operationId: getProfileByUsername
@@ -556,15 +629,15 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{userId}/room/current:
+  /users/{username}/room/current:
     get:
       operationId: UsersController_getCurrentRoomByUserId
-      summary: Get a user's current room based on user id
+      summary: Get a user's current room based on username
       parameters:
-        - name: userId
+        - name: username
           required: true
           in: path
-          description: The user id of user's current room to search for.
+          description: The username of user's current room to search for.
           schema:
             type: string
       responses:
@@ -574,6 +647,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
         '401':
           description: Unauthorized
       tags:
@@ -2225,7 +2300,7 @@ components:
       type: object
       properties:
         songID:
-          type: object
+          type: string
         title:
           type: string
         artists:
@@ -2234,7 +2309,7 @@ components:
           items:
             type: string
         cover:
-          type: object
+          type: string
         duration:
           type: number
         spotify_id:
@@ -2245,13 +2320,10 @@ components:
           description: The time the song started playing
           nullable: true
       required:
-        - songID
         - title
         - artists
-        - cover
         - duration
         - spotify_id
-        - start_time
     GenresWithCount:
       type: object
       properties:
@@ -2273,6 +2345,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SongInfoDto'
+      required:
+        - count
+        - data
+    RoomsData:
+      type: object
+      properties:
+        count:
+          type: number
+        data:
+          type: array
+          items:
+            type: string
       required:
         - count
         - data
@@ -2332,9 +2416,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          type: object
+          description: The user's favorite rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         recent_rooms:
-          type: object
+          description: The user's recent rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         friendship:
           description: >-
             The user's friendship status with the current user, or null if the
@@ -2408,9 +2496,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/SongInfosWithCount'
         fav_rooms:
-          type: object
+          description: The user's favorite rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         recent_rooms:
-          type: object
+          description: The user's recent rooms
+          allOf:
+            - $ref: '#/components/schemas/RoomsData'
         friendship:
           description: >-
             The user's friendship status with the current user, or null if the
@@ -2460,26 +2552,13 @@ components:
           example: 100
       required:
         - totalListenedSongs
-    RoomCreator:
-      type: object
-      properties:
-        userID:
-          type: string
-        username:
-          type: string
-        profile_picture_url:
-          type: string
-      required:
-        - userID
-        - username
-        - profile_picture_url
     RoomDto:
       type: object
       properties:
         creator:
-          description: The creator of the room with basic information
+          description: The date the room was created
           allOf:
-            - $ref: '#/components/schemas/RoomCreator'
+            - $ref: '#/components/schemas/UserDto'
         roomID:
           type: string
         participant_count:

@@ -95,6 +95,16 @@ export class UsersService {
 		return user;
 	}
 
+	async usernameTaken(username: string): Promise<boolean> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+		if (!user || user === null) {
+			return false;
+		}
+		return true;
+	}
+
 	async updateProfile(
 		userId: string,
 		updateProfileDto: UpdateUserDto,

@@ -56,6 +56,7 @@ const EditProfileScreen = () => {
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [errorMessage, setErrorMessage] = useState<string>("");
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const [token, setToken] = useState<string | null>(null);
 	useEffect(() => {
@@ -77,9 +78,26 @@ const EditProfileScreen = () => {
 		setUserData(null);
 	};
 
+	useEffect(() => {
+		const checkData = async () => {
+			if (JSON.stringify(profileInfo) !== JSON.stringify(profileData)) {
+				if (profileInfo.username !== profileData.username) {
+					const validUsername: boolean = await checkUsername();
+					setChanged(validUsername);
+				} else {
+					setChanged(true);
+				}
+			} else {
+				setChanged(false);
+			}
+		};
+
+		checkData();
+	}, [profileData]);
+
 	const updateProfile = async () => {
 		try {
-			console.log("Profile data: " + JSON.stringify(profileData));
+			// console.log("Profile data: " + JSON.stringify(profileData));
 			const response = await axios.patch(
 				`${utils.API_BASE_URL}/users`,
 				profileData,
@@ -95,6 +113,61 @@ const EditProfileScreen = () => {
 		} catch (error) {
 			console.error("Error updating profile info:", error);
 			return [];
+		}
+	};
+
+	const checkUsername = async (): Promise<boolean> => {
+		if (profileData.username === "") {
+			setErrorMessage("Username cannot be empty");
+			return false;
+		}
+
+		const regex = /^[a-z0-9]+$/;
+
+		if (!regex.test(profileData.username)) {
+			setErrorMessage(
+				"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
+			);
+			return false;
+		} else {
+			try {
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current);
+				}
+
+				// Wait for the timeout to complete and handle the response
+				const response = await new Promise<boolean>((resolve) => {
+					timeoutRef.current = setTimeout(async () => {
+						try {
+							const response = await axios.get(
+								`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+								{
+									headers: {
+										Authorization: `Bearer ${token}`,
+									},
+								},
+							);
+
+							if (response.data) {
+								setErrorMessage("Username already taken");
+								resolve(false);
+							} else {
+								setErrorMessage("");
+								resolve(true);
+							}
+						} catch (error) {
+							console.error("Error checking username:", error);
+							setErrorMessage("Error checking username");
+							resolve(false);
+						}
+					}, 500);
+				});
+
+				return response;
+			} catch (error) {
+				console.error("Error in checkUsername:", error);
+				return false;
+			}
 		}
 	};
 
@@ -125,7 +198,7 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				profile_picture_url: image,
 			}));
-			setChanged(true);
+
 			// console.log("\n\nUpdated profile data:", profileData);
 		} catch (error) {
 			console.error("Error updating image:", error);
@@ -159,32 +232,16 @@ const EditProfileScreen = () => {
 				...prevProfileData,
 				profile_name: text,
 			}));
-
-			setChanged(true);
 		} else if (value === "username") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				username: text,
 			}));
-
-			const regex = /^[a-z0-9]+$/;
-			if (!regex.test(text)) {
-				setErrorMessage(
-					"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
-				);
-				setChanged(false);
-				return;
-			} else {
-				setErrorMessage("");
-			}
-
-			setChanged(true);
 		} else if (value === "bio") {
 			setProfileData((prevProfileData) => ({
 				...prevProfileData,
 				bio: text,
 			}));
-			setChanged(true);
 		}
 	};
 
@@ -263,8 +320,6 @@ const EditProfileScreen = () => {
 				},
 			}));
 		}
-
-		setChanged(true);
 	};
 
 	const handleLinkAddition = (link: string) => {
@@ -320,7 +375,6 @@ const EditProfileScreen = () => {
 			updateLinks(updatedLinks); // Pass the updated links to updateLinks
 			return updatedLinks;
 		});
-		setChanged(true);
 	};
 
 	const removeGenre = (genreToRemove: string) => {
@@ -334,7 +388,6 @@ const EditProfileScreen = () => {
 					),
 				},
 			}));
-			setChanged(true);
 		}
 	};
 
@@ -349,7 +402,6 @@ const EditProfileScreen = () => {
 						data: [...prevProfileData.fav_genres.data, genreToAdd],
 					},
 				}));
-				setChanged(true);
 			}
 		}
 	};
@@ -366,7 +418,6 @@ const EditProfileScreen = () => {
 				},
 			};
 		});
-		setChanged(true);
 	};
 
 	const addSong = (newSongs: any) => {
@@ -380,7 +431,6 @@ const EditProfileScreen = () => {
 				},
 			};
 		});
-		setChanged(true);
 
 		// console.log("Fav Songs: " + JSON.stringify(profileData.fav_songs));
 
