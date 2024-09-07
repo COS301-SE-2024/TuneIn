@@ -431,7 +431,7 @@ paths:
         - users
   /users/{username}/taken:
     get:
-      operationId: getBookmarksByUsername
+      operationId: isUsernameTaken
       summary: Check if a username is taken
       description: Get all of the rooms that the user has bookmarked.
       parameters:
