@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
 	IsString,
 	IsArray,
@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS public.song
 */
 
 export class SongInfoDto {
-	@ApiProperty()
+	@ApiPropertyOptional()
+	@IsOptional()
 	@IsString()
 	songID?: string;
 
@@ -40,10 +41,10 @@ export class SongInfoDto {
 	@IsArray()
 	artists: string[];
 
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsOptional()
 	@IsString()
-	cover: string | null;
+	cover?: string;
 
 	@ApiProperty()
 	@IsNumber()
@@ -53,12 +54,12 @@ export class SongInfoDto {
 	@IsString()
 	spotify_id: string;
 
-	@ApiProperty({
+	@ApiPropertyOptional({
 		description: "The time the song started playing",
 		type: Date,
 		nullable: true,
 	})
 	@IsOptional()
 	@IsDate()
-	start_time: Date | null;
+	start_time?: Date;
 }

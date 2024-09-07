@@ -10,7 +10,7 @@ import { UpdateUserDto } from "./dto/updateuser.dto";
 const mockUserDto: UserDto = {
 	profile_name: "Testing",
 	userID: "812cd228-0031-70f9-4b63-e95752e43dad",
-	username: "Test",
+	username: "test",
 	profile_picture_url:
 		"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
 	followers: {
@@ -77,7 +77,7 @@ describe("UsersService Update Functionality", () => {
 		const mockUpdate: UpdateUserDto = {
 			profile_name: "Tester",
 			userID: "812cd228-0031-70f9-4b63-e95752e43dad",
-			username: "Testing",
+			username: "testing",
 			profile_picture_url:
 				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
 			links: {
@@ -102,7 +102,6 @@ describe("UsersService Update Functionality", () => {
 							"https://i.scdn.co/image/ab67616d0000b273bf97b2acaf967bb8ee7aa2f6",
 						spotify_id: "2tcSz3bcJqriPg9vetvJLs",
 						duration: 289,
-						start_time: null,
 					},
 				],
 			},
@@ -112,7 +111,7 @@ describe("UsersService Update Functionality", () => {
 		const result = await dtoGen.generateUserDto(mockUserDto.userID);
 
 		expect(result.profile_name).toBe("Tester");
-		expect(result.username).toBe("Testing");
+		expect(result.username).toBe("testing");
 		expect(result.links.data).toEqual({
 			instagram: ["instagram.com", "instagram.com/adventurous_epoch"],
 		});

@@ -529,7 +529,7 @@ export class UsersController {
 	})
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarks(userInfo.id);
+		return await this.usersService.getBookmarksById(userInfo.id);
 	}
 
 	@Get(":username/bookmarks")
@@ -549,7 +549,7 @@ export class UsersController {
 	async getBookmarksByUsername(
 		@Param("username") username: string,
 	): Promise<RoomDto[]> {
-		return await this.usersService.getBookmarks(username);
+		return await this.usersService.getBookmarksByUsername(username);
 	}
 
 	@ApiBearerAuth()

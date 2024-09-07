@@ -12,6 +12,7 @@ import { DirectMessageDto } from "./dto/dm.dto";
 import { IsNumber, IsObject, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
+import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -23,6 +24,7 @@ export class UserListeningStatsDto {
 
 	/* whatever else you want */
 }
+
 @Injectable()
 export class UsersService {
 	constructor(
@@ -130,13 +132,10 @@ export class UsersService {
 		}
 
 		if (updateProfileDto.links) {
-			console.log(updateProfileDto.links.data);
 			updatedUser.external_links = updateProfileDto.links.data;
 		}
 
 		if (updateProfileDto.fav_genres) {
-			console.log("Profile update: " + updateProfileDto.fav_genres.data);
-
 			const genres: string[] = updateProfileDto.fav_genres.data;
 			this.updateFavoriteGenresByName(userId, genres);
 		}
@@ -222,7 +221,7 @@ export class UsersService {
 
 	private async updateFavoriteSongsByID(
 		userId: string,
-		newSongs: any[],
+		newSongs: SongInfoDto[],
 	): Promise<void> {
 		await this.prisma.$transaction(async (prisma) => {
 			const newSongIds = newSongs.map((song) => song.spotify_id);
@@ -259,18 +258,6 @@ export class UsersService {
 
 			// Step 3: Insert missing songs into the database
 			if (missingSongs.length > 0) {
-				const newSongs = await prisma.song.createMany({
-					data: missingSongs.map((song) => ({
-						spotify_id: song.spotify_id,
-						name: song.title,
-						duration: song.duration,
-						artwork_url: song.cover,
-						audio_features: {},
-						artists: song.artists,
-					})),
-					skipDuplicates: true, // Prevents errors if a song was added in parallel by another transaction
-				});
-
 				// Re-fetch the newly added songs to update the songMap
 				const newlyInsertedSongs = await prisma.song.findMany({
 					where: {
@@ -642,35 +629,51 @@ export class UsersService {
 		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
 
 		const roomsWithSongs = await Promise.all(
-			rooms.map(async (room: any) => {
-				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
-				room.songs = songs;
-				return room;
-			}),
+			rooms.map(
+				async (
+					room: PrismaTypes.room & {
+						songs?: PrismaTypes.song[] | null;
+					},
+				) => {
+					const songs: PrismaTypes.song[] | null =
+						await this.dbUtils.getRoomSongs(room.room_id);
+					room.songs = songs;
+					return room;
+				},
+			),
 		);
-		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
-			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
-			return acc;
-		}, {});
+		const roomSongs = roomsWithSongs.reduce(
+			(
+				acc: { [key: string]: Prisma.JsonValue[] },
+				room: PrismaTypes.room & {
+					songs?: PrismaTypes.song[] | null;
+				},
+			) => {
+				acc[room.room_id] =
+					room.songs?.map((song) => song.audio_features) || [];
+				return acc;
+			},
+			{},
+		);
 		const favoriteSongs: PrismaTypes.song[] | null =
 			await this.dbUtils.getUserFavoriteSongs(userID);
 		if (!favoriteSongs) {
 			// return random rooms if the user has no favorite songs
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-				randomRooms.map((room: any) => room.room_id),
+				randomRooms.map((room) => room.room_id),
 			);
 			return r === null ? [] : r;
 		}
 		// console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
-			favoriteSongs.map((song: any) => song.audio_features),
+			favoriteSongs.map((song) => song.audio_features),
 		);
 		this.recommender.setPlaylists(roomSongs);
 		const recommendedRooms = this.recommender.getTopPlaylists(5);
 		// console.log("recommendedRooms:", recommendedRooms);
 		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-			recommendedRooms.map((room: any) => room.playlist),
+			recommendedRooms.map((room) => room.playlist),
 		);
 		return r === null ? [] : r;
 	}
@@ -729,7 +732,26 @@ export class UsersService {
 		return result;
 	}
 
-	async getBookmarks(username: string): Promise<RoomDto[]> {
+	async getBookmarksById(userID: string): Promise<RoomDto[]> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const bookmarks: PrismaTypes.bookmark[] =
+			await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+
+		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
+		return rooms;
+	}
+
+	async getBookmarksByUsername(username: string): Promise<RoomDto[]> {
 		const userID = (await this.getProfileByUsername(username)).userID;
 
 		if (!(await this.dbUtils.userExists(userID))) {

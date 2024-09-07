@@ -65,7 +65,6 @@ export class DtoGenService {
 				cover: song.song.artwork_url as string,
 				spotify_id: song.song.spotify_id,
 				duration: song.song.duration as number,
-				start_time: null,
 			})),
 		};
 
