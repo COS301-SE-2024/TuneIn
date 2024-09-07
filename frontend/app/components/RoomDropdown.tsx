@@ -20,17 +20,12 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({
 	initialRooms,
 	onRoomPick,
 }) => {
-	const [rooms, setRooms] = useState<string[]>(initialRooms);
-	const [selectedRoom, setSelectedRoom] = useState<string>(initialRooms[0]);
+	const [rooms, setRooms] = useState<string[]>([]);
+	const [selectedRoom, setSelectedRoom] = useState<string>("");
 	const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
 	const [inputText, setInputText] = useState<string>("");
 
 	useEffect(() => {
-		// check if currentRoom is stored in StorageService
-		// if it is, set selectedRoom to the stored value
-		// if not, set selectedRoom to the first room in initialRooms
-		// set rooms to initialRooms
-
 		const getRoom = async () => {
 			const currentRoom = await StorageService.getItem("currentRoom");
 			if (currentRoom) {
@@ -39,19 +34,17 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({
 				setSelectedRoom(initialRooms[0]);
 			}
 		};
-
+		console.log("initialRooms", initialRooms);
 		setRooms(initialRooms);
 		getRoom();
-		onRoomPick(selectedRoom);
 	}, [initialRooms]);
 
 	const handleRoomSelect = async (room: string) => {
 		setSelectedRoom(room);
+		onRoomPick(room);
 		setDropdownVisible(false);
 		await StorageService.setItem("currentRoom", room);
 	};
-
-	onRoomPick(selectedRoom);
 
 	return (
 		<View style={styles.container}>
