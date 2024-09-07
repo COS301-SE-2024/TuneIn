@@ -199,25 +199,25 @@ const AnalyticsPage: React.FC = () => {
 					<View style={styles.cardsContainer}>
 						<MetricsCard
 							title="Unique Visitors"
-							number={keymetrics?.unique_visitors.count.toString() ?? "0"}
+							number={keymetrics?.unique_visitors?.count?.toString() ?? "0"}
 							percentage={
-								keymetrics?.returning_visitors.percentage_change.toString() ===
+								keymetrics?.returning_visitors?.percentage_change?.toString() ===
 								undefined
 									? "0"
 									: (
-											keymetrics?.unique_visitors.percentage_change * 100
+											keymetrics?.unique_visitors?.percentage_change * 100
 										).toString()
 							}
 						/>
 						<MetricsCard
 							title="Returning Visitors"
-							number={keymetrics?.returning_visitors.count.toString() ?? "0"}
+							number={keymetrics?.returning_visitors?.count?.toString() ?? "0"}
 							percentage={
-								keymetrics?.returning_visitors.percentage_change.toString() ===
+								keymetrics?.returning_visitors?.percentage_change?.toString() ===
 								undefined
 									? "0"
 									: (
-											keymetrics?.returning_visitors.percentage_change * 100
+											keymetrics?.returning_visitors?.percentage_change * 100
 										).toString()
 							}
 						/>
@@ -226,14 +226,14 @@ const AnalyticsPage: React.FC = () => {
 						<MetricsCard
 							title="Average Session Duration"
 							number={secondsToString(
-								keymetrics?.average_session_duration.duration ?? 0,
+								keymetrics?.average_session_duration?.duration ?? 0,
 							)}
 							percentage={
-								keymetrics?.average_session_duration.percentage_change.toString() ===
+								keymetrics?.average_session_duration?.percentage_change?.toString() ===
 								undefined
 									? "0"
 									: (
-											keymetrics?.average_session_duration.percentage_change *
+											keymetrics?.average_session_duration?.percentage_change *
 											100
 										).toString()
 							}
@@ -241,10 +241,10 @@ const AnalyticsPage: React.FC = () => {
 					</View>
 					<View style={styles.cardsContainer}>
 						<PieChartCard
-							returningVisitors={keymetrics?.returning_visitors.count ?? 0}
+							returningVisitors={keymetrics?.returning_visitors?.count ?? 0}
 							newVisitors={
-								(keymetrics?.unique_visitors.count ?? 0) -
-								(keymetrics?.returning_visitors.count ?? 0)
+								(keymetrics?.unique_visitors?.count ?? 0) -
+								(keymetrics?.returning_visitors?.count ?? 0)
 							}
 						/>
 					</View>
