@@ -13,8 +13,6 @@ const Following: React.FC = () => {
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
 
 	const user = useLocalSearchParams();
-	console.log("User:", user);
-
 	useEffect(() => {
 		const fetchFollowing = async () => {
 			try {
@@ -22,7 +20,6 @@ const Following: React.FC = () => {
 				const response = await axios.get(`${API_BASE_URL}/users/following`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
-				console.log("Following:", response.data);
 				const mappedFollowing: Friend[] = response.data.map(
 					(user: any): Friend => ({
 						profile_picture_url: user.profile_picture_url,
@@ -53,7 +50,6 @@ const Following: React.FC = () => {
 	}, [search, following]);
 
 	const handleUnfollow = async (friend: Friend) => {
-		console.log("Unfollowing user:", friend);
 		const token = await auth.getToken();
 		if (token) {
 			try {
@@ -71,8 +67,6 @@ const Following: React.FC = () => {
 					console.error("Error unfollowing user:", response);
 					return;
 				}
-				console.log("Unfollow response:", response);
-				console.log("Unfollowed user:", friend);
 				const updatedFollowing = following.filter(
 					(user) => user.username !== friend.username,
 				);

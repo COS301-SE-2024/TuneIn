@@ -30,7 +30,6 @@ const Followers: React.FC = () => {
 						relationship: user.relationship,
 					}),
 				);
-				console.log("Followers:", mappedFollowers);
 				setFollowers(mappedFollowers);
 				setFilteredFollowers(mappedFollowers);
 			} catch (error) {
@@ -66,7 +65,6 @@ const Followers: React.FC = () => {
 						},
 					},
 				);
-				console.log("Following user:", friend, response);
 				// change relationship status of the user
 				if (response.ok) {
 					const updatedFollowers = followers.map((follower) => {

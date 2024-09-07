@@ -213,7 +213,7 @@ const AllFriends: React.FC = () => {
 					setPendingRequests(updatedRequests);
 					friend.relationship = "mutual";
 					setPotentialFriends([...potentialFriends, friend]);
-					console.log("Friend request cancelled successfully.", requests);
+					console.log("Friend request cancelled successfully.");
 				}
 			} catch (error) {
 				console.error("Error cancelling request:", error);
@@ -237,7 +237,6 @@ const AllFriends: React.FC = () => {
 						},
 					},
 				);
-				console.log("Response:", response.status);
 				if (response.status === 201) {
 					const updatedRequests = requests.filter(
 						(request) => request.friend_id !== friend.friend_id,
@@ -250,7 +249,7 @@ const AllFriends: React.FC = () => {
 						friend.relationship = "mutual";
 						setPotentialFriends([...potentialFriends, friend]);
 					}
-					console.log("Friend request handled successfully.", requests);
+					console.log("Friend request handled successfully.");
 				}
 			} catch (error) {
 				console.error("Error handling request:", error);
@@ -271,7 +270,6 @@ const AllFriends: React.FC = () => {
 						},
 					},
 				);
-				console.log("Response:", response.status);
 				if (response.status === 201) {
 					const updatedFriends = friends.filter(
 						(_friend) => _friend.friend_id !== friend.friend_id,
@@ -279,7 +277,7 @@ const AllFriends: React.FC = () => {
 					setFriends(updatedFriends);
 					friend.relationship = "mutual";
 					setPotentialFriends([...potentialFriends, friend]);
-					console.log("User unfriended successfully.", friends);
+					console.log("User unfriended successfully.");
 				}
 			} catch (error) {
 				console.error("Error following friend:", error);

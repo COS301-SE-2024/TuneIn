@@ -581,7 +581,6 @@ export class DbUtilsService {
 			};
 		};
 
-		console.log("where: ", getWhere(isPending));
 		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
 			where: getWhere(isPending),
 		});
