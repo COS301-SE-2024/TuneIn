@@ -195,22 +195,40 @@ export class UsersService {
 	*/
 	async followUser(selfID: string, usernameToFollow: string): Promise<boolean> {
 		if (!(await this.dbUtils.userExists(selfID))) {
-			throw new Error("User with id: (" + selfID + ") does not exist");
+			throw new HttpException(
+				"User with id: (" + selfID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
 		const followee = await this.prisma.users.findFirst({
-			where: { user_id: usernameToFollow },
+			where: { username: usernameToFollow },
 		});
 		if (!followee) {
-			throw new Error("User (" + usernameToFollow + ") does not exist");
+			throw new HttpException(
+				"User (" + usernameToFollow + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
 		if (selfID === followee.user_id) {
-			throw new Error("You cannot follow yourself");
+			throw new HttpException(
+				"You cannot unfollow yourself",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		if (await this.dbUtils.isFollowing(selfID, followee.user_id)) {
 			return true;
+		}
+
+		if (await this.dbUtils.isFriendsOrPending(selfID, followee.user_id)) {
+			throw new HttpException(
+				"Cannot unfollow user with id: (" +
+					followee.user_id +
+					"). User is a friend or has a pending request",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		try {
@@ -237,22 +255,40 @@ export class UsersService {
 		usernameToUnfollow: string,
 	): Promise<boolean> {
 		if (!(await this.dbUtils.userExists(selfID))) {
-			throw new Error("User with id: (" + selfID + ") does not exist");
+			throw new HttpException(
+				"User with id: (" + selfID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
 		const followee = await this.prisma.users.findFirst({
-			where: { user_id: usernameToUnfollow },
+			where: { username: usernameToUnfollow },
 		});
 		if (!followee) {
-			throw new Error("User (" + usernameToUnfollow + ") does not exist");
+			throw new HttpException(
+				"User (" + usernameToUnfollow + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
 		if (selfID === followee.user_id) {
-			throw new Error("You cannot unfollow yourself");
+			throw new HttpException(
+				"You cannot unfollow yourself",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		if (!(await this.dbUtils.isFollowing(selfID, followee.user_id))) {
 			return true;
+		}
+
+		if (await this.dbUtils.isFriendsOrPending(selfID, followee.user_id)) {
+			throw new HttpException(
+				"Cannot unfollow user with id: (" +
+					followee.user_id +
+					"). User is a friend or has a pending request",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		try {
@@ -614,7 +650,7 @@ export class UsersService {
 		}
 
 		const potentialFriend = await this.prisma.users.findFirst({
-			where: { user_id: newPotentialFriendUsername },
+			where: { username: newPotentialFriendUsername },
 		});
 		if (!potentialFriend) {
 			throw new Error(
@@ -699,7 +735,7 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { user_id: friendUsername },
+			where: { username: friendUsername },
 		});
 		if (!friend) {
 			throw new Error("User (@" + friendUsername + ") does not exist");
@@ -714,8 +750,9 @@ export class UsersService {
 		}
 
 		//check if they are friends
+		console.log("friend", friend);
 		if (
-			!(await this.dbUtils.isFriendsOrPending(userID, friend.user_id, true))
+			!(await this.dbUtils.isFriendsOrPending(userID, friend.user_id, false))
 		) {
 			throw new HttpException(
 				"User (" + userID + ") is not friends with (" + friend.user_id + ")",
@@ -760,7 +797,7 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { user_id: friendUsername },
+			where: { username: friendUsername },
 		});
 		if (!friend) {
 			throw new Error("User (@" + friendUsername + ") does not exist");
@@ -817,10 +854,13 @@ export class UsersService {
 		}
 
 		const friend = await this.prisma.users.findFirst({
-			where: { user_id: rejectedUsername },
+			where: { username: rejectedUsername },
 		});
 		if (!friend) {
-			throw new Error("User (@" + rejectedUsername + ") does not exist");
+			throw new HttpException(
+				"User (@" + rejectedUsername + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
 		// check if user is trying to accept themselves
@@ -879,14 +919,15 @@ export class UsersService {
 	async getPotentialFriends(userID: string): Promise<UserDto[]> {
 		//get all potential friends for the user
 		console.log("Getting potential friends for user " + userID);
-		const potentialFriends = await this.dbUtils.getPotentialFriends(userID);
+		const potentialFriends: PrismaTypes.users[] | null =
+			await this.dbUtils.getPotentialFriends(userID);
 		if (!potentialFriends) {
 			return [];
 		}
 		const ids: string[] = potentialFriends.map(
 			(friend: PrismaTypes.users) => friend.user_id,
 		);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for potential friends. Received null.",
@@ -898,12 +939,15 @@ export class UsersService {
 	async getPendingRequests(userID: string): Promise<UserDto[]> {
 		//get all pending friend requests for the user
 		console.log("Getting pending friend requests for user " + userID);
-		const pendingRequests = await this.dbUtils.getPendingRequests(userID);
+		const pendingRequests: PrismaTypes.friends[] | null =
+			await this.dbUtils.getPendingRequests(userID);
 		if (!pendingRequests) {
 			return [];
 		}
-		const ids: string[] = pendingRequests.map((friend) => friend.friend2);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		const ids: string[] = pendingRequests.map(
+			(friend: PrismaTypes.friends) => friend.friend2,
+		);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for pending requests. Received null.",
@@ -914,18 +958,12 @@ export class UsersService {
 
 	async cancelFriendRequest(
 		userID: string,
-		friendUserID: string,
+		friendUsername: string,
 	): Promise<boolean> {
 		//cancel friend request
 		console.log(
-			"user (" + userID + ") cancelled friend request to @" + friendUserID,
+			"user (" + userID + ") cancelled friend request to @" + friendUsername,
 		);
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot cancel a friend request to yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
 		// check if users exist
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
@@ -933,16 +971,26 @@ export class UsersService {
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
+				"User (" + friendUsername + ") does not exist",
 				HttpStatus.NOT_FOUND,
+			);
+		}
+		if (userID === friend.user_id) {
+			throw new HttpException(
+				"You cannot cancel a friend request to yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 		const cancelledRequest = await this.prisma.friends.deleteMany({
 			where: {
 				friend1: userID,
-				friend2: friendUserID,
+				friend2: friend.user_id,
 				is_pending: true,
 			},
 		});
@@ -951,7 +999,7 @@ export class UsersService {
 				"User (" +
 					userID +
 					") has not sent a friend request to user (" +
-					friendUserID +
+					friendUsername +
 					")",
 				HttpStatus.BAD_REQUEST,
 			);
@@ -976,7 +1024,9 @@ export class UsersService {
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const result = await this.dtogen.generateRoomDto(room.room.room_id);
+		const result: RoomDto | null = await this.dtogen.generateRoomDto(
+			room.room.room_id,
+		);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating RoomDto for current room. Received null.",

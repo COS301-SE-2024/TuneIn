@@ -58,7 +58,7 @@ const Following: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${API_BASE_URL}/users/${friend.friend_id}/unfollow`,
+					`${API_BASE_URL}/users/${friend.username}/unfollow`,
 					{
 						method: "POST",
 						headers: {

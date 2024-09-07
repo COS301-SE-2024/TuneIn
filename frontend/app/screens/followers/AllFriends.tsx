@@ -124,7 +124,7 @@ const AllFriends: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.friend_id}/befriend`,
+					`${utils.API_BASE_URL}/users/${friend.username}/befriend`,
 					{
 						method: "POST",
 						headers: {
@@ -198,7 +198,7 @@ const AllFriends: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${utils.API_BASE_URL}/users/friends/${friend.friend_id}/cancel`,
+					`${utils.API_BASE_URL}/users/friends/${friend.username}/cancel`,
 					{
 						method: "POST",
 						headers: {
@@ -229,7 +229,7 @@ const AllFriends: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.friend_id}/${accept ? "accept" : "reject"}`,
+					`${utils.API_BASE_URL}/users/${friend.username}/${accept ? "accept" : "reject"}`,
 					{
 						method: "POST",
 						headers: {
@@ -263,7 +263,7 @@ const AllFriends: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.friend_id}/unfriend`,
+					`${utils.API_BASE_URL}/users/${friend.username}/unfriend`,
 					{
 						method: "POST",
 						headers: {

@@ -58,7 +58,7 @@ const Followers: React.FC = () => {
 			try {
 				const action = friend.relationship === "mutual" ? "unfollow" : "follow";
 				const response = await fetch(
-					`${API_BASE_URL}/users/${friend.friend_id}/${action}`,
+					`${API_BASE_URL}/users/${friend.username}/${action}`,
 					{
 						method: "POST",
 						headers: {
@@ -68,18 +68,22 @@ const Followers: React.FC = () => {
 				);
 				console.log("Following user:", friend, response);
 				// change relationship status of the user
-				const updatedFollowers = followers.map((follower) => {
-					if (follower.username === friend.username) {
-						return {
-							...follower,
-							relationship:
-								friend.relationship === "mutual" ? "follower" : "mutual",
-						};
-					}
-					return follower;
-				});
-				setFollowers(updatedFollowers);
-				setFilteredFollowers(updatedFollowers);
+				if (response.ok) {
+					const updatedFollowers = followers.map((follower) => {
+						if (follower.username === friend.username) {
+							return {
+								...follower,
+								relationship:
+									friend.relationship === "mutual" ? "follower" : "mutual",
+							};
+						}
+						return follower;
+					});
+					setFollowers(updatedFollowers);
+					setFilteredFollowers(updatedFollowers);
+				} else {
+					console.error("Error following user:", response);
+				}
 			} catch (error) {
 				console.error("Error following user:", error);
 			}
