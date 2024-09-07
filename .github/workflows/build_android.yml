@@ -53,7 +53,7 @@ jobs:
 
       - name: 📤 Upload app secrets to EAS
         run: |
-          eas secret:push --scope project --env-file .env --force
+          cd frontend && eas secret:push --scope project --env-file .env --force
 
       # Step 4: Install dependencies
       # - name: 📦 Install Yarn dependencies
