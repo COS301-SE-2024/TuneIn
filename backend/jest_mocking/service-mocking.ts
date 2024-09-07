@@ -412,11 +412,21 @@ export const mockUsersService = {
 	// mock properties and methods as needed
 };
 
+export const mockRecommendationsService = {
+	getPlaylistSimilarityScores: jest.fn(),
+	getTopPlaylists: jest.fn(),
+	setMockSongs: jest.fn(),
+	setPlaylists: jest.fn(),
+	// Add other functions here if needed
+};
+
 export const mockDbUtilsService = {
 	getFriendRequests: jest.fn(),
 	userExists: jest.fn(),
 	isFollowing: jest.fn(),
 	getPotentialFriends: jest.fn(),
 	isFriendsOrPending: jest.fn(),
+	getRoomSongs: jest.fn(),
+	getUserFavoriteSongs: jest.fn(),
 	// mock properties and methods as needed
 };
