@@ -162,6 +162,9 @@ describe("UsersService follow function", () => {
 			});
 			jest.spyOn(dbUtilsService, "isFollowing").mockResolvedValueOnce(false);
 			jest
+				.spyOn(dbUtilsService, "isFriendsOrPending")
+				.mockResolvedValueOnce(false);
+			jest
 				.spyOn(prismaService.follows, "create")
 				.mockRejectedValue(new Error("DB Error"));
 
@@ -275,6 +278,9 @@ describe("UsersService follow function", () => {
 				email: null,
 			});
 			jest.spyOn(dbUtilsService, "isFollowing").mockResolvedValueOnce(true);
+			jest
+				.spyOn(dbUtilsService, "isFriendsOrPending")
+				.mockResolvedValueOnce(false);
 			jest.spyOn(prismaService.follows, "findFirst").mockResolvedValue({
 				follows_id: "followID",
 				follower: "selfID",

@@ -213,7 +213,7 @@ export class UsersService {
 
 		if (selfID === followee.user_id) {
 			throw new HttpException(
-				"You cannot unfollow yourself",
+				"You cannot follow yourself",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
@@ -224,7 +224,7 @@ export class UsersService {
 
 		if (await this.dbUtils.isFriendsOrPending(selfID, followee.user_id)) {
 			throw new HttpException(
-				"Cannot unfollow user with id: (" +
+				"Cannot follow user with id: (" +
 					followee.user_id +
 					"). User is a friend or has a pending request",
 				HttpStatus.BAD_REQUEST,

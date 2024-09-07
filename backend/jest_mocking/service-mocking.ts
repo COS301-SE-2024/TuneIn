@@ -417,5 +417,6 @@ export const mockDbUtilsService = {
 	userExists: jest.fn(),
 	isFollowing: jest.fn(),
 	getPotentialFriends: jest.fn(),
+	isFriendsOrPending: jest.fn(),
 	// mock properties and methods as needed
 };
