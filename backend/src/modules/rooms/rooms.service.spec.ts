@@ -73,6 +73,7 @@ describe("RoomsService", () => {
 				description: "New Room Description",
 				room_image: "new-room-image.jpg",
 				has_explicit_content: true,
+				has_nsfw_content: true,
 				language: "English",
 			};
 			jest.spyOn(mockConfigService, "get").mockReturnValue("test-salt");
@@ -102,7 +103,7 @@ describe("RoomsService", () => {
 					description: updateRoomDto.description,
 					playlist_photo: updateRoomDto.room_image,
 					explicit: updateRoomDto.has_explicit_content,
-					nsfw: updateRoomDto.has_explicit_content,
+					nsfw: updateRoomDto.has_nsfw_content,
 					room_language: updateRoomDto.language,
 				});
 			const generateRoomDtoFromRoomMock = jest
@@ -114,7 +115,7 @@ describe("RoomsService", () => {
 					description: updateRoomDto.description,
 					room_image: updateRoomDto.room_image,
 					has_explicit_content: updateRoomDto.has_explicit_content,
-					has_nsfw_content: updateRoomDto.has_explicit_content,
+					has_nsfw_content: updateRoomDto.has_nsfw_content,
 					language: updateRoomDto.language,
 					participant_count: 0,
 					is_private: false,
@@ -149,7 +150,7 @@ describe("RoomsService", () => {
 					description: updateRoomDto.description,
 					playlist_photo: updateRoomDto.room_image,
 					explicit: updateRoomDto.has_explicit_content,
-					nsfw: updateRoomDto.has_explicit_content,
+					nsfw: updateRoomDto.has_nsfw_content,
 					room_language: updateRoomDto.language,
 				},
 			});
@@ -159,7 +160,7 @@ describe("RoomsService", () => {
 				description: updateRoomDto.description,
 				playlist_photo: updateRoomDto.room_image,
 				explicit: updateRoomDto.has_explicit_content,
-				nsfw: updateRoomDto.has_explicit_content,
+				nsfw: updateRoomDto.has_nsfw_content,
 				room_language: updateRoomDto.language,
 			});
 			const response: RoomDto = {
@@ -168,7 +169,7 @@ describe("RoomsService", () => {
 				description: updateRoomDto.description,
 				room_image: updateRoomDto.room_image,
 				has_explicit_content: updateRoomDto.has_explicit_content,
-				has_nsfw_content: updateRoomDto.has_explicit_content,
+				has_nsfw_content: updateRoomDto.has_nsfw_content,
 				language: updateRoomDto.language,
 				creator: {
 					bio: "",
