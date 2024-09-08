@@ -147,9 +147,9 @@ const TestPage: React.FC = () => {
 
 			{/* Popup component */}
 			<RoomShareSheet
+				room={sampleRoomData}
 				isVisible={isPopupVisible}
 				onClose={handleClosePopup}
-				onConfirm={handleUserDecision} // Pass the updated handling function
 			/>
 
 			{/* Modal for RoomCard testing */}

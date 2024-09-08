@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { colors } from "../../styles/colors";
 import { DirectMessageDto } from "../../models/DmDto"; // Assuming this contains the data model
+import { Room } from "../../models/Room"; // Assuming this contains the data model
 import ProfileCard, {
 	ProfileCardProps,
 } from "../../components/messaging/profileCard"; // ProfileCard component for displaying users
@@ -21,9 +22,9 @@ import * as utils from "../../services/Utils"; // For API_BASE_URL
 import { UserDto } from "../../models/UserDto";
 
 interface RoomShareSheetProps {
+	room: Room;
 	isVisible: boolean;
 	onClose: () => void;
-	onConfirm: (choice: true | false) => Promise<void>; // Updated to take a choice
 }
 
 const createChats = (
@@ -43,15 +44,15 @@ const createChats = (
 };
 
 const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
+	room,
 	isVisible,
 	onClose,
-	onConfirm,
 }) => {
 	const [slideAnim] = useState(new Animated.Value(300)); // Initial position of the popup
 	const [searchQuery, setSearchQuery] = useState(""); // Search query state
 	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]); // Messages state
 	const [filteredChats, setFilteredChats] = useState<ProfileCardProps[]>([]); // Filtered chat state
-	const [selectedChats, setSelectedChats] = useState<UserDto[]>([]); // Selected chats state
+	const [selectedUsers, setSelectedUsers] = useState<UserDto[]>([]); // Selected chats state
 	const selfRef = React.useRef<UserDto | null>(null); // Explicitly define type and initialize with null
 
 	useEffect(() => {
@@ -117,21 +118,34 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 	}, [searchQuery, userMessages]);
 
 	const handleSelectChat = (user: UserDto) => {
-		setSelectedChats((prevSelected) =>
+		setSelectedUsers((prevSelected) =>
 			prevSelected.includes(user)
 				? prevSelected.filter((c) => c !== user)
 				: [...prevSelected, user],
 		);
 	};
 
-	const handleShare = () => {
-		console.log("Sharing with selected contacts:", selectedChats);
+	const handleShare = (room: Room) => {
+		console.log("Sharing with selected contacts:");
+		selectedUsers.forEach((user) => {
+			console.log(user.profile_name); // Print the name of each selected user
+		});
+		console.log("Room:", room.name);
 		// Add your share functionality here
+
+		// Clear selected users after sharing
+		setSelectedUsers([]);
 		onClose(); // Close the modal after sharing
 	};
 
 	const updateChatSelection = (user: UserDto) => {
 		handleSelectChat(user);
+	};
+
+	const handleClose = () => {
+		// Clear selected users when closing the modal
+		setSelectedUsers([]);
+		onClose(); // Call the original onClose function
 	};
 
 	return (
@@ -140,7 +154,7 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 			transparent={true}
 			animationType="none"
 			visible={isVisible}
-			onRequestClose={onClose}
+			onRequestClose={handleClose}
 		>
 			<View style={styles.modalOverlay}>
 				<Animated.View
@@ -163,7 +177,9 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 						renderItem={({ item }) => (
 							<ProfileCard
 								otherUser={item.otherUser}
-								isSelected={selectedChats.includes(item.otherUser)}
+								isSelected={selectedUsers.some(
+									(u) => u.userID === item.otherUser.userID,
+								)} // Check if the user is selected
 								select={() => updateChatSelection(item.otherUser)} // Pass the select function
 							/>
 						)}
@@ -173,15 +189,19 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 							styles.shareButton,
 							{
 								backgroundColor:
-									selectedChats.length > 0 ? colors.primary : "#CCCCCC",
-							}, // Change color based on selection
+									selectedUsers.length > 0 ? colors.primary : "#CCCCCC",
+							},
 						]}
-						onPress={selectedChats.length > 0 ? handleShare : undefined} // Disable press if no selection
+						onPress={() => {
+							if (selectedUsers.length > 0) {
+								handleShare(room);
+							}
+						}} // Use arrow function to wrap the call
 					>
 						<Text
 							style={[
 								styles.shareButtonText,
-								{ color: selectedChats.length > 0 ? "white" : "#666666" }, // Change text color based on selection
+								{ color: selectedUsers.length > 0 ? "white" : "#666666" }, // Change text color based on selection
 							]}
 						>
 							Share
