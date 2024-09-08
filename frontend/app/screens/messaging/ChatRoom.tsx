@@ -26,7 +26,7 @@ import auth from "../../services/AuthManagement";
 import { UserDto } from "../../models/UserDto";
 import { ChatEventDto } from "../../models/ChatEventDto";
 import { RoomDto } from "../../models/RoomDto";
-import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
+import { LiveChatMessageDto } from "../../../api";
 
 type Message = {
 	message: LiveChatMessageDto;

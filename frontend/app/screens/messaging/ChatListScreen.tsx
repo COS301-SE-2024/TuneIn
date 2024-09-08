@@ -14,11 +14,11 @@ import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
-import { DirectMessageDto } from "../../models/DmDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
 import { UserDto } from "../../models/UserDto";
+import { DirectMessageDto } from "../../../api";
 
 const initialChats: Chat[] = [
 	{

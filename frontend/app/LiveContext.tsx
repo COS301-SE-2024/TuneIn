@@ -8,10 +8,9 @@ import React, {
 import { io, Socket } from "socket.io-client";
 import auth from "./services/AuthManagement";
 import * as utils from "./services/Utils";
-import { RoomDto, UserDto } from "../api";
+import { DirectMessageDto, LiveChatMessageDto, RoomDto, UserDto } from "../api";
 
 import { SimpleSpotifyPlayback } from "./services/SimpleSpotifyPlayback";
-import { DirectMessageDto } from "./models/DmDto";
 import { EmojiReactionDto } from "./models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
 import { RoomSongDto } from "./models/RoomSongDto";
@@ -22,7 +21,6 @@ import { Text, Alert } from "react-native";
 import { ChatEventDto } from "./models/ChatEventDto";
 import { PlaybackEventDto } from "./models/PlaybackEventDto";
 import { set } from "react-datepicker/dist/date_utils";
-import { LiveChatMessageDto } from "./models/LiveChatMessageDto";
 import {
 	SpotifyApi,
 	Devices,
@@ -30,6 +28,7 @@ import {
 	PlaybackState,
 } from "@spotify/web-api-ts-sdk";
 import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
+import { useAPI } from "./APIContext";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -45,7 +44,7 @@ export type LiveMessage = {
 };
 
 export type DirectMessage = {
-	message: DirectMessageDto;
+	message: DirectMessageDto,
 	me?: boolean;
 	messageSent: boolean;
 	isOptimistic: boolean;
@@ -193,7 +192,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [timeOffset, setTimeOffset] = useState<number>(0);
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
-	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>(null);
+	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>();
 	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
 		devices: [],
 	});
