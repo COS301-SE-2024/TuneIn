@@ -140,7 +140,7 @@ export class RoomsService {
 			room_id: roomID,
 		};
 
-		if (updateRoomDto.room_name) {
+		if (updateRoomDto.room_name !== undefined) {
 			updatedRoom.name = updateRoomDto.room_name;
 		}
 
@@ -148,13 +148,16 @@ export class RoomsService {
 			updatedRoom.description = updateRoomDto.description;
 		}
 
-		if (updateRoomDto.room_image) {
+		if (updateRoomDto.room_image !== undefined) {
 			updatedRoom.playlist_photo = updateRoomDto.room_image;
 		}
 
-		if (updateRoomDto.has_explicit_content) {
+		if (updateRoomDto.has_explicit_content !== undefined) {
 			updatedRoom.explicit = updateRoomDto.has_explicit_content;
-			updatedRoom.nsfw = updateRoomDto.has_explicit_content;
+		}
+
+		if (updateRoomDto.has_nsfw_content !== undefined) {
+			updatedRoom.nsfw = updateRoomDto.has_nsfw_content;
 		}
 
 		if (updateRoomDto.language) {
