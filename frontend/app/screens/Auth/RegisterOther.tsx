@@ -43,7 +43,7 @@ if (!clientId) {
 const redirectTarget = SPOTIFY_REDIRECT_URI;
 if (!redirectTarget) {
 	throw new Error(
-		"No redirect target (SPOTIFY_REDIRECT_URI) provided in environment variables",
+		"No redirect URI (SPOTIFY_REDIRECT_URI) provided in environment variables",
 	);
 }
 
