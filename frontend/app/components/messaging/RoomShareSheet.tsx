@@ -168,8 +168,24 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 							/>
 						)}
 					/>
-					<TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-						<Text style={styles.shareButtonText}>Share</Text>
+					<TouchableOpacity
+						style={[
+							styles.shareButton,
+							{
+								backgroundColor:
+									selectedChats.length > 0 ? colors.primary : "#CCCCCC",
+							}, // Change color based on selection
+						]}
+						onPress={selectedChats.length > 0 ? handleShare : undefined} // Disable press if no selection
+					>
+						<Text
+							style={[
+								styles.shareButtonText,
+								{ color: selectedChats.length > 0 ? "white" : "#666666" }, // Change text color based on selection
+							]}
+						>
+							Share
+						</Text>
 					</TouchableOpacity>
 				</Animated.View>
 			</View>
@@ -203,14 +219,12 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	shareButton: {
-		backgroundColor: colors.primary,
 		paddingVertical: 15,
 		borderRadius: 25,
 		marginTop: 20,
 		alignItems: "center",
 	},
 	shareButtonText: {
-		color: "white",
 		fontWeight: "bold",
 	},
 });
