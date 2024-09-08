@@ -25,7 +25,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const { userData } = playerContext;
 
 	useEffect(() => {
-		console.log("effect called: " + JSON.stringify(user.followers));
+		// console.log("effect called: " + JSON.stringify(user.followers));
 		// if (userData !== null) {
 		const checkFollow = user.followers.some(
 			(item: any) => item.username === userData.username,
@@ -41,7 +41,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		if (storedToken) {
 			if (isFollowing) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.id}/unfollow`,
+					`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
 					{},
 					{
 						headers: {
@@ -58,7 +58,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.id}/follow`,
+					`${utils.API_BASE_URL}/users/${user.username}/follow`,
 					{},
 					{
 						headers: {
