@@ -122,6 +122,7 @@ const Search: React.FC = () => {
 	const [maxFollowers, setMaxFollowers] = useState("");
 	const [minFollowers, setMinFollowers] = useState("");
 	const prevFilterRef = useRef(filter);
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
@@ -170,64 +171,10 @@ const Search: React.FC = () => {
 			console.log("Recommended rooms: " + results);
 		}
 	}, [searchTerm]);
-	const mockResults: SearchResult[] = [
-		{
-			id: "1",
-			type: "room",
-			name: "Room 1",
-			roomData: {
-				roomID: "1",
-				backgroundImage:
-					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-				name: "Room 1",
-				description: "Description 1",
-				userID: "1",
-				tags: [],
-			},
-		},
-		{
-			id: "2",
-			type: "user",
-			name: "User 1",
-			userData: {
-				id: "1",
-				profile_picture_url:
-					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-				profile_name: "User 1",
-				username: "user1",
-			},
-		},
-		{
-			id: "3",
-			type: "room",
-			name: "Room 2",
-			roomData: {
-				roomID: "2",
-				backgroundImage:
-					"https://unblast.com/wp-content/uploads/2021/01/Space-Background-Images.jpg",
-				name: "Room 2",
-				description: "Description 2",
-				userID: "2",
-				tags: [],
-			},
-		},
-		{
-			id: "4",
-			type: "user",
-			name: "User 2",
-			userData: {
-				id: "2",
-				profile_picture_url:
-					"https://wallpapers-clan.com/wp-content/uploads/2023/11/marvel-iron-man-in-destroyed-suit-desktop-wallpaper-preview.jpg",
-				profile_name: "User 2",
-				username: "user2",
-			},
-		},
-	];
 
 	const handleSearch = async () => {
 		console.log("Search Filter: " + filter);
-		setLoading(true);
+		// setLoading(true);
 		try {
 			const token = await auth.getToken();
 
@@ -496,6 +443,19 @@ const Search: React.FC = () => {
 		setFilter(selectedFilter);
 	};
 
+	const handleTextChange = (text: string) => {
+		setSearchTerm(text);
+		setLoading(true);
+
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+		}
+
+		timeoutRef.current = setTimeout(() => {
+			handleSearch();
+		}, 500);
+	};
+
 	useEffect(() => {
 		// Check if the filter has changed and if the searchTerm is not empty
 		if (prevFilterRef.current !== filter && searchTerm !== "") {
@@ -560,7 +520,7 @@ const Search: React.FC = () => {
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
-					onChangeText={setSearchTerm}
+					onChangeText={handleTextChange}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
