@@ -107,11 +107,11 @@ const AnalyticsPage: React.FC = () => {
 						/>
 					</TouchableOpacity>
 					<View style={styles.drawerContent}>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							onPress={() => router.push("/screens/analytics/GeneralAnalytics")}
 						>
 							<Text style={styles.drawerItem}>General Analytics</Text>
-						</TouchableOpacity> */}
+						</TouchableOpacity>
 						<TouchableOpacity
 							onPress={() =>
 								router.navigate({
@@ -121,13 +121,13 @@ const AnalyticsPage: React.FC = () => {
 						>
 							<Text style={styles.drawerItem}>Interactions Analytics</Text>
 						</TouchableOpacity>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							onPress={() =>
 								router.push("/screens/analytics/PlaylistAnalytics")
 							}
 						>
 							<Text style={styles.drawerItem}>Playlist Analytics</Text>
-						</TouchableOpacity> */}
+						</TouchableOpacity>
 					</View>
 				</View>
 			)}
@@ -145,7 +145,7 @@ const AnalyticsPage: React.FC = () => {
 							<Ionicons name="menu" size={24} color="black" />
 						</TouchableOpacity>
 					</View>
-					{/* <View style={styles.buttonContainer}>
+					<View style={styles.buttonContainer}>
 						<TouchableOpacity
 							style={[
 								styles.timeButton,
@@ -197,7 +197,7 @@ const AnalyticsPage: React.FC = () => {
 								Month
 							</Text>
 						</TouchableOpacity>
-					</View> */}
+					</View>
 
 					<View style={styles.cardsContainer}>
 						<MetricsCard

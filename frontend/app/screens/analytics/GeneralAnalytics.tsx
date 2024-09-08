@@ -29,14 +29,12 @@ const GeneralAnalytics: React.FC = () => {
 		const fetchRooms = async () => {
 			// make an axios request with the API_BASE_URL and the auth token
 			const accessToken: string | null = await AuthManagement.getToken();
-			console.log("access token fr", accessToken);
 			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 				},
 			});
 			const data = await response.json();
-			// console.log(data);
 			setRooms(data);
 			const currentRoom = await StorageService.getItem("currentRoom");
 			console.log("user rooms", userRooms, "and current room", currentRoom);
@@ -45,7 +43,7 @@ const GeneralAnalytics: React.FC = () => {
 			setSelectedRoom(room);
 		};
 		fetchRooms();
-	}, [userRooms, selectedRoom]);
+	}, []);
 
 	useEffect(() => {
 		const fetchGeneralAnalytics = async () => {
@@ -66,7 +64,7 @@ const GeneralAnalytics: React.FC = () => {
 		};
 		fetchGeneralAnalytics();
 		console.log("general analytics", generalAnalytics);
-	}, [selectedRoom, generalAnalytics]);
+	}, [selectedRoom]);
 
 	// fetch data from the analytics/participation endpoint for the selected room and store it in generalAnalytics
 	const rooms = userRooms.map((room) => room.room_name);
@@ -113,12 +111,7 @@ const GeneralAnalytics: React.FC = () => {
 			},
 		);
 		const data = await response.json();
-		// if (data.statusCode !== 200) {
-		// 	console.log("error fetching interaction analytics");
-		// 	return;
-		// }
-		if (generalAnalytics?.room_previews === undefined)
-			setGeneralAnalytics(data);
+		setGeneralAnalytics(data);
 		console.log("Room picked", room);
 	};
 
