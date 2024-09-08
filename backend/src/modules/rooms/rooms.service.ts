@@ -376,7 +376,9 @@ export class RoomsService {
 			songInfoDto.title = song.song.name;
 			songInfoDto.cover = song.song.artwork_url || "";
 			songInfoDto.artists = song.song.artists;
-			songInfoDto.start_time = song.start_time;
+			if (song.start_time) {
+				songInfoDto.start_time = song.start_time;
+			}
 			songInfoDtos.push(songInfoDto);
 		}
 		return songInfoDtos;

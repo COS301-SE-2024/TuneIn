@@ -47,7 +47,7 @@ describe("RoomsService", () => {
 				},
 				links: {
 					count: 0,
-					data: [],
+					data: {},
 				},
 				bio: "",
 				fav_genres: {
@@ -195,7 +195,7 @@ describe("RoomsService", () => {
 					},
 					links: {
 						count: 0,
-						data: [],
+						data: {},
 					},
 					profile_name: "",
 					profile_picture_url: "",

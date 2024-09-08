@@ -217,6 +217,7 @@ model song {
   spotify_id     String           @unique
   audio_features Json             @db.Json
   artists        String[]
+  track_info     Json?            @db.Json
   favorite_songs favorite_songs[]
   queue          queue[]
 }

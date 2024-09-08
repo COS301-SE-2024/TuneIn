@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	TextInput,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import SongCard from "./Spotify/SongCard";
 import { useSpotifySearch } from "../hooks/useSpotifySearch";
+import { colors } from "../styles/colors";
 
 interface Track {
 	id: string;
@@ -44,6 +45,11 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
+	const [sResults, setSResults] = useState<SimplifiedTrack[]>(searchResults);
+
+	useEffect(() => {
+		setSResults(searchResults);
+	}, [searchResults]);
 
 	const addToPlaylist = (track: Track) => {
 		const simplifiedTrack: SimplifiedTrack = {
@@ -69,14 +75,17 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 	const savePlaylist = async () => {
 		const currentPlaylist = [...playlist];
 		const songInfo = currentPlaylist.map((song) => ({
+			spotify_id: song.id,
 			title: song.name,
-			artists: song.artistNames,
+			artists: song.artistNames.split(", "),
 			cover: song.albumArtUrl,
+			duration: Math.floor(song.duration_ms / 1000),
 			startTime: "",
 		}));
-		console.log(currentPlaylist);
-		console.log(songInfo);
 		handleSave(songInfo);
+		setPlaylist([]);
+		setSResults([]);
+		setSearchQuery("");
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -91,6 +100,7 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			transparent={true}
 			animationType="slide"
 			onRequestClose={() => {}}
+			testID="song-dialog"
 		>
 			<View style={styles.container}>
 				<TextInput
@@ -134,7 +144,7 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 
 				{/* Search Results Section */}
 				<ScrollView style={styles.resultsContainer}>
-					{searchResults.map((track) => (
+					{sResults.map((track) => (
 						<SongCard
 							key={track.id}
 							track={track}
@@ -228,7 +238,7 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	saveButton: {
-		backgroundColor: "#8b8fa8",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",

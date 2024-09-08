@@ -305,7 +305,7 @@ export class SpotifyAuthService {
 			username: spotifyUser.id,
 			full_name: spotifyUser.display_name,
 			external_links: {
-				spotify: spotifyUser.external_urls.spotify,
+				spotify: [spotifyUser.external_urls.spotify],
 			},
 			email: spotifyUser.email,
 		};
