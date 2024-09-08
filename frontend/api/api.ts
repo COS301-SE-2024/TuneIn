@@ -738,13 +738,13 @@ export interface RoomDto {
      * @type {string}
      * @memberof RoomDto
      */
-    'start_date': string;
+    'start_date'?: string;
     /**
      * 
      * @type {string}
      * @memberof RoomDto
      */
-    'end_date': string;
+    'end_date'?: string;
     /**
      * 
      * @type {string}
@@ -781,6 +781,18 @@ export interface RoomDto {
      * @memberof RoomDto
      */
     'tags': Array<string>;
+    /**
+     * The parent of this room, if this room was created by splitting another
+     * @type {string}
+     * @memberof RoomDto
+     */
+    'parentRoomID'?: string;
+    /**
+     * Rooms created by splitting this room.
+     * @type {Array<string>}
+     * @memberof RoomDto
+     */
+    'childrenRoomIDs': Array<string>;
 }
 /**
  * 
@@ -955,6 +967,44 @@ export interface SongInfosWithCount {
      * @memberof SongInfosWithCount
      */
     'data': Array<SongInfoDto>;
+}
+/**
+ * 
+ * @export
+ * @interface SpotifyCallbackResponse
+ */
+export interface SpotifyCallbackResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof SpotifyCallbackResponse
+     */
+    'token': string;
+    /**
+     * 
+     * @type {SpotifyTokenPair}
+     * @memberof SpotifyCallbackResponse
+     */
+    'spotifyTokens': SpotifyTokenPair;
+}
+/**
+ * 
+ * @export
+ * @interface SpotifyTokenPair
+ */
+export interface SpotifyTokenPair {
+    /**
+     * 
+     * @type {SpotifyTokenResponse}
+     * @memberof SpotifyTokenPair
+     */
+    'tokens': SpotifyTokenResponse;
+    /**
+     * 
+     * @type {number}
+     * @memberof SpotifyTokenPair
+     */
+    'epoch_expiry': number;
 }
 /**
  * 
@@ -1654,7 +1704,7 @@ export const AuthApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getSpotifyTokens(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SpotifyTokenResponse>> {
+        async getSpotifyTokens(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SpotifyTokenPair>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getSpotifyTokens(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthApi.getSpotifyTokens']?.[localVarOperationServerIndex]?.url;
@@ -1719,7 +1769,7 @@ export const AuthApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async spotifyCallback(code: string, state: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+        async spotifyCallback(code: string, state: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SpotifyCallbackResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.spotifyCallback(code, state, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthApi.spotifyCallback']?.[localVarOperationServerIndex]?.url;
@@ -1755,7 +1805,7 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSpotifyTokens(options?: RawAxiosRequestConfig): AxiosPromise<SpotifyTokenResponse> {
+        getSpotifyTokens(options?: RawAxiosRequestConfig): AxiosPromise<SpotifyTokenPair> {
             return localVarFp.getSpotifyTokens(options).then((request) => request(axios, basePath));
         },
         /**
@@ -1805,7 +1855,7 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        spotifyCallback(code: string, state: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+        spotifyCallback(code: string, state: string, options?: RawAxiosRequestConfig): AxiosPromise<SpotifyCallbackResponse> {
             return localVarFp.spotifyCallback(code, state, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3394,6 +3444,40 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * 
+         * @summary Evaluate if a room can be split
+         * @param {string} roomID The ID of the room to evaluate.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        checkRoomSplit: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('checkRoomSplit', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/split`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Clears the queue of the room except for the current song.
          * @summary Clear the queue of a room
          * @param {string} roomID The ID of the room to clear the queue for.
@@ -3832,6 +3916,78 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * 
+         * @summary Save room as a playlist
+         * @param {string} roomID The ID of the room to save as a playlist.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        saveRoom: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('saveRoom', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/save`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Returns a RoomDto with info about its split children
+         * @param {string} roomID The ID of the room to get the split children for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        splitRoom: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('splitRoom', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/split`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Removes the room from the user\'s bookmarks.
          * @summary Unbookmark a room
          * @param {string} roomID The ID of the room to unbookmark.
@@ -3986,6 +4142,19 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.bookmarkRoom(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.bookmarkRoom']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Evaluate if a room can be split
+         * @param {string} roomID The ID of the room to evaluate.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async checkRoomSplit(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.checkRoomSplit(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.checkRoomSplit']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -4145,6 +4314,32 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * 
+         * @summary Save room as a playlist
+         * @param {string} roomID The ID of the room to save as a playlist.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async saveRoom(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.saveRoom(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.saveRoom']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Returns a RoomDto with info about its split children
+         * @param {string} roomID The ID of the room to get the split children for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async splitRoom(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoomDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.splitRoom(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.splitRoom']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Removes the room from the user\'s bookmarks.
          * @summary Unbookmark a room
          * @param {string} roomID The ID of the room to unbookmark.
@@ -4214,6 +4409,16 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          */
         bookmarkRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.bookmarkRoom(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Evaluate if a room can be split
+         * @param {string} roomID The ID of the room to evaluate.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        checkRoomSplit(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.checkRoomSplit(roomID, options).then((request) => request(axios, basePath));
         },
         /**
          * Clears the queue of the room except for the current song.
@@ -4336,6 +4541,26 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.putRoomInfo(roomID, updateRoomDto, options).then((request) => request(axios, basePath));
         },
         /**
+         * 
+         * @summary Save room as a playlist
+         * @param {string} roomID The ID of the room to save as a playlist.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        saveRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.saveRoom(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Returns a RoomDto with info about its split children
+         * @param {string} roomID The ID of the room to get the split children for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        splitRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<RoomDto> {
+            return localVarFp.splitRoom(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Removes the room from the user\'s bookmarks.
          * @summary Unbookmark a room
          * @param {string} roomID The ID of the room to unbookmark.
@@ -4399,6 +4624,18 @@ export class RoomsApi extends BaseAPI {
      */
     public bookmarkRoom(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).bookmarkRoom(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Evaluate if a room can be split
+     * @param {string} roomID The ID of the room to evaluate.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public checkRoomSplit(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).checkRoomSplit(roomID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -4543,6 +4780,30 @@ export class RoomsApi extends BaseAPI {
      */
     public putRoomInfo(roomID: string, updateRoomDto: UpdateRoomDto, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).putRoomInfo(roomID, updateRoomDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Save room as a playlist
+     * @param {string} roomID The ID of the room to save as a playlist.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public saveRoom(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).saveRoom(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Returns a RoomDto with info about its split children
+     * @param {string} roomID The ID of the room to get the split children for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public splitRoom(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).splitRoom(roomID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

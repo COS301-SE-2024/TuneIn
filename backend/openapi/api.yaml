@@ -817,7 +817,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/SpotifyCallbackResponse'
         '403':
           description: Forbidden.
       tags:
@@ -834,7 +834,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SpotifyTokenResponse'
+                $ref: '#/components/schemas/SpotifyTokenPair'
         '404':
           description: User not found
       security:
@@ -1702,6 +1702,77 @@ paths:
           description: Room not found
       tags:
         - rooms
+  /rooms/{roomID}/save:
+    post:
+      operationId: saveRoom
+      summary: Save room as a playlist
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to save as a playlist.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The playlist ID as a string.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
+  /rooms/{roomID}/split:
+    get:
+      operationId: checkRoomSplit
+      summary: Evaluate if a room can be split
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to evaluate.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: >-
+            An array of the possible genres (if possible) or an empty array if
+            not possible.
+      tags:
+        - rooms
+    post:
+      operationId: splitRoom
+      summary: Returns a RoomDto with info about its split children
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to get the split children for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The RoomDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDto'
+      tags:
+        - rooms
   /search:
     get:
       operationId: search
@@ -2448,6 +2519,16 @@ components:
           type: array
           items:
             type: string
+        parentRoomID:
+          type: string
+          description: >-
+            The parent of this room, if this room was created by splitting
+            another
+        childrenRoomIDs:
+          description: Rooms created by splitting this room.
+          type: array
+          items:
+            type: string
       required:
         - creator
         - roomID
@@ -2457,13 +2538,12 @@ components:
         - is_temporary
         - is_private
         - is_scheduled
-        - start_date
-        - end_date
         - language
         - has_explicit_content
         - has_nsfw_content
         - room_image
         - tags
+        - childrenRoomIDs
     CreateRoomDto:
       type: object
       properties:
@@ -2551,6 +2631,26 @@ components:
         - scope
         - expires_in
         - refresh_token
+    SpotifyTokenPair:
+      type: object
+      properties:
+        tokens:
+          $ref: '#/components/schemas/SpotifyTokenResponse'
+        epoch_expiry:
+          type: number
+      required:
+        - tokens
+        - epoch_expiry
+    SpotifyCallbackResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        spotifyTokens:
+          $ref: '#/components/schemas/SpotifyTokenPair'
+      required:
+        - token
+        - spotifyTokens
     UpdateRoomDto:
       type: object
       properties:

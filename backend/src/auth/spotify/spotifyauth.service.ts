@@ -56,10 +56,17 @@ export class SpotifyTokenRefreshResponse {
 	expires_in: number;
 }
 
-export type SpotifyTokenPair = {
+export class SpotifyTokenPair {
+	@ApiProperty()
+	@IsObject()
+	@ValidateNested()
+	@Type(() => SpotifyTokenResponse)
 	tokens: SpotifyTokenResponse;
+
+	@ApiProperty()
+	@IsNumber()
 	epoch_expiry: number;
-};
+}
 
 export class SpotifyCallbackResponse {
 	@ApiProperty()
@@ -68,9 +75,9 @@ export class SpotifyCallbackResponse {
 
 	@ApiProperty()
 	@IsObject()
-	@Type(() => SpotifyTokenResponse)
+	@Type(() => SpotifyTokenPair)
 	@ValidateNested()
-	spotifyTokens: SpotifyTokenResponse;
+	spotifyTokens: SpotifyTokenPair;
 }
 
 @Injectable()
