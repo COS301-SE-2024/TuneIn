@@ -28,7 +28,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		// console.log("effect called: " + JSON.stringify(user.followers));
 		// if (userData !== null) {
 		const checkFollow = user.followers.some(
-			(item: any) => item.username === userData.username,
+			(item: any) => item.username === userData?.username,
 		);
 		setIsFollowing(checkFollow);
 		// }

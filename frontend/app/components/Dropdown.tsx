@@ -51,7 +51,13 @@ const Dropdown: React.FC<DropdownProps> = ({
 					styles.filterDropDown,
 					selectedOption ? styles.activeFilter : {},
 				]}
-				onPress={toggleModal}
+				onPress={() => {
+					if (selectedOption === null) {
+						toggleModal();
+					} else {
+						setSelectedOption(null);
+					}
+				}}
 			>
 				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
 			</TouchableOpacity>

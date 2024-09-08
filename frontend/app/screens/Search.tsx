@@ -109,6 +109,7 @@ const Search: React.FC = () => {
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [filter, setFilter] = useState("room"); // Default to "room"
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
+	const [filtersOn, setFiltersOn] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
 	const [loading, setLoading] = useState(true);
@@ -123,8 +124,51 @@ const Search: React.FC = () => {
 	const [minFollowers, setMinFollowers] = useState("");
 	const prevFilterRef = useRef(filter);
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
+
+	const isAdvancedSearch = () => {
+		if (filter === "room") {
+			if (nsfw) {
+				return true;
+			}
+			if (explicit) {
+				return true;
+			}
+			if (scheduled) {
+				return true;
+			}
+			if (isPrivate) {
+				return true;
+			}
+			if (temporary) {
+				return true;
+			}
+			if (selectedGenre) {
+				return true;
+			}
+			if (selectedLanguage) {
+				return true;
+			}
+			if (host !== "") {
+				return true;
+			}
+			if (roomCount !== "") {
+				return true;
+			}
+		} else if (filter === "user") {
+			if (minFollowers !== "") {
+				return true;
+			}
+			if (maxFollowers !== "") {
+				return true;
+			}
+		}
+
+		return false;
+	};
 
 	useEffect(() => {
 		const getRecommendedRooms = async () => {
@@ -172,9 +216,35 @@ const Search: React.FC = () => {
 		}
 	}, [searchTerm]);
 
+	useEffect(() => {
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+		}
+
+		timeoutRef.current = setTimeout(() => {
+			if (searchTerm !== "") {
+				handleSearch();
+			}
+		}, 500);
+	}, [
+		nsfw,
+		explicit,
+		scheduled,
+		isPrivate,
+		temporary,
+		selectedGenre,
+		selectedLanguage,
+		host,
+		roomCount,
+		minFollowers,
+		maxFollowers,
+		searchTerm,
+	]);
+
 	const handleSearch = async () => {
+		const advanced = isAdvancedSearch();
 		console.log("Search Filter: " + filter);
-		// setLoading(true);
+		setLoading(true);
 		try {
 			const token = await auth.getToken();
 
@@ -228,7 +298,7 @@ const Search: React.FC = () => {
 					// console.log("Formatted results: " + JSON.stringify(results));
 					setResults(combinedResult);
 				} else if (filter === "room") {
-					if (showMoreFilters) {
+					if (advanced) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
 						if (nsfw) {
 							request += `&nsfw=${nsfw}`;
@@ -264,7 +334,7 @@ const Search: React.FC = () => {
 							},
 						});
 
-						// console.log("Request: " + request);
+						console.log("Request: " + request);
 						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
@@ -285,14 +355,6 @@ const Search: React.FC = () => {
 						}));
 
 						setResults(results);
-						setSelectedGenre(null);
-						setSelectedLanguage(null);
-						setExplicit(false);
-						setNsfw(false);
-						setTemporary(false);
-						setIsPrivate(false);
-						setScheduled(false);
-						setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
@@ -327,7 +389,7 @@ const Search: React.FC = () => {
 						// console.log("Results: " + JSON.stringify(results));
 					}
 				} else if (filter === "user") {
-					if (showMoreFilters) {
+					if (advanced) {
 						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
 
 						if (minFollowers !== "") {
@@ -357,7 +419,7 @@ const Search: React.FC = () => {
 							},
 						}));
 						setResults(results);
-						setShowMoreFilters(false);
+						// setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
@@ -452,7 +514,7 @@ const Search: React.FC = () => {
 		}
 
 		timeoutRef.current = setTimeout(() => {
-			handleSearch();
+			// handleSearch();
 		}, 500);
 	};
 
@@ -463,7 +525,7 @@ const Search: React.FC = () => {
 		}
 		// Update the previous filter ref to the current filter
 		prevFilterRef.current = filter;
-	}, [filter, searchTerm]);
+	}, [filter]);
 
 	useEffect(() => {
 		if (loading && results.length === 0) {
@@ -492,9 +554,6 @@ const Search: React.FC = () => {
 		getGenres();
 	}, []);
 
-	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-
 	const handleSelectGenre = (genre: string) => {
 		setSelectedGenre(genre);
 	};
@@ -520,7 +579,7 @@ const Search: React.FC = () => {
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
-					onChangeText={handleTextChange}
+					onChangeText={setSearchTerm}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
@@ -573,11 +632,13 @@ const Search: React.FC = () => {
 									<View style={styles.searchBy}>
 										<ToggleButton
 											label="Minimum Followers"
+											value={minFollowers}
 											onValueChange={setMinFollowers}
 											testID="minFol-btn"
 										/>
 										<ToggleButton
 											label="Minimum Following"
+											value={maxFollowers}
 											onValueChange={setMaxFollowers}
 											testID="maxFl-btn"
 										/>
@@ -595,11 +656,13 @@ const Search: React.FC = () => {
 									<ToggleButton
 										label="Host"
 										testID="host-toggle"
+										value={host}
 										onValueChange={setHost}
 									/>
 									<ToggleButton
 										label="Room Count"
 										testID="room-count-toggle"
+										value={roomCount}
 										onValueChange={setRoomCount}
 									/>
 								</View>
