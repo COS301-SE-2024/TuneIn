@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
@@ -30,7 +30,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		const checkFollow = user.followers.some(
 			(item: any) => item.username === userData.username,
 		);
-		console.log("Following: " + checkFollow);
 		setIsFollowing(checkFollow);
 		// }
 	}, [userData, user.followers]);
@@ -94,15 +93,19 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		<View style={styles.container}>
 			<TouchableOpacity
 				onPress={navigateToHelp}
-				style={{ flexDirection: "row", alignItems: "center", paddingRight: 40 }}
+				style={{ flexDirection: "row", alignItems: "center", paddingRight: 20 }}
 			>
 				<Image
 					source={{ uri: user.profile_picture_url }}
 					style={styles.profileImage}
 				/>
-				<View>
-					<Text style={styles.profileName}>{user.profile_name}</Text>
-					<Text style={styles.username}>{user.username}</Text>
+				<View style={styles.textContainer}>
+					<Text style={styles.profileName} numberOfLines={1}>
+						{user.profile_name}
+					</Text>
+					<Text style={styles.username} numberOfLines={1}>
+						{user.username}
+					</Text>
 				</View>
 			</TouchableOpacity>
 			<TouchableOpacity
@@ -124,7 +127,11 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: "#ccc",
 		paddingBottom: 20,
-		paddingHorizontal: 20,
+		paddingHorizontal: 5,
+	},
+	textContainer: {
+		flex: 1,
+		width: 120,
 	},
 	profileImage: {
 		width: 70,
@@ -134,20 +141,20 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 	profileName: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: "bold",
 		color: "#333",
 		marginTop: 20,
 	},
 	username: {
-		fontSize: 16,
+		fontSize: 14,
 		color: colors.secondary,
 		fontWeight: "500",
+		marginTop: 5,
 	},
 	followButton: {
 		marginTop: 20,
 		paddingVertical: 5,
-		paddingHorizontal: 10,
 		borderRadius: 15,
 		backgroundColor: colors.primary,
 		alignItems: "center",
