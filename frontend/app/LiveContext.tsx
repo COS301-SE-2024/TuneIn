@@ -96,6 +96,31 @@ interface PlaybackControls {
 	stopPlayback: () => void;
 }
 
+export type SpotifyTokenResponse = {
+	access_token: string;
+	token_type: string;
+	scope: string;
+	expires_in: number;
+	refresh_token: string;
+};
+
+export type SpotifyTokenRefreshResponse = {
+	access_token: string;
+	token_type: string;
+	scope: string;
+	expires_in: number;
+};
+
+export type SpotifyTokenPair = {
+	tokens: SpotifyTokenResponse;
+	epoch_expiry: number;
+};
+
+export type SpotifyCallbackResponse = {
+	token: string;
+	spotifyTokens: SpotifyTokenResponse;
+};
+
 const LiveContext = createContext<LiveContextType | undefined>(undefined);
 
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -122,6 +147,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [timeOffset, setTimeOffset] = useState<number>(0);
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
+	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>(null);
 	const createSocket = (): Socket => {
 		const s = io(utils.API_BASE_URL + "/live", {
 			transports: ["websocket"],
@@ -136,6 +162,62 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		queue.sort((a, b) => a.index - b.index);
 		setRoomQueue(queue);
 	};
+
+	const getSpotifyTokens = async (): Promise<SpotifyTokenPair | null> => {
+		if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
+			if (spotifyTokens.epoch_expiry - Date.now() > 1000 * 60 * 5) {
+				return spotifyTokens;
+			}
+		}
+
+		if (auth.authenticated()) {
+			try {
+				const token = await auth.getToken();
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/auth/spotify/tokens`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+
+				const r: SpotifyTokenResponse = response.data;
+				return r;
+			} catch (error) {
+				console.error("Failed to get tokens:", error);
+			}
+			throw new Error("Something went wrong while getting Spotify tokens");
+		} else {
+			throw new Error("Cannot fetch Spotify tokens for unauthenticated user");
+		}
+	}
+
+	const exchangeCodeWithBackend = (
+		code: string,
+		state: string,
+		redirectURI: string,
+	):
+	Promise<SpotifyCallbackResponse> => {
+		try {
+			const response = await axios.get(
+				`${utils.API_BASE_URL}/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(
+					redirectURI,
+				)}`,
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			);
+
+			const r: SpotifyCallbackResponse = response.data;
+			return r;
+		} catch (error) {
+			console.error("Failed to exchange code with backend:", error);
+		}
+		throw new Error("Something went wrong while exchanging code with backend");
+	}
 
 	const initializeSocket = () => {
 		if (socket.current) {

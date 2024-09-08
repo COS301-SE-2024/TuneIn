@@ -75,7 +75,7 @@ class LiveSocketService {
 	private setJoined: stateSetJoined | null = null;
 	private setConnected: stateSetConnected | null = null;
 	private setIsSending: stateSetIsSending | null = null;
-	private setQueues: stateSetQueue[] = [];
+	private setQueue: stateSetQueue | null = null;
 	private setObjects: stateSetEmojiObject | null = null;
 
 	private liveChatHistoryReceived = false;
@@ -85,7 +85,6 @@ class LiveSocketService {
 	private fetchedHistory: DirectMessage[] = [];
 
 	private constructor() {
-		this.currentRoom = null;
 		this.socket = io(utils.API_BASE_URL + "/live", {
 			transports: ["websocket"],
 		});
@@ -183,7 +182,8 @@ class LiveSocketService {
 		await this.getTimeOffset();
 	}
 
-	public async initialiseSocket() {
+	public async initialiseSocket(setQueue: stateSetQueue) {
+		this.setQueue = setQueue;
 		console.log("Initialising socket");
 		console.log("initialised:", this.initialised);
 		if (
@@ -196,32 +196,11 @@ class LiveSocketService {
 				playback = SimpleSpotifyPlayback.getInstance();
 			}
 
-			const token = await auth.getToken();
-			try {
-				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				this.currentUser = response.data as UserDto;
-			} catch (error) {
-				console.error("Error fetching user's own info:", error);
-			}
-
-			console.log("Current user:", this.currentUser);
-
-			if (!this.currentUser) {
-				throw new Error("Something went wrong while getting user's info");
-			}
-
 			this.socket.on("userJoinedRoom", (response: ChatEventDto) => {
 				console.log("SOCKET EVENT: userJoinedRoom", response);
-				if (!this.currentUser) {
-					//throw new Error("Something went wrong while getting user's info");
-					return;
-				}
-
 				if (this.setJoined) {
+
+					const u: UserDto = this.getUser();
 					if (
 						response.body &&
 						response.body.sender.userID === this.currentUser.userID
@@ -230,20 +209,11 @@ class LiveSocketService {
 					}
 				}
 
-				if (!this.currentRoom) {
-					//throw new Error("Current room not set");
-					return;
-				}
 				this.requestLiveChatHistory();
 			});
 
 			this.socket.on("liveChatHistory", (history: LiveChatMessageDto[]) => {
 				console.log("SOCKET EVENT: liveChatHistory", history);
-				if (!this.currentUser) {
-					//throw new Error("Something went wrong while getting user's info");
-					return;
-				}
-
 				this.liveChatHistoryReceived = true;
 				if (this.setLiveChatMessages) {
 					const u = this.currentUser;
@@ -661,25 +631,8 @@ class LiveSocketService {
 		setLiveChatMessages: stateSetLiveMessages,
 	) {
 		this.pollLatency();
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
-			return;
-		}
-
 		this.setJoined = setJoined;
 		this.setLiveChatMessages = setLiveChatMessages;
-
-		try {
-			const token = await auth.getToken();
-			const roomDto = await axios.get(`${utils.API_BASE_URL}/rooms/${roomID}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			this.currentRoom = roomDto.data;
-		} catch (error) {
-			console.error("Error fetching room:", error);
-		}
 
 		const u = this.currentUser;
 		const input: ChatEventDto = {
@@ -740,15 +693,17 @@ class LiveSocketService {
 
 	public async sendLiveChatMessage(
 		message: string,
+		currentUser: UserDto | null,
+		currentRoom: RoomDto | null,
 		setIsSending: stateSetIsSending,
 	) {
 		this.pollLatency();
-		if (!this.currentUser) {
+		if (!currentUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
 		}
 
-		if (!this.currentRoom) {
+		if (!currentRoom) {
 			//throw new Error("Current room not set");
 			return;
 		}
@@ -756,11 +711,11 @@ class LiveSocketService {
 		this.setIsSending = setIsSending;
 
 		if (message.trim()) {
-			const u = this.currentUser;
+			const u = currentUser;
 			const newMessage = {
 				messageBody: message,
 				sender: u,
-				roomID: this.currentRoom.roomID,
+				roomID: currentRoom.roomID,
 				dateCreated: new Date(),
 			};
 			const input: ChatEventDto = {
@@ -771,18 +726,11 @@ class LiveSocketService {
 		}
 	}
 
-	public async sendReaction(emoji: string) {
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+	public async sendReaction(emoji: string, currentUser: UserDto | null) {
+		if (!currentUser) {
 			return;
 		}
-
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		const u = this.currentUser;
+		const u = currentUser;
 		const newReaction: EmojiReactionDto = {
 			date_created: new Date(),
 			body: emoji,
@@ -819,20 +767,19 @@ class LiveSocketService {
 	}
 
 	public async enterDM(
-		userID: string,
+		user: UserDto | null,
 		participantID: string,
 		setDMs: stateSetDirectMessages,
 		setConnected: stateSetJoined,
 	) {
 		this.pollLatency();
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+		if (!user) {
 			return;
 		}
 
 		this.setDMs = setDMs;
 		this.setConnected = setConnected;
-		const u = this.currentUser;
+		const u = user;
 		const input = {
 			userID: u.userID,
 			participantID: participantID,
@@ -840,9 +787,9 @@ class LiveSocketService {
 		this.socket.emit("enterDirectMessage", JSON.stringify(input));
 	}
 
-	public async leaveDM() {
+	public async leaveDM(user: UserDto | null) {
 		this.pollLatency();
-		if (!this.currentUser) {
+		if (!user) {
 			//throw new Error("Something went wrong while getting user's info");
 			console.log("end of: if (!this.currentUser)");
 			return;
@@ -864,7 +811,7 @@ class LiveSocketService {
 		this.dmHistoryReceived = false;
 		this.requestingDMHistory = false;
 
-		const u = this.currentUser;
+		const u = user;
 		const input = {
 			userID: u.userID,
 		};
@@ -872,10 +819,9 @@ class LiveSocketService {
 		console.log("emit exitDirectMessage with body:", input);
 	}
 
-	public async sendDM(message: DirectMessage, otherUser: UserDto) {
+	public async sendDM(message: DirectMessage, user: UserDto | null, otherUser: UserDto | null) {
 		this.pollLatency();
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+		if (!user || !otherUser) {
 			return;
 		}
 
@@ -885,16 +831,15 @@ class LiveSocketService {
 		}
 
 		if (message.message.messageBody.trim()) {
-			message.message.sender = this.currentUser;
+			message.message.sender = user;
 			message.message.recipient = otherUser;
 			this.socket.emit("directMessage", JSON.stringify(message.message));
 		}
 	}
 
-	public async editDM(message: LiveMessage, otherUser: UserDto) {
+	public async editDM(message: LiveMessage, sender: UserDto | null, otherUser: UserDto | null) {
 		this.pollLatency();
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+		if (!sender || !otherUser) {
 			return;
 		}
 
@@ -917,9 +862,9 @@ class LiveSocketService {
 		this.socket.emit("modifyDirectMessage", JSON.stringify(payload));
 	}
 
-	public async deleteDM(message: LiveMessage, otherUser: UserDto) {
+	public async deleteDM(message: LiveMessage, sender: UserDto | null, otherUser: UserDto | null) {
 		this.pollLatency();
-		if (!this.currentUser) {
+		if (!sender || !otherUser) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
 		}
@@ -929,7 +874,7 @@ class LiveSocketService {
 			return;
 		}
 
-		const u = this.currentUser;
+		const u = sender;
 		let payload = {
 			userID: u.userID,
 			participantID: otherUser.userID,
@@ -939,13 +884,12 @@ class LiveSocketService {
 		this.socket.emit("modifyDirectMessage", JSON.stringify(payload));
 	}
 
-	public requestDMHistory(participantID: string) {
+	public requestDMHistory(sender: UserDto | null, participantID: string) {
 		if (this.requestingDMHistory) {
 			return;
 		}
 
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+		if (!sender) {
 			return;
 		}
 
@@ -959,7 +903,7 @@ class LiveSocketService {
 
 		this.requestingDMHistory = true;
 
-		const u = this.currentUser;
+		const u = sender;
 		const input = {
 			userID: u.userID,
 			participantID: participantID,
@@ -971,19 +915,13 @@ class LiveSocketService {
 		return this.dmHistoryReceived;
 	}
 
-	public startPlayback(roomID: string) {
+	public startPlayback(sender: UserDto | null, roomID: string) {
 		this.pollLatency();
-		if (!this.currentUser) {
-			//throw new Error("Something went wrong while getting user's info");
+		if (!sender) {
 			return;
 		}
 
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		const u = this.currentUser;
+		const u = sender;
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
@@ -993,19 +931,14 @@ class LiveSocketService {
 		this.socket.emit("initPlay", JSON.stringify(input));
 	}
 
-	public pausePlayback(roomID: string) {
+	public pausePlayback(sender: UserDto | null, roomID: string) {
 		this.pollLatency();
-		if (!this.currentUser) {
+		if (!sender) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
 		}
 
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		const u = this.currentUser;
+		const u = sender;
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
@@ -1015,19 +948,14 @@ class LiveSocketService {
 		this.socket.emit("initPause", JSON.stringify(input));
 	}
 
-	public stopPlayback(roomID: string) {
+	public stopPlayback(sender: UserDto | null, roomID: string) {
 		this.pollLatency();
-		if (!this.currentUser) {
+		if (!sender) {
 			//throw new Error("Something went wrong while getting user's info");
 			return;
 		}
 
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
-			return;
-		}
-
-		const u = this.currentUser;
+		const u = sender;
 		const input: PlaybackEventDto = {
 			userID: u.userID,
 			roomID: roomID,
@@ -1037,18 +965,13 @@ class LiveSocketService {
 		this.socket.emit("initStop", JSON.stringify(input));
 	}
 
-	public requestLiveChatHistory() {
+	public requestLiveChatHistory(sender: UserDto | null, roomID: string) {
 		if (this.requestingLiveChatHistory) {
 			return;
 		}
 
-		if (!this.currentUser) {
+		if (!sender) {
 			//throw new Error("Something went wrong while getting user's info");
-			return;
-		}
-
-		if (!this.currentRoom) {
-			//throw new Error("Current room not set");
 			return;
 		}
 
@@ -1062,40 +985,40 @@ class LiveSocketService {
 
 		this.requestingLiveChatHistory = true;
 
-		const u = this.currentUser;
+		const u = sender;
 		const input: ChatEventDto = {
 			userID: u.userID,
 			body: {
 				messageBody: "",
 				sender: u,
-				roomID: this.currentRoom.roomID,
+				roomID: roomID,
 				dateCreated: new Date(),
 			},
 		};
 		this.socket.emit("getLiveChatHistory", JSON.stringify(input));
 	}
 
-	public canControlRoom(): boolean {
-		if (!this.currentRoom) {
+	public canControlRoom(sender: UserDto | null, room: RoomDto | null): boolean {
+		if (!room) {
 			return false;
 		}
-		if (!this.currentUser) {
+		if (!sender) {
 			return false;
 		}
-		if (!this.currentRoom.creator) {
+		if (!room.creator) {
 			return false;
 		}
-		if (this.currentRoom.creator.userID === this.currentUser.userID) {
+		if (room.creator.userID === sender.userID) {
 			return true;
 		}
 		return false;
 	}
 
-	public fetchRoomQueue(setQueue: stateSetQueue): void {
-		if (!this.currentRoom) {
+	public fetchRoomQueue(setQueue: stateSetQueue, sender: UserDto | null, room: RoomDto | null) {
+		if (!room) {
 			return;
 		}
-		if (!this.currentUser) {
+		if (!sender) {
 			return;
 		}
 		if (!this.setQueues.includes(setQueue)) {
