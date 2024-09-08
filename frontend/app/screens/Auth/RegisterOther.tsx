@@ -22,10 +22,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import {
-	SPOTIFY_CLIENT_ID,
-	SPOTIFY_REDIRECT_TARGET,
-} from "react-native-dotenv";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
 import {
 	exchangeCodeWithBackend,
 	SpotifyCallbackResponse,
@@ -43,10 +40,10 @@ if (!clientId) {
 	);
 }
 
-const redirectTarget = SPOTIFY_REDIRECT_TARGET;
+const redirectTarget = SPOTIFY_REDIRECT_URI;
 if (!redirectTarget) {
 	throw new Error(
-		"No redirect target (SPOTIFY_REDIRECT_TARGET) provided in environment variables",
+		"No redirect URI (SPOTIFY_REDIRECT_URI) provided in environment variables",
 	);
 }
 
@@ -75,7 +72,7 @@ const makeStateVariable = (redirectURI: string) => {
 		"unique-pre-padding": generateRandom(10),
 		"expo-redirect": redirectURI,
 		"ip-address": utils.API_BASE_NO_PORT,
-		"redirect-used": SPOTIFY_REDIRECT_TARGET,
+		"redirect-used": SPOTIFY_REDIRECT_URI,
 		"unique-post-padding": generateRandom(10),
 	};
 	const bytes = new TextEncoder().encode(JSON.stringify(state));
@@ -105,7 +102,7 @@ const RegisterOtherScreen: React.FC = () => {
 	const [request, response, promptAsync] = useAuthRequest(
 		{
 			clientId: SPOTIFY_CLIENT_ID,
-			//redirectUri: SPOTIFY_REDIRECT_TARGET,
+			//redirectUri: SPOTIFY_REDIRECT_URI,
 			redirectUri: redirectURI,
 			responseType: ResponseType.Code,
 			scopes: [scopes.join(" ")],
