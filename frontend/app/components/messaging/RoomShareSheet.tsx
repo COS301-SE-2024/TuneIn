@@ -90,8 +90,6 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 				const chats = responses[0].data as DirectMessageDto[];
 				selfRef.current = responses[1].data;
 
-				const initialChats = createChats(chats, selfRef.current?.userID);
-				setFilteredChats(initialChats);
 				setUserMessages(chats);
 			} catch (error) {
 				console.error(error);
@@ -100,20 +98,23 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 	}, []);
 
 	useEffect(() => {
-		if (searchQuery === "") {
-			if (selfRef.current !== undefined) {
-				setFilteredChats(createChats(userMessages, selfRef.current?.userID));
-			}
-		} else {
-			if (selfRef.current !== undefined) {
-				const filtered = userMessages.filter((chat) => {
-					return chat.sender.profile_name
-						.toLowerCase()
-						.includes(searchQuery.toLowerCase());
-				});
+		const filtered =
+			searchQuery === ""
+				? userMessages
+				: userMessages.filter(
+						(chat) =>
+							(chat.sender.profile_name || "")
+								.toLowerCase()
+								.includes(searchQuery.toLowerCase()) ||
+							(chat.recipient.profile_name || "")
+								.toLowerCase()
+								.includes(searchQuery.toLowerCase()),
+					);
+		console.log("Search searchQuery:", searchQuery); // Log search results
+		console.log("Search Results:", filtered); // Log search results
 
-				setFilteredChats(createChats(filtered, selfRef.current?.userID));
-			}
+		if (selfRef.current !== undefined) {
+			setFilteredChats(createChats(filtered, selfRef.current?.userID));
 		}
 	}, [searchQuery, userMessages]);
 
