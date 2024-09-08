@@ -18,11 +18,25 @@ import { RoomSongDto } from "./models/RoomSongDto";
 import { VoteDto } from "./models/VoteDto";
 import { QueueEventDto } from "./models/QueueEventDto";
 import { ObjectConfig } from "react-native-flying-objects";
-import { Text } from "react-native";
+import { Text, Alert } from "react-native";
 import { ChatEventDto } from "./models/ChatEventDto";
 import { PlaybackEventDto } from "./models/PlaybackEventDto";
 import { set } from "react-datepicker/dist/date_utils";
 import { LiveChatMessageDto } from "./models/LiveChatMessageDto";
+import {
+	SpotifyApi,
+	Devices,
+	Device,
+	PlaybackState,
+} from "@spotify/web-api-ts-sdk";
+import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
+
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
+}
 
 const TIMEOUT = 5000000;
 export type LiveMessage = {
@@ -36,6 +50,35 @@ export type DirectMessage = {
 	messageSent: boolean;
 	isOptimistic: boolean;
 };
+
+const validTrackUri = (uri: string): boolean => {
+	if (uri.startsWith("spotify:album:")) {
+		throw new Error("Album URIs are not supported");
+	}
+
+	if (uri.startsWith("spotify:artist:")) {
+		throw new Error("Artist URIs are not supported");
+	}
+
+	//validate with regex
+	const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
+	if (!uriRegex.test(uri)) {
+		throw new Error("Invalid URI");
+	}
+	return true;
+};
+
+interface SpotifyPlaybackHandler {
+	handlePlayback: (
+		action: string,
+		deviceID: string,
+		offset?: number,
+	) => Promise<void>;
+	getFirstDevice: () => Promise<string | null>;
+	getDevices: () => Promise<Device[]>;
+	getDeviceIDs: () => Promise<string[]>;
+	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
+}
 
 interface LiveContextType {
 	socket: Socket | null;
@@ -86,11 +129,12 @@ interface RoomControls {
 interface DirectMessageControls {
 	sendDirectMessage: (message: DirectMessage) => void;
 	editDirectMessage: (message: DirectMessage) => void;
-	deleteDirectMessage: (message: DirectMessage) => void;å
+	deleteDirectMessage: (message: DirectMessage) => void;
 	requestDirectMessageHistory: () => void;
 }
 
 interface PlaybackControls {
+	playbackHandler: SpotifyPlaybackHandler;
 	startPlayback: () => void;
 	pausePlayback: () => void;
 	stopPlayback: () => void;
@@ -126,8 +170,10 @@ const LiveContext = createContext<LiveContextType | undefined>(undefined);
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
+	const { users, rooms, authenticated } = useAPI();
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
+	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
 	const [roomQueue, setRoomQueue] = useState<RoomSongDto[]>([]);
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
@@ -148,6 +194,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
 	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>(null);
+	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
+		devices: [],
+	});
+	const [roomPlaying, setRoomPlaying] = useState<boolean>(false);
 	const createSocket = (): Socket => {
 		const s = io(utils.API_BASE_URL + "/live", {
 			transports: ["websocket"],
@@ -156,11 +206,84 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		return s;
 	};
 	const socket = useRef<Socket>(createSocket());
-	const playback = SimpleSpotifyPlayback.getInstance();
-
 	const updateRoomQueue = (queue: RoomSongDto[]) => {
 		queue.sort((a, b) => a.index - b.index);
 		setRoomQueue(queue);
+	};
+
+	const getUser = () => {
+		if (authenticated && self === null) {
+			users
+				.getProfile()
+				.then((user: AxiosResponse<UserDto>) => {
+					console.log("User: " + user);
+					if (user.status === 401) {
+						//Unauthorized
+						//Auth header is either missing or invalid
+						setUserData(null);
+					} else if (user.status === 500) {
+						//Internal Server Error
+						//Something went wrong in the backend (unlikely lmao)
+						throw new Error("Internal Server Error");
+					}
+					setSelf(user.data);
+					return user.data;
+				})
+				.catch((error) => {
+					if (error instanceof RequiredError) {
+						// a required field is missing
+						throw new Error("Parameter missing from request to get user");
+					} else {
+						// some other error
+						throw new Error("Error getting user");
+					}
+				});
+		}
+		return self;
+	};
+
+	const setRoomID = (roomID: string) => {
+		rooms
+			.getRoomInfo(roomID)
+			.then((room: AxiosResponse<RoomDto>) => {
+				console.log("Room: " + room);
+				if (room.status === 401) {
+					//Unauthorized
+					//Auth header is either missing or invalid
+					setCurrentRoomID(null);
+					setCurrentRoomDto(null);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+				} else if (room.status === 500) {
+					//Internal Server Error
+					//Something went wrong in the backend (unlikely lmao)
+					setCurrentRoomID(null);
+					setCurrentRoomDto(null);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+					throw new Error("Internal Server Error");
+				} else {
+					const r: RoomDto = room.data;
+					setCurrentRoomID(r.roomID);
+					setCurrentRoomDto(room.data);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+					live.fetchRoomQueue();
+				}
+			})
+			.catch((error) => {
+				setCurrentRoomID(null);
+				setCurrentRoomDto(null);
+				setRoomQueue([]);
+				setCurrentRoomVotes([]);
+				if (error instanceof RequiredError) {
+					// a required field is missing
+					throw new Error("Parameter missing from request to get room");
+				} else {
+					// some other error
+					throw new Error("Error getting room");
+				}
+			});
 	};
 
 	const getSpotifyTokens = async (): Promise<SpotifyTokenPair | null> => {
@@ -191,14 +314,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		} else {
 			throw new Error("Cannot fetch Spotify tokens for unauthenticated user");
 		}
-	}
+	};
 
 	const exchangeCodeWithBackend = (
 		code: string,
 		state: string,
 		redirectURI: string,
-	):
-	Promise<SpotifyCallbackResponse> => {
+	): Promise<SpotifyCallbackResponse> => {
 		try {
 			const response = await axios.get(
 				`${utils.API_BASE_URL}/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(
@@ -217,7 +339,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("Failed to exchange code with backend:", error);
 		}
 		throw new Error("Something went wrong while exchanging code with backend");
-	}
+	};
 
 	const initializeSocket = () => {
 		if (socket.current) {
@@ -649,7 +771,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			await controls.pollLatency();
 			console.log(`Device is ${backendLatency} ms behind the server`);
 			console.log(`Device's clock is ${timeOffset} ms behind the server`);
-			console.log(`Media is supposed to start at ${startTimeUtc} ms since epoch`);
+			console.log(
+				`Media is supposed to start at ${startTimeUtc} ms since epoch`,
+			);
 
 			// Get the current server time
 			const serverTime = Date.now() + timeOffset;
@@ -929,6 +1053,172 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 
 		playback: {
+			playbackHandler: {
+				handlePlayback: async function (
+					action: string,
+					deviceID: string,
+					offset?: number,
+				): Promise<void> {
+					try {
+						if (!spotifyTokens) {
+							throw new Error("Spotify tokens not found");
+						}
+						if (!currentSong) {
+							throw new Error("No song is currently playing");
+						}
+
+						const uri: string = `spotify:track:${currentSong.spotifyID}`;
+						if (!validTrackUri(uri)) {
+							throw new Error("Invalid track URI");
+						}
+
+						const activeDevice =
+							await roomControls.playback.playbackHandler.getFirstDevice();
+						if (!activeDevice) {
+							Alert.alert("Please connect a device to Spotify");
+							return;
+						}
+						console.log("active device:", activeDevice);
+						console.log("(action, uri, offset):", action, uri, offset);
+
+						let url = "";
+						let method = "";
+						let body: any = null;
+
+						switch (action) {
+							case "play":
+								if (uri) {
+									body = {
+										uris: [uri],
+										position_ms: offset || 0,
+									};
+								}
+								url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
+								method = "PUT";
+								break;
+							case "pause":
+								url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
+								method = "PUT";
+								break;
+							case "next":
+								url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
+								method = "POST";
+								break;
+							case "previous":
+								url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
+								method = "POST";
+								break;
+							default:
+								throw new Error("Unknown action");
+						}
+
+						const response = await fetch(url, {
+							method,
+							headers: {
+								Authorization: `Bearer ${spotifyTokens.tokens.access_token}`,
+								"Content-Type": "application/json",
+							},
+							body: body ? JSON.stringify(body) : undefined,
+						});
+
+						console.log("Request URL:", url);
+						console.log("Request Method:", method);
+						if (body) {
+							console.log("Request Body:", JSON.stringify(body, null, 2));
+						}
+
+						if (response.ok) {
+							console.log("Playback action successful");
+							if (action === "play") {
+								this._isPlaying = true;
+							} else if (action === "pause") {
+								this._isPlaying = false;
+							}
+						} else {
+							throw new Error(`HTTP error! Status: ${response.status}`);
+						}
+					} catch (err) {
+						console.error("An error occurred while controlling playback", err);
+					}
+				},
+				getFirstDevice: async function (): Promise<string> {
+					if (!spotifyTokens) {
+						throw new Error("Spotify tokens not found");
+					}
+					try {
+						const devices = spotifyDevices;
+						if (!devices.devices || devices.devices.length === 0) {
+							devices = { devices: await this.getDeviceIDs() };
+						}
+
+						if (devices.devices.length > 0) {
+							const first: Device = devices.devices[0];
+							if (!first.id) {
+								throw new Error("Device ID not found");
+							}
+							return first.id;
+						} else {
+							Alert.alert(
+								"No Devices Found",
+								"No devices are currently active.",
+							);
+							throw new Error("No devices found");
+						}
+					} catch (err) {
+						console.error("An error occurred while getting the device ID", err);
+						throw err;
+					}
+				},
+				getDevices: async function (): Promise<Device[]> {
+					if (!spotifyTokens) {
+						throw new Error("Spotify tokens not found");
+					}
+					try {
+						const api = SpotifyApi.withAccessToken(
+							clientId,
+							spotifyTokens.tokens,
+						);
+						const data: Devices = await api.player.getAvailableDevices();
+						setSpotifyDevices(data);
+						return data.devices;
+					} catch (err) {
+						console.error("An error occurred while fetching devices", err);
+						throw err;
+					}
+				},
+				getDeviceIDs: async function (): Promise<string[]> {
+					if (spotifyDevices.devices.length === 0) {
+						const devices = await this.getDevices();
+						return devices.map((device) => device.id);
+					}
+					return spotifyDevices.devices.map((device) => device.id);
+				},
+				userListeningToRoom: async function (
+					currentTrackUri: string,
+				): Promise<boolean> {
+					if (!spotifyTokens) {
+						throw new Error("Spotify tokens not found");
+					}
+					if (!validTrackUri(currentTrackUri)) {
+						throw new Error("Invalid track URI");
+					}
+					if (isPlaying()) {
+						const api = SpotifyApi.withAccessToken(
+							clientId,
+							spotifyTokens.tokens,
+						);
+						const playbackState: PlaybackState =
+							await api.player.getPlaybackState();
+						if (!playbackState) {
+							return false;
+						}
+						if (playbackState.item.uri === currentTrackUri) {
+							return true;
+						}
+					}
+					return false;
+				},
+			},
 			startPlayback: function (): void {
 				controls.pollLatency();
 				if (!currentUser) {
