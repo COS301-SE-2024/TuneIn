@@ -11,6 +11,7 @@ import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
 import "../polyfills";
 import { APIProvider } from "./APIContext";
+import { LiveProvider } from "./LiveContext";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -89,9 +90,11 @@ const App: React.FC = () => {
 
 	return (
 		<APIProvider>
-			<PlayerContextProvider>
-				<WelcomeScreen />
-			</PlayerContextProvider>
+			<LiveProvider>
+				<PlayerContextProvider>
+					<WelcomeScreen />
+				</PlayerContextProvider>
+			</LiveProvider>
 		</APIProvider>
 	);
 };
