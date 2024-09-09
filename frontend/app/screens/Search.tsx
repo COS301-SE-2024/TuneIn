@@ -24,12 +24,9 @@ import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
 import { SearchHistoryDto } from "../models/SearchHistoryDto";
-// import DatePicker from "../components/DatePicker";
-// import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
 import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
-import SearchWithDropdown from "../components/SearchWithDropDown";
 
 type SearchResult = {
 	id: string;
@@ -39,21 +36,6 @@ type SearchResult = {
 	userData?: User;
 };
 
-const roomFilterCategories = [
-	{ id: "roomName", label: "Room Name" },
-	{ id: "username", label: "Host" },
-	{ id: "participationCount", label: "Participation Count" },
-	{ id: "description", label: "Description" },
-	{ id: "isTemporary", label: "Temporary" },
-	{ id: "isPrivate", label: "Private" },
-	{ id: "isScheduled", label: "Scheduled" },
-	{ id: "startDate", label: "Start Date" },
-	//   { id: 'endDate', label: 'End Date' },
-	{ id: "language", label: "Language" },
-	{ id: "explicit", label: "Explicit" },
-	{ id: "nsfw", label: "NSFW" },
-	{ id: "tags", label: "Tags" },
-];
 // Sample genre data with additional genres
 let genres: string[] = [
 	"Rock",
@@ -103,20 +85,15 @@ const languages = [
 const Search: React.FC = () => {
 	const navigation = useNavigation();
 	const [searchTerm, setSearchTerm] = useState("");
-	// const [filter, setFilter] = useState<"all" | "room" | "user">("all");
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [filter, setFilter] = useState("room"); // Default to "room"
 	const [showMoreFilters, setShowMoreFilters] = useState(false);
-	const [filtersOn, setFiltersOn] = useState(false);
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
 	const [loading, setLoading] = useState(true);
-	// const [startDate, setStartDate] = useState(null);
-	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
@@ -132,8 +109,6 @@ const Search: React.FC = () => {
 	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
 	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-	// const [showStartDateModal, setShowStartDateModal] = useState(false);
-	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	const isAdvancedSearch = () => {
 		if (filter === "room") {
@@ -445,13 +420,13 @@ const Search: React.FC = () => {
 								},
 							},
 						);
-						// console.log("Search: " + JSON.stringify(response.data.followers));
+						// console.log("Search: " + JSON.stringify(response.data));
 						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.id,
+							id: item.userID,
 							type: "user",
 							name: item.username,
 							userData: {
-								id: item.id,
+								id: item.userID,
 								profile_picture_url: item.profile_picture_url,
 								profile_name: item.profile_name,
 								username: item.username,
@@ -822,34 +797,6 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
-							{/* <Text style={styles.includeHeader}>Room Availability:</Text>
-							<View style={styles.datePickerContainer}>
-								<Text style={styles.datePickerLabel}>Start Date:</Text>
-								<DatePicker selectedOption={startDate} onPress={() => setShowStartDateModal(!showStartDateModal)}></DatePicker>
-								{showStartDateModal && <DateTimePicker
-									value={startDate || new Date()}
-									mode="datetime"
-									display="default"
-									onChange={(event, selectedDate) =>{
-										setStartDate(selectedDate || undefined)
-										setShowStartDateModal(false);
-									}
-									}
-								/>}
-							</View>
-							<View style={styles.datePickerContainer}>
-								<Text style={styles.datePickerLabel}>End Date:</Text>
-								<DatePicker selectedOption={startDate} onPress={() => setShowEndDateModal(!showEndDateModal)}></DatePicker>
-								{showEndDateModal && <DateTimePicker
-									value={endDate || new Date()}
-									mode="datetime"
-									display="default"
-									onChange={(event, selectedDate) =>{
-										setEndDate(selectedDate || undefined);
-										setShowEndDateModal(false);
-									}}
-								/>}
-							</View> */}
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
