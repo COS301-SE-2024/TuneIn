@@ -195,7 +195,7 @@ const Search: React.FC = () => {
 				getRecommendedRooms();
 			} else if (filter === "user") {
 				setSearchSuggestions(userSearchHistory.slice(0, 5));
-			}			
+			}
 		} else {
 			if (timeoutRef.current) {
 				clearTimeout(timeoutRef.current);
@@ -650,50 +650,50 @@ const Search: React.FC = () => {
 				</TouchableOpacity>
 				<Text style={styles.title}>Search </Text>
 			</View>
-				<View style={styles.searchBarContainer}>
-					<TextInput
-						testID="search-input"
-						style={styles.searchBar}
-						placeholder="Search..."
-						value={searchTerm}
-						onBlur={() => {
-							setTimeout(() => {
-								setDropdownVisible(false);
-							}, 200);
-						}}
-						onFocus={() => {
-							setDropdownVisible(true);
-						}}
-						onChangeText={setSearchTerm}
-					/>
-					<TouchableOpacity
-						style={styles.searchIcon}
-						onPress={() => {
-							handleSearch();
-						}}
-						testID="search-button"
-					>
-						<Ionicons name="search-sharp" size={30} color={colors.primary} />
-					</TouchableOpacity>
-				</View>
-				{dropdownVisible && searchSuggestions.length !== 0 && (
-					<FlatList
-						data={searchSuggestions}
-						keyExtractor={(item) => item}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={() => {
-									setSearchTerm(item);
-									handleSearch(item);
-								}}
-							>
-								<Text style={styles.dropdownItemText}>{item}</Text>
-							</TouchableOpacity>
-						)}
-						style={styles.dropdown}
-					/>
-				)}
+			<View style={styles.searchBarContainer}>
+				<TextInput
+					testID="search-input"
+					style={styles.searchBar}
+					placeholder="Search..."
+					value={searchTerm}
+					onBlur={() => {
+						setTimeout(() => {
+							setDropdownVisible(false);
+						}, 200);
+					}}
+					onFocus={() => {
+						setDropdownVisible(true);
+					}}
+					onChangeText={setSearchTerm}
+				/>
+				<TouchableOpacity
+					style={styles.searchIcon}
+					onPress={() => {
+						handleSearch();
+					}}
+					testID="search-button"
+				>
+					<Ionicons name="search-sharp" size={30} color={colors.primary} />
+				</TouchableOpacity>
+			</View>
+			{dropdownVisible && searchSuggestions.length !== 0 && (
+				<FlatList
+					data={searchSuggestions}
+					keyExtractor={(item) => item}
+					renderItem={({ item }) => (
+						<TouchableOpacity
+							style={styles.dropdownItem}
+							onPress={() => {
+								setSearchTerm(item);
+								handleSearch(item);
+							}}
+						>
+							<Text style={styles.dropdownItemText}>{item}</Text>
+						</TouchableOpacity>
+					)}
+					style={styles.dropdown}
+				/>
+			)}
 			<View style={styles.filterContainer}>
 				<TouchableOpacity
 					style={[

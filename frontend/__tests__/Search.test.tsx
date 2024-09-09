@@ -181,8 +181,7 @@ describe("Search Component", () => {
 		waitFor(() => {
 			expect(getByTestId("host-toggle")).toBeTruthy();
 			expect(getByTestId("room-count-toggle")).toBeTruthy();
-		})
-		
+		});
 
 		// Press the button to hide more filters
 		fireEvent.press(getByText("View Less Filters"));
@@ -191,8 +190,7 @@ describe("Search Component", () => {
 			// Check if the additional filters are hidden
 			expect(queryByTestId("host-toggle")).toBeNull();
 			expect(queryByTestId("room-count-toggle")).toBeNull();
-		})
-		
+		});
 	});
 
 	it("should handle explicit filter switch", async () => {
@@ -325,11 +323,14 @@ describe("Search Component", () => {
 		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
-		await waitFor(async () => {
-			const searchInput = getByPlaceholderText("Search...");
-			fireEvent.changeText(searchInput, "nothing");
-			fireEvent.press(getByTestId("search-button"));
-		}, { timeout: 20000});
+		await waitFor(
+			async () => {
+				const searchInput = getByPlaceholderText("Search...");
+				fireEvent.changeText(searchInput, "nothing");
+				fireEvent.press(getByTestId("search-button"));
+			},
+			{ timeout: 20000 },
+		);
 
 		// await waitFor(async () => {
 		// 	expect(getByTestId("search-button")).toBe("nothing");

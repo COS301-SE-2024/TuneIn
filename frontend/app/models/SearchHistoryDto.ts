@@ -4,4 +4,4 @@ export type SearchHistoryDto = {
 	search_time: Date;
 
 	url: string;
-}
+};

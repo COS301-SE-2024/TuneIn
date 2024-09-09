@@ -674,11 +674,16 @@ describe("SearchService", () => {
 		it("should return query parameters", () => {
 			const result = service.getQueryParams("/search/users?q=nothing");
 
-			expect(result).toMatchObject({pathSegment: "users", queryParams: {q: "nothing"}});
+			expect(result).toMatchObject({
+				pathSegment: "users",
+				queryParams: { q: "nothing" },
+			});
 		});
 
 		it("should return query parameters with creator", () => {
-			const result = service.getQueryParams("/search/users?q=nothing&creator=test");
+			const result = service.getQueryParams(
+				"/search/users?q=nothing&creator=test",
+			);
 
 			expect(result).toMatchObject({
 				pathSegment: "users",

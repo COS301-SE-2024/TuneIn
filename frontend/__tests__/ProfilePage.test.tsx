@@ -37,93 +37,93 @@ jest.mock("expo-router", () => {
 });
 
 const mockCurrRoomData = {
-		creator: {
-			profile_name: "Jaden Moodley",
-			userID: "id",
-			username: "Jaden",
-			profile_picture_url:
-				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
-			followers: {
-				count: 0,
-				data: [],
-			},
-			following: {
-				count: 0,
-				data: [],
-			},
-			links: {
-				count: 2,
-				data: [
-					{
-						type: "Instagram",
-						links: "instagram.com/adventurous_epoch",
-					},
-					{
-						type: "Instagram",
-						links: "instagram.com/general_epoch",
-					},
-				],
-			},
-			bio: "Humanity is a boon",
-			current_song: {
-				title: "",
-				artists: [],
-				cover: "",
-				start_time: "2024-08-25T10:15:02.532Z",
-			},
-			fav_genres: {
-				count: 4,
-				data: ["j-pop", "rock", "jazz", "metal"],
-			},
-			fav_songs: {
-				count: 2,
-				data: [
-					{
-						title: "Faster",
-						artists: "Good Kid",
-						cover:
-							"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-						start_time: "",
-					},
-					{
-						title: "Bohemian Rhapsody",
-						artists: "Queen",
-						cover:
-							"https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
-						start_time: "",
-					},
-				],
-			},
-			fav_rooms: {
-				count: 0,
-				data: [],
-			},
-			recent_rooms: {
-				count: 0,
-				data: [],
-			},
+	creator: {
+		profile_name: "Jaden Moodley",
+		userID: "id",
+		username: "Jaden",
+		profile_picture_url:
+			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+		followers: {
+			count: 0,
+			data: [],
 		},
-		roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
-		participant_count: 0,
-		room_name: "Abyssal Paradise",
-		description: "Submerge yourself in solace",
-		is_temporary: false,
-		is_private: true,
-		is_scheduled: false,
-		start_date: "2024-08-25T10:15:02.406Z",
-		end_date: "2024-08-25T10:15:02.406Z",
-		language: "English",
-		has_explicit_content: false,
-		has_nsfw_content: false,
-		room_image:
-			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+		following: {
+			count: 0,
+			data: [],
+		},
+		links: {
+			count: 2,
+			data: [
+				{
+					type: "Instagram",
+					links: "instagram.com/adventurous_epoch",
+				},
+				{
+					type: "Instagram",
+					links: "instagram.com/general_epoch",
+				},
+			],
+		},
+		bio: "Humanity is a boon",
 		current_song: {
 			title: "",
 			artists: [],
 			cover: "",
-			start_time: "2024-08-25T10:15:02.406Z",
+			start_time: "2024-08-25T10:15:02.532Z",
 		},
-		tags: [],
+		fav_genres: {
+			count: 4,
+			data: ["j-pop", "rock", "jazz", "metal"],
+		},
+		fav_songs: {
+			count: 2,
+			data: [
+				{
+					title: "Faster",
+					artists: "Good Kid",
+					cover:
+						"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
+					start_time: "",
+				},
+				{
+					title: "Bohemian Rhapsody",
+					artists: "Queen",
+					cover:
+						"https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png",
+					start_time: "",
+				},
+			],
+		},
+		fav_rooms: {
+			count: 0,
+			data: [],
+		},
+		recent_rooms: {
+			count: 0,
+			data: [],
+		},
+	},
+	roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+	participant_count: 0,
+	room_name: "Abyssal Paradise",
+	description: "Submerge yourself in solace",
+	is_temporary: false,
+	is_private: true,
+	is_scheduled: false,
+	start_date: "2024-08-25T10:15:02.406Z",
+	end_date: "2024-08-25T10:15:02.406Z",
+	language: "English",
+	has_explicit_content: false,
+	has_nsfw_content: false,
+	room_image:
+		"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+	current_song: {
+		title: "",
+		artists: [],
+		cover: "",
+		start_time: "2024-08-25T10:15:02.406Z",
+	},
+	tags: [],
 };
 
 const mockRoomData = [
