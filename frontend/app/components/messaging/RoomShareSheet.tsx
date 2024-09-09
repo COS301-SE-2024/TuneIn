@@ -9,6 +9,7 @@ import {
 	TextInput,
 	FlatList,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 } from "react-native";
 import { colors } from "../../styles/colors";
 import { Room } from "../../models/Room"; // Assuming this contains the data model
@@ -19,7 +20,7 @@ import auth from "../../services/AuthManagement"; // For fetching auth token
 import axios from "axios";
 import * as utils from "../../services/Utils"; // For API_BASE_URL
 import { UserDto } from "../../models/UserDto";
-
+import Icon from "react-native-vector-icons/FontAwesome";
 interface RoomShareSheetProps {
 	room: Room;
 	isVisible: boolean;
@@ -104,9 +105,6 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 							.includes(searchQuery.toLowerCase()),
 					);
 
-		console.log("Search searchQuery:", searchQuery); // Log search results
-		console.log("Search Results:", filtered); // Log search results
-
 		if (selfRef.current !== undefined) {
 			setFilteredChats(createChats(filtered, selfRef.current?.userID));
 		}
@@ -118,6 +116,7 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 				? prevSelected.filter((c) => c !== user)
 				: [...prevSelected, user],
 		);
+		setSearchQuery(""); // Clear search query
 	};
 
 	const handleShare = (room: Room) => {
@@ -143,6 +142,14 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 		onClose(); // Call the original onClose function
 	};
 
+	const handleOverlayPress = () => {
+		handleClose(); // Dismiss the modal when the overlay is pressed
+	};
+
+	const clearSearch = () => {
+		setSearchQuery(""); // Clear the search query
+	};
+
 	return (
 		<Modal
 			testID="modal"
@@ -151,59 +158,79 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 			visible={isVisible}
 			onRequestClose={handleClose}
 		>
-			<View style={styles.modalOverlay}>
-				<Animated.View
-					style={[
-						styles.popupContainer,
-						{
-							transform: [{ translateY: slideAnim }],
-						},
-					]}
-				>
-					<TextInput
-						style={styles.searchInput}
-						placeholder="Search for contacts..."
-						value={searchQuery}
-						onChangeText={setSearchQuery}
-					/>
-					<FlatList
-						data={filteredChats}
-						keyExtractor={(item) => item.otherUser.userID}
-						renderItem={({ item }) => (
-							<ProfileCard
-								otherUser={item.otherUser}
-								isSelected={selectedUsers.some(
-									(u) => u.userID === item.otherUser.userID,
-								)} // Check if the user is selected
-								select={() => updateChatSelection(item.otherUser)} // Pass the select function
-							/>
-						)}
-					/>
-					<TouchableOpacity
+			<TouchableWithoutFeedback onPress={handleOverlayPress}>
+				<View style={styles.modalOverlay}>
+					<Animated.View
 						style={[
-							styles.shareButton,
+							styles.popupContainer,
 							{
-								backgroundColor:
-									selectedUsers.length > 0 ? colors.primary : "#CCCCCC",
+								transform: [{ translateY: slideAnim }],
 							},
 						]}
-						onPress={() => {
-							if (selectedUsers.length > 0) {
-								handleShare(room);
-							}
-						}} // Use arrow function to wrap the call
 					>
-						<Text
+						<View style={styles.searchContainer}>
+							<TextInput
+								style={styles.searchInput}
+								placeholder="Search for contacts..."
+								value={searchQuery}
+								onChangeText={setSearchQuery}
+							/>
+							{searchQuery !== "" && (
+								<TouchableOpacity
+									onPress={clearSearch}
+									style={styles.clearButton}
+								>
+									<Text style={styles.clearButtonText}>
+										<Icon name="close" size={15} color="#000" />
+									</Text>
+								</TouchableOpacity>
+							)}
+						</View>
+						{filteredChats.length === 0 ? (
+							<View style={styles.noResultsContainer}>
+								<Text style={styles.noResultsText}>No results found</Text>
+							</View>
+						) : (
+							<FlatList
+								data={filteredChats}
+								keyExtractor={(item) => item.otherUser.userID}
+								renderItem={({ item }) => (
+									<ProfileCard
+										otherUser={item.otherUser}
+										isSelected={selectedUsers.some(
+											(u) => u.userID === item.otherUser.userID,
+										)} // Check if the user is selected
+										select={() => updateChatSelection(item.otherUser)} // Pass the select function
+									/>
+								)}
+							/>
+						)}
+						<TouchableOpacity
 							style={[
-								styles.shareButtonText,
-								{ color: selectedUsers.length > 0 ? "white" : "#666666" }, // Change text color based on selection
+								styles.shareButton,
+								{
+									backgroundColor:
+										selectedUsers.length > 0 ? colors.primary : "#CCCCCC",
+								},
 							]}
+							onPress={() => {
+								if (selectedUsers.length > 0) {
+									handleShare(room);
+								}
+							}} // Use arrow function to wrap the call
 						>
-							Share
-						</Text>
-					</TouchableOpacity>
-				</Animated.View>
-			</View>
+							<Text
+								style={[
+									styles.shareButtonText,
+									{ color: selectedUsers.length > 0 ? "white" : "#666666" }, // Change text color based on selection
+								]}
+							>
+								Share
+							</Text>
+						</TouchableOpacity>
+					</Animated.View>
+				</View>
+			</TouchableWithoutFeedback>
 		</Modal>
 	);
 };
@@ -225,13 +252,33 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		elevation: 5,
 	},
-	searchInput: {
-		height: 40,
+	searchContainer: {
+		flexDirection: "row",
+		alignItems: "center",
 		borderColor: "#CCCCCC",
 		borderWidth: 1,
 		borderRadius: 20,
 		paddingHorizontal: 16,
 		marginBottom: 20,
+	},
+	searchInput: {
+		flex: 1,
+		height: 40,
+	},
+	clearButton: {
+		paddingHorizontal: 8,
+	},
+	clearButtonText: {
+		color: "#999",
+		fontSize: 16,
+	},
+	noResultsContainer: {
+		alignItems: "center",
+		paddingVertical: 20,
+	},
+	noResultsText: {
+		color: "#666666",
+		fontSize: 16,
 	},
 	shareButton: {
 		paddingVertical: 15,
