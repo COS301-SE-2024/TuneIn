@@ -13,9 +13,7 @@ import {
 } from "react-native";
 import { colors } from "../../styles/colors";
 import { Room } from "../../models/Room"; // Assuming this contains the data model
-import ProfileCard, {
-	ProfileCardProps,
-} from "../../components/messaging/profileCard"; // ProfileCard component for displaying users
+import ProfileCard, { ProfileCardProps } from "./profileCard"; // ProfileCard component for displaying users
 import auth from "../../services/AuthManagement"; // For fetching auth token
 import axios from "axios";
 import * as utils from "../../services/Utils"; // For API_BASE_URL
