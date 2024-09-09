@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { render, waitFor, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
@@ -297,7 +297,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByDisplayValue } = render(
+		const { getByDisplayValue, getByText } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
@@ -559,7 +559,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByTestId } = render(
+		const { getByText, getByTestId } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
@@ -640,7 +640,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { queryByText: getByTestId } = render(
+		const { queryByText: queryByTestId, getByTestId } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
