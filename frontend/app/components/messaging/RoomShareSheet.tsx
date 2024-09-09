@@ -11,7 +11,6 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import { colors } from "../../styles/colors";
-import { DirectMessageDto } from "../../models/DmDto"; // Assuming this contains the data model
 import { Room } from "../../models/Room"; // Assuming this contains the data model
 import ProfileCard, {
 	ProfileCardProps,
@@ -28,14 +27,13 @@ interface RoomShareSheetProps {
 }
 
 const createChats = (
-	messages: DirectMessageDto[],
+	friends: UserDto[],
 	selfID: string | undefined,
 ): ProfileCardProps[] => {
 	const chats: ProfileCardProps[] = [];
-	for (const message of messages) {
+	for (const friend of friends) {
 		chats.push({
-			otherUser:
-				message.sender.userID === selfID ? message.recipient : message.sender,
+			otherUser: friend,
 			isSelected: false, // Initialize as not selected
 			select: () => {}, // Placeholder for select function
 		});
@@ -50,9 +48,9 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 }) => {
 	const [slideAnim] = useState(new Animated.Value(300)); // Initial position of the popup
 	const [searchQuery, setSearchQuery] = useState(""); // Search query state
-	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]); // Messages state
-	const [filteredChats, setFilteredChats] = useState<ProfileCardProps[]>([]); // Filtered chat state
-	const [selectedUsers, setSelectedUsers] = useState<UserDto[]>([]); // Selected chats state
+	const [friends, setFriends] = useState<UserDto[]>([]); // Friends state
+	const [filteredChats, setFilteredChats] = useState<ProfileCardProps[]>([]); // Filtered friends state
+	const [selectedUsers, setSelectedUsers] = useState<UserDto[]>([]); // Selected users state
 	const selfRef = React.useRef<UserDto | null>(null); // Explicitly define type and initialize with null
 
 	useEffect(() => {
@@ -79,18 +77,17 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 				const token = await auth.getToken();
 
 				const responses = await Promise.all([
-					axios.get(`${utils.API_BASE_URL}/users/dms`, {
+					axios.get(`${utils.API_BASE_URL}/users`, {
 						headers: { Authorization: `Bearer ${token}` },
 					}),
-					axios.get(`${utils.API_BASE_URL}/users`, {
+					axios.get(`${utils.API_BASE_URL}/users/friends`, {
 						headers: { Authorization: `Bearer ${token}` },
 					}),
 				]);
 
-				const chats = responses[0].data as DirectMessageDto[];
-				selfRef.current = responses[1].data;
-
-				setUserMessages(chats);
+				selfRef.current = responses[0].data;
+				const friendsData = responses[1].data as UserDto[];
+				setFriends(friendsData);
 			} catch (error) {
 				console.error(error);
 			}
@@ -100,23 +97,20 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 	useEffect(() => {
 		const filtered =
 			searchQuery === ""
-				? userMessages
-				: userMessages.filter(
-						(chat) =>
-							(chat.sender.profile_name || "")
-								.toLowerCase()
-								.includes(searchQuery.toLowerCase()) ||
-							(chat.recipient.profile_name || "")
-								.toLowerCase()
-								.includes(searchQuery.toLowerCase()),
+				? friends
+				: friends.filter((friend) =>
+						(friend.profile_name || "")
+							.toLowerCase()
+							.includes(searchQuery.toLowerCase()),
 					);
+
 		console.log("Search searchQuery:", searchQuery); // Log search results
 		console.log("Search Results:", filtered); // Log search results
 
 		if (selfRef.current !== undefined) {
 			setFilteredChats(createChats(filtered, selfRef.current?.userID));
 		}
-	}, [searchQuery, userMessages]);
+	}, [searchQuery, friends]);
 
 	const handleSelectChat = (user: UserDto) => {
 		setSelectedUsers((prevSelected) =>
