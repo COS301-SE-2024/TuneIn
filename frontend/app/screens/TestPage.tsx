@@ -8,7 +8,6 @@ import {
 	ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import SplittingRoomPopUp from "../components/rooms/SplittingRoomPopUp";
 import RoomShareSheet from "../components/messaging/RoomShareSheet";
 import RoomLink from "../components/messaging/RoomLink"; // Adjust the path to where RoomCard is located
 import { formatRoomData } from "../models/Room"; // Adjust the path to where formatRoomData is located
@@ -112,17 +111,6 @@ const TestPage: React.FC = () => {
 	};
 
 	const handleClosePopup = () => {
-		setPopupVisible(false);
-	};
-
-	const handleUserDecision = async (choice: true | false) => {
-		if (choice) {
-			console.log("Branching rooms created");
-			// Here you can perform any additional actions, like calling an API to split rooms
-		} else {
-			console.log("User chose not to create branching rooms");
-			// Perform any necessary clean-up actions or state updates here
-		}
 		setPopupVisible(false);
 	};
 

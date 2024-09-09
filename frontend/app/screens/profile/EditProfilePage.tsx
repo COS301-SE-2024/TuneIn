@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
-import EditDialog from "../../components/EditDialog";
 import FavoriteSongs from "../../components/FavoriteSong";
 import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
@@ -93,7 +92,7 @@ const EditProfileScreen = () => {
 		};
 
 		checkData();
-	}, [profileData]);
+	}, [profileData, profileInfo]);
 
 	const updateProfile = async () => {
 		try {
@@ -175,7 +174,7 @@ const EditProfileScreen = () => {
 		if (userData === null) {
 			router.navigate("screens/profile/ProfilePage");
 		}
-	}, [userData]);
+	}, [userData, router]);
 
 	const handleImageUpload = async (uri: string) => {
 		try {

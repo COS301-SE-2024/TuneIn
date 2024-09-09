@@ -59,7 +59,6 @@ const ProfileScreen: React.FC = () => {
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
-	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
 	const [roomCheck, setRoomCheck] = useState<boolean>(false);

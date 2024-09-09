@@ -23,7 +23,6 @@ import { Room } from "../../models/Room";
 import { Friend } from "../../models/friend";
 import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
-import Miniplayer from "../../components/home/miniplayer";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios from "axios";
 import auth from "../../services/AuthManagement"; // Import AuthManagement

@@ -1,12 +1,11 @@
-import React, { useState } from "react";
-import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
+import React from "react";
+import { render, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import * as StorageService from "../app/services/StorageService";
 import { useLocalSearchParams } from "expo-router";
 import MorePage from "../app/screens/profile/MorePage";
-import { Animated } from "react-native";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -331,7 +330,7 @@ describe("ProfileScreen", () => {
 			title: "Favorite Songs",
 		});
 
-		const { getByText, getByTestId } = render(<MorePage />);
+		const { getByText } = render(<MorePage />);
 
 		expect(getByText("Favorite Songs")).toBeTruthy();
 		expect(getByText("Dramaturgy")).toBeTruthy();

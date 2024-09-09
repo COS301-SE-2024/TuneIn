@@ -1683,7 +1683,7 @@ describe("ProfileScreen", () => {
 			(useLocalSearchParams as jest.Mock).mockReturnValue({});
 
 			// Render the ProfileScreen component
-			const { getByText, getByTestId } = render(
+			const { getByText } = render(
 				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
@@ -1735,7 +1735,7 @@ describe("ProfileScreen", () => {
 			};
 
 			// Render the ProfileScreen component
-			const { queryByText, queryByTestId } = render(
+			const { queryByText } = render(
 				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,
@@ -1977,7 +1977,7 @@ describe("ProfileScreen", () => {
 				.mockResolvedValueOnce({ data: mockCurrRoomData });
 
 			// Render the ProfileScreen component
-			const { getByText, getByTestId } = render(
+			const { getByText } = render(
 				<PlayerContextProviderMock value={mockPlayerContextValue}>
 					<ProfileScreen />
 				</PlayerContextProviderMock>,

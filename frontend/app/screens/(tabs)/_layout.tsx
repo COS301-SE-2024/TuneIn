@@ -46,16 +46,6 @@ const AppTabs = () => {
 					tabBarLabel: "Help",
 				}}
 			/>
-			<Tabs.Screen
-				name="SiteMap"
-				options={{
-					title: "Site Map",
-					tabBarIcon: ({ color }) => (
-						<Ionicons size={26} name="map-sharp" color={color} />
-					),
-					tabBarLabel: "Site Map",
-				}}
-			/>
 		</Tabs>
 	);
 };
