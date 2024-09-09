@@ -26,7 +26,7 @@ export const formatRoomData = (room: any): Room => {
 		name: room.name,
 		language: room.language,
 		songName: room.current_song ? room.current_song.title : null,
-		artistName: room.artistName ? room.current_song.artists.join(", ") : null,
+		artistName: room.artistName ? room.artistName : null,
 		description: room.description,
 		userID: room.userID,
 		userProfile: room.userProfile

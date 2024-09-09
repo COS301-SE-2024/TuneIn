@@ -58,10 +58,15 @@ export class LinksWithCount {
 	@IsNumber()
 	count: number;
 
-	@ApiProperty({ type: String, isArray: true })
-	@IsArray()
-	@IsString({ each: true })
-	data: string[];
+	@ApiProperty({
+		type: "object",
+		additionalProperties: {
+			type: "array",
+			items: { type: "string" },
+		},
+	})
+	@IsObject()
+	data: Record<string, string[]>;
 }
 
 export class GenresWithCount {
@@ -133,10 +138,7 @@ export class UserDto {
 	@IsObject()
 	@ValidateNested()
 	@Type(() => LinksWithCount)
-	links: {
-		count: number;
-		data: string[];
-	};
+	links: LinksWithCount;
 
 	@ApiPropertyOptional()
 	@IsString()
