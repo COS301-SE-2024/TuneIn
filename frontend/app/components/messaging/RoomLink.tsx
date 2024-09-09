@@ -29,7 +29,11 @@ const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 	};
 
 	return (
-		<TouchableOpacity style={styles.card} onPress={navigateToRoom}>
+		<TouchableOpacity
+			style={styles.card}
+			testID="card"
+			onPress={navigateToRoom}
+		>
 			<ImageBackground
 				source={
 					room.backgroundImage
@@ -42,6 +46,7 @@ const RoomLink: React.FC<RoomLinkProps> = ({ room }) => {
 				<View style={styles.overlay}>
 					<View style={styles.header}>
 						<Image
+							testID="Image"
 							source={
 								room.userProfile
 									? { uri: room.userProfile }
