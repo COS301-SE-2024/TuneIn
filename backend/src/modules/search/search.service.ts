@@ -378,21 +378,30 @@ export class SearchService {
 		// OR url LIKE '/search/rooms/%')
 		// ORDER BY timestamp DESC
 		// LIMIT 10;`;
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
-		SELECT *
-		FROM search_history
-		WHERE user_id::text = ${userID}
-		AND (url LIKE '/rooms/%'
-		OR url LIKE '/search/rooms?q=%')
-		ORDER BY timestamp DESC
-		LIMIT 10;`;
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url,
+				url: row.url as string,
 			}));
 			// console.log("Called");
 			// console.log(searchIds);
@@ -586,20 +595,29 @@ export class SearchService {
 		// OR url LIKE '/search/user/%')
 		// ORDER BY timestamp DESC
 		// LIMIT 10;`;
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
-		SELECT *
-		FROM search_history
-		WHERE user_id::text = ${userID}
-		AND (url LIKE '/user/%'
-		OR url LIKE '/search/users?q=%')
-		ORDER BY timestamp DESC
-		LIMIT 10;`;
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+		});
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url,
+				url: row.url as string,
 			}));
 
 			if (searchIds) {
@@ -705,14 +723,53 @@ export class SearchService {
 	}
 
 	async clearSearchHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID
+			},
+		});
 		console.log(userID);
 	}
 
 	async clearRoomsHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log(userID);
 	}
 
 	async clearUsersHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log(userID);
 	}
 }
