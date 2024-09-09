@@ -508,7 +508,7 @@ const Search: React.FC = () => {
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setRoomSearchHistory(roomHistTerms);
-				setSearchSuggestions(roomHistTerms);
+				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
 			console.error("Error fetching search history:", error);
@@ -534,7 +534,7 @@ const Search: React.FC = () => {
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setUserSearchHistory(userHistTerms);
-				setSearchSuggestions(userHistTerms);
+				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
 			console.error("Error fetching search history:", error);
@@ -650,44 +650,50 @@ const Search: React.FC = () => {
 				</TouchableOpacity>
 				<Text style={styles.title}>Search </Text>
 			</View>
-			<View style={styles.searchBarContainer}>
-				<TextInput
-					testID="search-input"
-					style={styles.searchBar}
-					placeholder="Search..."
-					value={searchTerm}
-					onBlur={() => {setTimeout(() => {setDropdownVisible(false);}, 200)}}
-					onFocus={() => {setDropdownVisible(true)}}
-					onChangeText={setSearchTerm}
-				/>
-				<TouchableOpacity
-					style={styles.searchIcon}
-					onPress={() => {
-						handleSearch();
-					}}
-					testID="search-button"
-				>
-					<Ionicons name="search-sharp" size={30} color={colors.primary} />
-				</TouchableOpacity>
-			</View>
-			{(dropdownVisible && searchSuggestions.length !== 0) && (
-				<FlatList
-					data={searchSuggestions}
-					keyExtractor={(item) => item}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-						style={styles.dropdownItem}
-							onPress={() => {
-								setSearchTerm(item);
-								handleSearch(item);
-							}}
-						>
-							<Text style={styles.dropdownItemText}>{item}</Text>
-						</TouchableOpacity>
-					)}
-					style={styles.dropdown}
-				/>
-			)}
+				<View style={styles.searchBarContainer}>
+					<TextInput
+						testID="search-input"
+						style={styles.searchBar}
+						placeholder="Search..."
+						value={searchTerm}
+						onBlur={() => {
+							setTimeout(() => {
+								setDropdownVisible(false);
+							}, 200);
+						}}
+						onFocus={() => {
+							setDropdownVisible(true);
+						}}
+						onChangeText={setSearchTerm}
+					/>
+					<TouchableOpacity
+						style={styles.searchIcon}
+						onPress={() => {
+							handleSearch();
+						}}
+						testID="search-button"
+					>
+						<Ionicons name="search-sharp" size={30} color={colors.primary} />
+					</TouchableOpacity>
+				</View>
+				{dropdownVisible && searchSuggestions.length !== 0 && (
+					<FlatList
+						data={searchSuggestions}
+						keyExtractor={(item) => item}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.dropdownItem}
+								onPress={() => {
+									setSearchTerm(item);
+									handleSearch(item);
+								}}
+							>
+								<Text style={styles.dropdownItemText}>{item}</Text>
+							</TouchableOpacity>
+						)}
+						style={styles.dropdown}
+					/>
+				)}
 			<View style={styles.filterContainer}>
 				<TouchableOpacity
 					style={[
@@ -1112,7 +1118,7 @@ const styles = StyleSheet.create({
 	dropdown: {
 		position: "absolute",
 		top: 125,
-		width: "85%",
+		width: "100%",
 		backgroundColor: "#f2f2f2",
 		borderColor: "#ccc",
 		borderWidth: 1,
@@ -1125,6 +1131,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 3.84,
 		elevation: 5,
 		paddingHorizontal: 10, // Adding padding to match general spacing
+		marginLeft: 30,
 	},
 	searchContainer: {
 		flex: 1,
