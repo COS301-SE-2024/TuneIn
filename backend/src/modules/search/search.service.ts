@@ -706,6 +706,19 @@ export class SearchService {
 						searchResult = await this.searchUsers(
 							id.params.queryParams.q as string,
 						);
+					} else {
+						if (id.params.queryParams.creator) {
+							const combo = await this.combinedSearch({
+								q: id.params.queryParams.q as string,
+								creator: id.params.queryParams.creator as string,
+							});
+							searchResult = [combo.rooms, combo.users].flat();
+						}
+						const combo = await this.combinedSearch({
+							q: id.params.queryParams.q as string,
+							creator: id.params.queryParams.creator as string,
+						});
+						searchResult = [combo.rooms, combo.users].flat();
 					}
 
 					return { results: [id.search_term, ...searchResult].flat() };
