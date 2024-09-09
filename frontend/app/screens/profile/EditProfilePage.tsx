@@ -48,15 +48,9 @@ const EditProfileScreen = () => {
 
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
-<<<<<<< HEAD
-	const [isBioDialogVisible, setBioDialogVisible] = useState(false);
-	const [isNameDialogVisible, setNameDialogVisible] = useState(false);
-	const [isUsernameDialogVisible, setUsernameDialogVisible] = useState(false);
-=======
 	let [flatLinks, setFlatLinks] = useState<string[]>(
 		Object.values(profileData.links.data).flat() as unknown as string[],
 	);
->>>>>>> 9a4e4c5959a25d111f91a5457656ab94c9a190b0
 	const [isPhotoDialogVisible, setPhotoDialogVisible] = useState(false);
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
