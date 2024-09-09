@@ -403,11 +403,28 @@ export class SearchService {
 				search_time: row.timestamp,
 				url: row.url as string,
 			}));
-			// console.log("Called");
-			// console.log(searchIds);
 
 			if (searchIds) {
-				return searchIds;
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -621,7 +638,26 @@ export class SearchService {
 			}));
 
 			if (searchIds) {
-				return searchIds;
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -738,7 +774,7 @@ export class SearchService {
 	async clearSearchHistory(userID: string): Promise<void> {
 		await this.prisma.search_history.deleteMany({
 			where: {
-				user_id: userID
+				user_id: userID,
 			},
 		});
 		console.log(userID);

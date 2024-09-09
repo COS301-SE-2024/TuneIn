@@ -23,11 +23,13 @@ import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import Dropdown from "../components/Dropdown";
+import { SearchHistoryDto } from "../models/SearchHistoryDto";
 // import DatePicker from "../components/DatePicker";
 // import DateTimePicker from "@react-native-community/datetimepicker";
 import ToggleButton from "../components/ToggleButton";
 import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
+import SearchWithDropdown from "../components/SearchWithDropDown";
 
 type SearchResult = {
 	id: string;
@@ -126,6 +128,10 @@ const Search: React.FC = () => {
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+	const [dropdownVisible, setDropdownVisible] = useState(false);
+	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
+	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
+	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 	// const [showStartDateModal, setShowStartDateModal] = useState(false);
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
@@ -217,15 +223,9 @@ const Search: React.FC = () => {
 	}, [searchTerm]);
 
 	useEffect(() => {
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
+		if (searchTerm !== "") {
+			handleSearch();
 		}
-
-		timeoutRef.current = setTimeout(() => {
-			if (searchTerm !== "") {
-				handleSearch();
-			}
-		}, 500);
 	}, [
 		nsfw,
 		explicit,
@@ -238,12 +238,12 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
-		searchTerm,
 	]);
 
-	const handleSearch = async () => {
+	const handleSearch = async (sh: string = searchTerm) => {
 		const advanced = isAdvancedSearch();
 		console.log("Search Filter: " + filter);
+		setDropdownVisible(false);
 		setLoading(true);
 		try {
 			const token = await auth.getToken();
@@ -251,7 +251,7 @@ const Search: React.FC = () => {
 			if (token) {
 				if (filter === "all") {
 					const response = await axios.get(
-						`${utils.API_BASE_URL}/search?q=${searchTerm}`,
+						`${utils.API_BASE_URL}/search?q=${sh}`,
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,
@@ -299,7 +299,7 @@ const Search: React.FC = () => {
 					setResults(combinedResult);
 				} else if (filter === "room") {
 					if (advanced) {
-						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
+						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${sh}`;
 						if (nsfw) {
 							request += `&nsfw=${nsfw}`;
 						}
@@ -357,7 +357,7 @@ const Search: React.FC = () => {
 						setResults(results);
 					} else {
 						const response = await axios.get(
-							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
+							`${utils.API_BASE_URL}/search/rooms?q=${sh}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
@@ -390,7 +390,7 @@ const Search: React.FC = () => {
 					}
 				} else if (filter === "user") {
 					if (advanced) {
-						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
+						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${sh}`;
 
 						if (minFollowers !== "") {
 							request += `&following=${minFollowers}`;
@@ -422,7 +422,7 @@ const Search: React.FC = () => {
 						// setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
-							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
+							`${utils.API_BASE_URL}/search/users?q=${sh}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
@@ -505,17 +505,43 @@ const Search: React.FC = () => {
 		setFilter(selectedFilter);
 	};
 
-	const handleTextChange = (text: string) => {
-		setSearchTerm(text);
-		setLoading(true);
+	const getHistory = async () => {
+		try {
+			const token = await auth.getToken();
 
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
+			if (token) {
+				const roomHistResp = await axios.get(
+					`${utils.API_BASE_URL}/search/rooms/history`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+
+				const roomHistTerms = roomHistResp.data.map(
+					(search: SearchHistoryDto) => search.search_term,
+				);
+				setRoomSearchHistory(roomHistTerms);
+
+				const userHistResp = await axios.get(
+					`${utils.API_BASE_URL}/search/users/history`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+
+				const userHistTerms = userHistResp.data.map(
+					(search: SearchHistoryDto) => search.search_term,
+				);
+				setUserSearchHistory(userHistTerms);
+			}
+		} catch (error) {
+			console.error("Error fetching search history:", error);
+			return null;
 		}
-
-		timeoutRef.current = setTimeout(() => {
-			// handleSearch();
-		}, 500);
 	};
 
 	useEffect(() => {
@@ -523,14 +549,16 @@ const Search: React.FC = () => {
 		if (prevFilterRef.current !== filter && searchTerm !== "") {
 			handleSearch();
 		}
+
+		if (filter === "room") {
+			setSearchSuggestions(roomSearchHistory.slice(0, 5));
+		} else {
+			setSearchSuggestions(userSearchHistory.slice(0, 5));
+		}
+
 		// Update the previous filter ref to the current filter
 		prevFilterRef.current = filter;
 	}, [filter]);
-
-	useEffect(() => {
-		if (loading && results.length === 0) {
-		}
-	}, [loading, results]);
 
 	const getGenres = async () => {
 		try {
@@ -552,6 +580,7 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		getGenres();
+		getHistory();
 	}, []);
 
 	const handleSelectGenre = (genre: string) => {
@@ -579,16 +608,38 @@ const Search: React.FC = () => {
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
+					onBlur={() => setDropdownVisible(false)}
+					onFocus={() => setDropdownVisible(true)}
 					onChangeText={setSearchTerm}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
-					onPress={handleSearch}
+					onPress={() => {
+						handleSearch;
+					}}
 					testID="search-button"
 				>
 					<Ionicons name="search-sharp" size={30} color={colors.primary} />
 				</TouchableOpacity>
 			</View>
+			{dropdownVisible && (
+				<FlatList
+					data={searchSuggestions}
+					keyExtractor={(item) => item}
+					renderItem={({ item }) => (
+						<TouchableOpacity
+						style={styles.dropdownItem}
+							onPress={() => {
+								setSearchTerm(item);
+								handleSearch(item);
+							}}
+						>
+							<Text style={styles.dropdownItemText}>{item}</Text>
+						</TouchableOpacity>
+					)}
+					style={styles.dropdown}
+				/>
+			)}
 			<View style={styles.filterContainer}>
 				<TouchableOpacity
 					style={[
@@ -1037,6 +1088,40 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
+	},
+	dropdown: {
+		position: "absolute",
+		top: 125,
+		width: "85%",
+		backgroundColor: "#f2f2f2",
+		borderColor: "#ccc",
+		borderWidth: 1,
+		borderRadius: 5,
+		maxHeight: 150, // Optional: limits the height of the dropdown
+		zIndex: 1,
+		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
+		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+		paddingHorizontal: 10, // Adding padding to match general spacing
+	},
+	searchContainer: {
+		flex: 1,
+		paddingHorizontal: 10,
+		paddingTop: 50,
+	},
+	dropdownItem: {
+		// paddingVertical: 5,
+		paddingHorizontal: 15,
+		borderBottomWidth: 5,
+		borderBottomColor: "#eee",
+		justifyContent: "center",
+	},
+
+	dropdownItemText: {
+		fontSize: 16,
+		color: "#333",
 	},
 });
 
