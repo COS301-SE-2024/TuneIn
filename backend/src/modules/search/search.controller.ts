@@ -161,7 +161,7 @@ export class SearchController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		console.log("Result room search: " + JSON.stringify(result));
 
-		if(JSON.stringify(result) === "[]"){
+		if (JSON.stringify(result) === "[]") {
 			this.searchService.insertSearchHistory(
 				"/search/rooms",
 				query_params,
@@ -173,7 +173,7 @@ export class SearchController {
 				query_params,
 				userInfo.id,
 			);
-		}		
+		}
 
 		return result;
 	}
@@ -446,6 +446,34 @@ export class SearchController {
 
 	/* ************************************************** */
 
+	@Get("rooms/suggestions")
+	@ApiOperation({
+		summary: "Get recommended room search terms.",
+		description: "Get recommended room search terms.",
+		operationId: "searchRoomsSuggestion",
+	})
+	@ApiOkResponse({
+		description: "room search suggestions as an array of SearchHistoryDto.",
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: "Invalid query parameters" })
+	@ApiQuery({
+		name: "q",
+		required: true,
+		description: "A room name",
+		type: String,
+		example: "Chill Room",
+		allowEmptyValue: false,
+	})
+	async searchRoomsSuggestion(
+		@Query("q") q: string,
+	): Promise<SearchHistoryDto[]> {
+		return await this.searchService.searchRoomsSuggestions(q);
+	}
+
+	/* ************************************************** */
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -636,6 +664,34 @@ export class SearchController {
 	): Promise<SearchHistoryDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.searchService.searchUsersHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@Get("users/suggestions")
+	@ApiOperation({
+		summary: "Get recommended user search terms.",
+		description: "Get recommended user search terms.",
+		operationId: "searchUsersSuggestion",
+	})
+	@ApiOkResponse({
+		description: "user search suggestions as an array of SearchHistoryDto.",
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: "Invalid query parameters" })
+	@ApiQuery({
+		name: "q",
+		required: true,
+		description: "A user name",
+		type: String,
+		example: "John",
+		allowEmptyValue: false,
+	})
+	async searchUsersSuggestion(
+		@Query("q") q: string,
+	): Promise<SearchHistoryDto[]> {
+		return await this.searchService.searchUsersSuggestions(q);
 	}
 
 	/* ************************************************** */

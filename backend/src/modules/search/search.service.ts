@@ -433,6 +433,64 @@ export class SearchService {
 		return [new SearchHistoryDto()];
 	}
 
+	async searchRoomsSuggestions(q: string): Promise<SearchHistoryDto[]> {
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+		});
+		console.log("Result: " + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
+		return [new SearchHistoryDto()];
+	}
+
 	async searchUsers(q: string): Promise<UserDto[]> {
 		// console.log(q);
 
@@ -629,6 +687,64 @@ export class SearchService {
 				],
 			},
 		});
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
+		return [new SearchHistoryDto()];
+	}
+
+	async searchUsersSuggestions(q: string): Promise<SearchHistoryDto[]> {
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+		});
+		console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
