@@ -217,8 +217,24 @@ const Search: React.FC = () => {
 			setLoading(false);
 		};
 		if (searchTerm === "") {
-			getRecommendedRooms();
-			console.log("Recommended rooms: " + results);
+			if (filter === "room") {
+				setSearchSuggestions(roomSearchHistory.slice(0, 5));
+				getRecommendedRooms();
+			} else if (filter === "user") {
+				setSearchSuggestions(userSearchHistory.slice(0, 5));
+			}			
+		} else {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+
+			timeoutRef.current = setTimeout(() => {
+				if (filter === "room") {
+					getRoomsSuggestions(searchTerm);
+				} else if (filter === "user") {
+					getUsersSuggestions(searchTerm);
+				}
+			}, 500);
 		}
 	}, [searchTerm]);
 
@@ -523,6 +539,7 @@ const Search: React.FC = () => {
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setRoomSearchHistory(roomHistTerms);
+				console.log("Room history: " + roomHistTerms);
 
 				const userHistResp = await axios.get(
 					`${utils.API_BASE_URL}/search/users/history`,
@@ -537,6 +554,56 @@ const Search: React.FC = () => {
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setUserSearchHistory(userHistTerms);
+			}
+		} catch (error) {
+			console.error("Error fetching search history:", error);
+			return null;
+		}
+	};
+
+	const getRoomsSuggestions = async (q: string) => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/search/rooms/suggestions?q=${q}`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+
+				const searchTerms = response.data.map(
+					(search: SearchHistoryDto) => search.search_term,
+				);
+				setSearchSuggestions(searchTerms.slice(0, 5));
+			}
+		} catch (error) {
+			console.error("Error fetching search history:", error);
+			return null;
+		}
+	};
+
+	const getUsersSuggestions = async (q: string) => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(
+					`${utils.API_BASE_URL}/search/users/suggestions?q=${q}`,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+
+				const searchTerms = response.data.map(
+					(search: SearchHistoryDto) => search.search_term,
+				);
+				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
 			console.error("Error fetching search history:", error);
@@ -608,14 +675,15 @@ const Search: React.FC = () => {
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
-					onBlur={() => setDropdownVisible(false)}
+					onBlur={() => {setTimeout(() => {setDropdownVisible(false);}, 200)}}
 					onFocus={() => setDropdownVisible(true)}
 					onChangeText={setSearchTerm}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
 					onPress={() => {
-						handleSearch;
+						handleSearch();
+						getHistory();
 					}}
 					testID="search-button"
 				>
@@ -630,6 +698,7 @@ const Search: React.FC = () => {
 						<TouchableOpacity
 						style={styles.dropdownItem}
 							onPress={() => {
+								console.log("selected: " + item)
 								setSearchTerm(item);
 								handleSearch(item);
 							}}

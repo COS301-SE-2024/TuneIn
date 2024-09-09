@@ -1888,6 +1888,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/rooms:
     get:
       operationId: searchRooms
@@ -1927,6 +1930,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/history:
     get:
       operationId: searchHistory
@@ -2107,6 +2113,33 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /search/rooms/suggestions:
+    get:
+      operationId: searchRoomsSuggestion
+      summary: Get recommended room search terms.
+      description: Get recommended room search terms.
+      parameters:
+        - name: q
+          required: true
+          in: query
+          description: A room name
+          example: Chill Room
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: room search suggestions as an array of SearchHistoryDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchHistoryDto'
+        '400':
+          description: Invalid query parameters
+      tags:
+        - search
   /search/users:
     get:
       operationId: searchUsers
@@ -2138,6 +2171,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/users/advanced:
     get:
       operationId: advancedSearchUsers
@@ -2236,6 +2272,33 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /search/users/suggestions:
+    get:
+      operationId: searchUsersSuggestion
+      summary: Get recommended user search terms.
+      description: Get recommended user search terms.
+      parameters:
+        - name: q
+          required: true
+          in: query
+          description: A user name
+          example: John
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: user search suggestions as an array of SearchHistoryDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchHistoryDto'
+        '400':
+          description: Invalid query parameters
+      tags:
+        - search
   /genres:
     get:
       operationId: GenresController_getAllGenres
