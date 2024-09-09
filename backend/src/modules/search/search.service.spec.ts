@@ -327,7 +327,7 @@ describe("SearchService", () => {
 				SELECT follower, COUNT(*) AS num_following
 				FROM follows
 				GROUP BY follower
-		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
+		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
 		AND COALESCE(f2.num_following, 0) >= 0;
 		`),
 			);
@@ -342,7 +342,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -357,7 +357,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -372,7 +372,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -387,7 +387,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -405,7 +405,7 @@ describe("SearchService", () => {
 					SELECT followee, COUNT(*) AS num_followers
 					FROM follows
 					GROUP BY followee
-			) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
+			) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
 			);
 		});
 
@@ -422,7 +422,7 @@ describe("SearchService", () => {
 					SELECT follower, COUNT(*) AS num_following
 					FROM follows
 					GROUP BY follower
-			) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
+			) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
 			);
 		});
 	});
@@ -562,7 +562,9 @@ describe("SearchService", () => {
 		});
 
 		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.$queryRaw.mockResolvedValueOnce(rHistMock);
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
+				rHistMock,
+			);
 
 			const result = await service.searchRoomsHistory("mockId");
 
@@ -585,7 +587,9 @@ describe("SearchService", () => {
 		});
 
 		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.$queryRaw.mockResolvedValueOnce(uHistMock);
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
+				uHistMock,
+			);
 
 			const result = await service.searchUsersHistory("mockId");
 
@@ -593,38 +597,4 @@ describe("SearchService", () => {
 		});
 	});
 
-	// sorry Jaden, Typescript covered this already
-	/*
-	describe("parseBoolean function", () => {
-		beforeEach(async () => {
-			const module: TestingModule = await createSearchTestingModule();
-			service = module.get<SearchService>(SearchService);
-		});
-
-		it("should return true for string 'True'", () => {
-			const result = service.parseBoolean("True");
-			expect(result).toBe(true);
-		});
-
-		it("should return true for string '1'", () => {
-			const result = service.parseBoolean("1");
-			expect(result).toBe(true);
-		});
-
-		it("should return false for string 'False'", () => {
-			const result = service.parseBoolean("False");
-			expect(result).toBe(false);
-		});
-
-		it("should return false for string '0'", () => {
-			const result = service.parseBoolean("0");
-			expect(result).toBe(false);
-		});
-
-		it("should return false for string 'Unknown'", () => {
-			const result = service.parseBoolean("Unknown");
-			expect(result).toBe(false);
-		});
-	});
-	*/
 });

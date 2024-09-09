@@ -37,10 +37,6 @@ jest.mock("expo-router", () => {
 });
 
 const mockCurrRoomData = {
-	user_id: "id",
-	room_id: "id",
-	participate_id: "id",
-	room: {
 		creator: {
 			profile_name: "Jaden Moodley",
 			userID: "id",
@@ -128,8 +124,6 @@ const mockCurrRoomData = {
 			start_time: "2024-08-25T10:15:02.406Z",
 		},
 		tags: [],
-	},
-	room_join_time: "2024-08-24T10:54:08.778Z",
 };
 
 const mockRoomData = [
@@ -957,7 +951,7 @@ describe("ProfileScreen", () => {
 			.mockResolvedValueOnce({ data: mockProfileData })
 			.mockResolvedValueOnce({ data: mockRoomData })
 			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });
+			.mockResolvedValue({ data: mockCurrRoomData });
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",

@@ -430,7 +430,7 @@ export class SearchService {
 			console.error("Unexpected query result format, expected an array.");
 		}
 
-		return [new SearchHistoryDto()];
+		return [];
 	}
 
 	async searchRoomsSuggestions(q: string): Promise<SearchHistoryDto[]> {
@@ -721,7 +721,7 @@ export class SearchService {
 			console.error("Unexpected query result format, expected an array.");
 		}
 
-		return [new SearchHistoryDto()];
+		return [];
 	}
 
 	async searchUsersSuggestions(q: string): Promise<SearchHistoryDto[]> {

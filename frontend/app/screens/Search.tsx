@@ -209,7 +209,7 @@ const Search: React.FC = () => {
 				} else if (filter === "user") {
 					getUsersSuggestions(searchTerm);
 				}
-			}, 500);
+			}, 300);
 		}
 	}, [searchTerm]);
 
@@ -496,12 +496,12 @@ const Search: React.FC = () => {
 		setFilter(selectedFilter);
 	};
 
-	const getHistory = async () => {
+	const getRoomHistory = async () => {
 		try {
 			const token = await auth.getToken();
 
 			if (token) {
-				const roomHistResp = await axios.get(
+				const response = await axios.get(
 					`${utils.API_BASE_URL}/search/rooms/history`,
 					{
 						headers: {
@@ -510,13 +510,24 @@ const Search: React.FC = () => {
 					},
 				);
 
-				const roomHistTerms = roomHistResp.data.map(
+				const roomHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setRoomSearchHistory(roomHistTerms);
-				console.log("Room history: " + roomHistTerms);
+				setSearchSuggestions(roomHistTerms);
+			}
+		} catch (error) {
+			console.error("Error fetching search history:", error);
+			return null;
+		}
+	};
 
-				const userHistResp = await axios.get(
+	const getUserHistory = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(
 					`${utils.API_BASE_URL}/search/users/history`,
 					{
 						headers: {
@@ -525,10 +536,11 @@ const Search: React.FC = () => {
 					},
 				);
 
-				const userHistTerms = userHistResp.data.map(
+				const userHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
 				setUserSearchHistory(userHistTerms);
+				setSearchSuggestions(userHistTerms);
 			}
 		} catch (error) {
 			console.error("Error fetching search history:", error);
@@ -593,9 +605,9 @@ const Search: React.FC = () => {
 		}
 
 		if (filter === "room") {
-			setSearchSuggestions(roomSearchHistory.slice(0, 5));
+			getRoomHistory();
 		} else {
-			setSearchSuggestions(userSearchHistory.slice(0, 5));
+			getUserHistory();
 		}
 
 		// Update the previous filter ref to the current filter
@@ -622,7 +634,7 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		getGenres();
-		getHistory();
+		getRoomHistory();
 	}, []);
 
 	const handleSelectGenre = (genre: string) => {
@@ -651,21 +663,20 @@ const Search: React.FC = () => {
 					placeholder="Search..."
 					value={searchTerm}
 					onBlur={() => {setTimeout(() => {setDropdownVisible(false);}, 200)}}
-					onFocus={() => setDropdownVisible(true)}
+					onFocus={() => {setDropdownVisible(true)}}
 					onChangeText={setSearchTerm}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
 					onPress={() => {
 						handleSearch();
-						getHistory();
 					}}
 					testID="search-button"
 				>
 					<Ionicons name="search-sharp" size={30} color={colors.primary} />
 				</TouchableOpacity>
 			</View>
-			{dropdownVisible && (
+			{(dropdownVisible && searchSuggestions.length !== 0) && (
 				<FlatList
 					data={searchSuggestions}
 					keyExtractor={(item) => item}
