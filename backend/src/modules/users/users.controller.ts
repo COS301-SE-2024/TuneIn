@@ -297,10 +297,41 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
+	@ApiBadRequestResponse({
+		description: "Invalid request parameters or missing required headers.",
+	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const ids: string[] = await this.usersService.getRecentRooms(userInfo.id);
-		return await this.dtogen.generateMultipleRoomDto(ids);
+		return await this.usersService.getRecentRoomsById(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/rooms/recent")
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRoomsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getRecentRoomsByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getRecentRoomByUsername(username);
 	}
 
 	@ApiBearerAuth()
@@ -498,7 +529,41 @@ export class UsersController {
 	})
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarks(userInfo.id);
+		return await this.usersService.getBookmarksById(userInfo.id);
+	}
+
+	@Get(":username/bookmarks")
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getBookmarksByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarksByUsername(username);
+	}
+
+	@Get(":username/taken")
+	@ApiOperation({
+		summary: "Check if a username is taken",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "isUsernameTaken",
+	})
+	@ApiOkResponse({
+		description: "True if taken, false if not.",
+		type: Boolean,
+	})
+	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
+		return await this.usersService.usernameTaken(username);
 	}
 
 	@ApiBearerAuth()
@@ -764,11 +829,11 @@ export class UsersController {
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":userId/room/current")
-	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@Get(":username/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on username" })
 	@ApiParam({
-		name: "userId",
-		description: "The user id of user's current room to search for.",
+		name: "username",
+		description: "The username of user's current room to search for.",
 	})
 	@ApiOkResponse({
 		description: "User's current room retrieved successfully",
@@ -777,11 +842,14 @@ export class UsersController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
 	@ApiTags("rooms")
 	async getCurrentRoomByUserId(
-		@Param("userId") userId: string,
+		@Param("username") username: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoomDto(userId);
+		return await this.usersService.getCurrentRoomDto(username);
 	}
 
 	@Post(":username/block")
