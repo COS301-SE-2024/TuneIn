@@ -156,8 +156,6 @@ const Search: React.FC = () => {
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
-				console.log("Recommendations token: " + token);
-				console.log("Base url: " + utils.API_BASE_URL);
 				if (token) {
 					const response = await axios.get(
 						`${utils.API_BASE_URL}/users/rooms/foryou`,
@@ -233,7 +231,6 @@ const Search: React.FC = () => {
 
 	const handleSearch = async (sh: string = searchTerm) => {
 		const advanced = isAdvancedSearch();
-		console.log("Search Filter: " + filter);
 		setDropdownVisible(false);
 		setLoading(true);
 		try {
@@ -318,14 +315,12 @@ const Search: React.FC = () => {
 						if (roomCount !== "") {
 							request += `&participant_count=${roomCount}`;
 						}
-
 						const response = await axios.get(request, {
 							headers: {
 								Authorization: `Bearer ${token}`,
 							},
 						});
 
-						console.log("Request: " + request);
 						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
@@ -391,7 +386,6 @@ const Search: React.FC = () => {
 						}
 
 						// console.log("Request: " + request);
-
 						const response = await axios.get(request, {
 							headers: {
 								Authorization: `Bearer ${token}`,
@@ -684,7 +678,6 @@ const Search: React.FC = () => {
 						<TouchableOpacity
 						style={styles.dropdownItem}
 							onPress={() => {
-								console.log("selected: " + item)
 								setSearchTerm(item);
 								handleSearch(item);
 							}}
@@ -780,7 +773,7 @@ const Search: React.FC = () => {
 									<Switch
 										testID="explicit-switch"
 										value={explicit}
-										onValueChange={(value) => setExplicit(value)}
+										onValueChange={setExplicit}
 									/>
 								</View>
 								<View style={styles.switchContainer}>
@@ -788,7 +781,7 @@ const Search: React.FC = () => {
 									<Switch
 										testID="nsfw-switch"
 										value={nsfw}
-										onValueChange={(value) => setNsfw(value)}
+										onValueChange={setNsfw}
 									/>
 								</View>
 							</View>

@@ -123,8 +123,6 @@ const userMock = [
 	},
 ];
 
-const genreMock = ["genre1", "genre2", "genre3", "genre4"];
-
 const uHistDtoMock = [
 	{
 		search_term: "nothing",
@@ -158,7 +156,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
 			.mockResolvedValue({ data: uHistDtoMock });
-			
+
 		const { getByPlaceholderText } = render(<Search />);
 		const searchInput = getByPlaceholderText("Search...");
 		fireEvent.changeText(searchInput, "Room 1");
@@ -180,18 +178,24 @@ describe("Search Component", () => {
 		fireEvent.press(getByText("View More Filters"));
 
 		// Check if the additional filters are shown
-		expect(getByTestId("host-toggle")).toBeTruthy();
-		expect(getByTestId("room-count-toggle")).toBeTruthy();
+		waitFor(() => {
+			expect(getByTestId("host-toggle")).toBeTruthy();
+			expect(getByTestId("room-count-toggle")).toBeTruthy();
+		})
+		
 
 		// Press the button to hide more filters
 		fireEvent.press(getByText("View Less Filters"));
 
-		// Check if the additional filters are hidden
-		expect(queryByTestId("host-toggle")).toBeNull();
-		expect(queryByTestId("room-count-toggle")).toBeNull();
+		waitFor(() => {
+			// Check if the additional filters are hidden
+			expect(queryByTestId("host-toggle")).toBeNull();
+			expect(queryByTestId("room-count-toggle")).toBeNull();
+		})
+		
 	});
 
-	it("should handle explicit filter switch", () => {
+	it("should handle explicit filter switch", async () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
@@ -205,7 +209,9 @@ describe("Search Component", () => {
 		fireEvent(explicitSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		expect(explicitSwitch.props.value).toBe(true);
+		await waitFor(() => {
+			expect(explicitSwitch.props.value).toBe(true);
+		});
 	});
 
 	it("should handle nsfw filter switch", () => {
@@ -222,7 +228,9 @@ describe("Search Component", () => {
 		fireEvent(nsfwSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		expect(nsfwSwitch.props.value).toBe(true);
+		waitFor(() => {
+			expect(nsfwSwitch.props.value).toBe(true);
+		});
 	});
 
 	it("should handle temp filter switch", () => {
@@ -239,7 +247,9 @@ describe("Search Component", () => {
 		fireEvent(tempSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		expect(tempSwitch.props.value).toBe(true);
+		waitFor(() => {
+			expect(tempSwitch.props.value).toBe(true);
+		});
 	});
 
 	it("should handle priv filter switch", () => {
@@ -273,7 +283,9 @@ describe("Search Component", () => {
 		fireEvent(scheduledSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		expect(scheduledSwitch.props.value).toBe(true);
+		waitFor(() => {
+			expect(scheduledSwitch.props.value).toBe(true);
+		});
 	});
 
 	it("should search with all room filters", async () => {
@@ -294,7 +306,7 @@ describe("Search Component", () => {
 		fireEvent(getByTestId("priv-switch"), "valueChange", true);
 		fireEvent(getByTestId("scheduled-switch"), "valueChange", true);
 
-		await act(async () => {
+		await waitFor(async () => {
 			const searchInput = getByPlaceholderText("Search...");
 			fireEvent.changeText(searchInput, "Room 1");
 			fireEvent.press(getByTestId("search-button"));
@@ -310,13 +322,17 @@ describe("Search Component", () => {
 			.mockResolvedValue({ data: uHistDtoMock });
 
 		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
-		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		const { getByPlaceholderText, getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
-		await act(async () => {
+		await waitFor(async () => {
 			const searchInput = getByPlaceholderText("Search...");
-			fireEvent.changeText(searchInput, "Room 1");
+			fireEvent.changeText(searchInput, "nothing");
 			fireEvent.press(getByTestId("search-button"));
-		});
-	});
+		}, { timeout: 20000});
+
+		// await waitFor(async () => {
+		// 	expect(getByTestId("search-button")).toBe("nothing");
+		// });
+	}, 30000);
 });

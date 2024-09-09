@@ -876,14 +876,10 @@ export class SearchService {
 					return { results: [id.search_term, ...searchResult].flat() };
 				}),
 			);
-
 			return results;
 		} else {
 			console.error("Unexpected query result format, expected an array.");
 		}
-
-		const record = this.getQueryParams("/search/rooms?q=test&creator=users");
-		console.log("Parameters: " + JSON.stringify(record));
 		return [];
 	}
 

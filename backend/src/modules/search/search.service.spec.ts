@@ -24,7 +24,7 @@ const userMock = [
 		// distance: 4,
 	},
 ];
-const uDtoMock = [
+const uDtoMock: UserDto[] = [
 	{
 		profile_name: "Farmer23",
 		userID: "01ece2d8-e091-7023-c1f2-d3399faa7071",
@@ -41,23 +41,18 @@ const uDtoMock = [
 		},
 		links: {
 			count: 2,
-			data: [
-				{
-					type: "instagram",
-					links: "instagram.com/farmer",
-				},
-				{
-					type: "tiktok",
-					links: "tiktok.com/farmer",
-				},
-			],
+			data: {
+				instagram: ["instagram.com/lesedi"],
+				tiktok: ["tiktok.com/lesedi"],
+			},
 		},
 		bio: "Music enthusiast who loves exploring new tunes across various genres. Always on the lookout for fresh beats and hidden gems!",
 		current_song: {
 			title: "",
 			artists: [],
 			cover: "",
-			start_time: "2024-07-21T15:18:16.126Z",
+			duration: 0,
+			spotify_id: "",
 		},
 		fav_genres: {
 			count: 2,
@@ -68,10 +63,12 @@ const uDtoMock = [
 			data: [
 				{
 					title: "Faster",
-					artists: "Good Kid",
+					artists: ["Good Kid"],
 					cover:
 						"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-					start_time: "",
+					start_time: new Date("2024-09-04T05:05:06.064Z"),
+					duration: 0,
+					spotify_id: "",
 				},
 			],
 		},
@@ -195,6 +192,77 @@ const uHistMock = [
 		search_term: "nothing",
 		timestamp: "2024-07-19T09:03:19.651Z",
 		url: "/search/users?q=nothing",
+	},
+];
+
+const combinedHistMock = [
+	{
+		results: [
+			"abyss",
+			{
+				creator: {
+					profile_name: "Jaden Moodley",
+					userID: "012c4238-e071-7031-cb6c-30881378722f",
+					username: "jaden",
+					profile_picture_url:
+						"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+					followers: {
+						count: 0,
+						data: [],
+					},
+					following: {
+						count: 0,
+						data: [],
+					},
+					links: {
+						count: 0,
+						data: {},
+					},
+					bio: "Hello there stranger",
+					current_song: {
+						songID: "",
+						title: "",
+						artists: [],
+						cover: "",
+						spotify_id: "",
+						duration: 0,
+						start_time: "2024-09-09T10:22:20.513Z",
+					},
+					fav_genres: {
+						count: 0,
+						data: [],
+					},
+					fav_songs: {
+						count: 0,
+						data: [],
+					},
+					fav_rooms: {
+						count: 0,
+						data: [],
+					},
+					recent_rooms: {
+						count: 0,
+						data: [],
+					},
+				},
+				roomID: "8f928675-5c95-497a-b8a7-917064cdb462",
+				participant_count: 0,
+				room_name: "Abyssal Paradise",
+				description: "Submerge yourself in solace",
+				is_temporary: false,
+				is_private: false,
+				is_scheduled: false,
+				start_date: "2024-09-09T10:22:20.513Z",
+				end_date: "2024-09-09T10:22:20.513Z",
+				language: "English",
+				has_explicit_content: false,
+				has_nsfw_content: false,
+				room_image:
+					"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-10T18%3A23%3A52.849Z-testing.jpeg",
+				tags: [],
+				childrenRoomIDs: [],
+			},
+		],
 	},
 ];
 
@@ -554,7 +622,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
 
 			const result = await service.searchRoomsHistory("mockID");
 
@@ -579,7 +647,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
 
 			const result = await service.searchUsersHistory("mockID");
 
@@ -597,4 +665,75 @@ describe("SearchService", () => {
 		});
 	});
 
+	describe("getQueryParams function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return query parameters", () => {
+			const result = service.getQueryParams("/search/users?q=nothing");
+
+			expect(result).toMatchObject({pathSegment: "users", queryParams: {q: "nothing"}});
+		});
+
+		it("should return query parameters with creator", () => {
+			const result = service.getQueryParams("/search/users?q=nothing&creator=test");
+
+			expect(result).toMatchObject({
+				pathSegment: "users",
+				queryParams: { q: "nothing", creator: "test" },
+			});
+		});
+	});
+
+	describe("searchRoomsSuggestions function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
+
+			const result = await service.searchRoomsSuggestions("mockID");
+
+			expect(result).toMatchObject([]);
+		});
+
+		it("should return a SearchHistoryDto array when query returns an array", async () => {
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
+				uHistMock,
+			);
+
+			const result = await service.searchRoomsSuggestions("mockId");
+
+			expect(result).toMatchObject(uHistDtoMock);
+		});
+	});
+
+	describe("searchUsersSuggestions function", () => {
+		beforeEach(async () => {
+			const module: TestingModule = await createSearchTestingModule();
+			service = module.get<SearchService>(SearchService);
+		});
+
+		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
+
+			const result = await service.searchUsersSuggestions("mockID");
+
+			expect(result).toMatchObject([]);
+		});
+
+		it("should return a SearchHistoryDto array when query returns an array", async () => {
+			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
+				uHistMock,
+			);
+
+			const result = await service.searchUsersSuggestions("mockId");
+
+			expect(result).toMatchObject(uHistDtoMock);
+		});
+	});
 });
