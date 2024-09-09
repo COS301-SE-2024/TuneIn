@@ -1,7 +1,8 @@
+import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { DirectMessage } from "../../services/Live";
+import RoomLink from "./RoomLink";
 import { colors } from "../../styles/colors";
-import RoomLink from "./RoomLink"; // Adjust the path as necessary
 
 interface MessageItemProps {
 	message: DirectMessage;
@@ -12,15 +13,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
 	return (
 		<View
-			testID="message-container" // Add testID for container
+			testID="message-container"
 			style={[
 				styles.container,
-				message.me ? styles.containerMe : styles.containerOther,
+				message.messageSent ? styles.containerMe : styles.containerOther,
 			]}
 		>
-			{!message.me && (
+			{!message.messageSent && sender.profile_picture_url && (
 				<Image
-					testID="profile-pic" // Add testID for profile picture
+					testID="profile-pic"
 					source={{ uri: sender.profile_picture_url }}
 					style={styles.avatar}
 				/>
@@ -28,7 +29,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 			<View
 				style={[
 					styles.bubble,
-					message.me ? styles.bubbleMe : styles.bubbleOther,
+					message.messageSent ? styles.bubbleMe : styles.bubbleOther,
 				]}
 			>
 				{room ? (
@@ -40,6 +41,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 		</View>
 	);
 };
+
+// Styles remain unchanged
 
 const styles = StyleSheet.create({
 	container: {
