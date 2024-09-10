@@ -1,4 +1,4 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { TestingModule } from "@nestjs/testing";
 import { AutoModerationService } from "./automod.service";
 import { createAutoModerationTestingModule } from "../../../jest_mocking/module-mocking";
 

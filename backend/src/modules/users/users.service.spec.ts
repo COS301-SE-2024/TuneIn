@@ -3,8 +3,8 @@ import { UsersService } from "./users.service";
 import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-mocking";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UserDto } from "../users/dto/user.dto";
-import { RoomDto } from "../rooms/dto/room.dto";
-import { PrismaService } from "prisma/prisma.service";
+// import { RoomDto } from "../rooms/dto/room.dto";
+// import { PrismaService } from "prisma/prisma.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 
 const mockUserDto: UserDto = {
@@ -61,7 +61,6 @@ const mockUserDto: UserDto = {
 describe("UsersService Update Functionality", () => {
 	let service: UsersService;
 	let dtoGen: DtoGenService;
-	let prisma: PrismaService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await createUsersUpdateTestingModule();
