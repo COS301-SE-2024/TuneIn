@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
@@ -25,13 +25,10 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const { userData } = playerContext;
 
 	useEffect(() => {
-		// console.log("effect called: " + JSON.stringify(user.followers));
-		// if (userData !== null) {
 		const checkFollow = user.followers.some(
 			(item: any) => item.username === userData?.username,
 		);
 		setIsFollowing(checkFollow);
-		// }
 	}, [userData, user.followers]);
 
 	const followHandler = async () => {
@@ -50,7 +47,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				);
 
 				if (response) {
-					console.log("Called Unfollow");
 					setIsFollowing(false);
 				} else {
 					console.error("Issue unfollowing user");
@@ -76,10 +72,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		}
 	};
 
-	// const handleFollowToggle = () => {
-	// 	setIsFollowing((prevState) => !prevState);
-	// };
-
 	const navigateToHelp = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
@@ -98,6 +90,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				<Image
 					source={{ uri: user.profile_picture_url }}
 					style={styles.profileImage}
+					testID="profile-pic"
 				/>
 				<View style={styles.textContainer}>
 					<Text style={styles.profileName} numberOfLines={1}>
@@ -111,6 +104,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 			<TouchableOpacity
 				style={[styles.followButton, isFollowing && styles.unfollowButton]}
 				onPress={followHandler}
+				testID="follow-button"
 			>
 				<Text style={styles.followButtonText}>
 					{isFollowing ? "Unfollow" : "Follow"}
