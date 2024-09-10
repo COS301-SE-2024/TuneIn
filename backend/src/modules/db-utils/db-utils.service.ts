@@ -325,7 +325,7 @@ export class DbUtilsService {
 			});
 
 		if (!friendRequests || friendRequests === null) {
-			return null;
+			throw new Error("An unexpected error occurred in the database.");
 		}
 		return friendRequests;
 	}
@@ -618,30 +618,32 @@ export class DbUtilsService {
 	}
 	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[] | null> {
 		// console.log("getting room songs:", roomID);
-		const queue: PrismaTypes.queue[] | null = await this.prisma.queue.findMany({
-			where: { room_id: roomID },
-			include: { song: true },
-		});
+		const queue: (PrismaTypes.queue & { song: PrismaTypes.song })[] | null =
+			await this.prisma.queue.findMany({
+				where: { room_id: roomID },
+				include: { song: true },
+			});
 		// console.log("queue:", queue);
 		if (!queue || queue === null) {
 			throw new Error("Room not found. Probably doesn't exist fr.");
 		}
 
-		return queue.map((q: any) => q.song);
+		return queue.map((q) => q.song);
 	}
 	async getUserFavoriteSongs(
 		userID: string,
 	): Promise<PrismaTypes.song[] | null> {
-		const favorites: PrismaTypes.favorite_songs[] | null =
-			await this.prisma.favorite_songs.findMany({
-				where: { user_id: userID },
-				include: { song: true },
-			});
+		const favorites:
+			| (PrismaTypes.favorite_songs & { song: PrismaTypes.song })[]
+			| null = await this.prisma.favorite_songs.findMany({
+			where: { user_id: userID },
+			include: { song: true },
+		});
 
 		if (!favorites || favorites === null) {
-			return null;
+			throw new Error("User not found. Probably doesn't exist.");
 		}
 
-		return favorites.map((f: any) => f.song);
+		return favorites.map((f) => f.song);
 	}
 }

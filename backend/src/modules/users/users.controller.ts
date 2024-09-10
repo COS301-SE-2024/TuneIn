@@ -445,7 +445,7 @@ export class UsersController {
 		type: Boolean,
 	})
 	async cancelFriendRequest(
-		@Request() req: any,
+		@Request() req: Request,
 		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);

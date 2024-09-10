@@ -509,38 +509,63 @@ export class UsersService {
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
 		// const recommender: RecommenderService = new RecommenderService();
-		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
+		const rooms: (PrismaTypes.room & {
+			songs: PrismaTypes.song[] | undefined;
+		})[] = (await this.prisma.room.findMany()).map((room) => ({
+			...room,
+			songs: undefined,
+		}));
 
 		const roomsWithSongs = await Promise.all(
-			rooms.map(async (room: any) => {
-				const songs: any = await this.dbUtils.getRoomSongs(room.room_id);
-				room.songs = songs;
-				return room;
-			}),
+			rooms.map(
+				async (
+					room: PrismaTypes.room & {
+						songs: PrismaTypes.song[] | undefined;
+					},
+				) => {
+					const songs = await this.dbUtils.getRoomSongs(room.room_id);
+					if (songs) {
+						room.songs = songs;
+					} else {
+						room.songs = [];
+					}
+					return room;
+				},
+			),
 		);
-		const roomSongs = roomsWithSongs.reduce((acc: any, room: any) => {
-			acc[room.room_id] = room.songs.map((song: any) => song.audio_features);
-			return acc;
-		}, {});
+		const roomSongs = roomsWithSongs.reduce(
+			(
+				acc: Record<string, any[]>,
+				room: PrismaTypes.room & { songs: PrismaTypes.song[] | undefined },
+			) => {
+				acc[room.room_id] =
+					room.songs?.map((song: PrismaTypes.song) => song.audio_features) ??
+					[];
+				return acc;
+			},
+			{},
+		);
 		const favoriteSongs: PrismaTypes.song[] | null =
 			await this.dbUtils.getUserFavoriteSongs(userID);
 		if (!favoriteSongs) {
 			// return random rooms if the user has no favorite songs
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-				randomRooms.map((room: any) => room.room_id),
+				randomRooms.map((room: PrismaTypes.room) => room.room_id),
 			);
 			return r === null ? [] : r;
 		}
 		// console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
-			favoriteSongs.map((song: any) => song.audio_features),
+			favoriteSongs.map((song: PrismaTypes.song) => song.audio_features),
 		);
 		this.recommender.setPlaylists(roomSongs);
 		const recommendedRooms = this.recommender.getTopPlaylists(5);
 		// console.log("recommendedRooms:", recommendedRooms);
 		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-			recommendedRooms.map((room: any) => room.playlist),
+			recommendedRooms.map(
+				(room: { playlist: string; score: number }) => room.playlist,
+			),
 		);
 		return r === null ? [] : r;
 	}
