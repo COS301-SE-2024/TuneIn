@@ -835,6 +835,33 @@ paths:
           description: Unauthorized.
       tags:
         - auth
+  /auth/spotify/redirect:
+    get:
+      operationId: spotifyRedirect
+      summary: Spotify OAuth Redirect
+      description: Redirects to the Expo app with the Spotify auth code
+      parameters:
+        - name: code
+          required: true
+          in: query
+          description: The authorization code returned by Spotify after user consent
+          example: NApCCg..BkWtQ
+          allowEmptyValue: false
+          schema:
+            type: string
+        - name: state
+          required: true
+          in: query
+          description: A unique state value to prevent CSRF attacks
+          example: 34fFs29kd09
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirects to the Expo app with the Spotify auth code
+      tags:
+        - auth
   /auth/spotify/callback:
     get:
       operationId: spotifyCallback
@@ -1161,6 +1188,28 @@ paths:
           description: Unauthorized
         '404':
           description: Room not found
+      tags:
+        - rooms
+    delete:
+      operationId: clearRoomQueue
+      summary: Clear the queue of a room
+      description: Clears the queue of the room except for the current song.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to clear the queue for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - bearer: []
       tags:
         - rooms
     post:
@@ -1839,9 +1888,6 @@ paths:
           description: Invalid query parameters
       tags:
         - search
-      security:
-        - bearer: []
-        - bearer: []
   /search/rooms:
     get:
       operationId: searchRooms
@@ -1881,9 +1927,6 @@ paths:
           description: Invalid query parameters
       tags:
         - search
-      security:
-        - bearer: []
-        - bearer: []
   /search/history:
     get:
       operationId: searchHistory
@@ -2064,33 +2107,6 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /search/rooms/suggestions:
-    get:
-      operationId: searchRoomsSuggestion
-      summary: Get recommended room search terms.
-      description: Get recommended room search terms.
-      parameters:
-        - name: q
-          required: true
-          in: query
-          description: A room name
-          example: Chill Room
-          allowEmptyValue: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: room search suggestions as an array of SearchHistoryDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SearchHistoryDto'
-        '400':
-          description: Invalid query parameters
-      tags:
-        - search
   /search/users:
     get:
       operationId: searchUsers
@@ -2122,9 +2138,6 @@ paths:
           description: Invalid query parameters
       tags:
         - search
-      security:
-        - bearer: []
-        - bearer: []
   /search/users/advanced:
     get:
       operationId: advancedSearchUsers
@@ -2223,33 +2236,6 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /search/users/suggestions:
-    get:
-      operationId: searchUsersSuggestion
-      summary: Get recommended user search terms.
-      description: Get recommended user search terms.
-      parameters:
-        - name: q
-          required: true
-          in: query
-          description: A user name
-          example: John
-          allowEmptyValue: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: user search suggestions as an array of SearchHistoryDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SearchHistoryDto'
-        '400':
-          description: Invalid query parameters
-      tags:
-        - search
   /genres:
     get:
       operationId: GenresController_getAllGenres

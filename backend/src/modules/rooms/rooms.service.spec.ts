@@ -80,9 +80,9 @@ describe("RoomsService", () => {
 			const userExistsMock = jest
 				.spyOn(dbUtils, "userExists")
 				.mockResolvedValue(true);
-			// const roomExistsMock = jest
-			// 	.spyOn(dbUtils, "roomExists")
-			// 	.mockResolvedValue(true);
+			const roomExistsMock = jest
+				.spyOn(dbUtils, "roomExists")
+				.mockResolvedValue(true);
 			const findFirstMock = jest
 				.spyOn(mockPrismaService.room, "findFirst")
 				.mockResolvedValue({
@@ -256,9 +256,9 @@ describe("RoomsService", () => {
 			const userExistsMock = jest
 				.spyOn(dbUtils, "userExists")
 				.mockResolvedValue(true);
-			// const roomExistsMock = jest
-			// 	.spyOn(dbUtils, "roomExists")
-			// 	.mockResolvedValue(false);
+			const roomExistsMock = jest
+				.spyOn(dbUtils, "roomExists")
+				.mockResolvedValue(false);
 
 			// Act and Assert
 			await expect(
@@ -284,9 +284,9 @@ describe("RoomsService", () => {
 			const userExistsMock = jest
 				.spyOn(dbUtils, "userExists")
 				.mockResolvedValue(true);
-			// const roomExistsMock = jest
-			// 	.spyOn(dbUtils, "roomExists")
-			// 	.mockResolvedValue(true);
+			const roomExistsMock = jest
+				.spyOn(dbUtils, "roomExists")
+				.mockResolvedValue(true);
 			const findFirstMock = jest
 				.spyOn(mockPrismaService.room, "findFirst")
 				.mockResolvedValue({

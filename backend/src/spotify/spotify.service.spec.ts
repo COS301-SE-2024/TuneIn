@@ -26,6 +26,7 @@ describe("SpotifyService", () => {
 
 		service = new SpotifyService(
 			mockConfigService as ConfigService,
+			mockHttpService as HttpService,
 			mockPrismaService as PrismaService,
 		);
 

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 
 import { MulterModule } from "@nestjs/platform-express";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { memoryStorage } from "multer";
 

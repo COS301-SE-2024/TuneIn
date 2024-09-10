@@ -208,7 +208,7 @@ export class UsersService {
 				.filter((name) => !newGenreNames.includes(name));
 
 			// Step 4: Delete removed genres
-			await prisma.favorite_genres.deleteMany({
+			const resp = await prisma.favorite_genres.deleteMany({
 				where: {
 					user_id: userId,
 					genre_id: {
@@ -220,7 +220,7 @@ export class UsersService {
 			});
 
 			// Step 5: Insert new genres
-			await prisma.favorite_genres.createMany({
+			const resp2 = await prisma.favorite_genres.createMany({
 				data: genresToAdd.map((name) => ({
 					user_id: userId,
 					genre_id: genreMap.get(name)!,
@@ -292,7 +292,7 @@ export class UsersService {
 				.filter((id) => !newSongIds.includes(id));
 
 			// Step 4: Delete removed songs
-			await prisma.favorite_songs.deleteMany({
+			const resp = await prisma.favorite_songs.deleteMany({
 				where: {
 					user_id: userId,
 					song_id: {
@@ -304,7 +304,7 @@ export class UsersService {
 			});
 
 			// Step 5: Insert new songs
-			await prisma.favorite_songs.createMany({
+			const resp2 = await prisma.favorite_songs.createMany({
 				data: songsToAdd.map((id) => ({
 					user_id: userId,
 					song_id: songMap.get(id)!,

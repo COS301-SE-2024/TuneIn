@@ -40,7 +40,7 @@ describe("RoomCardWidget component", () => {
 
 		// Assert background image source
 		const imageBackground = queryByTestId("room-card-background");
-		expect(imageBackground?.props.source.uri).toBe(roomCard.backgroundImage);
+		expect(imageBackground.props.source.uri).toBe(roomCard.backgroundImage);
 	});
 
 	it("renders correctly when 'mine' is true", () => {
@@ -56,20 +56,26 @@ describe("RoomCardWidget component", () => {
 			mine: true,
 			tags: ["personal", "private"],
 		};
+
 		const { getByText, queryByTestId } = render(
 			<RoomCardWidget roomCard={roomCard} />,
 		);
+
 		// Assert room name
 		expect(getByText("My Room")).toBeTruthy();
+
 		// Assert description
 		expect(getByText("Personal room description")).toBeTruthy();
+
 		// Assert username
 		expect(getByText("✎")).toBeTruthy();
+
 		// Assert tags
 		expect(getByText("personal • private")).toBeTruthy();
+
 		// Assert background image source
 		const imageBackground = queryByTestId("room-card-background");
-		expect(imageBackground?.props.source.uri).toBe(roomCard.backgroundImage);
+		expect(imageBackground.props.source.uri).toBe(roomCard.backgroundImage);
 	});
 
 	it("renders correctly when songName and artistName are null", () => {

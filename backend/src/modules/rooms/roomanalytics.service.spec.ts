@@ -1,7 +1,7 @@
 import { TestingModule } from "@nestjs/testing";
 import { RoomAnalyticsService } from "./roomanalytics.service";
 import { createRoomsTestingModule } from "../../../jest_mocking/module-mocking";
-// import { mockPrismaService } from "jest_mocking/service-mocking";
+import { mockPrismaService } from "jest_mocking/service-mocking";
 import {
 	JoinsPerDay,
 	RoomAnalyticsContributorsDto,

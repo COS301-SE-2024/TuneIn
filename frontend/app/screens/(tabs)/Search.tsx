@@ -20,13 +20,13 @@ import { colors } from "../../styles/colors";
 import { Room } from "../../models/Room";
 import { User } from "../../models/user";
 import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
-import Dropdown from "../components/Dropdown";
-import { SearchHistoryDto } from "../models/SearchHistoryDto";
-import ToggleButton from "../components/ToggleButton";
-import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
-import SkeletonUserItem from "../components/SkeletonUserItem";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import Dropdown from "../../components/Dropdown";
+// import DatePicker from "../components/DatePicker";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+import ToggleButton from "../../components/ToggleButton";
+import SkeletonUserItem from "../../components/SkeletonUserItem";
 
 type SearchResult = {
 	id: string;
@@ -36,7 +36,6 @@ type SearchResult = {
 	userData?: User;
 };
 
-// Sample genre data with additional genres
 let genres: string[] = [
 	"Rock",
 	"Pop",
@@ -85,6 +84,7 @@ const languages = [
 const Search: React.FC = () => {
 	const navigation = useNavigation();
 	const [searchTerm, setSearchTerm] = useState("");
+	// const [filter, setFilter] = useState<"all" | "room" | "user">("all");
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [scrollY] = useState(new Animated.Value(0));
 	const previousScrollY = useRef(0);
@@ -94,6 +94,8 @@ const Search: React.FC = () => {
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
 	const [loading, setLoading] = useState(true);
+	// const [startDate, setStartDate] = useState(null);
+	// const [endDate, setEndDate] = useState(null);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
@@ -104,136 +106,12 @@ const Search: React.FC = () => {
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 	const prevFilterRef = useRef(filter);
-	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-	const [dropdownVisible, setDropdownVisible] = useState(false);
-	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
-	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
-	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+	// const [showStartDateModal, setShowStartDateModal] = useState(false);
+	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
-	const isAdvancedSearch = () => {
-		if (filter === "room") {
-			if (nsfw) {
-				return true;
-			}
-			if (explicit) {
-				return true;
-			}
-			if (scheduled) {
-				return true;
-			}
-			if (isPrivate) {
-				return true;
-			}
-			if (temporary) {
-				return true;
-			}
-			if (selectedGenre) {
-				return true;
-			}
-			if (selectedLanguage) {
-				return true;
-			}
-			if (host !== "") {
-				return true;
-			}
-			if (roomCount !== "") {
-				return true;
-			}
-		} else if (filter === "user") {
-			if (minFollowers !== "") {
-				return true;
-			}
-			if (maxFollowers !== "") {
-				return true;
-			}
-		}
-
-		return false;
-	};
-
-	useEffect(() => {
-		const getRecommendedRooms = async () => {
-			setLoading(true);
-			try {
-				const token = await auth.getToken();
-				if (token) {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/users/rooms/foryou`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
-						},
-					);
-					const recommendedRooms: SearchResult[] = response.data.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
-								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-							},
-						}),
-					);
-					console.log("recommended rooms:", recommendedRooms);
-					console.log("Recommended rooms length: " + recommendedRooms.length);
-					setResults(recommendedRooms);
-				}
-			} catch (error) {
-				console.error("Error fetching recommended rooms:", error);
-			}
-			setLoading(false);
-		};
-		if (searchTerm === "") {
-			if (filter === "room") {
-				setSearchSuggestions(roomSearchHistory.slice(0, 5));
-				getRecommendedRooms();
-			} else if (filter === "user") {
-				setSearchSuggestions(userSearchHistory.slice(0, 5));
-			}
-		} else {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current);
-			}
-
-			timeoutRef.current = setTimeout(() => {
-				if (filter === "room") {
-					getRoomsSuggestions(searchTerm);
-				} else if (filter === "user") {
-					getUsersSuggestions(searchTerm);
-				}
-			}, 300);
-		}
-	}, [searchTerm]);
-
-	useEffect(() => {
-		if (searchTerm !== "") {
-			handleSearch();
-		}
-	}, [
-		nsfw,
-		explicit,
-		scheduled,
-		isPrivate,
-		temporary,
-		selectedGenre,
-		selectedLanguage,
-		host,
-		roomCount,
-		minFollowers,
-		maxFollowers,
-	]);
-
-	const handleSearch = async (sh: string = searchTerm) => {
-		const advanced = isAdvancedSearch();
-		setDropdownVisible(false);
+	// Memoize handleSearch function with useCallback
+	const handleSearch = useCallback(async () => {
+		console.log("Search Filter: " + filter);
 		setLoading(true);
 		try {
 			const token = await auth.getToken();
@@ -241,7 +119,7 @@ const Search: React.FC = () => {
 			if (token) {
 				if (filter === "all") {
 					const response = await axios.get(
-						`${utils.API_BASE_URL}/search?q=${sh}`,
+						`${utils.API_BASE_URL}/search?q=${searchTerm}`,
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,
@@ -286,8 +164,9 @@ const Search: React.FC = () => {
 					const combinedResult = results.concat(users);
 					setResults(combinedResult);
 				} else if (filter === "room") {
-					if (advanced) {
-						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${sh}`;
+					// Additional code remains the same
+					if (showMoreFilters) {
+						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${searchTerm}`;
 						if (nsfw) {
 							request += `&nsfw=${nsfw}`;
 						}
@@ -315,13 +194,13 @@ const Search: React.FC = () => {
 						if (roomCount !== "") {
 							request += `&participant_count=${roomCount}`;
 						}
+
 						const response = await axios.get(request, {
 							headers: {
 								Authorization: `Bearer ${token}`,
 							},
 						});
 
-						// console.log("Search: " + JSON.stringify(response));
 						const results: SearchResult[] = response.data.map((item: any) => ({
 							id: item.roomID,
 							type: "room",
@@ -341,9 +220,17 @@ const Search: React.FC = () => {
 						}));
 
 						setResults(results);
+						setSelectedGenre(null);
+						setSelectedLanguage(null);
+						setExplicit(false);
+						setNsfw(false);
+						setTemporary(false);
+						setIsPrivate(false);
+						setScheduled(false);
+						setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
-							`${utils.API_BASE_URL}/search/rooms?q=${sh}`,
+							`${utils.API_BASE_URL}/search/rooms?q=${searchTerm}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
@@ -374,8 +261,8 @@ const Search: React.FC = () => {
 						setResults(formatResults);
 					}
 				} else if (filter === "user") {
-					if (advanced) {
-						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${sh}`;
+					if (showMoreFilters) {
+						let request = `${utils.API_BASE_URL}/search/users/advanced?q=${searchTerm}`;
 
 						if (minFollowers !== "") {
 							request += `&following=${minFollowers}`;
@@ -384,7 +271,6 @@ const Search: React.FC = () => {
 							request += `&followers=${maxFollowers}`;
 						}
 
-						// console.log("Request: " + request);
 						const response = await axios.get(request, {
 							headers: {
 								Authorization: `Bearer ${token}`,
@@ -403,23 +289,23 @@ const Search: React.FC = () => {
 							},
 						}));
 						setResults(results);
-						// setShowMoreFilters(false);
+						setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
-							`${utils.API_BASE_URL}/search/users?q=${sh}`,
+							`${utils.API_BASE_URL}/search/users?q=${searchTerm}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
 								},
 							},
 						);
-						// console.log("Search: " + JSON.stringify(response.data));
+
 						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.userID,
+							id: item.id,
 							type: "user",
 							name: item.username,
 							userData: {
-								id: item.userID,
+								id: item.id,
 								profile_picture_url: item.profile_picture_url,
 								profile_name: item.profile_name,
 								username: item.username,
@@ -503,123 +389,19 @@ const Search: React.FC = () => {
 		setFilter(selectedFilter);
 	};
 
-	const getRoomHistory = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/search/rooms/history`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-
-				const roomHistTerms = response.data.map(
-					(search: SearchHistoryDto) => search.search_term,
-				);
-				setRoomSearchHistory(roomHistTerms);
-				setSearchSuggestions(roomHistTerms.slice(0, 5));
-			}
-		} catch (error) {
-			console.error("Error fetching search history:", error);
-			return null;
-		}
-	};
-
-	const getUserHistory = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/search/users/history`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-
-				const userHistTerms = response.data.map(
-					(search: SearchHistoryDto) => search.search_term,
-				);
-				setUserSearchHistory(userHistTerms);
-				setSearchSuggestions(userHistTerms.slice(0, 5));
-			}
-		} catch (error) {
-			console.error("Error fetching search history:", error);
-			return null;
-		}
-	};
-
-	const getRoomsSuggestions = async (q: string) => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/search/rooms/suggestions?q=${q}`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-
-				const searchTerms = response.data.map(
-					(search: SearchHistoryDto) => search.search_term,
-				);
-				setSearchSuggestions(searchTerms.slice(0, 5));
-			}
-		} catch (error) {
-			console.error("Error fetching search history:", error);
-			return null;
-		}
-	};
-
-	const getUsersSuggestions = async (q: string) => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/search/users/suggestions?q=${q}`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-
-				const searchTerms = response.data.map(
-					(search: SearchHistoryDto) => search.search_term,
-				);
-				setSearchSuggestions(searchTerms.slice(0, 5));
-			}
-		} catch (error) {
-			console.error("Error fetching search history:", error);
-			return null;
-		}
-	};
-
 	useEffect(() => {
 		// Check if the filter has changed and if the searchTerm is not empty
 		if (prevFilterRef.current !== filter && searchTerm !== "") {
 			handleSearch();
 		}
-
-		if (filter === "room") {
-			getRoomHistory();
-		} else {
-			getUserHistory();
-		}
-
 		// Update the previous filter ref to the current filter
 		prevFilterRef.current = filter;
-	}, [filter]);
+	}, [filter, searchTerm, handleSearch]);
+
+	useEffect(() => {
+		if (loading && results.length === 0) {
+		}
+	}, [loading, results]);
 
 	const getGenres = async () => {
 		try {
@@ -641,7 +423,6 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		getGenres();
-		getRoomHistory();
 	}, []);
 
 	const handleSelectGenre = (genre: string) => {
@@ -669,44 +450,16 @@ const Search: React.FC = () => {
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchTerm}
-					onBlur={() => {
-						setTimeout(() => {
-							setDropdownVisible(false);
-						}, 200);
-					}}
-					onFocus={() => {
-						setDropdownVisible(true);
-					}}
 					onChangeText={setSearchTerm}
 				/>
 				<TouchableOpacity
 					style={styles.searchIcon}
-					onPress={() => {
-						handleSearch();
-					}}
+					onPress={handleSearch}
 					testID="search-button"
 				>
 					<Ionicons name="search-sharp" size={30} color={colors.primary} />
 				</TouchableOpacity>
 			</View>
-			{dropdownVisible && searchSuggestions.length !== 0 && (
-				<FlatList
-					data={searchSuggestions}
-					keyExtractor={(item) => item}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							style={styles.dropdownItem}
-							onPress={() => {
-								setSearchTerm(item);
-								handleSearch(item);
-							}}
-						>
-							<Text style={styles.dropdownItemText}>{item}</Text>
-						</TouchableOpacity>
-					)}
-					style={styles.dropdown}
-				/>
-			)}
 			<View style={styles.filterContainer}>
 				<TouchableOpacity
 					style={[
@@ -750,13 +503,11 @@ const Search: React.FC = () => {
 									<View style={styles.searchBy}>
 										<ToggleButton
 											label="Minimum Followers"
-											value={minFollowers}
 											onValueChange={setMinFollowers}
 											testID="minFol-btn"
 										/>
 										<ToggleButton
 											label="Minimum Following"
-											value={maxFollowers}
 											onValueChange={setMaxFollowers}
 											testID="maxFl-btn"
 										/>
@@ -774,13 +525,11 @@ const Search: React.FC = () => {
 									<ToggleButton
 										label="Host"
 										testID="host-toggle"
-										value={host}
 										onValueChange={setHost}
 									/>
 									<ToggleButton
 										label="Room Count"
 										testID="room-count-toggle"
-										value={roomCount}
 										onValueChange={setRoomCount}
 									/>
 								</View>
@@ -792,7 +541,7 @@ const Search: React.FC = () => {
 									<Switch
 										testID="explicit-switch"
 										value={explicit}
-										onValueChange={setExplicit}
+										onValueChange={(value) => setExplicit(value)}
 									/>
 								</View>
 								<View style={styles.switchContainer}>
@@ -800,7 +549,7 @@ const Search: React.FC = () => {
 									<Switch
 										testID="nsfw-switch"
 										value={nsfw}
-										onValueChange={setNsfw}
+										onValueChange={(value) => setNsfw(value)}
 									/>
 								</View>
 							</View>
@@ -820,6 +569,34 @@ const Search: React.FC = () => {
 									setSelectedOption={setSelectedLanguage}
 								/>
 							</View>
+							{/* <Text style={styles.includeHeader}>Room Availability:</Text>
+							<View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>Start Date:</Text>
+								<DatePicker selectedOption={startDate} onPress={() => setShowStartDateModal(!showStartDateModal)}></DatePicker>
+								{showStartDateModal && <DateTimePicker
+									value={startDate || new Date()}
+									mode="datetime"
+									display="default"
+									onChange={(event, selectedDate) =>{
+										setStartDate(selectedDate || undefined)
+										setShowStartDateModal(false);
+									}
+									}
+								/>}
+							</View>
+							<View style={styles.datePickerContainer}>
+								<Text style={styles.datePickerLabel}>End Date:</Text>
+								<DatePicker selectedOption={startDate} onPress={() => setShowEndDateModal(!showEndDateModal)}></DatePicker>
+								{showEndDateModal && <DateTimePicker
+									value={endDate || new Date()}
+									mode="datetime"
+									display="default"
+									onChange={(event, selectedDate) =>{
+										setEndDate(selectedDate || undefined);
+										setShowEndDateModal(false);
+									}}
+								/>}
+							</View> */}
 							<View style={styles.includeSection}>
 								<Text style={styles.includeHeader}>Other:</Text>
 								<View style={styles.switchContainer}>
@@ -1113,41 +890,6 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
-	},
-	dropdown: {
-		position: "absolute",
-		top: 125,
-		width: "100%",
-		backgroundColor: "#f2f2f2",
-		borderColor: "#ccc",
-		borderWidth: 1,
-		borderRadius: 5,
-		maxHeight: 150, // Optional: limits the height of the dropdown
-		zIndex: 1,
-		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
-		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 30,
-	},
-	searchContainer: {
-		flex: 1,
-		paddingHorizontal: 10,
-		paddingTop: 50,
-	},
-	dropdownItem: {
-		// paddingVertical: 5,
-		paddingHorizontal: 15,
-		borderBottomWidth: 5,
-		borderBottomColor: "#eee",
-		justifyContent: "center",
-	},
-
-	dropdownItemText: {
-		fontSize: 16,
-		color: "#333",
 	},
 });
 

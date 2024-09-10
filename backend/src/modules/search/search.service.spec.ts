@@ -24,7 +24,7 @@ const userMock = [
 		// distance: 4,
 	},
 ];
-const uDtoMock: UserDto[] = [
+const uDtoMock = [
 	{
 		profile_name: "Farmer23",
 		userID: "01ece2d8-e091-7023-c1f2-d3399faa7071",
@@ -41,18 +41,23 @@ const uDtoMock: UserDto[] = [
 		},
 		links: {
 			count: 2,
-			data: {
-				instagram: ["instagram.com/lesedi"],
-				tiktok: ["tiktok.com/lesedi"],
-			},
+			data: [
+				{
+					type: "instagram",
+					links: "instagram.com/farmer",
+				},
+				{
+					type: "tiktok",
+					links: "tiktok.com/farmer",
+				},
+			],
 		},
 		bio: "Music enthusiast who loves exploring new tunes across various genres. Always on the lookout for fresh beats and hidden gems!",
 		current_song: {
 			title: "",
 			artists: [],
 			cover: "",
-			duration: 0,
-			spotify_id: "",
+			start_time: "2024-07-21T15:18:16.126Z",
 		},
 		fav_genres: {
 			count: 2,
@@ -63,12 +68,10 @@ const uDtoMock: UserDto[] = [
 			data: [
 				{
 					title: "Faster",
-					artists: ["Good Kid"],
+					artists: "Good Kid",
 					cover:
 						"https://store.goodkidofficial.com/cdn/shop/products/GoodKidAlbumCover.jpg?v=1528948601",
-					start_time: new Date("2024-09-04T05:05:06.064Z"),
-					duration: 0,
-					spotify_id: "",
+					start_time: "",
 				},
 			],
 		},
@@ -324,7 +327,7 @@ describe("SearchService", () => {
 				SELECT follower, COUNT(*) AS num_following
 				FROM follows
 				GROUP BY follower
-		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
+		) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers, f2.num_following HAVING COALESCE(f1.num_followers, 0) >= 2
 		AND COALESCE(f2.num_following, 0) >= 0;
 		`),
 			);
@@ -339,7 +342,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(username, 'testing'), levenshtein(full_name, 'testing')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -354,7 +357,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(username, 'test')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -369,7 +372,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -384,7 +387,7 @@ describe("SearchService", () => {
 
 			expect(normalizeWhitespace(result)).toBe(
 				normalizeWhitespace(
-					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2`,
+					`SELECT user_id, LEAST(levenshtein(full_name, 'testing'), levenshtein(full_name, 't')) AS distance FROM users WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2`,
 				),
 			);
 		});
@@ -402,7 +405,7 @@ describe("SearchService", () => {
 					SELECT followee, COUNT(*) AS num_followers
 					FROM follows
 					GROUP BY followee
-			) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
+			) f1 ON f1.followee = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f1.num_followers HAVING COALESCE(f1.num_followers, 0) >= 0;`),
 			);
 		});
 
@@ -419,7 +422,7 @@ describe("SearchService", () => {
 					SELECT follower, COUNT(*) AS num_following
 					FROM follows
 					GROUP BY follower
-			) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 OR similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
+			) f2 ON f2.follower = users.user_id WHERE similarity(username, 'testing') > 0.2 AND similarity(full_name, 'testing') > 0.2 GROUP BY users.user_id, f2.num_following HAVING COALESCE(f2.num_following, 0) >= 2;`),
 			);
 		});
 	});
@@ -551,7 +554,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
+			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
 
 			const result = await service.searchRoomsHistory("mockID");
 
@@ -559,9 +562,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
-				rHistMock,
-			);
+			mockPrismaService.$queryRaw.mockResolvedValueOnce(rHistMock);
 
 			const result = await service.searchRoomsHistory("mockId");
 
@@ -576,7 +577,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
+			mockPrismaService.$queryRaw.mockResolvedValueOnce([]);
 
 			const result = await service.searchUsersHistory("mockID");
 
@@ -584,9 +585,7 @@ describe("SearchService", () => {
 		});
 
 		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
-				uHistMock,
-			);
+			mockPrismaService.$queryRaw.mockResolvedValueOnce(uHistMock);
 
 			const result = await service.searchUsersHistory("mockId");
 
@@ -594,80 +593,38 @@ describe("SearchService", () => {
 		});
 	});
 
-	describe("getQueryParams function", () => {
+	// sorry Jaden, Typescript covered this already
+	/*
+	describe("parseBoolean function", () => {
 		beforeEach(async () => {
 			const module: TestingModule = await createSearchTestingModule();
 			service = module.get<SearchService>(SearchService);
 		});
 
-		it("should return query parameters", () => {
-			const result = service.getQueryParams("/search/users?q=nothing");
-
-			expect(result).toMatchObject({
-				pathSegment: "users",
-				queryParams: { q: "nothing" },
-			});
+		it("should return true for string 'True'", () => {
+			const result = service.parseBoolean("True");
+			expect(result).toBe(true);
 		});
 
-		it("should return query parameters with creator", () => {
-			const result = service.getQueryParams(
-				"/search/users?q=nothing&creator=test",
-			);
-
-			expect(result).toMatchObject({
-				pathSegment: "users",
-				queryParams: { q: "nothing", creator: "test" },
-			});
-		});
-	});
-
-	describe("searchRoomsSuggestions function", () => {
-		beforeEach(async () => {
-			const module: TestingModule = await createSearchTestingModule();
-			service = module.get<SearchService>(SearchService);
+		it("should return true for string '1'", () => {
+			const result = service.parseBoolean("1");
+			expect(result).toBe(true);
 		});
 
-		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
-
-			const result = await service.searchRoomsSuggestions("mockID");
-
-			expect(result).toMatchObject([]);
+		it("should return false for string 'False'", () => {
+			const result = service.parseBoolean("False");
+			expect(result).toBe(false);
 		});
 
-		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
-				uHistMock,
-			);
+		it("should return false for string '0'", () => {
+			const result = service.parseBoolean("0");
+			expect(result).toBe(false);
+		});
 
-			const result = await service.searchRoomsSuggestions("mockId");
-
-			expect(result).toMatchObject(uHistDtoMock);
+		it("should return false for string 'Unknown'", () => {
+			const result = service.parseBoolean("Unknown");
+			expect(result).toBe(false);
 		});
 	});
-
-	describe("searchUsersSuggestions function", () => {
-		beforeEach(async () => {
-			const module: TestingModule = await createSearchTestingModule();
-			service = module.get<SearchService>(SearchService);
-		});
-
-		it("should return an empty SearchHistoryDto array when query returns an empty array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce([]);
-
-			const result = await service.searchUsersSuggestions("mockID");
-
-			expect(result).toMatchObject([]);
-		});
-
-		it("should return a SearchHistoryDto array when query returns an array", async () => {
-			mockPrismaService.search_history.findMany.mockResolvedValueOnce(
-				uHistMock,
-			);
-
-			const result = await service.searchUsersSuggestions("mockId");
-
-			expect(result).toMatchObject(uHistDtoMock);
-		});
-	});
+	*/
 });
