@@ -742,7 +742,6 @@ export class UsersService {
 				],
 			},
 		});
-		console.log(f);
 		if (!f) {
 			return [];
 		}
@@ -760,7 +759,6 @@ export class UsersService {
 			user.relationship = "friend";
 			return user;
 		});
-		console.log(r);
 		return r;
 	}
 

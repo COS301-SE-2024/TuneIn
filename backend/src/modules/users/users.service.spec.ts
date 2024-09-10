@@ -21,6 +21,7 @@ import {
 } from "./dto/user.dto";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
+import { HttpException } from "@nestjs/common";
 
 describe("UsersService follow function", () => {
 	let usersService: UsersService;
@@ -594,6 +595,220 @@ describe("UsersService follow function", () => {
 
 			const result = await usersService.getRecommendedRooms("user1");
 			expect(result).toEqual(mockRoomDtos);
+		});
+	});
+	describe("getUserFriends", () => {
+		it('should return a list of friends with relationship set to "friend"', async () => {
+			const mockFriends = [
+				{ friend1: "user1", friend2: "user2", is_pending: false },
+				{ friend1: "user3", friend2: "user1", is_pending: false },
+			];
+			const mockUserDtos = [
+				{ id: "user2", relationship: "friend" },
+				{ id: "user3", relationship: "friend" },
+			];
+
+			jest
+				.spyOn(prismaService.friends, "findMany")
+				.mockResolvedValue(mockFriends as any);
+			jest
+				.spyOn(dtoGenService, "generateMultipleUserDto")
+				.mockResolvedValue(mockUserDtos as any);
+
+			const result = await usersService.getUserFriends("user1");
+			expect(result).toEqual(mockUserDtos);
+		});
+	});
+	describe("rejectFriendRequest", () => {
+		it("should return true when a friend request is successfully rejected", async () => {
+			const mockUsers = [
+				{
+					user_id: "user1",
+					username: "username",
+					bio: null,
+					profile_picture: null,
+					activity: {},
+					preferences: {},
+					full_name: null,
+					external_links: {},
+					email: null,
+				},
+				{
+					user_id: "rejectedUsername",
+					username: "rejectedUsername",
+					bio: null,
+					profile_picture: null,
+					activity: {},
+					preferences: {},
+					full_name: null,
+					external_links: {},
+					email: null,
+				},
+				{
+					user_id: "friend1",
+					username: "friend1",
+					bio: null,
+					profile_picture: null,
+					activity: {},
+					preferences: {},
+					full_name: null,
+					external_links: {},
+					email: null,
+				},
+			];
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest
+				.spyOn(prismaService.users, "findFirst")
+				.mockResolvedValue(mockUsers[2] as any);
+			jest
+				.spyOn(prismaService.friends, "deleteMany")
+				.mockResolvedValue({ count: 1 });
+
+			const result = await usersService.rejectFriendRequest(
+				"user1",
+				"rejectedUsername",
+			);
+			expect(result).toBe(true);
+		});
+
+		it("should throw an error if the user does not exist", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(false);
+
+			await expect(
+				usersService.rejectFriendRequest("user1", "rejectedUsername"),
+			).rejects.toThrow(HttpException);
+		});
+
+		it("should throw an error if the friend does not exist", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue(null);
+
+			await expect(
+				usersService.rejectFriendRequest("user1", "rejectedUsername"),
+			).rejects.toThrow(HttpException);
+		});
+
+		it("should throw an error if the user tries to reject themselves", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue({
+				user_id: "user1",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			} as any);
+			await expect(
+				usersService.rejectFriendRequest("user1", "rejectedUsername"),
+			).rejects.toThrow(HttpException);
+		});
+
+		it("should throw an error if no pending friend request is found", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue({
+				user_id: "friend1",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			});
+			jest
+				.spyOn(prismaService.friends, "deleteMany")
+				.mockResolvedValue({ count: 0 });
+
+			await expect(
+				usersService.rejectFriendRequest("user1", "rejectedUsername"),
+			).rejects.toThrow(HttpException);
+		});
+	});
+	describe("acceptFriendRequest", () => {
+		it("should return true when a friend request is successfully accepted", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue({
+				user_id: "friend1",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			} as any);
+			jest
+				.spyOn(prismaService.friends, "updateMany")
+				.mockResolvedValue({ count: 1 });
+
+			const result = await usersService.acceptFriendRequest(
+				"user1",
+				"friendUsername",
+			);
+			expect(result).toBe(true);
+		});
+
+		it("should throw an error if the user does not exist", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(false);
+
+			await expect(
+				usersService.acceptFriendRequest("user1", "friendUsername"),
+			).rejects.toThrow(HttpException);
+		});
+
+		it("should throw an error if the friend does not exist", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue(null);
+
+			await expect(
+				usersService.acceptFriendRequest("user1", "friendUsername"),
+			).rejects.toThrow(Error);
+		});
+
+		it("should throw an error if the user tries to accept themselves", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue({
+				user_id: "user1",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			} as any);
+
+			await expect(
+				usersService.acceptFriendRequest("user1", "friendUsername"),
+			).rejects.toThrow(HttpException);
+		});
+
+		it("should throw an error if no pending friend request is found", async () => {
+			jest.spyOn(dbUtilsService, "userExists").mockResolvedValue(true);
+			jest.spyOn(prismaService.users, "findFirst").mockResolvedValue({
+				user_id: "userID",
+				username: "username",
+				bio: null,
+				profile_picture: null,
+				activity: {},
+				preferences: {},
+				full_name: null,
+				external_links: {},
+				email: null,
+			} as any);
+			jest
+				.spyOn(prismaService.friends, "updateMany")
+				.mockResolvedValue({ count: 0 });
+
+			await expect(
+				usersService.acceptFriendRequest("user1", "friendUsername"),
+			).rejects.toThrow(HttpException);
 		});
 	});
 });
