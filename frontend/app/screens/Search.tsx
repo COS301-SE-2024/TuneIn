@@ -126,50 +126,91 @@ const Search: React.FC = () => {
 	// const [showEndDateModal, setShowEndDateModal] = useState(false);
 
 	useEffect(() => {
-		const getRecommendedRooms = async () => {
+		const getRecommendations = async () => {
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
 				console.log("Recommendations token: " + token);
 				console.log("Base url: " + utils.API_BASE_URL);
 				if (token) {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/users/rooms/foryou`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
+					let response;
+					if (filter === "room") {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/rooms/foryou`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						},
-					);
-					const recommendedRooms: SearchResult[] = response.data.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended rooms:", response);
+							return;
+						}
+						const recommendedRooms: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: filter,
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+								},
+							}),
+						);
+						console.log("recommended rooms:", recommendedRooms);
+						console.log("Recommended rooms length: " + recommendedRooms.length);
+						setResults(recommendedRooms);
+					} else {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						}),
-					);
-					console.log("recommended rooms:", recommendedRooms);
-					console.log("Recommended rooms length: " + recommendedRooms.length);
-					setResults(recommendedRooms);
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended users:", response);
+							return;
+						}
+						console.log(
+							"Recommended users response: " + JSON.stringify(response),
+						);
+						const recommendedUsers: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: filter,
+								name: item.username,
+								userData: {
+									id: item.id,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						console.log("recommended users:", recommendedUsers);
+						console.log("Recommended users length: " + recommendedUsers.length);
+						setResults(recommendedUsers);
+					}
 				}
 			} catch (error) {
-				console.error("Error fetching recommended rooms:", error);
+				console.error("Error fetching recommendations:", error);
 			}
 			setLoading(false);
 		};
 		if (searchTerm === "") {
-			getRecommendedRooms();
-			console.log("Recommended rooms: " + results);
+			getRecommendations();
+			console.log("Recommendations: " + results);
 		}
-	}, [searchTerm]);
+	}, [searchTerm, filter]);
+
 	const mockResults: SearchResult[] = [
 		{
 			id: "1",
@@ -493,6 +534,7 @@ const Search: React.FC = () => {
 	};
 
 	const handleSelection = (selectedFilter: string) => {
+		console.log("Selected Filter: " + selectedFilter);
 		setFilter(selectedFilter);
 	};
 
