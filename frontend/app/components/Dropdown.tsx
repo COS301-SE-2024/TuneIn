@@ -19,12 +19,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 	setSelectedOption,
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
-	const [items, setItems] = useState(options);
-
-	useEffect(() => {
-		setItems(options);
-	}, [options]);
-
 	const toggleModal = () => setModalVisible(!modalVisible);
 
 	const handleSelectOption = (option: string) => {
@@ -40,7 +34,13 @@ const Dropdown: React.FC<DropdownProps> = ({
 					styles.filterDropDown,
 					selectedOption ? styles.activeFilter : {},
 				]}
-				onPress={toggleModal}
+				onPress={() => {
+					if (selectedOption === null) {
+						toggleModal();
+					} else {
+						setSelectedOption(null);
+					}
+				}}
 			>
 				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
 			</TouchableOpacity>
