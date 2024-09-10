@@ -111,8 +111,8 @@ interface LiveContextType {
 interface QueueControls {
 	enqueueSong: (song: RoomSongDto) => void;
 	dequeueSong: (song: RoomSongDto) => void;
-	upvoteSong: (song: RoomSongDto, vote: VoteDto) => void;
-	downvoteSong: (song: RoomSongDto, vote: VoteDto) => void;
+	upvoteSong: (song: RoomSongDto) => void;
+	downvoteSong: (song: RoomSongDto) => void;
 	swapSongVote: (song: RoomSongDto) => void;
 	undoSongVote: (song: RoomSongDto) => void;
 }
@@ -398,10 +398,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (!response.spotifyID) {
 						throw new Error("Server did not return song ID");
 					}
-					const deviceID =
-						await roomControls.playback.playbackHandler.getFirstDevice();
+					const deviceID = await roomControls.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						await roomControls.playback.playbackHandler.handlePlayback(
+						await roomControls.playbackHandler.handlePlayback(
 							"play",
 							deviceID,
 							await calculateSeekTime(response.UTC_time, 0),
@@ -411,25 +410,17 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.current.on("pauseMedia", async (response: PlaybackEventDto) => {
 					console.log("SOCKET EVENT: pauseMedia", response);
-					const deviceID =
-						await roomControls.playback.playbackHandler.getFirstDevice();
+					const deviceID = await roomControls.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						roomControls.playback.playbackHandler.handlePlayback(
-							"pause",
-							deviceID,
-						);
+						roomControls.playbackHandler.handlePlayback("pause", deviceID);
 					}
 				});
 
 				socket.current.on("stopMedia", async (response: PlaybackEventDto) => {
 					console.log("SOCKET EVENT: stopMedia", response);
-					const deviceID =
-						await roomControls.playback.playbackHandler.getFirstDevice();
+					const deviceID = await roomControls.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						roomControls.playback.playbackHandler.handlePlayback(
-							"pause",
-							deviceID,
-						);
+						roomControls.playbackHandler.handlePlayback("pause", deviceID);
 					}
 				});
 
