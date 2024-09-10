@@ -30,7 +30,7 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import { } from  "../../LiveContext";
+import { } from "../../LiveContext";
 import { colors } from "../../styles/colors";
 
 const clientId = SPOTIFY_CLIENT_ID;
@@ -139,7 +139,6 @@ const RegisterOtherScreen: React.FC = () => {
 						redirectURI,
 					);
 					await auth.setToken(tokens.token);
-					live.initialiseSocket();
 					router.navigate("screens/Home");
 				};
 				doExchange();

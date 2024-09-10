@@ -13,7 +13,7 @@ import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { } from  "../../LiveContext";
+import { useLive } from "../../LiveContext";
 import { colors } from "../../styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -21,6 +21,7 @@ import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { RoomDto } from "../../../api";
+import { set } from "react-datepicker/dist/date_utils";
 
 /*
 interface Track {
@@ -54,118 +55,142 @@ function isSpotifyTrack(track: any): track is Spotify.Track {
 }
 
 const EditPlaylist: React.FC = () => {
+	const { roomControls, currentUser, currentRoom, roomQueue } = useLive();
 	const router = useRouter();
 	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	console.log("passed in Room id:", Room_id);
-	const [isMine, setIsMine] = useState<boolean>(false);
 	const { searchResults, handleSearch } = useSpotifySearch();
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
-		live.getLastRoomQueue(),
-	);
-	const [allSongs, setAllSongs] = useState<RoomSongDto[]>(playlist);
 	const [addedSongs, setAddedSongs] = useState<Spotify.Track[]>([]);
 	const [removedSongs, setRemovedSongs] = useState<Spotify.Track[]>([]);
+	const [newQueue, setNewQueue] = useState<RoomSongDto[]>([]);
+	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
 	useEffect(() => {
-		live.fetchRoomQueue(setPlaylist);
-		setPlaylist(live.getLastRoomQueue());
-		const room: RoomDto | null = live.getCurrentRoom();
-		if (room) {
-			setIsMine(live.roomIsMine());
-		}
+		roomControls.requestRoomQueue();
 	}, []);
 
+	useEffect(() => {
+		if (unsavedChanges) {
+			setNewQueue(roomQueue);
+		} else {
+			if (!currentUser) {
+				console.error("Current user not found.");
+				return;
+			}
+			const tempQueue = roomQueue;
+			for (let i = 0; i < removedSongs.length; i++) {
+				const track = removedSongs[i];
+				const song = tempQueue.find((s) => s.spotifyID === track.id);
+				if (song) {
+					const index = tempQueue.indexOf(song);
+					tempQueue.splice(index, 1);
+				}
+			}
+			for (let i = 0; i < addedSongs.length; i++) {
+				const track = addedSongs[i];
+				const song = tempQueue.find((s) => s.spotifyID === track.id);
+				if (!song) {
+					const newSong: RoomSongDto = {
+						spotifyID: track.id,
+						userID: currentUser.userID,
+						track: track,
+						index: tempQueue.length,
+					};
+					tempQueue.push(newSong);
+				}
+			}
+			setNewQueue(tempQueue);
+		}
+	}, [roomQueue]);
+
 	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
-		if (!isMine && addedSongs.length >= 3) {
-			alert("You can only add up to 3 songs.");
+		if (!currentUser) {
+			console.error("Current user not found.");
 			return;
 		}
+		// if (!isMine && addedSongs.length >= 3) {
+		// 	alert("You can only add up to 3 songs.");
+		// 	return;
+		// }
 
 		if (isSpotifyTrack(track)) {
 			// if track is a Spotify track
 			const song: RoomSongDto = {
 				spotifyID: track.id,
-				userID: "1", // TODO: get user ID
+				userID: currentUser.userID,
 				track: track,
+				index: newQueue.length,
 			};
-			setPlaylist((prevPlaylist) => [...prevPlaylist, song]);
-			setAllSongs((prevAllSongs) => [...prevAllSongs, song]);
+			setNewQueue((prevQueue) => [...prevQueue, song]);
 			setAddedSongs((prevAddedSongs) => [...prevAddedSongs, track]);
 		} else {
-			setPlaylist((prevPlaylist) => [...prevPlaylist, track]);
-			setAllSongs((prevAllSongs) => [...prevAllSongs, track]);
+			setNewQueue((prevQueue) => [...prevQueue, track]);
 			const t: Spotify.Track | undefined = track.track;
 			if (t) {
 				setAddedSongs((prevAddedSongs) => [...prevAddedSongs, t]);
 			}
 		}
+		setUnsavedChanges(true);
 	};
 
 	const removeFromPlaylist = (trackId: string) => {
-		if (!isMine && !addedSongs.some((track) => track.id === trackId)) {
+		if (!currentUser) {
+			console.error("Current user not found.");
+			return;
+		}
+		const s: RoomSongDto | undefined = newQueue.find(
+			(song) => song.spotifyID === trackId,
+		);
+		if (!s) {
+			console.error("Song not found in queue.");
+			return;
+		}
+		if (s && s.userID !== currentUser.userID) {
 			alert("You can only remove songs that you added.");
 			return;
 		}
 
-		const song: RoomSongDto | undefined = playlist.find(
-			(song) => song.spotifyID === trackId,
-		);
-		if (song) {
-			setRemovedSongs((prevRemovedSongs) => [
-				...prevRemovedSongs,
-				song.track as Spotify.Track,
-			]);
-		}
-
-		setPlaylist((prevPlaylist) =>
-			prevPlaylist.filter((track) => track.track && track.track.id !== trackId),
+		setRemovedSongs((prevRemovedSongs) => [
+			...prevRemovedSongs,
+			s.track as Spotify.Track,
+		]);
+		setNewQueue((prevQueue) =>
+			prevQueue.filter((song) => song.spotifyID !== trackId),
 		);
 		setAddedSongs((prevAddedSongs) =>
 			prevAddedSongs.filter((track) => track.id !== trackId),
 		);
+		setUnsavedChanges(true);
 	};
 
 	const savePlaylist = async () => {
-		console.log("Playlist saved:", playlist);
+		console.log("New queue:", newQueue);
 		console.log("in room :", Room_id);
 
 		console.log("added songs:", addedSongs);
 		console.log("removed songs:", removedSongs);
 
-		try {
-			/*
-			const storedToken = await auth.getToken();
-			const response = await fetch(
-				`${utils.API_BASE_URL}/rooms/${Room_id}/songs`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${storedToken}`,
-					},
-					body: JSON.stringify(playlist),
-				},
-			);
-			const data = await response.json();
-			console.log("Playlist saved to backend:", data);
-			*/
-			for (let i = 0; i < removedSongs.length; i++) {
-				const track = removedSongs[i];
-				const song = allSongs.find((s) => s.spotifyID === track.id);
-				if (song) {
-					live.dequeueSong(song);
+		if (unsavedChanges) {
+			try {
+				for (let i = 0; i < removedSongs.length; i++) {
+					const track = removedSongs[i];
+					const song = newQueue.find((s) => s.spotifyID === track.id);
+					if (song) {
+						roomControls.queue.dequeueSong(song);
+					}
 				}
-			}
-			for (let i = 0; i < addedSongs.length; i++) {
-				const track = addedSongs[i];
-				const song = allSongs.find((s) => s.spotifyID === track.id);
-				if (song) {
-					live.enqueueSong(song);
+				for (let i = 0; i < addedSongs.length; i++) {
+					const track = addedSongs[i];
+					const song = newQueue.find((s) => s.spotifyID === track.id);
+					if (song) {
+						roomControls.queue.enqueueSong(song);
+					}
 				}
+				setUnsavedChanges(false);
+			} catch (error) {
+				console.error("Error saving playlist:", error);
 			}
-		} catch (error) {
-			console.error("Error saving playlist:", error);
 		}
 		router.navigate({
 			pathname: "/screens/rooms/Playlist",
@@ -209,7 +234,7 @@ const EditPlaylist: React.FC = () => {
 			{/* Selected Playlist Section */}
 			<ScrollView style={styles.selectedContainer}>
 				<Text style={styles.sectionTitle}>Selected Tracks</Text>
-				{playlist.map((song) => (
+				{roomQueue.map((song) => (
 					<View key={rs.getID(song)} style={styles.trackContainer}>
 						<Image
 							source={{ uri: rs.getAlbumArtUrl(song) }}
@@ -224,7 +249,7 @@ const EditPlaylist: React.FC = () => {
 								<Text style={styles.explicitTag}>Explicit</Text>
 							)}
 						</View>
-						{isMine ||
+						{currentRoom?.creator.userID === currentUser?.userID &&
 						addedSongs.some(
 							(addedTrack) => addedTrack.id === rs.getID(song),
 						) ? (
@@ -247,8 +272,8 @@ const EditPlaylist: React.FC = () => {
 						track={track}
 						onPlay={() => playPreview(track.preview_url || "")}
 						onAdd={() => addToPlaylist(track)}
-						isAdded={playlist.some(
-							(selectedTrack) => selectedTrack.spotifyID === track.id,
+						isAdded={addedSongs.some(
+							(selectedTrack) => selectedTrack.id === track.id,
 						)}
 						onRemove={() => removeFromPlaylist(track.id)}
 					/>
@@ -259,7 +284,7 @@ const EditPlaylist: React.FC = () => {
 			<TouchableOpacity
 				style={styles.saveButton}
 				onPress={savePlaylist}
-				disabled={playlist.length === 0}
+				disabled={!unsavedChanges}
 			>
 				<Text style={styles.buttonText}>Save Playlist</Text>
 			</TouchableOpacity>

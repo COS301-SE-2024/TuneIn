@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
 import { RoomSongDto } from "../../models/RoomSongDto";
-import { } from  "../../LiveContext";
+import { useLive } from "../../LiveContext";
 import { VoteDto } from "../../models/VoteDto";
 
 // Add mock songs here for testing
@@ -46,46 +46,44 @@ const mockSongs: Track[] = [
 ];
 
 const Playlist = () => {
+	const {
+		roomControls,
+		currentUser,
+		enterDM,
+		leaveDM,
+		dmControls,
+		dmsConnected,
+		dmsReceived,
+		dmParticipants,
+		directMessages,
+		roomQueue,
+	} = useLive();
 	const router = useRouter();
 	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
-	const [playlist, setPlaylist] = useState<RoomSongDto[]>(
-		live.getLastRoomQueue(),
-	);
-
-	// Define a function to fetch the latest playlist
-	const fetchPlaylist = () => {
-		live.fetchRoomQueue(setPlaylist);
-		setPlaylist(live.getLastRoomQueue());
-	};
-
-	useEffect(() => {
-		// Fetch playlist initially
-		fetchPlaylist();
-	}, []); // Empty dependency array ensures this effect runs only once on mount
 
 	// Function to handle voting
-	const handleVoteChange = (index: number, newVoteCount: number) => {
-		const songs = [...playlist];
-		songs[index].score = newVoteCount;
+	// const handleVoteChange = (index: number, newVoteCount: number) => {
+	// 	const songs = [...playlist];
+	// 	songs[index].score = newVoteCount;
 
-		const sortedPlaylist = [...playlist]
-			.map((track, i) => ({ track, index: i }))
-			.sort((a, b) => {
-				const aScore: number = a.track.score || 0;
-				const bScore: number = b.track.score || 0;
-				if (aScore === bScore) return a.index - b.index; // Keep original order for same votes
-				return bScore - aScore; // Sort descending by votes
-			})
-			.map((item) => item.track);
+	// 	const sortedPlaylist = [...playlist]
+	// 		.map((track, i) => ({ track, index: i }))
+	// 		.sort((a, b) => {
+	// 			const aScore: number = a.track.score || 0;
+	// 			const bScore: number = b.track.score || 0;
+	// 			if (aScore === bScore) return a.index - b.index; // Keep original order for same votes
+	// 			return bScore - aScore; // Sort descending by votes
+	// 		})
+	// 		.map((item) => item.track);
 
-		// Ensure songs don't move above the current track index
-		const finalPlaylist = [
-			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
-			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
-		];
-		setPlaylist(finalPlaylist);
-	};
+	// 	// Ensure songs don't move above the current track index
+	// 	const finalPlaylist = [
+	// 		...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
+	// 		...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
+	// 	];
+	// 	setPlaylist(finalPlaylist);
+	// };
 
 	const navigateToAddSong = () => {
 		console.log("curr room_id:", Room_id);
@@ -111,20 +109,9 @@ const Playlist = () => {
 				<Text style={styles.pageName}>Queue</Text>
 			</View>
 			<View style={styles.songListContainer}>
-				{playlist.length > 0 ? (
-					playlist.map((track, index) => (
-						<SongList
-							key={index}
-							songNumber={index + 1}
-							track={track}
-							showVoting={true}
-							index={index}
-							isCurrent={index === Number(currentTrackIndex)}
-							swapSongs={() => {}} // Not needed here
-							setVoteCount={(newVoteCount) =>
-								handleVoteChange(index, newVoteCount)
-							}
-						/>
+				{roomQueue.length > 0 ? (
+					roomQueue.map((track, index) => (
+						<SongList key={index} track={track} showVoting={true} />
 					))
 				) : (
 					<View style={styles.emptyQueueContainer}>

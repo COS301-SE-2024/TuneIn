@@ -63,7 +63,6 @@ const App: React.FC = () => {
 					const authToken = await StorageService.getItem("token");
 					if (authToken && authToken !== "undefined" && authToken !== "null") {
 						auth.setToken(authToken);
-						live.initialiseSocket();
 					}
 				}
 				// Perform token validation if necessary

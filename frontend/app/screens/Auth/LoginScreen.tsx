@@ -18,7 +18,7 @@ import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
-import { } from  "../../LiveContext";
+import { } from "../../LiveContext";
 
 
 const LoginScreen: React.FC = () => {
