@@ -15,6 +15,7 @@ import {
 	RoomAnalyticsApi,
 	RoomsApi,
 	SearchApi,
+	UserDto,
 	UsersApi,
 } from "../api";
 import * as utils from "./services/Utils";
@@ -33,6 +34,7 @@ interface APIGroup {
 		token: string | null;
 		setToken: React.Dispatch<React.SetStateAction<string | null>>;
 	};
+	getUser: (username: string) => Promise<UserDto>;
 }
 
 const APIContext = createContext<APIGroup | undefined>(undefined);
@@ -52,6 +54,25 @@ const createAPIGroup = (
 			accessToken: token,
 		});
 	}
+
+	const usersAPI: UsersApi = new UsersApi(config);
+
+	const getUser = async (username: string): Promise<UserDto> => {
+		let user: UserDto | null = null;
+		usersAPI
+			.getProfileByUsername(username)
+			.then((response) => {
+				user = response.data;
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+		if (user === null) {
+			throw new Error("Failed to fetch user @ " + username);
+		}
+		return user;
+	};
+
 	return {
 		auth: new AuthApi(config),
 		default: new DefaultApi(config),
@@ -59,9 +80,10 @@ const createAPIGroup = (
 		rooms: new RoomsApi(config),
 		roomAnalytics: new RoomAnalyticsApi(config),
 		search: new SearchApi(config),
-		users: new UsersApi(config),
+		users: usersAPI,
 		authenticated: token !== null,
 		tokenState: { token, setToken },
+		getUser,
 	};
 };
 
