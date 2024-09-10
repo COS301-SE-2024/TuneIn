@@ -7,7 +7,6 @@ import {
 	IsArray,
 	IsBoolean,
 } from "class-validator";
-import { RoomDto } from "../../rooms/dto/room.dto";
 import { SongInfoDto } from "../../rooms/dto/songinfo.dto";
 import { Type } from "class-transformer";
 

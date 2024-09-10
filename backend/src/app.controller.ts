@@ -10,11 +10,9 @@ import {
 } from "@nestjs/common";
 import { AppService } from "./app.service";
 import {
-	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiBody,
 	ApiConsumes,
-	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiSecurity,

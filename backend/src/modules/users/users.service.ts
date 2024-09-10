@@ -9,7 +9,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
-import { IsNumber, IsObject, ValidateNested } from "class-validator";
+import { IsNumber } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
@@ -1081,10 +1081,7 @@ export class UsersService {
 		return result;
 	}
 
-	async sendMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//send message to user
 		try {
 			const newMessage = await this.prisma.message.create({
@@ -1270,10 +1267,7 @@ export class UsersService {
 		}
 	}
 
-	async deleteMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<boolean> {
+	async deleteMessage(message: DirectMessageDto): Promise<boolean> {
 		//delete a message
 		try {
 			await this.prisma.message.delete({
@@ -1286,10 +1280,7 @@ export class UsersService {
 		}
 	}
 
-	async editMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async editMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//edit a message
 		try {
 			const updatedMessage:
@@ -1433,6 +1424,7 @@ export class UsersService {
 	}
 
 	async getBlockedUsers(userID: string): Promise<UserDto[]> {
+		console.log("Getting blocked users for user " + userID);
 		if (true) {
 			//if user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);

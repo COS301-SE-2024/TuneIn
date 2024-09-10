@@ -1,12 +1,6 @@
 //LiveChatMessageDto
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import {
-	IsString,
-	IsDateString,
-	ValidateNested,
-	IsObject,
-	IsDate,
-} from "class-validator";
+import { IsString, ValidateNested, IsObject, IsDate } from "class-validator";
 import { UserDto } from "../../modules/users/dto/user.dto";
 import { Type } from "class-transformer";
 
