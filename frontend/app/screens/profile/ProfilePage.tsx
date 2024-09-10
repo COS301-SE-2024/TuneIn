@@ -290,11 +290,8 @@ const ProfileScreen: React.FC = () => {
 						},
 					},
 				);
-				const hasRoom = await ownsRoom(response.data.room.roomID);
-				const formattedRoomData = preFormatRoomData(
-					response.data.room,
-					hasRoom,
-				);
+				const hasRoom = await ownsRoom(response.data.roomID);
+				const formattedRoomData = preFormatRoomData(response.data, hasRoom);
 				setCurrentRoomData(formatRoomData(formattedRoomData));
 				setRoomCheck(true);
 			}
