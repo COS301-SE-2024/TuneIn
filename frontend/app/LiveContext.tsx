@@ -8,9 +8,14 @@ import React, {
 import { io, Socket } from "socket.io-client";
 import auth from "./services/AuthManagement";
 import * as utils from "./services/Utils";
-import { DirectMessageDto, LiveChatMessageDto, RoomDto, UserDto } from "../api";
-
-import { SimpleSpotifyPlayback } from "./services/SimpleSpotifyPlayback";
+import {
+	DirectMessageDto,
+	LiveChatMessageDto,
+	RoomDto,
+	SpotifyCallbackResponse,
+	SpotifyTokenPair,
+	UserDto,
+} from "../api";
 import { EmojiReactionDto } from "./models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
 import { RoomSongDto } from "./models/RoomSongDto";
@@ -29,6 +34,8 @@ import {
 } from "@spotify/web-api-ts-sdk";
 import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 import { useAPI } from "./APIContext";
+import { AxiosResponse } from "axios";
+import { RequiredError } from "../api/base";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -44,7 +51,7 @@ export type LiveMessage = {
 };
 
 export type DirectMessage = {
-	message: DirectMessageDto,
+	message: DirectMessageDto;
 	me?: boolean;
 	messageSent: boolean;
 	isOptimistic: boolean;
@@ -79,29 +86,38 @@ interface SpotifyPlaybackHandler {
 	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
 }
 
-interface LiveContextType {
-	socket: Socket | null;
-	currentRoom: RoomDto | null;
-	currentUser: UserDto | null;
-	messages: LiveChatMessageDto[];
-	joinRoom: (roomId: string) => void;
-	sendMessage: (message: string) => void;
-	leaveRoom: () => void;
-	// Add any other functions that are used in live room interactions
+interface SpotifyAuth {
+	exchangeCodeWithBackend: (
+		code: string,
+		state: string,
+		redirectURI: string,
+	) => Promise<SpotifyCallbackResponse>;
+	getSpotifyTokens: () => Promise<SpotifyTokenPair | null>;
 }
 
-interface LiveContextControls {
-	joinRoom: (roomId: string) => void;
-	leaveRoom: () => void;
-	enterDM: (otherUser: UserDto) => void;
-	leaveDM: () => void;
+interface LiveContextType {
+	currentUser: UserDto | undefined;
+
 	sendPing: (timeout?: number) => Promise<void>;
 	getTimeOffset: () => void;
 	pollLatency: () => void;
-	calculateSeekTime: (
-		startTimeUtc: number,
-		mediaDurationMs: number,
-	) => Promise<number>;
+
+	currentRoom: RoomDto | undefined;
+	currentSong: RoomSongDto | undefined;
+	joinRoom: (roomId: string) => void;
+	leaveRoom: () => void;
+	roomMessages: LiveMessage[];
+	roomQueue: RoomSongDto[];
+	roomPlaying: boolean;
+	roomEmojiObjects: ObjectConfig[];
+	roomControls: RoomControls;
+
+	dmControls: DirectMessageControls;
+	directMessages: DirectMessage[];
+	enterDM: (otherUser: UserDto) => void;
+	leaveDM: () => void;
+
+	spotifyAuth: SpotifyAuth;
 }
 
 interface QueueControls {
@@ -117,7 +133,7 @@ interface RoomControls {
 	joinRoom: (roomId: string) => void;
 	leaveRoom: () => void;
 	sendLiveChatMessage: (message: string) => void;
-	sendReaction: (emoji: Emoji) => void;
+	sendReaction: (emoji: string) => void;
 	requestLiveChatHistory: () => void;
 	canControlRoom: () => boolean;
 	requestRoomQueue: () => void;
@@ -139,14 +155,6 @@ interface PlaybackControls {
 	stopPlayback: () => void;
 }
 
-export type SpotifyTokenResponse = {
-	access_token: string;
-	token_type: string;
-	scope: string;
-	expires_in: number;
-	refresh_token: string;
-};
-
 export type SpotifyTokenRefreshResponse = {
 	access_token: string;
 	token_type: string;
@@ -154,29 +162,19 @@ export type SpotifyTokenRefreshResponse = {
 	expires_in: number;
 };
 
-export type SpotifyTokenPair = {
-	tokens: SpotifyTokenResponse;
-	epoch_expiry: number;
-};
-
-export type SpotifyCallbackResponse = {
-	token: string;
-	spotifyTokens: SpotifyTokenResponse;
-};
-
 const LiveContext = createContext<LiveContextType | undefined>(undefined);
 
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { users, rooms, authenticated } = useAPI();
-	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
+	const { users, rooms, authenticated, auth, tokenState } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
+	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
 	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
 	const [roomQueue, setRoomQueue] = useState<RoomSongDto[]>([]);
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
-	const [otherDMUser, setOtherDMUser] = useState<UserDto>();
+	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
 	const [dmsConnected, setDmsConnected] = useState<boolean>(false);
 	const [dmsRequested, setDmsRequested] = useState<boolean>(false);
 	const [dmsReceived, setDmsReceived] = useState<boolean>(false);
@@ -210,23 +208,22 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		setRoomQueue(queue);
 	};
 
-	const getUser = () => {
-		if (authenticated && self === null) {
+	useEffect(() => {
+		if (authenticated && !currentUser) {
 			users
 				.getProfile()
-				.then((user: AxiosResponse<UserDto>) => {
-					console.log("User: " + user);
-					if (user.status === 401) {
+				.then((u: AxiosResponse<UserDto>) => {
+					console.log("User: " + u);
+					if (u.status === 401) {
 						//Unauthorized
 						//Auth header is either missing or invalid
-						setUserData(null);
-					} else if (user.status === 500) {
+						setCurrentUser(undefined);
+					} else if (u.status === 500) {
 						//Internal Server Error
 						//Something went wrong in the backend (unlikely lmao)
 						throw new Error("Internal Server Error");
 					}
-					setSelf(user.data);
-					return user.data;
+					setCurrentUser(u.data);
 				})
 				.catch((error) => {
 					if (error instanceof RequiredError) {
@@ -238,8 +235,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				});
 		}
-		return self;
-	};
+	}, [authenticated]);
 
 	const setRoomID = (roomID: string) => {
 		rooms
@@ -249,30 +245,26 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				if (room.status === 401) {
 					//Unauthorized
 					//Auth header is either missing or invalid
-					setCurrentRoomID(null);
-					setCurrentRoomDto(null);
+					setCurrentRoom(undefined);
 					setRoomQueue([]);
 					setCurrentRoomVotes([]);
 				} else if (room.status === 500) {
 					//Internal Server Error
 					//Something went wrong in the backend (unlikely lmao)
-					setCurrentRoomID(null);
-					setCurrentRoomDto(null);
+					setCurrentRoom(undefined);
 					setRoomQueue([]);
 					setCurrentRoomVotes([]);
 					throw new Error("Internal Server Error");
 				} else {
 					const r: RoomDto = room.data;
-					setCurrentRoomID(r.roomID);
-					setCurrentRoomDto(room.data);
+					setCurrentRoom(r);
 					setRoomQueue([]);
 					setCurrentRoomVotes([]);
-					live.fetchRoomQueue();
+					roomControls.requestRoomQueue();
 				}
 			})
 			.catch((error) => {
-				setCurrentRoomID(null);
-				setCurrentRoomDto(null);
+				setCurrentRoom(undefined);
 				setRoomQueue([]);
 				setCurrentRoomVotes([]);
 				if (error instanceof RequiredError) {
@@ -285,64 +277,83 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 	};
 
-	const getSpotifyTokens = async (): Promise<SpotifyTokenPair | null> => {
-		if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
-			if (spotifyTokens.epoch_expiry - Date.now() > 1000 * 60 * 5) {
-				return spotifyTokens;
-			}
-		}
-
-		if (auth.authenticated()) {
+	const spotifyAuth: SpotifyAuth = {
+		exchangeCodeWithBackend: async (
+			code: string,
+			state: string,
+			redirectURI: string,
+		): Promise<SpotifyCallbackResponse> => {
 			try {
-				const token = await auth.getToken();
-				const response = await axios.get(
-					`${utils.API_BASE_URL}/auth/spotify/tokens`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-
-				const r: SpotifyTokenResponse = response.data;
-				return r;
+				auth
+					.spotifyCallback(code, state)
+					.then((sp: AxiosResponse<SpotifyCallbackResponse>) => {
+						if (sp.status === 401) {
+							//Unauthorized
+							//Auth header is either missing or invalid
+						} else if (sp.status === 500) {
+							//Internal Server Error
+							//Something went wrong in the backend (unlikely lmao)
+							throw new Error("Internal Server Error");
+						}
+						setSpotifyTokens(sp.data.spotifyTokens);
+						return sp.data;
+					})
+					.catch((error) => {
+						if (error instanceof RequiredError) {
+							// a required field is missing
+							throw new Error("Parameter missing from request to get user");
+						} else {
+							// some other error
+							throw new Error("Error getting user");
+						}
+					});
 			} catch (error) {
-				console.error("Failed to get tokens:", error);
+				console.error("Failed to exchange code with backend:", error);
 			}
-			throw new Error("Something went wrong while getting Spotify tokens");
-		} else {
-			throw new Error("Cannot fetch Spotify tokens for unauthenticated user");
-		}
-	};
-
-	const exchangeCodeWithBackend = (
-		code: string,
-		state: string,
-		redirectURI: string,
-	): Promise<SpotifyCallbackResponse> => {
-		try {
-			const response = await axios.get(
-				`${utils.API_BASE_URL}/auth/spotify/callback?code=${code}&state=${state}&redirect=${encodeURIComponent(
-					redirectURI,
-				)}`,
-				{
-					headers: {
-						"Content-Type": "application/json",
-					},
-				},
+			throw new Error(
+				"Something went wrong while exchanging code with backend",
 			);
+		},
+		getSpotifyTokens: async (): Promise<SpotifyTokenPair | null> => {
+			if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
+				if (spotifyTokens.epoch_expiry - Date.now() > 1000 * 60 * 5) {
+					return spotifyTokens;
+				}
+			}
 
-			const r: SpotifyCallbackResponse = response.data;
-			return r;
-		} catch (error) {
-			console.error("Failed to exchange code with backend:", error);
-		}
-		throw new Error("Something went wrong while exchanging code with backend");
+			if (authenticated) {
+				auth
+					.getSpotifyTokens()
+					.then((sp: AxiosResponse<SpotifyTokenPair>) => {
+						if (sp.status === 401) {
+							//Unauthorized
+							//Auth header is either missing or invalid
+						} else if (sp.status === 500) {
+							//Internal Server Error
+							//Something went wrong in the backend (unlikely lmao)
+							throw new Error("Internal Server Error");
+						}
+						setSpotifyTokens(sp.data);
+						return sp.data;
+					})
+					.catch((error) => {
+						if (error instanceof RequiredError) {
+							// a required field is missing
+							throw new Error("Parameter missing from request to get user");
+						} else {
+							// some other error
+							throw new Error("Error getting user");
+						}
+					});
+			}
+			console.error("Cannot get Spotify tokens without being authenticated");
+			return null;
+		},
 	};
 
 	const initializeSocket = () => {
 		if (socket.current) {
-			if (!socketInitialized && mounted && currentUser) {
+			if (!socketInitialized && mounted && currentUser !== undefined) {
 				socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: userJoinedRoom", response);
 					const u: UserDto = currentUser;
@@ -360,10 +371,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					(history: LiveChatMessageDto[]) => {
 						console.log("SOCKET EVENT: liveChatHistory", history);
 						setRoomChatReceived(true);
-						const u = currentUser;
 						const chatHistory = history.map((msg) => ({
 							message: msg,
-							me: msg.sender.userID === u.userID,
+							me: msg.sender.userID === currentUser.userID,
 						}));
 						setRoomMessages(chatHistory);
 						setRoomChatRequested(false);
@@ -380,8 +390,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						return;
 					}
 					const message = newMessage.body;
-					const u = currentUser;
-					const me = message.sender.userID === u.userID;
+					const me = message.sender.userID === currentUser.userID;
 					if (me) {
 						if (setMessageSending) {
 							setMessageSending(false);
@@ -417,7 +426,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socket.current.on("connected", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: connected", response);
 					if (currentRoom) {
-						controls.joinRoom(currentRoom.roomID);
+						joinRoom(currentRoom.roomID);
 					}
 				});
 
@@ -431,35 +440,38 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (!response.spotifyID) {
 						throw new Error("Server did not return song ID");
 					}
-					/*
-					const songID: string = response.spotifyID;
-					const spotifyID: string = await songService.getSpotifyID(songID);
-					*/
-
-					const deviceID = await playback.getFirstDevice();
+					const deviceID =
+						await roomControls.playback.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						playback.handlePlayback(
+						await roomControls.playback.playbackHandler.handlePlayback(
 							"play",
 							deviceID,
-							response.spotifyID,
-							await controls.calculateSeekTime(response.UTC_time, 0),
+							await calculateSeekTime(response.UTC_time, 0),
 						);
 					}
 				});
 
 				socket.current.on("pauseMedia", async (response: PlaybackEventDto) => {
 					console.log("SOCKET EVENT: pauseMedia", response);
-					const deviceID = await playback.getFirstDevice();
+					const deviceID =
+						await roomControls.playback.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						playback.handlePlayback("pause", deviceID);
+						roomControls.playback.playbackHandler.handlePlayback(
+							"pause",
+							deviceID,
+						);
 					}
 				});
 
 				socket.current.on("stopMedia", async (response: PlaybackEventDto) => {
 					console.log("SOCKET EVENT: stopMedia", response);
-					const deviceID = await playback.getFirstDevice();
+					const deviceID =
+						await roomControls.playback.playbackHandler.getFirstDevice();
 					if (deviceID && deviceID !== null) {
-						playback.handlePlayback("pause", deviceID);
+						roomControls.playback.playbackHandler.handlePlayback(
+							"pause",
+							deviceID,
+						);
 					}
 				});
 
@@ -474,11 +486,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.current.on("directMessage", (data: DirectMessageDto) => {
 					console.log("SOCKET EVENT: directMessage", data);
-					const u = currentUser;
-					const me = data.sender.userID === u.userID;
+					const me = data.sender.userID === currentUser.userID;
 					const dm = {
 						message: data,
-						me: data.sender.userID === u.userID,
+						me: data.sender.userID === currentUser.userID,
 						messageSent: true,
 					} as DirectMessage;
 					if (me) {
@@ -524,12 +535,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					setDmsReceived(true);
 					console.log("c");
 					console.log("Setting DMs");
-					const u = currentUser;
 					const dmHistory = data.map(
 						(msg: DirectMessageDto) =>
 							({
 								message: msg,
-								me: msg.sender.userID === u.userID,
+								me: msg.sender.userID === currentUser.userID,
 								messageSent: true,
 							}) as DirectMessage,
 					);
@@ -601,233 +611,229 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 
 				setSocketInitialized(true);
-				controls.pollLatency();
+				pollLatency();
 			}
 
 			if (!joined && currentRoom && currentRoom.roomID) {
-				controls.joinRoom(currentRoom.roomID);
+				joinRoom(currentRoom.roomID);
 			}
 		}
 	};
 
-	const controls: LiveContextControls = {
-		joinRoom: (roomID: string) => {
-			if (!currentUser) {
-				console.error("User cannot join room without being logged in");
-				return;
-			}
+	const joinRoom = (roomID: string) => {
+		if (!currentUser) {
+			console.error("User cannot join room without being logged in");
+			return;
+		}
 
-			if (socket) {
-				controls.pollLatency();
-				const u = currentUser;
-				const input: ChatEventDto = {
-					userID: u.userID,
-					body: {
-						messageBody: "",
-						sender: u,
-						roomID: roomID,
-						dateCreated: new Date(),
-					},
-				};
-				socket.current.emit("joinRoom", JSON.stringify(input));
-
-				//request chat history
-				setRoomChatReceived(false);
-				roomControls.requestLiveChatHistory();
-				setRoomChatRequested(true);
-			}
-		},
-		leaveRoom: () => {
-			controls.pollLatency();
-			if (!currentUser) {
-				console.error("User cannot leave room without being logged in");
-				return;
-			}
-
-			if (!currentRoom) {
-				console.error("User cannot leave room without being in a room");
-				return;
-			}
-
-			setJoined(false);
-			const u = currentUser;
+		if (socket) {
+			pollLatency();
 			const input: ChatEventDto = {
-				userID: u.userID,
+				userID: currentUser.userID,
 				body: {
 					messageBody: "",
-					sender: u,
-					roomID: currentRoom.roomID,
-					dateCreated: new Date(),
+					sender: currentUser,
+					roomID: roomID,
+					dateCreated: new Date().toISOString(),
 				},
 			};
-			socket.current.emit("leaveRoom", JSON.stringify(input));
-			setRoomMessages([]);
+			socket.current.emit("joinRoom", JSON.stringify(input));
+
+			//request chat history
 			setRoomChatReceived(false);
-			setRoomChatRequested(false);
-			setCurrentRoom(undefined);
-		},
-		enterDM: function (otherUser: UserDto): void {
-			controls.pollLatency();
-			if (!currentUser) {
-				console.error("User is not logged in");
-				return;
-			}
-			setOtherDMUser(otherUser);
-			setDmsReceived(false);
-			setDmsRequested(true);
-			const u = currentUser;
-			const input = {
-				userID: currentUser.userID,
-				participantID: otherUser.userID,
-			};
-			socket.current.emit("enterDirectMessage", JSON.stringify(input));
-			dmControls.requestDirectMessageHistory();
-		},
+			roomControls.requestLiveChatHistory();
+			setRoomChatRequested(true);
+		}
+	};
 
-		leaveDM: function (): void {
-			controls.pollLatency();
-			if (!currentUser) {
-				console.error("User is not logged in");
-				return;
-			}
+	const leaveRoom = () => {
+		pollLatency();
+		if (!currentUser) {
+			console.error("User cannot leave room without being logged in");
+			return;
+		}
 
-			setConnected(false);
-			const input = {
-				userID: currentUser.userID,
-			};
-			socket.current.emit("exitDirectMessage", JSON.stringify(input));
-			console.log("emit exitDirectMessage with body:", input);
-			setOtherDMUser(undefined);
-			setDmsReceived(false);
-			setDmsRequested(false);
-			setDirectMessages([]);
-		},
-		// Method to send a ping and wait for a response or timeout
-		sendPing: function (timeout: number = TIMEOUT): Promise<void> {
-			if (pingSent) {
-				console.log("A ping is already waiting for a response. Please wait.");
-				return Promise.resolve();
-			}
+		if (!currentRoom) {
+			console.error("User cannot leave room without being in a room");
+			return;
+		}
 
+		setJoined(false);
+
+		const input: ChatEventDto = {
+			userID: currentUser.userID,
+			body: {
+				messageBody: "",
+				sender: currentUser,
+				roomID: currentRoom.roomID,
+				dateCreated: new Date().toISOString(),
+			},
+		};
+		socket.current.emit("leaveRoom", JSON.stringify(input));
+		setRoomMessages([]);
+		setRoomChatReceived(false);
+		setRoomChatRequested(false);
+		setCurrentRoom(undefined);
+	};
+
+	const enterDM = (otherUser: UserDto) => {
+		pollLatency();
+		if (!currentUser) {
+			console.error("User is not logged in");
+			return;
+		}
+		setDmParticipants([otherUser]);
+		setDmsReceived(false);
+		setDmsRequested(true);
+
+		const input = {
+			userID: currentUser.userID,
+			participantID: otherUser.userID,
+		};
+		socket.current.emit("enterDirectMessage", JSON.stringify(input));
+		dmControls.requestDirectMessageHistory();
+	};
+
+	const leaveDM = () => {
+		pollLatency();
+		if (!currentUser) {
+			console.error("User is not logged in");
+			return;
+		}
+
+		setConnected(false);
+		const input = {
+			userID: currentUser.userID,
+		};
+		socket.current.emit("exitDirectMessage", JSON.stringify(input));
+		console.log("emit exitDirectMessage with body:", input);
+		setDmParticipants([]);
+		setDmsReceived(false);
+		setDmsRequested(false);
+		setDirectMessages([]);
+	};
+
+	// Method to send a ping and wait for a response or timeout
+	const sendPing = (timeout: number = TIMEOUT): Promise<void> => {
+		if (pingSent) {
+			console.log("A ping is already waiting for a response. Please wait.");
+			return Promise.resolve();
+		}
+
+		const startTime = Date.now();
+		setPingSent(true);
+		socket.current.volatile.emit("ping", null, (hitTime: string) => {
+			console.log("Ping hit time:", hitTime);
+			console.log("Ping sent successfully.");
+			const roundTripTime = Date.now() - startTime;
+			console.log(`Ping round-trip time: ${roundTripTime}ms`);
+			setPingSent(false);
+			setBackendLatency(roundTripTime);
+		});
+
+		return new Promise<void>((resolve, reject) => {
 			const startTime = Date.now();
 			setPingSent(true);
-			socket.current.volatile.emit("ping", null, (hitTime: string) => {
-				console.log("Ping hit time:", hitTime);
-				console.log("Ping sent successfully.");
-				const roundTripTime = Date.now() - startTime;
-				console.log(`Ping round-trip time: ${roundTripTime}ms`);
-				setPingSent(false);
-				setBackendLatency(roundTripTime);
-			});
 
-			return new Promise<void>((resolve, reject) => {
-				const startTime = Date.now();
-				setPingSent(true);
+			// Set up a timeout
+			// const timeoutId = setTimeout(() => {
+			// 	pingSent = false;
+			// 	console.log("Ping timed out.");
+			// 	reject(new Error("Ping timed out"));
+			// }, timeout);
 
-				// Set up a timeout
-				/*
-				const timeoutId = setTimeout(() => {
-					pingSent = false;
-					console.log("Ping timed out.");
-					reject(new Error("Ping timed out"));
-				}, timeout);
-				*/
+			// Send the ping message with a callback
+			// socket.current.volatile.emit("ping", null, () => {
+			// 	console.log("Ping sent successfully.");
+			// 	clearTimeout(timeoutId);
+			// 	const roundTripTime = Date.now() - startTime;
+			// 	console.log(`Ping round-trip time: ${roundTripTime}ms`);
+			// 	pingSent = false;
+			// 	backendLatency = roundTripTime;
+			// 	resolve();
+			// });
+		}).catch((error) => {
+			console.error("Ping failed:", error.message);
+			// Optionally, retry sending the ping here
+			throw error; // Re-throw the error to maintain the Promise<void> type
+		});
+	};
 
-				// Send the ping message with a callback
-				/*
-				socket.current.volatile.emit("ping", null, () => {
-					console.log("Ping sent successfully.");
-					clearTimeout(timeoutId);
-					const roundTripTime = Date.now() - startTime;
-					console.log(`Ping round-trip time: ${roundTripTime}ms`);
-					pingSent = false;
-					backendLatency = roundTripTime;
-					resolve();
-				});
-				*/
-			}).catch((error) => {
-				console.error("Ping failed:", error.message);
-				// Optionally, retry sending the ping here
-				throw error; // Re-throw the error to maintain the Promise<void> type
-			});
-		},
-		getTimeOffset: function (): void {
-			let t0 = Date.now();
-			socket.current.emit("time_sync", { t0: Date.now() });
-		},
-		//function to find latency from NTP
-		pollLatency: function (): void {
-			controls.sendPing().then(() => {
-				console.log("Ping sent");
-				controls.getTimeOffset();
-				console.log("Awaiting time offset");
-			});
-		},
-		calculateSeekTime: async (
-			startTimeUtc: number,
-			mediaDurationMs: number,
-		): Promise<number> => {
-			await controls.pollLatency();
-			console.log(`Device is ${backendLatency} ms behind the server`);
-			console.log(`Device's clock is ${timeOffset} ms behind the server`);
-			console.log(
-				`Media is supposed to start at ${startTimeUtc} ms since epoch`,
-			);
+	const getTimeOffset = () => {
+		let t0 = Date.now();
+		socket.current.emit("time_sync", { t0: Date.now() });
+	};
 
-			// Get the current server time
-			const serverTime = Date.now() + timeOffset;
+	//function to find latency from NTP
+	const pollLatency = () => {
+		sendPing().then(() => {
+			console.log("Ping sent");
+			getTimeOffset();
+			console.log("Awaiting time offset");
+		});
+	};
 
-			// Convert startTimeUtc to milliseconds since epoch
-			const startTimeMs = new Date(startTimeUtc).getTime();
+	const calculateSeekTime = async (
+		startTimeUtc: number,
+		mediaDurationMs: number,
+	): Promise<number> => {
+		await pollLatency();
+		console.log(`Device is ${backendLatency} ms behind the server`);
+		console.log(`Device's clock is ${timeOffset} ms behind the server`);
+		console.log(`Media is supposed to start at ${startTimeUtc} ms since epoch`);
 
-			// Calculate the elapsed time since media started
-			const elapsedTimeMs = serverTime - startTimeMs;
+		// Get the current server time
+		const serverTime = Date.now() + timeOffset;
 
-			// Calculate the seek position within the media duration
-			let seekPosition = Math.max(0, Math.min(elapsedTimeMs, mediaDurationMs));
+		// Convert startTimeUtc to milliseconds since epoch
+		const startTimeMs = new Date(startTimeUtc).getTime();
 
-			console.log(`Seek position: ${seekPosition} ms`);
-			return seekPosition;
-		},
+		// Calculate the elapsed time since media started
+		const elapsedTimeMs = serverTime - startTimeMs;
+
+		// Calculate the seek position within the media duration
+		let seekPosition = Math.max(0, Math.min(elapsedTimeMs, mediaDurationMs));
+
+		console.log(`Seek position: ${seekPosition} ms`);
+		return seekPosition;
 	};
 
 	const dmControls: DirectMessageControls = {
 		sendDirectMessage: function (message: DirectMessage): void {
-			controls.pollLatency();
+			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
 			}
 
-			if (!otherDMUser) {
+			if (dmParticipants.length === 0) {
 				console.error("User is not sending a message to anyone");
 				return;
 			}
 
 			if (message.message.messageBody.trim()) {
 				message.message.sender = currentUser;
-				message.message.recipient = otherDMUser;
+				message.message.recipient = dmParticipants[0];
 				socket.current.emit("directMessage", JSON.stringify(message.message));
 			}
 		},
 
 		editDirectMessage: function (message: DirectMessage): void {
-			controls.pollLatency();
+			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
 			}
 
-			if (!otherDMUser) {
+			if (dmParticipants.length === 0) {
 				console.error("User is not sending a message to anyone");
 				return;
 			}
 
-			if (message.message.body.trim()) {
-				const u = currentUser;
+			if (message.message.messageBody.trim()) {
 				let payload = {
-					userID: u.userID,
-					participantID: otherDMUser.userID,
+					userID: currentUser.userID,
+					participantID: dmParticipants[0].userID,
 					action: "edit",
 					message: message.message,
 				};
@@ -841,15 +847,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
-			if (!otherDMUser) {
+			if (dmParticipants.length === 0) {
 				console.error("User is not sending a message to anyone");
 				return;
 			}
 
-			const u = currentUser;
 			let payload = {
-				userID: u.userID,
-				participantID: otherDMUser.userID,
+				userID: currentUser.userID,
+				participantID: dmParticipants[0].userID,
 				action: "delete",
 				message: message.message,
 			};
@@ -867,18 +872,16 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
-			if (!otherDMUser) {
+			if (dmParticipants.length === 0) {
 				console.error("User is not sending a message to anyone");
 				return;
 			}
 
-			setOtherDMUser(otherDMUser);
 			setDmsReceived(false);
 			setDmsRequested(true);
-			const u = sender;
 			const input = {
-				userID: u.userID,
-				participantID: participantID,
+				userID: currentUser.userID,
+				participantID: dmParticipants[0].userID,
 			};
 			socket.current.emit("getDirectMessageHistory", JSON.stringify(input));
 		},
@@ -892,15 +895,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 
 			if (socket) {
-				controls.pollLatency();
-				const u = currentUser;
+				pollLatency();
 				const input: ChatEventDto = {
-					userID: u.userID,
+					userID: currentUser.userID,
 					body: {
 						messageBody: "",
-						sender: u,
+						sender: currentUser,
 						roomID: roomID,
-						dateCreated: new Date(),
+						dateCreated: new Date().toISOString(),
 					},
 				};
 				socket.current.emit("joinRoom", JSON.stringify(input));
@@ -913,7 +915,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 
 		leaveRoom: function (): void {
-			controls.pollLatency();
+			pollLatency();
 			if (!currentUser) {
 				console.error("User cannot leave room without being logged in");
 				return;
@@ -925,14 +927,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 
 			setJoined(false);
-			const u = currentUser;
+
 			const input: ChatEventDto = {
-				userID: u.userID,
+				userID: currentUser.userID,
 				body: {
 					messageBody: "",
-					sender: u,
+					sender: currentUser,
 					roomID: currentRoom.roomID,
-					dateCreated: new Date(),
+					dateCreated: new Date().toISOString(),
 				},
 			};
 			socket.current.emit("leaveRoom", JSON.stringify(input));
@@ -943,7 +945,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 
 		sendLiveChatMessage: function (message: string): void {
-			controls.pollLatency();
+			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
@@ -955,30 +957,29 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 
 			if (message.trim()) {
-				const u = currentUser;
 				const newMessage = {
 					messageBody: message,
-					sender: u,
+					sender: currentUser,
 					roomID: currentRoom.roomID,
-					dateCreated: new Date(),
+					dateCreated: new Date().toISOString(),
 				};
 				const input: ChatEventDto = {
-					userID: u.userID,
+					userID: currentUser.userID,
 					body: newMessage,
 				};
 				socket.current.emit("liveMessage", JSON.stringify(input));
 			}
 		},
 
-		sendReaction: function (emoji: Emoji): void {
+		sendReaction: function (emoji: string): void {
 			if (!currentUser) {
 				return;
 			}
-			const u = currentUser;
+
 			const newReaction: EmojiReactionDto = {
 				date_created: new Date(),
 				body: emoji,
-				userID: u.userID,
+				userID: currentUser.userID,
 			};
 			//make it volatile so that it doesn't get queued up
 			//nothing will be lost if it doesn't get sent
@@ -1010,10 +1011,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					messageBody: "",
 					sender: currentUser,
 					roomID: currentRoom.roomID,
-					dateCreated: new Date(),
+					dateCreated: new Date().toISOString(),
 				},
 			};
-			this.socket.emit("getLiveChatHistory", JSON.stringify(input));
+			socket.current.emit("getLiveChatHistory", JSON.stringify(input));
 		},
 
 		canControlRoom: function (): boolean {
@@ -1128,11 +1129,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 						if (response.ok) {
 							console.log("Playback action successful");
-							if (action === "play") {
-								this._isPlaying = true;
-							} else if (action === "pause") {
-								this._isPlaying = false;
-							}
+							// if (action === "play") {
+							// 	this._isPlaying = true;
+							// } else if (action === "pause") {
+							// 	this._isPlaying = false;
+							// }
 						} else {
 							throw new Error(`HTTP error! Status: ${response.status}`);
 						}
@@ -1145,13 +1146,16 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						throw new Error("Spotify tokens not found");
 					}
 					try {
-						const devices = spotifyDevices;
-						if (!devices.devices || devices.devices.length === 0) {
-							devices = { devices: await this.getDeviceIDs() };
+						let d = spotifyDevices;
+						if (!d.devices || d.devices.length === 0) {
+							d = {
+								devices:
+									await roomControls.playback.playbackHandler.getDevices(),
+							};
 						}
 
-						if (devices.devices.length > 0) {
-							const first: Device = devices.devices[0];
+						if (d.devices.length > 0) {
+							const first: Device = d.devices[0];
 							if (!first.id) {
 								throw new Error("Device ID not found");
 							}
@@ -1186,11 +1190,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				},
 				getDeviceIDs: async function (): Promise<string[]> {
+					let devices: Device[];
 					if (spotifyDevices.devices.length === 0) {
-						const devices = await this.getDevices();
-						return devices.map((device) => device.id);
+						devices = await roomControls.playback.playbackHandler.getDevices();
+					} else {
+						devices = spotifyDevices.devices;
 					}
-					return spotifyDevices.devices.map((device) => device.id);
+					const result: string[] = [];
+					for (const device of devices) {
+						if (device.id) {
+							result.push(device.id);
+						}
+					}
+					return result;
 				},
 				userListeningToRoom: async function (
 					currentTrackUri: string,
@@ -1201,7 +1213,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (!validTrackUri(currentTrackUri)) {
 						throw new Error("Invalid track URI");
 					}
-					if (isPlaying()) {
+					if (roomPlaying) {
 						const api = SpotifyApi.withAccessToken(
 							clientId,
 							spotifyTokens.tokens,
@@ -1219,7 +1231,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				},
 			},
 			startPlayback: function (): void {
-				controls.pollLatency();
+				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
 					return;
@@ -1238,7 +1250,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 
 			pausePlayback: function (): void {
-				controls.pollLatency();
+				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
 					return;
@@ -1257,7 +1269,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 
 			stopPlayback: function (): void {
-				controls.pollLatency();
+				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
 					return;
@@ -1393,13 +1405,28 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	return (
 		<LiveContext.Provider
 			value={{
-				socket,
-				currentRoom,
 				currentUser,
-				messages,
+
+				sendPing,
+				getTimeOffset,
+				pollLatency,
+
+				currentRoom,
+				currentSong,
 				joinRoom,
-				sendMessage,
 				leaveRoom,
+				roomMessages,
+				roomQueue,
+				roomPlaying,
+				roomEmojiObjects,
+				roomControls,
+
+				dmControls,
+				directMessages,
+				enterDM,
+				leaveDM,
+
+				spotifyAuth,
 			}}
 		>
 			{children}
