@@ -178,7 +178,7 @@ describe("Search Component", () => {
 		fireEvent.press(getByText("View More Filters"));
 
 		// Check if the additional filters are shown
-		waitFor(() => {
+		await waitFor(() => {
 			expect(getByTestId("host-toggle")).toBeTruthy();
 			expect(getByTestId("room-count-toggle")).toBeTruthy();
 		});
@@ -186,7 +186,7 @@ describe("Search Component", () => {
 		// Press the button to hide more filters
 		fireEvent.press(getByText("View Less Filters"));
 
-		waitFor(() => {
+		awaitwaitFor(() => {
 			// Check if the additional filters are hidden
 			expect(queryByTestId("host-toggle")).toBeNull();
 			expect(queryByTestId("room-count-toggle")).toBeNull();
@@ -212,7 +212,7 @@ describe("Search Component", () => {
 		});
 	});
 
-	it("should handle nsfw filter switch", () => {
+	it("should handle nsfw filter switch", async () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
@@ -226,12 +226,12 @@ describe("Search Component", () => {
 		fireEvent(nsfwSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		waitFor(() => {
+		await waitFor(() => {
 			expect(nsfwSwitch.props.value).toBe(true);
 		});
 	});
 
-	it("should handle temp filter switch", () => {
+	it("should handle temp filter switch", async () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
@@ -245,7 +245,7 @@ describe("Search Component", () => {
 		fireEvent(tempSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		waitFor(() => {
+		await waitFor(() => {
 			expect(tempSwitch.props.value).toBe(true);
 		});
 	});
@@ -267,7 +267,7 @@ describe("Search Component", () => {
 		expect(privSwitch.props.value).toBe(true);
 	});
 
-	it("should handle scheduled filter switch", () => {
+	it("should handle scheduled filter switch", async () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
@@ -281,7 +281,7 @@ describe("Search Component", () => {
 		fireEvent(scheduledSwitch, "valueChange", true);
 
 		// Verify the switch value has changed
-		waitFor(() => {
+		await waitFor(() => {
 			expect(scheduledSwitch.props.value).toBe(true);
 		});
 	});

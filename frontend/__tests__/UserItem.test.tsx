@@ -110,7 +110,7 @@ describe("UserItem component", () => {
 		);
 	});
 
-	it("handles unfollow request when following", () => {
+	it("handles unfollow request when following", async () => {
 		const mockPlayerContextValue = {
 			userData: {
 				username: "follower",
@@ -129,12 +129,12 @@ describe("UserItem component", () => {
 
 		fireEvent.press(getByTestId("follow-button"));
 
-		waitFor(() => {
+		await waitFor(() => {
 			expect(getByText("Follow")).toBeTruthy();
 		});
 	});
 
-	it("handles follow request when not following", () => {
+	it("handles follow request when not following", async () => {
 		const mockPlayerContextValue = {
 			userData: {
 				username: "unfollower",
@@ -153,7 +153,7 @@ describe("UserItem component", () => {
 
 		fireEvent.press(getByTestId("follow-button"));
 
-		waitFor(() => {
+		await waitFor(() => {
 			expect(getByText("Unfollow")).toBeTruthy();
 		});
 	});

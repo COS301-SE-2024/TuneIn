@@ -44,32 +44,32 @@ describe("RoomCardWidget component", () => {
 	});
 
 	it("renders correctly when 'mine' is true", () => {
-		// const roomCard: Room = {
-		// 	userID: "TestUser",
-		// 	name: "My Room",
-		// 	description: "Personal room description",
-		// 	backgroundImage: "https://example.com/my-room-background.jpg",
-		// 	songName: null,
-		// 	artistName: null,
-		// 	username: "myusername",
-		// 	userProfile: "https://example.com/my-profile.jpg",
-		// 	mine: true,
-		// 	tags: ["personal", "private"],
-		// };
-		// const { getByText, queryByTestId } = render(
-		// 	<RoomCardWidget roomCard={roomCard} />,
-		// );
-		// // Assert room name
-		// expect(getByText("My Room")).toBeTruthy();
-		// // Assert description
-		// expect(getByText("Personal room description")).toBeTruthy();
-		// // Assert username
-		// expect(getByText("✎")).toBeTruthy();
-		// // Assert tags
-		// expect(getByText("personal • private")).toBeTruthy();
-		// // Assert background image source
-		// const imageBackground = queryByTestId("room-card-background");
-		// expect(imageBackground.props.source.uri).toBe(roomCard.backgroundImage);
+		const roomCard: Room = {
+			userID: "TestUser",
+			name: "My Room",
+			description: "Personal room description",
+			backgroundImage: "https://example.com/my-room-background.jpg",
+			songName: null,
+			artistName: null,
+			username: "myusername",
+			userProfile: "https://example.com/my-profile.jpg",
+			mine: true,
+			tags: ["personal", "private"],
+		};
+		const { getByText, queryByTestId } = render(
+			<RoomCardWidget roomCard={roomCard} />,
+		);
+		// Assert room name
+		expect(getByText("My Room")).toBeTruthy();
+		// Assert description
+		expect(getByText("Personal room description")).toBeTruthy();
+		// Assert username
+		expect(getByText("✎")).toBeTruthy();
+		// Assert tags
+		expect(getByText("personal • private")).toBeTruthy();
+		// Assert background image source
+		const imageBackground = queryByTestId("room-card-background");
+		expect(imageBackground?.props.source.uri).toBe(roomCard.backgroundImage);
 	});
 
 	it("renders correctly when songName and artistName are null", () => {
