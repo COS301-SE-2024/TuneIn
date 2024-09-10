@@ -827,6 +827,25 @@ export class UsersController {
 		await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
 
+	// create endpoint to get a user's recommended users
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("recommended/users")
+	@ApiOperation({ summary: "Get recommended users" })
+	@ApiOkResponse({
+		description: "Recommended users retrieved successfully",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("users")
+	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedUsers(userInfo.id);
+	}
+
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":username/room/current")
