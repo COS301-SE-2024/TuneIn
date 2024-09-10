@@ -38,6 +38,7 @@ export class DtoGenService {
 		//get user info
 		const result: UserDto = this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
+		// const preferences = await this.dbUtils.getPreferences(user);
 		const fav_genres = await this.prisma.favorite_genres.findMany({
 			where: { user_id: userID },
 			include: { genre: true },

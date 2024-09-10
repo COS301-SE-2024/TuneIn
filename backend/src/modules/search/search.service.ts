@@ -5,7 +5,6 @@ import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import * as PrismaTypes from "@prisma/client";
-import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import * as sqlstring from "sqlstring";
 import { PrismaService } from "../../../prisma/prisma.service";
@@ -51,7 +50,6 @@ export class CombinedSearchHistory {
 export class SearchService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 	) {}
 

@@ -14,7 +14,6 @@ import {
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
-	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiQuery,

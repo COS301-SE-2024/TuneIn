@@ -9,23 +9,6 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import {
-	subHours,
-	addHours,
-	isBefore,
-	startOfHour,
-	startOfDay,
-} from "date-fns";
-import {
-	RoomAnalyticsQueueDto,
-	RoomAnalyticsParticipationDto,
-	RoomAnalyticsInteractionsDto,
-	RoomAnalyticsVotesDto,
-	RoomAnalyticsSongsDto,
-	RoomAnalyticsContributorsDto,
-	RoomAnalyticsDto,
-	RoomAnalyticsKeyMetricsDto,
-} from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
@@ -389,11 +372,11 @@ export class RoomsService {
 		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
-	clearRoomQueue(userID: string, roomID: string): boolean {
-		// TODO: Implement logic to clear room queue
-		console.log(roomID);
-		return false;
-	}
+	// clearRoomQueue(userID: string, roomID: string): boolean {
+	// 	// TODO: Implement logic to clear room queue
+	// 	console.log(roomID);
+	// 	return false;
+	// }
 
 	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue
