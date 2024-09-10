@@ -74,18 +74,6 @@ const validTrackUri = (uri: string): boolean => {
 	return true;
 };
 
-interface SpotifyPlaybackHandler {
-	handlePlayback: (
-		action: string,
-		deviceID: string,
-		offset?: number,
-	) => Promise<void>;
-	getFirstDevice: () => Promise<string | null>;
-	getDevices: () => Promise<Device[]>;
-	getDeviceIDs: () => Promise<string[]>;
-	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
-}
-
 interface SpotifyAuth {
 	exchangeCodeWithBackend: (
 		code: string,
@@ -146,8 +134,17 @@ interface DirectMessageControls {
 	requestDirectMessageHistory: () => void;
 }
 
-interface PlaybackControls {
-	playbackHandler: SpotifyPlaybackHandler;
+interface Playback {
+	spotifyDevices: Devices;
+	handlePlayback: (
+		action: string,
+		deviceID: string,
+		offset?: number,
+	) => Promise<void>;
+	getFirstDevice: () => Promise<string | null>;
+	getDevices: () => Promise<Device[]>;
+	getDeviceIDs: () => Promise<string[]>;
+	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
 	startPlayback: () => void;
 	pausePlayback: () => void;
 	stopPlayback: () => void;
@@ -953,183 +950,178 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			socket.current.emit("requestQueue", JSON.stringify(input));
 		},
 
-		playback: {
-			playbackHandler: {
-				handlePlayback: async function (
-					action: string,
-					deviceID: string,
-					offset?: number,
-				): Promise<void> {
-					try {
-						if (!spotifyTokens) {
-							throw new Error("Spotify tokens not found");
-						}
-						if (!currentSong) {
-							throw new Error("No song is currently playing");
-						}
-
-						const uri: string = `spotify:track:${currentSong.spotifyID}`;
-						if (!validTrackUri(uri)) {
-							throw new Error("Invalid track URI");
-						}
-
-						const activeDevice =
-							await roomControls.playback.playbackHandler.getFirstDevice();
-						if (!activeDevice) {
-							Alert.alert("Please connect a device to Spotify");
-							return;
-						}
-						console.log("active device:", activeDevice);
-						console.log("(action, uri, offset):", action, uri, offset);
-
-						let url = "";
-						let method = "";
-						let body: any = null;
-
-						switch (action) {
-							case "play":
-								if (uri) {
-									body = {
-										uris: [uri],
-										position_ms: offset || 0,
-									};
-								}
-								url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
-								method = "PUT";
-								break;
-							case "pause":
-								url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
-								method = "PUT";
-								break;
-							case "next":
-								url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
-								method = "POST";
-								break;
-							case "previous":
-								url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
-								method = "POST";
-								break;
-							default:
-								throw new Error("Unknown action");
-						}
-
-						const response = await fetch(url, {
-							method,
-							headers: {
-								Authorization: `Bearer ${spotifyTokens.tokens.access_token}`,
-								"Content-Type": "application/json",
-							},
-							body: body ? JSON.stringify(body) : undefined,
-						});
-
-						console.log("Request URL:", url);
-						console.log("Request Method:", method);
-						if (body) {
-							console.log("Request Body:", JSON.stringify(body, null, 2));
-						}
-
-						if (response.ok) {
-							console.log("Playback action successful");
-							// if (action === "play") {
-							// 	this._isPlaying = true;
-							// } else if (action === "pause") {
-							// 	this._isPlaying = false;
-							// }
-						} else {
-							throw new Error(`HTTP error! Status: ${response.status}`);
-						}
-					} catch (err) {
-						console.error("An error occurred while controlling playback", err);
-					}
-				},
-				getFirstDevice: async function (): Promise<string> {
+		playbackHandler: {
+			spotifyDevices,
+			handlePlayback: async function (
+				action: string,
+				deviceID: string,
+				offset?: number,
+			): Promise<void> {
+				try {
 					if (!spotifyTokens) {
 						throw new Error("Spotify tokens not found");
 					}
-					try {
-						let d = spotifyDevices;
-						if (!d.devices || d.devices.length === 0) {
-							d = {
-								devices:
-									await roomControls.playback.playbackHandler.getDevices(),
-							};
-						}
+					if (!currentSong) {
+						throw new Error("No song is currently playing");
+					}
 
-						if (d.devices.length > 0) {
-							const first: Device = d.devices[0];
-							if (!first.id) {
-								throw new Error("Device ID not found");
-							}
-							return first.id;
-						} else {
-							Alert.alert(
-								"No Devices Found",
-								"No devices are currently active.",
-							);
-							throw new Error("No devices found");
-						}
-					} catch (err) {
-						console.error("An error occurred while getting the device ID", err);
-						throw err;
-					}
-				},
-				getDevices: async function (): Promise<Device[]> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					try {
-						const api = SpotifyApi.withAccessToken(
-							clientId,
-							spotifyTokens.tokens,
-						);
-						const data: Devices = await api.player.getAvailableDevices();
-						setSpotifyDevices(data);
-						return data.devices;
-					} catch (err) {
-						console.error("An error occurred while fetching devices", err);
-						throw err;
-					}
-				},
-				getDeviceIDs: async function (): Promise<string[]> {
-					let devices: Device[];
-					if (spotifyDevices.devices.length === 0) {
-						devices = await roomControls.playback.playbackHandler.getDevices();
-					} else {
-						devices = spotifyDevices.devices;
-					}
-					const result: string[] = [];
-					for (const device of devices) {
-						if (device.id) {
-							result.push(device.id);
-						}
-					}
-					return result;
-				},
-				userListeningToRoom: async function (
-					currentTrackUri: string,
-				): Promise<boolean> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					if (!validTrackUri(currentTrackUri)) {
+					const uri: string = `spotify:track:${currentSong.spotifyID}`;
+					if (!validTrackUri(uri)) {
 						throw new Error("Invalid track URI");
 					}
-					if (roomPlaying) {
-						const api = SpotifyApi.withAccessToken(
-							clientId,
-							spotifyTokens.tokens,
-						);
-						const playbackState: PlaybackState =
-							await api.player.getPlaybackState();
-						if (!playbackState) {
-							return false;
-						}
-						if (playbackState.item.uri === currentTrackUri) {
-							return true;
-						}
+
+					const activeDevice =
+						await roomControls.playbackHandler.getFirstDevice();
+					if (!activeDevice) {
+						Alert.alert("Please connect a device to Spotify");
+						return;
 					}
-					return false;
-				},
+					console.log("active device:", activeDevice);
+					console.log("(action, uri, offset):", action, uri, offset);
+
+					let url = "";
+					let method = "";
+					let body: any = null;
+
+					switch (action) {
+						case "play":
+							if (uri) {
+								body = {
+									uris: [uri],
+									position_ms: offset || 0,
+								};
+							}
+							url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
+							method = "PUT";
+							break;
+						case "pause":
+							url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
+							method = "PUT";
+							break;
+						case "next":
+							url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
+							method = "POST";
+							break;
+						case "previous":
+							url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
+							method = "POST";
+							break;
+						default:
+							throw new Error("Unknown action");
+					}
+
+					const response = await fetch(url, {
+						method,
+						headers: {
+							Authorization: `Bearer ${spotifyTokens.tokens.access_token}`,
+							"Content-Type": "application/json",
+						},
+						body: body ? JSON.stringify(body) : undefined,
+					});
+
+					console.log("Request URL:", url);
+					console.log("Request Method:", method);
+					if (body) {
+						console.log("Request Body:", JSON.stringify(body, null, 2));
+					}
+
+					if (response.ok) {
+						console.log("Playback action successful");
+						// if (action === "play") {
+						// 	this._isPlaying = true;
+						// } else if (action === "pause") {
+						// 	this._isPlaying = false;
+						// }
+					} else {
+						throw new Error(`HTTP error! Status: ${response.status}`);
+					}
+				} catch (err) {
+					console.error("An error occurred while controlling playback", err);
+				}
+			},
+			getFirstDevice: async function (): Promise<string> {
+				if (!spotifyTokens) {
+					throw new Error("Spotify tokens not found");
+				}
+				try {
+					let d = spotifyDevices;
+					if (!d.devices || d.devices.length === 0) {
+						d = {
+							devices: await roomControls.playbackHandler.getDevices(),
+						};
+					}
+
+					if (d.devices.length > 0) {
+						const first: Device = d.devices[0];
+						if (!first.id) {
+							throw new Error("Device ID not found");
+						}
+						return first.id;
+					} else {
+						Alert.alert("No Devices Found", "No devices are currently active.");
+						throw new Error("No devices found");
+					}
+				} catch (err) {
+					console.error("An error occurred while getting the device ID", err);
+					throw err;
+				}
+			},
+			getDevices: async function (): Promise<Device[]> {
+				if (!spotifyTokens) {
+					throw new Error("Spotify tokens not found");
+				}
+				try {
+					const api = SpotifyApi.withAccessToken(
+						clientId,
+						spotifyTokens.tokens,
+					);
+					const data: Devices = await api.player.getAvailableDevices();
+					setSpotifyDevices(data);
+					return data.devices;
+				} catch (err) {
+					console.error("An error occurred while fetching devices", err);
+					throw err;
+				}
+			},
+			getDeviceIDs: async function (): Promise<string[]> {
+				let devices: Device[];
+				if (spotifyDevices.devices.length === 0) {
+					devices = await roomControls.playbackHandler.getDevices();
+				} else {
+					devices = spotifyDevices.devices;
+				}
+				const result: string[] = [];
+				for (const device of devices) {
+					if (device.id) {
+						result.push(device.id);
+					}
+				}
+				return result;
+			},
+			userListeningToRoom: async function (
+				currentTrackUri: string,
+			): Promise<boolean> {
+				if (!spotifyTokens) {
+					throw new Error("Spotify tokens not found");
+				}
+				if (!validTrackUri(currentTrackUri)) {
+					throw new Error("Invalid track URI");
+				}
+				if (roomPlaying) {
+					const api = SpotifyApi.withAccessToken(
+						clientId,
+						spotifyTokens.tokens,
+					);
+					const playbackState: PlaybackState =
+						await api.player.getPlaybackState();
+					if (!playbackState) {
+						return false;
+					}
+					if (playbackState.item.uri === currentTrackUri) {
+						return true;
+					}
+				}
+				return false;
 			},
 			startPlayback: function (): void {
 				pollLatency();
@@ -1225,7 +1217,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socket.current.emit("requestQueue", JSON.stringify(input));
 				console.log("emitted: requestQueue");
 			},
-			upvoteSong: function (song: RoomSongDto, vote: VoteDto): void {
+			upvoteSong: function (song: RoomSongDto): void {
 				if (!currentRoom) {
 					return;
 				}
@@ -1239,7 +1231,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				};
 				socket.current.emit("upvoteSong", JSON.stringify(input));
 			},
-			downvoteSong: function (song: RoomSongDto, vote: VoteDto): void {
+			downvoteSong: function (song: RoomSongDto): void {
 				if (!currentRoom) {
 					return;
 				}
@@ -1342,7 +1334,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (t !== null) {
 						tokens = t;
 						setSpotifyTokens(tokens);
-						roomControls.playback.playbackHandler.getDevices();
+						roomControls.playbackHandler.getDevices();
 					}
 				})
 				.catch((error) => {
