@@ -27,6 +27,7 @@ import { SearchHistoryDto } from "../models/SearchHistoryDto";
 import ToggleButton from "../components/ToggleButton";
 import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
+import FilterBottomSheet from "../components/FilterBottomSheet";
 
 type SearchResult = {
 	id: string;
@@ -152,6 +153,7 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
+		console.log("Selected Genre: " + selectedGenre);
 		const getRecommendedRooms = async () => {
 			setLoading(true);
 			try {
@@ -230,6 +232,7 @@ const Search: React.FC = () => {
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
+		console.log("handle search genre: " + selectedGenre);
 		const advanced = isAdvancedSearch();
 		setDropdownVisible(false);
 		setLoading(true);
@@ -725,119 +728,13 @@ const Search: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
-			{(!filter ||
-				(filter === "user" && showMoreFilters) ||
-				(filter === "room" && showMoreFilters)) && (
-				<>
-					{(filter === "user" || !filter) && (
-						<View style={styles.additionalFilters}>
-							{showMoreFilters && (
-								<View style={styles.includeSection}>
-									<Text style={styles.includeHeader}>Search by:</Text>
-									<View style={styles.searchBy}>
-										<ToggleButton
-											label="Minimum Followers"
-											value={minFollowers}
-											onValueChange={setMinFollowers}
-											testID="minFol-btn"
-										/>
-										<ToggleButton
-											label="Minimum Following"
-											value={maxFollowers}
-											onValueChange={setMaxFollowers}
-											testID="maxFl-btn"
-										/>
-									</View>
-								</View>
-							)}
-						</View>
-					)}
-
-					{(filter === "room" || !filter) && (
-						<ScrollView style={styles.additionalFilters}>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Search by:</Text>
-								<View style={styles.searchBy}>
-									<ToggleButton
-										label="Host"
-										testID="host-toggle"
-										value={host}
-										onValueChange={setHost}
-									/>
-									<ToggleButton
-										label="Room Count"
-										testID="room-count-toggle"
-										value={roomCount}
-										onValueChange={setRoomCount}
-									/>
-								</View>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Include:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Explicit</Text>
-									<Switch
-										testID="explicit-switch"
-										value={explicit}
-										onValueChange={setExplicit}
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>NSFW</Text>
-									<Switch
-										testID="nsfw-switch"
-										value={nsfw}
-										onValueChange={setNsfw}
-									/>
-								</View>
-							</View>
-							<View style={styles.dropContainer}>
-								<Dropdown
-									options={genres}
-									placeholder="Select Genre"
-									onSelect={handleSelectGenre}
-									selectedOption={selectedGenre}
-									setSelectedOption={setSelectedGenre}
-								/>
-								<Dropdown
-									options={languages}
-									placeholder="Select Language"
-									onSelect={handleSelectLanguage}
-									selectedOption={selectedLanguage}
-									setSelectedOption={setSelectedLanguage}
-								/>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Other:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch
-										value={temporary}
-										onValueChange={setTemporary}
-										testID="temp-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Private</Text>
-									<Switch
-										value={isPrivate}
-										onValueChange={setIsPrivate}
-										testID="priv-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch
-										value={scheduled}
-										onValueChange={setScheduled}
-										testID="scheduled-switch"
-									/>
-								</View>
-							</View>
-						</ScrollView>
-					)}
-				</>
-			)}
+			<FilterBottomSheet
+				showMoreFilters={showMoreFilters}
+				setShowMoreFilters={setShowMoreFilters}
+				filter={filter}
+				selectedGenre={selectedGenre}
+				setSelectedGenre={setSelectedGenre}
+			/>
 
 			{loading ? (
 				!showMoreFilters && (
