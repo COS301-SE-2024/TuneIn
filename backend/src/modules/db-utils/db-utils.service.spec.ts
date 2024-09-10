@@ -546,13 +546,13 @@ describe("DbUtilsService", () => {
 		});
 	});
 	describe("getFriendRequests", () => {
-		it("should return null if no friend requests are found", async () => {
+		it("should throw Error if no friend requests are found", async () => {
 			jest
 				.spyOn(mockPrismaService.friends, "findMany")
 				.mockResolvedValueOnce(null);
-
-			const result = await service.getFriendRequests("userID");
-			expect(result).toBeNull();
+			await expect(service.getFriendRequests("userID")).rejects.toThrowError(
+				"An unexpected error occurred in the database.",
+			);
 		});
 
 		it("should return an array of friend requests if found", async () => {
