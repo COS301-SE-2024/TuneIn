@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RoomSongDto } from "../../models/RoomSongDto";
-import { live } from "../../services/Live";
+import { } from  "../../LiveContext";
+
 
 interface VotingProps {
 	song: RoomSongDto;

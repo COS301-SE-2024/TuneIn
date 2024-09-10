@@ -4,7 +4,6 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { API_BASE_URL } from "./services/Utils";
-import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
@@ -57,7 +56,7 @@ const App: React.FC = () => {
 
 				const cognitoToken = await StorageService.getItem("cognitoToken");
 				if (cognitoToken) {
-					auth.exchangeCognitoToken(cognitoToken, live.initialiseSocket, true);
+					auth.exchangeCognitoToken(cognitoToken);
 				}
 
 				if (!auth.tokenSet) {

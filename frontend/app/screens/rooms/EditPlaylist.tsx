@@ -13,14 +13,14 @@ import { useSpotifySearch } from "../../hooks/useSpotifySearch";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming useLocalSearchParams is correctly implemented
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { live } from "../../services/Live";
+import { } from  "../../LiveContext";
 import { colors } from "../../styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
 import * as Spotify from "@spotify/web-api-ts-sdk";
-import { RoomDto } from "../../../api-client";
+import { RoomDto } from "../../../api";
 
 /*
 interface Track {

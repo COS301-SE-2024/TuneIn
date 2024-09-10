@@ -32,9 +32,8 @@ import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
-import { live, LiveMessage } from "../../services/Live";
+import { LiveMessage, useLive } from  "../../LiveContext";
 import { Player } from "../../PlayerContext";
-import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
 import * as Spotify from "@spotify/web-api-ts-sdk";
@@ -53,6 +52,7 @@ type EmojiReaction = {
 };
 
 const RoomPage = () => {
+	const { roomControls, roomPlaying, canControlRoom } = useLive();
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -106,8 +106,6 @@ const RoomPage = () => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
-	const playback = useRef(new SimpleSpotifyPlayback()).current;
-
 	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
 		if (username) {
@@ -480,8 +478,8 @@ const RoomPage = () => {
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
 			*/
 			console.log("playPauseTrack playPauseTrack playPauseTrack");
-			if (live.canControlRoom()) {
-				if (!playback.isPlaying()) {
+			if (canControlRoom()) {
+				if (!roomPlaying) {
 					console.log("starting playback");
 					live.startPlayback(roomID);
 				} else {
@@ -494,7 +492,7 @@ const RoomPage = () => {
 			}
 		},
 		//[queue, playbackManager],
-		[playback, roomID],
+		[roomID],
 	);
 
 	const playNextTrack = () => {

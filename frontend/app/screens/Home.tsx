@@ -28,7 +28,6 @@ import NavBar from "../components/NavBar";
 import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
 import auth from "./../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
 import * as utils from "./../services/Utils"; // Import Utils
 import { Player } from "../PlayerContext";
 import { colors } from "../styles/colors";

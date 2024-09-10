@@ -121,11 +121,11 @@
       "**/*.{ts,tsx}",
       "!**/node_modules/**",
       "!**/vendor/**",
-      "!**/api-client/**"
+      "!**/api/**"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/api-client/"
+      "/api/"
     ]
   },
   "engines": {

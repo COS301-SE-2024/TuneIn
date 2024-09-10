@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { live, DirectMessage, instanceExists } from "../../services/Live";
+import { DirectMessage } from  "../../LiveContext";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";

@@ -30,7 +30,7 @@ import {
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import { live } from "../../services/Live";
+import { } from  "../../LiveContext";
 import { colors } from "../../styles/colors";
 
 const clientId = SPOTIFY_CLIENT_ID;

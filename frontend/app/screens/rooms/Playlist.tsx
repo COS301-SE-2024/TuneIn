@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
 import { RoomSongDto } from "../../models/RoomSongDto";
-import { live } from "../../services/Live";
+import { } from  "../../LiveContext";
 import { VoteDto } from "../../models/VoteDto";
 
 // Add mock songs here for testing

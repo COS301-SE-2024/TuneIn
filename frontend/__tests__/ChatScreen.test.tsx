@@ -4,9 +4,8 @@ import ChatScreen from "../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { TextInput } from "react-native";
 import { UserDto } from "../api";
-
+import { DirectMessage } from "../app/LiveContext";
 import axios from "axios";
-import { DirectMessage } from "../app/services/Live";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
