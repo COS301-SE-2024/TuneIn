@@ -13,6 +13,7 @@ import {
 import { RoomDto } from "../rooms/dto/room.dto";
 import {
 	GenresWithCount,
+	LinksWithCount,
 	RoomsData,
 	SongInfosWithCount,
 	UserDto,
@@ -457,10 +458,7 @@ describe("UsersService follow function", () => {
 						count: 0,
 						data: [],
 					},
-					links: {
-						count: 0,
-						data: [],
-					},
+					links: new LinksWithCount(),
 					bio: "",
 					current_song: new SongInfoDto(),
 					current_room_id: "",
@@ -522,10 +520,7 @@ describe("UsersService follow function", () => {
 						count: 0,
 						data: [],
 					},
-					links: {
-						count: 0,
-						data: [],
-					},
+					links: new LinksWithCount(),
 					bio: "",
 					current_song: new SongInfoDto(),
 					current_room_id: "",
