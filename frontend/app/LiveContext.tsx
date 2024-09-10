@@ -104,6 +104,10 @@ interface LiveContextType {
 	directMessages: DirectMessage[];
 	enterDM: (usernames: string[]) => void;
 	leaveDM: () => void;
+	dmsConnected: boolean;
+	dmsReceived: boolean;
+	dmParticipants: UserDto[];
+	currentRoomVotes: VoteDto[];
 
 	spotifyAuth: SpotifyAuth;
 }
@@ -123,7 +127,7 @@ interface RoomControls {
 	requestLiveChatHistory: () => void;
 	canControlRoom: () => boolean;
 	requestRoomQueue: () => void;
-	playback: PlaybackControls;
+	playbackHandler: Playback;
 	queue: QueueControls;
 }
 
@@ -172,6 +176,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
 	const [dmsRequested, setDmsRequested] = useState<boolean>(false);
 	const [dmsReceived, setDmsReceived] = useState<boolean>(false);
+	const [dmsConnected, setDmsConnected] = useState<boolean>(false);
 	const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
 	const [joined, setJoined] = useState<boolean>(false);
 	const [socketInitialized, setSocketInitialized] = useState<boolean>(false);
@@ -451,23 +456,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					});
 				});
 
-				socket.current.on("userOnline", (data) => {
+				socket.current.on("userOnline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOnline", data);
-					if (!currentUser) {
-						//throw new Error("Something went wrong while getting user's info");
-						return;
+					if (data.userID === currentUser.userID) {
+						setDmsConnected(true);
 					}
-
 					//we can use this to update the user's status
 				});
 
-				socket.current.on("userOffline", (data) => {
+				socket.current.on("userOffline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOffline", data);
-					if (!currentUser) {
-						//throw new Error("Something went wrong while getting user's info");
-						return;
+					if (data.userID === currentUser.userID) {
+						setDmsConnected(false);
 					}
-
 					//we can use this to update the user's status
 				});
 
@@ -655,7 +656,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("User is not logged in");
 			return;
 		}
-
+		setDmsConnected(false);
 		const input = {
 			userID: currentUser.userID,
 		};
@@ -1397,6 +1398,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				directMessages,
 				enterDM,
 				leaveDM,
+				dmsConnected,
+				dmsReceived,
+				dmParticipants,
+				currentRoomVotes,
 
 				spotifyAuth,
 			}}
