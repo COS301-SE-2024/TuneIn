@@ -26,17 +26,14 @@ import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
-import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
 import { LiveMessage, useLive } from  "../../LiveContext";
 import { Player } from "../../PlayerContext";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import * as rs from "../../models/RoomSongDto";
-import * as Spotify from "@spotify/web-api-ts-sdk";
 import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
@@ -46,13 +43,8 @@ import { colors } from "../../styles/colors";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
-type EmojiReaction = {
-	emoji: string;
-	userId: string; // Add more properties if needed
-};
-
 const RoomPage = () => {
-	const { roomControls, roomPlaying, canControlRoom } = useLive();
+	const { roomControls, roomPlaying } = useLive();
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -154,7 +146,6 @@ const RoomPage = () => {
 
 	const handleBookmark = async () => {
 		live.startPlayback(roomID);
-
 		// make a request to the backend to check if the room is bookmarked
 		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
@@ -187,218 +178,18 @@ const RoomPage = () => {
 		const formattedRoom = formatRoomData(roomData);
 		setJoined(true);
 		setCurrentRoom(formattedRoom);
-		// if (userRef.current && socket.current) {
-		// 	const u: UserDto = userRef.current;
-		// 	const input: ChatEventDto = {
-		// 		userID: u.userID,
-		// 		body: {
-		// 			messageBody: "",
-		// 			sender: u,
-		// 			roomID: roomID,
-		// 			dateCreated: new Date(),
-		// 		},
-		// 	};
-		// 	socket.current.emit("joinRoom", JSON.stringify(input));
-		//
-		// }
 	}, [roomData, setCurrentRoom]);
 
 	const leaveRoom = () => {
-		// if (userRef.current && socket.current) {
-		// 	const u: UserDto = userRef.current;
-		// 	const input: ChatEventDto = {
-		// 		userID: u.userID,
-		// 		body: {
-		// 			messageBody: "",
-		// 			sender: u,
-		// 			roomID: roomID,
-		// 			dateCreated: new Date(),
-		// 		},
-		// 	};
-		// 	console.log("Socket emit: leaveRoom", input);
-		// 	socket.current.emit("leaveRoom", JSON.stringify(input));
-		// 	setJoined(false);
-
-		// }
 		setCurrentRoom(null);
 	};
-	//init & connect to socket
-	// useEffect(() => {
-	// 	const getTokenAndSelf = async () => {
-	// 		const storedToken = await auth.getToken();
-	// 		console.log("token:", token);
-	// 		token.current = storedToken;
-	// 		console.log("Stored token:", token.current);
-	// 		try {
-	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-	// 				headers: {
-	// 					Authorization: `Bearer ${storedToken}`,
-	// 				},
-	// 			});
-	// 			userRef.current = response.data as UserDto;
-	// 		} catch (error) {
-	// 			console.error("Error fetching user's own info:", error);
-	// 		}
-
-	// 		try {
-	// 			const roomDto = await axios.get(
-	// 				`${utils.API_BASE_URL}/rooms/${roomID}`,
-	// 				{
-	// 					headers: {
-	// 						Authorization: `Bearer ${storedToken}`,
-	// 					},
-	// 				},
-	// 			);
-	// 			roomObjRef.current = roomDto.data;
-	// 		} catch (error) {
-	// 			console.error("Error fetching room:", error);
-	// 		}
-	// 	};
-
-	// 	const setupSocketEventHandlers = () => {
-	// 		console.log("Setting up socket event handlers...");
-	// 		if (socket.current) {
-	// 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					console.log("User joined room:", response);
-	// 					const input: ChatEventDto = {
-	// 						userID: u.userID,
-	// 						body: {
-	// 							messageBody: "",
-	// 							sender: u,
-	// 							roomID: roomID,
-	// 							dateCreated: new Date(),
-	// 						},
-	// 					};
-
-	// 					console.log("Socket emit: getChatHistory", input);
-	// 					if (socket.current)
-	// 						socket.current.emit("getChatHistory", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					const chatHistory = history.map((msg) => ({
-	// 						message: msg,
-	// 						me: msg.sender.userID === u.userID,
-	// 					}));
-	// 					setMessages(chatHistory);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-	// 				console.log("Received live message:", newMessage);
-	// 				const message = newMessage.body;
-	// 				const u = userRef.current;
-	// 				if (message && u) {
-	// 					const me: boolean = message.sender.userID === u.userID;
-	// 					if (me) {
-	// 						setMessage("");
-	// 					}
-	// 					setMessages((prevMessages) => [
-	// 						...prevMessages,
-	// 						{ message, me: message.sender.userID === u.userID },
-	// 					]);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-	// 				console.log("User left room:", response);
-	// 			});
-
-	// 			socket.current.on("error", (response: ChatEventDto) => {
-	// 				console.error("Error:", response.errorMessage);
-	// 			});
-	// 		}
-
-	// 		if (socket.current) {
-	// 			socket.current.on("connect", () => {
-	// 				if (userRef.current) {
-	// 					const input: ChatEventDto = {
-	// 						userID: userRef.current.userID,
-	// 					};
-	// 					if (socket.current)
-	// 						socket.current.emit("connectUser", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("connected", (response: ChatEventDto) => {
-	// 				if (!joined && readyToJoinRoom) {
-	// 					// joinRoom();
-	// 				}
-	// 			});
-	// 		}
-	// 	};
-
-	// 	getTokenAndSelf();
-	// 	checkBookmark();
-
+	
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const collapsedHeight = 60;
 	const screenHeight = Dimensions.get("window").height;
 	const expandedHeight = screenHeight - 350;
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
-
-	/*
-	useEffect(() => {
-		const fetchQueue = async () => {
-			const storedToken = await auth.getToken();
-
-			if (!storedToken) {
-				console.error("No stored token found");
-				return;
-			}
-
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
-					{
-						method: "GET",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${storedToken}`,
-						},
-					},
-				);
-
-				if (!response.ok) {
-					const errorText = await response.text();
-					console.error(
-						`Failed to fetch queue: ${response.status} ${response.statusText}`,
-						errorText,
-					);
-					return;
-				}
-
-				const data = await response.json();
-				if (Array.isArray(data)) {
-					const tracks: Track[] = data.map((item: any) => ({
-						id: item.id,
-						name: item.name,
-						//artists: [item.artistNames],
-						artists: [{ name: item.artistNames }],
-						album: { images: [{ url: item.albumArtUrl }] },
-						explicit: item.explicit,
-						preview_url: item.preview_url,
-						uri: item.uri,
-						duration_ms: item.duration_ms,
-					}));
-					setQueue(tracks);
-				} else {
-					console.error("Unexpected response data format:", data);
-				}
-			} catch (error) {
-				console.error("Failed to fetch queue:", error);
-			}
-		};
-
-		fetchQueue();
-	}, [roomData.roomID, roomID]);
-	*/
 
 	useEffect(() => {
 		const fetchQueue = async () => {
@@ -434,41 +225,6 @@ const RoomPage = () => {
 		};
 	}, [isPlaying]);
 
-	// const handleJoinLeave = async () => {
-	// 	console.log("Joining/Leaving room...", joined);
-	// 	setJoined((prevJoined) => !prevJoined);
-	// 	if (!joined) {
-	// 		// joinRoom();
-	// 		const token = await auth.getToken();
-	// 		currentRoom.leaveJoinRoom(token as string, roomID, false);
-	// 		setJoined(true);
-	// 		live.joinRoom(roomID, setJoined, setMessages, setMessage);
-	// 		//setJoined(true);
-	// 		setJoinedSongIndex(currentTrackIndex);
-	// 		setJoinedSecondsPlayed(secondsPlayed);
-	// 		console.log(
-	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-	// 		);
-	// 	} else {
-	// 		const token = await auth.getToken();
-	// 		currentRoom.leaveJoinRoom(token as string, roomID, true);
-	// 		// leaveRoom();
-	// 		setJoined(false);
-	// 		playbackManager.pause();
-	// 		//leaveRoom();
-	// 		live.leaveRoom();
-	// 		//setJoined(false);
-	// 		setJoinedSongIndex(null);
-	// 		setJoinedSecondsPlayed(null);
-	// 		//playbackManager.pause();
-	// 		const deviceID = await playback.getFirstDevice();
-	// 		if (deviceID && deviceID !== null) {
-	// 			playback.handlePlayback(deviceID, "pause");
-	// 		}
-	// 		setIsPlaying(false);
-	// 	}
-	// };
-
 	const playPauseTrack = useCallback(
 		async (index: number = currentTrackIndex, offset: number = 0) => {
 			/*
@@ -478,7 +234,7 @@ const RoomPage = () => {
 			setSecondsPlayed(playbackManager.getSecondsPlayed());
 			*/
 			console.log("playPauseTrack playPauseTrack playPauseTrack");
-			if (canControlRoom()) {
+			if (roomControls.canControlRoom()) {
 				if (!roomPlaying) {
 					console.log("starting playback");
 					live.startPlayback(roomID);
