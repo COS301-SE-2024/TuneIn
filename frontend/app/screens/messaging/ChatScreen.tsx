@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { DirectMessage } from  "../../LiveContext";
+import { DirectMessage, useLive } from "../../LiveContext";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
@@ -55,12 +55,6 @@ const defaultUser: UserDto = {
 	following: { count: 0, data: [] },
 	links: { count: 0, data: [] },
 	bio: "Hello, I'm John Doe",
-	current_song: {
-		title: "Song Title",
-		artists: ["Artist 1", "Artist 2"],
-		cover: "https://via.placeholder.com/150",
-		start_time: new Date(),
-	},
 	fav_genres: { count: 0, data: [] },
 	fav_songs: { count: 0, data: [] },
 	fav_rooms: { count: 0, data: [] },
@@ -77,12 +71,6 @@ const defaultMe: UserDto = {
 	following: { count: 0, data: [] },
 	links: { count: 0, data: [] },
 	bio: "Hello, I'm Me",
-	current_song: {
-		title: "Song Title",
-		artists: ["Artist 1", "Artist 2"],
-		cover: "https://via.placeholder.com/150",
-		start_time: new Date(),
-	},
 	fav_genres: { count: 0, data: [] },
 	fav_songs: { count: 0, data: [] },
 	fav_rooms: { count: 0, data: [] },
@@ -96,13 +84,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Hey there!",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p1",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -110,13 +99,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Hi! How are you?",
 			sender: defaultMe,
 			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p2",
 		},
 		me: true,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -124,13 +114,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "I'm good, thanks!",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p3",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -138,13 +129,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "What are you up to?",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p4",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -152,13 +144,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Just working on a new project",
 			sender: defaultMe,
 			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p5",
 		},
 		me: true,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -166,13 +159,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "That's great! I'd love to hear more about it",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p6",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -180,13 +174,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Sure! I'll tell you more about it later",
 			sender: defaultMe,
 			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p7",
 		},
 		me: true,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -194,13 +189,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Sounds good!",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p8",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -208,13 +204,14 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Bye!",
 			sender: defaultUser,
 			recipient: defaultMe,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p9",
 		},
 		me: false,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	{
 		message: {
@@ -222,89 +219,62 @@ const dummyMessages: DirectMessage[] = [
 			messageBody: "Bye!",
 			sender: defaultMe,
 			recipient: defaultUser,
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "p10",
 		},
 		me: true,
 		messageSent: true,
+		isOptimistic: false,
 	},
 	// Add more messages here if needed
 ];
 
 //path: http://localhost:8081/screens/messaging/ChatScreen?friend=8xbbie
 const ChatScreen = () => {
-	const [self, setSelf] = useState<UserDto>();
-	const [otherUser, setOtherUser] = useState<UserDto>();
+	const {
+		roomControls,
+		currentUser,
+		enterDM,
+		leaveDM,
+		dmControls,
+		dmsConnected,
+		dmsReceived,
+		dmParticipants,
+		directMessages,
+	} = useLive();
 	const [message, setMessage] = useState<string>("");
-	const [messages, setMessages] = useState<DirectMessage[]>([]);
-	const [connected, setConnected] = useState<boolean>(false);
-	const [isSending, setIsSending] = useState<boolean>(false);
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
 	console.log("Username:", u);
 
-	const getUsers = async () => {
-		try {
-			const token = await auth.getToken();
-			const userPromises = [
-				axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-				axios.get(`${utils.API_BASE_URL}/users/${u}`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			];
-			const [selfResponse, otherUserResponse] = await Promise.all(userPromises);
-			return [selfResponse.data as UserDto, otherUserResponse.data as UserDto];
-		} catch (error) {
-			console.error("Error fetching users' information", error);
-			throw error;
-		}
-	};
-
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
-		if (connected) {
+		if (dmsConnected) {
 			console.log("Leaving DM");
-			await live.leaveDM();
+			leaveDM();
 		}
 	};
 
 	useEffect(() => {
-		if (instanceExists()) {
-			if (!messages || messages.length === 0) {
-				if (live.receivedDMHistory()) {
-					setMessages(live.getFetchedDMs());
+		if (dmsConnected) {
+			if (!directMessages || directMessages.length === 0) {
+				if (!dmsReceived) {
+					dmControls.requestDirectMessageHistory();
 				}
-				live.requestDMHistory(u);
 			}
 		}
-	}, [messages]);
+	}, [directMessages]);
 
 	//on component mount
 	useEffect(() => {
 		const initialize = async () => {
 			try {
-				if (instanceExists()) {
-					await live.initialiseSocket();
-				}
-				const [fetchedSelf, fetchedOtherUser] = await getUsers();
-				setSelf(fetchedSelf);
-				setOtherUser(fetchedOtherUser);
-				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
-				console.log(self);
-				console.log(otherUser);
-				await live.enterDM(
-					fetchedSelf.userID,
-					fetchedOtherUser.userID,
-					setMessages,
-					setConnected,
-				);
-				if (!live.receivedDMHistory()) {
-					live.requestDMHistory(fetchedOtherUser.userID);
+				await enterDM([u]);
+				if (!dmsReceived) {
+					dmControls.requestDirectMessageHistory();
 				}
 			} catch (error) {
 				console.error("Failed to setup DM", error);
@@ -323,26 +293,24 @@ const ChatScreen = () => {
 	}, []);
 
 	const handleSend = () => {
-		if (!self || !otherUser || isSending) return;
+		if (!currentUser || dmParticipants.length <= 0) return;
 		const newMessage: DirectMessage = {
 			message: {
-				index: messages.length,
+				index: directMessages.length,
 				messageBody: message,
-				sender: self,
-				recipient: otherUser,
-				dateSent: new Date(),
-				dateRead: new Date(0),
+				sender: currentUser,
+				recipient: dmParticipants[0],
+				dateSent: new Date().toISOString(),
+				dateRead: new Date(0).toISOString(),
 				isRead: false,
 				pID: "",
 			},
 			me: true,
 			messageSent: false,
+			isOptimistic: true,
 		};
-		setIsSending(true);
+		dmControls.sendDirectMessage(newMessage);
 		setMessage("");
-		live.sendDM(newMessage, otherUser).finally(() => {
-			setIsSending(false);
-		});
 	};
 
 	return (
@@ -364,20 +332,20 @@ const ChatScreen = () => {
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				{otherUser && otherUser.profile_picture_url && (
+				{dmParticipants[0] && dmParticipants[0].profile_picture_url && (
 					<Image
 						source={{
-							uri: otherUser.profile_picture_url,
+							uri: dmParticipants[0].profile_picture_url,
 						}}
 						style={styles.avatar}
 					/>
 				)}
 				<Text style={styles.headerTitle}>
-					{otherUser?.profile_name || "Loading..."}
+					{dmParticipants[0]?.profile_name || "Loading..."}
 				</Text>
 			</View>
 			<FlatList
-				data={messages}
+				data={directMessages}
 				keyExtractor={(item) => item.message.index.toString()}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
