@@ -215,6 +215,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Invalid request parameters or missing required headers.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/rooms/recent:
+    get:
+      operationId: getRecentRoomsByUsername
+      summary: Get a user's recent rooms
+      description: Get the user's most recently visited rooms.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's recent rooms as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
       tags:
         - users
       security:
@@ -376,6 +405,50 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/{username}/bookmarks:
+    get:
+      operationId: getBookmarksByUsername
+      summary: Get the authorized user's bookmarks
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's bookmarks as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
+        - users
+  /users/{username}/taken:
+    get:
+      operationId: isUsernameTaken
+      summary: Check if a username is taken
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: True if taken, false if not.
+          content:
+            application/json:
+              schema:
+                type: boolean
+      tags:
+        - users
   /users/{username}:
     get:
       operationId: getProfileByUsername
@@ -556,15 +629,15 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{userId}/room/current:
+  /users/{username}/room/current:
     get:
       operationId: UsersController_getCurrentRoomByUserId
-      summary: Get a user's current room based on user id
+      summary: Get a user's current room based on username
       parameters:
-        - name: userId
+        - name: username
           required: true
           in: path
-          description: The user id of user's current room to search for.
+          description: The username of user's current room to search for.
           schema:
             type: string
       responses:
@@ -574,6 +647,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
         '401':
           description: Unauthorized
       tags:
@@ -1702,6 +1777,77 @@ paths:
           description: Room not found
       tags:
         - rooms
+  /rooms/{roomID}/save:
+    post:
+      operationId: saveRoom
+      summary: Save room as a playlist
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to save as a playlist.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The playlist ID as a string.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
+  /rooms/{roomID}/split:
+    get:
+      operationId: checkRoomSplit
+      summary: Evaluate if a room can be split
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to evaluate.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: >-
+            An array of the possible genres (if possible) or an empty array if
+            not possible.
+      tags:
+        - rooms
+    post:
+      operationId: splitRoom
+      summary: Returns a RoomDto with info about its split children
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to get the split children for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: The RoomDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDto'
+      tags:
+        - rooms
   /search:
     get:
       operationId: search
@@ -2142,9 +2288,11 @@ components:
         count:
           type: number
         data:
-          type: array
-          items:
-            type: string
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
       required:
         - count
         - data
@@ -2162,20 +2310,20 @@ components:
             type: string
         cover:
           type: string
+        duration:
+          type: number
+        spotify_id:
+          type: string
         start_time:
           format: date-time
           type: string
           description: The time the song started playing
           nullable: true
-        duration:
-          type: number
       required:
-        - songID
         - title
         - artists
-        - cover
-        - start_time
         - duration
+        - spotify_id
     GenresWithCount:
       type: object
       properties:
@@ -2448,6 +2596,16 @@ components:
           type: array
           items:
             type: string
+        parentRoomID:
+          type: string
+          description: >-
+            The parent of this room, if this room was created by splitting
+            another
+        childrenRoomIDs:
+          description: Rooms created by splitting this room.
+          type: array
+          items:
+            type: string
       required:
         - creator
         - roomID
@@ -2457,13 +2615,12 @@ components:
         - is_temporary
         - is_private
         - is_scheduled
-        - start_date
-        - end_date
         - language
         - has_explicit_content
         - has_nsfw_content
         - room_image
         - tags
+        - childrenRoomIDs
     CreateRoomDto:
       type: object
       properties:

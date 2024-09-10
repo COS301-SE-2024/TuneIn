@@ -39,8 +39,9 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
 			animationType="slide"
 			visible={visibility}
 			onRequestClose={onClose}
+			testID="change-photo"
 		>
-			<View style={styles.modalContainer} testID="change-photo">
+			<View style={styles.modalContainer}>
 				<View style={styles.modal}>
 					<View style={styles.headerContainer}>
 						<Text style={styles.modalTitle}>Add Image</Text>

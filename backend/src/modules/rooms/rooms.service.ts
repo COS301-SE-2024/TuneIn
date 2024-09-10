@@ -9,23 +9,6 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import {
-	subHours,
-	addHours,
-	isBefore,
-	startOfHour,
-	startOfDay,
-} from "date-fns";
-import {
-	RoomAnalyticsQueueDto,
-	RoomAnalyticsParticipationDto,
-	RoomAnalyticsInteractionsDto,
-	RoomAnalyticsVotesDto,
-	RoomAnalyticsSongsDto,
-	RoomAnalyticsContributorsDto,
-	RoomAnalyticsDto,
-	RoomAnalyticsKeyMetricsDto,
-} from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
@@ -140,7 +123,7 @@ export class RoomsService {
 			room_id: roomID,
 		};
 
-		if (updateRoomDto.room_name) {
+		if (updateRoomDto.room_name !== undefined) {
 			updatedRoom.name = updateRoomDto.room_name;
 		}
 
@@ -148,13 +131,16 @@ export class RoomsService {
 			updatedRoom.description = updateRoomDto.description;
 		}
 
-		if (updateRoomDto.room_image) {
+		if (updateRoomDto.room_image !== undefined) {
 			updatedRoom.playlist_photo = updateRoomDto.room_image;
 		}
 
-		if (updateRoomDto.has_explicit_content) {
+		if (updateRoomDto.has_explicit_content !== undefined) {
 			updatedRoom.explicit = updateRoomDto.has_explicit_content;
-			updatedRoom.nsfw = updateRoomDto.has_explicit_content;
+		}
+
+		if (updateRoomDto.has_nsfw_content !== undefined) {
+			updatedRoom.nsfw = updateRoomDto.has_nsfw_content;
 		}
 
 		if (updateRoomDto.language) {
@@ -373,7 +359,9 @@ export class RoomsService {
 			songInfoDto.title = song.song.name;
 			songInfoDto.cover = song.song.artwork_url || "";
 			songInfoDto.artists = song.song.artists;
-			songInfoDto.start_time = song.start_time;
+			if (song.start_time) {
+				songInfoDto.start_time = song.start_time;
+			}
 			songInfoDtos.push(songInfoDto);
 		}
 		return songInfoDtos;
@@ -384,11 +372,11 @@ export class RoomsService {
 		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
-	clearRoomQueue(userID: string, roomID: string): boolean {
-		// TODO: Implement logic to clear room queue
-		console.log(roomID);
-		return false;
-	}
+	// clearRoomQueue(userID: string, roomID: string): boolean {
+	// 	// TODO: Implement logic to clear room queue
+	// 	console.log(roomID);
+	// 	return false;
+	// }
 
 	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue

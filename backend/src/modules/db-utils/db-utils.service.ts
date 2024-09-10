@@ -3,7 +3,6 @@ import { PrismaService } from "../../../prisma/prisma.service";
 //import Prisma from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
-import { UpdateUserDto } from "../users/dto/updateuser.dto";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
 @Injectable()
@@ -102,28 +101,28 @@ export class DbUtilsService {
 
 	async getLinks(
 		user: PrismaTypes.users,
-	): Promise<{ count: number; data: string[] }> {
-		if (!user.external_links) {
-			return { count: 0, data: [] };
+	): Promise<{ count: number; data: Record<string, string[]> }> {
+		if (JSON.stringify(user.external_links || {}) === "{}") {
+			return { count: 0, data: {} };
 		}
 
 		try {
 			// Parse the JSON string
 			const links = JSON.parse(JSON.stringify(user.external_links));
-			// console.log(links);
+			const totalLinks = Object.values(links).flat().length; // Flatten the arrays into a single array
 
 			// Ensure the parsed object has the required properties
-			if (links && typeof links === "object" && "data" in links) {
+			if (links && typeof links === "object") {
 				return {
-					count: links.data.length,
-					data: links.data,
+					count: totalLinks,
+					data: links,
 				};
 			} else {
 				throw new Error("Invalid links format");
 			}
 		} catch (error) {
 			console.error("Failed to parse external_links: ", error);
-			return { count: 0, data: [] };
+			return { count: 0, data: {} };
 		}
 	}
 

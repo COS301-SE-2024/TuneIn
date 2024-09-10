@@ -4,7 +4,6 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { GetObjectCommand, S3 } from "@aws-sdk/client-s3";
 import * as awsS3 from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
-import { Express } from "express";
 
 @Injectable()
 export class S3Service {
