@@ -102,7 +102,7 @@ interface LiveContextType {
 
 	dmControls: DirectMessageControls;
 	directMessages: DirectMessage[];
-	enterDM: (otherUser: UserDto) => void;
+	enterDM: (usernames: string[]) => void;
 	leaveDM: () => void;
 
 	spotifyAuth: SpotifyAuth;
@@ -162,7 +162,7 @@ const LiveContext = createContext<LiveContextType | undefined>(undefined);
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { users, rooms, authenticated, auth, tokenState } = useAPI();
+	const { users, rooms, authenticated, auth, tokenState, getUser } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
 	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
@@ -622,22 +622,31 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		setRoomQueue([]);
 	};
 
-	const enterDM = (otherUser: UserDto) => {
+	const enterDM = (usernames: string[]) => {
 		pollLatency();
 		if (!currentUser) {
 			console.error("User is not logged in");
 			return;
 		}
-		setDmParticipants([otherUser]);
-		setDmsReceived(false);
-		setDmsRequested(true);
+		const promises: Promise<UserDto>[] = usernames.map((username) =>
+			getUser(username),
+		);
+		Promise.all(promises)
+			.then((users) => {
+				setDmParticipants(users);
+				setDmsReceived(false);
+				setDmsRequested(true);
 
-		const input = {
-			userID: currentUser.userID,
-			participantID: otherUser.userID,
-		};
-		socket.current.emit("enterDirectMessage", JSON.stringify(input));
-		dmControls.requestDirectMessageHistory();
+				const input = {
+					userID: currentUser.userID,
+					participantID: users[0].userID,
+				};
+				socket.current.emit("enterDirectMessage", JSON.stringify(input));
+				dmControls.requestDirectMessageHistory();
+			})
+			.catch((error) => {
+				console.error("Failed to get user info:", error);
+			});
 	};
 
 	const leaveDM = () => {
