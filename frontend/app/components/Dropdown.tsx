@@ -29,13 +29,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 	setSelectedOption,
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [items, setItems] = useState(options);
-
-	useEffect(() => {
-		setItems(options);
-	}, [options]);
-
 	const toggleModal = () => setModalVisible(!modalVisible);
 
 	const handleSelectOption = (option: string) => {
