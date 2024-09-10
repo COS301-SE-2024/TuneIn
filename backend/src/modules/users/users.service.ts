@@ -12,6 +12,7 @@ import { DirectMessageDto } from "./dto/dm.dto";
 import { IsNumber, IsObject, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
+import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -23,6 +24,7 @@ export class UserListeningStatsDto {
 
 	/* whatever else you want */
 }
+
 @Injectable()
 export class UsersService {
 	constructor(
@@ -93,6 +95,16 @@ export class UsersService {
 		return user;
 	}
 
+	async usernameTaken(username: string): Promise<boolean> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+		if (!user || user === null) {
+			return false;
+		}
+		return true;
+	}
+
 	async updateProfile(
 		userId: string,
 		updateProfileDto: UpdateUserDto,
@@ -130,35 +142,16 @@ export class UsersService {
 		}
 
 		if (updateProfileDto.links) {
-			// console.log(updateProfileDto.links.data);
-			// updatedUser.external_links = { data: updateProfileDto.links.data };
+			updatedUser.external_links = updateProfileDto.links.data;
 		}
 
-		// Merge the preferences if they exist in the updateProfileDto
 		if (updateProfileDto.fav_genres) {
-			let existingPreferences = user.preferences;
+			const genres: string[] = updateProfileDto.fav_genres.data;
+			this.updateFavoriteGenresByName(userId, genres);
+		}
 
-			if (existingPreferences) {
-				if (
-					typeof existingPreferences === "object" &&
-					!Array.isArray(existingPreferences)
-				) {
-					if (updateProfileDto.fav_genres) {
-						existingPreferences.fav_genres = updateProfileDto.fav_genres
-							.data as Prisma.JsonArray;
-					}
-				} else {
-					existingPreferences = {
-						fav_genres: updateProfileDto.fav_genres.data,
-					};
-				}
-			} else {
-				existingPreferences = {
-					fav_genres: updateProfileDto.fav_genres.data,
-				};
-			}
-
-			updatedUser.preferences = existingPreferences as Prisma.InputJsonValue;
+		if (updateProfileDto.fav_songs) {
+			this.updateFavoriteSongsByID(userId, updateProfileDto.fav_songs.data);
 		}
 
 		await this.prisma.users.update({
@@ -173,7 +166,155 @@ export class UsersService {
 		return u;
 	}
 
+	private async updateFavoriteGenresByName(
+		userId: string,
+		newGenreNames: string[],
+	): Promise<void> {
+		await this.prisma.$transaction(async (prisma) => {
+			// Step 1: Fetch current genres associated with the user
+			const currentFavoriteGenres = await prisma.favorite_genres.findMany({
+				where: { user_id: userId },
+				include: { genre: true }, // Include genre details in the result
+			});
+
+			const genreNameToIdMap = new Map<string, string>(
+				currentFavoriteGenres.map((fg) => [
+					fg.genre.genre as string,
+					fg.genre.genre_id,
+				]),
+			);
+
+			const currentGenreNames = currentFavoriteGenres.map(
+				(fg) => fg.genre.genre,
+			);
+
+			// Step 2: Fetch genre IDs for the provided genre names
+			const genres = await prisma.genre.findMany({
+				where: { genre: { in: newGenreNames } },
+				select: { genre_id: true, genre: true },
+			});
+
+			const genreMap = new Map(
+				genres.map((genre) => [genre.genre, genre.genre_id as string]),
+			);
+
+			// Step 3: Determine genres to add and remove
+			const genresToAdd = newGenreNames.filter(
+				(name) => !currentGenreNames.includes(name) && genreMap.has(name),
+			);
+
+			const genresToRemove = currentGenreNames
+				.filter((name): name is string => name !== null)
+				.filter((name) => !newGenreNames.includes(name));
+
+			// Step 4: Delete removed genres
+			const resp = await prisma.favorite_genres.deleteMany({
+				where: {
+					user_id: userId,
+					genre_id: {
+						in: genresToRemove
+							.map((name) => genreNameToIdMap.get(name))
+							.filter((id) => id !== undefined) as string[],
+					},
+				},
+			});
+
+			// Step 5: Insert new genres
+			const resp2 = await prisma.favorite_genres.createMany({
+				data: genresToAdd.map((name) => ({
+					user_id: userId,
+					genre_id: genreMap.get(name)!,
+				})),
+			});
+		});
+	}
+
+	private async updateFavoriteSongsByID(
+		userId: string,
+		newSongs: SongInfoDto[],
+	): Promise<void> {
+		await this.prisma.$transaction(async (prisma) => {
+			const newSongIds = newSongs.map((song) => song.spotify_id);
+			// Step 1: Fetch current songs associated with the user
+			const currentFavoriteSongs = await prisma.favorite_songs.findMany({
+				where: { user_id: userId },
+				include: { song: true }, // Include song details in the result
+			});
+
+			const spotifyIdToSongIdMap = new Map<string, string>(
+				currentFavoriteSongs.map((fg) => [
+					fg.song.spotify_id as string,
+					fg.song.song_id,
+				]),
+			);
+
+			const currentSongSpotifyId = currentFavoriteSongs.map(
+				(fg) => fg.song.spotify_id,
+			);
+
+			// Step 2: Fetch song IDs for the provided song namespotify ids
+			const songs = await prisma.song.findMany({
+				where: { spotify_id: { in: newSongIds } },
+				select: { song_id: true, spotify_id: true },
+			});
+
+			const songMap = new Map(
+				songs.map((song) => [song.spotify_id, song.song_id as string]),
+			);
+
+			const missingSongs = newSongs.filter(
+				(song) => !songMap.has(song.spotify_id),
+			);
+
+			// Step 3: Insert missing songs into the database
+			if (missingSongs.length > 0) {
+				// Re-fetch the newly added songs to update the songMap
+				const newlyInsertedSongs = await prisma.song.findMany({
+					where: {
+						spotify_id: { in: missingSongs.map((song) => song.spotify_id) },
+					},
+					select: { song_id: true, spotify_id: true },
+				});
+
+				// Add newly inserted songs to the songMap
+				newlyInsertedSongs.forEach((song) => {
+					songMap.set(song.spotify_id, song.song_id as string);
+				});
+			}
+
+			// Step 3: Determine songs to add and remove
+			const songsToAdd = newSongIds.filter(
+				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
+			);
+
+			const songsToRemove = currentSongSpotifyId
+				.filter((id): id is string => id !== null)
+				.filter((id) => !newSongIds.includes(id));
+
+			// Step 4: Delete removed songs
+			const resp = await prisma.favorite_songs.deleteMany({
+				where: {
+					user_id: userId,
+					song_id: {
+						in: songsToRemove
+							.map((id) => spotifyIdToSongIdMap.get(id))
+							.filter((id) => id !== undefined) as string[],
+					},
+				},
+			});
+
+			// Step 5: Insert new songs
+			const resp2 = await prisma.favorite_songs.createMany({
+				data: songsToAdd.map((id) => ({
+					user_id: userId,
+					song_id: songMap.get(id)!,
+				})),
+			});
+		});
+	}
+
 	async getProfileByUsername(username: string): Promise<UserDto> {
+		console.log("Getter called");
 		const userData = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
@@ -444,7 +585,7 @@ export class UsersService {
 		return result;
 	}
 
-	async getRecentRooms(userID: string): Promise<string[]> {
+	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
@@ -458,52 +599,74 @@ export class UsersService {
 			throw new Error("User does not exist");
 		}
 
-		const user: PrismaTypes.users = u;
-		const activity: Prisma.JsonValue = user.activity;
-		console.log(user);
-		console.log(activity);
-		if (!activity || activity === null) {
-			return [];
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
+
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+			)) || [];
+
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
+	}
+
+	async getRecentRoomByUsername(username: string): Promise<RoomDto[]> {
+		/*
+		activity field in users table is modelled as:
+		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
+		*/
+		// get the recent rooms from the user's activity field
+		const userID = (await this.getProfileByUsername(username)).userID;
+
+		const u = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u === null) {
+			throw new Error("User does not exist");
 		}
 
-		if (typeof activity !== "object") {
-			throw new Error(
-				"An unknown error occurred while parsing the 'activity' field in 'users'. Expected object, received " +
-					typeof activity,
-			);
-		}
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
 
-		//if (!"recent_rooms" in activity) {
-		if (!("recent_rooms" in activity)) {
-			return [];
-		}
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+			)) || [];
 
-		try {
-			const recentRooms: string[] = activity["recent_rooms"] as string[];
-			for (const roomID of recentRooms) {
-				if (typeof roomID !== "string") {
-					throw new Error(
-						"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-							typeof roomID,
-					);
-				}
-			}
-			return recentRooms;
-			/*
-			const r = await this.dtogen.generateMultipleRoomDto(recentRooms);
-			if (!r || r === null) {
-				throw new Error(
-					"An unknown error occurred while generating RoomDto for recent rooms. Received null.",
-				);
-			}
-			return r;
-			*/
-		} catch (e) {
-			throw new Error(
-				"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-					typeof activity["recent_rooms"],
-			);
-		}
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
 	}
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
@@ -654,7 +817,28 @@ export class UsersService {
 		return result;
 	}
 
-	async getBookmarks(userID: string): Promise<RoomDto[]> {
+	async getBookmarksById(userID: string): Promise<RoomDto[]> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const bookmarks: PrismaTypes.bookmark[] =
+			await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+
+		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
+		return rooms;
+	}
+
+	async getBookmarksByUsername(username: string): Promise<RoomDto[]> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
@@ -1052,7 +1236,9 @@ export class UsersService {
 		return true;
 	}
 
-	async getCurrentRoomDto(userID: string): Promise<RoomDto> {
+	async getCurrentRoomDto(username: string): Promise<RoomDto> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
 		}

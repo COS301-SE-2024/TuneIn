@@ -47,6 +47,7 @@ const Selector: React.FC<SelectorProps> = ({
 			transparent={true}
 			animationType="slide"
 			onRequestClose={onClose}
+			testID="genre-selector"
 		>
 			<View style={styles.modalContainer}>
 				<View style={styles.modalContent}>
@@ -55,6 +56,7 @@ const Selector: React.FC<SelectorProps> = ({
 						placeholder={`Search ${placeholder.toLowerCase()}...`}
 						value={searchQuery}
 						onChangeText={setSearchQuery}
+						testID="genre-search-query"
 					/>
 					<ScrollView style={styles.scrollView}>
 						<FlatList
@@ -66,15 +68,23 @@ const Selector: React.FC<SelectorProps> = ({
 									style={styles.filterOption}
 									onPress={() => {
 										onSelect(item);
+										setSearchQuery("");
 										onClose();
 									}}
+									testID={`${item}-genre-option`}
 								>
 									<Text style={styles.filterText}>{item}</Text>
 								</TouchableOpacity>
 							)}
 						/>
 					</ScrollView>
-					<TouchableOpacity style={styles.closeButton} onPress={onClose}>
+					<TouchableOpacity
+						style={styles.closeButton}
+						onPress={() => {
+							setSearchQuery("");
+							onClose();
+						}}
+					>
 						<Text style={styles.filterText}>Close</Text>
 					</TouchableOpacity>
 				</View>

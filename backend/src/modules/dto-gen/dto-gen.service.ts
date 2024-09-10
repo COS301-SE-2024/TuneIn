@@ -39,8 +39,36 @@ export class DtoGenService {
 		const result: UserDto = this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
 		const preferences = await this.dbUtils.getPreferences(user);
-		result.fav_genres = preferences.fav_genres;
-		result.fav_songs = preferences.fav_songs;
+		const fav_genres = await this.prisma.favorite_genres.findMany({
+			where: { user_id: userID },
+			include: { genre: true },
+		});
+
+		const fav_songs = await this.prisma.favorite_songs.findMany({
+			where: { user_id: userID },
+			include: { song: true },
+		});
+
+		result.fav_genres = {
+			count: fav_genres.length,
+			data: fav_genres
+				.map((genre) => genre.genre?.genre)
+				.filter((name): name is string => name !== null),
+		};
+
+		result.fav_songs = {
+			count: fav_songs.length,
+			data: fav_songs.map((song) => ({
+				songID: song.song.song_id,
+				title: song.song.name,
+				artists: song.song.artists,
+				cover: song.song.artwork_url as string,
+				spotify_id: song.song.spotify_id,
+				duration: song.song.duration as number,
+			})),
+		};
+
+		// result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
 			const recent_rooms = await this.dbUtils.getActivity(user);
@@ -189,7 +217,7 @@ export class DtoGenService {
 			},
 			links: {
 				count: 0,
-				data: [],
+				data: {},
 			},
 			bio: user.bio || "",
 			current_song: {
@@ -197,8 +225,9 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
-				start_time: new Date(),
+				spotify_id: "",
 				duration: 0,
+				start_time: new Date(),
 			},
 			fav_genres: {
 				count: 0,
@@ -344,8 +373,9 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
-				start_time: new Date(),
+				spotify_id: "",
 				duration: 0,
+				start_time: new Date(),
 			},
 			tags: room.tags || [],
 			childrenRoomIDs: [],
@@ -353,7 +383,10 @@ export class DtoGenService {
 
 		const creator = await this.generateUserDto(room.room_creator, false);
 		if (creator && creator !== null) {
-			result.creator = creator;
+			const creator = await this.generateUserDto(room.room_creator, false);
+			if (creator && creator !== null) {
+				result.creator = creator;
+			}
 		}
 
 		if (scheduledRoom && scheduledRoom !== null) {
