@@ -1554,4 +1554,34 @@ export class UsersService {
 			roomMessages.length;
 		return activity / 100;
 	}
+
+	private async calculateGenreSimilarity(
+		userID1: string,
+		userID2: string,
+	): Promise<number> {
+		const user1: PrismaTypes.favorite_genres[] | null =
+			await this.prisma.favorite_genres.findMany({
+				where: { user_id: userID1 },
+			});
+		const user2: PrismaTypes.favorite_genres[] | null =
+			await this.prisma.favorite_genres.findMany({
+				where: { user_id: userID2 },
+			});
+		if (!user1 || !user2) {
+			throw new Error("Failed to calculate genre similarity");
+		}
+
+		const user1Genres: string[] = user1.map(
+			(genre: PrismaTypes.favorite_genres) => genre.genre_id,
+		);
+		const user2Genres: string[] = user2.map(
+			(genre: PrismaTypes.favorite_genres) => genre.genre_id,
+		);
+		const commonGenres: string[] = user1Genres.filter((genre) =>
+			user2Genres.includes(genre),
+		);
+		const genreSimilarity: number =
+			(commonGenres.length / (user1Genres.length + user2Genres.length)) * 100;
+		return genreSimilarity;
+	}
 }
