@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import Voting from "../components/rooms/Voting";
+import SongVote from "./rooms/SongVote";
 import { Track } from "../models/Track";
 import {
 	RoomSongDto,
@@ -8,33 +8,33 @@ import {
 	constructArtistString,
 	getTitle,
 } from "../models/RoomSongDto";
+import { useLive } from "../LiveContext";
 
 interface SongListProps {
 	track: RoomSongDto;
 	showVoting?: boolean;
-	songNumber: number;
-	index: number; // Index of the song in the list
-	isCurrent: boolean; // Indicates if this song is the currently playing song
-	swapSongs: (index: number, direction: "up" | "down") => void; // Function to swap songs
-	setVoteCount: (newVoteCount: number) => void;
 }
 
-const SongList: React.FC<SongListProps> = ({
-	track,
-	showVoting = true,
-	songNumber,
-	index,
-	isCurrent,
-	swapSongs,
-}) => {
+const SongList: React.FC<SongListProps> = ({ track, showVoting = true }) => {
+	const { currentSong, roomQueue } = useLive();
 	const albumCoverUrl = getAlbumArtUrl(track);
+	const [isCurrentSong, setIsCurrentSong] = useState(false);
+	const [queueIndex, setQueueIndex] = React.useState<number>(0);
+
+	useEffect(() => {
+		const i = roomQueue.indexOf(track);
+		if (i !== -1) {
+			setIsCurrentSong(currentSong?.spotifyID === track.spotifyID);
+			setQueueIndex(i);
+		}
+	}, [currentSong, roomQueue]);
 
 	return (
 		<View
-			style={[styles.container, isCurrent ? styles.currentSong : null]}
+			style={[styles.container, isCurrentSong ? styles.currentSong : null]}
 			testID="song-container"
 		>
-			<Text style={styles.songNumber}>{songNumber}</Text>
+			<Text style={styles.songNumber}>{queueIndex + 1}</Text>
 			<Image
 				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
@@ -42,19 +42,17 @@ const SongList: React.FC<SongListProps> = ({
 			/>
 			<View style={styles.infoContainer}>
 				<Text
-					style={[styles.songName, isCurrent ? styles.currentSongText : null]}
+					style={[
+						styles.songName,
+						isCurrentSong ? styles.currentSongText : null,
+					]}
 				>
 					{getTitle(track)}
 				</Text>
 				<Text style={styles.artist}>{constructArtistString(track)}</Text>
 			</View>
 
-			<Voting
-				song={track}
-				voteCount={track.score || 0}
-				index={index}
-				swapSongs={swapSongs}
-			/>
+			{showVoting && <SongVote song={track} />}
 		</View>
 	);
 };

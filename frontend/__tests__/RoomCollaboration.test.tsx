@@ -36,8 +36,8 @@ describe("RoomCollaboration", () => {
 		// Check if the Add To The Playlist card is rendered
 		expect(getByText("Add To The Playlist")).toBeTruthy();
 
-		// Check if the Voting card is rendered
-		expect(getByText("Voting")).toBeTruthy();
+		// Check if the SongVote card is rendered
+		expect(getByText("SongVote")).toBeTruthy();
 	});
 
 	test("goes back when the back button is pressed", () => {
