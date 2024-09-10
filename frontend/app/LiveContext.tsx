@@ -130,8 +130,6 @@ interface QueueControls {
 }
 
 interface RoomControls {
-	joinRoom: (roomId: string) => void;
-	leaveRoom: () => void;
 	sendLiveChatMessage: (message: string) => void;
 	sendReaction: (emoji: string) => void;
 	requestLiveChatHistory: () => void;
@@ -175,18 +173,15 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
 	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
-	const [dmsConnected, setDmsConnected] = useState<boolean>(false);
 	const [dmsRequested, setDmsRequested] = useState<boolean>(false);
 	const [dmsReceived, setDmsReceived] = useState<boolean>(false);
 	const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
 	const [joined, setJoined] = useState<boolean>(false);
 	const [socketInitialized, setSocketInitialized] = useState<boolean>(false);
 	const [mounted, setMounted] = useState<boolean>(false);
-	const [messageSending, setMessageSending] = useState<boolean>(false);
 	const [roomChatReceived, setRoomChatReceived] = useState<boolean>(false);
 	const [roomChatRequested, setRoomChatRequested] = useState<boolean>(false);
 	const [roomEmojiObjects, setRoomEmojiObjects] = useState<ObjectConfig[]>([]);
-	const [connected, setConnected] = useState<boolean>(false);
 	const [timeOffset, setTimeOffset] = useState<number>(0);
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
@@ -207,35 +202,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		queue.sort((a, b) => a.index - b.index);
 		setRoomQueue(queue);
 	};
-
-	useEffect(() => {
-		if (authenticated && !currentUser) {
-			users
-				.getProfile()
-				.then((u: AxiosResponse<UserDto>) => {
-					console.log("User: " + u);
-					if (u.status === 401) {
-						//Unauthorized
-						//Auth header is either missing or invalid
-						setCurrentUser(undefined);
-					} else if (u.status === 500) {
-						//Internal Server Error
-						//Something went wrong in the backend (unlikely lmao)
-						throw new Error("Internal Server Error");
-					}
-					setCurrentUser(u.data);
-				})
-				.catch((error) => {
-					if (error instanceof RequiredError) {
-						// a required field is missing
-						throw new Error("Parameter missing from request to get user");
-					} else {
-						// some other error
-						throw new Error("Error getting user");
-					}
-				});
-		}
-	}, [authenticated]);
 
 	const setRoomID = (roomID: string) => {
 		rooms
@@ -391,11 +357,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 					const message = newMessage.body;
 					const me = message.sender.userID === currentUser.userID;
-					if (me) {
-						if (setMessageSending) {
-							setMessageSending(false);
-						}
-					}
 					if (setRoomMessages) {
 						const messages: LiveMessage[] = [
 							...roomMessages,
@@ -507,10 +468,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (!currentUser) {
 						//throw new Error("Something went wrong while getting user's info");
 						return;
-					}
-
-					if (data.userID === currentUser.userID) {
-						setDmsConnected(true);
 					}
 
 					//we can use this to update the user's status
@@ -674,6 +631,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		setRoomChatReceived(false);
 		setRoomChatRequested(false);
 		setCurrentRoom(undefined);
+		setRoomQueue([]);
 	};
 
 	const enterDM = (otherUser: UserDto) => {
@@ -701,7 +659,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
-		setConnected(false);
 		const input = {
 			userID: currentUser.userID,
 		};
@@ -888,62 +845,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const roomControls: RoomControls = {
-		joinRoom: function (roomID: string): void {
-			if (!currentUser) {
-				console.error("User cannot join room without being logged in");
-				return;
-			}
-
-			if (socket) {
-				pollLatency();
-				const input: ChatEventDto = {
-					userID: currentUser.userID,
-					body: {
-						messageBody: "",
-						sender: currentUser,
-						roomID: roomID,
-						dateCreated: new Date().toISOString(),
-					},
-				};
-				socket.current.emit("joinRoom", JSON.stringify(input));
-
-				//request chat history
-				setRoomChatReceived(false);
-				roomControls.requestLiveChatHistory();
-				setRoomChatRequested(true);
-			}
-		},
-
-		leaveRoom: function (): void {
-			pollLatency();
-			if (!currentUser) {
-				console.error("User cannot leave room without being logged in");
-				return;
-			}
-
-			if (!currentRoom) {
-				console.error("User cannot leave room without being in a room");
-				return;
-			}
-
-			setJoined(false);
-
-			const input: ChatEventDto = {
-				userID: currentUser.userID,
-				body: {
-					messageBody: "",
-					sender: currentUser,
-					roomID: currentRoom.roomID,
-					dateCreated: new Date().toISOString(),
-				},
-			};
-			socket.current.emit("leaveRoom", JSON.stringify(input));
-			setRoomMessages([]);
-			setRoomChatReceived(false);
-			setRoomChatRequested(false);
-			setCurrentRoom(undefined);
-		},
-
 		sendLiveChatMessage: function (message: string): void {
 			pollLatency();
 			if (!currentUser) {
@@ -1389,18 +1290,97 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		const s = socket.current;
 		return () => {
 			if (socket) {
-				roomControls.leaveRoom();
+				leaveRoom();
 				s.disconnect();
 			}
+			setMounted(false);
 		};
 	}, []);
 
+	// re-initialize socket if it disconnects
 	useEffect(() => {
 		if (!socket.current?.connected) {
+			setSocketInitialized(false);
 			initializeSocket();
 			socket.current.connect();
 		}
 	}, [socket.current, socket.current?.connected]);
+
+	//initialise the user
+	useEffect(() => {
+		if (authenticated && !currentUser) {
+			users
+				.getProfile()
+				.then((u: AxiosResponse<UserDto>) => {
+					console.log("User: " + u);
+					if (u.status === 401) {
+						//Unauthorized
+						//Auth header is either missing or invalid
+						setCurrentUser(undefined);
+					} else if (u.status === 500) {
+						//Internal Server Error
+						//Something went wrong in the backend (unlikely lmao)
+						throw new Error("Internal Server Error");
+					}
+					setCurrentUser(u.data);
+				})
+				.catch((error) => {
+					if (error instanceof RequiredError) {
+						// a required field is missing
+						throw new Error("Parameter missing from request to get user");
+					} else {
+						// some other error
+						throw new Error("Error getting user");
+					}
+				});
+
+			// get spotify tokens
+			let tokens: SpotifyTokenPair | null = null;
+			spotifyAuth
+				.getSpotifyTokens()
+				.then((t) => {
+					if (t !== null) {
+						tokens = t;
+						setSpotifyTokens(tokens);
+						roomControls.playback.playbackHandler.getDevices();
+					}
+				})
+				.catch((error) => {
+					console.error("Failed to get Spotify tokens:", error);
+				});
+		}
+	}, [authenticated]);
+
+	useEffect(() => {
+		// re-request if user is connected to dms but no messages have been received
+		if (dmParticipants.length > 0 && !dmsReceived) {
+			dmControls.requestDirectMessageHistory();
+		}
+		// disconnect from dms if no participants somehow
+		if (dmParticipants.length === 0) {
+			leaveDM();
+		}
+	}, [dmsReceived, dmParticipants]);
+
+	useEffect(() => {}, []);
+
+	useEffect(() => {
+		if (joined) {
+			if (currentRoom) {
+				roomControls.requestLiveChatHistory();
+				roomControls.requestRoomQueue();
+			} else {
+				console.error("User is not in a room");
+				console.error("Setting joined to false");
+				leaveRoom();
+			}
+		} else {
+		}
+
+		if (!roomChatReceived) {
+			roomControls.requestLiveChatHistory();
+		}
+	}, [joined, roomChatReceived, currentRoom]);
 
 	return (
 		<LiveContext.Provider
