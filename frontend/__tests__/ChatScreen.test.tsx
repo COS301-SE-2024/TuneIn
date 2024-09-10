@@ -3,7 +3,8 @@ import { render, fireEvent } from "@testing-library/react-native";
 import ChatScreen from "../app/screens/messaging/ChatScreen";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { TextInput } from "react-native";
-import { UserDto } from "../app/models/UserDto";
+import { UserDto } from "../api";
+
 import axios from "axios";
 import { DirectMessage } from "../app/services/Live";
 

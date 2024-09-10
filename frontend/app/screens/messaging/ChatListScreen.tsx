@@ -17,8 +17,7 @@ import { useRouter } from "expo-router";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
-import { UserDto } from "../../models/UserDto";
-import { DirectMessageDto } from "../../../api";
+import { DirectMessageDto, UserDto } from "../../../api";
 
 const initialChats: Chat[] = [
 	{

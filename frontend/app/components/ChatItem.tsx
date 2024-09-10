@@ -2,8 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Chat } from "../models/chat";
-import { UserDto } from "../models/UserDto";
-import { DirectMessageDto } from "../../api";
+import { DirectMessageDto, UserDto } from "../../api";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;

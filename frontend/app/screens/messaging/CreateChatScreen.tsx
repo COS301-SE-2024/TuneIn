@@ -10,11 +10,11 @@ import {
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
 import { set } from "react-datepicker/dist/date_utils";
+import { UserDto } from "../../../api";
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
