@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RoomSongDto } from "../../models/RoomSongDto";
-import { } from  "../../LiveContext";
-
+import { useLive } from "../../LiveContext";
 
 interface VotingProps {
 	song: RoomSongDto;
@@ -18,56 +17,54 @@ const Voting: React.FC<VotingProps> = ({
 	index,
 	swapSongs,
 }) => {
+	const { roomControls } = useLive();
 	const [currentVoteCount, setCurrentVoteCount] = useState(voteCount);
 	const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
 
 	const handleUpvote = () => {
 		let newVoteCount = currentVoteCount;
-
 		if (userVote === "up") {
 			// Remove upvote
-			live.undoSongVote(song);
+			roomControls.queue.undoSongVote(song);
 			newVoteCount -= 1;
 			setUserVote(null);
 		} else if (userVote === "down") {
 			// Change downvote to upvote
-			live.swapSongVote(song);
+			roomControls.queue.swapSongVote(song);
 			newVoteCount += 2;
 			setUserVote("up");
 		} else {
 			// Cast upvote
-			live.upvoteSong(song);
+			roomControls.queue.upvoteSong(song);
 			newVoteCount += 1;
 			setUserVote("up");
 		}
 
 		setCurrentVoteCount(newVoteCount);
 		swapSongs(index, "up");
-		song = live.updateSong(song);
 	};
 
 	const handleDownvote = () => {
 		let newVoteCount = currentVoteCount;
 		if (userVote === "down") {
 			// Remove downvote
-			live.undoSongVote(song);
+			roomControls.queue.undoSongVote(song);
 			newVoteCount += 1;
 			setUserVote(null);
 		} else if (userVote === "up") {
 			// Change upvote to downvote
-			live.swapSongVote(song);
+			roomControls.queue.swapSongVote(song);
 			newVoteCount -= 2;
 			setUserVote("down");
 		} else {
 			// Cast downvote
 			newVoteCount -= 1;
-			live.downvoteSong(song);
+			roomControls.queue.downvoteSong(song);
 			setUserVote("down");
 		}
 
 		setCurrentVoteCount(newVoteCount);
 		swapSongs(index, "down");
-		song = live.updateSong(song);
 	};
 
 	return (
