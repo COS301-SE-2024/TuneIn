@@ -1469,8 +1469,45 @@ export class UsersService {
 
 	async getRecommendedUsers(userID: string): Promise<UserDto[]> {
 		const users: PrismaTypes.users[] = await this.prisma.users.findMany();
-		const ids: string[] = users.map((user) => user.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		const currentUser = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!currentUser) {
+			throw new Error("User does not exist");
+		}
+
+		const userScores: { [key: string]: number } = {};
+
+		for (const user of users) {
+			if (user.user_id === userID) continue;
+
+			const mutualFriends = await this.calculateMutualFriends(
+				userID,
+				user.user_id,
+			);
+			const popularity = await this.calculatePopularity(user.user_id);
+			const activity = await this.calculateActivity(user.user_id);
+			const genreSimilarity = await this.calculateGenreSimilarity(
+				currentUser.user_id,
+				user.user_id,
+			);
+
+			const score =
+				mutualFriends * 0.4 +
+				popularity * 0.3 +
+				activity * 0.2 +
+				genreSimilarity * 0.1;
+			userScores[user.user_id] = score;
+		}
+
+		// filter undefined scores
+		const sortedUserIds = Object.keys(userScores).sort(
+			(a, b) => (userScores[b] ?? 0) - (userScores[a] ?? 0),
+		);
+		const topUserIds = sortedUserIds.slice(0, 10); // Top 10 recommendations
+
+		const result = await this.dtogen.generateMultipleUserDto(topUserIds);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for recommended users. Received null.",
