@@ -1478,4 +1478,16 @@ export class UsersService {
 		}
 		return result;
 	}
+
+	private async calculateMutualFriends(
+		userID1: string,
+		userID2: string,
+	): Promise<number> {
+		const mutualFriends: PrismaTypes.users[] | null =
+			await this.dbUtils.getMutualFriends(userID1, userID2);
+		if (!mutualFriends) {
+			throw new Error("Failed to calculate mutual friends");
+		}
+		return mutualFriends.length;
+	}
 }
