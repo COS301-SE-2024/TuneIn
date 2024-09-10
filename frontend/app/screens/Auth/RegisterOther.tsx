@@ -23,15 +23,12 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
-import {
-	exchangeCodeWithBackend,
-	SpotifyCallbackResponse,
-} from "../../services/SpotifyAuth";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import { } from "../../LiveContext";
+import { useLive } from "../../LiveContext";
 import { colors } from "../../styles/colors";
+import { SpotifyCallbackResponse } from "../../../api";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -81,6 +78,7 @@ const makeStateVariable = (redirectURI: string) => {
 };
 
 const RegisterOtherScreen: React.FC = () => {
+	const { spotifyAuth } = useLive();
 	const router = useRouter();
 	if (Platform.OS === "web") {
 		console.log(WebBrowser.maybeCompleteAuthSession());
@@ -133,11 +131,8 @@ const RegisterOtherScreen: React.FC = () => {
 
 				//make post request to backend server get access token
 				const doExchange = async () => {
-					const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
-						code,
-						state,
-						redirectURI,
-					);
+					const tokens: SpotifyCallbackResponse =
+						await spotifyAuth.exchangeCodeWithBackend(code, state, redirectURI);
 					await auth.setToken(tokens.token);
 					router.navigate("screens/Home");
 				};

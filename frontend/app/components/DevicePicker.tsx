@@ -13,13 +13,12 @@ import { RadioButton } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
 import { Devices } from "../models/Devices";
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
-import * as spotifyAuth from "../services/SpotifyAuth";
 import { colors } from "../styles/colors";
+import { useLive } from "../LiveContext";
 
 const DevicePicker = () => {
-	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
+	const { getDeviceIDs, error,  } = useSpotifyDevices();
 	const [isVisible, setIsVisible] = useState(false);
-	const [devices, setDevices] = useState<Devices[]>(initialDevices);
 	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [accessToken, setAccessToken] = useState<string>("");

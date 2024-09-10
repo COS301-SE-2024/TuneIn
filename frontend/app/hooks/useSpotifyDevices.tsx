@@ -1,54 +1,52 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import * as spotifyAuth from "../services/SpotifyAuth";
 import { Devices } from "../models/Devices"; // Ensure this path is correct
+import { useLive } from "../LiveContext";
+import { SpotifyTokenPair, SpotifyTokenResponse } from "../../api";
 
 export const useSpotifyDevices = () => {
-	const [accessToken, setAccessToken] = useState<string>("");
+	const { spotifyAuth } = useLive();
 	const [devices, setDevices] = useState<Devices[]>([]); // Update to use Devices type
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchToken = async () => {
-			try {
-				const allTokens = await spotifyAuth.getTokens();
-				const token = allTokens.access_token;
-				console.log("allTokens: ", allTokens, "\ntoken: ", token);
-				setAccessToken(token);
-			} catch (err) {
-				setError("An error occurred while fetching the token");
-				console.error("An error occurred while fetching the token", err);
+	const fetchToken = async (): Promise<string> => {
+		try {
+			const tp: SpotifyTokenPair | null = await spotifyAuth.getSpotifyTokens();
+			if (!tp) {
+				throw new Error("No tokens found");
 			}
-		};
-
-		fetchToken();
-	}, []);
-
-	useEffect(() => {
-		if (accessToken) {
-			getDevices(accessToken);
+			const tokens: SpotifyTokenResponse = tp.tokens;
+			const token = tokens.access_token;
+			console.log("allTokens: ", tokens, "\ntoken: ", token);
+			return token;
+		} catch (err) {
+			setError("An error occurred while fetching the token");
+			console.error("An error occurred while fetching the token", err);
+			throw err;
 		}
-	}, [accessToken]);
+	};
 
 	const getDevices = async (token: string) => {
 		try {
-			const response = await fetch(
-				"https://api.spotify.com/v1/me/player/devices",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-						"Content-Type": "application/json",
+			fetchToken().then(async (token) => {
+				const response = await fetch(
+					"https://api.spotify.com/v1/me/player/devices",
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${token}`,
+							"Content-Type": "application/json",
+						},
 					},
-				},
-			);
+				);
 
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
 
-			const data = await response.json();
-			setDevices(data.devices);
+				const data = await response.json();
+				setDevices(data.devices);
+			});
 		} catch (err) {
 			setError("An error occurred while fetching devices");
 			console.error("An error occurred while fetching devices", err);
@@ -73,27 +71,31 @@ export const useSpotifyDevices = () => {
 	// Updated getDeviceIDs function to return an array of Devices
 	const getDeviceIDs = async (): Promise<Devices[] | null> => {
 		try {
-			console.log("getDeviceIDs token: ", accessToken);
-			const response = await fetch(
-				"https://api.spotify.com/v1/me/player/devices",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
+			let result: Devices[] | null = null;
+			fetchToken().then(async (token) => {
+				console.log("getDeviceIDs token: ", token);
+				const response = await fetch(
+					"https://api.spotify.com/v1/me/player/devices",
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${token}`,
+							"Content-Type": "application/json",
+						},
 					},
-				},
-			);
+				);
 
-			if (!response.ok) {
-				console.error(`Error fetching devices: ${response.statusText}`);
-				return null; // Return null if response is not ok
-			}
+				if (!response.ok) {
+					console.error(`Error fetching devices: ${response.statusText}`);
+					return null; // Return null if response is not ok
+				}
 
-			const data = await response.json();
+				const data = await response.json();
 
-			// Return the devices array or null if it's undefined
-			return Array.isArray(data.devices) ? data.devices : null;
+				// Return the devices array or null if it's undefined
+				result = Array.isArray(data.devices) ? data.devices : null;
+			});
+			return result;
 		} catch (err) {
 			setError("An error occurred while fetching devices");
 			console.error("An error occurred while fetching devices", err);
