@@ -1466,4 +1466,16 @@ export class UsersService {
 		};
 		return stats;
 	}
+
+	async getRecommendedUsers(userID: string): Promise<UserDto[]> {
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany();
+		const ids: string[] = users.map((user) => user.user_id);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for recommended users. Received null.",
+			);
+		}
+		return result;
+	}
 }
