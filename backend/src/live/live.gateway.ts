@@ -1006,6 +1006,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 							.to(payload.roomID)
 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+						this.sendQueueState(payload.roomID);
 					}
 				}
 			} catch (error) {
@@ -1050,6 +1051,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 							.to(payload.roomID)
 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+						this.sendQueueState(payload.roomID);
 					}
 				}
 			} catch (error) {
@@ -1090,6 +1092,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 							.to(payload.roomID)
 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+						this.sendQueueState(payload.roomID);
 					}
 				}
 			} catch (error) {
@@ -1134,6 +1137,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 							.to(payload.roomID)
 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+						this.sendQueueState(payload.roomID);
 					}
 				}
 			} catch (error) {
