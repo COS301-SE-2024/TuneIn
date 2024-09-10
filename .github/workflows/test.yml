@@ -92,6 +92,12 @@ jobs:
         run:  |
           cd backend && npm ci
 
+      - name: Refresh Prisma Client
+        run: |
+          cd backend
+          npm run prisma-read > /dev/null
+          npm run prisma-gen
+
       - name: Test Codebase
         run:  |
           cd backend && npm run test:cov
