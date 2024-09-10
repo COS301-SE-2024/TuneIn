@@ -57,7 +57,7 @@ function isSpotifyTrack(track: any): track is Spotify.Track {
 const EditPlaylist: React.FC = () => {
 	const { roomControls, currentUser, currentRoom, roomQueue } = useLive();
 	const router = useRouter();
-	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
+	const { Room_id, mine } = useLocalSearchParams();
 	console.log("passed in Room id:", Room_id);
 	const { searchResults, handleSearch } = useSpotifySearch();
 	const [searchQuery, setSearchQuery] = useState<string>("");
@@ -195,7 +195,6 @@ const EditPlaylist: React.FC = () => {
 		router.navigate({
 			pathname: "/screens/rooms/Playlist",
 			params: {
-				currentTrackIndex,
 				Room_id: Room_id,
 				mine: mine,
 			},

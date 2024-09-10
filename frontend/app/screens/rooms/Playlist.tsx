@@ -59,7 +59,7 @@ const Playlist = () => {
 		roomQueue,
 	} = useLive();
 	const router = useRouter();
-	const { currentTrackIndex, Room_id, mine } = useLocalSearchParams();
+	const { Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
 
 	// Function to handle voting
@@ -90,7 +90,6 @@ const Playlist = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditPlaylist",
 			params: {
-				currentTrackIndex: currentTrackIndex,
 				Room_id: Room_id,
 				isMine: mine,
 			},

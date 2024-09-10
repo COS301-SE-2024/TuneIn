@@ -93,7 +93,6 @@ const RoomPage = () => {
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
 	);
@@ -227,12 +226,6 @@ const RoomPage = () => {
 
 	const playPauseTrack = useCallback(
 		async (index: number = currentTrackIndex, offset: number = 0) => {
-			/*
-			playbackManager.playPauseTrack(queue[index], index, offset);
-			setCurrentTrackIndex(index);
-			setIsPlaying(playbackManager.getIsPlaying());
-			setSecondsPlayed(playbackManager.getSecondsPlayed());
-			*/
 			console.log("playPauseTrack playPauseTrack playPauseTrack");
 			if (roomControls.canControlRoom()) {
 				if (!roomPlaying) {
@@ -308,10 +301,9 @@ const RoomPage = () => {
 			await live.joinRoom(roomID, setJoined, setMessages, setMessage);
 			live.fetchRoomQueue(setQueue);
 			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
+			const i = currentSong ? currentSong.index : 0;
 			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+				`Joined: Song Index - ${i}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
 			leaveRoom();
