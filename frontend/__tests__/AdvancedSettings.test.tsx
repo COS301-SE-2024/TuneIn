@@ -154,7 +154,6 @@ describe("AdvancedSettings", () => {
 
 		// Press "Save Changes"
 		fireEvent.press(getByText("Save Changes"));
-
 	});
 
 	it("calls router.back() when the close button is pressed", () => {
