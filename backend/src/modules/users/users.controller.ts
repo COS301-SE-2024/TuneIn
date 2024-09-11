@@ -596,6 +596,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
+		console.log("called /users/:username");
 		return this.usersService.getProfileByUsername(username);
 	}
 
@@ -830,6 +831,7 @@ export class UsersController {
 	// create endpoint to get a user's recommended users
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
+	@ApiSecurity("bearer")
 	@Get("recommended/users")
 	@ApiOperation({ summary: "Get recommended users" })
 	@ApiOkResponse({
@@ -842,6 +844,7 @@ export class UsersController {
 	})
 	@ApiTags("users")
 	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		console.log("called /users/recommended/users");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecommendedUsers(userInfo.id);
 	}
