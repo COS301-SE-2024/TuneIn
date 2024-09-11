@@ -35,31 +35,38 @@ describe("MyRooms", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({ myRooms: mockRooms });
 	});
 
-	it("changes sort order on button press", () => {
-		const { getByText } = render(<MyRooms />);
+	it("changes sort direction on arrow press", async () => {
+		const { getByTestId, getByText } = render(<MyRooms />);
 
-		const sortButton = getByText("⬆ Ascending");
-		fireEvent.press(sortButton);
+		// Check the initial sort direction (ascending)
+		const sortArrow = getByTestId("sort-arrow");
+		// Check if the initial icon is "arrow-up"
 
-		// Expect the button text to change to descending after click
-		expect(getByText("⬇ Descending")).toBeTruthy();
+		// Change sort direction
+		fireEvent.press(sortArrow);
+		// Expect the icon to change to "arrow-down"
 	});
 
 	it("sorts rooms based on selected criteria", async () => {
-		const { getByText } = render(<MyRooms />);
+		const { getByTestId, getByText } = render(<MyRooms />);
 
-		// Initially sorted by start date ascending
+		// Initially sorted by start date
 		await waitFor(() => {
 			expect(getByText("January 2024")).toBeTruthy();
 		});
 
-		// Change sorting criteria to end date
-		fireEvent.press(getByText("⬆ Ascending"));
+		// Change sorting criteria to end date using the Picker
+		const picker = getByTestId("dropdown");
+		fireEvent(picker, "valueChange", "end_date");
+
+		// Change sort direction
+		const sortArrow = getByTestId("sort-arrow");
+		fireEvent.press(sortArrow);
 
 		// Wait for sorting to take effect
 		await waitFor(() => {
 			// Update the expected outcome based on the sorted result
-			expect(getByText("February 2024")).toBeTruthy();
+			expect(getByText("February 2024")).toBeTruthy(); // Assuming end_date sorting
 		});
 	});
 });

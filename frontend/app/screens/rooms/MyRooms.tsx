@@ -132,6 +132,7 @@ const MyRooms: React.FC = () => {
 					onPress={() =>
 						setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
 					}
+					testID="sort-arrow"
 				>
 					<MaterialCommunityIcons
 						name={sortDirection === "asc" ? "arrow-up" : "arrow-down"}
