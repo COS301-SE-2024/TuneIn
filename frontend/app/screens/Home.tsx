@@ -16,6 +16,7 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	RefreshControl,
+	BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";
@@ -112,6 +113,14 @@ const Home: React.FC = () => {
 		}
 	};
 
+	useEffect(() => {
+		const handleBackButton = () => true;
+		BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+		return () => {
+			BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+		};
+	}, []);
+
 	const getFriends = async (token: string) => {
 		try {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
@@ -147,25 +156,36 @@ const Home: React.FC = () => {
 			return [];
 		}
 
-		return rooms.map((room) => ({
-			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
-			name: room.room_name,
-			language: room.language,
-			songName: room.current_song ? room.current_song.title : null,
-			artistName: room.current_song
-				? room.current_song.artists.join(", ")
-				: null,
-			description: room.description,
-			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
-			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: 50,
-			tags: room.tags ? room.tags : [],
-			mine: mine,
-			isNsfw: room.has_nsfw_content,
-			isExplicit: room.has_explicit_content,
-		}));
+		return rooms.map((room, index) => {
+			// Print out the raw room data for the first room only
+			if (index === 0) {
+				console.log("Raw room data before formatting:", room);
+			}
+
+			return {
+				id: room.roomID,
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				name: room.room_name,
+				language: room.language,
+				songName: room.current_song ? room.current_song.title : null,
+				artistName: room.current_song
+					? room.current_song.artists.join(", ")
+					: null,
+				description: room.description,
+				userID: room.creator.userID,
+				userProfile: room.creator
+					? room.creator.profile_picture_url
+					: ProfileIMG,
+				username: room.creator ? room.creator.username : "Unknown",
+				roomSize: 50,
+				tags: room.tags ? room.tags : [],
+				mine: mine,
+				isNsfw: room.has_nsfw_content,
+				isExplicit: room.has_explicit_content,
+				start_date: room.start_date,
+				end_date: room.end_date,
+			};
+		});
 	};
 
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
@@ -270,12 +290,20 @@ const Home: React.FC = () => {
 	);
 
 	const router = useRouter();
+
 	const navigateToAllFriends = () => {
 		const safeUserData = userData ?? { username: "defaultUser" };
 
 		router.navigate({
 			pathname: "/screens/followers/FollowerStack",
 			params: { username: safeUserData.username },
+		});
+	};
+
+	const navigateToMyRooms = () => {
+		router.navigate({
+			pathname: "/screens/rooms/MyRooms",
+			params: { myRooms: JSON.stringify(myRooms) },
 		});
 	};
 
@@ -365,7 +393,12 @@ const Home: React.FC = () => {
 								maxVisible={8}
 							/>
 						) : null}
-						<Text style={styles.sectionTitle}>My Rooms</Text>
+						<TouchableOpacity
+							style={styles.navigateButton}
+							onPress={navigateToMyRooms}
+						>
+							<Text style={styles.sectionTitle}>My Rooms</Text>
+						</TouchableOpacity>
 						<AppCarousel
 							data={myRooms}
 							renderItem={renderItem}
