@@ -108,14 +108,6 @@ const Home: React.FC = () => {
 		}
 	};
 
-	useEffect(() => {
-		const handleBackButton = () => true;
-		BackHandler.addEventListener("hardwareBackPress", handleBackButton);
-		return () => {
-			BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
-		};
-	}, []);
-
 	const getFriends = async (token: string) => {
 		try {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {

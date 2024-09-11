@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
-import { API_BASE_URL } from "./services/Utils";
 import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform } from "react-native";
@@ -43,10 +42,6 @@ const App: React.FC = () => {
 	const router = useRouter();
 	const [, setIsCheckingToken] = useState(true);
 	const [, setFontLoaded] = useState(false);
-	// const [isCheckingToken, setIsCheckingToken] = useState(true);
-	// const [fontLoaded, setFontLoaded] = useState(false);
-
-	console.log(API_BASE_URL);
 
 	useEffect(() => {
 		const checkTokenAndLoadFonts = async () => {
@@ -66,19 +61,19 @@ const App: React.FC = () => {
 						live.initialiseSocket();
 					}
 				}
-				// Perform token validation if necessary
+
 				if (auth.authenticated()) {
-					// Redirect to the HomeScreen or appropriate route
-					router.push("/screens/Home");
+					// Redirect to HomeScreen and replace the current route
+					router.replace("/screens/Home");
 				} else {
-					// Redirect to the WelcomeScreen or appropriate route
+					// Redirect to WelcomeScreen and replace the current route
 					console.log("clearing from index");
 					StorageService.clear();
-					router.push("/screens/WelcomeScreen");
+					router.replace("/screens/WelcomeScreen");
 				}
 			} catch (error) {
 				console.error("Error checking token or loading fonts:", error);
-				router.push("/screens/WelcomeScreen");
+				router.replace("/screens/WelcomeScreen");
 			} finally {
 				setIsCheckingToken(false);
 			}
