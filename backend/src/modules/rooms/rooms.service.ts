@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
-import { SongInfoDto } from "./dto/songinfo.dto";
+import { AudioFeatures, SongInfoDto } from "./dto/songinfo.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
@@ -12,6 +12,8 @@ import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
+import { kmeans } from "ml-kmeans";
+import { KMeansResult } from "ml-kmeans/lib/KMeansResult";
 
 export class UserActionDto {
 	@ApiProperty({
@@ -956,15 +958,180 @@ export class RoomsService {
 		//return RoomDto
 		console.log(roomID);
 	}
-
 	async canSplitRoom(roomID: string): Promise<string[]> {
-		// Implement the logic to check if the room can be split
-		// if (true) {
-		// 	// room does not exist
-		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		// }
-		console.log(roomID);
-		const childGenres: string[] = [];
-		return childGenres;
+		try {
+			console.log(roomID);
+
+			// Fetch audio features of the songs in the room queue
+			const audioFeatures: (AudioFeatures & { genre: string })[] =
+				await this.getAudioFeatures(roomID);
+			if (!audioFeatures || audioFeatures.length === 0) {
+				throw new HttpException(
+					"Room does not have any events",
+					HttpStatus.NOT_FOUND,
+				);
+			}
+
+			const features: number[][] = audioFeatures.map((song) => [
+				song.danceability,
+				song.energy,
+				song.key,
+				song.loudness,
+				song.mode,
+				song.speechiness,
+				song.acousticness,
+				song.instrumentalness,
+				song.liveness,
+				song.valence,
+				song.tempo,
+			]);
+
+			// Apply K-means clustering with convergence check
+			const maxIterations = 100;
+			const distinctivenessThreshold = 0.5; // Define your threshold
+			let clusters: KMeansResult = kmeans(features, 2, { maxIterations: 20 });
+			for (let i = 0; i < maxIterations; i++) {
+				clusters = kmeans(features, 2, { maxIterations: 20 });
+				if (this.checkConvergence(clusters, distinctivenessThreshold)) {
+					break;
+				}
+			}
+
+			// Assign songs to sub-rooms based on clusters
+			const subRooms = clusters.clusters.map((cluster: number) => {
+				return audioFeatures.filter(
+					(_, index) => clusters.clusters[index] === cluster,
+				);
+			});
+
+			// Get genres of the sub-rooms
+			// const genreCluster1 = this.genresFromCluster(subRooms[0]);
+			console.log("Number of subrooms:", subRooms.length);
+			const childGenres = subRooms.map((subRoom) =>
+				this.genresFromCluster(subRoom.map((song) => song.genre)),
+			);
+
+			console.log(childGenres);
+			// only get distinct genres
+			const distinctGenres = [...new Set(childGenres)];
+			return distinctGenres;
+		} catch (error) {
+			console.error("Error splitting room:", error);
+			throw new HttpException(
+				"Error splitting room",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
 	}
+
+	checkConvergence(clusters: KMeansResult, threshold: number): boolean {
+		const centroids = clusters.centroids;
+		let minDistance = Infinity;
+
+		for (let i = 0; i < centroids.length; i++) {
+			for (let j = i + 1; j < centroids.length; j++) {
+				const distance = this.euclideanDistance(
+					centroids[i] ?? [],
+					centroids[j] ?? [],
+				);
+				if (distance < minDistance) {
+					minDistance = distance;
+				}
+			}
+		}
+
+		return minDistance > threshold;
+	}
+
+	euclideanDistance(point1: number[], point2: number[]): number {
+		let sum = 0;
+		console.log(point1);
+		for (let i = 0; i < point1.length; i++) {
+			const val1: number = point1[i] ?? 0;
+			const val2: number = point2[i] ?? 0;
+			if (val1 === undefined || val2 === undefined) {
+				break;
+			}
+			sum += Math.pow(val1 - val2, 2);
+		}
+		return Math.sqrt(sum);
+	}
+
+	async getAudioFeatures(
+		roomID: string,
+	): Promise<(AudioFeatures & { genre: string })[]> {
+		// Implement the logic to get the audio features for a song
+		const songs: (PrismaTypes.queue & { song: PrismaTypes.song })[] =
+			await this.prisma.queue.findMany({
+				where: {
+					room_id: roomID,
+				},
+				include: {
+					song: true,
+				},
+			});
+		return songs.map((song) => {
+			return {
+				...(song.song.audio_features as unknown as AudioFeatures),
+				genre: song.song.genre ?? "Unknown",
+			};
+		});
+	}
+	genresFromCluster(cluster: string[]): string {
+		const genreCounts: { [genre: string]: number } = {};
+		cluster.forEach((genre) => {
+			if (genre in genreCounts && genreCounts[genre]) {
+				genreCounts[genre]++;
+			} else {
+				genreCounts[genre] = 1;
+			}
+		});
+
+		const sortedGenres = Object.keys(genreCounts).sort(
+			(genre1, genre2) =>
+				(genreCounts[genre2] ?? 0) - (genreCounts[genre1] ?? 0),
+		);
+
+		return sortedGenres[0] ?? "Unknown";
+	}
+
+	getGenresFromCluster(cluster: AudioFeatures[]): string {
+		// Implement the logic to determine genres from a cluster
+		console.log(cluster);
+		return "genre"; // Placeholder, implement your logic
+	}
+
+	// async updateGenresInSongsTable(): Promise<void> {
+	// 	// this is a temporary function to update the genres in the songs table
+	// 	// retrieve all genres from genre table
+	// 	const genres = await this.prisma.genre.findMany();
+	// 	const _genreNames: (string | null)[] = genres.map((genre) => genre.genre);
+	// 	// filter out null values
+	// 	const genreNames: string[] = _genreNames.filter(
+	// 		(genre) => genre !== null,
+	// 	) as string[];
+	// 	if (!genreNames) {
+	// 		throw new Error("Failed to get genre names");
+	// 	}
+	// 	// retrieve all songs from the songs table
+	// 	const songs = await this.prisma.song.findMany();
+	// 	// for each song, update the genres randomly since it's just mock data
+	// 	for (const song of songs) {
+	// 		let randomGenres: string | null | undefined =
+	// 			genreNames[randomInt(0, genreNames.length)];
+	// 		while (!randomGenres) {
+	// 			randomGenres = genreNames[randomInt(0, genreNames.length)];
+	// 		}
+	// 		await this.prisma.song.update({
+	// 			where: {
+	// 				song_id: song.song_id,
+	// 			},
+	// 			data: {
+	// 				genre: {
+	// 					set: randomGenres,
+	// 				},
+	// 			},
+	// 		});
+	// 	}
+	// }
 }
