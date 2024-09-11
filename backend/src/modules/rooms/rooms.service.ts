@@ -1016,10 +1016,10 @@ export class RoomsService {
 			const distinctGenres = [...new Set(childGenres)];
 			return distinctGenres;
 		} catch (error) {
-			console.error("Error splitting room:", error);
+			// console.error("Error splitting room:", error);
 			throw new HttpException(
-				"Error splitting room",
-				HttpStatus.INTERNAL_SERVER_ERROR,
+				"ROOM HAS NO SONGS IN QUEUE",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 	}
@@ -1094,44 +1094,4 @@ export class RoomsService {
 
 		return sortedGenres[0] ?? "Unknown";
 	}
-
-	getGenresFromCluster(cluster: AudioFeatures[]): string {
-		// Implement the logic to determine genres from a cluster
-		console.log(cluster);
-		return "genre"; // Placeholder, implement your logic
-	}
-
-	// async updateGenresInSongsTable(): Promise<void> {
-	// 	// this is a temporary function to update the genres in the songs table
-	// 	// retrieve all genres from genre table
-	// 	const genres = await this.prisma.genre.findMany();
-	// 	const _genreNames: (string | null)[] = genres.map((genre) => genre.genre);
-	// 	// filter out null values
-	// 	const genreNames: string[] = _genreNames.filter(
-	// 		(genre) => genre !== null,
-	// 	) as string[];
-	// 	if (!genreNames) {
-	// 		throw new Error("Failed to get genre names");
-	// 	}
-	// 	// retrieve all songs from the songs table
-	// 	const songs = await this.prisma.song.findMany();
-	// 	// for each song, update the genres randomly since it's just mock data
-	// 	for (const song of songs) {
-	// 		let randomGenres: string | null | undefined =
-	// 			genreNames[randomInt(0, genreNames.length)];
-	// 		while (!randomGenres) {
-	// 			randomGenres = genreNames[randomInt(0, genreNames.length)];
-	// 		}
-	// 		await this.prisma.song.update({
-	// 			where: {
-	// 				song_id: song.song_id,
-	// 			},
-	// 			data: {
-	// 				genre: {
-	// 					set: randomGenres,
-	// 				},
-	// 			},
-	// 		});
-	// 	}
-	// }
 }
