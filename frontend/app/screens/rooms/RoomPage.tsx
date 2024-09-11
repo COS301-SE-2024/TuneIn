@@ -26,7 +26,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
-import DevicePicker from "../../components/rooms/DevicePicker";
+import DevicePicker from "../../components/DatePicker";
 import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
@@ -36,14 +36,15 @@ import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
-const MemoizedCommentWidget = memo(CommentWidget);
+import SongRoomWidget from "../../components/SongRoomWidget";
 
-type EmojiReaction = {
-	emoji: string;
-	userId: string; // Add more properties if needed
-};
+interface RoomPageProps {
+	joined: boolean;
+	handleJoinLeave: () => Promise<void>;
+}
 
-const RoomPage = () => {
+// const RoomPage = () => {
+const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -88,7 +89,7 @@ const RoomPage = () => {
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsogIndex, setJoinedSongIndex] = useState<number | null>(null);
+	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
 	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
 		null,
 	);
