@@ -8,8 +8,6 @@ import {
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
-	Switch,
-	ScrollView,
 	FlatList,
 } from "react-native";
 import { useNavigation } from "expo-router";
@@ -22,9 +20,7 @@ import { User } from "../models/user";
 import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
-import Dropdown from "../components/Dropdown";
 import { SearchHistoryDto } from "../models/SearchHistoryDto";
-import ToggleButton from "../components/ToggleButton";
 import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
 import FilterBottomSheet from "../components/FilterBottomSheet";
@@ -324,7 +320,7 @@ const Search: React.FC = () => {
 							},
 						});
 
-						// console.log("Search: " + JSON.stringify(response));
+						console.log("Advance Room Search: " + JSON.stringify(response));
 						const roomResults: SearchResult[] = response.data.map(
 							(item: any) => ({
 								id: item.roomID,
