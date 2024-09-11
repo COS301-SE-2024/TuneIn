@@ -354,10 +354,13 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
 			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
-			console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
