@@ -14,7 +14,6 @@ import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import ToggleButton from "./ToggleButton";
 import Dropdown from "./Dropdown";
-import { colors } from "../styles/colors";
 
 interface BottomSheetProps {
 	filter: string;
@@ -77,7 +76,6 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	selectedLanguage = null,
 }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
-
 	const [genres, setGenres] = useState([
 		"rock",
 		"pop",
@@ -157,18 +155,26 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 					if (gestureState.dy > 0) {
 						// Allow dragging only downwards
 						if (gestureState.dy < 300) {
-							// limit the maximum peeking height
+							// Limit the maximum peeking height
 							animation.setValue(gestureState.dy);
 						}
 					}
 				},
 			}),
 			onPanResponderRelease: (evt, gestureState) => {
-				if (gestureState.dy > 20) {
-					setShowMoreFilters(false);
+				if (gestureState.dy > 100) {
+					// If dragged sufficiently, close the modal
+					Animated.timing(animation, {
+						toValue: 300, // Animate to the closed position
+						duration: 300,
+						useNativeDriver: false,
+					}).start(() => {
+						setShowMoreFilters(false); // Close the modal after animation
+					});
 				} else {
+					// Otherwise, snap back to the open position
 					Animated.spring(animation, {
-						toValue: 0,
+						toValue: 0, // Fully open position
 						useNativeDriver: false,
 					}).start();
 				}
@@ -176,13 +182,30 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		}),
 	);
 
+	// Reset animation when modal is opened or closed
+	useEffect(() => {
+		if (showMoreFilters) {
+			// When modal is opened, reset animation to open position
+			Animated.timing(animation, {
+				toValue: 0, // Fully open position
+				duration: 300,
+				useNativeDriver: false,
+			}).start();
+		} else {
+			// When modal is closed, reset animation to closed position
+			animation.setValue(300); // Move the sheet off-screen
+		}
+	}, [showMoreFilters]);
+
 	return (
 		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
 			<View style={styles.modalContainer}>
 				<Animated.View
 					style={[styles.modal, { transform: [{ translateY: animation }] }]}
 				>
-					<View style={styles.dragHandle} {...panResponder.panHandlers} />
+					<View style={styles.dragHandleContainer}>
+						<View style={styles.dragHandle} {...panResponder.panHandlers} />
+					</View>
 					{(!filter || filter === "user" || filter === "room") && (
 						<>
 							{(filter === "user" || !filter) && (
@@ -210,7 +233,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 							)}
 
 							{(filter === "room" || !filter) && (
-								<ScrollView style={styles.additionalFilters}>
+								<View style={styles.additionalFilters}>
 									<View style={styles.includeSection}>
 										<Text style={styles.includeHeader}>Search by:</Text>
 										<View style={styles.searchBy}>
@@ -290,7 +313,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 											/>
 										</View>
 									</View>
-								</ScrollView>
+								</View>
 							)}
 						</>
 					)}
@@ -311,154 +334,8 @@ const styles = StyleSheet.create({
 		padding: 20,
 		borderTopLeftRadius: 40,
 		borderTopRightRadius: 40,
-		alignItems: "center",
 		width: "100%",
 		minHeight: "30%", // Adjust the minimum height here
-	},
-	container: {
-		flex: 1,
-		paddingHorizontal: 30,
-		paddingTop: 30,
-	},
-	roomCardPadding: {
-		marginTop: 20,
-		alignItems: "center",
-	},
-	header: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		marginBottom: 20,
-	},
-	noResult: {
-		flex: 1, // Make the View take up the full screen
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: "bold",
-		color: "#333",
-		textAlign: "center",
-		flex: 1,
-	},
-	searchBarContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		marginBottom: 20,
-		borderColor: "#ccc",
-		borderWidth: 1,
-		borderRadius: 56,
-		paddingHorizontal: 10,
-	},
-	searchBar: {
-		flex: 1,
-		height: 40,
-	},
-	searchIcon: {
-		marginLeft: 10,
-	},
-	filterContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginBottom: 20,
-	},
-	filterButton: {
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		borderRadius: 20,
-		borderWidth: 1,
-		borderColor: "#ccc",
-	},
-	filterMore: {
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		borderRadius: 7,
-		borderWidth: 1,
-		borderColor: "#ccc",
-	},
-	activeFilter: {
-		backgroundColor: colors.primary,
-		borderColor: colors.primary,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 5.84,
-		elevation: 5,
-	},
-	activeFilterMore: {
-		backgroundColor: colors.primary,
-		borderColor: colors.primary,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 5.84,
-		elevation: 5,
-	},
-	filterText: {
-		color: "#333",
-		fontWeight: "bold",
-		textAlign: "center",
-	},
-	selectedFiltersContainer: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		marginBottom: 20,
-	},
-	selectedFilter: {
-		flexDirection: "row",
-		alignItems: "center",
-		backgroundColor: "#fff",
-		borderRadius: 20,
-		paddingVertical: 5,
-		paddingHorizontal: 10,
-		margin: 5,
-		borderWidth: 1,
-		borderColor: colors.lightGray,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	selectedFilterText: {
-		marginRight: 5,
-	},
-	// modalContainer: {
-	// 	flex: 1,
-	// 	justifyContent: "center",
-	// 	alignItems: "center",
-	// 	backgroundColor: "rgba(0, 0, 0, 0.5)",
-	// },
-	modalContent: {
-		width: "60%",
-		backgroundColor: "white",
-		borderRadius: 10,
-		padding: 20,
-		alignItems: "center",
-	},
-	modalTitle: {
-		fontSize: 20,
-		marginBottom: 20,
-		fontWeight: "bold",
-	},
-	modalItem: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		width: "100%",
-		paddingVertical: 10,
-		borderBottomWidth: 1,
-		borderBottomColor: "#ccc",
-	},
-	modalItemText: {
-		fontSize: 18,
-	},
-	closeButton: {
-		marginTop: 20,
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		backgroundColor: colors.primary,
-		borderRadius: 5,
 	},
 	dragHandle: {
 		width: 60,
@@ -467,25 +344,15 @@ const styles = StyleSheet.create({
 		borderRadius: 5,
 		marginBottom: 10,
 	},
-	closeButtonText: {
-		color: "white",
-		fontSize: 16,
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
-	},
-	resultsContainer: {
-		paddingVertical: 10,
+	dragHandleContainer: {
+		alignItems: "center", // Ensures the drag handle is centered horizontally
+		marginBottom: 10,
 	},
 	additionalFilters: {
 		paddingHorizontal: 20,
 		marginTop: 10,
 		marginBottom: 40,
-		height: "100%",
+		flexGrow: 1,
 	},
 	includeSection: {
 		paddingVertical: 10,
@@ -504,86 +371,17 @@ const styles = StyleSheet.create({
 	switchLabel: {
 		fontSize: 16,
 	},
-	datePickerContainer: {
-		paddingVertical: 10,
-	},
-	datePickerLabel: {
-		fontSize: 16,
-	},
-	participantCountContainer: {
-		paddingVertical: 10,
-	},
-	participantCountLabel: {
-		fontSize: 16,
-	},
-	participantCountInput: {
-		height: 40,
-		borderColor: "gray",
-		borderWidth: 1,
-		borderRadius: 10,
-		paddingHorizontal: 10,
-	},
 	dropContainer: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
 	},
-	heading: {
-		fontSize: 24,
-		marginBottom: 20,
-	},
-	button: {
-		backgroundColor: "#08BDBD",
-		padding: 10,
-		borderRadius: 5,
-		marginTop: 10,
-	},
-	buttonText: {
-		color: "#fff",
-		fontSize: 16,
-		fontWeight: "bold",
-		textAlign: "center",
-	},
 	searchBy: {
-		flex: 1,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingBottom: 10,
-	},
-	dropdown: {
-		position: "absolute",
-		top: 125,
-		width: "100%",
-		backgroundColor: "#f2f2f2",
-		borderColor: "#ccc",
-		borderWidth: 1,
-		borderRadius: 5,
-		maxHeight: 150, // Optional: limits the height of the dropdown
-		zIndex: 1,
-		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
-		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 30,
-	},
-	searchContainer: {
-		flex: 1,
-		paddingHorizontal: 10,
-		paddingTop: 50,
-	},
-	dropdownItem: {
-		// paddingVertical: 5,
-		paddingHorizontal: 15,
-		borderBottomWidth: 5,
-		borderBottomColor: "#eee",
-		justifyContent: "center",
-	},
-
-	dropdownItemText: {
-		fontSize: 16,
-		color: "#333",
+		alignItems: "center", // Ensures the ToggleButtons align vertically in the center
+		width: "100%", // Ensure it takes full width
 	},
 });
 
