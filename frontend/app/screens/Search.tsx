@@ -707,7 +707,7 @@ const Search: React.FC = () => {
 					testID="toggle-filters-button"
 				>
 					<Text style={styles.filterText}>
-						{showMoreFilters ? "View Less Filters" : "View More Filters"}
+						{"View More Filters"}
 					</Text>
 				</TouchableOpacity>
 			</View>
