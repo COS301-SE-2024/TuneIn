@@ -6,7 +6,9 @@ describe("ToggleButton Component", () => {
 	const label = "Test Label";
 
 	const renderToggleButton = (props = {}) => {
-		return render(<ToggleButton label={label} {...props} />);
+		return render(
+			<ToggleButton value={""} label={label} onValueChange={() => { } } {...props} />,
+		);
 	};
 
 	test("should render correctly with initial label", () => {
