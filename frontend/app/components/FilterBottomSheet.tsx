@@ -17,8 +17,7 @@ import Dropdown from "./Dropdown";
 import { colors } from "../styles/colors";
 
 interface BottomSheetProps {
-	onClose?: () => void; // Required prop
-	filter?: string;
+	filter: string;
 	explicit?: boolean;
 	nsfw?: boolean;
 	temporary?: boolean;
@@ -31,7 +30,6 @@ interface BottomSheetProps {
 	minFollowers?: string;
 	selectedGenre?: string | null;
 	selectedLanguage?: string | null;
-	dropdownVisible?: boolean;
 	setExplicit?: (value: boolean) => void;
 	setNsfw?: (value: boolean) => void;
 	setTemporary?: (value: boolean) => void;
@@ -64,7 +62,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	handleSelectGenre = () => {},
 	handleSelectLanguage = () => {},
     setShowMoreFilters = () => {},
-	filter = "user",
+	filter,
 	explicit = false,
 	nsfw = false,
 	temporary = false,
@@ -80,33 +78,31 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 
-	let genres: string[] = [
-		"Rock",
-		"Pop",
-		"jazz",
-		"Classical",
-		"Hip Hop",
-		"Country",
-		"Electronic",
-		"Reggae",
-		"Blues",
-		"Folk",
-		"Metal",
-		"Punk",
-		"Soul",
-		"R&B",
-		"Funk",
-		"Alternative",
-		"Indie",
-		"Dance",
-		"Techno",
-		"Ambient",
-		"Gospel",
-		"Latin",
-		"Reggaeton",
-		"Ska",
-		"Opera",
-	];
+	 const [genres, setGenres] = useState([
+			"rock",
+			"pop",
+			"jazz",
+			"classical",
+			"hip hop",
+			"country",
+			"electronica",
+			"reggae",
+			"blues",
+			"folk",
+			"metal",
+			"punk",
+			"soul",
+			"r&b",
+			"funk",
+			"dancehall",
+			"techno",
+			"ambient",
+			"gospel",
+			"latin",
+			"reggaeton",
+			"ska",
+			"opera",
+		]);
 
 	// Sample language data
 	const languages = [
@@ -125,6 +121,11 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		"Swedish",
 	];
 
+	useEffect(() => {
+		getGenres();
+		console.log("Genre effect called");
+	}, []);
+
 	const getGenres = async () => {
 		try {
 			const token = await auth.getToken();
@@ -135,8 +136,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 						Authorization: `Bearer ${token}`,
 					},
 				});
-				// console.log("Genre data" + response.data);
-				genres = response.data;
+				setGenres(response.data);
 			}
 		} catch (error) {
 			console.error("Error fetching genres:", error);
@@ -147,10 +147,6 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		setShowMoreFilters(showMoreFilters); // Update visibility state when prop changes
 	}, [showMoreFilters]);
 
-	const handleOnClose = () => {
-		setShowMoreFilters(false); // Set visibility to false
-		// onClose();
-	};
 	const [panResponder] = useState(
 		PanResponder.create({
 			onStartShouldSetPanResponder: () => true,
@@ -169,7 +165,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 			}),
 			onPanResponderRelease: (evt, gestureState) => {
 				if (gestureState.dy > 20) {
-					handleOnClose();
+					setShowMoreFilters(false); 
 				} else {
 					Animated.spring(animation, {
 						toValue: 0,

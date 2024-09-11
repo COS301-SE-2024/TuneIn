@@ -325,25 +325,27 @@ const Search: React.FC = () => {
 						});
 
 						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						const roomResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: "room",
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}));
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+									language: item.language,
+									roomSize: item.participant_count,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+								},
+							}),
+						);
 
-						setResults(results);
+						setResults(roomResults);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/rooms?q=${sh}`,
@@ -394,19 +396,22 @@ const Search: React.FC = () => {
 								Authorization: `Bearer ${token}`,
 							},
 						});
-						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}));
-						setResults(results);
+
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 						// setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
@@ -418,19 +423,21 @@ const Search: React.FC = () => {
 							},
 						);
 						// console.log("Search: " + JSON.stringify(response.data));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.userID,
-							type: "user",
-							name: item.username,
-							userData: {
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
 								id: item.userID,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-								followers: item.followers.data,
-							},
-						}));
-						setResults(results);
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 					}
 				}
 			}
@@ -611,26 +618,7 @@ const Search: React.FC = () => {
 		prevFilterRef.current = filter;
 	}, [filter]);
 
-	const getGenres = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				// console.log("Genre data" + response.data);
-				genres = response.data;
-			}
-		} catch (error) {
-			console.error("Error fetching genres:", error);
-		}
-	};
-
 	useEffect(() => {
-		getGenres();
 		getRoomHistory();
 	}, []);
 
@@ -729,11 +717,31 @@ const Search: React.FC = () => {
 			</View>
 
 			<FilterBottomSheet
-				showMoreFilters={showMoreFilters}
-				setShowMoreFilters={setShowMoreFilters}
 				filter={filter}
+				explicit={explicit}
+				nsfw={nsfw}
+				temporary={temporary}
+				isPrivate={isPrivate}
+				scheduled={scheduled}
+				showMoreFilters={showMoreFilters}
+				host={host}
+				roomCount={roomCount}
+				maxFollowers={maxFollowers}
+				minFollowers={minFollowers}
 				selectedGenre={selectedGenre}
+				selectedLanguage={selectedLanguage}
+				setExplicit={setExplicit}
+				setNsfw={setNsfw}
+				setTemporary={setTemporary}
+				setIsPrivate={setIsPrivate}
+				setScheduled={setScheduled}
+				setHost={setHost}
+				setRoomCount={setRoomCount}
+				setMaxFollowers={setMaxFollowers}
+				setMinFollowers={setMinFollowers}
 				setSelectedGenre={setSelectedGenre}
+				setSelectedLanguage={setSelectedLanguage}
+				setShowMoreFilters={setShowMoreFilters}
 			/>
 
 			{loading ? (
