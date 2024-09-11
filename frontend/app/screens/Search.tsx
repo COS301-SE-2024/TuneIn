@@ -706,9 +706,7 @@ const Search: React.FC = () => {
 					onPress={handleToggleMoreFilters}
 					testID="toggle-filters-button"
 				>
-					<Text style={styles.filterText}>
-						{"View More Filters"}
-					</Text>
+					<Text style={styles.filterText}>{"View More Filters"}</Text>
 				</TouchableOpacity>
 			</View>
 
