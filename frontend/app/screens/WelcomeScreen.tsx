@@ -1,7 +1,6 @@
 import React from "react";
 import {
 	View,
-	Text,
 	ImageBackground,
 	TouchableOpacity,
 	Dimensions,
@@ -36,7 +35,11 @@ const WelcomeScreen: React.FC = () => {
 					style={[styles.imageBackground, { width, height: height * 0.6 }]}
 					resizeMode="cover"
 				>
-					<TouchableOpacity style={styles.helpButton} onPress={navigateToHelp}>
+					<TouchableOpacity
+						style={styles.helpButton}
+						onPress={navigateToHelp}
+						testID="help-button"
+					>
 						<MaterialCommunityIcons
 							name="help-circle-outline"
 							size={24}

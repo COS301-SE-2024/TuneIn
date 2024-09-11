@@ -34,7 +34,8 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const navigateToRoomPage = () => {
 		console.log("Room:", room);
 		router.navigate({
-			pathname: "/screens/rooms/RoomPage",
+			// pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(room) },
 		});
 	};

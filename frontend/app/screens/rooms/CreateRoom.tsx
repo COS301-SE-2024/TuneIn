@@ -14,7 +14,7 @@ import { useRouter } from "expo-router"; // Import useRouter from 'expo-router'
 import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import path as needed
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
-import CyanButton from "../../components/CyanButton";
+import CreateButton from "../../components/CreateButton";
 
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
@@ -181,7 +181,7 @@ const CreateRoomScreen: React.FC = () => {
 							</View>
 						)}
 					</View>
-					<CyanButton title="Let's go" onPress={navigateToRoomDetails} />
+					<CreateButton title="Let's go" onPress={navigateToRoomDetails} />
 				</View>
 			</ScrollView>
 		</KeyboardAvoidingView>
