@@ -284,6 +284,28 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 		}
 		return b.score - a.score;
 	});
+	if (tempQueue.length > 0) {
+		const head: RoomSong = tempQueue[0];
+		const currentStartTime = head.getPlaybackStartTime();
+		if (currentStartTime !== null) {
+			//update all start times to be sequential
+			const initStartTime = currentStartTime.getMilliseconds();
+			let pos = 0;
+			for (let i = 0; i < tempQueue.length; i++) {
+				const song: RoomSong = tempQueue[i];
+				if (song.spotifyInfo === null) {
+					console.log(
+						"Song does not have spotify info. Will try again next time",
+					);
+					break;
+				}
+				const t: Date = new Date(initStartTime + pos);
+				song.setPlaybackStartTime(t);
+				tempQueue[i] = song;
+				pos += song.spotifyInfo.duration_ms;
+			}
+		}
+	}
 	console.log("===================================");
 	console.log("Sorted queue:");
 	for (const song of tempQueue) {
