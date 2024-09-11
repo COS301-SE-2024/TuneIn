@@ -7,7 +7,7 @@ import {
 	Animated,
 	ScrollView,
 	Switch,
-    Modal,
+	Modal,
 } from "react-native";
 import axios from "axios";
 import auth from "../services/AuthManagement";
@@ -61,7 +61,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	setSelectedLanguage = () => {},
 	handleSelectGenre = () => {},
 	handleSelectLanguage = () => {},
-    setShowMoreFilters = () => {},
+	setShowMoreFilters = () => {},
 	filter,
 	explicit = false,
 	nsfw = false,
@@ -78,31 +78,31 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
 
-	 const [genres, setGenres] = useState([
-			"rock",
-			"pop",
-			"jazz",
-			"classical",
-			"hip hop",
-			"country",
-			"electronica",
-			"reggae",
-			"blues",
-			"folk",
-			"metal",
-			"punk",
-			"soul",
-			"r&b",
-			"funk",
-			"dancehall",
-			"techno",
-			"ambient",
-			"gospel",
-			"latin",
-			"reggaeton",
-			"ska",
-			"opera",
-		]);
+	const [genres, setGenres] = useState([
+		"rock",
+		"pop",
+		"jazz",
+		"classical",
+		"hip hop",
+		"country",
+		"electronica",
+		"reggae",
+		"blues",
+		"folk",
+		"metal",
+		"punk",
+		"soul",
+		"r&b",
+		"funk",
+		"dancehall",
+		"techno",
+		"ambient",
+		"gospel",
+		"latin",
+		"reggaeton",
+		"ska",
+		"opera",
+	]);
 
 	// Sample language data
 	const languages = [
@@ -165,7 +165,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 			}),
 			onPanResponderRelease: (evt, gestureState) => {
 				if (gestureState.dy > 20) {
-					setShowMoreFilters(false); 
+					setShowMoreFilters(false);
 				} else {
 					Animated.spring(animation, {
 						toValue: 0,
@@ -177,19 +177,13 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	);
 
 	return (
-		<Modal
-			transparent={true}
-			animationType="slide"
-			visible={showMoreFilters}
-		>
+		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
 			<View style={styles.modalContainer}>
 				<Animated.View
 					style={[styles.modal, { transform: [{ translateY: animation }] }]}
 				>
 					<View style={styles.dragHandle} {...panResponder.panHandlers} />
-					{(!filter ||
-						(filter === "user") ||
-						(filter === "room")) && (
+					{(!filter || filter === "user" || filter === "room") && (
 						<>
 							{(filter === "user" || !filter) && (
 								<View style={styles.additionalFilters}>

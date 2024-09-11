@@ -7,7 +7,12 @@ describe("ToggleButton Component", () => {
 
 	const renderToggleButton = (props = {}) => {
 		return render(
-			<ToggleButton value={""} label={label} onValueChange={() => { } } {...props} />,
+			<ToggleButton
+				value={""}
+				label={label}
+				onValueChange={() => {}}
+				{...props}
+			/>,
 		);
 	};
 
