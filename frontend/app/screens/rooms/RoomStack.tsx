@@ -18,12 +18,12 @@ import { formatRoomData } from "../../models/Room";
 import { live, LiveMessage } from "../../services/Live";
 // import { useRouter } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as utils from "../../services/Utils";
+// import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
-import { UserDto } from "../../models/UserDto";
-import { ChatEventDto } from "../../models/ChatEventDto";
-import { RoomDto } from "../../models/RoomDto";
-import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
+// import { UserDto } from "../../models/UserDto";
+// import { ChatEventDto } from "../../models/ChatEventDto";
+// import { RoomDto } from "../../models/RoomDto";
+// import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
 import CurrentRoom from "./functions/CurrentRoom";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 
@@ -118,14 +118,6 @@ function MyRoomTabs() {
 			}
 			setIsPlaying(false);
 		}
-	};
-
-	const navigateToAdvancedSettings = () => {
-		router.navigate("/screens/rooms/AdvancedSettings");
-	};
-
-	const navigateToRoomInfo = () => {
-		router.navigate("/screens/rooms/RoomInfo");
 	};
 
 	const navigateBasedOnOwnership = () => {

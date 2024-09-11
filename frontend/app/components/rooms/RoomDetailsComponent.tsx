@@ -1,7 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { colors } from "../../styles/colors";
+import { color } from "react-native-elements/dist/helpers";
 
 export interface RoomDetailsProps {
+	image: string;
 	name: string;
 	description: string;
 	genre: string;
@@ -12,6 +15,8 @@ export interface RoomDetailsProps {
 }
 
 const RoomDetails: React.FC<RoomDetailsProps> = ({
+	name,
+	image,
 	description,
 	genre,
 	language,
@@ -21,6 +26,7 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
 }) => {
 	return (
 		<View style={styles.container}>
+			<Image source={{ uri: image }} style={styles.imageSize} />
 			<Text style={styles.sectionTitle}>Room Description</Text>
 			<Text style={styles.description}>{description}</Text>
 			<View style={styles.section}>
@@ -59,6 +65,12 @@ const styles = StyleSheet.create({
 		backgroundColor: "#FFFFFF",
 		padding: 30,
 	},
+	imageSize: {
+		width: "100%",
+		height: 200,
+		borderRadius: 10,
+		marginBottom: 20,
+	},
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: "bold",
@@ -75,14 +87,22 @@ const styles = StyleSheet.create({
 	},
 	tag: {
 		fontSize: 14,
-		fontFamily: "Plus Jakarta Sans",
-		color: "#0C111C",
-		backgroundColor: "#E8EAF2",
+		// fontFamily: "Plus Jakarta Sans",
+		color: "black",
+		fontWeight: 500,
+		backgroundColor: colors.primary,
 		borderRadius: 12,
 		paddingVertical: 8,
 		paddingHorizontal: 16,
 		marginRight: 12,
 		marginBottom: 20,
+		// borderRadius: 56,
+		// marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	explicitTag: {
 		borderRadius: 8,
@@ -92,6 +112,13 @@ const styles = StyleSheet.create({
 		paddingVertical: 9,
 		paddingHorizontal: 16,
 		marginHorizontal: 16,
+		// borderRadius: 56,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	nsfwTag: {
 		borderRadius: 8,
@@ -101,6 +128,13 @@ const styles = StyleSheet.create({
 		paddingVertical: 9,
 		paddingHorizontal: 16,
 		marginHorizontal: 16,
+		// borderRadius: 56,
+		marginBottom: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
 	},
 	explicitTagText: {
 		fontSize: 16,
