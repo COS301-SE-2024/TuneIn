@@ -25,14 +25,10 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const { userData } = playerContext;
 
 	useEffect(() => {
-		console.log("effect called: " + JSON.stringify(user.followers));
-		// if (userData !== null) {
 		const checkFollow = user.followers.some(
-			(item: any) => item.username === userData.username,
+			(item: any) => item.username === userData?.username,
 		);
-		console.log("Following: " + checkFollow);
 		setIsFollowing(checkFollow);
-		// }
 	}, [userData, user.followers]);
 
 	const followHandler = async () => {
@@ -41,7 +37,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		if (storedToken) {
 			if (isFollowing) {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.id}/unfollow`,
+					`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
 					{},
 					{
 						headers: {
@@ -51,14 +47,13 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				);
 
 				if (response) {
-					console.log("Called Unfollow");
 					setIsFollowing(false);
 				} else {
 					console.error("Issue unfollowing user");
 				}
 			} else {
 				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.id}/follow`,
+					`${utils.API_BASE_URL}/users/${user.username}/follow`,
 					{},
 					{
 						headers: {
@@ -77,10 +72,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		}
 	};
 
-	// const handleFollowToggle = () => {
-	// 	setIsFollowing((prevState) => !prevState);
-	// };
-
 	const navigateToHelp = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
@@ -94,20 +85,26 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		<View style={styles.container}>
 			<TouchableOpacity
 				onPress={navigateToHelp}
-				style={{ flexDirection: "row", alignItems: "center", paddingRight: 40 }}
+				style={{ flexDirection: "row", alignItems: "center", paddingRight: 20 }}
 			>
 				<Image
 					source={{ uri: user.profile_picture_url }}
 					style={styles.profileImage}
+					testID="profile-pic"
 				/>
-				<View>
-					<Text style={styles.profileName}>{user.profile_name}</Text>
-					<Text style={styles.username}>{user.username}</Text>
+				<View style={styles.textContainer}>
+					<Text style={styles.profileName} numberOfLines={1}>
+						{user.profile_name}
+					</Text>
+					<Text style={styles.username} numberOfLines={1}>
+						{user.username}
+					</Text>
 				</View>
 			</TouchableOpacity>
 			<TouchableOpacity
 				style={[styles.followButton, isFollowing && styles.unfollowButton]}
 				onPress={followHandler}
+				testID="follow-button"
 			>
 				<Text style={styles.followButtonText}>
 					{isFollowing ? "Unfollow" : "Follow"}
@@ -124,7 +121,11 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: "#ccc",
 		paddingBottom: 20,
-		paddingHorizontal: 20,
+		paddingHorizontal: 5,
+	},
+	textContainer: {
+		flex: 1,
+		width: 120,
 	},
 	profileImage: {
 		width: 70,
@@ -134,20 +135,20 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 	profileName: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: "bold",
 		color: "#333",
 		marginTop: 20,
 	},
 	username: {
-		fontSize: 16,
+		fontSize: 14,
 		color: colors.secondary,
 		fontWeight: "500",
+		marginTop: 5,
 	},
 	followButton: {
 		marginTop: 20,
 		paddingVertical: 5,
-		paddingHorizontal: 10,
 		borderRadius: 15,
 		backgroundColor: colors.primary,
 		alignItems: "center",
