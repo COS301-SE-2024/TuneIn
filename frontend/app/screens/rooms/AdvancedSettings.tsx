@@ -61,14 +61,6 @@ const AdvancedSettings = () => {
 		navigateToHome(); // Proceed to delete and navigate home
 	};
 
-	// const handleSave = () => {
-	// 	setShowSaveModal(true);
-	// 	setTimeout(() => {
-	// 		setShowSaveModal(false);
-	// 		router.back(); // Go back after showing save confirmation
-	// 	}, 1000); // Display the modal for 1.5 seconds before navigating
-	// };
-
 	const handleSave = () => {
 		setShowSaveModal(true); // Open the save modal
 	};
@@ -83,7 +75,12 @@ const AdvancedSettings = () => {
 			<View style={styles.header}>
 				<TouchableOpacity onPress={() => router.back()}>
 					{/* <Text style={styles.closeButton}>×</Text> */}
-					<MaterialCommunityIcons name="window-close" size={24} color="black" />
+					<MaterialCommunityIcons
+						name="window-close"
+						size={24}
+						color="black"
+						testID="closeButton"
+					/>
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
 			</View>
@@ -206,26 +203,12 @@ const AdvancedSettings = () => {
 					</View>
 				</View>
 			</Modal>
-
-			{/* Save Confirmation Modal */}
-			{/* <Modal
-				animationType="fade"
-				transparent={true}
-				visible={showSaveModal}
-				onRequestClose={() => setShowSaveModal(false)}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalViewS}>
-						<Text style={styles.modalTextS}>Settings have been saved!</Text>
-					</View>
-				</View>
-			</Modal> */}
 			{/* Save Confirmation Modal */}
 			<Modal
 				animationType="fade"
 				transparent={true}
 				visible={showSaveModal}
-				onRequestClose={closeSaveModal} // Handle modal close on outside click or back button
+				onRequestClose={closeSaveModal}
 			>
 				<View style={styles.modalContainer}>
 					<View style={styles.modalViewS}>

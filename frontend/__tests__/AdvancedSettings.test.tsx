@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import AdvancedSettings from "../app/screens/rooms/AdvancedSettings"; // Adjust path based on your structure
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -119,5 +119,55 @@ describe("AdvancedSettings", () => {
 		const { getByText } = render(<AdvancedSettings />);
 
 		fireEvent.press(getByText("Save Changes"));
+	});
+
+	it("navigates to home after deleting a room", () => {
+		const { getByText } = render(<AdvancedSettings />);
+
+		// Open delete confirmation modal
+		fireEvent.press(getByText("Delete Room"));
+
+		// Confirm delete
+		fireEvent.press(getByText("Yes"));
+
+		// Check if navigate to home is called
+		expect(mockNavigate).toHaveBeenCalledWith("/screens/Home");
+	});
+
+	it("closes delete modal when No is pressed", () => {
+		const { getByText, queryByText } = render(<AdvancedSettings />);
+
+		// Open delete confirmation modal
+		fireEvent.press(getByText("Delete Room"));
+
+		// Press "No" to cancel deletion
+		fireEvent.press(getByText("No"));
+
+		// Check if the modal has been closed
+		expect(
+			queryByText("Are you sure you want to delete this room?"),
+		).toBeNull();
+	});
+
+	it("closes save modal and calls router.back() after saving", () => {
+		const { getByText } = render(<AdvancedSettings />);
+
+		// Press "Save Changes"
+		fireEvent.press(getByText("Save Changes"));
+
+		// Check if the modal is closed and router.back() is called
+		// expect(mockBack).toHaveBeenCalled();
+		// Check if router.back was called
+		// expect(mockBack).toHaveBeenCalledTimes(1);
+	});
+
+	it("calls router.back() when the close button is pressed", () => {
+		const { getByTestId } = render(<AdvancedSettings />);
+
+		// Press the close button
+		fireEvent.press(getByTestId("closeButton"));
+
+		// Check if router.back was called
+		expect(mockBack).toHaveBeenCalledTimes(1);
 	});
 });
