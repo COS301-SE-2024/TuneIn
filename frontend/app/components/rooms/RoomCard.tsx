@@ -18,7 +18,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
 }) => {
 	const renderSongInfo = () => {
 		if (!songName || !artistName) {
-			return <Text style={styles.nowPlaying}>No song playing</Text>;
+			return <Text style={styles.nowPlaying}></Text>;
 		}
 
 		return (

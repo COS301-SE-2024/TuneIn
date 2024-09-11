@@ -52,6 +52,7 @@ const s3 = new S3({
 
 const uploadImage = async (imageURI: string, roomName: string) => {
 	try {
+		console.log("Uploading imageURI: " + imageURI);
 		const response = await fetch(imageURI);
 		const blob = await response.blob();
 		const params = {
