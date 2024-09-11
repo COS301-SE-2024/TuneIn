@@ -45,11 +45,32 @@ describe("AdvancedSettings", () => {
 		expect(getByText("Only Friends")).toBeTruthy();
 	});
 
-	it("handles option selection correctly", () => {
+	it("handles option 2 selection correctly", () => {
 		const { getByText } = render(<AdvancedSettings />);
 
 		// Select "People with the link"
 		fireEvent.press(getByText("People with the link"));
+	});
+
+	it("handles option 1 selection correctly", () => {
+		const { getByText } = render(<AdvancedSettings />);
+
+		// Select "People with the link"
+		fireEvent.press(getByText("Everyone"));
+	});
+
+	it("handles option 3 selection correctly", () => {
+		const { getByText } = render(<AdvancedSettings />);
+
+		// Select "People with the link"
+		fireEvent.press(getByText("Friends and people you follow"));
+	});
+
+	it("handles option 4 selection correctly", () => {
+		const { getByText } = render(<AdvancedSettings />);
+
+		// Select "People with the link"
+		fireEvent.press(getByText("Only Friends"));
 	});
 
 	it("toggles switches correctly", () => {
@@ -98,10 +119,5 @@ describe("AdvancedSettings", () => {
 		const { getByText } = render(<AdvancedSettings />);
 
 		fireEvent.press(getByText("Save Changes"));
-
-		//Check if router back is called after save
-		setTimeout(() => {
-			expect(mockBack).toHaveBeenCalled();
-		}, 1000);
 	});
 });

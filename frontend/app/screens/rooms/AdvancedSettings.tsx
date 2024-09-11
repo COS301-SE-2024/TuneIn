@@ -61,12 +61,21 @@ const AdvancedSettings = () => {
 		navigateToHome(); // Proceed to delete and navigate home
 	};
 
+	// const handleSave = () => {
+	// 	setShowSaveModal(true);
+	// 	setTimeout(() => {
+	// 		setShowSaveModal(false);
+	// 		router.back(); // Go back after showing save confirmation
+	// 	}, 1000); // Display the modal for 1.5 seconds before navigating
+	// };
+
 	const handleSave = () => {
-		setShowSaveModal(true);
-		setTimeout(() => {
-			setShowSaveModal(false);
-			router.back(); // Go back after showing save confirmation
-		}, 1000); // Display the modal for 1.5 seconds before navigating
+		setShowSaveModal(true); // Open the save modal
+	};
+
+	const closeSaveModal = () => {
+		setShowSaveModal(false);
+		router.back(); // Navigate back when the modal is closed
 	};
 
 	return (
@@ -199,7 +208,7 @@ const AdvancedSettings = () => {
 			</Modal>
 
 			{/* Save Confirmation Modal */}
-			<Modal
+			{/* <Modal
 				animationType="fade"
 				transparent={true}
 				visible={showSaveModal}
@@ -207,6 +216,29 @@ const AdvancedSettings = () => {
 			>
 				<View style={styles.modalContainer}>
 					<View style={styles.modalViewS}>
+						<Text style={styles.modalTextS}>Settings have been saved!</Text>
+					</View>
+				</View>
+			</Modal> */}
+			{/* Save Confirmation Modal */}
+			<Modal
+				animationType="fade"
+				transparent={true}
+				visible={showSaveModal}
+				onRequestClose={closeSaveModal} // Handle modal close on outside click or back button
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalViewS}>
+						<TouchableOpacity
+							onPress={closeSaveModal}
+							style={styles.closeButtonS}
+						>
+							<MaterialCommunityIcons
+								name="window-close"
+								size={24}
+								color="black"
+							/>
+						</TouchableOpacity>
 						<Text style={styles.modalTextS}>Settings have been saved!</Text>
 					</View>
 				</View>
@@ -251,6 +283,11 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
+	},
+	closeButtonS: {
+		position: "absolute",
+		top: 10,
+		left: 10,
 	},
 	selectedOption: {
 		backgroundColor: "lightblue",

@@ -61,31 +61,6 @@ describe("DevicePicker Component", () => {
 		});
 	});
 
-	// test("selects a device and makes API call", async () => {
-	// 	const { getByTestId, getByText } = render(<DevicePicker />);
-	// 	const mockFetch = jest.spyOn(global, "fetch").mockResolvedValue({
-	// 		ok: true,
-	// 		json: jest.fn().mockResolvedValue({}),
-	// 	} as any);
-
-	// 	fireEvent.press(getByTestId("Speaker-button"));
-	// 	const phoneRadioButton = getByTestId("radio-button-1");
-
-	// 	fireEvent.press(phoneRadioButton);
-
-	// 	await waitFor(() => {
-	// 		expect(mockFetch).toHaveBeenCalledWith(
-	// 			"https://api.spotify.com/v1/me/player",
-	// 			expect.objectContaining({
-	// 				method: "PUT",
-	// 				body: JSON.stringify({ device_ids: ["1"] }),
-	// 			}),
-	// 		);
-	// 	});
-
-	// 	mockFetch.mockRestore();
-	// });
-
 	test("handles device fetch error", async () => {
 		(useSpotifyDevices as jest.Mock).mockReturnValue({
 			getDeviceIDs: jest

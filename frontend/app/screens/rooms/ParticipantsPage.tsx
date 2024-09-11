@@ -25,17 +25,10 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 }) => {
 	const navigation = useNavigation();
 
-	const navigateToProfile = (userId: string) => {
-		// Replace with actual navigation logic
-		console.log(`Navigating to profile of user with ID: ${userId}`);
-		// For example: navigation.navigate('UserProfile', { userId });
-	};
+	const navigateToProfile = (userId: string) => {};
 
 	const renderItem = ({ item }: { item: Participant }) => (
-		<TouchableOpacity
-			style={styles.participantContainer}
-			onPress={() => navigateToProfile(item.id)}
-		>
+		<TouchableOpacity style={styles.participantContainer}>
 			<Image
 				source={{ uri: item.profilePictureUrl }}
 				style={styles.profilePicture}
