@@ -81,6 +81,11 @@ const Home: React.FC = () => {
 	/* ********************************************************************** */
 
 	console.log("currentRoom: " + currentRoom);
+	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [roomError, setRoomError] = useState<boolean>(false);
+	const [profileError, setProfileError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState<boolean>(false);
+	const [cacheError, setCacheError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -105,9 +110,11 @@ const Home: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
+			setRoomError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching rooms:", error);
+			console.log("Error fetching rooms:", error);
+			setRoomError(true);
 			return [];
 		}
 	};
@@ -119,9 +126,11 @@ const Home: React.FC = () => {
 			});
 
 			// console.log("Friends: " + JSON.stringify(response.data));
+			setFriendError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching friends:", error);
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
 			return [];
 		}
 	};
@@ -134,11 +143,12 @@ const Home: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-
+				setProfileError(false);
 				return response.data;
 			}
 		} catch (error) {
-			console.error("Error fetching profile info:", error);
+			console.log("Error fetching profile info:", error);
+			setProfileError(true);
 		}
 	};
 
@@ -183,8 +193,10 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
+			setCacheError(false);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
+			setCacheError(true);
 		}
 	};
 
@@ -342,7 +354,7 @@ const Home: React.FC = () => {
 						color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
-				) : (
+				) : !roomError && !profileError && !friendError && !cacheError ? (
 					<View style={styles.contentContainer}>
 						{myRecents.length > 0 && (
 							<>
@@ -372,6 +384,16 @@ const Home: React.FC = () => {
 							showAddRoomCard={true} // Conditionally show the AddRoomCard
 						/>
 					</View>
+				) : (
+					<>
+						<View style={styles.errorMessage}>
+							<Text>
+								{roomError && friendError
+									? "Failed to load content"
+									: roomError ? "Failed to load rooms" : "Failed to load friend data"}
+							</Text>
+						</View>
+					</>
 				)}
 			</ScrollView>
 			<Animated.View
@@ -392,12 +414,19 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollViewContent: {
-		paddingTop: 40,
+		// paddingTop: 40,
+		flexGrow: 1,
 	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: "center",
 		paddingTop: 20,
+	},
+	errorMessage: {
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
+		width: "100%",
 	},
 	sectionTitle: {
 		fontSize: 24,
