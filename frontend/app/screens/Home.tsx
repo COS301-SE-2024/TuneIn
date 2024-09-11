@@ -38,11 +38,6 @@ import { useAPI } from "../APIContext";
 import { UserDto } from "../../api";
 import { RequiredError } from "../../api/base";
 
-interface UserData {
-	username: string;
-	// Add other properties if needed
-}
-
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -273,7 +268,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, []);
+	}, [setUserData, userData]);
 
 	const [refreshing] = React.useState(false);
 

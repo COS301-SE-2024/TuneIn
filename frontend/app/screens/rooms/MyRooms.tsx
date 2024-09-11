@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -7,12 +7,11 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Import Picker for dropdown
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
+import { useLocalSearchParams } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
-import TopNavBar from "../../components/TopNavBar";
 
 // Utility function to group rooms by the month they were created
 const groupRoomsByMonth = (rooms: Room[]) => {
@@ -42,13 +41,30 @@ const groupRoomsByMonth = (rooms: Room[]) => {
 };
 
 const MyRooms: React.FC = () => {
-	const router = useRouter();
-	const { myRooms } = useLocalSearchParams(); // Get rooms from navigation params
+	const { myRooms } = useLocalSearchParams();
 	const [groupedRooms, setGroupedRooms] = useState<Record<string, Room[]>>({});
 	const [loading, setLoading] = useState(true);
 	const [sortBy, setSortBy] = useState<"start_date" | "end_date">("start_date");
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 	const [sortLoading, setSortLoading] = useState(false);
+
+	// Sorting function for rooms
+	const sortRooms = useCallback(
+		(rooms: Room[]) => {
+			console.log("sorting");
+			return rooms.sort((a, b) => {
+				const dateA = a[sortBy] as Date;
+				const dateB = b[sortBy] as Date;
+
+				if (sortDirection === "asc") {
+					return dateA > dateB ? 1 : -1;
+				} else {
+					return dateA < dateB ? 1 : -1;
+				}
+			});
+		},
+		[sortBy, sortDirection],
+	);
 
 	useEffect(() => {
 		if (myRooms) {
@@ -70,27 +86,12 @@ const MyRooms: React.FC = () => {
 			}
 		}
 		setLoading(false);
-	}, [myRooms]);
-
-	// Sorting function for rooms
-	const sortRooms = (rooms: Room[]) => {
-		console.log("sorting");
-		return rooms.sort((a, b) => {
-			const dateA = a[sortBy] as Date;
-			const dateB = b[sortBy] as Date;
-
-			if (sortDirection === "asc") {
-				return dateA > dateB ? 1 : -1;
-			} else {
-				return dateA < dateB ? 1 : -1;
-			}
-		});
-	};
+	}, [myRooms, sortRooms]);
 
 	// Effect to handle sorting when sortBy or sortDirection changes
 	useEffect(() => {
-		if (!myRooms) return; // Exit if no rooms are available
-		setSortLoading(true); // Start loader when sorting starts
+		if (!myRooms) return;
+		setSortLoading(true);
 		try {
 			const parsedRooms: Room[] = JSON.parse(myRooms as string).map(
 				(room: Room) => ({
@@ -100,24 +101,22 @@ const MyRooms: React.FC = () => {
 				}),
 			);
 
-			// Sort the rooms based on the sort settings
 			const sortedRooms = sortRooms(parsedRooms);
 			const formattedRooms = groupRoomsByMonth(sortedRooms);
 			setGroupedRooms(formattedRooms);
 		} catch (error) {
 			console.error("Failed to sort rooms:", error);
 		}
-		setSortLoading(false); // Stop loader when sorting is done
-	}, [sortBy, sortDirection]);
+		setSortLoading(false);
+	}, [sortBy, sortDirection, myRooms, sortRooms]);
 
 	return (
 		<View style={styles.container}>
-			{/* Page Title */}
 			<Text style={styles.pageTitle}>My Rooms</Text>
 
-			{/* Sorting Dropdown */}
 			<View style={styles.sortContainer}>
 				<Picker
+					testID="dropdown"
 					selectedValue={sortBy}
 					style={styles.dropdown}
 					onValueChange={(itemValue) =>
@@ -141,8 +140,9 @@ const MyRooms: React.FC = () => {
 			</View>
 
 			<ScrollView contentContainerStyle={styles.scrollViewContent}>
-				{loading || sortLoading ? ( // Show loader while sorting
+				{loading || sortLoading ? (
 					<ActivityIndicator
+						testID="loading-indicator"
 						size={60}
 						color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
