@@ -11,20 +11,15 @@ import {
 	Text,
 	Image,
 	TouchableOpacity,
-	ScrollView,
 	StyleSheet,
 	Animated,
-	TextInput,
-	KeyboardAvoidingView,
-	Platform,
 	Dimensions,
 	Easing,
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
-import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -36,20 +31,12 @@ import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
-import { FlyingView, ObjectConfig } from "react-native-flying-objects";
+import { ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import SongRoomWidget from "../../components/SongRoomWidget";
-
-const MemoizedCommentWidget = memo(CommentWidget);
-
-type EmojiReaction = {
-	emoji: string;
-	userId: string; // Add more properties if needed
-};
 
 interface RoomPageProps {
 	joined: boolean;
@@ -84,7 +71,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	const { currentRoom, setCurrentRoom } = playerContext;
 	const [joineds, setJoined] = useState(false);
-	const [activeTab, setActiveTab] = useState("Room");
 
 	useEffect(() => {
 		console.log("Room ID: " + currentRoom?.roomID);

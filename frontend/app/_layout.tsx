@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
 import { StatusBar, View, StyleSheet } from "react-native";
-// import TopNavBar from "../app/components/TopNavBar";
 import { colors } from "../app/styles/colors";
 import { APIProvider } from "./APIContext";
 
@@ -31,7 +30,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 45,
-		// backgroundColor: colors.backgroundColor,
 	},
 });
 

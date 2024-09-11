@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import AdvancedSettings from "../app/screens/rooms/AdvancedSettings"; // Adjust path based on your structure
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -74,7 +74,7 @@ describe("AdvancedSettings", () => {
 	});
 
 	it("toggles switches correctly", () => {
-		const { getByText, getAllByRole } = render(<AdvancedSettings />);
+		const { getAllByRole } = render(<AdvancedSettings />);
 
 		// Get the switches (Assuming 4 switches)
 		const switches = getAllByRole("switch");
@@ -109,7 +109,7 @@ describe("AdvancedSettings", () => {
 	});
 
 	it("displays and closes the delete confirmation modal", () => {
-		const { getByText, queryByText } = render(<AdvancedSettings />);
+		const { getByText } = render(<AdvancedSettings />);
 
 		// Open delete confirmation modal
 		fireEvent.press(getByText("Delete Room"));
@@ -155,10 +155,6 @@ describe("AdvancedSettings", () => {
 		// Press "Save Changes"
 		fireEvent.press(getByText("Save Changes"));
 
-		// Check if the modal is closed and router.back() is called
-		// expect(mockBack).toHaveBeenCalled();
-		// Check if router.back was called
-		// expect(mockBack).toHaveBeenCalledTimes(1);
 	});
 
 	it("calls router.back() when the close button is pressed", () => {
