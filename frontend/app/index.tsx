@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import WelcomeScreen from "./screens/WelcomeScreen";
+import HomeScreen from "./screens/Home"; // Make sure to import the HomeScreen component
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
+import { API_BASE_URL } from "./services/Utils";
 import { live } from "./services/Live";
 import * as Font from "expo-font";
-import { Platform } from "react-native";
+import { Platform, ActivityIndicator, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
 import "../polyfills";
@@ -40,8 +42,8 @@ if (Platform.OS === "web") {
 
 const App: React.FC = () => {
 	const router = useRouter();
-	const [, setIsCheckingToken] = useState(true);
-	const [, setFontLoaded] = useState(false);
+	const [isCheckingToken, setIsCheckingToken] = useState(true);
+	const [fontLoaded, setFontLoaded] = useState(false);
 
 	useEffect(() => {
 		const checkTokenAndLoadFonts = async () => {
@@ -63,10 +65,8 @@ const App: React.FC = () => {
 				}
 
 				if (auth.authenticated()) {
-					// Redirect to HomeScreen and replace the current route
 					router.replace("/screens/Home");
 				} else {
-					// Redirect to WelcomeScreen and replace the current route
 					console.log("clearing from index");
 					StorageService.clear();
 					router.replace("/screens/WelcomeScreen");
@@ -82,10 +82,19 @@ const App: React.FC = () => {
 		checkTokenAndLoadFonts();
 	}, [router]);
 
+	if (isCheckingToken || !fontLoaded) {
+		// Show a loader while checking authentication status
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<ActivityIndicator size="large" color="#0000ff" />
+			</View>
+		);
+	}
+
 	return (
 		<APIProvider>
 			<PlayerContextProvider>
-				<WelcomeScreen />
+				<HomeScreen /> {/* Display HomeScreen after checking authentication */}
 			</PlayerContextProvider>
 		</APIProvider>
 	);
