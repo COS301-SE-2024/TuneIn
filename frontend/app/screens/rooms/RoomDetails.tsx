@@ -150,7 +150,7 @@ const RoomDetails: React.FC = () => {
 							/>
 						)}
 					</View>
-					<CreateButton title="Share" onPress={navigateToChatRoom} />
+					<CreateButton title="Share" onPress={handleCreateRoom} />
 				</View>
 			</View>
 		</ScrollView>

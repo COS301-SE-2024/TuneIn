@@ -36,15 +36,14 @@ import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
-import SongRoomWidget from "../../components/SongRoomWidget";
+const MemoizedCommentWidget = memo(CommentWidget);
 
-interface RoomPageProps {
-	joined: boolean;
-	handleJoinLeave: () => Promise<void>;
-}
+type EmojiReaction = {
+	emoji: string;
+	userId: string; // Add more properties if needed
+};
 
-// const RoomPage = () => {
-const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
+const RoomPage = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();

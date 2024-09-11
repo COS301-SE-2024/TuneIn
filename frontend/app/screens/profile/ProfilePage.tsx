@@ -17,7 +17,7 @@ import GenreList from "../../components/GenreList";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -298,12 +298,17 @@ const ProfileScreen: React.FC = () => {
 				setRoomCheck(true);
 			}
 		} catch (error) {
-			// console.log("Error: " + error);
-			if (error.response && error.response.status === 404) {
-				setCurrentRoomData(null);
-				setRoomCheck(true);
+			if (axios.isAxiosError(error)) {
+				// Narrow down to AxiosError type
+				if (error.response && error.response.status === 404) {
+					setCurrentRoomData(null);
+					setRoomCheck(true);
+				} else {
+					console.error("Error fetching current room info:", error.message);
+				}
 			} else {
-				console.error("Error fetching current room info:", error);
+				// Handle non-Axios errors
+				console.error("An unexpected error occurred:", error);
 			}
 		}
 	};

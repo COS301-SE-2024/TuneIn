@@ -18,28 +18,23 @@ import {
 	RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import RoomCardWidget from "../../components/rooms/RoomCardWidget";
-import { Room } from "../../models/Room";
-import { Friend } from "../../models/friend";
-import AppCarousel from "../../components/AppCarousel";
-import FriendsGrid from "../../components/FriendsGrid";
-import Miniplayer from "../../components/home/miniplayer";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
+import RoomCardWidget from "../components/rooms/RoomCardWidget";
+import { Room } from "../models/Room";
+import { Friend } from "../models/friend";
+import AppCarousel from "../components/AppCarousel";
+import FriendsGrid from "../components/FriendsGrid";
+import Miniplayer from "../components/home/miniplayer";
+import * as StorageService from "./../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "../../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
-import * as utils from "../../services/Utils"; // Import Utils
-import { Player } from "../../PlayerContext";
-import { colors } from "../../styles/colors";
-import TopNavBar from "../../components/TopNavBar";
-import { useAPI } from "../../APIContext";
-import { UserDto } from "../../../api";
-import { RequiredError } from "../../../api/base";
-
-// interface UserData {
-// 	username: string;
-// 	// Add other properties if needed
-// }
+import auth from "./../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
+import * as utils from "./../services/Utils"; // Import Utils
+import { Player } from "../PlayerContext";
+import { colors } from "../styles/colors";
+import TopNavBar from "../components/TopNavBar";
+import { useAPI } from "../APIContext";
+import { UserDto } from "../../api";
+import { RequiredError } from "../../api/base";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -49,7 +44,37 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData } = playerContext;
+	const { currentRoom, userData, setUserData } = playerContext;
+
+	// An example of a well-typed & well-defined way to interact with the API
+	/* ********************************************************************** */
+	const { users, authenticated } = useAPI();
+	const [currentUser, setCurrentUser] = useState<UserDto>();
+	if (authenticated && !currentUser) {
+		users
+			.getProfile()
+			.then((user: AxiosResponse<UserDto>) => {
+				console.log("User: " + user);
+				if (user.status === 401) {
+					//Unauthorized
+					//Auth header is either missing or invalid
+				} else if (user.status === 500) {
+					//Internal Server Error
+					//Something went wrong in the backend (unlikely lmao)
+				}
+				setCurrentUser(user.data);
+			})
+			.catch((error) => {
+				if (error instanceof RequiredError) {
+					// a required field is missing
+				} else {
+					// some other error
+				}
+			});
+	}
+	/* ********************************************************************** */
+
+	console.log("currentRoom: " + currentRoom);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -86,6 +111,8 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
+
+			// console.log("Friends: " + JSON.stringify(response.data));
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching friends:", error);
@@ -114,25 +141,36 @@ const Home: React.FC = () => {
 			return [];
 		}
 
-		return rooms.map((room) => ({
-			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
-			name: room.room_name,
-			language: room.language,
-			songName: room.current_song ? room.current_song.title : null,
-			artistName: room.current_song
-				? room.current_song.artists.join(", ")
-				: null,
-			description: room.description,
-			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
-			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: 50,
-			tags: room.tags ? room.tags : [],
-			mine: mine,
-			isNsfw: room.has_nsfw_content,
-			isExplicit: room.has_explicit_content,
-		}));
+		return rooms.map((room, index) => {
+			// Print out the raw room data for the first room only
+			if (index === 0) {
+				console.log("Raw room data before formatting:", room);
+			}
+
+			return {
+				id: room.roomID,
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				name: room.room_name,
+				language: room.language,
+				songName: room.current_song ? room.current_song.title : null,
+				artistName: room.current_song
+					? room.current_song.artists.join(", ")
+					: null,
+				description: room.description,
+				userID: room.creator.userID,
+				userProfile: room.creator
+					? room.creator.profile_picture_url
+					: ProfileIMG,
+				username: room.creator ? room.creator.username : "Unknown",
+				roomSize: 50,
+				tags: room.tags ? room.tags : [],
+				mine: mine,
+				isNsfw: room.has_nsfw_content,
+				isExplicit: room.has_explicit_content,
+				start_date: room.start_date,
+				end_date: room.end_date,
+			};
+		});
 	};
 
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
@@ -157,6 +195,7 @@ const Home: React.FC = () => {
 
 	const refreshData = useCallback(async () => {
 		// await StorageService.clear();
+		// console.log("CLEARED STORAGE");
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		console.log("Stored token:", storedToken);
@@ -209,6 +248,9 @@ const Home: React.FC = () => {
 				: [];
 
 			setFriends(formattedFriends);
+
+			console.log("Friends after format: " + JSON.stringify(formattedFriends));
+
 			await StorageService.setItem(
 				"cachedFriends",
 				JSON.stringify(formattedFriends),
@@ -233,12 +275,20 @@ const Home: React.FC = () => {
 	);
 
 	const router = useRouter();
+
 	const navigateToAllFriends = () => {
 		const safeUserData = userData ?? { username: "defaultUser" };
 
 		router.navigate({
 			pathname: "/screens/followers/FollowerStack",
 			params: { username: safeUserData.username },
+		});
+	};
+
+	const navigateToMyRooms = () => {
+		router.navigate({
+			pathname: "/screens/rooms/MyRooms",
+			params: { myRooms: JSON.stringify(myRooms) },
 		});
 	};
 
@@ -281,6 +331,12 @@ const Home: React.FC = () => {
 		[scrollY],
 	);
 
+	const navBarTranslateY = scrollY.interpolate({
+		inputRange: [0, 100],
+		outputRange: [0, 100],
+		extrapolate: "clamp",
+	});
+
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
@@ -296,7 +352,7 @@ const Home: React.FC = () => {
 				{loading ? (
 					<ActivityIndicator
 						size={60}
-						// color={colors.backgroundColor}
+						color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
 				) : (
@@ -322,7 +378,12 @@ const Home: React.FC = () => {
 								maxVisible={8}
 							/>
 						) : null}
-						<Text style={styles.sectionTitle}>My Rooms</Text>
+						<TouchableOpacity
+							style={styles.navigateButton}
+							onPress={navigateToMyRooms}
+						>
+							<Text style={styles.sectionTitle}>My Rooms</Text>
+						</TouchableOpacity>
 						<AppCarousel
 							data={myRooms}
 							renderItem={renderItem}
@@ -331,6 +392,14 @@ const Home: React.FC = () => {
 					</View>
 				)}
 			</ScrollView>
+			<Animated.View
+				style={[
+					styles.navBar,
+					{ transform: [{ translateY: navBarTranslateY }] },
+				]}
+			>
+				<Miniplayer />
+			</Animated.View>
 		</View>
 	);
 };
@@ -338,7 +407,6 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "white",
 	},
 	scrollViewContent: {
 		paddingTop: 40,
@@ -377,6 +445,13 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 32,
 		fontWeight: "bold",
+	},
+	navBar: {
+		position: "absolute",
+		bottom: 0,
+		left: 0,
+		right: 0,
+		zIndex: 10,
 	},
 });
 
