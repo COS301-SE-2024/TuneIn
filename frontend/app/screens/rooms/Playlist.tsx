@@ -74,6 +74,7 @@ const Playlist = () => {
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back-button"
 				>
 					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
 				</TouchableOpacity>
