@@ -11,20 +11,15 @@ import {
 	Text,
 	Image,
 	TouchableOpacity,
-	ScrollView,
 	StyleSheet,
 	Animated,
-	TextInput,
-	KeyboardAvoidingView,
-	Platform,
 	Dimensions,
 	Easing,
 	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
-import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -36,14 +31,20 @@ import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
-import { FlyingView, ObjectConfig } from "react-native-flying-objects";
+import { ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
-const MemoizedCommentWidget = memo(CommentWidget);
+import SongRoomWidget from "../../components/SongRoomWidget";
 
-const RoomPage = () => {
+interface RoomPageProps {
+	joined: boolean;
+	handleJoinLeave: () => Promise<void>;
+}
+
+// const RoomPage = () => {
+const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -69,7 +70,7 @@ const RoomPage = () => {
 	}
 
 	const { currentRoom, setCurrentRoom } = playerContext;
-	const [joined, setJoined] = useState(false);
+	const [joineds, setJoined] = useState(false);
 
 	useEffect(() => {
 		console.log("Room ID: " + currentRoom?.roomID);
@@ -503,40 +504,44 @@ const RoomPage = () => {
 		});
 	};
 
-	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined(!joined);
-		const token = await auth.getToken();
-		console.log("Token fr fr:", token);
-		if (!joined) {
-			if (!token) {
-				throw new Error("No token found");
-			}
-			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
-			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages);
-			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			leaveRoom();
-			setJoined(false);
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
-			live.leaveRoom();
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			//playbackManager.pause();
-			const deviceID = await playback.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				playback.handlePlayback("pause", deviceID);
-			}
-			setIsPlaying(false);
-		}
+	const handleViewParticipants = () => {
+		router.navigate("screens/rooms/ParticipantsPage"); // Change this to the correct page for participants
 	};
+
+	// const handleJoinLeave = async () => {
+	// 	console.log("joined", joined);
+	// 	setJoined(!joined);
+	// 	const token = await auth.getToken();
+	// 	console.log("Token fr fr:", token);
+	// 	if (!joined) {
+	// 		if (!token) {
+	// 			throw new Error("No token found");
+	// 		}
+	// 		console.log("Joining room........", roomID, token);
+	// 		roomCurrent.leaveJoinRoom(token, roomID, false);
+	// 		joinRoom();
+	// 		live.joinRoom(roomID, setJoined, setMessages);
+	// 		setJoined(true);
+	// 		setJoinedSongIndex(currentTrackIndex);
+	// 		setJoinedSecondsPlayed(secondsPlayed);
+	// 		console.log(
+	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+	// 		);
+	// 	} else {
+	// 		leaveRoom();
+	// 		setJoined(false);
+	// 		roomCurrent.leaveJoinRoom(token as string, roomID, true);
+	// 		live.leaveRoom();
+	// 		setJoinedSongIndex(null);
+	// 		setJoinedSecondsPlayed(null);
+	// 		//playbackManager.pause();
+	// 		const deviceID = await playback.getFirstDevice();
+	// 		if (deviceID && deviceID !== null) {
+	// 			playback.handlePlayback("pause", deviceID);
+	// 		}
+	// 		setIsPlaying(false);
+	// 	}
+	// };
 
 	if (!readyToJoinRoom) {
 		setReadyToJoinRoom(true);
@@ -558,27 +563,31 @@ const RoomPage = () => {
 		setMessage("");
 	};
 
+	const exampleTrack: SongRoomWidget = {
+		name: "Song Title",
+		artists: [{ name: "Artist Name" }],
+		album: {
+			images: [
+				{
+					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
+				},
+			],
+		},
+	};
+
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-
-			<Image
+			{/* <Image
 				source={{ uri: roomData.backgroundImage }}
 				style={styles.backgroundImage}
-			/>
-			<LinearGradient
+			/> */}
+			{/* <LinearGradient
 				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
 				style={styles.gradientOverlay}
-			/>
+			/> */}
 
 			<View style={styles.contentContainer}>
-				<View style={styles.roomDetails}>
+				{/* <View style={styles.roomDetails}>
 					<Text style={styles.roomName}>{roomData.name}</Text>
 					<Text style={styles.description}>{roomData.description}</Text>
 					<View style={styles.tagsContainer}>
@@ -588,19 +597,20 @@ const RoomPage = () => {
 							</Text>
 						))}
 					</View>
-				</View>
+				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						<Image
-							source={{ uri: roomData.userProfile }}
-							style={styles.userImage}
-						/>
-						<Text style={styles.username}>
-							{truncateUsername(roomData.username)}
-						</Text>
+						{/* <Ionicons name="people" size={30} color="black" />
+						<Text>134 Particpants</Text> */}
+						<TouchableOpacity
+							style={styles.userInfoContainer}
+							onPress={handleViewParticipants}
+						>
+							<Ionicons name="people" size={30} color="black" />
+							<Text>134 Participants</Text>
+						</TouchableOpacity>
 					</View>
-
 					{/* Right side */}
 					<View style={styles.joinLeaveButtonContainer}>
 						<TouchableOpacity
@@ -614,24 +624,14 @@ const RoomPage = () => {
 					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
-				<View style={styles.sideBySideClose}>
-					<TouchableOpacity
-						onPress={handleBookmark}
-						style={styles.bookmarkButton}
-					>
-						<Icon
-							name={isBookmarked ? "bookmark" : "bookmark-border"}
-							size={34}
-							color={isBookmarked ? "gold" : "black"}
-						/>
-					</TouchableOpacity>
-					<DevicePicker />
-				</View>
 				<View style={styles.trackDetails}>
 					<Image
 						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
 						style={styles.nowPlayingAlbumArt}
 					/>
+				</View>
+				<View style={styles.songRoomWidget}>
+					<SongRoomWidget track={exampleTrack} />
 				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
@@ -646,6 +646,14 @@ const RoomPage = () => {
 						))}
 					</Text>
 				</View>
+				{/* <SongRoomWidget
+					songName="Eternal Sunshine"
+					artist="Ariana Grande"
+					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
+					progress={0.5}
+					time1="1:30"
+					time2="3:00"
+				/> */}
 
 				{roomData.mine ? (
 					<View style={styles.controls}>
@@ -653,7 +661,7 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
 						>
-							<FontAwesome5 name="step-backward" size={24} color="black" />
+							<FontAwesome5 name="step-backward" size={30} color="black" />
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
@@ -661,7 +669,7 @@ const RoomPage = () => {
 						>
 							<FontAwesome5
 								name={isPlaying ? "pause" : "play"}
-								size={24}
+								size={30}
 								color="black"
 							/>
 						</TouchableOpacity>
@@ -669,20 +677,20 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playNextTrack}
 						>
-							<FontAwesome5 name="step-forward" size={24} color="black" />
+							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
 					</View>
 				) : (
 					<View></View>
 				)}
 
-				<TouchableOpacity
+				{/* <TouchableOpacity
 					style={styles.queueButton}
 					onPress={navigateToPlaylist}
 				>
 					<MaterialIcons name="queue-music" size={55} color="Black" />
 					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -719,7 +727,36 @@ const RoomPage = () => {
 				))}
 			</Animated.ScrollView>
 
-			<Animated.View
+			<View style={styles.sideBySideTwo}>
+				{/* Left side */}
+				<View style={styles.userInfoContainer}>
+					<Image
+						source={{ uri: roomData.userProfile }}
+						style={styles.userImage}
+					/>
+					<Text style={styles.username}>
+						{truncateUsername(roomData.username)}
+					</Text>
+				</View>
+				{/* Right side */}
+				<View style={styles.joinLeaveButtonContainer}>
+					<View style={styles.sideBySideClose}>
+						<TouchableOpacity
+							onPress={handleBookmark}
+							style={styles.bookmarkButton}
+						>
+							<Icon
+								name={isBookmarked ? "bookmark" : "bookmark-border"}
+								size={34}
+								color={isBookmarked ? colors.primary : "black"}
+							/>
+						</TouchableOpacity>
+						<DevicePicker />
+					</View>
+				</View>
+			</View>
+
+			{/* <Animated.View
 				style={{
 					position: "absolute",
 					bottom: 0,
@@ -813,7 +850,7 @@ const RoomPage = () => {
 						</KeyboardAvoidingView>
 					</>
 				)}
-			</Animated.View>
+			</Animated.View> */}
 		</View>
 	);
 };
@@ -822,6 +859,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		position: "relative",
+		// marginHorizontal: 10,
+		backgroundColor: "white",
 	},
 	scrollView: {
 		flex: 1,
@@ -833,12 +872,6 @@ const styles = StyleSheet.create({
 		right: 10, // Adjust this value as needed
 		width: 150,
 		height: 200,
-	},
-	backButton: {
-		position: "absolute",
-		top: 40,
-		left: 20,
-		zIndex: 1,
 	},
 	bookmarkButton: {
 		marginLeft: 10,
@@ -865,7 +898,8 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 		right: 0,
-		paddingTop: 40,
+		paddingTop: 10,
+		marginHorizontal: 20,
 	},
 	joinLeaveButtonContainer: {
 		position: "absolute",
@@ -874,7 +908,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "flex-end",
 	},
-
 	userInfoContainer: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -882,16 +915,16 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	userImage: {
-		width: 30,
-		height: 30,
+		width: 50,
+		height: 50,
 		borderRadius: 25,
 		marginRight: 10,
 		borderWidth: 2,
 		borderColor: "blue",
 	},
 	username: {
-		fontSize: 18,
-		color: "white",
+		fontSize: 20,
+		color: "black",
 		fontWeight: "bold",
 	},
 	roomDetails: {
@@ -962,6 +995,17 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 	},
+	sideBySideTwo: {
+		position: "absolute",
+		bottom: 10,
+		left: 0,
+		right: 0,
+		marginHorizontal: 20,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginBottom: 20,
+	},
 	sideBySideClose: {
 		marginTop: 15,
 		flexDirection: "row",
@@ -980,10 +1024,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
-		marginTop: 10,
+		marginTop: 50,
 	},
 	controlButton: {
-		marginHorizontal: 20,
+		marginHorizontal: 40,
 	},
 	queueButton: {
 		marginTop: 20,
@@ -1024,13 +1068,17 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		marginVertical: 10,
 		paddingVertical: 8,
-		paddingHorizontal: 16,
+		paddingHorizontal: 30,
 		backgroundColor: colors.primary,
 		borderRadius: 20,
 	},
 	joinLeaveButtonText: {
 		color: "white",
 		fontSize: 16,
+		fontWeight: "bold",
+	},
+	songRoomWidget: {
+		marginTop: -50,
 	},
 });
 

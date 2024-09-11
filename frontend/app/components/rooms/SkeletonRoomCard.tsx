@@ -1,5 +1,7 @@
 import React from "react";
 import { ImageBackground, StyleSheet, Animated } from "react-native";
+// import { Room } from "../../models/Room";
+// import { useRouter } from "expo-router";
 
 // interface SkeletonRoomCardProps {
 // 	roomCard: Room;
@@ -8,6 +10,13 @@ import { ImageBackground, StyleSheet, Animated } from "react-native";
 
 const SkeletonRoomCard: React.FC<{}> = () => {
 	const cardWidth = 320;
+
+	// const truncateText = (text: string, maxLength: number) => {
+	// 	if (text.length > maxLength) {
+	// 		return text.substring(0, maxLength - 3) + "...";
+	// 	}
+	// 	return text;
+	// };
 
 	return (
 		<Animated.View style={[styles.container, { width: cardWidth }]}>

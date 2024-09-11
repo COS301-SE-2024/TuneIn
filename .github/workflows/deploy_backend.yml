@@ -64,6 +64,7 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=2048"
 
           cd TuneIn/
+          git reset --hard
           git checkout develop
           git fetch
           git pull

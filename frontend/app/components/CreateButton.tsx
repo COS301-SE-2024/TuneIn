@@ -2,12 +2,12 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { colors } from "../styles/colors";
 
-interface CyanButtonProps {
+interface CreateButtonProps {
 	title: string;
 	onPress: () => void;
 }
 
-const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
+const CreateButton: React.FC<CreateButtonProps> = ({ title, onPress }) => {
 	return (
 		<TouchableOpacity style={styles.button} onPress={onPress}>
 			<Text style={styles.buttonText}>{title}</Text>
@@ -17,7 +17,7 @@ const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
 
 const styles = StyleSheet.create({
 	button: {
-		width: "92%",
+		width: "100%",
 		height: 52,
 		justifyContent: "center",
 		alignItems: "center",
@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default CyanButton;
+export default CreateButton;

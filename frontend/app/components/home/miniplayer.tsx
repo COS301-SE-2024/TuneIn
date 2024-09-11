@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Player } from "../../PlayerContext";
+// import Icon from "react-native-vector-icons/FontAwesome";
 
 const Miniplayer: React.FC = () => {
 	const windowWidth = Dimensions.get("window").width;
@@ -56,7 +57,7 @@ const Miniplayer: React.FC = () => {
 
 	const navigateToRoomPage = () => {
 		router.push({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(currentRoom) },
 		});
 	};

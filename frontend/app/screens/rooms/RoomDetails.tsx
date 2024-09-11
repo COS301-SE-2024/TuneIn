@@ -15,6 +15,7 @@ import { RoomDetailsProps } from "../../models/roomdetails";
 import { createRoom } from "../../services/RoomService"; // Import createRoom function
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
+import CreateButton from "../../components/CreateButton";
 
 const RoomDetails: React.FC = () => {
 	const router = useRouter();
@@ -149,7 +150,7 @@ const RoomDetails: React.FC = () => {
 							/>
 						)}
 					</View>
-					<CyanButton title="Share" onPress={handleCreateRoom} />
+					<CreateButton title="Share" onPress={navigateToChatRoom} />
 				</View>
 			</View>
 		</ScrollView>

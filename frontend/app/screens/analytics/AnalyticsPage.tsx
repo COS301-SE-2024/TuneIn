@@ -11,11 +11,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import MetricsCard from "../../components/MetricsCard";
 import PieChartCard from "../../components/PieChartCard";
+// import { Room } from "../../models/Room";
 import { API_BASE_URL } from "../../services/Utils";
+// import * as StorageService from "../../services/StorageService";
 import AuthManagement from "../../services/AuthManagement";
 
 const AnalyticsPage: React.FC = () => {
 	const router = useRouter();
+	const [, setActiveButton] = useState("Day");
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [keymetrics, setKeyMetrics] = useState<{
 		unique_visitors: {
@@ -46,6 +49,9 @@ const AnalyticsPage: React.FC = () => {
 		if (keymetrics === null) fetchKeyMetrics();
 		console.log("keymetrics", keymetrics);
 	});
+	// const handleButtonPress = (button: string) => {
+	// 	setActiveButton(button);
+	// };
 
 	const toggleDrawer = () => {
 		setDrawerOpen(!drawerOpen);

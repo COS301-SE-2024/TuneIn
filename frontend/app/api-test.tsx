@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Configuration, DefaultApi } from "../api"; // or "../api-client"
 import * as utils from "./services/Utils";

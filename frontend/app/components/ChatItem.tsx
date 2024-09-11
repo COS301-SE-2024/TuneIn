@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+// import { Chat } from "../models/chat";
 import { DirectMessageDto } from "../models/DmDto";
 import { UserDto } from "../models/UserDto";
 
