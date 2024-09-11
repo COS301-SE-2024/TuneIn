@@ -12,6 +12,7 @@ import { useLocalSearchParams } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Utility function to group rooms by the month they were created
 const groupRoomsByMonth = (rooms: Room[]) => {
@@ -51,7 +52,6 @@ const MyRooms: React.FC = () => {
 	// Sorting function for rooms
 	const sortRooms = useCallback(
 		(rooms: Room[]) => {
-			console.log("sorting");
 			return rooms.sort((a, b) => {
 				const dateA = a[sortBy] as Date;
 				const dateB = b[sortBy] as Date;
@@ -133,9 +133,11 @@ const MyRooms: React.FC = () => {
 						setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
 					}
 				>
-					<Text style={styles.sortButtonText}>
-						{sortDirection === "asc" ? "⬆ Ascending" : "⬇ Descending"}
-					</Text>
+					<MaterialCommunityIcons
+						name={sortDirection === "asc" ? "arrow-up" : "arrow-down"}
+						size={24}
+						color={colors.primaryText}
+					/>
 				</TouchableOpacity>
 			</View>
 
@@ -176,23 +178,26 @@ const styles = StyleSheet.create({
 	},
 	sortContainer: {
 		flexDirection: "row",
-		justifyContent: "space-around",
-		marginTop: 15,
-		marginBottom: 15,
+		justifyContent: "space-between",
+		marginTop: 10,
+		marginBottom: 2,
+		paddingHorizontal: 10,
 	},
 	dropdown: {
+		flex: 1,
 		padding: 10,
 		backgroundColor: colors.backgroundColor,
 		borderRadius: 25,
 		borderColor: colors.secondary,
 		borderWidth: 2,
+		color: colors.primaryText,
 	},
 	sortButton: {
+		justifyContent: "center",
+		alignItems: "center",
 		padding: 10,
 		backgroundColor: colors.backgroundColor,
 		borderRadius: 25,
-		borderColor: colors.secondary,
-		borderWidth: 2,
 	},
 	sortButtonText: {
 		color: colors.primaryText,
