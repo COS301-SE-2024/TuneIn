@@ -441,7 +441,6 @@ export class UsersController {
 	})
 	@ApiBadRequestResponse({
 		description: "Error getting pending friend requests.",
-		type: Boolean,
 	})
 	async getPendingRequests(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -463,11 +462,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully cancelled friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error cancelling friend request.",
-		type: Boolean,
 	})
 	async cancelFriendRequest(
 		@Request() req: Request,
@@ -490,7 +487,6 @@ export class UsersController {
 	})
 	@ApiBadRequestResponse({
 		description: "Error getting potential friends.",
-		type: Boolean,
 	})
 	async getPotentialFriends(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -626,7 +622,6 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "True if taken, false if not.",
-		type: Boolean,
 	})
 	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
 		return await this.usersService.usernameTaken(username);
@@ -801,11 +796,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error ending friendship.",
-		type: Boolean,
 	})
 	async unfriendUser(
 		@Request() req: Request,
@@ -1017,11 +1010,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully reported the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error reporting the user.",
-		type: Boolean,
 	})
 	async reportUser(
 		@Request() req: Request,
