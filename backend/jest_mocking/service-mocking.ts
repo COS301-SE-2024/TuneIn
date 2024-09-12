@@ -404,4 +404,8 @@ export const mockAuthService = {
 
 export const mockUsersService = {
 	// mock properties and methods as needed
+	calculateMutualFriends: jest.fn(),
+	calculatePopularity: jest.fn(),
+	calculateActivity: jest.fn(),
+	calculateGenreSimilarity: jest.fn(),
 };
