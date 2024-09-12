@@ -224,7 +224,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 		const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
 		setFilteredUsers(sortedUsers);
 		*/
-	}, []);
+	}, [friends]);
 
 	const handleUserSelect = (user: UserDto) => {
 		router.push(`/screens/messaging/ChatScreen?username=${user.username}`);

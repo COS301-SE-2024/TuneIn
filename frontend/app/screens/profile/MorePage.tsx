@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
 	View,
 	Text,
@@ -9,14 +9,13 @@ import {
 	NativeSyntheticEvent,
 	FlatList,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import FavoriteSongs from "../../components/FavoriteSong";
 import { colors } from "../../styles/colors";
 
 const MorePage: React.FC = () => {
-	const router = useRouter();
 	const params = useLocalSearchParams();
 	const items = Array.isArray(params.items)
 		? JSON.parse(params.items[0])
@@ -27,7 +26,6 @@ const MorePage: React.FC = () => {
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
-	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
 	const flatListRef = useRef<FlatList<any>>(null);
 

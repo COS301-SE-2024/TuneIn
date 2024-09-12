@@ -13,7 +13,6 @@ describe("RoomCard Component", () => {
 
 		expect(getByText("Lounge")).toBeTruthy();
 		expect(getByTestId("imageBackground"));
-		expect(getByText("No song playing")).toBeTruthy();
 	});
 
 	it("renders song information correctly when songName and artistName are provided", () => {

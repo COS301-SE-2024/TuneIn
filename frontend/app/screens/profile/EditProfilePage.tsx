@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
-import EditDialog from "../../components/EditDialog";
 import FavoriteSongs from "../../components/FavoriteSong";
 import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";

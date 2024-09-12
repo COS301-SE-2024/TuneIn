@@ -16,7 +16,6 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	RefreshControl,
-	BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";

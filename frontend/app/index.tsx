@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import WelcomeScreen from "./screens/WelcomeScreen";
 import HomeScreen from "./screens/Home"; // Make sure to import the HomeScreen component
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
-import { API_BASE_URL } from "./services/Utils";
 import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform, ActivityIndicator, View } from "react-native";
