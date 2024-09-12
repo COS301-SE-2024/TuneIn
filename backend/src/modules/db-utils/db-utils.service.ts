@@ -26,14 +26,16 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowing(userID: string): Promise<PrismaTypes.users[] | null> {
+	async getUserFollowing(userID: string): Promise<PrismaTypes.users[]> {
 		const following: PrismaTypes.follows[] | null =
 			await this.prisma.follows.findMany({
 				where: { follower: userID },
 			});
 
 		if (!following || following === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database. getUserFollowing():ERROR01",
+			);
 		}
 
 		const result: PrismaTypes.users[] = [];
@@ -65,14 +67,16 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowers(userID: string): Promise<PrismaTypes.users[] | null> {
+	async getUserFollowers(userID: string): Promise<PrismaTypes.users[]> {
 		const followers: PrismaTypes.follows[] | null =
 			await this.prisma.follows.findMany({
 				where: { followee: userID },
 			});
 
 		if (!followers || followers === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database. getUserFollowers():ERROR01",
+			);
 		}
 
 		const result: PrismaTypes.users[] = [];
@@ -203,11 +207,12 @@ export class DbUtilsService {
 		}
 	}
 
-	async getRandomRooms(count: number): Promise<PrismaTypes.room[] | null> {
+	async getRandomRooms(count: number): Promise<PrismaTypes.room[]> {
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany();
-
 		if (!rooms || rooms === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch rooms.",
+			);
 		}
 
 		if (rooms.length <= count) {
@@ -312,9 +317,7 @@ export class DbUtilsService {
 		return true;
 	}
 
-	async getFriendRequests(
-		userID: string,
-	): Promise<PrismaTypes.friends[] | null> {
+	async getFriendRequests(userID: string): Promise<PrismaTypes.friends[]> {
 		const friendRequests: PrismaTypes.friends[] | null =
 			await this.prisma.friends.findMany({
 				where: {
@@ -329,9 +332,7 @@ export class DbUtilsService {
 		return friendRequests;
 	}
 
-	async getPendingRequests(
-		userID: string,
-	): Promise<PrismaTypes.friends[] | null> {
+	async getPendingRequests(userID: string): Promise<PrismaTypes.friends[]> {
 		const pendingRequests: PrismaTypes.friends[] | null =
 			await this.prisma.friends.findMany({
 				where: {
@@ -340,22 +341,24 @@ export class DbUtilsService {
 				},
 			});
 		if (!pendingRequests || pendingRequests === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch pending requests.",
+			);
 		}
 		return pendingRequests;
 	}
 
 	// get users who aren't friends with the user, but are mutual followers
-	async getPotentialFriends(
-		userID: string,
-	): Promise<PrismaTypes.users[] | null> {
+	async getPotentialFriends(userID: string): Promise<PrismaTypes.users[]> {
 		const follows: PrismaTypes.follows[] | null =
 			await this.prisma.follows.findMany({
 				where: { OR: [{ follower: userID }, { followee: userID }] },
 			});
 
 		if (!follows || follows === null) {
-			return null;
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch follows.",
+			);
 		}
 
 		const following = follows.filter((f) => f.follower === userID);
@@ -615,7 +618,7 @@ export class DbUtilsService {
 		}
 		return room.room.room_id;
 	}
-	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[] | null> {
+	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[]> {
 		// console.log("getting room songs:", roomID);
 		const queue: (PrismaTypes.queue & { song: PrismaTypes.song })[] | null =
 			await this.prisma.queue.findMany({
@@ -629,9 +632,7 @@ export class DbUtilsService {
 
 		return queue.map((q) => q.song);
 	}
-	async getUserFavoriteSongs(
-		userID: string,
-	): Promise<PrismaTypes.song[] | null> {
+	async getUserFavoriteSongs(userID: string): Promise<PrismaTypes.song[]> {
 		const favorites:
 			| (PrismaTypes.favorite_songs & { song: PrismaTypes.song })[]
 			| null = await this.prisma.favorite_songs.findMany({

@@ -95,30 +95,26 @@ export class DtoGenService {
 
 		const following: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
-		if (following && following !== null) {
 			result.following.count = following.length;
-			if (fully_qualify) {
-				for (let i = 0; i < following.length; i++) {
-					const f = following[i];
-					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
-						result.following.data.push(u);
-					}
+		if (fully_qualify) {
+			for (let i = 0; i < following.length; i++) {
+				const f = following[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.following.data.push(u);
 				}
 			}
 		}
 
 		const followers: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowers(userID);
-		if (followers && followers !== null) {
-			result.followers.count = followers.length;
-			if (fully_qualify) {
-				for (let i = 0; i < followers.length; i++) {
-					const f = followers[i];
-					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
-						result.followers.data.push(u);
-					}
+		result.followers.count = followers.length;
+		if (fully_qualify) {
+			for (let i = 0; i < followers.length; i++) {
+				const f = followers[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.followers.data.push(u);
 				}
 			}
 		}

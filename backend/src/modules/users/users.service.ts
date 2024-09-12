@@ -687,11 +687,7 @@ export class UsersService {
 					},
 				) => {
 					const songs = await this.dbUtils.getRoomSongs(room.room_id);
-					if (songs) {
-						room.songs = songs;
-					} else {
-						room.songs = [];
-					}
+					room.songs = songs;
 					return room;
 				},
 			),
@@ -708,16 +704,16 @@ export class UsersService {
 			},
 			{},
 		);
-		const favoriteSongs: PrismaTypes.song[] | null =
+		const favoriteSongs: PrismaTypes.song[] =
 			await this.dbUtils.getUserFavoriteSongs(userID);
-		if (!favoriteSongs) {
-			// return random rooms if the user has no favorite songs
-			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
-			const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
-				randomRooms.map((room: PrismaTypes.room) => room.room_id),
-			);
-			return r === null ? [] : r;
-		}
+		// if (!favoriteSongs) {
+		// 	// return random rooms if the user has no favorite songs
+		// 	const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
+		// 	const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
+		// 		randomRooms.map((room: PrismaTypes.room) => room.room_id),
+		// 	);
+		// 	return r === null ? [] : r;
+		// }
 		// console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
 			favoriteSongs.map((song: PrismaTypes.song) => song.audio_features),
@@ -764,9 +760,6 @@ export class UsersService {
 
 	async getFollowers(userID: string): Promise<UserDto[]> {
 		const f = await this.dbUtils.getUserFollowers(userID);
-		if (!f) {
-			return [];
-		}
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
 		let result = await this.dtogen.generateMultipleUserDto(ids);
@@ -791,9 +784,6 @@ export class UsersService {
 
 	async getFollowing(userID: string): Promise<UserDto[]> {
 		const following = await this.dbUtils.getUserFollowing(userID);
-		if (!following) {
-			return [];
-		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
 		let result = await this.dtogen.generateMultipleUserDto(ids);
@@ -1130,9 +1120,6 @@ export class UsersService {
 		*/
 
 		const friendRequests = await this.dbUtils.getFriendRequests(userID);
-		if (!friendRequests) {
-			return [];
-		}
 		const ids: string[] = friendRequests.map((friend) => friend.friend1);
 		const result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
@@ -1148,9 +1135,6 @@ export class UsersService {
 		console.log("Getting potential friends for user " + userID);
 		const potentialFriends: PrismaTypes.users[] | null =
 			await this.dbUtils.getPotentialFriends(userID);
-		if (!potentialFriends) {
-			return [];
-		}
 		const ids: string[] = potentialFriends.map(
 			(friend: PrismaTypes.users) => friend.user_id,
 		);
@@ -1168,9 +1152,6 @@ export class UsersService {
 		console.log("Getting pending friend requests for user " + userID);
 		const pendingRequests: PrismaTypes.friends[] | null =
 			await this.dbUtils.getPendingRequests(userID);
-		if (!pendingRequests) {
-			return [];
-		}
 		const ids: string[] = pendingRequests.map(
 			(friend: PrismaTypes.friends) => friend.friend2,
 		);
