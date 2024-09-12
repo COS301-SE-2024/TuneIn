@@ -8,6 +8,7 @@ import React, {
 import { io, Socket } from "socket.io-client";
 import auth from "./services/AuthManagement";
 import * as utils from "./services/Utils";
+import bookmarks from "./services/BookmarkService";
 import {
 	DirectMessageDto,
 	LiveChatMessageDto,
@@ -85,6 +86,7 @@ interface SpotifyAuth {
 
 interface LiveContextType {
 	currentUser: UserDto | undefined;
+	userBookmarks: RoomDto[];
 
 	sendPing: (timeout?: number) => Promise<void>;
 	getTimeOffset: () => void;
@@ -170,6 +172,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const { users, rooms, authenticated, auth, tokenState, getUser } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
+	const [userBookmarks, setUserBookmarks] = useState<RoomDto[]>([]);
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
 	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
 	const [roomQueue, setRoomQueue] = useState<RoomSongDto[]>([]);
@@ -1375,6 +1378,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						throw new Error("Error getting user");
 					}
 				});
+			bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
+				setUserBookmarks(fetchedBookmarks);
+			});
 
 			// get spotify tokens
 			let tokens: SpotifyTokenPair | null = null;
@@ -1428,6 +1434,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		<LiveContext.Provider
 			value={{
 				currentUser,
+				userBookmarks,
 
 				sendPing,
 				getTimeOffset,
