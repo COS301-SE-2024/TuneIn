@@ -1460,9 +1460,10 @@ export class UsersService {
 
 	async getRecommendedUsers(userID: string): Promise<UserDto[]> {
 		let users: PrismaTypes.users[] = await this.prisma.users.findMany();
-		const currentUser = await this.prisma.users.findUnique({
-			where: { user_id: userID },
-		});
+		const currentUser: PrismaTypes.users | null =
+			await this.prisma.users.findUnique({
+				where: { user_id: userID },
+			});
 
 		if (!currentUser) {
 			throw new Error("User does not exist");
@@ -1471,8 +1472,12 @@ export class UsersService {
 		const userFriends: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
 		if (userFriends !== null) {
-			const friendIDs: string[] = userFriends.map((user) => user.user_id);
-			users = users.filter((user) => !friendIDs.includes(user.user_id));
+			const friendIDs: string[] = userFriends.map(
+				(user: PrismaTypes.users) => user.user_id,
+			);
+			users = users.filter(
+				(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
+			);
 		}
 
 		const userScores: { [key: string]: number } = {};
@@ -1503,9 +1508,11 @@ export class UsersService {
 		const sortedUserIds = Object.keys(userScores).sort(
 			(a, b) => (userScores[b] ?? 0) - (userScores[a] ?? 0),
 		);
-		const topUserIds = sortedUserIds.slice(0, 5); // Top 10 recommendations
+		const topUserIds: string[] = sortedUserIds.slice(0, 5); // Top 10 recommendations
 
-		const result = await this.dtogen.generateMultipleUserDto(topUserIds);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			topUserIds,
+		);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for recommended users. Received null.",
