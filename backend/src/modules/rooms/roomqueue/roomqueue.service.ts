@@ -587,39 +587,52 @@ export class ActiveRoom {
 		*/
 	}
 
-	async getCurrentOrNextSong(): Promise<RoomSong | null> {
+	async getNextSong(murLockService: MurLockService): Promise<RoomSong | null> {
 		console.log("historicQueue");
 		console.log(this.historicQueue.toArray());
 		console.log("currentQueue");
 		console.log(this.queue.toArray());
 
-		if (this.queue.isEmpty()) {
-			return null;
-		}
-		let result = this.historicQueue.front();
-		if (result.isPlaying()) {
-			return result;
-		}
+		let result: RoomSong | null = null;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			5000,
+			async () => {
+				this.updateQueue();
+				if (this.queue.isEmpty()) {
+					return;
+				} else {
+					let song = this.queue.front();
+					if (song === null) {
+						return;
+					}
+					let t = song.getPlaybackStartTime();
+					// while there are songs in the queue that have played already
+					while (t && t < new Date()) {
+						// add them to the historic queue, if not there yet
+						const s = this.historicQueue
+							.toArray()
+							.find(
+								(s) =>
+									s.spotifyID === song.spotifyID &&
+									s.getPlaybackStartTime() === t,
+							);
+						if (!s) {
+							this.historicQueue.enqueue(song);
+						}
 
-		result = this.queue.front();
-		while (!result.isPlaying()) {
-			result = this.queue.dequeue();
-			if (result.getPlaybackStartTime() === null) {
-				result.setPlaybackStartTime(new Date());
-			}
-			this.historicQueue.enqueue(result);
-
-			if (this.queue.isEmpty()) {
-				return null;
-			}
-
-			result = this.queue.front();
-			if (result.spotifyInfo === null) {
-				throw new Error(
-					"Queue songs do not have spotify info, after explicitly requesting it. Something has gone very wrong",
-				);
-			}
-		}
+						// remove them from the queue until we find an unplayed song
+						this.queue.dequeue();
+						song = this.queue.front();
+						if (song === null) {
+							return;
+						}
+						t = song.getPlaybackStartTime();
+					}
+					result = song;
+				}
+			},
+		);
 		return result;
 	}
 
@@ -844,49 +857,48 @@ export class ActiveRoom {
 		);
 	}
 
-	async playSongNow(murLockService: MurLockService): Promise<RoomSong | null> {
+	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
 		let result: RoomSong | null = null;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			5000,
 			async () => {
-				this.updateQueue();
-				const song = this.queue.dequeue();
-				if (!song || song === null) {
-					return;
+				result = await this.getNextSong(murLockService);
+				if (result !== null) {
+					result.setPlaybackStartTime(new Date());
 				}
-				song.setPlaybackStartTime(new Date());
-				this.historicQueue.enqueue(song);
-				result = song;
 			},
 		);
 		return result;
 	}
 
-	async skipSong(murLockService: MurLockService): Promise<RoomSong | null> {
-		let result: RoomSong | null = null;
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			5000,
-			async () => {
-				this.updateQueue();
-				const song = this.queue.dequeue();
-				if (!song || song === null) {
-					return;
-				}
-				this.historicQueue.enqueue(song);
-				result = song;
-			},
-		);
-		return result;
-	}
+	// async skipSong(murLockService: MurLockService): Promise<RoomSong | null> {
+	// 	let result: RoomSong | null = null;
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		5000,
+	// 		async () => {
+	// 			this.updateQueue();
+	// 			if (this.queue.isEmpty()) {
+	// 				return;
+	// 			}
+	// 			const song = this.queue.dequeue();
+	// 			if (!song || song === null) {
+	// 				return;
+	// 			}
+	// 			this.historicQueue.enqueue(song);
+	// 			result = song;
+	// 		},
+	// 	);
+	// 	return result;
+	// }
 
-	async isPlaying(): Promise<boolean> {
+	async isPlaying(murLockService: MurLockService): Promise<boolean> {
 		this.updateQueue();
 		if (this.historicQueue.isEmpty()) {
 			return false;
 		}
-		const song = await this.getCurrentOrNextSong();
+		const song = await this.getNextSong(murLockService);
 		return song !== null && song.isPlaying();
 	}
 
@@ -1133,11 +1145,11 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.initiatePlayback",
 			);
 		}
-		if (!activeRoom.isPlaying()) {
+		if (!activeRoom.isPlaying(this.murLockService)) {
 			if (activeRoom.isEmpty()) {
 				return false;
 			} else {
-				const s = activeRoom.getCurrentOrNextSong();
+				const s = await activeRoom.getNextSong(this.murLockService);
 				if (!s || s === null) {
 					return false;
 				}
@@ -1154,21 +1166,21 @@ export class RoomQueueService {
 		return true;
 	}
 
-	async getCurrentOrNextSong(roomID: string): Promise<RoomSongDto | null> {
+	async getNextSong(roomID: string): Promise<RoomSongDto | null> {
 		if (!this.roomQueues.has(roomID)) {
 			await this.createRoomQueue(roomID);
 		}
 		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.getCurrentOrNextSong",
+				"Weird error. HashMap is broken: RoomQueueService.getNextSong",
 			);
 		}
 		await activeRoom.getSpotifyInfo(
 			this.spotifyAuth.getUserlessAPI(),
 			this.murLockService,
 		);
-		const song = await activeRoom.getCurrentOrNextSong();
+		const song = await activeRoom.getNextSong(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1190,7 +1202,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.isPlaying",
 			);
 		}
-		return await activeRoom.isPlaying();
+		return await activeRoom.isPlaying(this.murLockService);
 	}
 
 	async isPaused(roomID: string): Promise<boolean> {
@@ -1216,7 +1228,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.playSongNow",
 			);
 		}
-		const song = await activeRoom.playSongNow(this.murLockService);
+		const song = await activeRoom.playNext(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1274,7 +1286,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.skipSong",
 			);
 		}
-		await activeRoom.playSongNow(this.murLockService);
+		await activeRoom.playNext(this.murLockService);
 	}
 
 	/*
