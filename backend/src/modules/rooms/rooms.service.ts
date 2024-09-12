@@ -1137,6 +1137,18 @@ export class RoomsService {
 	async canSplitRoom(roomID: string): Promise<string[]> {
 		try {
 			// Fetch audio features of the songs in the room queue
+			const childrenRoom: PrismaTypes.child_room[] | null =
+				await this.prisma.child_room.findMany({
+					where: {
+						parent_room_id: roomID,
+					},
+				});
+			if (!childrenRoom || childrenRoom.length !== 0) {
+				throw new HttpException(
+					"Room already has child rooms",
+					HttpStatus.BAD_REQUEST,
+				);
+			}
 			const audioFeatures: (AudioFeatures & { genre: string })[] =
 				await this.getAudioFeatures(roomID);
 			if (!audioFeatures || audioFeatures.length === 0) {
