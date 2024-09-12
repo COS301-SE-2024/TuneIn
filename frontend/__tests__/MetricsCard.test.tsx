@@ -11,9 +11,7 @@ describe("MetricsCard Component", () => {
 	};
 
 	it("renders correctly with positive percentage", () => {
-		const { getByText, getByTestId } = render(
-			<MetricsCard {...defaultProps} />,
-		);
+		const { getByText } = render(<MetricsCard {...defaultProps} />);
 
 		// Check if the title is displayed
 		expect(getByText("Metric Title")).toBeTruthy();
