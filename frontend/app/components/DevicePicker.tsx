@@ -11,18 +11,21 @@ import {
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
-import { Devices } from "../models/Devices";
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import { colors } from "../styles/colors";
 import { useLive } from "../LiveContext";
+import { Device } from "@spotify/web-api-ts-sdk";
 
 const DevicePicker = () => {
-	const { getDeviceIDs, error,  } = useSpotifyDevices();
+	const { getDeviceIDs, error } = useSpotifyDevices();
+	const { roomControls } = useLive();
 	const [isVisible, setIsVisible] = useState(false);
 	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [accessToken, setAccessToken] = useState<string>("");
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+
+	/*
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
@@ -36,6 +39,7 @@ const DevicePicker = () => {
 
 		fetchToken();
 	}, []);
+	*/
 
 	useEffect(() => {
 		// Declare intervalId using useRef to ensure it maintains its value across renders
@@ -43,9 +47,12 @@ const DevicePicker = () => {
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
-					const deviceList = await getDeviceIDs();
+					//const deviceList = await getDeviceIDs();
+					const deviceList: Device[] =
+						await roomControls.playbackHandler.getDevices();
+					console.log("deviceList: ", deviceList);
 					if (deviceList) {
-						setDevices(deviceList);
+						//setDevices(deviceList);
 						const activeDevice = deviceList.find((device) => device.is_active);
 						if (activeDevice) {
 							setSelectedDevice(activeDevice.id);
@@ -86,7 +93,12 @@ const DevicePicker = () => {
 		setIsVisible(false);
 	};
 
-	const handleDeviceSelect = async (deviceId: string) => {
+	/*
+	const handleDeviceSelect = async (deviceId: string | null) => {
+		if (!deviceId) {
+			Alert.alert("Error", "No device ID was provided.");
+			return;
+		}
 		setIsLoading(true);
 		setSelectedDevice(deviceId);
 		try {
@@ -110,8 +122,9 @@ const DevicePicker = () => {
 			setIsLoading(false);
 		}
 	};
+	*/
 
-	const renderDeviceName = (device: Devices) => {
+	const renderDeviceName = (device: Device) => {
 		let icon = null;
 		switch (device.type) {
 			case "Smartphone":
@@ -151,7 +164,9 @@ const DevicePicker = () => {
 									<Text style={styles.popupTitle}>Error Fetching Devices</Text>
 									<Text style={styles.popupMessage}>{error}</Text>
 								</>
-							) : !devices || devices.length === 0 ? (
+							) : !roomControls.playbackHandler.spotifyDevices.devices ||
+							  roomControls.playbackHandler.spotifyDevices.devices.length ===
+									0 ? (
 								<>
 									<Text style={styles.popupTitle}>No Devices Available</Text>
 									<Text style={styles.popupMessage}>
@@ -164,24 +179,31 @@ const DevicePicker = () => {
 									{isLoading ? (
 										<ActivityIndicator size="large" color={colors.primary} />
 									) : (
-										devices.map((device: Devices, index: number) => (
-											<TouchableOpacity
-												key={index}
-												style={styles.deviceOption}
-												onPress={() => handleDeviceSelect(device.id)}
-											>
-												<RadioButton
-													value={device.id}
-													testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
-													status={
-														selectedDevice === device.id
-															? "checked"
-															: "unchecked"
-													}
-												/>
-												{renderDeviceName(device)}
-											</TouchableOpacity>
-										))
+										roomControls.playbackHandler.spotifyDevices.devices.map(
+											(device: Device, index: number) =>
+												device.id !== null && (
+													<TouchableOpacity
+														key={index}
+														style={styles.deviceOption}
+														onPress={() =>
+															roomControls.playbackHandler.setActiveDevice(
+																device.id,
+															)
+														}
+													>
+														<RadioButton
+															value={device.id}
+															testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
+															status={
+																selectedDevice === device.id
+																	? "checked"
+																	: "unchecked"
+															}
+														/>
+														{renderDeviceName(device)}
+													</TouchableOpacity>
+												),
+										)
 									)}
 								</>
 							)}

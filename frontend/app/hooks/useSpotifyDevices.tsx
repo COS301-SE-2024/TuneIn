@@ -3,6 +3,7 @@ import { Alert } from "react-native";
 import { Devices } from "../models/Devices"; // Ensure this path is correct
 import { useLive } from "../LiveContext";
 import { SpotifyTokenPair, SpotifyTokenResponse } from "../../api";
+import { Device } from "@spotify/web-api-ts-sdk";
 
 export const useSpotifyDevices = () => {
 	const { spotifyAuth } = useLive();
@@ -69,11 +70,10 @@ export const useSpotifyDevices = () => {
 	};
 
 	// Updated getDeviceIDs function to return an array of Devices
-	const getDeviceIDs = async (): Promise<Devices[] | null> => {
+	const getDeviceIDs = async (): Promise<Device[] | null> => {
 		try {
-			let result: Devices[] | null = null;
+			let result: Device[] | null = null;
 			fetchToken().then(async (token) => {
-				console.log("getDeviceIDs token: ", token);
 				const response = await fetch(
 					"https://api.spotify.com/v1/me/player/devices",
 					{
@@ -94,6 +94,7 @@ export const useSpotifyDevices = () => {
 
 				// Return the devices array or null if it's undefined
 				result = Array.isArray(data.devices) ? data.devices : null;
+				console.log("getDeviceIDs result: ", result);
 			});
 			return result;
 		} catch (err) {

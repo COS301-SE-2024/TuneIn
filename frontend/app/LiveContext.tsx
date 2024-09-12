@@ -148,6 +148,7 @@ interface Playback {
 	getFirstDevice: () => Promise<string | null>;
 	getDevices: () => Promise<Device[]>;
 	getDeviceIDs: () => Promise<string[]>;
+	setActiveDevice: (deviceID: string | null) => void;
 	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
 	startPlayback: () => void;
 	pausePlayback: () => void;
@@ -1099,6 +1100,34 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				}
 				return result;
+			},
+			setActiveDevice: async function (deviceID: string | null): Promise<void> {
+				if (!spotifyTokens) {
+					throw new Error("Spotify tokens not found");
+				}
+				if (!deviceID) {
+					throw new Error("Cannot set active device to null");
+				}
+				try {
+					const api = SpotifyApi.withAccessToken(
+						clientId,
+						spotifyTokens.tokens,
+					);
+
+					//fetch devices again to get the latest list
+					const devices = await api.player.getAvailableDevices();
+					for (const device of devices.devices) {
+						if (device.id === deviceID) {
+							await api.player.transferPlayback([deviceID]);
+							console.log("Playback transferred to device:", deviceID);
+							return;
+						}
+					}
+					throw new Error("Device not found");
+				} catch (err) {
+					console.error("An error occurred while transferring playback", err);
+					throw err;
+				}
 			},
 			userListeningToRoom: async function (
 				currentTrackUri: string,
