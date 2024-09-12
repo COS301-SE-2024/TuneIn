@@ -447,33 +447,6 @@ export class UsersController {
 		return await this.usersService.getPendingRequests(userInfo.id);
 	}
 
-	// add an endpoint for cancelling a friend request
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Post("friends/:username/cancel")
-	@ApiTags("users")
-	@ApiOperation({
-		summary: "Cancel a friend request to the given user",
-		operationId: "cancelFriendRequest",
-	})
-	@ApiParam({
-		name: "username",
-		description: "The username of the user to cancel the friend request to.",
-	})
-	@ApiOkResponse({
-		description: "Successfully cancelled friend request.",
-	})
-	@ApiBadRequestResponse({
-		description: "Error cancelling friend request.",
-	})
-	async cancelFriendRequest(
-		@Request() req: Request,
-		@Param("username") username: string,
-	): Promise<boolean> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.cancelFriendRequest(userInfo.id, username);
-	}
-
 	// add an endpoint to get potential friends
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
@@ -884,6 +857,33 @@ export class UsersController {
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.usersService.rejectFriendRequest(userInfo.id, username);
+	}
+
+	// add an endpoint for cancelling a friend request
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/cancel")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Cancel a friend request to the given user",
+		operationId: "cancelFriendRequest",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to cancel the friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully cancelled friend request.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error cancelling friend request.",
+	})
+	async cancelFriendRequest(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.cancelFriendRequest(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()

@@ -198,7 +198,7 @@ const AllFriends: React.FC = () => {
 		if (token) {
 			try {
 				const response = await fetch(
-					`${utils.API_BASE_URL}/users/friends/${friend.username}/cancel`,
+					`${utils.API_BASE_URL}/users/${friend.username}/cancel`,
 					{
 						method: "POST",
 						headers: {
