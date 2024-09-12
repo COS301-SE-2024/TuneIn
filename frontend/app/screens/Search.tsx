@@ -153,6 +153,7 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		const getRecommendations = async () => {
+			console.log("Getting recommendations", filter);
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
@@ -230,9 +231,9 @@ const Search: React.FC = () => {
 			setLoading(false);
 		};
 		if (searchTerm === "") {
+			getRecommendations();
 			if (filter === "room") {
 				setSearchSuggestions(roomSearchHistory.slice(0, 5));
-				getRecommendedRooms();
 			} else if (filter === "user") {
 				setSearchSuggestions(userSearchHistory.slice(0, 5));
 			}
@@ -249,7 +250,7 @@ const Search: React.FC = () => {
 				}
 			}, 300);
 		}
-	}, [searchTerm]);
+	}, [searchTerm, filter]);
 
 	useEffect(() => {
 		if (searchTerm !== "") {
