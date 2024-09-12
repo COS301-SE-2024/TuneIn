@@ -16,6 +16,7 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	RefreshControl,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../components/rooms/RoomCardWidget";
@@ -82,7 +83,7 @@ const Home: React.FC = () => {
 
 	console.log("currentRoom: " + currentRoom);
 	const [errorMessage, setErrorMessage] = useState<string>("");
-	const [roomError, setRoomError] = useState<boolean>(false);
+	const [roomError, setRoomError] = useState<boolean>(true);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const [cacheError, setCacheError] = useState<boolean>(false);
@@ -177,7 +178,7 @@ const Home: React.FC = () => {
 			isExplicit: room.has_explicit_content,
 		}));
 	};
-
+ 
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
@@ -300,6 +301,21 @@ const Home: React.FC = () => {
 		return;
 	}, [refreshData]);
 
+	useEffect(() => {
+		if (roomError && !profileError) {
+			ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+		} else if (!roomError && friendError) {
+			ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+		} else if (profileError) {
+			ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+		}
+
+		if(cacheError) {
+			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
+		}
+
+	}, [roomError, friendError, profileError, cacheError]);
+
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
@@ -354,44 +370,51 @@ const Home: React.FC = () => {
 						// color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
-				) : !roomError && !profileError && !friendError && !cacheError ? (
+				) : !roomError && !friendError ? (
 					<View style={styles.contentContainer}>
-						{myRecents.length > 0 && (
+						{!roomError && (
 							<>
-								<Text style={styles.sectionTitle}>Recent Rooms</Text>
-								<AppCarousel data={myRecents} renderItem={renderItem} />
+								{myRecents.length > 0 && (
+									<>
+										<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										<AppCarousel data={myRecents} renderItem={renderItem} />
+									</>
+								)}
+								<Text style={styles.sectionTitle}>Picks for you</Text>
+								<AppCarousel data={myPicks} renderItem={renderItem} />
 							</>
 						)}
-						<Text style={styles.sectionTitle}>Picks for you</Text>
-						<AppCarousel data={myPicks} renderItem={renderItem} />
-						<TouchableOpacity
-							style={styles.navigateButton}
-							onPress={navigateToAllFriends}
-						>
-							<Text style={styles.sectionTitle}>Friends</Text>
-						</TouchableOpacity>
-						{userData && userData.username ? (
-							<FriendsGrid
-								friends={friends}
-								user={userData.username}
-								maxVisible={8}
-							/>
+						{!friendError && userData && userData.username ? (
+							<>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={navigateToAllFriends}
+								>
+									<Text style={styles.sectionTitle}>Friends</Text>
+								</TouchableOpacity>
+								<FriendsGrid
+									friends={friends}
+									user={userData.username}
+									maxVisible={8}
+								/>
+							</>
 						) : null}
-						<Text style={styles.sectionTitle}>My Rooms</Text>
-						<AppCarousel
-							data={myRooms}
-							renderItem={renderItem}
-							showAddRoomCard={true} // Conditionally show the AddRoomCard
-						/>
+						{!roomError && (
+							<>
+								<Text style={styles.sectionTitle}>My Rooms</Text>
+								<AppCarousel
+									data={myRooms}
+									renderItem={renderItem}
+									showAddRoomCard={true} // Conditionally show the AddRoomCard
+								/>
+							</>
+						)}
 					</View>
 				) : (
 					<>
 						<View style={styles.errorMessage}>
-							<Text>
-								{roomError && friendError
-									? "Failed to load content"
-									: roomError ? "Failed to load rooms" : "Failed to load friend data"}
-							</Text>
+							<Text>Failed to load content</Text>
+							<Text>Try refreshing</Text>
 						</View>
 					</>
 				)}
