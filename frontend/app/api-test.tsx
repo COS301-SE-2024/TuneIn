@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Configuration, DefaultApi } from "../api";
 //import { Configuration, DefaultApi } from "../api-client";

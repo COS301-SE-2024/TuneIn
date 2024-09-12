@@ -3,9 +3,9 @@ import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
 import Search from "../app/screens/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
-import Fuse from "fuse.js";
+// import Fuse from "fuse.js";
 
 // Mocking modules
 jest.mock("expo-router", () => ({

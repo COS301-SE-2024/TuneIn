@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+// import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
+import CreateButton from "../../components/CreateButton";
 
 const Playlist = () => {
 	const router = useRouter();
@@ -66,14 +67,18 @@ const Playlist = () => {
 
 	return (
 		<View style={styles.container}>
+			{/* RoomTab component */}
+			{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
+			{/* Set activeTab to "Queue" */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back-button"
 				>
-					<Ionicons name="chevron-back" size={24} color="black" />
+					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
 				</TouchableOpacity>
-				<Text style={styles.pageName}>Queue</Text>
+				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
 				{playlist.length > 0 ? (
@@ -103,13 +108,17 @@ const Playlist = () => {
 					</View>
 				)}
 			</View>
-			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+			{/* <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
 				{isMine ? (
 					<Text style={styles.addButtonText}>Manage queue</Text>
 				) : (
 					<Text style={styles.addButtonText}>Add Song</Text>
 				)}
-			</TouchableOpacity>
+			</TouchableOpacity> */}
+			<CreateButton
+				title={isMine ? "Manage queue" : "Add Song"}
+				onPress={navigateToAddSong}
+			/>
 		</View>
 	);
 };
@@ -118,6 +127,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 16,
+		backgroundColor: "white",
 	},
 	header: {
 		flexDirection: "row",
