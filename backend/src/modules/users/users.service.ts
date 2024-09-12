@@ -1483,7 +1483,7 @@ export class UsersService {
 		console.log("userFriends:", userFriends);
 		if (userFriends !== null) {
 			const friendIDs: string[] = userFriends.map((user) => user.user_id);
-			users = users.filter((user) => friendIDs.includes(user.user_id));
+			users = users.filter((user) => !friendIDs.includes(user.user_id));
 			console.log("filtered users:", users);
 			console.log("friendIDs:", friendIDs);
 		}
@@ -1498,7 +1498,7 @@ export class UsersService {
 				user.user_id,
 			);
 			const popularity = await this.calculatePopularity(user.user_id);
-			// const activity = await this.calculateActivity(user.user_id);
+			const activity = await this.calculateActivity(user.user_id);
 			const genreSimilarity = await this.calculateGenreSimilarity(
 				currentUser.user_id,
 				user.user_id,
@@ -1507,7 +1507,7 @@ export class UsersService {
 			const score =
 				mutualFriends * 0.4 +
 				popularity * 0.3 +
-				// activity * 0.2 +
+				activity * 0.2 +
 				genreSimilarity * 0.1;
 			userScores[user.user_id] = score;
 		}
@@ -1516,7 +1516,7 @@ export class UsersService {
 		const sortedUserIds = Object.keys(userScores).sort(
 			(a, b) => (userScores[b] ?? 0) - (userScores[a] ?? 0),
 		);
-		const topUserIds = sortedUserIds.slice(0, 10); // Top 10 recommendations
+		const topUserIds = sortedUserIds.slice(0, 5); // Top 10 recommendations
 
 		const result = await this.dtogen.generateMultipleUserDto(topUserIds);
 		if (!result) {
@@ -1576,27 +1576,30 @@ export class UsersService {
 		}
 
 		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
-		// const Date30DaysAgo: Date = new Date();
-		// Date30DaysAgo.setDate(Date30DaysAgo.getDate() - 30);
-		// const messages: PrismaTypes.message[] | null =
-		// 	await this.prisma.message.findMany({
-		// 		where: { sender: userID, date_sent: { gte: Date30DaysAgo } },
-		// 	});
-		// if (!messages) {
-		// 	throw new Error("Failed to calculate activity (no messages)");
-		// }
-		// const roomMessages: PrismaTypes.room_message[] | null =
-		// 	await this.prisma.room_message.findMany({
-		// 		where: {
-		// 			message_id: { in: messages.map((message) => message.message_id) },
-		// 		},
-		// 	});
-		// if (!roomMessages) {
-		// 	throw new Error("Failed to calculate activity (no room messages)");
-		// }
-		const activity: number = rooms.length + friends.length + bookmarks.length;
-		// messages.length +
-		// roomMessages.length;
+		const Date30DaysAgo: Date = new Date();
+		Date30DaysAgo.setDate(Date30DaysAgo.getDate() - 30);
+		const messages: PrismaTypes.message[] | null =
+			await this.prisma.message.findMany({
+				where: { sender: userID, date_sent: { gte: Date30DaysAgo } },
+			});
+		if (!messages) {
+			throw new Error("Failed to calculate activity (no messages)");
+		}
+		const roomMessages: PrismaTypes.room_message[] | null =
+			await this.prisma.room_message.findMany({
+				where: {
+					message_id: { in: messages.map((message) => message.message_id) },
+				},
+			});
+		if (!roomMessages) {
+			throw new Error("Failed to calculate activity (no room messages)");
+		}
+		const activity: number =
+			rooms.length +
+			friends.length +
+			bookmarks.length +
+			messages.length +
+			roomMessages.length;
 		return activity / 100;
 	}
 
