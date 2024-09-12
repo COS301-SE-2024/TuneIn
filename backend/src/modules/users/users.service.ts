@@ -314,7 +314,6 @@ export class UsersService {
 	}
 
 	async getProfileByUsername(username: string): Promise<UserDto> {
-		console.log("Getter called");
 		const userData = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
