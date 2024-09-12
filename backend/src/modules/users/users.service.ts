@@ -681,7 +681,6 @@ export class UsersService {
 		);
 		this.recommender.setPlaylists(roomSongs);
 		const recommendedRooms = this.recommender.getTopPlaylists(5);
-		// console.log("recommendedRooms:", recommendedRooms);
 		const r: RoomDto[] | null = await this.dtogen.generateMultipleRoomDto(
 			recommendedRooms.map((room) => room.playlist),
 		);
@@ -1460,7 +1459,6 @@ export class UsersService {
 	}
 
 	async getRecommendedUsers(userID: string): Promise<UserDto[]> {
-		console.log("Getting recommended users for user " + userID);
 		let users: PrismaTypes.users[] = await this.prisma.users.findMany();
 		const currentUser = await this.prisma.users.findUnique({
 			where: { user_id: userID },
@@ -1472,12 +1470,9 @@ export class UsersService {
 
 		const userFriends: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
-		console.log("userFriends:", userFriends);
 		if (userFriends !== null) {
 			const friendIDs: string[] = userFriends.map((user) => user.user_id);
 			users = users.filter((user) => !friendIDs.includes(user.user_id));
-			console.log("filtered users:", users);
-			console.log("friendIDs:", friendIDs);
 		}
 
 		const userScores: { [key: string]: number } = {};
