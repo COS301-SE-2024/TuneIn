@@ -28,6 +28,7 @@ export const SOCKET_EVENTS = {
 	INIT_PLAY: "initPlay",
 	INIT_PAUSE: "initPause",
 	INIT_STOP: "initStop",
+	INIT_SKIP: "initSkip",
 	SEEK_MEDIA: "seekMedia",
 	CURRENT_MEDIA: "currentMedia",
 	MEDIA_SYNC: "mediaSync",

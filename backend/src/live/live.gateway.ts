@@ -917,6 +917,62 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
+	@SubscribeMessage(SOCKET_EVENTS.INIT_SKIP)
+	async handleInitSkipMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
+		this.eventQueueService.addToQueue(async () => {
+			this.handOverSocketServer(this.server);
+			console.log("Received event: " + SOCKET_EVENTS.INIT_SKIP);
+			try {
+				//this.server.emit();
+				console.log(p);
+
+				const roomID: string | null = this.roomUsers.getRoomId(client.id);
+				if (roomID === null) {
+					throw new Error("User is not in a room");
+				}
+
+				//{check user permissions}
+
+				if (await this.roomQueue.isPlaying(roomID)) {
+					let song: RoomSongDto | null = await this.roomQueue.getNextSong(
+						roomID,
+					);
+					console.log("Song to play: " + song);
+					if (song === null) {
+						throw new Error("No song is queued");
+					}
+					let startTime: Date | undefined = song.startTime;
+					if (startTime === undefined) {
+						song = await this.roomQueue.playSongNow(roomID);
+						if (song === null) {
+							throw new Error("No song is queued");
+						}
+					}
+
+					startTime = song.startTime;
+					if (startTime === undefined) {
+						throw new Error("No start time for song");
+					}
+
+					const response: PlaybackEventDto = {
+						date_created: new Date(),
+						userID: null,
+						roomID: roomID,
+						spotifyID: song.spotifyID,
+						UTC_time: startTime.getTime(),
+					};
+					this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				}
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
 	@SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
 	async handleSeekMedia(
 		@ConnectedSocket() client: Socket,
@@ -1252,7 +1308,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async sendMediaState(roomID: string): Promise<void> {
-		const song: RoomSongDto | null = await this.roomQueue.getCurrentOrNextSong(
+		const song: RoomSongDto | null = await this.roomQueue.getNextSong(
 			roomID,
 		);
 		if (song) {

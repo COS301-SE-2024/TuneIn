@@ -152,6 +152,7 @@ interface Playback {
 	startPlayback: () => void;
 	pausePlayback: () => void;
 	stopPlayback: () => void;
+	nextTrack: () => void;
 }
 
 export type SpotifyTokenRefreshResponse = {
@@ -1179,6 +1180,25 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					UTC_time: null,
 				};
 				socket.current.emit("initStop", JSON.stringify(input));
+			},
+
+			nextTrack: function (): void {
+				pollLatency();
+				if (!currentUser) {
+					console.error("User is not logged in");
+					return;
+				}
+				if (!currentRoom) {
+					console.error("User is not in a room");
+					return;
+				}
+				const input: PlaybackEventDto = {
+					userID: currentUser.userID,
+					roomID: currentRoom.roomID,
+					spotifyID: null,
+					UTC_time: null,
+				};
+				socket.current.emit("initNext", JSON.stringify(input));
 			},
 		},
 		queue: {
