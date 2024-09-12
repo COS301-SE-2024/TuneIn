@@ -3,48 +3,46 @@ import { render } from "@testing-library/react-native";
 import SongRoomWidget from "../app/components/SongRoomWidget";
 import { Track } from "../app/models/Track";
 
+// Mock data
 const mockTrack: Track = {
-	id: "1",
-	name: "Mock Song",
-	artists: [{ name: "Mock Artist" }],
+	name: "Song Title",
+	artists: [{ name: "Artist 1" }, { name: "Artist 2" }],
 	album: {
-		images: [{ url: "https://example.com/mock-album-cover.jpg" }],
+		images: [{ url: "https://example.com/album-cover.jpg" }],
 	},
+	id: "",
 	explicit: false,
-	preview_url: "https://example.com/mock-preview.mp3",
-	uri: "spotify:track:1",
-	duration_ms: 210000,
+	preview_url: "",
+	uri: "",
+	duration_ms: 0,
 };
 
+// Tests
 describe("SongRoomWidget", () => {
-	it("renders the song room widget correctly", () => {
-		const { getByText, getByTestId } = render(
-			<SongRoomWidget
-				track={mockTrack}
-				progress={0.5}
-				time1="0:00"
-				time2="3:30"
-			/>,
+	it("renders correctly with the given track data", () => {
+		const { getByTestId, getByText } = render(
+			<SongRoomWidget track={mockTrack} />,
 		);
 
-		// Check song name
-		expect(getByText("Mock Song")).toBeTruthy();
+		// Check if album cover image is rendered
+		expect(getByTestId("album-cover-image")).toBeTruthy();
 
-		// Check artist name
-		expect(getByText("Mock Artist")).toBeTruthy();
+		// Check if song name is rendered
+		expect(getByText("Song Title")).toBeTruthy();
 
-		// Check album cover image source
-		const albumCoverImage = getByTestId("album-cover-image");
-		expect(albumCoverImage.props.source.uri).toBe(
-			"https://example.com/mock-album-cover.jpg",
-		);
+		// Check if artist names are rendered
+		expect(getByText("Artist 1, Artist 2")).toBeTruthy();
+	});
 
-		// Check slider value
-		const slider = getByTestId("song-slider");
-		expect(slider.props.value).toBe(0.5);
+	it("renders the correct album cover image", () => {
+		const { getByTestId } = render(<SongRoomWidget track={mockTrack} />);
+		const image = getByTestId("album-cover-image");
 
-		// Check displayed times
-		expect(getByText("0:00")).toBeTruthy();
-		expect(getByText("3:30")).toBeTruthy();
+		expect(image.props.source.uri).toBe("https://example.com/album-cover.jpg");
+	});
+
+	it("renders the correct artist names", () => {
+		const { getByText } = render(<SongRoomWidget track={mockTrack} />);
+		expect(getByText("Artist 1, Artist 2")).toBeTruthy();
 	});
 });

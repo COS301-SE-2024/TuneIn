@@ -11,10 +11,10 @@ import {
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { UserDto } from "../../models/UserDto";
-import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
-import axios from "axios";
-import { set } from "react-datepicker/dist/date_utils";
+// import auth from "../../services/AuthManagement";
+// import * as utils from "../../services/Utils";
+// import axios from "axios";
+// import { set } from "react-datepicker/dist/date_utils";
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
@@ -199,7 +199,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 	friends,
 }) => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [users, setUsers] = useState<UserDto[]>(friends);
+	const [users] = useState<UserDto[]>(friends);
 	const [filteredUsers, setFilteredUsers] = useState<UserDto[]>([]);
 	const router = useRouter();
 

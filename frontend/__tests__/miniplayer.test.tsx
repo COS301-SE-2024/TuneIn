@@ -63,7 +63,7 @@ describe("Miniplayer", () => {
 		fireEvent.press(touchable);
 
 		expect(mockRouter.push).toHaveBeenCalledWith({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(mockContextValue.currentRoom) },
 		});
 	});
