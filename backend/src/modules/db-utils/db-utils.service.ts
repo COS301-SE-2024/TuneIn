@@ -3,7 +3,6 @@ import { PrismaService } from "../../../prisma/prisma.service";
 //import Prisma from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
-import { UpdateUserDto } from "../users/dto/updateuser.dto";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
 @Injectable()

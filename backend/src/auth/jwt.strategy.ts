@@ -1,11 +1,11 @@
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { PassportStrategy } from "@nestjs/passport";
 import { Injectable } from "@nestjs/common";
-import { AuthService, JWTPayload } from "./auth.service";
+import { JWTPayload } from "./auth.service";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-	constructor(private authService: AuthService) {
+	constructor() {
 		const jwtSecret = process.env.JWT_SECRET_KEY;
 		if (!jwtSecret || jwtSecret === "") {
 			throw new Error("Missing JWT_SECRET_KEY");

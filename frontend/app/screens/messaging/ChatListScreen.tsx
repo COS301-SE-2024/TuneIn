@@ -20,23 +20,23 @@ import * as utils from "../../services/Utils";
 import axios from "axios";
 import { UserDto } from "../../models/UserDto";
 
-const initialChats: Chat[] = [
-	{
-		id: "1",
-		name: "John Doe",
-		lastMessage: "Hey there!",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "2",
-		name: "Jane Smith",
-		lastMessage: "What's up?",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	// Add more dummy chats
-];
+// const initialChats: Chat[] = [
+// 	{
+// 		id: "1",
+// 		name: "John Doe",
+// 		lastMessage: "Hey there!",
+// 		avatar:
+// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+// 	},
+// 	{
+// 		id: "2",
+// 		name: "Jane Smith",
+// 		lastMessage: "What's up?",
+// 		avatar:
+// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+// 	},
+// 	// Add more dummy chats
+// ];
 
 const createChats = (
 	messages: DirectMessageDto[],

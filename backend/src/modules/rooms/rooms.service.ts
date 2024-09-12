@@ -9,23 +9,6 @@ import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import {
-	subHours,
-	addHours,
-	isBefore,
-	startOfHour,
-	startOfDay,
-} from "date-fns";
-import {
-	RoomAnalyticsQueueDto,
-	RoomAnalyticsParticipationDto,
-	RoomAnalyticsInteractionsDto,
-	RoomAnalyticsVotesDto,
-	RoomAnalyticsSongsDto,
-	RoomAnalyticsContributorsDto,
-	RoomAnalyticsDto,
-	RoomAnalyticsKeyMetricsDto,
-} from "./dto/roomanalytics.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
@@ -389,11 +372,11 @@ export class RoomsService {
 		return this.DUMBroomQueues.get(roomID) || "";
 	}
 
-	clearRoomQueue(userID: string, roomID: string): boolean {
-		// TODO: Implement logic to clear room queue
-		console.log(roomID);
-		return false;
-	}
+	// clearRoomQueue(userID: string, roomID: string): boolean {
+	// 	// TODO: Implement logic to clear room queue
+	// 	console.log(roomID);
+	// 	return false;
+	// }
 
 	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
 		// TODO: Implement logic to add song to queue
@@ -797,11 +780,12 @@ export class RoomsService {
 	}
 
 	async getKickedUsers(roomID: string): Promise<UserDto[]> {
+		console.log(roomID);
 		// Implement the logic to get the kicked users for the room
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// room does not exist
+		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		// }
 		return [];
 	}
 
@@ -810,34 +794,37 @@ export class RoomsService {
 		initiatorID: string,
 		kickedUserID: string,
 	): Promise<void> {
+		console.log(roomID);
+		console.log(initiatorID);
+		console.log(kickedUserID);
 		// Implement the logic to kick a user from the room
 		if (true) {
 			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) {
-			// user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// user does not exist
+		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// }
 
-		if (true) {
-			// user does not have permission to kick
-			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		}
+		// if (true) {
+		// 	// user does not have permission to kick
+		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		// }
 
-		if (true) {
-			// user is not in the room
-			throw new HttpException(
-				"User is not in the room",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
+		// if (true) {
+		// 	// user is not in the room
+		// 	throw new HttpException(
+		// 		"User is not in the room",
+		// 		HttpStatus.BAD_REQUEST,
+		// 	);
+		// }
 
-		if (true) {
-			// user is trying to kick themselves
-			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		}
+		// if (true) {
+		// 	// user is trying to kick themselves
+		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		// }
 	}
 
 	async undoKick(
@@ -845,30 +832,34 @@ export class RoomsService {
 		initiatorID: string,
 		kickedUserID: string,
 	): Promise<void> {
+		console.log(roomID);
+		console.log(initiatorID);
+		console.log(kickedUserID);
 		// Implement the logic to undo the kick of a participant in the room
 		if (true) {
 			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) {
-			// user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// user does not exist
+		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// }
 
-		if (true) {
-			// user does not have permission to kick
-			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		}
+		// if (true) {
+		// 	// user does not have permission to kick
+		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		// }
 
-		if (true) {
-			// user is trying to undo their own kick
-			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		}
+		// if (true) {
+		// 	// user is trying to undo their own kick
+		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		// }
 	}
 
 	async getBannedUsers(roomID: string): Promise<UserDto[]> {
 		// Implement the logic to get the banned users for the room
+		console.log(roomID);
 		if (true) {
 			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
@@ -882,25 +873,28 @@ export class RoomsService {
 		bannedUserID: string,
 	): Promise<void> {
 		// Implement the logic to ban a user from the room
+		console.log(roomID);
+		console.log(initiatorID);
+		console.log(bannedUserID);
 		if (true) {
 			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) {
-			// user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// user does not exist
+		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// }
 
-		if (true) {
-			// user does not have permission to ban
-			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		}
+		// if (true) {
+		// 	// user does not have permission to ban
+		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		// }
 
-		if (true) {
-			// user is trying to ban themselves
-			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		}
+		// if (true) {
+		// 	// user is trying to ban themselves
+		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		// }
 	}
 
 	async undoBan(
@@ -909,40 +903,44 @@ export class RoomsService {
 		bannedUserID: string,
 	): Promise<void> {
 		// Implement the logic to undo the ban of a participant in the room
+		console.log(roomID);
+		console.log(initiatorID);
+		console.log(bannedUserID);
 		if (true) {
 			// room does not exist
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		if (true) {
-			// user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// user does not exist
+		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// }
 
-		if (true) {
-			// user does not have permission to ban
-			throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		}
+		// if (true) {
+		// 	// user does not have permission to ban
+		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
+		// }
 
-		if (true) {
-			// user is trying to undo their own ban
-			throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		}
+		// if (true) {
+		// 	// user is trying to undo their own ban
+		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
+		// }
 	}
 
 	async getCalendarFile(roomID: string): Promise<File> {
 		// Implement the logic to get the calendar file for the room
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		}
-		if (true) {
-			// room does not have any events
-			throw new HttpException(
-				"Room does not have any events",
-				HttpStatus.NOT_FOUND,
-			);
-		}
+		// if (true) {
+		// 	// room does not exist
+		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		// }
+		// if (true) {
+		// 	// room does not have any events
+		// 	throw new HttpException(
+		// 		"Room does not have any events",
+		// 		HttpStatus.NOT_FOUND,
+		// 	);
+		// }
+		console.log(roomID);
 		const bytes: BlobPart[] = [];
 		return new File(bytes, "calendar.ics");
 	}
@@ -956,14 +954,16 @@ export class RoomsService {
 		//split the room
 		//set the children ids to RoomDto.children
 		//return RoomDto
+		console.log(roomID);
 	}
 
 	async canSplitRoom(roomID: string): Promise<string[]> {
 		// Implement the logic to check if the room can be split
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		}
+		// if (true) {
+		// 	// room does not exist
+		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		// }
+		console.log(roomID);
 		const childGenres: string[] = [];
 		return childGenres;
 	}

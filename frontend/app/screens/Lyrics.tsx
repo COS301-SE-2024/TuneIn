@@ -89,6 +89,7 @@ const LyricsScreen: React.FC = () => {
 			<TouchableOpacity
 				onPress={() => router.back()}
 				style={styles.closeButton}
+				testID="close-button"
 			>
 				<Ionicons name="chevron-back" size={24} color="black" />
 			</TouchableOpacity>
