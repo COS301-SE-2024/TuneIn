@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import ChatItem from "../app/components/ChatItem"; // Adjust the import path as necessary
-// import { Chat } from "../app/models/chat"; // Adjust the import path as necessary
 import { DirectMessageDto } from "../app/models/DmDto";
 import { UserDto } from "../app/models/UserDto";
 

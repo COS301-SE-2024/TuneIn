@@ -62,7 +62,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 		if (selectedRoom === null) fetchUserRooms();
 		console.log("selectedRoom", selectedRoom);
-	}, [selectedRoom]);
+	}, [selectedRoom, userRooms]);
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
@@ -83,7 +83,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 		fetchInteractionAnalytics();
 		console.log("interaction analytics", interactionAnalytics);
-	}, [interactionAnalytics]);
+	}, [interactionAnalytics, selectedRoom?.roomID]);
 
 	const rooms = userRooms?.map((room) => room.room_name as string);
 	console.log("rooms", rooms);

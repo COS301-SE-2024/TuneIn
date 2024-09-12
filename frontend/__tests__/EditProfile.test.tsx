@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
@@ -297,7 +297,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByDisplayValue, getByText } = render(
+		const { getByDisplayValue } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
