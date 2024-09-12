@@ -476,9 +476,7 @@ describe("UsersService follow function", () => {
 		});
 
 		it("should return an empty array if no friend requests are found", async () => {
-			jest
-				.spyOn(dbUtilsService, "getFriendRequests")
-				.mockResolvedValueOnce(null);
+			jest.spyOn(dbUtilsService, "getFriendRequests").mockResolvedValueOnce([]);
 
 			const result = await usersService.getFriendRequests("userID");
 			expect(result).toEqual([]);
@@ -538,7 +536,7 @@ describe("UsersService follow function", () => {
 		it("should return an empty array if no potential friends are found", async () => {
 			jest
 				.spyOn(dbUtilsService, "getPotentialFriends")
-				.mockResolvedValueOnce(null);
+				.mockResolvedValueOnce([]);
 
 			const result = await usersService.getPotentialFriends("userID");
 			expect(result).toEqual([]);
@@ -607,12 +605,13 @@ describe("UsersService follow function", () => {
 			jest
 				.spyOn(dbUtilsService, "getRoomSongs")
 				.mockResolvedValue(mockRoomSongs as any);
-			jest
-				.spyOn(dbUtilsService, "getUserFavoriteSongs")
-				.mockResolvedValue(null);
+			jest.spyOn(dbUtilsService, "getUserFavoriteSongs").mockResolvedValue([]);
 			jest
 				.spyOn(dtoGenService, "generateMultipleRoomDto")
 				.mockResolvedValue(mockRoomDtos as any);
+			jest
+				.spyOn(mockRecommendationsService, "getTopPlaylists")
+				.mockReturnValue([]);
 
 			const result = await usersService.getRecommendedRooms("user1");
 			expect(result).toEqual(mockRoomDtos);

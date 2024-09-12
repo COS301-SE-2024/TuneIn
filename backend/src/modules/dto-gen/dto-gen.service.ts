@@ -95,7 +95,7 @@ export class DtoGenService {
 
 		const following: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
-			result.following.count = following.length;
+		result.following.count = following.length;
 		if (fully_qualify) {
 			for (let i = 0; i < following.length; i++) {
 				const f = following[i];
@@ -402,6 +402,9 @@ export class DtoGenService {
 	}
 
 	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
+		if (room_ids.length === 0) {
+			return [];
+		}
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: { room_id: { in: room_ids } },
 		});

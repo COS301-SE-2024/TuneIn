@@ -57,12 +57,12 @@ describe("DbUtilsService", () => {
 			expect(mockPrismaService.room.findMany).toHaveBeenCalledTimes(1);
 		});
 
-		it("should return null if no rooms found", async () => {
-			jest.spyOn(mockPrismaService.room, "findMany").mockResolvedValue(null);
+		it("should return an empty array if no rooms found", async () => {
+			jest.spyOn(mockPrismaService.room, "findMany").mockResolvedValue([]);
 
 			const result = await service.getRandomRooms(2);
 
-			expect(result).toBeNull();
+			expect(result).toEqual([]);
 			expect(mockPrismaService.room.findMany).toHaveBeenCalledTimes(1);
 		});
 
@@ -275,6 +275,17 @@ describe("DbUtilsService", () => {
 	});
 
 	describe("getUserFollowing", () => {
+		it("should return an empty array if the user is not following anyone", async () => {
+			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValue([]);
+
+			const result = await service.getUserFollowing("user1");
+
+			expect(result).toEqual([]);
+			expect(mockPrismaService.follows.findMany).toHaveBeenCalledWith({
+				where: { follower: "user1" },
+			});
+		});
+
 		it("should return an array of users that the specified user is following", async () => {
 			const follows: PrismaTypes.follows[] = [
 				{
@@ -327,17 +338,6 @@ describe("DbUtilsService", () => {
 			});
 			expect(mockPrismaService.users.findMany).toHaveBeenCalledWith({
 				where: { user_id: { in: ["user2", "user3"] } },
-			});
-		});
-
-		it("should return null if the user is not following anyone", async () => {
-			jest.spyOn(mockPrismaService.follows, "findMany").mockResolvedValue(null);
-
-			const result = await service.getUserFollowing("user1");
-
-			expect(result).toBeNull();
-			expect(mockPrismaService.follows.findMany).toHaveBeenCalledWith({
-				where: { follower: "user1" },
 			});
 		});
 	});
@@ -473,15 +473,6 @@ describe("DbUtilsService", () => {
 		});
 	});
 	describe("getPendingRequests", () => {
-		it("should return null if no pending requests are found", async () => {
-			jest
-				.spyOn(mockPrismaService.friends, "findMany")
-				.mockResolvedValueOnce(null);
-
-			const result = await service.getPendingRequests("userID");
-			expect(result).toBeNull();
-		});
-
 		it("should return an array of pending requests if found", async () => {
 			const mockPendingRequests = [
 				{ friend1: "userID", friend2: "friendID1", is_pending: true },

@@ -37,7 +37,9 @@ export class DbUtilsService {
 				"An unexpected error occurred in the database. getUserFollowing():ERROR01",
 			);
 		}
-
+		if (following.length === 0) {
+			return [];
+		}
 		const result: PrismaTypes.users[] = [];
 		const ids: string[] = [];
 		for (let i = 0; i < following.length; i++) {
@@ -49,9 +51,14 @@ export class DbUtilsService {
 			}
 		}
 
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: { user_id: { in: ids } },
 		});
+		if (!users || users === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. getUserFollowing():ERROR02",
+			);
+		}
 
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
