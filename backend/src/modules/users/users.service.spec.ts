@@ -23,6 +23,7 @@ import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { HttpException } from "@nestjs/common";
 import { UpdateUserDto } from "./dto/updateuser.dto";
+import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-mocking";
 
 const mockUserDto: UserDto = {
 	profile_name: "Testing",
@@ -80,7 +81,6 @@ describe("UsersService follow function", () => {
 	let prismaService: PrismaService;
 	let dbUtilsService: DbUtilsService;
 	let dtoGenService: DtoGenService;
-	let configService: ConfigService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -120,7 +120,6 @@ describe("UsersService follow function", () => {
 		prismaService = module.get<PrismaService>(PrismaService);
 		dbUtilsService = module.get<DbUtilsService>(DbUtilsService);
 		dtoGenService = module.get<DtoGenService>(DtoGenService);
-		configService = module.get<ConfigService>(ConfigService);
 	});
 	describe("followUser", () => {
 		it("should be defined", () => {
