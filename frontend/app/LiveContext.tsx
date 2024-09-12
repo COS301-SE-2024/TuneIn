@@ -197,14 +197,27 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		devices: [],
 	});
 	const [roomPlaying, setRoomPlaying] = useState<boolean>(false);
-	const createSocket = (): Socket => {
+	const createSocketConnection = (): Socket => {
+		console.log("==================== CREATING SOCKET ====================");
 		const s = io(utils.API_BASE_URL + "/live", {
 			transports: ["websocket"],
 			timeout: TIMEOUT,
 		});
 		return s;
 	};
-	const socket = useRef<Socket>(createSocket());
+	const socketRef = useRef<Socket | null>(null);
+	const createSocket = () => {
+		socketRef.current = createSocketConnection();
+	};
+	const getSocket = (): Socket => {
+		if (socketRef.current === null) {
+			createSocket();
+		}
+		if (socketRef.current === null) {
+			throw new Error("Socket connection not initialized");
+		}
+		return socketRef.current;
+	};
 	const updateRoomQueue = (queue: RoomSongDto[]) => {
 		queue.sort((a, b) => a.index - b.index);
 		setRoomQueue(queue);
@@ -325,9 +338,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const initializeSocket = () => {
-		if (socket.current) {
+		if (socketRef.current === null) {
+			createSocket();
+		}
+
+		if (socketRef.current !== null) {
 			if (!socketInitialized && mounted && currentUser !== undefined) {
-				socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
+				socketRef.current.on("userJoinedRoom", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: userJoinedRoom", response);
 					const u: UserDto = currentUser;
 					if (
@@ -339,7 +356,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					dmControls.requestDirectMessageHistory();
 				});
 
-				socket.current.on(
+				socketRef.current.on(
 					"liveChatHistory",
 					(history: LiveChatMessageDto[]) => {
 						console.log("SOCKET EVENT: liveChatHistory", history);
@@ -353,7 +370,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					},
 				);
 
-				socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
+				socketRef.current.on("liveMessage", (newMessage: ChatEventDto) => {
 					console.log("SOCKET EVENT: liveMessage", newMessage);
 					if (!roomChatRequested || !roomChatReceived) {
 						dmControls.requestDirectMessageHistory();
@@ -373,68 +390,87 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				});
 
-				socket.current.on("userLeftRoom", (response: ChatEventDto) => {
+				socketRef.current.on("userLeftRoom", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: userLeftRoom", response);
 					console.log("User left room:", response);
 				});
 
-				socket.current.on("error", (response: ChatEventDto) => {
+				socketRef.current.on("error", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: error", response);
 					console.error("Error:", response.errorMessage);
 				});
 
-				socket.current.on("connect", () => {
+				socketRef.current.on("connect", () => {
 					console.log("SOCKET EVENT: connect");
+					if (socketRef.current === null) {
+						console.error("Socket connection not initialized");
+						return Promise.reject(
+							new Error("Socket connection not initialized"),
+						);
+					}
+
 					const input: ChatEventDto = {
 						userID: currentUser.userID,
 					};
-					socket.current.emit("connectUser", JSON.stringify(input));
+					socketRef.current.emit("connectUser", JSON.stringify(input));
 				});
 
-				socket.current.on("connected", (response: ChatEventDto) => {
+				socketRef.current.on("connected", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: connected", response);
 					if (currentRoom) {
 						joinRoom(currentRoom.roomID);
 					}
 				});
 
-				socket.current.on("playMedia", async (response: PlaybackEventDto) => {
-					console.log("SOCKET EVENT: playMedia", response);
-					if (!response.UTC_time) {
-						console.log("UTC time not found");
-						return;
-					}
+				socketRef.current.on(
+					"playMedia",
+					async (response: PlaybackEventDto) => {
+						console.log("SOCKET EVENT: playMedia", response);
+						if (!response.UTC_time) {
+							console.log("UTC time not found");
+							return;
+						}
 
-					if (!response.spotifyID) {
-						throw new Error("Server did not return song ID");
-					}
-					const deviceID = await roomControls.playbackHandler.getFirstDevice();
-					if (deviceID && deviceID !== null) {
-						await roomControls.playbackHandler.handlePlayback(
-							"play",
-							deviceID,
-							await calculateSeekTime(response.UTC_time, 0),
-						);
-					}
-				});
+						if (!response.spotifyID) {
+							throw new Error("Server did not return song ID");
+						}
+						const deviceID =
+							await roomControls.playbackHandler.getFirstDevice();
+						if (deviceID && deviceID !== null) {
+							await roomControls.playbackHandler.handlePlayback(
+								"play",
+								deviceID,
+								await calculateSeekTime(response.UTC_time, 0),
+							);
+						}
+					},
+				);
 
-				socket.current.on("pauseMedia", async (response: PlaybackEventDto) => {
-					console.log("SOCKET EVENT: pauseMedia", response);
-					const deviceID = await roomControls.playbackHandler.getFirstDevice();
-					if (deviceID && deviceID !== null) {
-						roomControls.playbackHandler.handlePlayback("pause", deviceID);
-					}
-				});
+				socketRef.current.on(
+					"pauseMedia",
+					async (response: PlaybackEventDto) => {
+						console.log("SOCKET EVENT: pauseMedia", response);
+						const deviceID =
+							await roomControls.playbackHandler.getFirstDevice();
+						if (deviceID && deviceID !== null) {
+							roomControls.playbackHandler.handlePlayback("pause", deviceID);
+						}
+					},
+				);
 
-				socket.current.on("stopMedia", async (response: PlaybackEventDto) => {
-					console.log("SOCKET EVENT: stopMedia", response);
-					const deviceID = await roomControls.playbackHandler.getFirstDevice();
-					if (deviceID && deviceID !== null) {
-						roomControls.playbackHandler.handlePlayback("pause", deviceID);
-					}
-				});
+				socketRef.current.on(
+					"stopMedia",
+					async (response: PlaybackEventDto) => {
+						console.log("SOCKET EVENT: stopMedia", response);
+						const deviceID =
+							await roomControls.playbackHandler.getFirstDevice();
+						if (deviceID && deviceID !== null) {
+							roomControls.playbackHandler.handlePlayback("pause", deviceID);
+						}
+					},
+				);
 
-				socket.current.on("time_sync_response", (data) => {
+				socketRef.current.on("time_sync_response", (data) => {
 					console.log("SOCKET EVENT: time_sync_response", data);
 					const t2 = Date.now();
 					const t1 = data.t1;
@@ -443,7 +479,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					console.log(`Time offset: ${offset} ms`);
 				});
 
-				socket.current.on("directMessage", (data: DirectMessageDto) => {
+				socketRef.current.on("directMessage", (data: DirectMessageDto) => {
 					console.log("SOCKET EVENT: directMessage", data);
 					const me = data.sender.userID === currentUser.userID;
 					const dm = {
@@ -461,7 +497,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					});
 				});
 
-				socket.current.on("userOnline", (data: { userID: string }) => {
+				socketRef.current.on("userOnline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOnline", data);
 					if (data.userID === currentUser.userID) {
 						setDmsConnected(true);
@@ -469,7 +505,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					//we can use this to update the user's status
 				});
 
-				socket.current.on("userOffline", (data: { userID: string }) => {
+				socketRef.current.on("userOffline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOffline", data);
 					if (data.userID === currentUser.userID) {
 						setDmsConnected(false);
@@ -478,9 +514,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				});
 
 				// (unused) for edits and deletes of direct messages
-				socket.current.on("chatModified", (data) => {});
+				socketRef.current.on("chatModified", (data) => {});
 
-				socket.current.on("dmHistory", (data: DirectMessageDto[]) => {
+				socketRef.current.on("dmHistory", (data: DirectMessageDto[]) => {
 					console.log("SOCKET EVENT: dmHistory", data);
 					console.log("b");
 					setDmsReceived(true);
@@ -499,7 +535,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					setDmsRequested(false);
 				});
 
-				socket.current.on("emojiReaction", (reaction: EmojiReactionDto) => {
+				socketRef.current.on("emojiReaction", (reaction: EmojiReactionDto) => {
 					console.log("SOCKET EVENT: emojiReaction", reaction);
 					//add the new reaction to components
 					if (reaction.userID === currentUser.userID) {
@@ -513,7 +549,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					]);
 				});
 
-				socket.current.on(
+				socketRef.current.on(
 					"queueState",
 					(response: {
 						room: RoomDto;
@@ -527,13 +563,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					},
 				);
 
-				socket.current.on("songAdded", (newSong: QueueEventDto) => {
+				socketRef.current.on("songAdded", (newSong: QueueEventDto) => {
 					console.log("SOCKET EVENT: songAdded", newSong);
 					const newQueue = [...roomQueue, newSong.song];
 					updateRoomQueue(newQueue);
 				});
 
-				socket.current.on("songRemoved", (removedSong: QueueEventDto) => {
+				socketRef.current.on("songRemoved", (removedSong: QueueEventDto) => {
 					console.log("SOCKET EVENT: songRemoved", removedSong);
 					let newQueue = [...roomQueue];
 					newQueue = newQueue.filter(
@@ -542,7 +578,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					updateRoomQueue(newQueue);
 				});
 
-				socket.current.on("voteUpdated", (updatedSong: QueueEventDto) => {
+				socketRef.current.on("voteUpdated", (updatedSong: QueueEventDto) => {
 					console.log("SOCKET EVENT: voteUpdated", updatedSong);
 					const i = roomQueue.findIndex(
 						(song) => song.spotifyID === updatedSong.song.spotifyID,
@@ -555,8 +591,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					updateRoomQueue(newQueue);
 				});
 
-				socket.current.connect();
-				socket.current.emit(
+				socketRef.current.connect();
+				socketRef.current.emit(
 					"connectUser",
 					JSON.stringify({ userID: currentUser.userID }),
 				);
@@ -577,7 +613,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
-		if (socket) {
+		const socket = getSocket();
+		if (socket !== null) {
 			pollLatency();
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
@@ -588,7 +625,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					dateCreated: new Date().toISOString(),
 				},
 			};
-			socket.current.emit("joinRoom", JSON.stringify(input));
+			socket.emit("joinRoom", JSON.stringify(input));
 
 			//request chat history
 			setRoomChatReceived(false);
@@ -609,6 +646,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
+		const socket = getSocket();
 		setJoined(false);
 
 		const input: ChatEventDto = {
@@ -620,7 +658,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				dateCreated: new Date().toISOString(),
 			},
 		};
-		socket.current.emit("leaveRoom", JSON.stringify(input));
+		socket.emit("leaveRoom", JSON.stringify(input));
 		setRoomMessages([]);
 		setRoomChatReceived(false);
 		setRoomChatRequested(false);
@@ -634,11 +672,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("User is not logged in");
 			return;
 		}
+		const socket = getSocket();
 		const promises: Promise<UserDto>[] = usernames.map((username) =>
 			getUser(username),
 		);
 		Promise.all(promises)
 			.then((users) => {
+				const socket = getSocket();
+
 				setDmParticipants(users);
 				setDmsReceived(false);
 				setDmsRequested(true);
@@ -647,7 +688,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					userID: currentUser.userID,
 					participantID: users[0].userID,
 				};
-				socket.current.emit("enterDirectMessage", JSON.stringify(input));
+				socket.emit("enterDirectMessage", JSON.stringify(input));
 				dmControls.requestDirectMessageHistory();
 			})
 			.catch((error) => {
@@ -661,11 +702,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("User is not logged in");
 			return;
 		}
+		const socket = getSocket();
 		setDmsConnected(false);
 		const input = {
 			userID: currentUser.userID,
 		};
-		socket.current.emit("exitDirectMessage", JSON.stringify(input));
+		socket.emit("exitDirectMessage", JSON.stringify(input));
 		console.log("emit exitDirectMessage with body:", input);
 		setDmParticipants([]);
 		setDmsReceived(false);
@@ -679,10 +721,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.log("A ping is already waiting for a response. Please wait.");
 			return Promise.resolve();
 		}
-
+		const socket = getSocket();
 		const startTime = Date.now();
 		setPingSent(true);
-		socket.current.volatile.emit("ping", null, (hitTime: string) => {
+		socket.volatile.emit("ping", null, (hitTime: string) => {
 			console.log("Ping hit time:", hitTime);
 			console.log("Ping sent successfully.");
 			const roundTripTime = Date.now() - startTime;
@@ -703,7 +745,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			// }, timeout);
 
 			// Send the ping message with a callback
-			// socket.current.volatile.emit("ping", null, () => {
+			// socket.volatile.emit("ping", null, () => {
 			// 	console.log("Ping sent successfully.");
 			// 	clearTimeout(timeoutId);
 			// 	const roundTripTime = Date.now() - startTime;
@@ -720,8 +762,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const getTimeOffset = () => {
+		const socket = getSocket();
 		let t0 = Date.now();
-		socket.current.emit("time_sync", { t0: Date.now() });
+		socket.emit("time_sync", { t0: Date.now() });
 	};
 
 	//function to find latency from NTP
@@ -760,6 +803,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const dmControls: DirectMessageControls = {
 		sendDirectMessage: function (message: DirectMessage): void {
+			const socket = getSocket();
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -774,11 +818,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			if (message.message.messageBody.trim()) {
 				message.message.sender = currentUser;
 				message.message.recipient = dmParticipants[0];
-				socket.current.emit("directMessage", JSON.stringify(message.message));
+				socket.emit("directMessage", JSON.stringify(message.message));
 			}
 		},
 
 		editDirectMessage: function (message: DirectMessage): void {
+			const socket = getSocket();
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -797,11 +842,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					action: "edit",
 					message: message.message,
 				};
-				socket.current.emit("modifyDirectMessage", JSON.stringify(payload));
+				socket.emit("modifyDirectMessage", JSON.stringify(payload));
 			}
 		},
 
 		deleteDirectMessage: function (message: DirectMessage): void {
+			const socket = getSocket();
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
@@ -818,10 +864,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				action: "delete",
 				message: message.message,
 			};
-			socket.current.emit("modifyDirectMessage", JSON.stringify(payload));
+			socket.emit("modifyDirectMessage", JSON.stringify(payload));
 		},
 
 		requestDirectMessageHistory: function (): void {
+			const socket = getSocket();
 			if (dmsRequested) {
 				console.log("Already requested DM history");
 				return;
@@ -843,12 +890,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				userID: currentUser.userID,
 				participantID: dmParticipants[0].userID,
 			};
-			socket.current.emit("getDirectMessageHistory", JSON.stringify(input));
+			socket.emit("getDirectMessageHistory", JSON.stringify(input));
 		},
 	};
 
 	const roomControls: RoomControls = {
 		sendLiveChatMessage: function (message: string): void {
+			const socket = getSocket();
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -871,11 +919,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					userID: currentUser.userID,
 					body: newMessage,
 				};
-				socket.current.emit("liveMessage", JSON.stringify(input));
+				socket.emit("liveMessage", JSON.stringify(input));
 			}
 		},
 
 		sendReaction: function (emoji: string): void {
+			const socket = getSocket();
 			if (!currentUser) {
 				return;
 			}
@@ -887,13 +936,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			};
 			//make it volatile so that it doesn't get queued up
 			//nothing will be lost if it doesn't get sent
-			socket.current.volatile.emit(
-				"emojiReaction",
-				JSON.stringify(newReaction),
-			);
+			socket.volatile.emit("emojiReaction", JSON.stringify(newReaction));
 		},
 
 		requestLiveChatHistory: function (): void {
+			const socket = getSocket();
 			// if (this.requestingLiveChatHistory) {
 			if (roomChatRequested) {
 				console.log("Already requested live chat history");
@@ -918,7 +965,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					dateCreated: new Date().toISOString(),
 				},
 			};
-			socket.current.emit("getLiveChatHistory", JSON.stringify(input));
+			socket.emit("getLiveChatHistory", JSON.stringify(input));
 		},
 
 		canControlRoom: function (): boolean {
@@ -938,6 +985,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 
 		requestRoomQueue: function (): void {
+			const socket = getSocket();
+			console.log("Requesting room queue");
 			if (!currentRoom) {
 				return;
 			}
@@ -953,7 +1002,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
-			socket.current.emit("requestQueue", JSON.stringify(input));
+			socket.emit("requestQueue", JSON.stringify(input));
 		},
 
 		playbackHandler: {
@@ -1158,6 +1207,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return false;
 			},
 			startPlayback: function (): void {
+				const socket = getSocket();
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1173,10 +1223,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					spotifyID: null,
 					UTC_time: null,
 				};
-				socket.current.emit("initPlay", JSON.stringify(input));
+				socket.emit("initPlay", JSON.stringify(input));
 			},
 
 			pausePlayback: function (): void {
+				const socket = getSocket();
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1192,10 +1243,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					spotifyID: null,
 					UTC_time: null,
 				};
-				socket.current.emit("initPause", JSON.stringify(input));
+				socket.emit("initPause", JSON.stringify(input));
 			},
 
 			stopPlayback: function (): void {
+				const socket = getSocket();
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1211,10 +1263,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					spotifyID: null,
 					UTC_time: null,
 				};
-				socket.current.emit("initStop", JSON.stringify(input));
+				socket.emit("initStop", JSON.stringify(input));
 			},
 
 			nextTrack: function (): void {
+				const socket = getSocket();
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1230,11 +1283,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					spotifyID: null,
 					UTC_time: null,
 				};
-				socket.current.emit("initNext", JSON.stringify(input));
+				socket.emit("initNext", JSON.stringify(input));
 			},
 		},
 		queue: {
 			enqueueSong: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				console.log("Enqueueing song", song);
 				if (!currentRoom) {
 					return;
@@ -1247,12 +1301,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("enqueueSong", JSON.stringify(input));
+				socket.emit("enqueueSong", JSON.stringify(input));
 				console.log("emitted: enqueueSong");
-				socket.current.emit("requestQueue", JSON.stringify(input));
+				socket.emit("requestQueue", JSON.stringify(input));
 				console.log("emitted: requestQueue");
 			},
 			dequeueSong: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				console.log("Dequeueing song", song);
 				if (!currentRoom) {
 					return;
@@ -1265,12 +1320,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("dequeueSong", JSON.stringify(input));
+				socket.emit("dequeueSong", JSON.stringify(input));
 				console.log("emitted: dequeueSong");
-				socket.current.emit("requestQueue", JSON.stringify(input));
+				socket.emit("requestQueue", JSON.stringify(input));
 				console.log("emitted: requestQueue");
 			},
 			upvoteSong: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				if (!currentRoom) {
 					return;
 				}
@@ -1282,9 +1338,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("upvoteSong", JSON.stringify(input));
+				socket.emit("upvoteSong", JSON.stringify(input));
 			},
 			downvoteSong: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				if (!currentRoom) {
 					return;
 				}
@@ -1296,9 +1353,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("downvoteSong", JSON.stringify(input));
+				socket.emit("downvoteSong", JSON.stringify(input));
 			},
 			swapSongVote: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				if (!currentRoom) {
 					return;
 				}
@@ -1310,9 +1368,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("swapSongVote", JSON.stringify(input));
+				socket.emit("swapSongVote", JSON.stringify(input));
 			},
 			undoSongVote: function (song: RoomSongDto): void {
+				const socket = getSocket();
 				if (!currentRoom) {
 					return;
 				}
@@ -1324,17 +1383,18 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.current.emit("undoSongVote", JSON.stringify(input));
+				socket.emit("undoSongVote", JSON.stringify(input));
 			},
 		},
 	};
 
 	useEffect(() => {
+		socketRef.current = createSocketConnection();
 		setMounted(true);
 		initializeSocket();
-		const s = socket.current;
+		const s = socketRef.current;
 		return () => {
-			if (socket) {
+			if (s !== null) {
 				leaveRoom();
 				s.disconnect();
 			}
@@ -1344,12 +1404,17 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	// re-initialize socket if it disconnects
 	useEffect(() => {
-		if (!socket.current?.connected) {
+		if (!socketRef.current) {
+			socketRef.current = createSocketConnection();
+			initializeSocket();
+		}
+		console.log("Socket connected:", socketRef.current?.connected);
+		if (!socketRef.current.connected) {
 			setSocketInitialized(false);
 			initializeSocket();
-			socket.current.connect();
+			socketRef.current.connect();
 		}
-	}, [socket.current, socket.current?.connected]);
+	}, [socketRef.current, socketRef.current?.connected]);
 
 	//initialise the user
 	useEffect(() => {
