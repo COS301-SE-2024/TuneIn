@@ -1,13 +1,12 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { colors } from "../styles/colors";
 
-interface CyanButtonProps {
+interface DeleteButtonProps {
 	title: string;
 	onPress: () => void;
 }
 
-const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
+const DeleteButton: React.FC<DeleteButtonProps> = ({ title, onPress }) => {
 	return (
 		<TouchableOpacity style={styles.button} onPress={onPress}>
 			<Text style={styles.buttonText}>{title}</Text>
@@ -17,11 +16,12 @@ const CyanButton: React.FC<CyanButtonProps> = ({ title, onPress }) => {
 
 const styles = StyleSheet.create({
 	button: {
-		width: "92%",
 		height: 52,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: colors.primary,
+		backgroundColor: "#FFF",
+		borderColor: "#E8ECF4",
+		borderWidth: 1,
 		borderRadius: 56,
 		marginBottom: 20,
 		shadowColor: "#000",
@@ -33,8 +33,8 @@ const styles = StyleSheet.create({
 	buttonText: {
 		fontSize: 18,
 		fontWeight: "bold",
-		color: "#FFF",
+		color: "#000",
 	},
 });
 
-export default CyanButton;
+export default DeleteButton;

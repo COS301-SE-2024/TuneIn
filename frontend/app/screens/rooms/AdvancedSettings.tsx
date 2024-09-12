@@ -1,7 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Switch,
+	Modal,
+	Pressable,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import CreateButton from "../../components/CreateButton";
+import DeleteButton from "../../components//DeleteButton";
+import { colors } from "../../styles/colors";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
@@ -37,15 +49,38 @@ const AdvancedSettings = () => {
 		});
 	};
 
-	const goToChat = () => {
-		router.navigate("/screens/ChatRoom");
+	const navigateToHome = () => {
+		router.navigate("/screens/Home");
+	};
+
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showSaveModal, setShowSaveModal] = useState(false);
+
+	const handleDelete = () => {
+		setShowDeleteModal(false);
+		navigateToHome(); // Proceed to delete and navigate home
+	};
+
+	const handleSave = () => {
+		setShowSaveModal(true); // Open the save modal
+	};
+
+	const closeSaveModal = () => {
+		setShowSaveModal(false);
+		router.back(); // Navigate back when the modal is closed
 	};
 
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
 				<TouchableOpacity onPress={() => router.back()}>
-					<Text style={styles.closeButton}>×</Text>
+					{/* <Text style={styles.closeButton}>×</Text> */}
+					<MaterialCommunityIcons
+						name="window-close"
+						size={24}
+						color="black"
+						testID="closeButton"
+					/>
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
 			</View>
@@ -126,9 +161,71 @@ const AdvancedSettings = () => {
 				<Icon name="edit" size={20} color="black" />
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.saveButton} onPress={goToChat}>
+			{/* <TouchableOpacity style={styles.saveButton} onPress={() => router.back()}>
 				<Text style={styles.saveButtonText}>Save Changes</Text>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
+			<View style={styles.saveButton}>
+				<CreateButton title="Save Changes" onPress={handleSave} />
+				{/* <CreateButton title="Save Changes" onPress={() => router.back()} /> */}
+				{/* <DeleteButton title="Delete Room" onPress={navigateToHome} /> */}
+				<DeleteButton
+					title="Delete Room"
+					onPress={() => setShowDeleteModal(true)}
+				/>
+			</View>
+			{/* Delete Confirmation Modal */}
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={showDeleteModal}
+				onRequestClose={() => setShowDeleteModal(false)}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalView}>
+						<Text style={styles.modalText}>
+							Are you sure you want to delete this room? The room will be
+							deleted forever.
+						</Text>
+						<View style={styles.modalButtonContainer}>
+							<Pressable
+								style={[styles.button, styles.buttonYes]}
+								onPress={handleDelete}
+							>
+								<Text style={styles.textStyle}>Yes</Text>
+							</Pressable>
+							<Pressable
+								style={[styles.button, styles.buttonNo]}
+								onPress={() => setShowDeleteModal(false)}
+							>
+								<Text style={styles.textStyle}>No</Text>
+							</Pressable>
+						</View>
+					</View>
+				</View>
+			</Modal>
+			{/* Save Confirmation Modal */}
+			<Modal
+				animationType="fade"
+				transparent={true}
+				visible={showSaveModal}
+				onRequestClose={closeSaveModal}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalViewS}>
+						<TouchableOpacity
+							onPress={closeSaveModal}
+							style={styles.closeButtonS}
+						>
+							<MaterialCommunityIcons
+								name="window-close"
+								size={24}
+								color="black"
+							/>
+						</TouchableOpacity>
+						<Text style={styles.modalTextS}>Settings have been saved!</Text>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 };
@@ -137,6 +234,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
+		backgroundColor: "white",
 	},
 	header: {
 		flexDirection: "row",
@@ -168,6 +266,11 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		marginBottom: 10,
+	},
+	closeButtonS: {
+		position: "absolute",
+		top: 10,
+		left: 10,
 	},
 	selectedOption: {
 		backgroundColor: "lightblue",
@@ -211,16 +314,87 @@ const styles = StyleSheet.create({
 		marginRight: 5,
 	},
 	saveButton: {
-		backgroundColor: "#08BDBD",
-		borderRadius: 24,
-		paddingVertical: 12,
-		alignItems: "center",
+		// backgroundColor: "#08BDBD",
+		// borderRadius: 24,
+		// paddingVertical: 12,
+		// alignItems: "center",
 		marginTop: 32,
 	},
 	saveButtonText: {
 		fontSize: 16,
 		fontWeight: "bold",
 		color: "white",
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0,0,0,0.5)",
+	},
+	modalView: {
+		width: 300,
+		backgroundColor: "white",
+		borderRadius: 10,
+		padding: 20,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalViewS: {
+		width: 300,
+		backgroundColor: "white",
+		borderRadius: 10,
+		padding: 40,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalTextS: {
+		fontSize: 20,
+		textAlign: "center",
+		marginBottom: 15,
+		fontWeight: "bold",
+	},
+	modalText: {
+		fontSize: 16,
+		textAlign: "center",
+		marginBottom: 15,
+		fontWeight: "bold",
+	},
+	modalButtonContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		width: "100%",
+	},
+	button: {
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: "45%",
+		alignItems: "center",
+	},
+	buttonYes: {
+		backgroundColor: colors.primary,
+	},
+	buttonNo: {
+		backgroundColor: colors.secondary,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 });
 

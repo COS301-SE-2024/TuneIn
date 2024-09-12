@@ -354,7 +354,7 @@ const Home: React.FC = () => {
 				{loading ? (
 					<ActivityIndicator
 						size={60}
-						color={colors.backgroundColor}
+						// color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
 				) : (
@@ -410,6 +410,7 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		backgroundColor: "white",
 	},
 	scrollViewContent: {
 		paddingTop: 40,

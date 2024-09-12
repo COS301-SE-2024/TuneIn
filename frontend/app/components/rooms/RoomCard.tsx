@@ -46,6 +46,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
 				source={{ uri: imageUrl }}
 				style={styles.imageBackground}
 				imageStyle={styles.imageBackgroundStyle}
+				testID="imageBackground"
 			>
 				<View style={styles.overlay} />
 				<View style={styles.textContainer}>
