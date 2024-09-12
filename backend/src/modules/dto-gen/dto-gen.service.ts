@@ -347,6 +347,10 @@ export class DtoGenService {
 			where: { room_id: room.room_id },
 		});
 
+		const childrenRooms = await this.prisma.child_room.findMany({
+			where: { parent_room_id: room.room_id },
+		});
+
 		const result: RoomDto = {
 			creator: new UserDto(),
 			roomID: room.room_id,
@@ -389,6 +393,10 @@ export class DtoGenService {
 			result.start_date = scheduledRoom.start_date;
 			result.end_date = scheduledRoom.end_date;
 			*/
+		}
+
+		if (childrenRooms && childrenRooms !== null) {
+			result.childrenRoomIDs = childrenRooms.map((r) => r.room_id);
 		}
 
 		//participant count will be added later
