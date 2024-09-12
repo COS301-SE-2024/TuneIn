@@ -23,18 +23,13 @@ import { Room } from "../../models/Room";
 import { Friend } from "../../models/friend";
 import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
-import Miniplayer from "../../components/home/miniplayer";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
-import axios, { AxiosResponse } from "axios";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import TopNavBar from "../../components/TopNavBar";
-import { useAPI } from "../../APIContext";
-import { UserDto } from "../../../api";
-import { RequiredError } from "../../../api/base";
 
 // interface UserData {
 // 	username: string;

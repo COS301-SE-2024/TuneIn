@@ -12,8 +12,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { RoomDetailsProps } from "../../models/roomdetails";
-import { createRoom } from "../../services/RoomService"; // Import createRoom function
-import CyanButton from "../../components/CyanButton";
+import { createRoom } from "../../services/RoomService";
 import { colors } from "../../styles/colors";
 import CreateButton from "../../components/CreateButton";
 

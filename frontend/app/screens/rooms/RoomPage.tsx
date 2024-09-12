@@ -3,7 +3,6 @@ import React, {
 	useState,
 	useRef,
 	useCallback,
-	memo,
 	useContext,
 } from "react";
 import {
@@ -19,22 +18,16 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
-import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DatePicker";
 import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
-import { ObjectConfig } from "react-native-flying-objects";
-import EmojiPicker, {
-	EmojiPickerRef,
-} from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
 
@@ -47,7 +40,6 @@ interface RoomPageProps {
 const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -88,11 +80,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-		null,
-	);
 	const [isSending, setIsSending] = useState(false);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
@@ -101,21 +88,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
-	};
-
-	//Emoji picker
-	const [object, setObject] = useState<ObjectConfig[]>([]);
-	const emojiPickerRef = useRef<EmojiPickerRef>(null);
-
-	const handleSelectEmoji = (emoji: string) => {
-		setObject((prev) => [
-			...prev,
-			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
-		]);
-	};
-
-	const passEmojiToTextField = (emoji: string) => {
-		emojiPickerRef.current?.passEmojiToTextField(emoji);
 	};
 
 	const checkBookmark = useCallback(async () => {
@@ -482,28 +454,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		}
 	};
 
-	const toggleChat = () => {
-		Animated.timing(animatedHeight, {
-			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
-			duration: 300,
-			easing: Easing.ease,
-			useNativeDriver: false,
-		}).start();
-		setChatExpanded(!isChatExpanded);
-	};
-
-	const navigateToPlaylist = () => {
-		router.navigate({
-			pathname: "/screens/rooms/Playlist",
-			params: {
-				queue: JSON.stringify(queue),
-				currentTrackIndex,
-				Room_id: roomID,
-				mine: roomData.mine,
-			},
-		});
-	};
-
 	const handleViewParticipants = () => {
 		router.navigate("screens/rooms/ParticipantsPage"); // Change this to the correct page for participants
 	};
@@ -555,25 +505,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
 	}, [readyToJoinRoom, joined, roomID]);
-
-	const sendMessage = () => {
-		if (isSending) return;
-		setIsSending(true);
-		live.sendLiveChatMessage(message, setIsSending);
-		setMessage("");
-	};
-
-	const exampleTrack: SongRoomWidget = {
-		name: "Song Title",
-		artists: [{ name: "Artist Name" }],
-		album: {
-			images: [
-				{
-					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
-				},
-			],
-		},
-	};
 
 	return (
 		<View style={styles.container}>
@@ -646,14 +577,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						))}
 					</Text>
 				</View>
-				{/* <SongRoomWidget
-					songName="Eternal Sunshine"
-					artist="Ariana Grande"
-					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
-					progress={0.5}
-					time1="1:30"
-					time2="3:00"
-				/> */}
 
 				{roomData.mine ? (
 					<View style={styles.controls}>

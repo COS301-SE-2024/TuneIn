@@ -61,7 +61,7 @@ const EditRoom: React.FC = () => {
 
 		loadRoomDetails();
 		console.log(roomDetails);
-	}, []);
+	}, [roomData, roomDetails]);
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {

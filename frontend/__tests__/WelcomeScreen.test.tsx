@@ -1,6 +1,5 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import { Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import WelcomeScreen from "../app/screens/WelcomeScreen"; // Update this path accordingly
 
@@ -24,7 +23,7 @@ describe("WelcomeScreen", () => {
 	});
 
 	it("should render correctly", () => {
-		const { getByText, getByTestId } = render(<WelcomeScreen />);
+		const { getByText } = render(<WelcomeScreen />);
 
 		// Check if the buttons are rendered
 		expect(getByText("Login")).toBeTruthy();

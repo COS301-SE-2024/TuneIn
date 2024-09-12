@@ -18,7 +18,6 @@ import AuthManagement from "../../services/AuthManagement";
 
 const AnalyticsPage: React.FC = () => {
 	const router = useRouter();
-	const [, setActiveButton] = useState("Day");
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [keymetrics, setKeyMetrics] = useState<{
 		unique_visitors: {

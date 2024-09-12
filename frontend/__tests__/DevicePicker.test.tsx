@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import DevicePicker from "../app/components/DevicePicker"; // Adjust the path to your component
+import DevicePicker from "../app/components/rooms/DevicePicker";
 import { useSpotifyDevices } from "../app/hooks/useSpotifyDevices";
 import * as spotifyAuth from "../app/services/SpotifyAuth";
 
