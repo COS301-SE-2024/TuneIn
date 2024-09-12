@@ -8,8 +8,6 @@ import {
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
-	Switch,
-	ScrollView,
 	FlatList,
 } from "react-native";
 import { useNavigation } from "expo-router";
@@ -22,11 +20,10 @@ import { User } from "../models/user";
 import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
-import Dropdown from "../components/Dropdown";
 import { SearchHistoryDto } from "../models/SearchHistoryDto";
-import ToggleButton from "../components/ToggleButton";
 import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../components/SkeletonUserItem";
+import FilterBottomSheet from "../components/FilterBottomSheet";
 
 type SearchResult = {
 	id: string;
@@ -152,6 +149,7 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
+		console.log("Selected Genre: " + selectedGenre);
 		const getRecommendations = async () => {
 			console.log("Getting recommendations", filter);
 			setLoading(true);
@@ -271,6 +269,7 @@ const Search: React.FC = () => {
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
+		console.log("handle search genre: " + selectedGenre);
 		const advanced = isAdvancedSearch();
 		setDropdownVisible(false);
 		setLoading(true);
@@ -362,26 +361,28 @@ const Search: React.FC = () => {
 							},
 						});
 
-						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						console.log("Advance Room Search: " + JSON.stringify(response));
+						const roomResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: "room",
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}));
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+									language: item.language,
+									roomSize: item.participant_count,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+								},
+							}),
+						);
 
-						setResults(results);
+						setResults(roomResults);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/rooms?q=${sh}`,
@@ -432,19 +433,22 @@ const Search: React.FC = () => {
 								Authorization: `Bearer ${token}`,
 							},
 						});
-						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}));
-						setResults(results);
+
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 						// setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
@@ -456,19 +460,21 @@ const Search: React.FC = () => {
 							},
 						);
 						// console.log("Search: " + JSON.stringify(response.data));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.userID,
-							type: "user",
-							name: item.username,
-							userData: {
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
 								id: item.userID,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-								followers: item.followers.data,
-							},
-						}));
-						setResults(results);
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 					}
 				}
 			}
@@ -650,26 +656,7 @@ const Search: React.FC = () => {
 		prevFilterRef.current = filter;
 	}, [filter]);
 
-	const getGenres = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				// console.log("Genre data" + response.data);
-				genres = response.data;
-			}
-		} catch (error) {
-			console.error("Error fetching genres:", error);
-		}
-	};
-
 	useEffect(() => {
-		getGenres();
 		getRoomHistory();
 	}, []);
 
@@ -761,125 +748,37 @@ const Search: React.FC = () => {
 					onPress={handleToggleMoreFilters}
 					testID="toggle-filters-button"
 				>
-					<Text style={styles.filterText}>
-						{showMoreFilters ? "View Less Filters" : "View More Filters"}
-					</Text>
+					<Text style={styles.filterText}>{"View More Filters"}</Text>
 				</TouchableOpacity>
 			</View>
 
-			{(!filter ||
-				(filter === "user" && showMoreFilters) ||
-				(filter === "room" && showMoreFilters)) && (
-				<>
-					{(filter === "user" || !filter) && (
-						<View style={styles.additionalFilters}>
-							{showMoreFilters && (
-								<View style={styles.includeSection}>
-									<Text style={styles.includeHeader}>Search by:</Text>
-									<View style={styles.searchBy}>
-										<ToggleButton
-											label="Minimum Followers"
-											value={minFollowers}
-											onValueChange={setMinFollowers}
-											testID="minFol-btn"
-										/>
-										<ToggleButton
-											label="Minimum Following"
-											value={maxFollowers}
-											onValueChange={setMaxFollowers}
-											testID="maxFl-btn"
-										/>
-									</View>
-								</View>
-							)}
-						</View>
-					)}
-
-					{(filter === "room" || !filter) && (
-						<ScrollView style={styles.additionalFilters}>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Search by:</Text>
-								<View style={styles.searchBy}>
-									<ToggleButton
-										label="Host"
-										testID="host-toggle"
-										value={host}
-										onValueChange={setHost}
-									/>
-									<ToggleButton
-										label="Room Count"
-										testID="room-count-toggle"
-										value={roomCount}
-										onValueChange={setRoomCount}
-									/>
-								</View>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Include:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Explicit</Text>
-									<Switch
-										testID="explicit-switch"
-										value={explicit}
-										onValueChange={setExplicit}
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>NSFW</Text>
-									<Switch
-										testID="nsfw-switch"
-										value={nsfw}
-										onValueChange={setNsfw}
-									/>
-								</View>
-							</View>
-							<View style={styles.dropContainer}>
-								<Dropdown
-									options={genres}
-									placeholder="Select Genre"
-									onSelect={handleSelectGenre}
-									selectedOption={selectedGenre}
-									setSelectedOption={setSelectedGenre}
-								/>
-								<Dropdown
-									options={languages}
-									placeholder="Select Language"
-									onSelect={handleSelectLanguage}
-									selectedOption={selectedLanguage}
-									setSelectedOption={setSelectedLanguage}
-								/>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Other:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch
-										value={temporary}
-										onValueChange={setTemporary}
-										testID="temp-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Private</Text>
-									<Switch
-										value={isPrivate}
-										onValueChange={setIsPrivate}
-										testID="priv-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch
-										value={scheduled}
-										onValueChange={setScheduled}
-										testID="scheduled-switch"
-									/>
-								</View>
-							</View>
-						</ScrollView>
-					)}
-				</>
-			)}
+			<FilterBottomSheet
+				filter={filter}
+				explicit={explicit}
+				nsfw={nsfw}
+				temporary={temporary}
+				isPrivate={isPrivate}
+				scheduled={scheduled}
+				showMoreFilters={showMoreFilters}
+				host={host}
+				roomCount={roomCount}
+				maxFollowers={maxFollowers}
+				minFollowers={minFollowers}
+				selectedGenre={selectedGenre}
+				selectedLanguage={selectedLanguage}
+				setExplicit={setExplicit}
+				setNsfw={setNsfw}
+				setTemporary={setTemporary}
+				setIsPrivate={setIsPrivate}
+				setScheduled={setScheduled}
+				setHost={setHost}
+				setRoomCount={setRoomCount}
+				setMaxFollowers={setMaxFollowers}
+				setMinFollowers={setMinFollowers}
+				setSelectedGenre={setSelectedGenre}
+				setSelectedLanguage={setSelectedLanguage}
+				setShowMoreFilters={setShowMoreFilters}
+			/>
 
 			{loading ? (
 				!showMoreFilters && (

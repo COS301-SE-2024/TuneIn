@@ -2,9 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Playlist from "../app/screens/rooms/Playlist";
-import { Track } from "../app/models/Track";
-import SongList from "../app/components/SongList";
-import CreateButton from "../app/components/CreateButton";
 
 // Mock the useRouter and useLocalSearchParams hooks
 jest.mock("expo-router", () => ({

@@ -65,6 +65,7 @@
     "react-native-elements": "^3.4.3",
     "react-native-flying-objects": "^1.2.0",
     "react-native-gesture-handler": "~2.16.1",
+    "react-native-get-random-values": "^1.11.0",
     "react-native-localhost": "^1.0.0",
     "react-native-modal": "^13.0.1",
     "react-native-pager-view": "6.3.0",
@@ -74,13 +75,15 @@
     "react-native-screens": "3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-tab-view": "^3.5.2",
+    "react-native-url-polyfill": "^2.0.0",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
     "rn-emoji-picker": "^1.1.6",
     "socket.io-client": "^4.7.5",
     "stream-browserify": "^3.0.0",
-    "url": "^0.11.3"
+    "url": "^0.11.3",
+    "web-streams-polyfill": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -23,7 +23,6 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 
-	// console.log("roomCard", roomCard);
 	const navigateToEditRoom = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
@@ -42,7 +41,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 
 	const renderSongInfo = () => {
 		if (!roomCard.songName || !roomCard.artistName) {
-			return <Text style={styles.nowPlaying}>No song playing</Text>;
+			return <Text style={styles.nowPlaying}></Text>;
 		}
 
 		return (
@@ -59,8 +58,8 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 		);
 	};
 
-	const truncateText = (text: string, maxLength: number) => {
-		if (text.length > maxLength) {
+	const truncateText = (text: string | undefined, maxLength: number) => {
+		if (text && text.length > maxLength) {
 			return text.substring(0, maxLength - 3) + "...";
 		}
 		return text;
@@ -103,7 +102,9 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 										source={{ uri: roomCard.userProfile }}
 										style={styles.userAvatar}
 									/>
-									<Text style={styles.username}>{roomCard.username}</Text>
+									<Text style={styles.username}>
+										{truncateText(roomCard.username, 13)}
+									</Text>
 								</View>
 								<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
 							</View>

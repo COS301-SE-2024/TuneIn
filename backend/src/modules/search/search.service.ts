@@ -165,7 +165,11 @@ export class SearchService {
 			// console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -354,10 +358,13 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
 			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
-			console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -501,9 +508,10 @@ export class SearchService {
 		// LIMIT 5;`;
 		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
 		SELECT *,
-		LEVENSHTEIN(username, ${q}) AS distance
+		LEAST(levenshtein(full_name, ${q}), levenshtein(username, ${q})) AS distance
 		FROM users
-		WHERE similarity(username, ${q}) > 0.2
+		WHERE similarity(full_name, ${q}) > 0.2
+		OR similarity(username, ${q}) > 0.2
 		ORDER BY distance ASC
 		LIMIT 5;`;
 
@@ -517,7 +525,11 @@ export class SearchService {
 			console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -649,7 +661,11 @@ export class SearchService {
 			// console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -779,12 +795,6 @@ export class SearchService {
 
 		return [new SearchHistoryDto()];
 	}
-
-	/*
-	async searchGenres(q: string): Promise<string[]> {
-		
-	}
-	*/
 
 	getQueryParams(url: string): {
 		pathSegment: string | null;

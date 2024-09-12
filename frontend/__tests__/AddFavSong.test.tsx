@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import AddFavSong from "../app/components/AddFavSong"; // Update the path accordingly
 import { useSpotifySearch } from "../app/hooks/useSpotifySearch";
 

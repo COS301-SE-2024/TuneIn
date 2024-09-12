@@ -37,6 +37,8 @@ const EditRoom: React.FC = () => {
 		roomSize: 50,
 		isExplicit: false,
 		isNsfw: false,
+		start_date: new Date(), // Use ISO string for consistency
+		end_date: new Date(), // Use ISO string for consistency
 	});
 
 	const [image, setImage] = useState<string | null>(null);
