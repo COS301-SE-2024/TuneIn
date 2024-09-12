@@ -170,14 +170,15 @@ export class DmUsersService {
 	}
 
 	disconnectChat(socketId: string) {
-		const u = this.connectedUsers.get(socketId);
-		if (!u || u === undefined) {
-			throw new Error("Connected user does not exist");
-		}
-		this.connectedUsers.set(socketId, {
-			user: u.user,
-			participant: null,
-			chatID: null,
-		});
+		// const u = this.connectedUsers.get(socketId);
+		// if (!u || u === undefined) {
+		// 	throw new Error("Connected user does not exist");
+		// }
+		// this.connectedUsers.set(socketId, {
+		// 	user: u.user,
+		// 	participant: null,
+		// 	chatID: null,
+		// });
+		console.log(socketId);
 	}
 }

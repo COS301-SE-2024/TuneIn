@@ -24,13 +24,15 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 
 	const changeText = (val: any) => {
 		setText(val);
-		onValueChange(val);
+		// onValueChange(val);
 	};
 
 	useEffect(() => {
 		if (isSelected && inputRef.current) {
 			inputRef.current.focus();
 		}
+		console.log("Toggle call with text: " + text);
+		onValueChange(text);
 	}, [isSelected]);
 
 	return (
@@ -47,6 +49,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 					ref={inputRef}
 					style={styles.input}
 					value={text}
+					onBlur={() => setIsSelected(false)}
 					onChangeText={changeText}
 					placeholder={`Enter ${label}`}
 					placeholderTextColor="#fff"

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import RoomDetails from "../app/screens/rooms/RoomDetails"; // Adjust the import path accordingly
 import { useRouter, useLocalSearchParams } from "expo-router"; // Import both hooks
 // import * as ImagePicker from "expo-image-picker";

@@ -43,7 +43,7 @@ const RoomDropdown: React.FC<RoomDropdownProps> = ({
 		setRooms(initialRooms);
 		getRoom();
 		onRoomPick(selectedRoom);
-	}, [initialRooms]);
+	}, [initialRooms, onRoomPick, selectedRoom]);
 
 	const handleRoomSelect = async (room: string) => {
 		setSelectedRoom(room);

@@ -2,8 +2,6 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import AnalyticsPage from "../app/screens/analytics/AnalyticsPage"; // Update the import path accordingly
-import AuthManagement from "../app/services/AuthManagement";
-import { API_BASE_URL } from "../app/services/Utils";
 
 // Mock the useRouter hook
 jest.mock("expo-router", () => ({
