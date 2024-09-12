@@ -11,8 +11,11 @@ import RoomDetails, {
 	RoomDetailsProps,
 } from "../../components/rooms/RoomDetailsComponent";
 import { useRouter } from "expo-router";
+// import { colors } from "../../styles/colors";
 
 const roomDetails: RoomDetailsProps = {
+	image:
+		"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
 	name: "Chill Vibes",
 	description: "A place to relax and unwind with great music.",
 	genre: "Jazz",
@@ -26,7 +29,7 @@ const RoomInfoScreen = () => {
 	const router = useRouter();
 
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
+		<ScrollView contentContainerStyle={styles.container} testID="room-details">
 			<View style={styles.header}>
 				<TouchableOpacity
 					onPress={() => router.back()}
@@ -47,7 +50,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	header: {
-		backgroundColor: "#E8EBF2",
+		// backgroundColor: colors.primary,
 		padding: 16,
 		flexDirection: "row",
 		alignItems: "center",

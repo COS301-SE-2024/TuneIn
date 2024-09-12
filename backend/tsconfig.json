@@ -22,8 +22,8 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "strictFunctionTypes": true,
     "useUnknownInCatchVariables": false,
     "noUncheckedIndexedAccess": true,
@@ -33,5 +33,6 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowJs": true,
+    "noEmitOnError": true,
   }
 }

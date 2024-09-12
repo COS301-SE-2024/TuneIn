@@ -7,6 +7,8 @@ import RoomDetails, {
 describe("RoomDetails component", () => {
 	it("renders correctly with provided props", () => {
 		const props: RoomDetailsProps = {
+			image:
+				"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
 			name: "Living Room",
 			description: "A cozy place to relax and enjoy music.",
 			genre: "Electronic",
@@ -39,6 +41,8 @@ describe("RoomDetails component", () => {
 
 	it("renders correctly when NSFW is true", () => {
 		const props: RoomDetailsProps = {
+			image:
+				"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
 			name: "Private Room",
 			description: "A private room with restricted content.",
 			genre: "Adult",

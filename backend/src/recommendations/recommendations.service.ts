@@ -36,6 +36,7 @@ export class RecommendationsService {
 			if (songs.some((song) => !song)) {
 				throw new Error("Invalid song in playlist");
 			}
+			console.log(playlistName);
 		}
 
 		this.playlists = playlists;

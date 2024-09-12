@@ -4,16 +4,18 @@ import { Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 type ToggleButtonProps = {
 	label: string;
 	testID?: string;
+	value: string;
 	onValueChange: (value: string) => void;
 };
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({
 	label,
 	testID,
+	value,
 	onValueChange,
 }) => {
 	const [isSelected, setIsSelected] = useState(false);
-	const [text, setText] = useState("");
+	const [text, setText] = useState(value);
 	const inputRef = useRef<TextInput>(null);
 
 	const handleClick = () => {

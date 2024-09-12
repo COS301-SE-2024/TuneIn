@@ -8,14 +8,12 @@ import {
 	UseGuards,
 	Request,
 	Param,
-	RawBodyRequest,
 } from "@nestjs/common";
 import { UserListeningStatsDto, UsersService } from "./users.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiBody,
-	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
@@ -27,8 +25,6 @@ import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { DbUtilsService } from "../db-utils/db-utils.service";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
@@ -38,8 +34,6 @@ import { DirectMessageDto } from "./dto/dm.dto";
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
 		private readonly auth: AuthService,
 	) {}
 

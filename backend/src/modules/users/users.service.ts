@@ -9,7 +9,7 @@ import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
-import { IsNumber, IsObject, ValidateNested } from "class-validator";
+import { IsNumber } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
@@ -208,7 +208,7 @@ export class UsersService {
 				.filter((name) => !newGenreNames.includes(name));
 
 			// Step 4: Delete removed genres
-			const resp = await prisma.favorite_genres.deleteMany({
+			await prisma.favorite_genres.deleteMany({
 				where: {
 					user_id: userId,
 					genre_id: {
@@ -220,7 +220,7 @@ export class UsersService {
 			});
 
 			// Step 5: Insert new genres
-			const resp2 = await prisma.favorite_genres.createMany({
+			await prisma.favorite_genres.createMany({
 				data: genresToAdd.map((name) => ({
 					user_id: userId,
 					genre_id: genreMap.get(name)!,
@@ -292,7 +292,7 @@ export class UsersService {
 				.filter((id) => !newSongIds.includes(id));
 
 			// Step 4: Delete removed songs
-			const resp = await prisma.favorite_songs.deleteMany({
+			await prisma.favorite_songs.deleteMany({
 				where: {
 					user_id: userId,
 					song_id: {
@@ -304,7 +304,7 @@ export class UsersService {
 			});
 
 			// Step 5: Insert new songs
-			const resp2 = await prisma.favorite_songs.createMany({
+			await prisma.favorite_songs.createMany({
 				data: songsToAdd.map((id) => ({
 					user_id: userId,
 					song_id: songMap.get(id)!,
@@ -1264,10 +1264,7 @@ export class UsersService {
 		return result;
 	}
 
-	async sendMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//send message to user
 		try {
 			const newMessage = await this.prisma.message.create({
@@ -1453,10 +1450,7 @@ export class UsersService {
 		}
 	}
 
-	async deleteMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<boolean> {
+	async deleteMessage(message: DirectMessageDto): Promise<boolean> {
 		//delete a message
 		try {
 			await this.prisma.message.delete({
@@ -1469,10 +1463,7 @@ export class UsersService {
 		}
 	}
 
-	async editMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async editMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//edit a message
 		try {
 			const updatedMessage:
@@ -1616,6 +1607,7 @@ export class UsersService {
 	}
 
 	async getBlockedUsers(userID: string): Promise<UserDto[]> {
+		console.log("Getting blocked users for user " + userID);
 		if (true) {
 			//if user does not exist
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
