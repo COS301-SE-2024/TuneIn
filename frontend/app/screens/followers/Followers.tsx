@@ -1,36 +1,37 @@
 import React, { useState, useEffect } from "react";
-import {
-	View,
-	Text,
-	TextInput,
-	FlatList,
-	StyleSheet,
-	TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import { API_BASE_URL } from "../../services/Utils";
+import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
-	const [requests, setRequests] = useState<Friend[]>([]);
-	const [filteredRequests, setFilteredRequests] = useState<Friend[]>([]);
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
-
+	const user = useLocalSearchParams();
 	useEffect(() => {
 		const fetchRequestsAndFollowers = async () => {
 			try {
-				const [requestsResponse, followersResponse] = await Promise.all([
-					axios.get(`${API_BASE_URL}/users/requests`),
-					axios.get(`${API_BASE_URL}/users/followers`),
-				]);
-				setRequests(requestsResponse.data);
-				setFollowers(followersResponse.data);
-				setFilteredRequests(requestsResponse.data);
-				setFilteredFollowers(followersResponse.data);
+				const token = await auth.getToken(); // Await the token to resolve the promise
+				const followersResponse = await axios.get<Friend[]>(
+					`${API_BASE_URL}/users/followers`,
+					{
+						headers: { Authorization: `Bearer ${token}` },
+					},
+				);
+				const mappedFollowers = followersResponse.data.map(
+					(user: any): Friend => ({
+						profile_picture_url: user.profile_picture_url,
+						username: user.username,
+						friend_id: user.userID,
+						relationship: user.relationship,
+					}),
+				);
+				setFollowers(mappedFollowers);
+				setFilteredFollowers(mappedFollowers);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
@@ -41,42 +42,68 @@ const Followers: React.FC = () => {
 
 	useEffect(() => {
 		if (search === "") {
-			setFilteredRequests(requests);
 			setFilteredFollowers(followers);
 		} else {
-			setFilteredRequests(
-				requests.filter((request) =>
-					request.username.toLowerCase().includes(search.toLowerCase()),
-				),
-			);
 			setFilteredFollowers(
 				followers.filter((follower) =>
 					follower.username.toLowerCase().includes(search.toLowerCase()),
 				),
 			);
 		}
-	}, [search, requests, followers]);
-
-	const renderRequest = ({ item }: { item: Friend }) => (
-		<FriendCard
-			profile_picture_url={item.profile_picture_url}
-			username={item.username}
-			friend={item}
-			user="current_user" // Replace with actual current user info
-		/>
-	);
+	}, [search, followers]);
+	const handleFollow = async (friend: Friend) => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const action = friend.relationship === "mutual" ? "unfollow" : "follow";
+				const response = await fetch(
+					`${API_BASE_URL}/users/${friend.username}/${action}`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				// change relationship status of the user
+				if (response.ok) {
+					const updatedFollowers = followers.map((follower) => {
+						if (follower.username === friend.username) {
+							return {
+								...follower,
+								relationship:
+									friend.relationship === "mutual" ? "follower" : "mutual",
+							};
+						}
+						return follower;
+					});
+					setFollowers(updatedFollowers);
+					setFilteredFollowers(updatedFollowers);
+				} else {
+					console.error("Error following user:", response);
+				}
+			} catch (error) {
+				console.error("Error following user:", error);
+			}
+		}
+	};
 
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username} // Replace with actual current user info
+			cardType={
+				item.relationship === "mutual" || item.relationship === "following"
+					? "following"
+					: item.relationship === "friend" || item.relationship === "pending"
+						? "friend-follow"
+						: "follower"
+			}
+			handle={handleFollow}
 		/>
 	);
-
-	const requestsToShow = filteredRequests.slice(0, 6);
-	const remainingRequests = filteredRequests.length - requestsToShow.length;
 
 	return (
 		<View style={styles.container}>
@@ -86,7 +113,7 @@ const Followers: React.FC = () => {
 				value={search}
 				onChangeText={setSearch}
 			/>
-			<View style={styles.requestsSection}>
+			{/* <View style={styles.requestsSection}>
 				<Text style={styles.requestsTitle}>Requests</Text>
 				{requestsToShow.length > 0 ? (
 					<>
@@ -108,9 +135,9 @@ const Followers: React.FC = () => {
 				) : (
 					<Text style={styles.noRequestsText}>No requests available.</Text>
 				)}
-			</View>
+			</View> */}
 			<View style={styles.followersSection}>
-				<Text style={styles.followersTitle}>Followers</Text>
+				{/* <Text style={styles.followersTitle}>Followers</Text> */}
 				{filteredFollowers.length > 0 ? (
 					<FlatList
 						data={filteredFollowers}
