@@ -209,12 +209,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const createSocket = () => {
 		socketRef.current = createSocketConnection();
 	};
-	const getSocket = (): Socket => {
-		if (socketRef.current === null) {
+	const getSocket = (): Socket | null => {
+		if (socketRef.current === null && currentUser) {
 			createSocket();
 		}
 		if (socketRef.current === null) {
-			throw new Error("Socket connection not initialized");
+			// throw new Error("Socket connection not initialized");
+			console.error("Socket connection not initialized");
 		}
 		return socketRef.current;
 	};
@@ -722,43 +723,46 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return Promise.resolve();
 		}
 		const socket = getSocket();
-		const startTime = Date.now();
-		setPingSent(true);
-		socket.volatile.emit("ping", null, (hitTime: string) => {
-			console.log("Ping hit time:", hitTime);
-			console.log("Ping sent successfully.");
-			const roundTripTime = Date.now() - startTime;
-			console.log(`Ping round-trip time: ${roundTripTime}ms`);
-			setPingSent(false);
-			setBackendLatency(roundTripTime);
-		});
-
-		return new Promise<void>((resolve, reject) => {
+		if (socket !== null) {
 			const startTime = Date.now();
 			setPingSent(true);
+			socket.volatile.emit("ping", null, (hitTime: string) => {
+				console.log("Ping hit time:", hitTime);
+				console.log("Ping sent successfully.");
+				const roundTripTime = Date.now() - startTime;
+				console.log(`Ping round-trip time: ${roundTripTime}ms`);
+				setPingSent(false);
+				setBackendLatency(roundTripTime);
+			});
 
-			// Set up a timeout
-			// const timeoutId = setTimeout(() => {
-			// 	pingSent = false;
-			// 	console.log("Ping timed out.");
-			// 	reject(new Error("Ping timed out"));
-			// }, timeout);
+			return new Promise<void>((resolve, reject) => {
+				const startTime = Date.now();
+				setPingSent(true);
 
-			// Send the ping message with a callback
-			// socket.volatile.emit("ping", null, () => {
-			// 	console.log("Ping sent successfully.");
-			// 	clearTimeout(timeoutId);
-			// 	const roundTripTime = Date.now() - startTime;
-			// 	console.log(`Ping round-trip time: ${roundTripTime}ms`);
-			// 	pingSent = false;
-			// 	backendLatency = roundTripTime;
-			// 	resolve();
-			// });
-		}).catch((error) => {
-			console.error("Ping failed:", error.message);
-			// Optionally, retry sending the ping here
-			throw error; // Re-throw the error to maintain the Promise<void> type
-		});
+				// Set up a timeout
+				// const timeoutId = setTimeout(() => {
+				// 	pingSent = false;
+				// 	console.log("Ping timed out.");
+				// 	reject(new Error("Ping timed out"));
+				// }, timeout);
+
+				// Send the ping message with a callback
+				// socket.volatile.emit("ping", null, () => {
+				// 	console.log("Ping sent successfully.");
+				// 	clearTimeout(timeoutId);
+				// 	const roundTripTime = Date.now() - startTime;
+				// 	console.log(`Ping round-trip time: ${roundTripTime}ms`);
+				// 	pingSent = false;
+				// 	backendLatency = roundTripTime;
+				// 	resolve();
+				// });
+			}).catch((error) => {
+				console.error("Ping failed:", error.message);
+				// Optionally, retry sending the ping here
+				throw error; // Re-throw the error to maintain the Promise<void> type
+			});
+		}
+		return Promise.resolve();
 	};
 
 	const getTimeOffset = () => {
