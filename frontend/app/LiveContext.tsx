@@ -1388,6 +1388,26 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 	};
 
+	let t: string | null = tokenState.token;
+	if (t === null) {
+		auth
+			.getToken()
+			.then((token) => {
+				t = token;
+				if (t !== null && !spotifyTokens) {
+					spotifyAuth.getSpotifyTokens().then((tokens) => {
+						if (tokens) {
+							setSpotifyTokens(tokens);
+						}
+						console.log("Spotify tokens fetched:", tokens);
+					});
+				}
+			})
+			.catch((error) => {
+				console.error("Error getting token:", error);
+			});
+	}
+	// on mount, initialize the socket
 	useEffect(() => {
 		socketRef.current = createSocketConnection();
 		setMounted(true);
