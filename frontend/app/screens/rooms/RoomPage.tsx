@@ -27,7 +27,6 @@ import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
 import DevicePicker from "../../components/DevicePicker";
 import { useLive } from "../../LiveContext";
@@ -39,10 +38,13 @@ import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
+import bookmarks from "../../services/BookmarkService";
+import { useAPI } from "../../APIContext";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const RoomPage = () => {
+	const { rooms } = useAPI();
 	const {
 		roomControls,
 		roomPlaying,
@@ -52,6 +54,7 @@ const RoomPage = () => {
 		currentSong,
 		roomQueue,
 		roomMessages,
+		userBookmarks,
 	} = useLive();
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -95,7 +98,6 @@ const RoomPage = () => {
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [isSending, setIsSending] = useState(false);
-	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
@@ -111,47 +113,30 @@ const RoomPage = () => {
 		emojiPickerRef.current?.passEmojiToTextField(emoji);
 	};
 
-	const checkBookmark = useCallback(async () => {
-		try {
-			const token = await auth.getToken();
-			const isBookmarked = await bookmarker.checkBookmark(
-				token as string,
-				String(roomID),
-			);
-			setIsBookmarked(isBookmarked ?? false); // Use false as the default value if isBookmarked is undefined
-		} catch (error) {
-			console.error("Error checking bookmark:", error);
-		}
-	}, [roomID, bookmarker]);
-
-	checkBookmark();
-
 	const handleBookmark = async () => {
-		// make a request to the backend to check if the room is bookmarked
-		// if it is bookmarked, set isBookmarked to true
-		setIsBookmarked(!isBookmarked);
-		const token = await auth.getToken();
-
-		try {
-			const handleBookmark = await bookmarker.handleBookmark(
-				token as string,
-				String(roomID),
-				isBookmarked,
-			);
-			if (handleBookmark) {
-				Alert.alert(
-					"Success",
-					`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
-					[
-						{
-							text: "OK",
-							onPress: () => console.log("OK Pressed"),
-						},
-					],
-				);
-			}
-		} catch (error) {
-			console.error("Error:", error);
+		const previouslyBookmarked = isBookmarked;
+		if (previouslyBookmarked) {
+			// Unbookmark the room
+			bookmarks.unbookmarkRoom(rooms, roomID).then(() => {
+				Alert.alert("Success", `Room bookmark has been removed`, [
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]);
+			});
+			setIsBookmarked(false);
+		} else {
+			// Bookmark the room
+			bookmarks.bookmarkRoom(rooms, roomID).then(() => {
+				Alert.alert("Success", `Room has been bookmarked`, [
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]);
+			});
+			setIsBookmarked(true);
 		}
 	};
 
@@ -288,6 +273,16 @@ const RoomPage = () => {
 		}
 	}, [joined, roomID]);
 
+	// on component mount
+	useEffect(() => {
+		for (let i = 0; i < userBookmarks.length; i++) {
+			if (userBookmarks[i].roomID === roomID) {
+				setIsBookmarked(true);
+				break;
+			}
+		}
+	}, []);
+
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
@@ -392,7 +387,7 @@ const RoomPage = () => {
 							onPress={() => playPauseTrack()}
 						>
 							<FontAwesome5
-								name={isPlaying ? "pause" : "play"}
+								name={roomPlaying ? "pause" : "play"}
 								size={24}
 								color="black"
 							/>
