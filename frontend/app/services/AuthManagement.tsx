@@ -12,7 +12,7 @@ if (!jwtSecretKey) {
 	);
 }
 
-class AuthManagement {
+export class AuthManagement {
 	private static instance: AuthManagement;
 	private token: string | null = null;
 	public tokenSet: boolean = false;
@@ -91,9 +91,6 @@ class AuthManagement {
 			if (await this.checkTokenExpiry()) {
 				await this.refreshAccessToken();
 			}
-
-			console.log("Token:", this.token);
-			console.log("Token expiry:", await this.checkTokenExpiry());
 			return this.token;
 		} catch (error) {
 			console.error("Failed to get token:", error);

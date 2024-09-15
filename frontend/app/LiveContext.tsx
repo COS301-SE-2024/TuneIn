@@ -170,7 +170,14 @@ const LiveContext = createContext<LiveContextType | undefined>(undefined);
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { users, rooms, authenticated, auth, tokenState, getUser } = useAPI();
+	const {
+		users,
+		rooms,
+		authenticated,
+		auth: authAPI,
+		tokenState,
+		getUser,
+	} = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
 	const [userBookmarks, setUserBookmarks] = useState<RoomDto[]>([]);
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
@@ -271,7 +278,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			redirectURI: string,
 		): Promise<SpotifyCallbackResponse> => {
 			try {
-				auth
+				authAPI
 					.spotifyCallback(code, state)
 					.then((sp: AxiosResponse<SpotifyCallbackResponse>) => {
 						if (sp.status === 401) {
@@ -309,7 +316,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 
 			if (authenticated) {
-				auth
+				authAPI
 					.getSpotifyTokens()
 					.then((sp: AxiosResponse<SpotifyTokenPair>) => {
 						if (sp.status === 401) {
@@ -1392,25 +1399,26 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 	};
 
-	let t: string | null = tokenState.token;
-	if (t === null) {
-		auth
-			.getToken()
-			.then((token) => {
-				t = token;
-				if (t !== null && !spotifyTokens) {
-					spotifyAuth.getSpotifyTokens().then((tokens) => {
-						if (tokens) {
-							setSpotifyTokens(tokens);
-						}
-						console.log("Spotify tokens fetched:", tokens);
-					});
-				}
-			})
-			.catch((error) => {
-				console.error("Error getting token:", error);
-			});
-	}
+	// let t: string | null = tokenState.token;
+	// if (t === null) {
+	// 	auth
+	// 		.getToken()
+	// 		.then((token) => {
+	// 			t = token;
+	// 			if (t !== null && !spotifyTokens) {
+	// 				spotifyAuth.getSpotifyTokens().then((tokens) => {
+	// 					if (tokens) {
+	// 						setSpotifyTokens(tokens);
+	// 					}
+	// 					console.log("Spotify tokens fetched:", tokens);
+	// 				});
+	// 			}
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error("Error getting token:", error);
+	// 		});
+	// }
+
 	// on mount, initialize the socket
 	useEffect(() => {
 		socketRef.current = createSocketConnection();
