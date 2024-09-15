@@ -758,6 +758,83 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 	}, []);
 
+	const spotifyAuth: SpotifyAuth = useMemo(
+		() => ({
+			exchangeCodeWithBackend: async (
+				code: string,
+				state: string,
+				redirectURI: string,
+			): Promise<SpotifyCallbackResponse> => {
+				try {
+					authAPI
+						.spotifyCallback(code, state)
+						.then((sp: AxiosResponse<SpotifyCallbackResponse>) => {
+							if (sp.status === 401) {
+								//Unauthorized
+								//Auth header is either missing or invalid
+							} else if (sp.status === 500) {
+								//Internal Server Error
+								//Something went wrong in the backend (unlikely lmao)
+								throw new Error("Internal Server Error");
+							}
+							setSpotifyTokens(sp.data.spotifyTokens);
+							return sp.data;
+						})
+						.catch((error) => {
+							if (error instanceof RequiredError) {
+								// a required field is missing
+								throw new Error("Parameter missing from request to get user");
+							} else {
+								// some other error
+								throw new Error("Error getting user");
+							}
+						});
+				} catch (error) {
+					console.error("Failed to exchange code with backend:", error);
+				}
+				throw new Error(
+					"Something went wrong while exchanging code with backend",
+				);
+			},
+			getSpotifyTokens: async (): Promise<SpotifyTokenPair | null> => {
+				if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
+					if (spotifyTokens.epoch_expiry - Date.now() > 1000 * 60 * 5) {
+						return spotifyTokens;
+					}
+				}
+
+				if (authenticated) {
+					authAPI
+						.getSpotifyTokens()
+						.then((sp: AxiosResponse<SpotifyTokenPair>) => {
+							if (sp.status === 401) {
+								//Unauthorized
+								//Auth header is either missing or invalid
+							} else if (sp.status === 500) {
+								//Internal Server Error
+								//Something went wrong in the backend (unlikely lmao)
+								throw new Error("Internal Server Error");
+							}
+							setSpotifyTokens(sp.data);
+							return sp.data;
+						})
+						.catch((error) => {
+							if (error instanceof RequiredError) {
+								// a required field is missing
+								throw new Error("Parameter missing from request to get user");
+							} else {
+								// some other error
+								throw new Error("Error getting user");
+							}
+						});
+				}
+				console.error("Cannot get Spotify tokens without being authenticated");
+				return null;
+			},
+		}),
+		[authAPI, authenticated, spotifyTokens],
+	);
+
 	const joinRoom = useCallback((roomID: string) => {
 		if (!currentUser) {
 			console.error("User cannot join room without being logged in");
