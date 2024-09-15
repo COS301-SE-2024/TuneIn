@@ -8,7 +8,7 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { SOCKET_EVENTS } from "../common/constants";
+import { SOCKET_EVENTS } from "../../../common/constants";
 import { ChatEventDto } from "./dto/chatevent.dto";
 import { RoomUsersService } from "./roomusers/roomuser.service";
 import { DbUtilsService } from "../modules/db-utils/db-utils.service";

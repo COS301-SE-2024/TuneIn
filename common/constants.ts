@@ -50,7 +50,7 @@ export const SOCKET_EVENTS = {
 
 	//for server responses
 	CONNECTED: "connected",
-	DISONNECTED: "disconnected",
+	DISCONNECTED: "disconnected",
 	ROOM_JOINED: "roomJoined",
 	ROOM_LEFT: "roomLeft",
 	MESSAGE_SENT: "messageSent",

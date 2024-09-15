@@ -39,6 +39,7 @@ import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 import { useAPI } from "./APIContext";
 import { AxiosResponse } from "axios";
 import { RequiredError } from "../api/base";
+import { SOCKET_EVENTS } from "../../common/constants";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -255,7 +256,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
 			};
-			socket.emit("connectUser", JSON.stringify(input));
+			socket.emit(SOCKET_EVENTS.CONNECT, JSON.stringify(input));
 			setSocketHandshakesCompleted((prev) => {
 				return {
 					...prev,
@@ -316,7 +317,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				if (!socketHandshakesCompleted.sentIdentity) {
 					sendIdentity(s);
 				}
-				s.on("connected", (response) => {
+				s.on(SOCKET_EVENTS.CONNECTED, (response) => {
 					console.log("Identity confirmed by server");
 					setSocketHandshakesCompleted((prev) => {
 						return {
@@ -373,27 +374,36 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				mounted &&
 				currentUser !== undefined
 			) {
-				socketRef.current.on("userJoinedRoom", (response: ChatEventDto) => {
-					console.log("SOCKET EVENT: userJoinedRoom", response);
-					const u: UserDto = currentUser;
-					if (
-						response.body &&
-						response.body.sender.userID === currentUser.userID
-					) {
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								roomJoined: true,
-							};
-						});
-					}
-					roomControls.requestLiveChatHistory();
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.USER_JOINED_ROOM,
+					(response: ChatEventDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.USER_JOINED_ROOM}`,
+							response,
+						);
+						const u: UserDto = currentUser;
+						if (
+							response.body &&
+							response.body.sender.userID === currentUser.userID
+						) {
+							setSocketHandshakesCompleted((prev) => {
+								return {
+									...prev,
+									roomJoined: true,
+								};
+							});
+						}
+						roomControls.requestLiveChatHistory();
+					},
+				);
 
 				socketRef.current.on(
-					"liveChatHistory",
+					SOCKET_EVENTS.LIVE_CHAT_HISTORY,
 					(history: LiveChatMessageDto[]) => {
-						console.log("SOCKET EVENT: liveChatHistory", history);
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.LIVE_CHAT_HISTORY}`,
+							history,
+						);
 						const chatHistory = history.map((msg) => ({
 							message: msg,
 							me: msg.sender.userID === currentUser.userID,
@@ -409,41 +419,53 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					},
 				);
 
-				socketRef.current.on("liveMessage", (newMessage: ChatEventDto) => {
-					console.log("SOCKET EVENT: liveMessage", newMessage);
-					if (
-						!socketHandshakesCompleted.roomChatRequested ||
-						!socketHandshakesCompleted.roomChatReceived
-					) {
-						dmControls.requestDirectMessageHistory();
-					}
+				socketRef.current.on(
+					SOCKET_EVENTS.LIVE_MESSAGE,
+					(newMessage: ChatEventDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.LIVE_MESSAGE}`,
+							newMessage,
+						);
+						if (
+							!socketHandshakesCompleted.roomChatRequested ||
+							!socketHandshakesCompleted.roomChatReceived
+						) {
+							dmControls.requestDirectMessageHistory();
+						}
 
-					if (!newMessage.body) {
-						return;
-					}
-					const message = newMessage.body;
-					const me = message.sender.userID === currentUser.userID;
-					if (setRoomMessages) {
-						const messages: LiveMessage[] = [
-							...roomMessages,
-							{ message, me } as LiveMessage,
-						];
-						setRoomMessages(messages);
-					}
-				});
+						if (!newMessage.body) {
+							return;
+						}
+						const message = newMessage.body;
+						const me = message.sender.userID === currentUser.userID;
+						if (setRoomMessages) {
+							const messages: LiveMessage[] = [
+								...roomMessages,
+								{ message, me } as LiveMessage,
+							];
+							setRoomMessages(messages);
+						}
+					},
+				);
 
-				socketRef.current.on("userLeftRoom", (response: ChatEventDto) => {
-					console.log("SOCKET EVENT: userLeftRoom", response);
-					console.log("User left room:", response);
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.USER_LEFT_ROOM,
+					(response: ChatEventDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.USER_LEFT_ROOM}`,
+							response,
+						);
+						console.log("User left room:", response);
+					},
+				);
 
-				socketRef.current.on("error", (response: ChatEventDto) => {
-					console.log("SOCKET EVENT: error", response);
+				socketRef.current.on(SOCKET_EVENTS.ERROR, (response: ChatEventDto) => {
+					console.log(`SOCKET EVENT: ${SOCKET_EVENTS.ERROR}`, response);
 					console.error("Error:", response.errorMessage);
 				});
 
 				socketRef.current.on("connect", () => {
-					console.log("SOCKET EVENT: connect");
+					console.log(`SOCKET EVENT: connect`);
 					if (socketRef.current === null) {
 						console.error("Socket connection not initialized");
 						return Promise.reject(
@@ -460,24 +482,27 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					sendIdentity(socketRef.current);
 				});
 
-				socketRef.current.on("connected", (response: ChatEventDto) => {
-					console.log("SOCKET EVENT: connected", response);
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							sentIdentity: true,
-							identityConfirmed: true,
-						};
-					});
-					if (currentRoom) {
-						joinRoom(currentRoom.roomID);
-					}
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.CONNECTED,
+					(response: ChatEventDto) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.CONNECTED}`, response);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								sentIdentity: true,
+								identityConfirmed: true,
+							};
+						});
+						if (currentRoom) {
+							joinRoom(currentRoom.roomID);
+						}
+					},
+				);
 
 				socketRef.current.on(
-					"playMedia",
+					SOCKET_EVENTS.PLAY_MEDIA,
 					async (response: PlaybackEventDto) => {
-						console.log("SOCKET EVENT: playMedia", response);
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.PLAY_MEDIA}`, response);
 						if (!response.UTC_time) {
 							console.log("UTC time not found");
 							return;
@@ -499,9 +524,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 
 				socketRef.current.on(
-					"pauseMedia",
+					SOCKET_EVENTS.PAUSE_MEDIA,
 					async (response: PlaybackEventDto) => {
-						console.log("SOCKET EVENT: pauseMedia", response);
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.PAUSE_MEDIA}`, response);
 						const deviceID =
 							await roomControls.playbackHandler.getFirstDevice();
 						if (deviceID && deviceID !== null) {
@@ -511,9 +536,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 
 				socketRef.current.on(
-					"stopMedia",
+					SOCKET_EVENTS.STOP_MEDIA,
 					async (response: PlaybackEventDto) => {
-						console.log("SOCKET EVENT: stopMedia", response);
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.STOP_MEDIA}`, response);
 						const deviceID =
 							await roomControls.playbackHandler.getFirstDevice();
 						if (deviceID && deviceID !== null) {
@@ -523,7 +548,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 
 				socketRef.current.on("time_sync_response", (data) => {
-					console.log("SOCKET EVENT: time_sync_response", data);
+					console.log(`SOCKET EVENT: time_sync_response`, data);
 					const t2 = Date.now();
 					const t1 = data.t1;
 					const offset = (t1 - data.t0 + (data.t2 - t2)) / 2;
@@ -531,132 +556,165 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					console.log(`Time offset: ${offset} ms`);
 				});
 
-				socketRef.current.on("directMessage", (data: DirectMessageDto) => {
-					console.log("SOCKET EVENT: directMessage", data);
-					const me = data.sender.userID === currentUser.userID;
-					const dm = {
-						message: data,
-						me: data.sender.userID === currentUser.userID,
-						messageSent: true,
-					} as DirectMessage;
-					if (me) {
-						//if (setDMTextBox) setDMTextBox("");
-					}
-					setDirectMessages((prevMessages) => {
-						const newMessages = [...prevMessages, dm];
-						newMessages.sort((a, b) => a.message.index - b.message.index);
-						return newMessages;
-					});
-				});
-
-				socketRef.current.on("userOnline", (data: { userID: string }) => {
-					console.log("SOCKET EVENT: userOnline", data);
-					if (data.userID === currentUser.userID) {
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								dmJoined: true,
-							};
+				socketRef.current.on(
+					SOCKET_EVENTS.DIRECT_MESSAGE,
+					(data: DirectMessageDto) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.DIRECT_MESSAGE}`, data);
+						const me = data.sender.userID === currentUser.userID;
+						const dm = {
+							message: data,
+							me: data.sender.userID === currentUser.userID,
+							messageSent: true,
+						} as DirectMessage;
+						if (me) {
+							//if (setDMTextBox) setDMTextBox("");
+						}
+						setDirectMessages((prevMessages) => {
+							const newMessages = [...prevMessages, dm];
+							newMessages.sort((a, b) => a.message.index - b.message.index);
+							return newMessages;
 						});
-					}
-					//we can use this to update the user's status
-				});
-
-				socketRef.current.on("userOffline", (data: { userID: string }) => {
-					console.log("SOCKET EVENT: userOffline", data);
-					if (data.userID === currentUser.userID) {
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								dmJoined: false,
-							};
-						});
-					}
-					//we can use this to update the user's status
-				});
-
-				// (unused) for edits and deletes of direct messages
-				socketRef.current.on("chatModified", (data) => {});
-
-				socketRef.current.on("dmHistory", (data: DirectMessageDto[]) => {
-					console.log("SOCKET EVENT: dmHistory", data);
-					console.log("b");
-					console.log("c");
-					console.log("Setting DMs");
-					const dmHistory = data.map(
-						(msg: DirectMessageDto) =>
-							({
-								message: msg,
-								me: msg.sender.userID === currentUser.userID,
-								messageSent: true,
-							}) as DirectMessage,
-					);
-					dmHistory.sort((a, b) => a.message.index - b.message.index);
-					setDirectMessages(dmHistory);
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							dmsRequested: false,
-							dmsReceived: true,
-						};
-					});
-				});
-
-				socketRef.current.on("emojiReaction", (reaction: EmojiReactionDto) => {
-					console.log("SOCKET EVENT: emojiReaction", reaction);
-					//add the new reaction to components
-					if (reaction.userID === currentUser.userID) {
-						return;
-					}
-					setRoomEmojiObjects((prev) => [
-						...prev,
-						{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-						{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-						{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-					]);
-				});
+					},
+				);
 
 				socketRef.current.on(
-					"queueState",
+					SOCKET_EVENTS.USER_ONLINE,
+					(data: { userID: string }) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_ONLINE}`, data);
+						if (data.userID === currentUser.userID) {
+							setSocketHandshakesCompleted((prev) => {
+								return {
+									...prev,
+									dmJoined: true,
+								};
+							});
+						}
+						//we can use this to update the user's status
+					},
+				);
+
+				socketRef.current.on(
+					SOCKET_EVENTS.USER_OFFLINE,
+					(data: { userID: string }) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_OFFLINE}`, data);
+						if (data.userID === currentUser.userID) {
+							setSocketHandshakesCompleted((prev) => {
+								return {
+									...prev,
+									dmJoined: false,
+								};
+							});
+						}
+						//we can use this to update the user's status
+					},
+				);
+
+				// (unused) for edits and deletes of direct messages
+				socketRef.current.on(SOCKET_EVENTS.CHAT_MODIFIED, (data) => {});
+
+				socketRef.current.on(
+					SOCKET_EVENTS.DM_HISTORY,
+					(data: DirectMessageDto[]) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.DM_HISTORY}`, data);
+						console.log("b");
+						console.log("c");
+						console.log("Setting DMs");
+						const dmHistory = data.map(
+							(msg: DirectMessageDto) =>
+								({
+									message: msg,
+									me: msg.sender.userID === currentUser.userID,
+									messageSent: true,
+								}) as DirectMessage,
+						);
+						dmHistory.sort((a, b) => a.message.index - b.message.index);
+						setDirectMessages(dmHistory);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								dmsRequested: false,
+								dmsReceived: true,
+							};
+						});
+					},
+				);
+
+				socketRef.current.on(
+					SOCKET_EVENTS.EMOJI_REACTION,
+					(reaction: EmojiReactionDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.EMOJI_REACTION}`,
+							reaction,
+						);
+						//add the new reaction to components
+						if (reaction.userID === currentUser.userID) {
+							return;
+						}
+						setRoomEmojiObjects((prev) => [
+							...prev,
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+						]);
+					},
+				);
+
+				socketRef.current.on(
+					SOCKET_EVENTS.QUEUE_STATE,
 					(response: {
 						room: RoomDto;
 						songs: RoomSongDto[];
 						votes: VoteDto[];
 					}) => {
-						console.log("SOCKET EVENT: queueState", response);
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.QUEUE_STATE}`, response);
 						setCurrentRoom(response.room);
 						updateRoomQueue(response.songs);
 						setCurrentRoomVotes(response.votes);
 					},
 				);
 
-				socketRef.current.on("songAdded", (newSong: QueueEventDto) => {
-					console.log("SOCKET EVENT: songAdded", newSong);
-					const newQueue = [...roomQueue, newSong.song];
-					updateRoomQueue(newQueue);
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.SONG_ADDED,
+					(newSong: QueueEventDto) => {
+						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.SONG_ADDED}`, newSong);
+						const newQueue = [...roomQueue, newSong.song];
+						updateRoomQueue(newQueue);
+					},
+				);
 
-				socketRef.current.on("songRemoved", (removedSong: QueueEventDto) => {
-					console.log("SOCKET EVENT: songRemoved", removedSong);
-					let newQueue = [...roomQueue];
-					newQueue = newQueue.filter(
-						(song) => song.spotifyID !== removedSong.song.spotifyID,
-					);
-					updateRoomQueue(newQueue);
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.SONG_REMOVED,
+					(removedSong: QueueEventDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.SONG_REMOVED}`,
+							removedSong,
+						);
+						let newQueue = [...roomQueue];
+						newQueue = newQueue.filter(
+							(song) => song.spotifyID !== removedSong.song.spotifyID,
+						);
+						updateRoomQueue(newQueue);
+					},
+				);
 
-				socketRef.current.on("voteUpdated", (updatedSong: QueueEventDto) => {
-					console.log("SOCKET EVENT: voteUpdated", updatedSong);
-					const i = roomQueue.findIndex(
-						(song) => song.spotifyID === updatedSong.song.spotifyID,
-					);
-					if (i === -1) {
-						return;
-					}
-					const newQueue = [...roomQueue];
-					newQueue[i] = updatedSong.song;
-					updateRoomQueue(newQueue);
-				});
+				socketRef.current.on(
+					SOCKET_EVENTS.VOTE_UPDATED,
+					(updatedSong: QueueEventDto) => {
+						console.log(
+							`SOCKET EVENT: ${SOCKET_EVENTS.VOTE_UPDATED}`,
+							updatedSong,
+						);
+						const i = roomQueue.findIndex(
+							(song) => song.spotifyID === updatedSong.song.spotifyID,
+						);
+						if (i === -1) {
+							return;
+						}
+						const newQueue = [...roomQueue];
+						newQueue[i] = updatedSong.song;
+						updateRoomQueue(newQueue);
+					},
+				);
 
 				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
 				socketRef.current.connect();
@@ -864,7 +922,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					dateCreated: new Date().toISOString(),
 				},
 			};
-			socket.emit("joinRoom", JSON.stringify(input));
+			socket.emit(SOCKET_EVENTS.JOIN_ROOM, JSON.stringify(input));
 
 			setSocketHandshakesCompleted((prev) => {
 				return {
@@ -915,7 +973,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					dateCreated: new Date().toISOString(),
 				},
 			};
-			socket.emit("leaveRoom", JSON.stringify(input));
+			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
 		}
 		setRoomMessages([]);
 		setSocketHandshakesCompleted((prev) => {
@@ -951,7 +1009,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						userID: currentUser.userID,
 						participantID: users[0].userID,
 					};
-					socket.emit("enterDirectMessage", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.ENTER_DM, JSON.stringify(input));
 					setSocketHandshakesCompleted((prev) => {
 						return {
 							...prev,
@@ -986,7 +1044,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				const input = {
 					userID: currentUser.userID,
 				};
-				socket.emit("exitDirectMessage", JSON.stringify(input));
+				socket.emit(SOCKET_EVENTS.EXIT_DM, JSON.stringify(input));
 				console.log("emit exitDirectMessage with body:", input);
 				setSocketHandshakesCompleted((prev) => {
 					return {
@@ -1117,7 +1175,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				if (message.message.messageBody.trim()) {
 					message.message.sender = currentUser;
 					message.message.recipient = dmParticipants[0];
-					socket.emit("directMessage", JSON.stringify(message.message));
+					socket.emit(
+						SOCKET_EVENTS.DIRECT_MESSAGE,
+						JSON.stringify(message.message),
+					);
 				}
 			},
 
@@ -1146,7 +1207,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						action: "edit",
 						message: message.message,
 					};
-					socket.emit("modifyDirectMessage", JSON.stringify(payload));
+					socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
 				}
 			},
 
@@ -1173,7 +1234,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					action: "delete",
 					message: message.message,
 				};
-				socket.emit("modifyDirectMessage", JSON.stringify(payload));
+				socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
 			},
 
 			requestDirectMessageHistory: function (): void {
@@ -1198,6 +1259,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					return;
 				}
 
+				const input = {
+					userID: currentUser.userID,
+					participantID: dmParticipants[0].userID,
+				};
+				socket.emit(
+					SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+					JSON.stringify(input),
+				);
 				setSocketHandshakesCompleted((prev) => {
 					return {
 						...prev,
@@ -1205,11 +1274,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						dmsReceived: false,
 					};
 				});
-				const input = {
-					userID: currentUser.userID,
-					participantID: dmParticipants[0].userID,
-				};
-				socket.emit("getDirectMessageHistory", JSON.stringify(input));
 			},
 		};
 	}, [currentUser, dmParticipants]);
@@ -1245,7 +1309,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						userID: currentUser.userID,
 						body: newMessage,
 					};
-					socket.emit("liveMessage", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.LIVE_MESSAGE, JSON.stringify(input));
 				}
 			},
 
@@ -1267,7 +1331,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				};
 				//make it volatile so that it doesn't get queued up
 				//nothing will be lost if it doesn't get sent
-				socket.volatile.emit("emojiReaction", JSON.stringify(newReaction));
+				socket.volatile.emit(
+					SOCKET_EVENTS.EMOJI_REACTION,
+					JSON.stringify(newReaction),
+				);
 			},
 
 			requestLiveChatHistory: function (): void {
@@ -1300,7 +1367,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						dateCreated: new Date().toISOString(),
 					},
 				};
-				socket.emit("getLiveChatHistory", JSON.stringify(input));
+				socket.emit(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY, JSON.stringify(input));
 				setSocketHandshakesCompleted((prev) => {
 					return {
 						...prev,
@@ -1348,7 +1415,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomID: currentRoom.roomID,
 					createdAt: new Date(),
 				};
-				socket.emit("requestQueue", JSON.stringify(input));
+				socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			},
 
 			playbackHandler: {
@@ -1579,7 +1646,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						spotifyID: null,
 						UTC_time: null,
 					};
-					socket.emit("initPlay", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.INIT_PLAY, JSON.stringify(input));
 				},
 
 				pausePlayback: function (): void {
@@ -1604,7 +1671,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						spotifyID: null,
 						UTC_time: null,
 					};
-					socket.emit("initPause", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.INIT_PAUSE, JSON.stringify(input));
 				},
 
 				stopPlayback: function (): void {
@@ -1629,7 +1696,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						spotifyID: null,
 						UTC_time: null,
 					};
-					socket.emit("initStop", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.INIT_STOP, JSON.stringify(input));
 				},
 
 				nextTrack: function (): void {
@@ -1654,7 +1721,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						spotifyID: null,
 						UTC_time: null,
 					};
-					socket.emit("initNext", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.INIT_SKIP, JSON.stringify(input));
 				},
 			},
 			queue: {
@@ -1677,9 +1744,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("enqueueSong", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
 					console.log("emitted: enqueueSong");
-					socket.emit("requestQueue", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 					console.log("emitted: requestQueue");
 				},
 				dequeueSong: function (song: RoomSongDto): void {
@@ -1701,9 +1768,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("dequeueSong", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
 					console.log("emitted: dequeueSong");
-					socket.emit("requestQueue", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 					console.log("emitted: requestQueue");
 				},
 				upvoteSong: function (song: RoomSongDto): void {
@@ -1724,7 +1791,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("upvoteSong", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.UPVOTE_SONG, JSON.stringify(input));
 				},
 				downvoteSong: function (song: RoomSongDto): void {
 					const socket = getSocket();
@@ -1744,7 +1811,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("downvoteSong", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.DOWNVOTE_SONG, JSON.stringify(input));
 				},
 				swapSongVote: function (song: RoomSongDto): void {
 					const socket = getSocket();
@@ -1764,7 +1831,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("swapSongVote", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.SWAP_SONG_VOTE, JSON.stringify(input));
 				},
 				undoSongVote: function (song: RoomSongDto): void {
 					const socket = getSocket();
@@ -1784,7 +1851,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						roomID: currentRoom.roomID,
 						createdAt: new Date(),
 					};
-					socket.emit("undoSongVote", JSON.stringify(input));
+					socket.emit(SOCKET_EVENTS.UNDO_SONG_VOTE, JSON.stringify(input));
 				},
 			},
 		};
