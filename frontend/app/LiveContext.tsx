@@ -265,7 +265,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	}, []);
 
-	const createSocketConnection = (): Socket | null => {
+	const createSocketConnection = useCallback((): Socket | null => {
 		if (socketHandshakesCompleted.socketConnected) {
 			if (socketHandshakesCompleted.socketInitialized) {
 				console.error(
@@ -350,7 +350,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return s;
 		}
 		return null;
-	};
+	}, [currentUser, socketHandshakesCompleted]);
 	const socketRef = useRef<Socket | null>(null);
 	const initializeSocket = useCallback(() => {
 		console.log("Initializing socket");
@@ -713,6 +713,17 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		}
 	}, []);
+	const getSocket = useCallback((): Socket | null => {
+		if (socketRef.current === null && currentUser) {
+			createSocket();
+		}
+		if (socketRef.current === null) {
+			// throw new Error("Socket connection not initialized");
+			console.error("Socket connection not initialized");
+		}
+		return socketRef.current;
+	}, [currentUser, createSocket]);
+
 	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
 		queue.sort((a, b) => a.index - b.index);
 		setRoomQueue(queue);
@@ -992,7 +1003,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	}, []);
 
 	// Method to send a ping and wait for a response or timeout
-	const sendPing = (timeout: number = TIMEOUT): Promise<void> => {
+	const sendPing = useCallback((timeout: number = TIMEOUT): Promise<void> => {
 		if (pingSent) {
 			console.log("A ping is already waiting for a response. Please wait.");
 			return Promise.resolve();
@@ -1011,7 +1022,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 
 			return new Promise<void>((resolve, reject) => {
-				const startTime = Date.now();
+				// const startTime = Date.now();
 				setPingSent(true);
 
 				// Set up a timeout
@@ -1038,7 +1049,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 		}
 		return Promise.resolve();
-	};
+	}, []);
 
 	const getTimeOffset = useCallback(() => {
 		const socket = getSocket();
@@ -1056,30 +1067,32 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		});
 	}, []);
 
-	const calculateSeekTime = async (
-		startTimeUtc: number,
-		mediaDurationMs: number,
-	): Promise<number> => {
-		await pollLatency();
-		console.log(`Device is ${backendLatency} ms behind the server`);
-		console.log(`Device's clock is ${timeOffset} ms behind the server`);
-		console.log(`Media is supposed to start at ${startTimeUtc} ms since epoch`);
+	const calculateSeekTime = useCallback(
+		async (startTimeUtc: number, mediaDurationMs: number): Promise<number> => {
+			await pollLatency();
+			console.log(`Device is ${backendLatency} ms behind the server`);
+			console.log(`Device's clock is ${timeOffset} ms behind the server`);
+			console.log(
+				`Media is supposed to start at ${startTimeUtc} ms since epoch`,
+			);
 
-		// Get the current server time
-		const serverTime = Date.now() + timeOffset;
+			// Get the current server time
+			const serverTime = Date.now() + timeOffset;
 
-		// Convert startTimeUtc to milliseconds since epoch
-		const startTimeMs = new Date(startTimeUtc).getTime();
+			// Convert startTimeUtc to milliseconds since epoch
+			const startTimeMs = new Date(startTimeUtc).getTime();
 
-		// Calculate the elapsed time since media started
-		const elapsedTimeMs = serverTime - startTimeMs;
+			// Calculate the elapsed time since media started
+			const elapsedTimeMs = serverTime - startTimeMs;
 
-		// Calculate the seek position within the media duration
-		let seekPosition = Math.max(0, Math.min(elapsedTimeMs, mediaDurationMs));
+			// Calculate the seek position within the media duration
+			let seekPosition = Math.max(0, Math.min(elapsedTimeMs, mediaDurationMs));
 
-		console.log(`Seek position: ${seekPosition} ms`);
-		return seekPosition;
-	};
+			console.log(`Seek position: ${seekPosition} ms`);
+			return seekPosition;
+		},
+		[],
+	);
 
 	const dmControls: DirectMessageControls = useMemo(() => {
 		return {
