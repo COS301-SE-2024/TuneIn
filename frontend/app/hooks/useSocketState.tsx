@@ -203,6 +203,6 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 }
 
 export function useLiveState() {
-	const [state, dispatch] = useReducer(reducer, initialState);
-	return { state, dispatch };
+	const [socketState, updateState] = useReducer(reducer, initialState);
+	return { socketState, updateState };
 }

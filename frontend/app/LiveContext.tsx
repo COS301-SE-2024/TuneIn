@@ -40,6 +40,7 @@ import { useAPI } from "./APIContext";
 import { AxiosResponse } from "axios";
 import { RequiredError } from "../api/base";
 import { SOCKET_EVENTS } from "../../common/constants";
+import { useLiveState, actionTypes } from "./hooks/useSocketState";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -215,60 +216,25 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		devices: [],
 	});
 	const [roomPlaying, setRoomPlaying] = useState<boolean>(false);
-	const [socketHandshakesCompleted, setSocketHandshakesCompleted] = useState<{
-		socketConnected: boolean;
-		socketInitialized: boolean;
-		sentIdentity: boolean;
-		identityConfirmed: boolean;
-		sentRoomJoin: boolean;
-		roomJoined: boolean;
-		roomChatRequested: boolean;
-		roomChatReceived: boolean;
-		roomQueueRequested: boolean;
-		roomQueueReceived: boolean;
-		sentDMJoin: boolean;
-		dmJoined: boolean;
-		dmsRequested: boolean;
-		dmsReceived: boolean;
-	}>({
-		socketConnected: false,
-		socketInitialized: false,
-		sentIdentity: false,
-		identityConfirmed: false,
-		sentRoomJoin: false,
-		roomJoined: false,
-		roomChatRequested: false,
-		roomChatReceived: false,
-		roomQueueRequested: false,
-		roomQueueReceived: false,
-		sentDMJoin: false,
-		dmJoined: false,
-		dmsRequested: false,
-		dmsReceived: false,
-	});
+	const { socketState, updateState } = useLiveState();
 
 	const sendIdentity = useCallback((socket: Socket) => {
 		if (
 			currentUser &&
-			!socketHandshakesCompleted.sentIdentity &&
-			!socketHandshakesCompleted.identityConfirmed
+			!socketState.sentIdentity &&
+			!socketState.identityConfirmed
 		) {
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
 			};
 			socket.emit(SOCKET_EVENTS.CONNECT, JSON.stringify(input));
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					sentIdentity: true,
-				};
-			});
+			updateState({ type: actionTypes.SENT_IDENTITY });
 		}
 	}, []);
 
 	const createSocketConnection = useCallback((): Socket | null => {
-		if (socketHandshakesCompleted.socketConnected) {
-			if (socketHandshakesCompleted.socketInitialized) {
+		if (socketState.socketConnected) {
+			if (socketState.socketInitialized) {
 				console.error(
 					"Cannot create new socket connection: Socket already initialized",
 				);
@@ -283,22 +249,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("Cannot create new socket connection: User not logged in");
 			return null;
 		}
-		setSocketHandshakesCompleted({
-			socketConnected: false,
-			socketInitialized: false,
-			sentIdentity: false,
-			identityConfirmed: false,
-			sentRoomJoin: false,
-			roomJoined: false,
-			roomChatRequested: false,
-			roomChatReceived: false,
-			roomQueueRequested: false,
-			roomQueueReceived: false,
-			sentDMJoin: false,
-			dmJoined: false,
-			dmsRequested: false,
-			dmsReceived: false,
-		});
+		updateState({ type: actionTypes.SOCKET_INITIALIZED });
 		console.log("==================== CREATING SOCKET ====================");
 		if (socketRef.current === null && currentUser) {
 			const s = io(utils.API_BASE_URL + "/live", {
@@ -307,51 +258,25 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 			s.on("connect", () => {
 				console.log("Connected to the server!");
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						socketConnected: true,
-					};
-				});
+				updateState({ type: actionTypes.SOCKET_CONNECTED });
 				console.log(s.connected);
-				if (!socketHandshakesCompleted.sentIdentity) {
+				if (!socketState.sentIdentity) {
 					sendIdentity(s);
 				}
 				s.on(SOCKET_EVENTS.CONNECTED, (response) => {
 					console.log("Identity confirmed by server");
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							sentIdentity: true,
-							identityConfirmed: true,
-						};
-					});
+					updateState({ type: actionTypes.IDENTITY_CONFIRMED });
 				});
 			});
 			s.on("disconnect", () => {
 				console.log("Disconnected from the server");
-				setSocketHandshakesCompleted({
-					socketConnected: false,
-					socketInitialized: false,
-					sentIdentity: false,
-					identityConfirmed: false,
-					sentRoomJoin: false,
-					roomJoined: false,
-					roomChatRequested: false,
-					roomChatReceived: false,
-					roomQueueRequested: false,
-					roomQueueReceived: false,
-					sentDMJoin: false,
-					dmJoined: false,
-					dmsRequested: false,
-					dmsReceived: false,
-				});
+				updateState({ type: actionTypes.RESET });
 			});
 			s.connect();
 			return s;
 		}
 		return null;
-	}, [currentUser, socketHandshakesCompleted]);
+	}, [currentUser, socketState]);
 	const socketRef = useRef<Socket | null>(null);
 	const initializeSocket = useCallback(() => {
 		console.log("Initializing socket");
@@ -363,14 +288,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 
 		if (socketRef.current !== null) {
-			console.log(
-				"socketInitialized:",
-				socketHandshakesCompleted.socketInitialized,
-			);
+			console.log("socketInitialized:", socketState.socketInitialized);
 			console.log("mounted:", mounted);
 			console.log("currentUser:", currentUser);
 			if (
-				!socketHandshakesCompleted.socketInitialized &&
+				!socketState.socketInitialized &&
 				mounted &&
 				currentUser !== undefined
 			) {
@@ -386,12 +308,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							response.body &&
 							response.body.sender.userID === currentUser.userID
 						) {
-							setSocketHandshakesCompleted((prev) => {
-								return {
-									...prev,
-									roomJoined: true,
-								};
-							});
+							updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
 						}
 						roomControls.requestLiveChatHistory();
 					},
@@ -409,13 +326,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							me: msg.sender.userID === currentUser.userID,
 						}));
 						setRoomMessages(chatHistory);
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								roomChatRequested: false,
-								roomChatReceived: true,
-							};
-						});
+						updateState({ type: actionTypes.ROOM_CHAT_RECEIVED });
 					},
 				);
 
@@ -427,8 +338,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							newMessage,
 						);
 						if (
-							!socketHandshakesCompleted.roomChatRequested ||
-							!socketHandshakesCompleted.roomChatReceived
+							!socketState.roomChatRequested ||
+							!socketState.roomChatReceived
 						) {
 							dmControls.requestDirectMessageHistory();
 						}
@@ -473,12 +384,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						);
 					}
 
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							socketConnected: true,
-						};
-					});
+					updateState({ type: actionTypes.SOCKET_CONNECTED });
 					sendIdentity(socketRef.current);
 				});
 
@@ -486,13 +392,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					SOCKET_EVENTS.CONNECTED,
 					(response: ChatEventDto) => {
 						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.CONNECTED}`, response);
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								sentIdentity: true,
-								identityConfirmed: true,
-							};
-						});
+						updateState({ type: actionTypes.IDENTITY_CONFIRMED });
 						if (currentRoom) {
 							joinRoom(currentRoom.roomID);
 						}
@@ -582,12 +482,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					(data: { userID: string }) => {
 						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_ONLINE}`, data);
 						if (data.userID === currentUser.userID) {
-							setSocketHandshakesCompleted((prev) => {
-								return {
-									...prev,
-									dmJoined: true,
-								};
-							});
+							updateState({ type: actionTypes.DM_JOIN_CONFIRMED });
 						}
 						//we can use this to update the user's status
 					},
@@ -598,12 +493,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					(data: { userID: string }) => {
 						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_OFFLINE}`, data);
 						if (data.userID === currentUser.userID) {
-							setSocketHandshakesCompleted((prev) => {
-								return {
-									...prev,
-									dmJoined: false,
-								};
-							});
+							updateState({ type: actionTypes.DM_LEAVE_CONFIRMED });
 						}
 						//we can use this to update the user's status
 					},
@@ -629,13 +519,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						);
 						dmHistory.sort((a, b) => a.message.index - b.message.index);
 						setDirectMessages(dmHistory);
-						setSocketHandshakesCompleted((prev) => {
-							return {
-								...prev,
-								dmsRequested: false,
-								dmsReceived: true,
-							};
-						});
+						updateState({ type: actionTypes.DMS_RECEIVED });
 					},
 				);
 
@@ -724,20 +608,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				sendIdentity(socketRef.current);
 				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
 
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						socketInitialized: true,
-					};
-				});
+				updateState({ type: actionTypes.SOCKET_INITIALIZED });
 				pollLatency();
 			}
 
-			if (
-				!socketHandshakesCompleted.roomJoined &&
-				currentRoom &&
-				currentRoom.roomID
-			) {
+			if (!socketState.roomJoined && currentRoom && currentRoom.roomID) {
 				joinRoom(currentRoom.roomID);
 			}
 		}
@@ -759,14 +634,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (
 			currentUser &&
 			(!socketRef.current ||
-				(socketHandshakesCompleted.socketConnected &&
-					socketRef.current.disconnected))
+				(socketState.socketConnected && socketRef.current.disconnected))
 		) {
 			socketRef.current = createSocketConnection();
-			if (
-				socketRef.current !== null &&
-				!socketHandshakesCompleted.socketInitialized
-			) {
+			if (socketRef.current !== null && !socketState.socketInitialized) {
 				initializeSocket();
 			}
 		}
@@ -923,23 +794,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				},
 			};
 			socket.emit(SOCKET_EVENTS.JOIN_ROOM, JSON.stringify(input));
-
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					sentRoomJoin: true,
-				};
-			});
+			updateState({ type: actionTypes.SENT_ROOM_JOIN });
 
 			//request chat history
 			roomControls.requestLiveChatHistory();
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					roomChatRequested: true,
-					roomChatReceived: false,
-				};
-			});
+			updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
 		}
 	}, []);
 
@@ -956,13 +815,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 
 		const socket = getSocket();
-		setSocketHandshakesCompleted((prev) => {
-			return {
-				...prev,
-				roomJoined: false,
-			};
-		});
-
+		updateState({ type: actionTypes.START_ROOM_LEAVE });
 		if (socket !== null) {
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
@@ -976,17 +829,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
 		}
 		setRoomMessages([]);
-		setSocketHandshakesCompleted((prev) => {
-			return {
-				...prev,
-				sentRoomJoin: false,
-				roomJoined: false,
-				roomChatRequested: false,
-				roomChatReceived: false,
-				roomQueueRequested: false,
-				roomQueueReceived: false,
-			};
-		});
+		updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
 		setCurrentRoom(undefined);
 		setRoomQueue([]);
 	}, []);
@@ -1010,21 +853,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						participantID: users[0].userID,
 					};
 					socket.emit(SOCKET_EVENTS.ENTER_DM, JSON.stringify(input));
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							sentDMJoin: true,
-							dmJoined: false,
-						};
-					});
+					updateState({ type: actionTypes.REQUEST_DM_JOIN });
 					dmControls.requestDirectMessageHistory();
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							dmsRequested: false,
-							dmsReceived: false,
-						};
-					});
+					updateState({ type: actionTypes.DMS_REQUESTED });
 				}
 			})
 			.catch((error) => {
@@ -1034,7 +865,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const leaveDM = useCallback(() => {
 		pollLatency();
-		if (socketHandshakesCompleted.dmJoined) {
+		if (socketState.dmJoined) {
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
@@ -1046,14 +877,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				};
 				socket.emit(SOCKET_EVENTS.EXIT_DM, JSON.stringify(input));
 				console.log("emit exitDirectMessage with body:", input);
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						dmJoined: false,
-						dmsRequested: false,
-						dmsReceived: true,
-					};
-				});
+				updateState({ type: actionTypes.REQUEST_DM_LEAVE });
 				setDmParticipants([]);
 				setDirectMessages([]);
 			}
@@ -1244,7 +1068,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					return;
 				}
 
-				if (socketHandshakesCompleted.dmsRequested) {
+				if (socketState.dmsRequested) {
 					console.log("Already requested DM history");
 					return;
 				}
@@ -1267,13 +1091,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
 					JSON.stringify(input),
 				);
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						dmsRequested: true,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.DMS_REQUESTED });
 			},
 		};
 	}, [currentUser, dmParticipants]);
@@ -1345,7 +1163,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 
 				// if (this.requestingLiveChatHistory) {
-				if (socketHandshakesCompleted.roomChatRequested) {
+				if (socketState.roomChatRequested) {
 					console.log("Already requested live chat history");
 					return;
 				}
@@ -1368,12 +1186,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					},
 				};
 				socket.emit(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY, JSON.stringify(input));
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						roomChatRequested: true,
-					};
-				});
+				updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
 			},
 
 			canControlRoom: function (): boolean {
@@ -1864,7 +1677,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		spotifyDevices,
 		currentSong,
 		roomPlaying,
-		// socketHandshakesCompleted,
+		// socketState,
 	]);
 
 	// let t: string | null = tokenState.token;
@@ -1916,22 +1729,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				// user is not authenticated & socket doesn't exist anyway
 				// ignore
 			}
-			setSocketHandshakesCompleted({
-				socketConnected: false,
-				socketInitialized: false,
-				sentIdentity: false,
-				identityConfirmed: false,
-				sentRoomJoin: false,
-				roomJoined: false,
-				roomChatRequested: false,
-				roomChatReceived: false,
-				roomQueueRequested: false,
-				roomQueueReceived: false,
-				sentDMJoin: false,
-				dmJoined: false,
-				dmsRequested: false,
-				dmsReceived: false,
-			});
+			updateState({ type: actionTypes.RESET });
 			return;
 		}
 
@@ -1992,22 +1790,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					console.log(
 						"User authenticated & we have their info, but socket is null. Creating socket",
 					);
-					setSocketHandshakesCompleted({
-						socketConnected: false,
-						socketInitialized: false,
-						sentIdentity: false,
-						identityConfirmed: false,
-						sentRoomJoin: false,
-						roomJoined: false,
-						roomChatRequested: false,
-						roomChatReceived: false,
-						roomQueueRequested: false,
-						roomQueueReceived: false,
-						sentDMJoin: false,
-						dmJoined: false,
-						dmsRequested: false,
-						dmsReceived: false,
-					});
+					updateState({ type: actionTypes.RESET });
 					createSocket();
 				} else {
 					console.error("User is authenticated but we don't have their info");
@@ -2021,25 +1804,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (
 			!socketRef.current.connected ||
 			socketRef.current.disconnected ||
-			!socketHandshakesCompleted.socketConnected
+			!socketState.socketConnected
 		) {
 			console.log("Reconnecting socket");
-			setSocketHandshakesCompleted({
-				socketConnected: false,
-				socketInitialized: false,
-				sentIdentity: false,
-				identityConfirmed: false,
-				sentRoomJoin: false,
-				roomJoined: false,
-				roomChatRequested: false,
-				roomChatReceived: false,
-				roomQueueRequested: false,
-				roomQueueReceived: false,
-				sentDMJoin: false,
-				dmJoined: false,
-				dmsRequested: false,
-				dmsReceived: false,
-			});
+			updateState({ type: actionTypes.RESET });
 			socketRef.current.connect();
 			return;
 		}
@@ -2047,59 +1815,35 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		//// from here on, we know that the socket exists and is connected
 
 		// fix inconsistencies in handshake 'connected'
-		if (!socketHandshakesCompleted.socketConnected) {
+		if (!socketState.socketConnected) {
 			if (socketRef.current.connected) {
 				console.log("Socket is connected");
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						socketConnected: true,
-					};
-				});
+				updateState({ type: actionTypes.SOCKET_CONNECTED });
 			}
 		}
 
-		if (!socketHandshakesCompleted.socketInitialized) {
+		if (!socketState.socketInitialized) {
 			console.log("Socket is connected but not initialized. Initializing...");
 			initializeSocket();
-			setSocketHandshakesCompleted(() => {
-				return {
-					...socketHandshakesCompleted,
-					socketInitialized: true,
-					sentIdentity: false,
-					identityConfirmed: false,
-				};
-			});
+			updateState({ type: actionTypes.SOCKET_INITIALIZED });
 			return;
 		}
 
 		//// from here on, we know that the socket is connected and initialized
 		// send identity if not sent
-		if (!socketHandshakesCompleted.sentIdentity) {
+		if (!socketState.sentIdentity) {
 			console.log(
 				"User is connected via sockets but identity not sent. Sending identity...",
 			);
 			sendIdentity(socketRef.current);
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					sentIdentity: true,
-					identityConfirmed: false,
-				};
-			});
+			updateState({ type: actionTypes.SENT_IDENTITY });
 			return;
 		}
 
-		if (!socketHandshakesCompleted.identityConfirmed) {
+		if (!socketState.identityConfirmed) {
 			console.log("Identity not confirmed. Retry sending identity...");
 			sendIdentity(socketRef.current);
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					sentIdentity: true,
-					identityConfirmed: false,
-				};
-			});
+			updateState({ type: actionTypes.SENT_IDENTITY });
 			return;
 		}
 
@@ -2107,176 +1851,101 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		// disconnect if otherwise
 		// join dms if socket is connected but user is not in dms
 		if (dmParticipants.length > 0) {
-			if (!socketHandshakesCompleted.sentDMJoin) {
+			if (!socketState.sentDMJoin) {
 				console.log("User is connected to dms but not joined. Joining...");
 				enterDM(dmParticipants.map((u) => u.username));
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						sentDMJoin: true,
-						dmJoined: false,
-						dmsRequested: false,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.REQUEST_DM_JOIN });
 				return;
 			}
 
-			if (!socketHandshakesCompleted.dmJoined) {
+			if (!socketState.dmJoined) {
 				console.log("User tried to join dms but failed. Retrying...");
 				enterDM(dmParticipants.map((u) => u.username));
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						sentDMJoin: true,
-						dmJoined: false,
-						dmsRequested: false,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.REQUEST_DM_JOIN });
 				return;
 			}
 
-			if (!socketHandshakesCompleted.dmsRequested) {
+			if (!socketState.dmsRequested) {
 				console.log(
 					"User is connected to dms but no messages have been requested",
 				);
 				dmControls.requestDirectMessageHistory();
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						dmsRequested: true,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.DMS_REQUESTED });
 				return;
 			}
 
-			if (!socketHandshakesCompleted.dmsReceived) {
+			if (!socketState.dmsReceived) {
 				console.log(
 					"User is connected to dms but no messages have been received",
 				);
 				dmControls.requestDirectMessageHistory();
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						dmsRequested: true,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.DMS_REQUESTED });
 				return;
 			}
 		}
 		// disconnect from dms if no participants & user is in dms somehow
 		else if (dmParticipants.length === 0) {
 			if (
-				socketHandshakesCompleted.sentDMJoin ||
-				socketHandshakesCompleted.dmJoined ||
-				socketHandshakesCompleted.dmsRequested ||
-				socketHandshakesCompleted.dmsReceived
+				socketState.sentDMJoin ||
+				socketState.dmJoined ||
+				socketState.dmsRequested ||
+				socketState.dmsReceived
 			) {
 				leaveDM();
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						sentDMJoin: false,
-						dmJoined: false,
-						dmsRequested: false,
-						dmsReceived: false,
-					};
-				});
+				updateState({ type: actionTypes.REQUEST_DM_LEAVE });
 				return;
 			}
 		}
 
 		if (currentRoom) {
-			if (!socketHandshakesCompleted.sentRoomJoin) {
+			if (!socketState.sentRoomJoin) {
 				console.log("User is in a room but not joined in backend. Joining...");
 				joinRoom(currentRoom.roomID);
-				setSocketHandshakesCompleted((prev) => {
-					return {
-						...prev,
-						sentRoomJoin: true,
-						roomJoined: false,
-					};
-				});
+				updateState({ type: actionTypes.SENT_ROOM_JOIN });
 				return;
 			}
 
-			if (!socketHandshakesCompleted.roomJoined) {
+			if (!socketState.roomJoined) {
 				console.log("User tried to join room but failed. Retrying...");
 				joinRoom(currentRoom.roomID);
+				updateState({ type: actionTypes.SENT_ROOM_JOIN });
 				return;
 			}
 
-			if (!socketHandshakesCompleted.roomChatReceived) {
-				if (socketHandshakesCompleted.roomChatRequested) {
+			if (!socketState.roomChatReceived) {
+				if (socketState.roomChatRequested) {
 					console.log("Live chat was requested but not received. Retrying...");
 					roomControls.requestLiveChatHistory();
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							roomChatRequested: true,
-							roomChatReceived: false,
-						};
-					});
+					updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
 					return;
 				} else {
 					console.log(
 						"User is in a room but the live chat has not been requested",
 					);
 					roomControls.requestLiveChatHistory();
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							roomChatRequested: true,
-							roomChatReceived: false,
-						};
-					});
+					updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
 					return;
 				}
 			}
 
-			if (!socketHandshakesCompleted.roomQueueReceived) {
-				if (socketHandshakesCompleted.roomQueueRequested) {
+			if (!socketState.roomQueueReceived) {
+				if (socketState.roomQueueRequested) {
 					console.log("Room queue was requested but not received. Retrying...");
 					roomControls.requestRoomQueue();
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							roomQueueRequested: true,
-							roomQueueReceived: false,
-						};
-					});
+					updateState({ type: actionTypes.ROOM_QUEUE_REQUESTED });
 					return;
 				} else {
 					console.log(
 						"User is in a room but room queue has not been requested",
 					);
 					roomControls.requestRoomQueue();
-					setSocketHandshakesCompleted((prev) => {
-						return {
-							...prev,
-							roomQueueRequested: true,
-							roomQueueReceived: false,
-						};
-					});
+					updateState({ type: actionTypes.ROOM_QUEUE_REQUESTED });
 					return;
 				}
 			}
 		} else {
 			// user is not in a room
-			setSocketHandshakesCompleted((prev) => {
-				return {
-					...prev,
-					sentRoomJoin: false,
-					roomJoined: false,
-					roomChatRequested: false,
-					roomChatReceived: false,
-					roomQueueRequested: false,
-					roomQueueReceived: false,
-				};
-			});
+			updateState({ type: actionTypes.CLEAR_ROOM_STATE });
 		}
 	}, [
 		authenticated,
@@ -2288,7 +1957,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		roomQueue,
 		roomMessages,
 		currentRoomVotes,
-		socketHandshakesCompleted,
+		socketState,
 	]);
 
 	useEffect(() => {}, []);
@@ -2296,7 +1965,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	return (
 		<LiveContext.Provider
 			value={{
-				socketHandshakes: socketHandshakesCompleted,
+				socketHandshakes: socketState,
 
 				currentUser,
 				userBookmarks,
