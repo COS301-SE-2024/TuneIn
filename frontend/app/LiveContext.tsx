@@ -1805,98 +1805,396 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		};
 	}, []);
 
-	// re-initialize socket if it disconnects
+	//if auth info changes, get user info & spotify tokens
 	useEffect(() => {
-		if (!socketRef.current) {
-			socketRef.current = createSocketConnection();
-			initializeSocket();
-		}
-		console.log("Socket connected:", socketRef.current?.connected);
-		if (!socketRef.current.connected) {
-			setSocketInitialized(false);
-			initializeSocket();
-			socketRef.current.connect();
-		}
-	}, [socketRef.current, socketRef.current?.connected]);
-
-	//initialise the user
-	useEffect(() => {
-		if (authenticated && !currentUser) {
-			users
-				.getProfile()
-				.then((u: AxiosResponse<UserDto>) => {
-					console.log("User: " + u);
-					if (u.status === 401) {
-						//Unauthorized
-						//Auth header is either missing or invalid
-						setCurrentUser(undefined);
-					} else if (u.status === 500) {
-						//Internal Server Error
-						//Something went wrong in the backend (unlikely lmao)
-						throw new Error("Internal Server Error");
-					}
-					setCurrentUser(u.data);
-				})
-				.catch((error) => {
-					if (error instanceof RequiredError) {
-						// a required field is missing
-						throw new Error("Parameter missing from request to get user");
-					} else {
-						// some other error
-						throw new Error("Error getting user");
-					}
-				});
-			bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
-				setUserBookmarks(fetchedBookmarks);
-			});
-
-			// get spotify tokens
-			let tokens: SpotifyTokenPair | null = null;
-			spotifyAuth
-				.getSpotifyTokens()
-				.then((t) => {
-					if (t !== null) {
-						tokens = t;
-						setSpotifyTokens(tokens);
-						roomControls.playbackHandler.getDevices();
-					}
-				})
-				.catch((error) => {
-					console.error("Failed to get Spotify tokens:", error);
-				});
-		}
-	}, [authenticated]);
-
-	useEffect(() => {
-		// re-request if user is connected to dms but no messages have been received
-		if (dmParticipants.length > 0 && !dmsReceived) {
-			dmControls.requestDirectMessageHistory();
-		}
-		// disconnect from dms if no participants somehow
-		if (dmParticipants.length === 0) {
-			leaveDM();
-		}
-	}, [dmsReceived, dmParticipants]);
-
-	useEffect(() => {}, []);
-
-	useEffect(() => {
-		if (joined) {
-			if (currentRoom) {
-				roomControls.requestLiveChatHistory();
-				roomControls.requestRoomQueue();
+		// if user is not authenticated, disconnect from socket
+		if (!currentUser || !authenticated) {
+			if (socketRef.current !== null) {
+				if (socketRef.current.connected || !socketRef.current.disconnected) {
+					socketRef.current.disconnect();
+					console.error("Socket disconnected. User is not authenticated");
+				}
+				socketRef.current = null;
 			} else {
-				console.error("User is not in a room");
-				console.error("Setting joined to false");
-				leaveRoom();
+				// user is not authenticated & socket doesn't exist anyway
+				// ignore
+			}
+			setSocketHandshakesCompleted({
+				socketConnected: false,
+				socketInitialized: false,
+				sentIdentity: false,
+				identityConfirmed: false,
+				sentRoomJoin: false,
+				roomJoined: false,
+				roomChatRequested: false,
+				roomChatReceived: false,
+				roomQueueRequested: false,
+				roomQueueReceived: false,
+				sentDMJoin: false,
+				dmJoined: false,
+				dmsRequested: false,
+				dmsReceived: false,
+			});
+			return;
+		}
+
+		const getUserDetails = async () => {
+			if (tokenState.token !== null) {
+				console.log("Getting user");
+				users
+					.getProfile()
+					.then((u: AxiosResponse<UserDto>) => {
+						console.log("User: " + u);
+						if (u.status === 401) {
+							//Unauthorized
+							//Auth header is either missing or invalid
+							setCurrentUser(undefined);
+						} else if (u.status === 500) {
+							//Internal Server Error
+							//Something went wrong in the backend (unlikely lmao)
+							throw new Error("Internal Server Error");
+						}
+						setCurrentUser(u.data);
+					})
+					.catch((error) => {
+						if (error instanceof RequiredError) {
+							// a required field is missing
+							throw new Error("Parameter missing from request to get user");
+						} else {
+							// some other error
+							throw new Error("Error getting user");
+						}
+					});
+
+				bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
+					setUserBookmarks(fetchedBookmarks);
+				});
+
+				// get spotify tokens
+				let tokens: SpotifyTokenPair | null = null;
+				spotifyAuth
+					.getSpotifyTokens()
+					.then((t) => {
+						if (t !== null) {
+							tokens = t;
+							setSpotifyTokens(tokens);
+							roomControls.playbackHandler.getDevices();
+						}
+					})
+					.catch((error) => {
+						console.error("Failed to get Spotify tokens:", error);
+					});
+			}
+		};
+		getUserDetails();
+
+		//// from here on, we know that the user is authenticated
+		if (socketRef.current === null) {
+			if (authenticated) {
+				if (currentUser) {
+					console.log(
+						"User authenticated & we have their info, but socket is null. Creating socket",
+					);
+					setSocketHandshakesCompleted({
+						socketConnected: false,
+						socketInitialized: false,
+						sentIdentity: false,
+						identityConfirmed: false,
+						sentRoomJoin: false,
+						roomJoined: false,
+						roomChatRequested: false,
+						roomChatReceived: false,
+						roomQueueRequested: false,
+						roomQueueReceived: false,
+						sentDMJoin: false,
+						dmJoined: false,
+						dmsRequested: false,
+						dmsReceived: false,
+					});
+					createSocket();
+				} else {
+					console.error("User is authenticated but we don't have their info");
+					getUserDetails();
+				}
+			}
+			return;
+		}
+
+		// reconnect if socket is disconnected
+		if (
+			!socketRef.current.connected ||
+			socketRef.current.disconnected ||
+			!socketHandshakesCompleted.socketConnected
+		) {
+			console.log("Reconnecting socket");
+			setSocketHandshakesCompleted({
+				socketConnected: false,
+				socketInitialized: false,
+				sentIdentity: false,
+				identityConfirmed: false,
+				sentRoomJoin: false,
+				roomJoined: false,
+				roomChatRequested: false,
+				roomChatReceived: false,
+				roomQueueRequested: false,
+				roomQueueReceived: false,
+				sentDMJoin: false,
+				dmJoined: false,
+				dmsRequested: false,
+				dmsReceived: false,
+			});
+			socketRef.current.connect();
+			return;
+		}
+
+		//// from here on, we know that the socket exists and is connected
+
+		// fix inconsistencies in handshake 'connected'
+		if (!socketHandshakesCompleted.socketConnected) {
+			if (socketRef.current.connected) {
+				console.log("Socket is connected");
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						socketConnected: true,
+					};
+				});
+			}
+		}
+
+		if (!socketHandshakesCompleted.socketInitialized) {
+			console.log("Socket is connected but not initialized. Initializing...");
+			initializeSocket();
+			setSocketHandshakesCompleted(() => {
+				return {
+					...socketHandshakesCompleted,
+					socketInitialized: true,
+					sentIdentity: false,
+					identityConfirmed: false,
+				};
+			});
+			return;
+		}
+
+		//// from here on, we know that the socket is connected and initialized
+		// send identity if not sent
+		if (!socketHandshakesCompleted.sentIdentity) {
+			console.log(
+				"User is connected via sockets but identity not sent. Sending identity...",
+			);
+			sendIdentity(socketRef.current);
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					sentIdentity: true,
+					identityConfirmed: false,
+				};
+			});
+			return;
+		}
+
+		if (!socketHandshakesCompleted.identityConfirmed) {
+			console.log("Identity not confirmed. Retry sending identity...");
+			sendIdentity(socketRef.current);
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					sentIdentity: true,
+					identityConfirmed: false,
+				};
+			});
+			return;
+		}
+
+		// get dms if state appears to expect dms
+		// disconnect if otherwise
+		// join dms if socket is connected but user is not in dms
+		if (dmParticipants.length > 0) {
+			if (!socketHandshakesCompleted.sentDMJoin) {
+				console.log("User is connected to dms but not joined. Joining...");
+				enterDM(dmParticipants.map((u) => u.username));
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						sentDMJoin: true,
+						dmJoined: false,
+						dmsRequested: false,
+						dmsReceived: false,
+					};
+				});
+				return;
+			}
+
+			if (!socketHandshakesCompleted.dmJoined) {
+				console.log("User tried to join dms but failed. Retrying...");
+				enterDM(dmParticipants.map((u) => u.username));
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						sentDMJoin: true,
+						dmJoined: false,
+						dmsRequested: false,
+						dmsReceived: false,
+					};
+				});
+				return;
+			}
+
+			if (!socketHandshakesCompleted.dmsRequested) {
+				console.log(
+					"User is connected to dms but no messages have been requested",
+				);
+				dmControls.requestDirectMessageHistory();
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						dmsRequested: true,
+						dmsReceived: false,
+					};
+				});
+				return;
+			}
+
+			if (!socketHandshakesCompleted.dmsReceived) {
+				console.log(
+					"User is connected to dms but no messages have been received",
+				);
+				dmControls.requestDirectMessageHistory();
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						dmsRequested: true,
+						dmsReceived: false,
+					};
+				});
+				return;
+			}
+		}
+		// disconnect from dms if no participants & user is in dms somehow
+		else if (dmParticipants.length === 0) {
+			if (
+				socketHandshakesCompleted.sentDMJoin ||
+				socketHandshakesCompleted.dmJoined ||
+				socketHandshakesCompleted.dmsRequested ||
+				socketHandshakesCompleted.dmsReceived
+			) {
+				leaveDM();
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						sentDMJoin: false,
+						dmJoined: false,
+						dmsRequested: false,
+						dmsReceived: false,
+					};
+				});
+				return;
+			}
+		}
+
+		if (currentRoom) {
+			if (!socketHandshakesCompleted.sentRoomJoin) {
+				console.log("User is in a room but not joined in backend. Joining...");
+				joinRoom(currentRoom.roomID);
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						sentRoomJoin: true,
+						roomJoined: false,
+					};
+				});
+				return;
+			}
+
+			if (!socketHandshakesCompleted.roomJoined) {
+				console.log("User tried to join room but failed. Retrying...");
+				joinRoom(currentRoom.roomID);
+				return;
+			}
+
+			if (!socketHandshakesCompleted.roomChatReceived) {
+				if (socketHandshakesCompleted.roomChatRequested) {
+					console.log("Live chat was requested but not received. Retrying...");
+					roomControls.requestLiveChatHistory();
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							roomChatRequested: true,
+							roomChatReceived: false,
+						};
+					});
+					return;
+				} else {
+					console.log(
+						"User is in a room but the live chat has not been requested",
+					);
+					roomControls.requestLiveChatHistory();
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							roomChatRequested: true,
+							roomChatReceived: false,
+						};
+					});
+					return;
+				}
+			}
+
+			if (!socketHandshakesCompleted.roomQueueReceived) {
+				if (socketHandshakesCompleted.roomQueueRequested) {
+					console.log("Room queue was requested but not received. Retrying...");
+					roomControls.requestRoomQueue();
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							roomQueueRequested: true,
+							roomQueueReceived: false,
+						};
+					});
+					return;
+				} else {
+					console.log(
+						"User is in a room but room queue has not been requested",
+					);
+					roomControls.requestRoomQueue();
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							roomQueueRequested: true,
+							roomQueueReceived: false,
+						};
+					});
+					return;
+				}
 			}
 		} else {
+			// user is not in a room
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					sentRoomJoin: false,
+					roomJoined: false,
+					roomChatRequested: false,
+					roomChatReceived: false,
+					roomQueueRequested: false,
+					roomQueueReceived: false,
+				};
+			});
 		}
+	}, [
+		authenticated,
+		currentRoom,
+		currentSong,
+		currentUser,
+		directMessages,
+		dmParticipants,
+		roomQueue,
+		roomMessages,
+		currentRoomVotes,
+		socketHandshakesCompleted,
+	]);
 
-		if (!roomChatReceived) {
-			roomControls.requestLiveChatHistory();
-		}
-	}, [joined, roomChatReceived, currentRoom]);
+	useEffect(() => {}, []);
 
 	return (
 		<LiveContext.Provider
