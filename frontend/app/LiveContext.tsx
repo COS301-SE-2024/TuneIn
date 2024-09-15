@@ -5,6 +5,7 @@ import React, {
 	useState,
 	useRef,
 	useMemo,
+	useCallback,
 } from "react";
 import { io, Socket } from "socket.io-client";
 import auth from "./services/AuthManagement";
@@ -245,7 +246,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		dmsReceived: false,
 	});
 
-	const sendIdentity = (socket: Socket) => {
+	const sendIdentity = useCallback((socket: Socket) => {
 		if (
 			currentUser &&
 			!socketHandshakesCompleted.sentIdentity &&
@@ -262,7 +263,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				};
 			});
 		}
-	};
+	}, []);
 
 	const createSocketConnection = (): Socket | null => {
 		if (socketHandshakesCompleted.socketConnected) {
@@ -351,166 +352,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		return null;
 	};
 	const socketRef = useRef<Socket | null>(null);
-	const createSocket = () => {
-		if (
-			socketRef.current !== null &&
-			socketRef.current.connected &&
-			!socketRef.current.disconnected
-		) {
-			console.error("Socket connection already created");
-			return;
-		}
-		if (
-			currentUser &&
-			(!socketRef.current ||
-				(socketHandshakesCompleted.socketConnected &&
-					socketRef.current.disconnected))
-		) {
-			socketRef.current = createSocketConnection();
-			if (
-				socketRef.current !== null &&
-				!socketHandshakesCompleted.socketInitialized
-			) {
-				initializeSocket();
-			}
-		}
-	};
-	const getSocket = (): Socket | null => {
-		if (socketRef.current === null && currentUser) {
-			createSocket();
-		}
-		if (socketRef.current === null) {
-			// throw new Error("Socket connection not initialized");
-			console.error("Socket connection not initialized");
-		}
-		return socketRef.current;
-	};
-	const updateRoomQueue = (queue: RoomSongDto[]) => {
-		queue.sort((a, b) => a.index - b.index);
-		setRoomQueue(queue);
-	};
-
-	const setRoomID = (roomID: string) => {
-		rooms
-			.getRoomInfo(roomID)
-			.then((room: AxiosResponse<RoomDto>) => {
-				console.log("Room: " + room);
-				if (room.status === 401) {
-					//Unauthorized
-					//Auth header is either missing or invalid
-					setCurrentRoom(undefined);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-				} else if (room.status === 500) {
-					//Internal Server Error
-					//Something went wrong in the backend (unlikely lmao)
-					setCurrentRoom(undefined);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-					throw new Error("Internal Server Error");
-				} else {
-					const r: RoomDto = room.data;
-					setCurrentRoom(r);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-					roomControls.requestRoomQueue();
-				}
-			})
-			.catch((error) => {
-				setCurrentRoom(undefined);
-				setRoomQueue([]);
-				setCurrentRoomVotes([]);
-				if (error instanceof RequiredError) {
-					// a required field is missing
-					throw new Error("Parameter missing from request to get room");
-				} else {
-					// some other error
-					throw new Error("Error getting room");
-				}
-			});
-	};
-
-	const spotifyAuth: SpotifyAuth = {
-		exchangeCodeWithBackend: async (
-			code: string,
-			state: string,
-			redirectURI: string,
-		): Promise<SpotifyCallbackResponse> => {
-			try {
-				authAPI
-					.spotifyCallback(code, state)
-					.then((sp: AxiosResponse<SpotifyCallbackResponse>) => {
-						if (sp.status === 401) {
-							//Unauthorized
-							//Auth header is either missing or invalid
-						} else if (sp.status === 500) {
-							//Internal Server Error
-							//Something went wrong in the backend (unlikely lmao)
-							throw new Error("Internal Server Error");
-						}
-						setSpotifyTokens(sp.data.spotifyTokens);
-						return sp.data;
-					})
-					.catch((error) => {
-						if (error instanceof RequiredError) {
-							// a required field is missing
-							throw new Error("Parameter missing from request to get user");
-						} else {
-							// some other error
-							throw new Error("Error getting user");
-						}
-					});
-			} catch (error) {
-				console.error("Failed to exchange code with backend:", error);
-			}
-			throw new Error(
-				"Something went wrong while exchanging code with backend",
-			);
-		},
-		getSpotifyTokens: async (): Promise<SpotifyTokenPair | null> => {
-			if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
-				if (spotifyTokens.epoch_expiry - Date.now() > 1000 * 60 * 5) {
-					return spotifyTokens;
-				}
-			}
-
-			if (authenticated) {
-				authAPI
-					.getSpotifyTokens()
-					.then((sp: AxiosResponse<SpotifyTokenPair>) => {
-						if (sp.status === 401) {
-							//Unauthorized
-							//Auth header is either missing or invalid
-						} else if (sp.status === 500) {
-							//Internal Server Error
-							//Something went wrong in the backend (unlikely lmao)
-							throw new Error("Internal Server Error");
-						}
-						setSpotifyTokens(sp.data);
-						return sp.data;
-					})
-					.catch((error) => {
-						if (error instanceof RequiredError) {
-							// a required field is missing
-							throw new Error("Parameter missing from request to get user");
-						} else {
-							// some other error
-							throw new Error("Error getting user");
-						}
-					});
-			}
-			console.error("Cannot get Spotify tokens without being authenticated");
-			return null;
-		},
-	};
-
-	const initializeSocket = () => {
+	const initializeSocket = useCallback(() => {
 		console.log("Initializing socket");
 		if (!currentUser) {
 			return;
 		}
 		if (socketRef.current === null) {
-			createSocket();
+			// createSocket();
 		}
 
 		if (socketRef.current !== null) {
@@ -835,9 +683,82 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				joinRoom(currentRoom.roomID);
 			}
 		}
-	};
+	}, [
+		// createSocket,
+		currentRoom,
+		currentUser,
+		mounted,
+	]);
+	const createSocket = useCallback(() => {
+		if (
+			socketRef.current !== null &&
+			socketRef.current.connected &&
+			!socketRef.current.disconnected
+		) {
+			console.error("Socket connection already created");
+			return;
+		}
+		if (
+			currentUser &&
+			(!socketRef.current ||
+				(socketHandshakesCompleted.socketConnected &&
+					socketRef.current.disconnected))
+		) {
+			socketRef.current = createSocketConnection();
+			if (
+				socketRef.current !== null &&
+				!socketHandshakesCompleted.socketInitialized
+			) {
+				initializeSocket();
+			}
+		}
+	}, []);
+	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
+		queue.sort((a, b) => a.index - b.index);
+		setRoomQueue(queue);
+	}, []);
 
-	const joinRoom = (roomID: string) => {
+	const setRoomID = useCallback((roomID: string) => {
+		rooms
+			.getRoomInfo(roomID)
+			.then((room: AxiosResponse<RoomDto>) => {
+				console.log("Room: " + room);
+				if (room.status === 401) {
+					//Unauthorized
+					//Auth header is either missing or invalid
+					setCurrentRoom(undefined);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+				} else if (room.status === 500) {
+					//Internal Server Error
+					//Something went wrong in the backend (unlikely lmao)
+					setCurrentRoom(undefined);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+					throw new Error("Internal Server Error");
+				} else {
+					const r: RoomDto = room.data;
+					setCurrentRoom(r);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+					roomControls.requestRoomQueue();
+				}
+			})
+			.catch((error) => {
+				setCurrentRoom(undefined);
+				setRoomQueue([]);
+				setCurrentRoomVotes([]);
+				if (error instanceof RequiredError) {
+					// a required field is missing
+					throw new Error("Parameter missing from request to get room");
+				} else {
+					// some other error
+					throw new Error("Error getting room");
+				}
+			});
+	}, []);
+
+	const joinRoom = useCallback((roomID: string) => {
 		if (!currentUser) {
 			console.error("User cannot join room without being logged in");
 			return;
@@ -874,9 +795,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				};
 			});
 		}
-	};
+	}, []);
 
-	const leaveRoom = () => {
+	const leaveRoom = useCallback(() => {
 		pollLatency();
 		if (!currentUser) {
 			console.error("User cannot leave room without being logged in");
@@ -922,9 +843,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		});
 		setCurrentRoom(undefined);
 		setRoomQueue([]);
-	};
+	}, []);
 
-	const enterDM = (usernames: string[]) => {
+	const enterDM = useCallback((usernames: string[]) => {
 		pollLatency();
 		if (!currentUser) {
 			console.error("User is not logged in");
@@ -963,9 +884,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			.catch((error) => {
 				console.error("Failed to get user info:", error);
 			});
-	};
+	}, []);
 
-	const leaveDM = () => {
+	const leaveDM = useCallback(() => {
 		pollLatency();
 		if (socketHandshakesCompleted.dmJoined) {
 			if (!currentUser) {
@@ -991,7 +912,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				setDirectMessages([]);
 			}
 		}
-	};
+	}, []);
 
 	// Method to send a ping and wait for a response or timeout
 	const sendPing = (timeout: number = TIMEOUT): Promise<void> => {
@@ -1042,22 +963,21 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		return Promise.resolve();
 	};
 
-	const getTimeOffset = () => {
+	const getTimeOffset = useCallback(() => {
 		const socket = getSocket();
 		if (socket !== null) {
 			let t0 = Date.now();
 			socket.emit("time_sync", { t0: Date.now() });
 		}
-	};
+	}, []);
 
-	//function to find latency from NTP
-	const pollLatency = () => {
+	const pollLatency = useCallback(() => {
 		sendPing().then(() => {
 			console.log("Ping sent");
 			getTimeOffset();
 			console.log("Awaiting time offset");
 		});
-	};
+	}, []);
 
 	const calculateSeekTime = async (
 		startTimeUtc: number,
