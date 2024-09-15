@@ -85,6 +85,23 @@ interface SpotifyAuth {
 }
 
 interface LiveContextType {
+	socketHandshakes: {
+		socketConnected: boolean;
+		socketInitialized: boolean;
+		sentIdentity: boolean;
+		identityConfirmed: boolean;
+		sentRoomJoin: boolean;
+		roomJoined: boolean;
+		roomChatRequested: boolean;
+		roomChatReceived: boolean;
+		roomQueueRequested: boolean;
+		roomQueueReceived: boolean;
+		sentDMJoin: boolean;
+		dmJoined: boolean;
+		dmsRequested: boolean;
+		dmsReceived: boolean;
+	};
+
 	currentUser: UserDto | undefined;
 	userBookmarks: RoomDto[];
 
@@ -106,8 +123,6 @@ interface LiveContextType {
 	directMessages: DirectMessage[];
 	enterDM: (usernames: string[]) => void;
 	leaveDM: () => void;
-	dmsConnected: boolean;
-	dmsReceived: boolean;
 	dmParticipants: UserDto[];
 	currentRoomVotes: VoteDto[];
 
@@ -186,15 +201,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
 	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
-	const [dmsRequested, setDmsRequested] = useState<boolean>(false);
-	const [dmsReceived, setDmsReceived] = useState<boolean>(false);
-	const [dmsConnected, setDmsConnected] = useState<boolean>(false);
 	const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
-	const [joined, setJoined] = useState<boolean>(false);
-	const [socketInitialized, setSocketInitialized] = useState<boolean>(false);
 	const [mounted, setMounted] = useState<boolean>(false);
-	const [roomChatReceived, setRoomChatReceived] = useState<boolean>(false);
-	const [roomChatRequested, setRoomChatRequested] = useState<boolean>(false);
 	const [roomEmojiObjects, setRoomEmojiObjects] = useState<ObjectConfig[]>([]);
 	const [timeOffset, setTimeOffset] = useState<number>(0);
 	const [backendLatency, setBackendLatency] = useState<number>(0);
@@ -204,17 +212,167 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		devices: [],
 	});
 	const [roomPlaying, setRoomPlaying] = useState<boolean>(false);
-	const createSocketConnection = (): Socket => {
-		console.log("==================== CREATING SOCKET ====================");
-		const s = io(utils.API_BASE_URL + "/live", {
-			transports: ["websocket"],
-			timeout: TIMEOUT,
+	const [socketHandshakesCompleted, setSocketHandshakesCompleted] = useState<{
+		socketConnected: boolean;
+		socketInitialized: boolean;
+		sentIdentity: boolean;
+		identityConfirmed: boolean;
+		sentRoomJoin: boolean;
+		roomJoined: boolean;
+		roomChatRequested: boolean;
+		roomChatReceived: boolean;
+		roomQueueRequested: boolean;
+		roomQueueReceived: boolean;
+		sentDMJoin: boolean;
+		dmJoined: boolean;
+		dmsRequested: boolean;
+		dmsReceived: boolean;
+	}>({
+		socketConnected: false,
+		socketInitialized: false,
+		sentIdentity: false,
+		identityConfirmed: false,
+		sentRoomJoin: false,
+		roomJoined: false,
+		roomChatRequested: false,
+		roomChatReceived: false,
+		roomQueueRequested: false,
+		roomQueueReceived: false,
+		sentDMJoin: false,
+		dmJoined: false,
+		dmsRequested: false,
+		dmsReceived: false,
+	});
+
+	const sendIdentity = (socket: Socket) => {
+		if (
+			currentUser &&
+			!socketHandshakesCompleted.sentIdentity &&
+			!socketHandshakesCompleted.identityConfirmed
+		) {
+			const input: ChatEventDto = {
+				userID: currentUser.userID,
+			};
+			socket.emit("connectUser", JSON.stringify(input));
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					sentIdentity: true,
+				};
+			});
+		}
+	};
+
+	const createSocketConnection = (): Socket | null => {
+		if (socketHandshakesCompleted.socketConnected) {
+			if (socketHandshakesCompleted.socketInitialized) {
+				console.error(
+					"Cannot create new socket connection: Socket already initialized",
+				);
+			} else {
+				console.error(
+					"Cannot create new socket connection: Socket connection already established",
+				);
+			}
+			return null;
+		}
+		if (!currentUser) {
+			console.error("Cannot create new socket connection: User not logged in");
+			return null;
+		}
+		setSocketHandshakesCompleted({
+			socketConnected: false,
+			socketInitialized: false,
+			sentIdentity: false,
+			identityConfirmed: false,
+			sentRoomJoin: false,
+			roomJoined: false,
+			roomChatRequested: false,
+			roomChatReceived: false,
+			roomQueueRequested: false,
+			roomQueueReceived: false,
+			sentDMJoin: false,
+			dmJoined: false,
+			dmsRequested: false,
+			dmsReceived: false,
 		});
-		return s;
+		console.log("==================== CREATING SOCKET ====================");
+		if (socketRef.current === null && currentUser) {
+			const s = io(utils.API_BASE_URL + "/live", {
+				transports: ["websocket"],
+				timeout: TIMEOUT,
+			});
+			s.on("connect", () => {
+				console.log("Connected to the server!");
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						socketConnected: true,
+					};
+				});
+				console.log(s.connected);
+				if (!socketHandshakesCompleted.sentIdentity) {
+					sendIdentity(s);
+				}
+				s.on("connected", (response) => {
+					console.log("Identity confirmed by server");
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							sentIdentity: true,
+							identityConfirmed: true,
+						};
+					});
+				});
+			});
+			s.on("disconnect", () => {
+				console.log("Disconnected from the server");
+				setSocketHandshakesCompleted({
+					socketConnected: false,
+					socketInitialized: false,
+					sentIdentity: false,
+					identityConfirmed: false,
+					sentRoomJoin: false,
+					roomJoined: false,
+					roomChatRequested: false,
+					roomChatReceived: false,
+					roomQueueRequested: false,
+					roomQueueReceived: false,
+					sentDMJoin: false,
+					dmJoined: false,
+					dmsRequested: false,
+					dmsReceived: false,
+				});
+			});
+			s.connect();
+			return s;
+		}
+		return null;
 	};
 	const socketRef = useRef<Socket | null>(null);
 	const createSocket = () => {
-		socketRef.current = createSocketConnection();
+		if (
+			socketRef.current !== null &&
+			socketRef.current.connected &&
+			!socketRef.current.disconnected
+		) {
+			console.error("Socket connection already created");
+			return;
+		}
+		if (
+			currentUser &&
+			(!socketRef.current ||
+				(socketHandshakesCompleted.socketConnected &&
+					socketRef.current.disconnected))
+		) {
+			socketRef.current = createSocketConnection();
+			if (
+				socketRef.current !== null &&
+				!socketHandshakesCompleted.socketInitialized
+			) {
+				initializeSocket();
+			}
+		}
 	};
 	const getSocket = (): Socket | null => {
 		if (socketRef.current === null && currentUser) {
@@ -346,12 +504,26 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const initializeSocket = () => {
+		console.log("Initializing socket");
+		if (!currentUser) {
+			return;
+		}
 		if (socketRef.current === null) {
 			createSocket();
 		}
 
 		if (socketRef.current !== null) {
-			if (!socketInitialized && mounted && currentUser !== undefined) {
+			console.log(
+				"socketInitialized:",
+				socketHandshakesCompleted.socketInitialized,
+			);
+			console.log("mounted:", mounted);
+			console.log("currentUser:", currentUser);
+			if (
+				!socketHandshakesCompleted.socketInitialized &&
+				mounted &&
+				currentUser !== undefined
+			) {
 				socketRef.current.on("userJoinedRoom", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: userJoinedRoom", response);
 					const u: UserDto = currentUser;
@@ -359,28 +531,41 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						response.body &&
 						response.body.sender.userID === currentUser.userID
 					) {
-						setJoined(true);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								roomJoined: true,
+							};
+						});
 					}
-					dmControls.requestDirectMessageHistory();
+					roomControls.requestLiveChatHistory();
 				});
 
 				socketRef.current.on(
 					"liveChatHistory",
 					(history: LiveChatMessageDto[]) => {
 						console.log("SOCKET EVENT: liveChatHistory", history);
-						setRoomChatReceived(true);
 						const chatHistory = history.map((msg) => ({
 							message: msg,
 							me: msg.sender.userID === currentUser.userID,
 						}));
 						setRoomMessages(chatHistory);
-						setRoomChatRequested(false);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								roomChatRequested: false,
+								roomChatReceived: true,
+							};
+						});
 					},
 				);
 
 				socketRef.current.on("liveMessage", (newMessage: ChatEventDto) => {
 					console.log("SOCKET EVENT: liveMessage", newMessage);
-					if (!roomChatRequested || !roomChatReceived) {
+					if (
+						!socketHandshakesCompleted.roomChatRequested ||
+						!socketHandshakesCompleted.roomChatReceived
+					) {
 						dmControls.requestDirectMessageHistory();
 					}
 
@@ -417,14 +602,24 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						);
 					}
 
-					const input: ChatEventDto = {
-						userID: currentUser.userID,
-					};
-					socketRef.current.emit("connectUser", JSON.stringify(input));
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							socketConnected: true,
+						};
+					});
+					sendIdentity(socketRef.current);
 				});
 
 				socketRef.current.on("connected", (response: ChatEventDto) => {
 					console.log("SOCKET EVENT: connected", response);
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							sentIdentity: true,
+							identityConfirmed: true,
+						};
+					});
 					if (currentRoom) {
 						joinRoom(currentRoom.roomID);
 					}
@@ -508,7 +703,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socketRef.current.on("userOnline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOnline", data);
 					if (data.userID === currentUser.userID) {
-						setDmsConnected(true);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								dmJoined: true,
+							};
+						});
 					}
 					//we can use this to update the user's status
 				});
@@ -516,7 +716,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socketRef.current.on("userOffline", (data: { userID: string }) => {
 					console.log("SOCKET EVENT: userOffline", data);
 					if (data.userID === currentUser.userID) {
-						setDmsConnected(false);
+						setSocketHandshakesCompleted((prev) => {
+							return {
+								...prev,
+								dmJoined: false,
+							};
+						});
 					}
 					//we can use this to update the user's status
 				});
@@ -527,7 +732,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socketRef.current.on("dmHistory", (data: DirectMessageDto[]) => {
 					console.log("SOCKET EVENT: dmHistory", data);
 					console.log("b");
-					setDmsReceived(true);
 					console.log("c");
 					console.log("Setting DMs");
 					const dmHistory = data.map(
@@ -540,7 +744,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					);
 					dmHistory.sort((a, b) => a.message.index - b.message.index);
 					setDirectMessages(dmHistory);
-					setDmsRequested(false);
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							dmsRequested: false,
+							dmsReceived: true,
+						};
+					});
 				});
 
 				socketRef.current.on("emojiReaction", (reaction: EmojiReactionDto) => {
@@ -599,17 +809,28 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					updateRoomQueue(newQueue);
 				});
 
+				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
 				socketRef.current.connect();
-				socketRef.current.emit(
-					"connectUser",
-					JSON.stringify({ userID: currentUser.userID }),
-				);
+				while (!socketRef.current.connected) {
+					console.log("awaiting socket connection");
+				}
+				sendIdentity(socketRef.current);
+				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
 
-				setSocketInitialized(true);
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						socketInitialized: true,
+					};
+				});
 				pollLatency();
 			}
 
-			if (!joined && currentRoom && currentRoom.roomID) {
+			if (
+				!socketHandshakesCompleted.roomJoined &&
+				currentRoom &&
+				currentRoom.roomID
+			) {
 				joinRoom(currentRoom.roomID);
 			}
 		}
@@ -635,10 +856,22 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			};
 			socket.emit("joinRoom", JSON.stringify(input));
 
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					sentRoomJoin: true,
+				};
+			});
+
 			//request chat history
-			setRoomChatReceived(false);
 			roomControls.requestLiveChatHistory();
-			setRoomChatRequested(true);
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					roomChatRequested: true,
+					roomChatReceived: false,
+				};
+			});
 		}
 	};
 
@@ -655,21 +888,37 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 
 		const socket = getSocket();
-		setJoined(false);
+		setSocketHandshakesCompleted((prev) => {
+			return {
+				...prev,
+				roomJoined: false,
+			};
+		});
 
-		const input: ChatEventDto = {
-			userID: currentUser.userID,
-			body: {
-				messageBody: "",
-				sender: currentUser,
-				roomID: currentRoom.roomID,
-				dateCreated: new Date().toISOString(),
-			},
-		};
-		socket.emit("leaveRoom", JSON.stringify(input));
+		if (socket !== null) {
+			const input: ChatEventDto = {
+				userID: currentUser.userID,
+				body: {
+					messageBody: "",
+					sender: currentUser,
+					roomID: currentRoom.roomID,
+					dateCreated: new Date().toISOString(),
+				},
+			};
+			socket.emit("leaveRoom", JSON.stringify(input));
+		}
 		setRoomMessages([]);
-		setRoomChatReceived(false);
-		setRoomChatRequested(false);
+		setSocketHandshakesCompleted((prev) => {
+			return {
+				...prev,
+				sentRoomJoin: false,
+				roomJoined: false,
+				roomChatRequested: false,
+				roomChatReceived: false,
+				roomQueueRequested: false,
+				roomQueueReceived: false,
+			};
+		});
 		setCurrentRoom(undefined);
 		setRoomQueue([]);
 	};
@@ -680,24 +929,35 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.error("User is not logged in");
 			return;
 		}
-		const socket = getSocket();
 		const promises: Promise<UserDto>[] = usernames.map((username) =>
 			getUser(username),
 		);
 		Promise.all(promises)
 			.then((users) => {
 				const socket = getSocket();
-
 				setDmParticipants(users);
-				setDmsReceived(false);
-				setDmsRequested(true);
-
-				const input = {
-					userID: currentUser.userID,
-					participantID: users[0].userID,
-				};
-				socket.emit("enterDirectMessage", JSON.stringify(input));
-				dmControls.requestDirectMessageHistory();
+				if (socket !== null) {
+					const input = {
+						userID: currentUser.userID,
+						participantID: users[0].userID,
+					};
+					socket.emit("enterDirectMessage", JSON.stringify(input));
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							sentDMJoin: true,
+							dmJoined: false,
+						};
+					});
+					dmControls.requestDirectMessageHistory();
+					setSocketHandshakesCompleted((prev) => {
+						return {
+							...prev,
+							dmsRequested: false,
+							dmsReceived: false,
+						};
+					});
+				}
 			})
 			.catch((error) => {
 				console.error("Failed to get user info:", error);
@@ -706,21 +966,30 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const leaveDM = () => {
 		pollLatency();
-		if (!currentUser) {
-			console.error("User is not logged in");
-			return;
+		if (socketHandshakesCompleted.dmJoined) {
+			if (!currentUser) {
+				console.error("User is not logged in");
+				return;
+			}
+			const socket = getSocket();
+			if (socket !== null) {
+				const input = {
+					userID: currentUser.userID,
+				};
+				socket.emit("exitDirectMessage", JSON.stringify(input));
+				console.log("emit exitDirectMessage with body:", input);
+				setSocketHandshakesCompleted((prev) => {
+					return {
+						...prev,
+						dmJoined: false,
+						dmsRequested: false,
+						dmsReceived: true,
+					};
+				});
+				setDmParticipants([]);
+				setDirectMessages([]);
+			}
 		}
-		const socket = getSocket();
-		setDmsConnected(false);
-		const input = {
-			userID: currentUser.userID,
-		};
-		socket.emit("exitDirectMessage", JSON.stringify(input));
-		console.log("emit exitDirectMessage with body:", input);
-		setDmParticipants([]);
-		setDmsReceived(false);
-		setDmsRequested(false);
-		setDirectMessages([]);
 	};
 
 	// Method to send a ping and wait for a response or timeout
@@ -774,8 +1043,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const getTimeOffset = () => {
 		const socket = getSocket();
-		let t0 = Date.now();
-		socket.emit("time_sync", { t0: Date.now() });
+		if (socket !== null) {
+			let t0 = Date.now();
+			socket.emit("time_sync", { t0: Date.now() });
+		}
 	};
 
 	//function to find latency from NTP
@@ -815,6 +1086,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const dmControls: DirectMessageControls = {
 		sendDirectMessage: function (message: DirectMessage): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -835,6 +1111,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		editDirectMessage: function (message: DirectMessage): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -859,6 +1140,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		deleteDirectMessage: function (message: DirectMessage): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			if (!currentUser) {
 				console.error("User is not logged in");
 				return;
@@ -880,7 +1166,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		requestDirectMessageHistory: function (): void {
 			const socket = getSocket();
-			if (dmsRequested) {
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
+			if (socketHandshakesCompleted.dmsRequested) {
 				console.log("Already requested DM history");
 				return;
 			}
@@ -895,8 +1186,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
-			setDmsReceived(false);
-			setDmsRequested(true);
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					dmsRequested: true,
+					dmsReceived: false,
+				};
+			});
 			const input = {
 				userID: currentUser.userID,
 				participantID: dmParticipants[0].userID,
@@ -908,6 +1204,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const roomControls: RoomControls = {
 		sendLiveChatMessage: function (message: string): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -936,6 +1237,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		sendReaction: function (emoji: string): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			if (!currentUser) {
 				return;
 			}
@@ -952,8 +1258,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		requestLiveChatHistory: function (): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			// if (this.requestingLiveChatHistory) {
-			if (roomChatRequested) {
+			if (socketHandshakesCompleted.roomChatRequested) {
 				console.log("Already requested live chat history");
 				return;
 			}
@@ -966,7 +1277,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				console.error("User is not logged in");
 				return;
 			}
-			setRoomChatRequested(true);
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
 				body: {
@@ -977,6 +1287,12 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				},
 			};
 			socket.emit("getLiveChatHistory", JSON.stringify(input));
+			setSocketHandshakesCompleted((prev) => {
+				return {
+					...prev,
+					roomChatRequested: true,
+				};
+			});
 		},
 
 		canControlRoom: function (): boolean {
@@ -997,6 +1313,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		requestRoomQueue: function (): void {
 			const socket = getSocket();
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
 			console.log("Requesting room queue");
 			if (!currentRoom) {
 				return;
@@ -1219,6 +1540,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			startPlayback: function (): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1239,6 +1565,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			pausePlayback: function (): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1259,6 +1590,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			stopPlayback: function (): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1279,6 +1615,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			nextTrack: function (): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				pollLatency();
 				if (!currentUser) {
 					console.error("User is not logged in");
@@ -1300,6 +1641,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		queue: {
 			enqueueSong: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				console.log("Enqueueing song", song);
 				if (!currentRoom) {
 					return;
@@ -1319,6 +1665,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			dequeueSong: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				console.log("Dequeueing song", song);
 				if (!currentRoom) {
 					return;
@@ -1338,6 +1689,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			upvoteSong: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				if (!currentRoom) {
 					return;
 				}
@@ -1353,6 +1709,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			downvoteSong: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				if (!currentRoom) {
 					return;
 				}
@@ -1368,6 +1729,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			swapSongVote: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				if (!currentRoom) {
 					return;
 				}
@@ -1383,6 +1749,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 			undoSongVote: function (song: RoomSongDto): void {
 				const socket = getSocket();
+				if (!socket) {
+					console.error("Socket connection not initialized");
+					return;
+				}
+
 				if (!currentRoom) {
 					return;
 				}
@@ -1530,6 +1901,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	return (
 		<LiveContext.Provider
 			value={{
+				socketHandshakes: socketHandshakesCompleted,
+
 				currentUser,
 				userBookmarks,
 
@@ -1551,8 +1924,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				directMessages,
 				enterDM,
 				leaveDM,
-				dmsConnected,
-				dmsReceived,
 				dmParticipants,
 				currentRoomVotes,
 
