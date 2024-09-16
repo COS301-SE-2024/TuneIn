@@ -1,11 +1,4 @@
-import {
-	Controller,
-	Get,
-	Query,
-	Redirect,
-	Request,
-	UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
@@ -15,28 +8,53 @@ import {
 import {
 	ApiBearerAuth,
 	ApiOperation,
+	ApiQuery,
 	ApiResponse,
+	ApiSecurity,
 	ApiTags,
 } from "@nestjs/swagger";
 import * as PrismaTypes from "@prisma/client";
-import { SpotifyService } from "../../spotify/spotify.service";
-import { JwtAuthGuard } from "../jwt-auth.guard";
 import { AuthService, JWTPayload } from "../auth.service";
+import { JwtAuthGuard } from "../jwt-auth.guard";
 
 @Controller("auth/spotify")
 export class SpotifyAuthController {
 	constructor(
 		private readonly spotifyAuth: SpotifyAuthService,
-		private readonly spotify: SpotifyService,
 		private readonly auth: AuthService,
 	) {}
 
+	/*
 	@Get("redirect")
 	@Redirect()
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Spotify OAuth Redirect" })
+	@ApiQuery({
+		name: "code",
+		description:
+			"The authorization code returned by Spotify after user consent",
+		required: true,
+		type: String,
+		example: "NApCCg..BkWtQ",
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: "state",
+		description: "A unique state value to prevent CSRF attacks",
+		required: true,
+		type: String,
+		example: "34fFs29kd09",
+		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: "Spotify OAuth Redirect",
+		description: "Redirects to the Expo app with the Spotify auth code",
+		operationId: "spotifyRedirect",
+	})
+	@ApiResponse({
+		status: 302,
+		description: "Redirects to the Expo app with the Spotify auth code",
+	})
 	async performRedirect(
-		@Request() req: Request,
 		@Query("code") code: string,
 		@Query("state") state: string,
 	) {
@@ -53,10 +71,33 @@ export class SpotifyAuthController {
 			url: redirectURI,
 		};
 	}
+	*/
 
 	@Get("callback")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Callback for Spotify Auth" })
+	@ApiOperation({
+		summary: "Callback for Spotify Auth",
+		description:
+			"Handles the Spotify auth callback, creates an account for the user (if necessary), authenticates the user, and returns a JWT token",
+		operationId: "spotifyCallback",
+	})
+	@ApiQuery({
+		name: "code",
+		description:
+			"The authorization code returned by Spotify after user consent",
+		required: true,
+		type: String,
+		example: "NApCCg..BkWtQ",
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: "state",
+		description: "A unique state value to prevent CSRF attacks",
+		required: true,
+		type: String,
+		example: "34fFs29kd09",
+		allowEmptyValue: false,
+	})
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
@@ -64,7 +105,6 @@ export class SpotifyAuthController {
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
 	async handleSpotifyAuthCallback(
-		@Request() req: Request,
 		@Query("code") code: string,
 		@Query("state") state: string,
 	) {
@@ -89,10 +129,21 @@ export class SpotifyAuthController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("tokens")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Get Spotify Auth Tokens" })
+	@ApiOperation({
+		summary: "Get Spotify Auth Tokens",
+		description: "Returns the user's Spotify Auth Tokens",
+		operationId: "getSpotifyTokens",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "The user's Spotify Auth Tokens",
@@ -110,10 +161,22 @@ export class SpotifyAuthController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("refresh")
 	@ApiTags("auth")
-	@ApiOperation({ summary: "Manually Refresh Spotify Auth Token" })
+	@ApiOperation({
+		summary: "Manually Refresh Spotify Auth Tokens",
+		description:
+			"This method will manually refresh the user's Spotify Auth Tokens and return the new tokens",
+		operationId: "refreshSpotifyTokens",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "The user's new Spotify Auth Tokens",

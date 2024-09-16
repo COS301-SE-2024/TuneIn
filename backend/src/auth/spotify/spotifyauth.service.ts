@@ -8,12 +8,11 @@ import * as PrismaTypes from "@prisma/client";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
-import { IsNumber, IsObject, IsString } from "class-validator";
+import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
-import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
+import { Type } from "class-transformer";
 
 export class SpotifyTokenResponse {
 	@ApiProperty()
@@ -67,6 +66,8 @@ export class SpotifyCallbackResponse {
 
 	@ApiProperty()
 	@IsObject()
+	@Type(() => SpotifyTokenResponse)
+	@ValidateNested()
 	spotifyTokens: SpotifyTokenResponse;
 }
 
@@ -74,16 +75,15 @@ export class SpotifyCallbackResponse {
 export class SpotifyAuthService {
 	private clientId;
 	private clientSecret;
-	private redirectUri;
+	// private redirectUri;
 	private authHeader;
 
 	constructor(
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly spotify: SpotifyService,
-		private readonly tasksService: TasksService,
+		// private readonly dbUtils: DbUtilsService,
+		private readonly spotify: SpotifyService, // private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -99,15 +99,15 @@ export class SpotifyAuthService {
 		}
 		this.clientSecret = clientSecret;
 
-		const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
-		if (!redirectUri) {
-			throw new Error("Missing SPOTIFY_REDIRECT_URI");
-		}
-		this.redirectUri = redirectUri;
+		// const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
+		// if (!redirectUri) {
+		// 	throw new Error("Missing SPOTIFY_REDIRECT_URI");
+		// }
+		// this.redirectUri = redirectUri;
 
-		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
-			"base64",
-		);
+		this.authHeader = Buffer.from(
+			`${this.clientId}:${this.clientSecret}`,
+		).toString("base64");
 	}
 
 	//how state is constructed in frontend
@@ -117,7 +117,7 @@ export class SpotifyAuthService {
 			"unique-pre-padding": generateRandom(10),
 			"expo-redirect": redirectURI,
 			"ip-address": utils.API_BASE_NO_PORT,
-			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"redirect-used": SPOTIFY_REDIRECT_URI,
 			"unique-post-padding": generateRandom(10),
 		};
 		const bytes = new TextEncoder().encode(JSON.stringify(state));
@@ -288,33 +288,53 @@ export class SpotifyAuthService {
 			throw new Error("Failed to find user");
 		}
 		if (existingUser && existingUser.length > 0) {
-			return existingUser[0];
+			if (existingUser.length > 1) {
+				throw new Error("Multiple users with the same username");
+			}
+			if (!existingUser[0] || existingUser[0] === null) {
+				throw new Error("Failed to find user");
+			}
+			const e = existingUser[0];
+			return e;
 		}
 
 		const user: Prisma.usersCreateInput = {
 			username: spotifyUser.id,
 			full_name: spotifyUser.display_name,
 			external_links: {
-				spotify: spotifyUser.external_urls.spotify,
+				spotify: [spotifyUser.external_urls.spotify],
 			},
 			email: spotifyUser.email,
 		};
 
 		if (spotifyUser.images && spotifyUser.images.length > 0) {
 			//find largest profile picture
-			let largest = 0;
+			let largest = -1;
 			for (let i = 0; i < spotifyUser.images.length; i++) {
-				if (spotifyUser.images[i].height > largest) {
+				const img = spotifyUser.images[i];
+				if (
+					img !== undefined &&
+					img.height !== undefined &&
+					img.height > largest
+				) {
 					largest = i;
 				}
+			}
+			let imageURL = "";
+			if (
+				largest >= 0 &&
+				spotifyUser.images[largest] !== undefined &&
+				spotifyUser.images[largest] !== undefined
+			) {
+				imageURL = spotifyUser.images[largest]?.url || "";
 			}
 
 			console.log("spotifyUser image : " + spotifyUser.images);
 			console.log("\nimage size: " + largest);
 
 			user.profile_picture =
-				largest > 0
-					? spotifyUser.images[largest]?.url
+				imageURL !== ""
+					? imageURL
 					: "https://example.com/default-profile-picture.png";
 		}
 

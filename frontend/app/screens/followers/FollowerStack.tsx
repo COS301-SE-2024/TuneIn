@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
 		height: 4,
 	},
 	tabBarStyle: {
-		backgroundColor: colors.backgroundColor,
+		// backgroundColor: colors.backgroundColor,
 		height: 45,
 	},
 	tabBarItemStyle: {

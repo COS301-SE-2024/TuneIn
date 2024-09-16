@@ -28,7 +28,7 @@ import { EmojiReactionDto } from "./dto/emojireaction.dto";
 	namespace: "/live",
 	transports: ["websocket"],
 	cors: {
-		origin: "http://localhost:3000",
+		origin: "*",
 		methods: ["GET", "POST"],
 	},
 })
@@ -47,28 +47,28 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer() server: Server;
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async handleConnection(client: Socket, ...args: any[]) {
+	async handleConnection(client: Socket) {
 		this.handOverSocketServer(this.server);
 		console.log("Client connected with ID: " + client.id);
 	}
 
 	async handleDisconnect(client: Socket) {
-		this.handOverSocketServer(this.server);
-		console.log("Client (id: " + client.id + ") disconnected");
-		if (this.roomUsers.getConnectedUser(client.id) !== null) {
-			this.roomUsers.leaveRoom(client.id);
+		try {
+			this.handOverSocketServer(this.server);
+			console.log("Client (id: " + client.id + ") disconnected");
+			if (this.roomUsers.getConnectedUser(client.id) !== null) {
+				this.roomUsers.leaveRoom(client.id);
+			}
+			this.roomUsers.removeConnectedUser(client.id);
+			this.dmUsers.disconnectChat(client.id);
+			this.dmUsers.removeConnectedUser(client.id);
+		} catch (error) {
+			console.error(error);
 		}
-		this.roomUsers.removeConnectedUser(client.id);
-		this.dmUsers.disconnectChat(client.id);
-		this.dmUsers.removeConnectedUser(client.id);
 	}
 
 	@SubscribeMessage("message")
-	async handleMessage(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleMessage(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log(p);
@@ -101,7 +101,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -116,7 +116,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error as Error);
+			this.handleThrownError(error as Error);
 		}
 	}
 	*/
@@ -131,7 +131,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error as Error);
+			this.handleThrownError(error as Error);
 		}
 	}
 	*/
@@ -139,10 +139,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
-	async handleLiveMessage(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleLiveMessage(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
@@ -192,16 +189,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
-	async handleGetLiveChatHistory(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleGetLiveChatHistory(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
@@ -242,7 +236,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -322,7 +316,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -378,7 +372,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -409,7 +403,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -447,11 +441,11 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("user: " + user);
 				console.log("chatID: " + chatID);
 				const finalMessage: DirectMessageDto =
-					await this.userService.sendMessage(user.userID, payload);
+					await this.userService.sendMessage(payload);
 				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -493,7 +487,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -535,7 +529,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -579,7 +573,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -624,7 +618,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -660,7 +654,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(chatID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -706,7 +700,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				if (payload.action === "edit") {
 					const edited: DirectMessageDto = await this.userService.editMessage(
-						user.userID,
 						payload.message,
 					);
 					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
@@ -726,10 +719,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						throw new Error("Message does not exist");
 					}
 
-					const deleted = await this.userService.deleteMessage(
-						user.userID,
-						deletedMessage,
-					);
+					const deleted = await this.userService.deleteMessage(deletedMessage);
 					if (!deleted) {
 						throw new Error("Message could not be deleted");
 					}
@@ -744,7 +734,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -838,7 +828,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -874,7 +864,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(client, error as Error);
+			this.handleThrownError(error as Error);
 		}
 	}
 
@@ -910,16 +900,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
-	async handleSeekMedia(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleSeekMedia(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
@@ -928,16 +915,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)
-	async handleCurrentMedia(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleCurrentMedia(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.CURRENT_MEDIA);
@@ -946,16 +930,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.QUEUE_STATE)
-	async handleQueueState(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleQueueState(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
@@ -964,16 +945,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
-	async handleMediaSync(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
+	async handleMediaSync(@MessageBody() p: string): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
@@ -982,7 +960,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(client, error as Error);
+				this.handleThrownError(error as Error);
 			}
 		});
 	}
@@ -1023,7 +1001,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		return result;
 	}
 
-	async handleThrownError(client: Socket, error: Error): Promise<void> {
+	async handleThrownError(error: Error): Promise<void> {
 		const errorResponse: ChatEventDto = {
 			userID: null,
 			date_created: new Date(),

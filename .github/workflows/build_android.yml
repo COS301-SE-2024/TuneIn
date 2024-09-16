@@ -51,6 +51,10 @@ jobs:
         run:  |
           cd frontend && npm ci
 
+      - name: 📤 Upload app secrets to EAS
+        run: |
+          cd frontend && eas secret:push --scope project --env-file .env --force
+
       # Step 4: Install dependencies
       # - name: 📦 Install Yarn dependencies
       #   run: cd frontend && yarn install

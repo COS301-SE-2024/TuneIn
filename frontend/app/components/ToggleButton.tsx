@@ -4,16 +4,18 @@ import { Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 type ToggleButtonProps = {
 	label: string;
 	testID?: string;
+	value: string;
 	onValueChange: (value: string) => void;
 };
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({
 	label,
 	testID,
+	value,
 	onValueChange,
 }) => {
 	const [isSelected, setIsSelected] = useState(false);
-	const [text, setText] = useState("");
+	const [text, setText] = useState(value);
 	const inputRef = useRef<TextInput>(null);
 
 	const handleClick = () => {
@@ -22,13 +24,15 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 
 	const changeText = (val: any) => {
 		setText(val);
-		onValueChange(val);
+		// onValueChange(val);
 	};
 
 	useEffect(() => {
 		if (isSelected && inputRef.current) {
 			inputRef.current.focus();
 		}
+		console.log("Toggle call with text: " + text);
+		onValueChange(text);
 	}, [isSelected]);
 
 	return (
@@ -45,6 +49,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 					ref={inputRef}
 					style={styles.input}
 					value={text}
+					onBlur={() => setIsSelected(false)}
 					onChangeText={changeText}
 					placeholder={`Enter ${label}`}
 					placeholderTextColor="#fff"

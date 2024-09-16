@@ -11,7 +11,7 @@ export class GenresService {
 		const result: string[] = [];
 		for (let i = 0; i < genres_only.length; i++) {
 			const g = genres_only[i];
-			if (g !== null) {
+			if (g !== null && g !== undefined) {
 				result.push(g);
 			}
 		}

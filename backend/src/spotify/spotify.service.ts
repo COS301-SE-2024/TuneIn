@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
-import { HttpService } from "@nestjs/axios";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import {
@@ -17,13 +16,12 @@ const NUMBER_OF_RETRIES = 3;
 @Injectable()
 export class SpotifyService {
 	private clientId;
-	private clientSecret;
-	private redirectUri;
-	private authHeader;
+	// private clientSecret;
+	// private redirectUri;
+	// private authHeader;
 
 	constructor(
 		private readonly configService: ConfigService,
-		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
@@ -32,29 +30,38 @@ export class SpotifyService {
 		}
 		this.clientId = clientId;
 
-		const clientSecret = this.configService.get<string>(
-			"SPOTIFY_CLIENT_SECRET",
-		);
-		if (!clientSecret) {
-			throw new Error("Missing SPOTIFY_CLIENT_SECRET");
-		}
-		this.clientSecret = clientSecret;
+		// const clientSecret = this.configService.get<string>(
+		// 	"SPOTIFY_CLIENT_SECRET",
+		// );
+		// if (!clientSecret) {
+		// 	throw new Error("Missing SPOTIFY_CLIENT_SECRET");
+		// }
+		// this.clientSecret = clientSecret;
 
-		const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
-		if (!redirectUri) {
-			throw new Error("Missing SPOTIFY_REDIRECT_URI");
-		}
-		this.redirectUri = redirectUri;
+		// const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
+		// if (!redirectUri) {
+		// 	throw new Error("Missing SPOTIFY_REDIRECT_URI");
+		// }
+		// this.redirectUri = redirectUri;
 
-		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
-			"base64",
-		);
+		// this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
+		// 	"base64",
+		// );
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
 		const api = SpotifyApi.withAccessToken(this.clientId, token);
 		const user = await api.currentUser.profile();
 		return user;
+	}
+
+	async getAudioFeatures(
+		token: SpotifyTokenResponse,
+		songID: string,
+	): Promise<Spotify.AudioFeatures> {
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const audioFeatures = await api?.tracks?.audioFeatures(songID);
+		return audioFeatures;
 	}
 
 	async getUserPlaylists(
@@ -208,13 +215,17 @@ export class SpotifyService {
 
 		const dbLikedSongs: Prisma.songCreateInput[] = [];
 		for (const track of newLikedSongs) {
+			// const audioFeatures: Spotify.AudioFeatures =
+			// 	await api.tracks.audioFeatures(track.track.id);
 			const song: Prisma.songCreateInput = {
 				name: track.track.name,
 				duration: track.track.duration_ms,
-				artist: track.track.artists[0].name,
+				artists: track.track.artists.map((artist) => artist.name),
 				genres: track.track.album.genres ? track.track.album.genres : [],
 				artwork_url: this.getLargestImage(track.track.album.images).url,
 				spotify_id: track.track.id,
+				// audio_features: JSON.stringify(audioFeatures),
+				audio_features: {},
 			};
 			dbLikedSongs.push(song);
 		}
@@ -291,10 +302,17 @@ export class SpotifyService {
 	getLargestImage(images: Spotify.Image[]): Spotify.Image {
 		let largest = 0;
 		for (let i = 0; i < images.length; i++) {
-			if (images[i].height * images[i].width > largest) {
-				largest = i;
+			const img = images[i];
+			if (img) {
+				if (img.height * img.width > largest) {
+					largest = i;
+				}
 			}
 		}
-		return images[largest];
+		const result = images[largest];
+		if (!result) {
+			throw new Error("Failed to find largest image");
+		}
+		return result;
 	}
 }

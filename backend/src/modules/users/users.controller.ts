@@ -9,13 +9,15 @@ import {
 	Request,
 	Param,
 } from "@nestjs/common";
-import { UsersService } from "./users.service";
+import { UserListeningStatsDto, UsersService } from "./users.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
+	ApiBody,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
+	ApiSecurity,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -23,8 +25,6 @@ import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { DbUtilsService } from "../db-utils/db-utils.service";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
@@ -34,8 +34,6 @@ import { DirectMessageDto } from "./dto/dm.dto";
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
 		private readonly auth: AuthService,
 	) {}
 
@@ -68,52 +66,59 @@ export class UsersController {
 		return this.usersService.remove(id);
 	}
   */
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get()
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get current user's profile info" })
+	@ApiOperation({
+		summary: "Get current user's profile info",
+		description: "Get the profile info of the currently authenticated user.",
+		operationId: "getProfile",
+	})
 	@ApiOkResponse({
 		description: "Successfully returned user profile info.",
 		type: UserDto,
 	})
-	@ApiTags("users")
-	getProfile(@Request() req: any): Promise<UserDto> {
+	getProfile(@Request() req: Request): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return this.usersService.getProfile(userInfo.id);
 	}
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Put()
-	@ApiTags("users")
-	@ApiOperation({ summary: "Update user's profile info" })
+	@ApiOperation({
+		summary: "Update user's profile info",
+		description: "Update the profile info of the currently authenticated user.",
+		operationId: "putProfile",
+	})
 	@ApiOkResponse({
 		description: "Returns the updated user profile info.",
 		type: UserDto,
 	})
 	@ApiBadRequestResponse({
 		description: "Bad request. The request body may be malformed.",
+	})
+	@ApiBody({
+		type: UpdateUserDto,
+		required: true,
+		description: "The updated user profile info",
 	})
 	async putProfile(
-		@Request() req: any,
-		@Body() updateProfileDto: UpdateUserDto,
-	): Promise<UserDto> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Patch()
-	@ApiTags("users")
-	@ApiOperation({ summary: "Update user's profile info" })
-	@ApiOkResponse({
-		description: "Returns the updated user profile info.",
-		type: UserDto,
-	})
-	@ApiBadRequestResponse({
-		description: "Bad request. The request body may be malformed.",
-	})
-	async patchProfile(
-		@Request() req: any,
+		@Request() req: Request,
 		@Body() updateProfileDto: UpdateUserDto,
 	): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -121,48 +126,145 @@ export class UsersController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Patch()
+	@ApiOperation({
+		summary: "Update user's profile info",
+		description: "Update the profile info of the currently authenticated user.",
+		operationId: "patchProfile",
+	})
+	@ApiOkResponse({
+		description: "Returns the updated user profile info.",
+		type: UserDto,
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request. The request body may be malformed.",
+	})
+	@ApiBody({
+		type: UpdateUserDto,
+		required: true,
+		description: "The updated user profile info",
+	})
+	async patchProfile(
+		@Request() req: Request,
+		@Body() updateProfileDto: UpdateUserDto,
+	): Promise<UserDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.updateProfile(userInfo.id, updateProfileDto);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("dms")
-	@ApiTags("users")
 	@ApiOperation({
 		summary: "Get the last DMs sent to or received from another user",
+		description:
+			"Get all of the last DMs either sent to or received from another user",
+		operationId: "getDMs",
 	})
 	@ApiOkResponse({
 		description: "The last DMs as an array of DirectMessageDto.",
-		type: Object,
+		type: DirectMessageDto,
+		isArray: true,
 	})
-	async getDMs(@Request() req: any): Promise<DirectMessageDto[]> {
+	async getDMs(@Request() req: Request): Promise<DirectMessageDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getLastDMs(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("stats")
+	@ApiOperation({
+		summary: "Get a user's listening stats",
+		description:
+			"Get the listening stats of the authenticated user, including total time listened, and average listening time per day, most played songs, genres, and artists.",
+		operationId: "getListeningStats",
+	})
+	@ApiOkResponse({
+		description: "The user's listening stats as a UserListeningStatsDto.",
+		type: UserListeningStatsDto,
+	})
+	async getListeningStats(
+		@Request() req: Request,
+	): Promise<UserListeningStatsDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getListeningStats(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("rooms")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's rooms" })
+	@ApiOperation({
+		summary: "Get the user's rooms",
+		description: "Get all of the rooms that the user created.",
+		operationId: "getUserRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getUserRooms(@Request() req: any): Promise<RoomDto[]> {
+	async getUserRooms(@Request() req: Request): Promise<RoomDto[]> {
 		console.log("called /users/rooms");
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post("rooms")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Create a new room" })
+	@ApiOperation({
+		summary: "Create a new room",
+		description: "Create a new room with the given information.",
+		operationId: "createRoom",
+	})
 	@ApiOkResponse({
 		description: "The newly created room as a RoomDto.",
 		type: RoomDto,
 	})
+	@ApiBody({
+		type: CreateRoomDto,
+		required: true,
+		description: "The room to create",
+	})
 	async createRoom(
-		@Request() req: any,
+		@Request() req: Request,
 		@Body() createRoomDto: CreateRoomDto,
 	): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
@@ -170,118 +272,356 @@ export class UsersController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("rooms/recent")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's recent rooms" })
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's recent rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getRecentRooms(@Request() req: any): Promise<RoomDto[]> {
+	@ApiBadRequestResponse({
+		description: "Invalid request parameters or missing required headers.",
+	})
+	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRooms(userInfo.id);
+		return await this.usersService.getRecentRoomsById(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/rooms/recent")
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRoomsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getRecentRoomsByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getRecentRoomByUsername(username);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("rooms/foryou")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's recommended rooms" })
+	@ApiOperation({
+		summary: "Get a user's recommended rooms",
+		description: "Get the rooms that are recommended for the user.",
+		operationId: "getRecommendedRooms",
+	})
 	@ApiOkResponse({
 		description: "The user's recommended rooms as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getRecommendedRooms(@Request() req: any): Promise<RoomDto[]> {
+	async getRecommendedRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getRecommendedRooms(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("rooms/current")
+	@ApiOperation({
+		summary: "Get a user's current room",
+		description: "Get the room that the user is currently in.",
+		operationId: "getCurrentRoom",
+	})
+	@ApiOkResponse({
+		description: "The user's current room as a RoomDto.",
+		type: RoomDto,
+	})
+	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getCurrentRoomDto(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("friends")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's friends" })
+	@ApiOperation({
+		summary: "Get a user's friends",
+		operationId: "getUserFriends",
+	})
 	@ApiOkResponse({
 		description: "The user's friends as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
-	async getUserFriends(@Request() req: any): Promise<UserDto[]> {
+	async getUserFriends(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getUserFriends(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("friends/requests")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's friend requests" })
+	@ApiOperation({
+		summary: "Get a user's friend requests",
+		operationId: "getFriendRequests",
+	})
 	@ApiOkResponse({
 		description: "The user's friend requests as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
-	async getFriendRequests(@Request() req: any): Promise<UserDto[]> {
+	async getFriendRequests(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFriendRequests(userInfo.id);
 	}
 
+	// add endpoint for getting a user's pending requests
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get("followers")
+	@Get("friends/pending")
 	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's followers" })
-	@ApiParam({ name: "none" })
+	@ApiOperation({
+		summary: "Get a user's sent friend requests",
+		operationId: "getPendingRequests",
+	})
+	@ApiOkResponse({
+		description: "The user's sent friend requests as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting pending friend requests.",
+	})
+	async getPendingRequests(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPendingRequests(userInfo.id);
+	}
+
+	// add an endpoint to get potential friends
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/potential")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get potential friends for the user" })
+	@ApiOkResponse({
+		description: "The user's potential friends as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting potential friends.",
+	})
+	async getPotentialFriends(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPotentialFriends(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("followers")
+	@ApiOperation({
+		summary: "Get a user's followers",
+		description: "Get all of the users that follow the authenticated user.",
+		operationId: "getFollowers",
+	})
 	@ApiOkResponse({
 		description: "The user's followers as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
-	async getFollowers(@Request() req: any): Promise<UserDto[]> {
+	async getFollowers(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowers(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("following")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get a user's following" })
+	@ApiOperation({
+		summary: "Get a user's following",
+		description: "Get all of the users that the authenticated user follows.",
+		operationId: "getFollowing",
+	})
 	@ApiOkResponse({
 		description: "The user's following as an array of UserDto.",
 		type: UserDto,
 		isArray: true,
 	})
-	async getFollowing(@Request() req: any): Promise<UserDto[]> {
+	async getFollowing(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFollowing(userInfo.id);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get("blocked")
+	@ApiOperation({
+		summary: "Get blocked users",
+		description:
+			"Get all of the users that the authenticated user has blocked.",
+		operationId: "getBlocked",
+	})
+	@ApiOkResponse({
+		description: "The user's following as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	async getBlocked(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getFollowing(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get("bookmarks")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get the authorized user's bookmarks" })
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarks",
+	})
 	@ApiOkResponse({
 		description: "The user's bookmarks as an array of RoomDto.",
 		type: RoomDto,
 		isArray: true,
 	})
-	async getBookmarks(@Request() req: any): Promise<RoomDto[]> {
+	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarks(userInfo.id);
+		return await this.usersService.getBookmarksById(userInfo.id);
 	}
 
+	@Get(":username/bookmarks")
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getBookmarksByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarksByUsername(username);
+	}
+
+	@Get(":username/taken")
+	@ApiOperation({
+		summary: "Check if a username is taken",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "isUsernameTaken",
+	})
+	@ApiOkResponse({
+		description: "True if taken, false if not.",
+	})
+	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
+		return await this.usersService.usernameTaken(username);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Get(":username")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Get user profile info by username" })
+	@ApiOperation({
+		summary: "Get user profile info by username",
+		description: "Get the profile info of the user with the given username.",
+		operationId: "getProfileByUsername",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to fetch profile info for.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Returns the user profile.",
@@ -294,251 +634,391 @@ export class UsersController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/follow")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Follow the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Post(":username/follow")
+	@ApiOperation({
+		summary: "Follow the given user",
+		description: "Follow the user with the given username.",
+		operationId: "followUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to follow.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully followed the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error following the user.",
-		type: Boolean,
 	})
 	async followUser(
-		@Request() req: any,
-		@Param("userID") userID: string,
-	): Promise<boolean> {
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.followUser(userInfo.id, userID);
+		await this.usersService.followUser(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/unfollow")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Unfollow the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Post(":username/unfollow")
+	@ApiOperation({
+		summary: "Unfollow the given user",
+		description: "Unfollow the user with the given username.",
+		operationId: "unfollowUser",
+	})
 	@ApiParam({
 		name: "username",
 		description: "The username of the user to unfollow.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully unfollowed the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error unfollowing the user.",
-		type: Boolean,
 	})
 	async unfollowUser(
-		@Request() req: any,
-		@Param("userID") userID: string,
-	): Promise<boolean> {
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfollowUser(userInfo.id, userID);
+		await this.usersService.unfollowUser(userInfo.id, username);
 	}
 
-	/*
-	### `/users/{username}/befriend`
-	#### POST: sends a friend request to user with given username
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/unfriend`
-	#### POST: ends friendship with user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/accept`
-	#### POST: accepts friend request from user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/reject`
-	#### POST: accepts user's friend request
-	no input
-	response: code (2xx for success, 4xx for error)
-	*/
-
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@Post(":userID/befriend")
-	@ApiTags("users")
-	@ApiOperation({ summary: "Send a friend request to the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Post(":username/befriend")
+	@ApiOperation({
+		summary: "Send a friend request to the given user",
+		description: "Send a friend request to the user with the given username.",
+		operationId: "befriendUser",
+	})
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user to send a friend request to.",
+		name: "username",
+		description: "The username of the user to send a friend request to.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully sent friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error sending friend request.",
-		type: Boolean,
 	})
 	async befriendUser(
-		@Request() req: any,
-		@Param("userID") userID: string,
-	): Promise<boolean> {
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.befriendUser(userInfo.id, userID);
+		await this.usersService.befriendUser(userInfo.id, username);
 	}
 
-	@Post(":userID/unfriend")
-	@ApiTags("users")
+	@Post(":username/unfriend")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@ApiOperation({ summary: "End friendship with the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiOperation({
+		summary: "End friendship with the given user",
+		description: "End friendship with the user with the given username.",
+		operationId: "unfriendUser",
+	})
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user to end friendship with.",
+		name: "username",
+		description: "The username of the user to end friendship with.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error ending friendship.",
-		type: Boolean,
 	})
 	async unfriendUser(
-		@Request() req: any,
-		@Param("userID") userID: string,
-	): Promise<boolean> {
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.unfriendUser(userInfo.id, userID);
+		await this.usersService.unfriendUser(userInfo.id, username);
 	}
 
-	@Post(":userID/accept")
-	@ApiTags("users")
+	@Post(":username/accept")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@ApiOperation({ summary: "Accept a friend request from the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiOperation({
+		summary: "Accept a friend request from the given user",
+		description:
+			"Accept a friend request from the user with the given username.",
+		operationId: "acceptFriendRequest",
+	})
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user whose friend request to accept.",
+		name: "username",
+		description:
+			"Our new friend. The username of the user to accept a friend request from.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully accepted friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error accepting friend request.",
-		type: Boolean,
 	})
 	async acceptFriendRequest(
-		@Request() req: any,
-		@Param("userID") userID: string,
-	): Promise<boolean> {
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.acceptFriendRequest(userInfo.id, userID);
+		await this.usersService.acceptFriendRequest(userInfo.id, username);
 	}
 
-	@Post(":userID/reject")
-	@ApiTags("users")
+	@Post(":username/reject")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
-	@ApiOperation({ summary: "Reject a friend request from the given user" })
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiOperation({
+		summary: "Reject a friend request from the given user",
+		description:
+			"Reject a friend request from the user with the given username.",
+		operationId: "rejectFriendRequest",
+	})
 	@ApiParam({
-		name: "userID",
-		description: "The userID of the user whose friend request to reject.",
+		name: "username",
+		description:
+			"The username of the user whose friend request we are rejecting.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
 		description: "Successfully rejected friend request.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error rejecting friend request.",
-		type: Boolean,
 	})
 	async rejectFriendRequest(
-		@Request() req: any,
-		@Param("userID") userID: string,
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.rejectFriendRequest(userInfo.id, username);
+	}
+
+	// add an endpoint for cancelling a friend request
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/cancel")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Cancel a friend request to the given user",
+		operationId: "cancelFriendRequest",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to cancel the friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully cancelled friend request.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error cancelling friend request.",
+	})
+	async cancelFriendRequest(
+		@Request() req: Request,
+		@Param("username") username: string,
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.rejectFriendRequest(userInfo.id, userID);
-	}
-
-	// define an endpoint for getting a user's current room
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@Get("rooms/current")
-	@ApiOperation({ summary: "Get a user's current room" })
-	@ApiOkResponse({
-		description: "User's current room retrieved successfully",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiTags("rooms")
-	async getCurrentRoom(@Request() req: any): Promise<any> {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getCurrentRoom(userInfo.id);
+		return await this.usersService.cancelFriendRequest(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":userId/room/current")
-	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@Get(":username/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on username" })
 	@ApiParam({
-		name: "userId",
-		description: "The user id of user's current room to search for.",
+		name: "username",
+		description: "The username of user's current room to search for.",
 	})
 	@ApiOkResponse({
 		description: "User's current room retrieved successfully",
+		type: RoomDto,
 	})
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
 	@ApiTags("rooms")
-	async getCurrentRoomByUserId(@Param("userId") userId: string): Promise<any> {
-		return await this.usersService.getCurrentRoom(userId);
+	async getCurrentRoomByUserId(
+		@Param("username") username: string,
+	): Promise<RoomDto> {
+		return await this.usersService.getCurrentRoomDto(username);
 	}
 
+	@Post(":username/block")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	/*
-	### `/users/{username}/befriend`
-	#### POST: sends a friend request to user with given username
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/unfriend`
-	#### POST: ends friendship with user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/accept`
-	#### POST: accepts friend request from user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/reject`
-	#### POST: accepts user's friend request
-	no input
-	response: code (2xx for success, 4xx for error)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	*/
+	@ApiOperation({
+		summary: "Block a given user",
+		description: "Block the user with the given username.",
+		operationId: "blockUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to block.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully blocked the user.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error blocking the user.",
+	})
+	async blockUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.blockUser(userInfo.id, username);
+	}
 
+	@Post(":username/unblock")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	/*
-	### `/users/{username}/befriend`
-	#### POST: sends a friend request to user with given username
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/unfriend`
-	#### POST: ends friendship with user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/accept`
-	#### POST: accepts friend request from user
-	no input
-	response: code (2xx for success, 4xx for error)
-
-	### `/users/{username}/reject`
-	#### POST: accepts user's friend request
-	no input
-	response: code (2xx for success, 4xx for error)
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
 	*/
+	@ApiOperation({
+		summary: "Unblock a given user",
+		description: "Unblock the user with the given username.",
+		operationId: "unblockUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to unblock.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully unblocked the user.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error unblocking the user.",
+	})
+	async unblockUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.unblockUser(userInfo.id, username);
+	}
+
+	@Post(":username/report")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiOperation({
+		summary: "Report a given user",
+		description: "Report the user with the given username.",
+		operationId: "reportUser",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to report.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Successfully reported the user.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error reporting the user.",
+	})
+	async reportUser(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.usersService.reportUser(userInfo.id, username);
+	}
 }

@@ -9,6 +9,7 @@ import {
 	Animated,
 	Linking,
 } from "react-native";
+import { colors } from "../styles/colors";
 
 const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
@@ -52,20 +53,20 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 		}),
 	);
 
-	// Function to group links by type
-	const groupLinksByType = (links) => {
-		const groupedLinks = {};
-		links.forEach((link) => {
-			if (!groupedLinks[link.type]) {
-				groupedLinks[link.type] = [];
-			}
-			groupedLinks[link.type].push(link);
-		});
-		return groupedLinks;
-	};
+	// // Function to group links by type
+	// const groupLinksByType = (links) => {
+	// 	const groupedLinks = {};
+	// 	links.forEach((link) => {
+	// 		if (!groupedLinks[link.type]) {
+	// 			groupedLinks[link.type] = [];
+	// 		}
+	// 		groupedLinks[link.type].push(link);
+	// 	});
+	// 	return groupedLinks;
+	// };
 
-	// Group links by type
-	const groupedLinks = groupLinksByType(links);
+	// // Group links by type
+	// const groupedLinks = groupLinksByType(links);
 
 	return (
 		<Modal
@@ -81,12 +82,8 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 					<View style={styles.dragHandle} {...panResponder.panHandlers} />
 					<View style={styles.textContainer}>
 						<Text style={styles.modalTitle}>Links</Text>
-						{Object.keys(groupedLinks).map((type, index) => (
-							<Links
-								key={index}
-								mediaPlatform={type}
-								links={groupedLinks[type]}
-							/>
+						{Object.keys(links).map((type, index) => (
+							<Links key={index} mediaPlatform={type} links={links[type]} />
 						))}
 					</View>
 				</Animated.View>
@@ -95,20 +92,24 @@ const LinkBottomSheet = ({ isVisible, onClose, links }) => {
 	);
 };
 
+const capitalizeFirstLetter = (string) => {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const Links = ({ mediaPlatform, links }) => {
+	console.log("Links: " + links + " Type: " + mediaPlatform);
 	const handleLinkPress = (link) => {
 		Linking.openURL("https://www." + link); // Open the link in the device's default browser
 	};
 
 	return (
 		<View>
-			<Text style={styles.mediaHeader}>{mediaPlatform}</Text>
+			<Text style={styles.mediaHeader}>
+				{capitalizeFirstLetter(mediaPlatform)}
+			</Text>
 			{links.map((link, index) => (
-				<TouchableOpacity
-					key={index}
-					onPress={() => handleLinkPress(link.links)}
-				>
-					<Text style={styles.link}>{link.links}</Text>
+				<TouchableOpacity key={index} onPress={() => handleLinkPress(link)}>
+					<Text style={styles.link}>{link}</Text>
 				</TouchableOpacity>
 			))}
 		</View>
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 	},
 	modal: {
-		backgroundColor: "rgba(158, 171, 184, 1)",
+		backgroundColor: colors.primary,
 		padding: 20,
 		borderTopLeftRadius: 40,
 		borderTopRightRadius: 40,

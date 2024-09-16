@@ -1,7 +1,7 @@
 import React, { createContext, useState } from "react";
 import { Room } from "../app/models/Room";
 import { Track } from "../app/models/Track";
-import { UserDto } from "../api-client";
+import { UserDto } from "../api";
 
 interface PlayerContextType {
 	setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;

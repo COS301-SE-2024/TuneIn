@@ -8,8 +8,22 @@ import { RoomDto } from "../rooms/dto/room.dto";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
-import { CreateUserDto } from "./dto/create-user.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
+import { IsNumber } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { RecommendationsService } from "../../recommendations/recommendations.service";
+import { SongInfoDto } from "../rooms/dto/songinfo.dto";
+
+export class UserListeningStatsDto {
+	@ApiProperty({
+		description: "The total number of songs listened to by the user",
+		example: 100,
+	})
+	@IsNumber()
+	totalListenedSongs: number;
+
+	/* whatever else you want */
+}
 
 @Injectable()
 export class UsersService {
@@ -17,18 +31,30 @@ export class UsersService {
 		private readonly prisma: PrismaService,
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
+		private recommender: RecommendationsService,
 	) {}
 
 	// Tutorial CRUD operations
-	create(createUserDto: CreateUserDto) {
+	create(createUserDto: Partial<UserDto>) {
+		if (!createUserDto.username) {
+			throw new HttpException("Username is required", HttpStatus.BAD_REQUEST);
+		}
+		if (!createUserDto.bio) {
+			throw new HttpException("Bio is required", HttpStatus.BAD_REQUEST);
+		}
 		const user: Prisma.usersCreateInput = {
-			user_id: createUserDto.userID,
 			username: createUserDto.username,
 			bio: createUserDto.bio,
-			profile_picture: createUserDto.profile_picture,
-			activity: createUserDto.activity,
-			preferences: createUserDto.preferences,
 		};
+		if (createUserDto.userID) {
+			user.user_id = createUserDto.userID;
+		}
+		if (createUserDto.profile_picture_url) {
+			user.profile_picture = createUserDto.profile_picture_url;
+		}
+		if (createUserDto.profile_name) {
+			user.full_name = createUserDto.profile_name;
+		}
 		return this.prisma.users.create({ data: user });
 	}
 
@@ -69,6 +95,16 @@ export class UsersService {
 		return user;
 	}
 
+	async usernameTaken(username: string): Promise<boolean> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+		if (!user || user === null) {
+			return false;
+		}
+		return true;
+	}
+
 	async updateProfile(
 		userId: string,
 		updateProfileDto: UpdateUserDto,
@@ -81,19 +117,200 @@ export class UsersService {
 			throw new Error("User not found");
 		}
 
-		const updateData = this.dbUtils.buildUpdateData(user, updateProfileDto);
+		const updatedUser: Prisma.usersUpdateInput = {
+			user_id: userId,
+		};
+
+		if (updateProfileDto.username) {
+			updatedUser.username = updateProfileDto.username;
+		}
+
+		if (updateProfileDto.bio) {
+			updatedUser.bio = updateProfileDto.bio;
+		}
+
+		if (updateProfileDto.email) {
+			updatedUser.email = updateProfileDto.email;
+		}
+
+		if (updateProfileDto.profile_name) {
+			updatedUser.full_name = updateProfileDto.profile_name;
+		}
+
+		if (updateProfileDto.profile_picture_url) {
+			updatedUser.profile_picture = updateProfileDto.profile_picture_url;
+		}
+
+		if (updateProfileDto.links) {
+			updatedUser.external_links = updateProfileDto.links.data;
+		}
+
+		if (updateProfileDto.fav_genres) {
+			const genres: string[] = updateProfileDto.fav_genres.data;
+			this.updateFavoriteGenresByName(userId, genres);
+		}
+
+		if (updateProfileDto.fav_songs) {
+			this.updateFavoriteSongsByID(userId, updateProfileDto.fav_songs.data);
+		}
 
 		await this.prisma.users.update({
 			where: { user_id: userId },
-			data: updateData,
+			data: updatedUser,
 		});
 
 		const u = await this.dtogen.generateUserDto(userId);
 		if (!u) {
 			throw new Error("Failed to generate user profile");
 		}
-
 		return u;
+	}
+
+	private async updateFavoriteGenresByName(
+		userId: string,
+		newGenreNames: string[],
+	): Promise<void> {
+		await this.prisma.$transaction(async (prisma) => {
+			// Step 1: Fetch current genres associated with the user
+			const currentFavoriteGenres = await prisma.favorite_genres.findMany({
+				where: { user_id: userId },
+				include: { genre: true }, // Include genre details in the result
+			});
+
+			const genreNameToIdMap = new Map<string, string>(
+				currentFavoriteGenres.map((fg) => [
+					fg.genre.genre as string,
+					fg.genre.genre_id,
+				]),
+			);
+
+			const currentGenreNames = currentFavoriteGenres.map(
+				(fg) => fg.genre.genre,
+			);
+
+			// Step 2: Fetch genre IDs for the provided genre names
+			const genres = await prisma.genre.findMany({
+				where: { genre: { in: newGenreNames } },
+				select: { genre_id: true, genre: true },
+			});
+
+			const genreMap = new Map(
+				genres.map((genre) => [genre.genre, genre.genre_id as string]),
+			);
+
+			// Step 3: Determine genres to add and remove
+			const genresToAdd = newGenreNames.filter(
+				(name) => !currentGenreNames.includes(name) && genreMap.has(name),
+			);
+
+			const genresToRemove = currentGenreNames
+				.filter((name): name is string => name !== null)
+				.filter((name) => !newGenreNames.includes(name));
+
+			// Step 4: Delete removed genres
+			await prisma.favorite_genres.deleteMany({
+				where: {
+					user_id: userId,
+					genre_id: {
+						in: genresToRemove
+							.map((name) => genreNameToIdMap.get(name))
+							.filter((id) => id !== undefined) as string[],
+					},
+				},
+			});
+
+			// Step 5: Insert new genres
+			await prisma.favorite_genres.createMany({
+				data: genresToAdd.map((name) => ({
+					user_id: userId,
+					genre_id: genreMap.get(name)!,
+				})),
+			});
+		});
+	}
+
+	private async updateFavoriteSongsByID(
+		userId: string,
+		newSongs: SongInfoDto[],
+	): Promise<void> {
+		await this.prisma.$transaction(async (prisma) => {
+			const newSongIds = newSongs.map((song) => song.spotify_id);
+			// Step 1: Fetch current songs associated with the user
+			const currentFavoriteSongs = await prisma.favorite_songs.findMany({
+				where: { user_id: userId },
+				include: { song: true }, // Include song details in the result
+			});
+
+			const spotifyIdToSongIdMap = new Map<string, string>(
+				currentFavoriteSongs.map((fg) => [
+					fg.song.spotify_id as string,
+					fg.song.song_id,
+				]),
+			);
+
+			const currentSongSpotifyId = currentFavoriteSongs.map(
+				(fg) => fg.song.spotify_id,
+			);
+
+			// Step 2: Fetch song IDs for the provided song namespotify ids
+			const songs = await prisma.song.findMany({
+				where: { spotify_id: { in: newSongIds } },
+				select: { song_id: true, spotify_id: true },
+			});
+
+			const songMap = new Map(
+				songs.map((song) => [song.spotify_id, song.song_id as string]),
+			);
+
+			const missingSongs = newSongs.filter(
+				(song) => !songMap.has(song.spotify_id),
+			);
+
+			// Step 3: Insert missing songs into the database
+			if (missingSongs.length > 0) {
+				// Re-fetch the newly added songs to update the songMap
+				const newlyInsertedSongs = await prisma.song.findMany({
+					where: {
+						spotify_id: { in: missingSongs.map((song) => song.spotify_id) },
+					},
+					select: { song_id: true, spotify_id: true },
+				});
+
+				// Add newly inserted songs to the songMap
+				newlyInsertedSongs.forEach((song) => {
+					songMap.set(song.spotify_id, song.song_id as string);
+				});
+			}
+
+			// Step 3: Determine songs to add and remove
+			const songsToAdd = newSongIds.filter(
+				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
+			);
+
+			const songsToRemove = currentSongSpotifyId
+				.filter((id): id is string => id !== null)
+				.filter((id) => !newSongIds.includes(id));
+
+			// Step 4: Delete removed songs
+			await prisma.favorite_songs.deleteMany({
+				where: {
+					user_id: userId,
+					song_id: {
+						in: songsToRemove
+							.map((id) => spotifyIdToSongIdMap.get(id))
+							.filter((id) => id !== undefined) as string[],
+					},
+				},
+			});
+
+			// Step 5: Insert new songs
+			await prisma.favorite_songs.createMany({
+				data: songsToAdd.map((id) => ({
+					user_id: userId,
+					song_id: songMap.get(id)!,
+				})),
+			});
+		});
 	}
 
 	async getProfileByUsername(username: string): Promise<UserDto> {
@@ -117,36 +334,56 @@ export class UsersService {
 	follower: the person who does the following
 	followee (leader): the person being followed
 	*/
-	async followUser(
-		userId: string,
-		accountFollowedId: string,
-	): Promise<boolean> {
-		if (userId === accountFollowedId) {
-			throw new Error("You cannot follow yourself");
+	async followUser(selfID: string, usernameToFollow: string): Promise<boolean> {
+		if (!(await this.dbUtils.userExists(selfID))) {
+			throw new HttpException(
+				"User with id: (" + selfID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
-		if (!(await this.dbUtils.userExists(accountFollowedId))) {
-			throw new Error("User (" + accountFollowedId + ") does not exist");
+		const followee = await this.prisma.users.findFirst({
+			where: { username: usernameToFollow },
+		});
+		if (!followee) {
+			throw new HttpException(
+				"User (" + usernameToFollow + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
-		if (!(await this.dbUtils.userExists(userId))) {
-			throw new Error("User (" + userId + ") does not exist");
+		if (selfID === followee.user_id) {
+			throw new HttpException(
+				"You cannot follow yourself",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
-		if (await this.dbUtils.isFollowing(userId, accountFollowedId)) {
+		if (await this.dbUtils.isFollowing(selfID, followee.user_id)) {
 			return true;
+		}
+
+		if (await this.dbUtils.isFriendsOrPending(selfID, followee.user_id)) {
+			throw new HttpException(
+				"Cannot follow user with id: (" +
+					followee.user_id +
+					"). User is a friend or has a pending request",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		try {
 			await this.prisma.follows.create({
 				data: {
-					follower: userId,
-					followee: accountFollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			return true;
 		} catch (e) {
-			throw new Error("Failed to follow user (" + accountFollowedId + ")");
+			throw new Error(
+				"Failed to follow user with id: (" + followee.user_id + ")",
+			);
 		}
 	}
 
@@ -155,31 +392,52 @@ export class UsersService {
 	followee (leader): the person being followed
 	*/
 	async unfollowUser(
-		userId: string,
-		accountUnfollowedId: string,
+		selfID: string,
+		usernameToUnfollow: string,
 	): Promise<boolean> {
-		if (userId === accountUnfollowedId) {
-			throw new Error("You cannot unfollow yourself");
+		if (!(await this.dbUtils.userExists(selfID))) {
+			throw new HttpException(
+				"User with id: (" + selfID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
-		if (!(await this.dbUtils.userExists(accountUnfollowedId))) {
-			throw new Error("User (" + accountUnfollowedId + ") does not exist");
+		const followee = await this.prisma.users.findFirst({
+			where: { username: usernameToUnfollow },
+		});
+		if (!followee) {
+			throw new HttpException(
+				"User (" + usernameToUnfollow + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 
-		if (!(await this.dbUtils.userExists(userId))) {
-			throw new Error("User (" + userId + ") does not exist");
+		if (selfID === followee.user_id) {
+			throw new HttpException(
+				"You cannot unfollow yourself",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
-		if (!(await this.dbUtils.isFollowing(userId, accountUnfollowedId))) {
+		if (!(await this.dbUtils.isFollowing(selfID, followee.user_id))) {
 			return true;
+		}
+
+		if (await this.dbUtils.isFriendsOrPending(selfID, followee.user_id)) {
+			throw new HttpException(
+				"Cannot unfollow user with id: (" +
+					followee.user_id +
+					"). User is a friend or has a pending request",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		try {
 			//find the follow relationship and delete it
 			const follow = await this.prisma.follows.findFirst({
 				where: {
-					follower: userId,
-					followee: accountUnfollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			if (!follow) {
@@ -189,13 +447,15 @@ export class UsersService {
 			await this.prisma.follows.delete({
 				where: {
 					follows_id: follow.follows_id,
-					follower: userId,
-					followee: accountUnfollowedId,
+					follower: selfID,
+					followee: followee.user_id,
 				},
 			});
 			return true;
 		} catch (e) {
-			throw new Error("Failed to unfollow user (" + accountUnfollowedId + ")");
+			throw new Error(
+				"Failed to unfollow user with id: (" + followee.user_id + ")",
+			);
 		}
 	}
 
@@ -305,7 +565,7 @@ export class UsersService {
 		//TODO: implement scheduled room creation
 		/*
 		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;		
+		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
 		if (createRoomDto.is_scheduled) {
 			newRoom.
 				connect: {
@@ -324,7 +584,7 @@ export class UsersService {
 		return result;
 	}
 
-	async getRecentRooms(userID: string): Promise<RoomDto[]> {
+	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
@@ -338,76 +598,148 @@ export class UsersService {
 			throw new Error("User does not exist");
 		}
 
-		const user: PrismaTypes.users = u;
-		const activity: Prisma.JsonValue = user.activity;
-		console.log(user);
-		console.log(activity);
-		if (!activity || activity === null) {
-			return [];
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
+
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+			)) || [];
+
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
+	}
+
+	async getRecentRoomByUsername(username: string): Promise<RoomDto[]> {
+		/*
+		activity field in users table is modelled as:
+		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
+		*/
+		// get the recent rooms from the user's activity field
+		const userID = (await this.getProfileByUsername(username)).userID;
+
+		const u = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u === null) {
+			throw new Error("User does not exist");
 		}
 
-		if (typeof activity !== "object") {
-			throw new Error(
-				"An unknown error occurred while parsing the 'activity' field in 'users'. Expected object, received " +
-					typeof activity,
-			);
-		}
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
 
-		//if (!"recent_rooms" in activity) {
-		if (!("recent_rooms" in activity)) {
-			return [];
-		}
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+			)) || [];
 
-		try {
-			const recentRooms: string[] = activity["recent_rooms"] as string[];
-			for (const roomID of recentRooms) {
-				if (typeof roomID !== "string") {
-					throw new Error(
-						"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-							typeof roomID,
-					);
-				}
-			}
-			const r = await this.dtogen.generateMultipleRoomDto(recentRooms);
-			if (!r || r === null) {
-				throw new Error(
-					"An unknown error occurred while generating RoomDto for recent rooms. Received null.",
-				);
-			}
-			return r;
-		} catch (e) {
-			throw new Error(
-				"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-					typeof activity["recent_rooms"],
-			);
-		}
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
 	}
 
 	async getRecommendedRooms(userID: string): Promise<RoomDto[]> {
 		//TODO: implement recommendation algorithm
-		console.log("Getting recommended rooms for user " + userID);
-		const r = await this.dbUtils.getRandomRooms(5);
-		if (!r || r === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
+		// const recommender: RecommenderService = new RecommenderService();
+		const rooms: (PrismaTypes.room & {
+			songs: PrismaTypes.song[] | undefined;
+		})[] = (await this.prisma.room.findMany()).map((room) => ({
+			...room,
+			songs: undefined,
+		}));
+
+		const roomsWithSongs = await Promise.all(
+			rooms.map(
+				async (
+					room: PrismaTypes.room & {
+						songs: PrismaTypes.song[] | undefined;
+					},
+				) => {
+					const songs = await this.dbUtils.getRoomSongs(room.room_id);
+					room.songs = songs;
+					return room;
+				},
+			),
+		);
+		const roomSongs = roomsWithSongs.reduce(
+			(
+				acc: Record<string, any[]>,
+				room: PrismaTypes.room & { songs: PrismaTypes.song[] | undefined },
+			) => {
+				acc[room.room_id] =
+					room.songs?.map((song: PrismaTypes.song) => song.audio_features) ??
+					[];
+				return acc;
+			},
+			{},
+		);
+		const favoriteSongs: PrismaTypes.song[] =
+			await this.dbUtils.getUserFavoriteSongs(userID);
+		if (favoriteSongs.length === 0) {
+			// return random rooms if the user has no favorite songs
+			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
+			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+				randomRooms.map((room: PrismaTypes.room) => room.room_id),
 			);
+			return r === null ? [] : r;
 		}
-		const rooms: PrismaTypes.room[] = r;
-		const ids: string[] = rooms.map((room) => room.room_id);
-		const recommends = await this.dtogen.generateMultipleRoomDto(ids);
-		if (!recommends || recommends === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for recommended rooms. Received null.",
-			);
+		console.log("favoriteSongs:", favoriteSongs);
+		this.recommender.setMockSongs(
+			favoriteSongs.map((song: PrismaTypes.song) => song.audio_features),
+		);
+		this.recommender.setPlaylists(roomSongs);
+		const recommendedRooms: { playlist: string; score: number }[] =
+			this.recommender.getTopPlaylists(5);
+		if (recommendedRooms.length === 0) {
+			return [];
 		}
-		return recommends;
+		// console.log("recommendedRooms:", recommendedRooms);
+		const ids: string[] = recommendedRooms.map(
+			(room: { playlist: string; score: number }) => room.playlist,
+		);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
+		return r;
 	}
 
 	async getUserFriends(userID: string): Promise<UserDto[]> {
 		const f = await this.prisma.friends.findMany({
-			where: { OR: [{ friend1: userID }, { friend2: userID }] },
+			where: {
+				AND: [
+					{ OR: [{ friend1: userID }, { friend2: userID }] },
+					{ is_pending: false },
+				],
+			},
 		});
-		console.log(f);
 		if (!f) {
 			return [];
 		}
@@ -420,44 +752,86 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		const r = await this.dtogen.generateMultipleUserDto(ids);
-		console.log(r);
+		let r = await this.dtogen.generateMultipleUserDto(ids);
+		r = r.map((user) => {
+			user.relationship = "friend";
+			return user;
+		});
 		return r;
 	}
 
 	async getFollowers(userID: string): Promise<UserDto[]> {
 		const f = await this.dbUtils.getUserFollowers(userID);
-		if (!f) {
-			return [];
-		}
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
 			);
 		}
+
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
 	async getFollowing(userID: string): Promise<UserDto[]> {
 		const following = await this.dbUtils.getUserFollowing(userID);
-		if (!following) {
+		if (following.length === 0) {
 			return [];
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
 			);
 		}
+		result = await Promise.all(
+			result.map(async (user) => {
+				const relationship = await this.dbUtils.getRelationshipStatus(
+					userID,
+					user.userID,
+				);
+				user.relationship = relationship;
+				return user;
+			}),
+		);
 		return result;
 	}
 
-	async getBookmarks(userID: string): Promise<RoomDto[]> {
+	async getBookmarksById(userID: string): Promise<RoomDto[]> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const bookmarks: PrismaTypes.bookmark[] =
+			await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+
+		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
+		return rooms;
+	}
+
+	async getBookmarksByUsername(username: string): Promise<RoomDto[]> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
@@ -478,33 +852,39 @@ export class UsersService {
 
 	async befriendUser(
 		userID: string,
-		newPotentialFriendID: string,
+		newPotentialFriendUsername: string,
 	): Promise<boolean> {
 		//add friend request for the user
 		console.log(
-			"user (" + userID + ") wants to befriend (" + newPotentialFriendID + ")",
+			"user (" +
+				userID +
+				") wants to befriend (@" +
+				newPotentialFriendUsername +
+				")",
 		);
 
-		// check if user is trying to friend themselves
-		if (userID === newPotentialFriendID) {
-			throw new HttpException(
-				"You cannot friend yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-
-		// check if users exist
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		// check if friend exists as a user
-		if (!(await this.dbUtils.userExists(newPotentialFriendID))) {
+
+		const potentialFriend = await this.prisma.users.findFirst({
+			where: { username: newPotentialFriendUsername },
+		});
+		if (!potentialFriend) {
+			throw new Error(
+				"User (@" + newPotentialFriendUsername + ") does not exist",
+			);
+		}
+
+		// check if user is trying to friend themselves
+		if (userID === potentialFriend.user_id) {
 			throw new HttpException(
-				"User (" + newPotentialFriendID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot friend yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
@@ -512,76 +892,92 @@ export class UsersService {
 		if (
 			(await this.dbUtils.isFriendsOrPending(
 				userID,
-				newPotentialFriendID,
+				potentialFriend.user_id,
 				true,
 			)) ||
 			(await this.dbUtils.isFriendsOrPending(
 				userID,
-				newPotentialFriendID,
+				potentialFriend.user_id,
 				false,
 			))
 		) {
 			throw new HttpException(
 				"User (" +
 					userID +
-					") is already friends with (" +
-					newPotentialFriendID +
+					") is already friends with (@" +
+					newPotentialFriendUsername +
 					") or has a pending request",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
 
-		if (!(await this.dbUtils.isMutualFollow(userID, newPotentialFriendID))) {
+		if (!(await this.dbUtils.isMutualFollow(userID, potentialFriend.user_id))) {
 			throw new HttpException(
-				"User (" + userID + ") cannot befriend (" + newPotentialFriendID + ")",
+				"User (" +
+					userID +
+					") cannot befriend (@" +
+					newPotentialFriendUsername +
+					"). Users must follow each other first.",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
 		const result = await this.prisma.friends.create({
 			data: {
 				friend1: userID,
-				friend2: newPotentialFriendID,
+				friend2: potentialFriend.user_id,
 			},
 		});
 
 		if (!result || result === null) {
-			throw new Error("Failed to befriend user (" + newPotentialFriendID + ")");
+			throw new Error(
+				"Failed to befriend user (@" +
+					newPotentialFriendUsername +
+					"). Database error.",
+			);
 		}
 		return true;
 	}
 
-	async unfriendUser(userID: string, friendUserID: string): Promise<boolean> {
+	async unfriendUser(userID: string, friendUsername: string): Promise<boolean> {
 		//remove friend from the user's friend list
 		console.log(
-			"user (" + userID + ") is no longer friends with (" + friendUserID + ")",
+			"user (" +
+				userID +
+				") is no longer friends with (@" +
+				friendUsername +
+				")",
 		);
 
-		// check if user is trying to unfriend themselves
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot unfriend yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-
-		//check if the user exists
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
+			throw new Error("User (@" + friendUsername + ") does not exist");
+		}
+
+		// check if user is trying to unfriend themselves
+		if (userID === friend.user_id) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot unfriend yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
 		//check if they are friends
-		if (!(await this.dbUtils.isFriendsOrPending(userID, friendUserID, false))) {
+		console.log("friend", friend);
+		if (
+			!(await this.dbUtils.isFriendsOrPending(userID, friend.user_id, false))
+		) {
 			throw new HttpException(
-				"User (" + userID + ") is not friends with (" + friendUserID + ")",
+				"User (" + userID + ") is not friends with (" + friend.user_id + ")",
 				HttpStatus.BAD_REQUEST,
 			);
 		}
@@ -590,14 +986,16 @@ export class UsersService {
 		const result = await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
-					{ friend1: userID, friend2: friendUserID },
-					{ friend1: friendUserID, friend2: userID },
+					{ friend1: userID, friend2: friend.user_id },
+					{ friend1: friend.user_id, friend2: userID },
 				],
 			},
 		});
 
 		if (!result || result === null) {
-			throw new Error("Failed to unfriend user (" + friendUserID + ")");
+			throw new Error(
+				"Failed to unfriend user (" + friendUsername + "). Database error.",
+			);
 		}
 
 		return true;
@@ -605,48 +1003,52 @@ export class UsersService {
 
 	async acceptFriendRequest(
 		userID: string,
-		friendUserID: string,
+		friendUsername: string,
 	): Promise<boolean> {
 		//accept friend request
 		console.log(
-			"user (" + userID + ") accepted friend request from @" + friendUserID,
+			"user (" + userID + ") accepted friend request from @" + friendUsername,
 		);
 
-		// check if user is trying to accept themselves
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot accept yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-		// check if users exist
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
+			throw new Error("User (@" + friendUsername + ") does not exist");
+		}
+
+		// check if user is trying to accept themselves
+		if (userID === friend.user_id) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
-				HttpStatus.NOT_FOUND,
+				"You cannot accept yourself",
+				HttpStatus.BAD_REQUEST,
 			);
 		}
+
 		const result = await this.prisma.friends.updateMany({
 			where: {
-				friend1: friendUserID,
+				friend1: friend.user_id,
 				friend2: userID,
 				is_pending: true,
 			},
 			data: {
 				is_pending: false,
+				date_friended: new Date(),
 			},
 		});
 		console.log("accepted friend request", result);
 		if (result.count === 0) {
 			throw new HttpException(
-				"User (" +
-					friendUserID +
+				"User (@" +
+					friendUsername +
 					") has not sent a friend request to user (" +
 					userID +
 					")",
@@ -658,42 +1060,50 @@ export class UsersService {
 
 	async rejectFriendRequest(
 		userID: string,
-		friendUserID: string,
+		rejectedUsername: string,
 	): Promise<boolean> {
 		//reject friend request
 		console.log(
-			"user (" + userID + ") rejected friend request from @" + friendUserID,
+			"user (" + userID + ") rejected friend request from @" + rejectedUsername,
 		);
-		if (userID === friendUserID) {
-			throw new HttpException(
-				"You cannot reject yourself",
-				HttpStatus.BAD_REQUEST,
-			);
-		}
-		// check if users exist
+
+		// check if user exists
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException(
 				"User (" + userID + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
-		if (!(await this.dbUtils.userExists(friendUserID))) {
+
+		const friend = await this.prisma.users.findFirst({
+			where: { username: rejectedUsername },
+		});
+		if (!friend) {
 			throw new HttpException(
-				"User (" + friendUserID + ") does not exist",
+				"User (@" + rejectedUsername + ") does not exist",
 				HttpStatus.NOT_FOUND,
 			);
 		}
+
+		// check if user is trying to accept themselves
+		if (userID === friend.user_id) {
+			throw new HttpException(
+				"You cannot reject yourself",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+
 		const rejectedRequest = await this.prisma.friends.deleteMany({
 			where: {
-				friend1: friendUserID,
+				friend1: friend.user_id,
 				friend2: userID,
 				is_pending: true,
 			},
 		});
 		if (rejectedRequest.count === 0) {
 			throw new HttpException(
-				"User (" +
-					friendUserID +
+				"User (@" +
+					rejectedUsername +
 					") has not sent a friend request to user (" +
 					userID +
 					")",
@@ -713,56 +1123,131 @@ export class UsersService {
 			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
 			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
 		*/
-		return [];
+
+		const friendRequests: PrismaTypes.friends[] =
+			await this.dbUtils.getFriendRequests(userID);
+		if (friendRequests.length === 0) {
+			return [];
+		}
+		const ids: string[] = friendRequests.map((friend) => friend.friend1);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
+		return result;
 	}
 
-	async getCurrentRoom(userID: string): Promise<PrismaTypes.room | null> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+	async getPotentialFriends(userID: string): Promise<UserDto[]> {
+		//get all potential friends for the user
+		console.log("Getting potential friends for user " + userID);
+		const potentialFriends: PrismaTypes.users[] =
+			await this.dbUtils.getPotentialFriends(userID);
+		if (potentialFriends.length === 0) {
+			return [];
 		}
-		const room: any = await this.prisma.participate.findFirst({
+		const ids: string[] = potentialFriends.map(
+			(friend: PrismaTypes.users) => friend.user_id,
+		);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		return result;
+	}
+
+	async getPendingRequests(userID: string): Promise<UserDto[]> {
+		//get all pending friend requests for the user
+		console.log("Getting pending friend requests for user " + userID);
+		const pendingRequests: PrismaTypes.friends[] | null =
+			await this.dbUtils.getPendingRequests(userID);
+		const ids: string[] = pendingRequests.map(
+			(friend: PrismaTypes.friends) => friend.friend2,
+		);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for pending requests. Received null.",
+			);
+		}
+		return result;
+	}
+
+	async cancelFriendRequest(
+		userID: string,
+		friendUsername: string,
+	): Promise<boolean> {
+		//cancel friend request
+		console.log(
+			"user (" + userID + ") cancelled friend request to @" + friendUsername,
+		);
+		// check if users exist
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException(
+				"User (" + userID + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+
+		const friend: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: friendUsername },
+		});
+		if (!friend) {
+			throw new HttpException(
+				"User (" + friendUsername + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		if (userID === friend.user_id) {
+			throw new HttpException(
+				"You cannot cancel a friend request to yourself",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		const cancelledRequest = await this.prisma.friends.deleteMany({
 			where: {
-				user_id: userID,
-			},
-			include: {
-				room: true,
+				friend1: userID,
+				friend2: friend.user_id,
+				is_pending: true,
 			},
 		});
-
-		if (room !== null) {
-			room.room = await this.dtogen.generateRoomDto(room.room.room_id);
+		if (cancelledRequest.count === 0) {
+			throw new HttpException(
+				"User (" +
+					userID +
+					") has not sent a friend request to user (" +
+					friendUsername +
+					")",
+				HttpStatus.BAD_REQUEST,
+			);
 		}
+		return true;
+	}
 
-		// if the user is in a room, get the join time from the user_activity table.
-		// do the query on user id and retrieve the activity with a leave date of null
-		// if the user is not in a room, return null
+	async getCurrentRoomDto(username: string): Promise<RoomDto> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
+		}
+		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
+			await this.prisma.participate.findFirst({
+				where: {
+					user_id: userID,
+				},
+				include: {
+					room: true,
+				},
+			});
+
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const userActivity: any = await this.prisma.user_activity.findFirst({
-			where: {
-				user_id: userID,
-				room_id: room.room_id,
-				room_leave_time: null,
-			},
-		});
-		// add the join date to the returned object
-		try {
-			room.room_join_time = userActivity.room_join_time;
-		} catch (error) {
-			console.error("Error getting room join time:", error);
-			throw new HttpException(
-				"Error getting room join time",
-				HttpStatus.INTERNAL_SERVER_ERROR,
+		const result: RoomDto | null = await this.dtogen.generateRoomDto(
+			room.room.room_id,
+		);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for current room. Received null.",
 			);
 		}
-		return room;
+		return result;
 	}
 
-	async sendMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//send message to user
 		try {
 			const newMessage = await this.prisma.message.create({
@@ -948,10 +1433,7 @@ export class UsersService {
 		}
 	}
 
-	async deleteMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<boolean> {
+	async deleteMessage(message: DirectMessageDto): Promise<boolean> {
 		//delete a message
 		try {
 			await this.prisma.message.delete({
@@ -964,10 +1446,7 @@ export class UsersService {
 		}
 	}
 
-	async editMessage(
-		userID: string,
-		message: DirectMessageDto,
-	): Promise<DirectMessageDto> {
+	async editMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
 		//edit a message
 		try {
 			const updatedMessage:
@@ -1045,13 +1524,15 @@ export class UsersService {
 		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			if (dm.message.sender !== userID) {
-				if (!uniqueUserIDs.has(dm.message.sender)) {
-					uniqueUserIDs.set(dm.message.sender, false);
-				}
-			} else if (dm.recipient !== userID) {
-				if (!uniqueUserIDs.has(dm.recipient)) {
-					uniqueUserIDs.set(dm.recipient, false);
+			if (dm) {
+				if (dm.message.sender !== userID) {
+					if (!uniqueUserIDs.has(dm.message.sender)) {
+						uniqueUserIDs.set(dm.message.sender, false);
+					}
+				} else if (dm.recipient !== userID) {
+					if (!uniqueUserIDs.has(dm.recipient)) {
+						uniqueUserIDs.set(dm.recipient, false);
+					}
 				}
 			}
 		}
@@ -1066,20 +1547,81 @@ export class UsersService {
 		} & PrismaTypes.private_message)[] = [];
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			const recipient: string = dm.recipient;
-			const sender: string = dm.message.sender;
-			const r = uniqueUserIDs.get(recipient);
-			const s = uniqueUserIDs.get(sender);
-			if (r !== undefined && r === false) {
-				uniqueUserIDs.set(recipient, true);
-				chats.push(dm);
-			} else if (s !== undefined && s === false) {
-				uniqueUserIDs.set(sender, true);
-				chats.push(dm);
+			if (dm) {
+				const recipient: string = dm.recipient;
+				const sender: string = dm.message.sender;
+				const r = uniqueUserIDs.get(recipient);
+				const s = uniqueUserIDs.get(sender);
+				if (r !== undefined && r === false) {
+					uniqueUserIDs.set(recipient, true);
+					chats.push(dm);
+				} else if (s !== undefined && s === false) {
+					uniqueUserIDs.set(sender, true);
+					chats.push(dm);
+				}
 			}
 		}
 		const result: DirectMessageDto[] =
 			await this.dtogen.generateMultipleDirectMessageDto(chats);
 		return result;
+	}
+
+	async blockUser(userID: string, usernameToBlock: string): Promise<void> {
+		console.log(
+			"Blocking user with id: " + userID + " is blocking " + usernameToBlock,
+		);
+		if (true) {
+			//if user does not exist
+			throw new HttpException("User is already blocked", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	async unblockUser(userID: string, usernameToUnblock: string): Promise<void> {
+		console.log(
+			"Unblocking user with id: " +
+				userID +
+				" is unblocking " +
+				usernameToUnblock,
+		);
+		if (true) {
+			//if user does not exist
+			throw new HttpException("User was not blocked", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	async getBlockedUsers(userID: string): Promise<UserDto[]> {
+		console.log("Getting blocked users for user " + userID);
+		if (true) {
+			//if user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		return [];
+	}
+
+	async reportUser(userID: string, usernameToReport: string): Promise<void> {
+		console.log(
+			"Reporting user with id: " + userID + " is reporting " + usernameToReport,
+		);
+		if (true) {
+			//if user does not exist
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+
+		//if user has been reported 5x, delete their account
+	}
+
+	async getListeningStats(userID: string): Promise<UserListeningStatsDto> {
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user) {
+			throw new Error("User does not exist");
+		}
+
+		const stats: UserListeningStatsDto = {
+			totalListenedSongs: 0,
+		};
+		return stats;
 	}
 }

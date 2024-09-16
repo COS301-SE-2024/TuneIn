@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsDateString } from "class-validator";
+import { IsString, IsDate } from "class-validator";
 
 export class SearchHistoryDto {
 	@ApiProperty()
@@ -7,7 +7,7 @@ export class SearchHistoryDto {
 	search_term: string;
 
 	@ApiProperty()
-	@IsDateString()
+	@IsDate()
 	search_time: Date;
 
 	@ApiProperty()

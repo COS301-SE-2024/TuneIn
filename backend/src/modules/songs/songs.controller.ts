@@ -1,14 +1,15 @@
-import { Controller, Get, Param } from "@nestjs/common";
-import { SongsService } from "./songs.service";
-import {
-	ApiOkResponse,
-	ApiOperation,
-	ApiParam,
-	ApiTags,
-} from "@nestjs/swagger";
+import { Controller } from "@nestjs/common";
+// import { SongsService } from "./songs.service";
+// import {
+// 	ApiOkResponse,
+// 	ApiOperation,
+// 	ApiParam,
+// 	ApiTags,
+// } from "@nestjs/swagger";
 
 @Controller("songs")
 export class SongsController {
+	/*
 	constructor(private readonly songsService: SongsService) {}
 
 	@Get(":songID/spotify")
@@ -22,4 +23,5 @@ export class SongsController {
 	async getSpotifyId(@Param("songID") songID: string): Promise<{ id: string }> {
 		return await this.songsService.getSpotifyId(songID);
 	}
+	*/
 }

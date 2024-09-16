@@ -1,12 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
 	IsString,
-	IsDateString,
 	IsNumber,
 	IsObject,
 	IsBoolean,
+	ValidateNested,
+	IsDate,
 } from "class-validator";
 import { UserDto } from "../../users/dto/user.dto";
+import { Type } from "class-transformer";
 
 export class DirectMessageDto {
 	@ApiProperty()
@@ -17,20 +19,30 @@ export class DirectMessageDto {
 	@IsString()
 	messageBody: string;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The sender of the message",
+		type: UserDto,
+	})
 	@IsObject()
+	@ValidateNested()
+	@Type(() => UserDto)
 	sender: UserDto;
 
-	@ApiProperty()
+	@ApiProperty({
+		description: "The recipient of the message",
+		type: UserDto,
+	})
 	@IsObject()
+	@ValidateNested()
+	@Type(() => UserDto)
 	recipient: UserDto;
 
 	@ApiProperty()
-	@IsDateString()
+	@IsDate()
 	dateSent: Date;
 
 	@ApiProperty()
-	@IsDateString()
+	@IsDate()
 	dateRead: Date;
 
 	@ApiProperty()

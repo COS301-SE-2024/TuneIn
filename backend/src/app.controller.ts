@@ -5,19 +5,22 @@ import {
 	HttpStatus,
 	Post,
 	UploadedFile,
+	UseGuards,
 	UseInterceptors,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
 import {
-	ApiBadRequestResponse,
+	ApiBearerAuth,
 	ApiBody,
 	ApiConsumes,
 	ApiOkResponse,
 	ApiOperation,
+	ApiSecurity,
 } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { S3Service } from "./s3/s3.service";
 import { memoryStorage } from "multer";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 
 @Controller()
 export class AppController {
@@ -27,7 +30,7 @@ export class AppController {
 	) {}
 
 	@Get()
-	@ApiOperation({ summary: "Hello World!" })
+	@ApiOperation({ summary: "Hello World!", operationId: "getHello" })
 	@ApiOkResponse({
 		description: "Hello World!",
 		type: String,
@@ -39,8 +42,26 @@ export class AppController {
 	/*
 	curl -v -X POST http://localhost:3000/upload -F "file=@/Users/lesedikekana/Downloads/f.jpg"
 	*/
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
 	@Post("upload")
-	@ApiOperation({ summary: "Upload a file to our AWS S3 storage bucket" })
+	@ApiOperation({
+		summary: "Upload a file to our AWS S3 storage bucket",
+		description:
+			"This operation uploads a file to AWS S3 (the TuneIn bucket) and returns the URL of the uploaded file.",
+		operationId: "uploadFile",
+		externalDocs: {
+			description: "More about file uploads via HTTP POST requests",
+			url: "https://www.postman.com/postman/postman-answers/collection/t38ia1u/upload-a-file-via-post-request",
+		},
+	})
 	@ApiConsumes("multipart/form-data")
 	@ApiBody({
 		description: "A file to upload to our AWS S3 storage bucket",
@@ -58,10 +79,10 @@ export class AppController {
 		description: "The URL of the uploaded file",
 		type: String,
 	})
+	/*
 	@ApiBadRequestResponse({
 		description: "Bad request. The file is not a .png or .jpg file.",
 	})
-	/*
 	@ApiPayloadTooLargeResponse({
 		description: "The file is too large. It must be less than 5MB.",
 	})

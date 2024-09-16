@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../../prisma/prisma.service";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
@@ -16,7 +15,6 @@ export class DmUsersService {
 	constructor(
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
-		private readonly prisma: PrismaService,
 		private readonly usersService: UsersService,
 	) {}
 
@@ -133,15 +131,27 @@ export class DmUsersService {
 			//disconnect & reconnect
 			this.disconnectChat(socketId);
 		}
+
 		const participant: UserDto = await this.dtogen.generateUserDto(
 			participantId,
 		);
+
 		const chatIDs: string[] = await this.usersService.generateChatHash(
 			u.user.userID,
 			participantId,
 		);
+
 		const values: dmUser[] = Array.from(this.connectedUsers.values());
-		let chatID = chatIDs[0];
+		if (
+			chatIDs.length !== 2 ||
+			chatIDs[0] === undefined ||
+			chatIDs[1] === undefined ||
+			chatIDs[0] === chatIDs[1]
+		) {
+			throw new Error("Invalid chatIDs generated");
+		}
+
+		let chatID: string = chatIDs[0];
 		if (values.some((u) => u.chatID === chatIDs[1])) {
 			const id = values.find((u) => u.chatID === chatIDs[1]);
 			if (!id) {
@@ -169,5 +179,6 @@ export class DmUsersService {
 			participant: null,
 			chatID: null,
 		});
+		console.log(socketId);
 	}
 }

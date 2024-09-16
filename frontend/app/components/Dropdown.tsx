@@ -1,16 +1,7 @@
-import React, { useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	Modal,
-	FlatList,
-	TextInput,
-	StyleSheet,
-	ScrollView,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../styles/colors";
-import Fuse from "fuse.js";
+// import Fuse from "fuse.js";
 import Selector from "./Selector";
 
 interface DropdownProps {
@@ -29,13 +20,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 	setSelectedOption,
 }) => {
 	const [modalVisible, setModalVisible] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [items, setItems] = useState(options);
-
-	useEffect(() => {
-		setItems(options);
-	}, [options]);
-
 	const toggleModal = () => setModalVisible(!modalVisible);
 
 	const handleSelectOption = (option: string) => {
@@ -51,7 +35,13 @@ const Dropdown: React.FC<DropdownProps> = ({
 					styles.filterDropDown,
 					selectedOption ? styles.activeFilter : {},
 				]}
-				onPress={toggleModal}
+				onPress={() => {
+					if (selectedOption === null) {
+						toggleModal();
+					} else {
+						setSelectedOption(null);
+					}
+				}}
 			>
 				<Text style={styles.filterText}>{selectedOption || placeholder}</Text>
 			</TouchableOpacity>
