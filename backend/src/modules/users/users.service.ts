@@ -1570,11 +1570,11 @@ export class UsersService {
 		}
 
 		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
-		const Date30DaysAgo: Date = new Date();
-		Date30DaysAgo.setDate(Date30DaysAgo.getDate() - 30);
+		const date30DaysAgo: Date = new Date();
+		date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
 		const messages: PrismaTypes.message[] | null =
 			await this.prisma.message.findMany({
-				where: { sender: userID, date_sent: { gte: Date30DaysAgo } },
+				where: { sender: userID, date_sent: { gte: date30DaysAgo } },
 			});
 		if (!messages) {
 			throw new Error("Failed to calculate activity (no messages)");
@@ -1594,7 +1594,8 @@ export class UsersService {
 			bookmarks.length +
 			messages.length +
 			roomMessages.length;
-		return activity / 100;
+		console.log("Activity for user " + userID + ": " + activity);
+		return activity;
 	}
 
 	private async calculateGenreSimilarity(
