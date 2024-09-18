@@ -55,14 +55,32 @@ const RoomOptions = () => {
 				<Text style={styles.host}>{room.host}</Text>
 			</View>
 
-			<Image source={{ uri: room.image }} style={styles.image} />
+			<Image
+				source={{ uri: room.image }}
+				style={styles.image}
+				testID="room-image"
+			/>
 
-			<TouchableOpacity style={styles.button} onPress={toggleBookmark}>
+			<TouchableOpacity
+				style={styles.button}
+				onPress={toggleBookmark}
+				testID="bookmark-button" // Updated testID for the button
+			>
 				<View style={styles.buttonContent}>
 					{isBookmarked ? (
-						<FontAwesome name="bookmark" size={20} color="black" />
+						<FontAwesome
+							name="bookmark"
+							size={20}
+							color="black"
+							testID="bookmarked-icon"
+						/>
 					) : (
-						<FontAwesome5 name="bookmark" size={20} color="black" />
+						<FontAwesome5
+							name="bookmark"
+							size={20}
+							color="black"
+							testID="not-bookmarked-icon"
+						/>
 					)}
 					<Text style={styles.buttonText}>Bookmark room</Text>
 				</View>
