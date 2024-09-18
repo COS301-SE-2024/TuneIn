@@ -16,7 +16,7 @@ const WelcomeScreen: React.FC = () => {
 	const { width, height } = Dimensions.get("window");
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/Auth/LoginScreen");
+		router.navigate("/screens/Auth/LoginOther");
 	};
 
 	const navigateToRegister = () => {
