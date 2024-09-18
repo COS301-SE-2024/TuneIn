@@ -105,25 +105,8 @@ export class RecommendationsService {
 
 		return playlistScores;
 	}
-	// analyzeFeatureDistribution = (playlists: any[]) => {
-	// 	console.log("Analyzing feature distribution");
-	// 	const features = ["danceability", "energy", "loudness", "tempo", "valence"];
-	// 	features.forEach((feature) => {
-	// 		const values = playlists.map((p) => {
-	// 			console.log(p[0]);
-	// 			console.log(p[0][feature]);
-	// 			return p[0][feature];
-	// 		});
-	// 		const min = Math.min(...values);
-	// 		const max = Math.max(...values);
-	// 		console.log(`${feature}: min=${min}, max=${max}`);
-	// 	});
-	// };
 
 	getTopPlaylists(topN: number): { playlist: string; score: number }[] {
-		// eslint-disable-next-line prettier/prettier
-        // this.analyzeFeatureDistribution(Object.values(this.playlists));
-		// console.log("Analyzing feature distribution");
 		const playlistScores = this.getPlaylistSimilarityScores();
 		return Object.entries(playlistScores)
 			.map(([playlist, score]) => ({ playlist, score }))

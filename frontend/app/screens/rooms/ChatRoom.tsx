@@ -9,7 +9,6 @@ import React, {
 import {
 	View,
 	Text,
-	Image,
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
@@ -18,19 +17,14 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	Dimensions,
-	Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
-import Bookmarker from "./functions/Bookmarker";
 import CurrentRoom from "./functions/CurrentRoom";
-import { Track } from "../../models/Track";
 import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
-import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {

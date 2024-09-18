@@ -3,25 +3,37 @@ import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import { API_BASE_URL } from "../../services/Utils";
+import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [following, setFollowing] = useState<Friend[]>([]);
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
 
+	const user = useLocalSearchParams();
 	useEffect(() => {
 		const fetchFollowing = async () => {
 			try {
-				const response = await axios.get(`${API_BASE_URL}/users/following`);
-				setFollowing(response.data);
-				setFilteredFollowing(response.data);
+				const token = await auth.getToken(); // Await the token to resolve the promise
+				const response = await axios.get(`${API_BASE_URL}/users/following`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				const mappedFollowing: Friend[] = response.data.map(
+					(user: any): Friend => ({
+						profile_picture_url: user.profile_picture_url,
+						username: user.username,
+						friend_id: user.userID,
+						relationship: user.relationship,
+					}),
+				);
+				setFollowing(mappedFollowing);
+				setFilteredFollowing(mappedFollowing);
 			} catch (error) {
 				console.error("Error fetching following:", error);
 			}
 		};
-
 		fetchFollowing();
 	}, []);
 
@@ -37,12 +49,46 @@ const Following: React.FC = () => {
 		}
 	}, [search, following]);
 
+	const handleUnfollow = async (friend: Friend) => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${API_BASE_URL}/users/${friend.username}/unfollow`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+							"Content-Type": "application/json",
+						},
+					},
+				);
+				if (!response.ok) {
+					console.error("Error unfollowing user:", response);
+					return;
+				}
+				const updatedFollowing = following.filter(
+					(user) => user.username !== friend.username,
+				);
+				setFollowing(updatedFollowing);
+				setFilteredFollowing(updatedFollowing);
+			} catch (error) {
+				console.error("Error unfollowing user:", error);
+			}
+		}
+	};
 	const renderFollowing = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username} // Replace with actual current user info
+			cardType={
+				item.relationship === "mutual" || item.relationship === "following"
+					? "following"
+					: "friend-follow"
+			}
+			handle={handleUnfollow}
 		/>
 	);
 

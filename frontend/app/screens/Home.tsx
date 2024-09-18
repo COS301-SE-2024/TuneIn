@@ -38,11 +38,6 @@ import { useAPI } from "../APIContext";
 import { UserDto } from "../../api";
 import { RequiredError } from "../../api/base";
 
-// interface UserData {
-// 	username: string;
-// 	// Add other properties if needed
-// }
-
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -158,27 +153,38 @@ const Home: React.FC = () => {
 			return [];
 		}
 
-		return rooms.map((room) => ({
-			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
-			name: room.room_name,
-			language: room.language,
-			songName: room.current_song ? room.current_song.title : null,
-			artistName: room.current_song
-				? room.current_song.artists.join(", ")
-				: null,
-			description: room.description,
-			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
-			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: 50,
-			tags: room.tags ? room.tags : [],
-			mine: mine,
-			isNsfw: room.has_nsfw_content,
-			isExplicit: room.has_explicit_content,
-		}));
+		return rooms.map((room, index) => {
+			// Print out the raw room data for the first room only
+			if (index === 0) {
+				console.log("Raw room data before formatting:", room);
+			}
+
+			return {
+				id: room.roomID,
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				name: room.room_name,
+				language: room.language,
+				songName: room.current_song ? room.current_song.title : null,
+				artistName: room.current_song
+					? room.current_song.artists.join(", ")
+					: null,
+				description: room.description,
+				userID: room.creator.userID,
+				userProfile: room.creator
+					? room.creator.profile_picture_url
+					: ProfileIMG,
+				username: room.creator ? room.creator.username : "Unknown",
+				roomSize: 50,
+				tags: room.tags ? room.tags : [],
+				mine: mine,
+				isNsfw: room.has_nsfw_content,
+				isExplicit: room.has_explicit_content,
+				start_date: room.start_date,
+				end_date: room.end_date,
+			};
+		});
 	};
- 
+
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
@@ -266,7 +272,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, []);
+	}, [setUserData, userData]);
 
 	const [refreshing] = React.useState(false);
 
@@ -283,12 +289,20 @@ const Home: React.FC = () => {
 	);
 
 	const router = useRouter();
+
 	const navigateToAllFriends = () => {
 		const safeUserData = userData ?? { username: "defaultUser" };
 
 		router.navigate({
 			pathname: "/screens/followers/FollowerStack",
 			params: { username: safeUserData.username },
+		});
+	};
+
+	const navigateToMyRooms = () => {
+		router.navigate({
+			pathname: "/screens/rooms/MyRooms",
+			params: { myRooms: JSON.stringify(myRooms) },
 		});
 	};
 
@@ -310,10 +324,9 @@ const Home: React.FC = () => {
 			ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
 		}
 
-		if(cacheError) {
+		if (cacheError) {
 			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
 		}
-
 	}, [roomError, friendError, profileError, cacheError]);
 
 	const handleScroll = useCallback(
@@ -399,16 +412,17 @@ const Home: React.FC = () => {
 								/>
 							</>
 						) : null}
-						{!roomError && (
-							<>
-								<Text style={styles.sectionTitle}>My Rooms</Text>
-								<AppCarousel
-									data={myRooms}
-									renderItem={renderItem}
-									showAddRoomCard={true} // Conditionally show the AddRoomCard
-								/>
-							</>
-						)}
+						<TouchableOpacity
+							style={styles.navigateButton}
+							onPress={navigateToMyRooms}
+						>
+							<Text style={styles.sectionTitle}>My Rooms</Text>
+						</TouchableOpacity>
+						<AppCarousel
+							data={myRooms}
+							renderItem={renderItem}
+							showAddRoomCard={true} // Conditionally show the AddRoomCard
+						/>
 					</View>
 				) : (
 					<>

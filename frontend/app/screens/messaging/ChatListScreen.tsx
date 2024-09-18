@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import ChatItem, { ChatItemProps } from "../../components/ChatItem";
-import { Chat } from "../../models/chat";
 import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
@@ -128,7 +127,7 @@ const ChatListScreen = () => {
 				setFilteredChats(createChats(filtered, selfRef.current.userID));
 			}
 		}
-	}, [searchQuery]);
+	}, [searchQuery, userMessages]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);

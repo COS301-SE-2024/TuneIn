@@ -6,7 +6,6 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { UserDto } from "../app/models/UserDto";
 // import { DirectMessageDto } from "../app/models/DmDto";
 import axios from "axios";
-import { DirectMessage } from "../app/services/Live";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),

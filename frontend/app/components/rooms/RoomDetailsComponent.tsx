@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { colors } from "../../styles/colors";
-import { color } from "react-native-elements/dist/helpers";
 
 export interface RoomDetailsProps {
 	image: string;

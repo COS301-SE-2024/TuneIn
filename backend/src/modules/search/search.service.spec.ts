@@ -27,7 +27,7 @@ const userMock = [
 const uDtoMock: UserDto[] = [
 	{
 		profile_name: "Farmer23",
-		userID: "01ece2d8-e091-7023-c1f2-d3399faa7071",
+		userID: "mockId",
 		username: "farmer 345",
 		profile_picture_url:
 			"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-06-23T13:23:20.848Z-image.jpeg",
@@ -143,7 +143,7 @@ const rDtoMock = [
 				data: [],
 			},
 		},
-		roomID: "66bb6bf7-25be-45af-bc38-7e7e258797b8",
+		roomID: "mockID",
 		participant_count: 0,
 		room_name: "chill vibes",
 		description:

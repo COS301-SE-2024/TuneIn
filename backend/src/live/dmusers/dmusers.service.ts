@@ -179,5 +179,6 @@ export class DmUsersService {
 			participant: null,
 			chatID: null,
 		});
+		console.log(socketId);
 	}
 }
