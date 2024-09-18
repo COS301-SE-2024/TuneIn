@@ -156,7 +156,7 @@ const EditRoom: React.FC = () => {
 				[{ text: "OK" }],
 				{ cancelable: false },
 			);
-			router.navigate("/screens/Home");
+			router.navigate("/screens/(tabs)/Home");
 		} catch (error) {
 			console.error("Error:", error);
 		}

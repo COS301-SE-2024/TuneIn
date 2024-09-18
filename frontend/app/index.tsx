@@ -63,7 +63,7 @@ const App: React.FC = () => {
 				}
 
 				if (auth.authenticated()) {
-					router.replace("/screens/Home");
+					router.replace("/screens/(tabs)/Home");
 				} else {
 					console.log("clearing from index");
 					StorageService.clear();
