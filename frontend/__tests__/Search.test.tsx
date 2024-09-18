@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import Search from "../app/screens/Search"; // Adjust the path as needed
+import Search from "../app/screens/(tabs)/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
 import auth from "../app/services/AuthManagement";
@@ -23,7 +23,6 @@ jest.mock("../app/components/UserItem", () => {
 	MockUserItem.displayName = "MockUserItem";
 	return MockUserItem;
 });
-
 
 jest.mock("axios");
 
