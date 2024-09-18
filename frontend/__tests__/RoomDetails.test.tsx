@@ -105,7 +105,7 @@ describe("RoomDetails Component", () => {
 	// 	await waitFor(() => {
 	// 		expect(uploadImage).toHaveBeenCalledWith("image-uri", "My Room");
 	// 		expect(mockRouter.navigate).toHaveBeenCalledWith({
-	// 			pathname: "/screens/Home",
+	// 			pathname: "/screens/(tabs)/Home",
 	// 			params: { roomID: "123" },
 	// 		});
 	// 	});

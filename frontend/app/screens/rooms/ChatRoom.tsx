@@ -18,7 +18,7 @@ import {
 	Platform,
 	Dimensions,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";
@@ -74,7 +74,6 @@ const ChatRoom = () => {
 		}
 	}, [currentRoom, roomID]);
 
-	const router = useRouter();
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<LiveMessage[]>([]);

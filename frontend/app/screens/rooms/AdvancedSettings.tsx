@@ -50,7 +50,7 @@ const AdvancedSettings = () => {
 	};
 
 	const navigateToHome = () => {
-		router.navigate("/screens/Home");
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);

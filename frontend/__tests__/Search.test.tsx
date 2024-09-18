@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import Search from "../app/screens/Search"; // Adjust the path as needed
+import Search from "../app/screens/(tabs)/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
 import auth from "../app/services/AuthManagement";
@@ -22,12 +22,6 @@ jest.mock("../app/components/UserItem", () => {
 	const MockUserItem = (props: Record<string, unknown>) => <div {...props} />;
 	MockUserItem.displayName = "MockUserItem";
 	return MockUserItem;
-});
-
-jest.mock("../app/components/NavBar", () => {
-	const MockNavBar = () => <div />;
-	MockNavBar.displayName = "MockNavBar";
-	return MockNavBar;
 });
 
 jest.mock("axios");
@@ -143,7 +137,7 @@ describe("Search Component", () => {
 			.mockResolvedValue({ data: uHistDtoMock });
 
 		// Render the page component (this triggers the mock usage)
-		const { getByText, getByTestId, queryByTestId } = render(<Search />);
+		const { getByText, getByTestId } = render(<Search />);
 
 		// Press the button to show more filters
 		fireEvent.press(getByText("View More Filters"));

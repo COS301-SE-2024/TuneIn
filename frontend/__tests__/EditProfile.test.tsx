@@ -559,7 +559,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByText, getByTestId } = render(
+		const { getByTestId } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
