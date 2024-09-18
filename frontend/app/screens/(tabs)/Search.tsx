@@ -33,52 +33,6 @@ type SearchResult = {
 	userData?: User;
 };
 
-// Sample genre data with additional genres
-let genres: string[] = [
-	"Rock",
-	"Pop",
-	"Jazz",
-	"Classical",
-	"Hip Hop",
-	"Country",
-	"Electronic",
-	"Reggae",
-	"Blues",
-	"Folk",
-	"Metal",
-	"Punk",
-	"Soul",
-	"R&B",
-	"Funk",
-	"Alternative",
-	"Indie",
-	"Dance",
-	"Techno",
-	"Ambient",
-	"Gospel",
-	"Latin",
-	"Reggaeton",
-	"Ska",
-	"Opera",
-];
-
-// Sample language data
-const languages = [
-	"English",
-	"Spanish",
-	"French",
-	"German",
-	"Chinese",
-	"Japanese",
-	"Korean",
-	"Portuguese",
-	"Russian",
-	"Arabic",
-	"Italian",
-	"Turkish",
-	"Swedish",
-];
-
 const Search: React.FC = () => {
 	const navigation = useNavigation();
 	const [searchTerm, setSearchTerm] = useState("");

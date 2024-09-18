@@ -17,7 +17,7 @@ import uploadImage from "../../services/ImageUpload";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
 const EditRoom: React.FC = () => {
@@ -63,7 +63,7 @@ const EditRoom: React.FC = () => {
 
 		loadRoomDetails();
 		console.log(roomDetails);
-	}, []);
+	}, [roomData, roomDetails]);
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {

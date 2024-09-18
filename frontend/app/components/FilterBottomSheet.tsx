@@ -5,7 +5,6 @@ import {
 	StyleSheet,
 	PanResponder,
 	Animated,
-	ScrollView,
 	Switch,
 	Modal,
 } from "react-native";

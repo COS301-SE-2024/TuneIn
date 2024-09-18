@@ -137,7 +137,7 @@ describe("Search Component", () => {
 			.mockResolvedValue({ data: uHistDtoMock });
 
 		// Render the page component (this triggers the mock usage)
-		const { getByText, getByTestId, queryByTestId } = render(<Search />);
+		const { getByText, getByTestId } = render(<Search />);
 
 		// Press the button to show more filters
 		fireEvent.press(getByText("View More Filters"));
