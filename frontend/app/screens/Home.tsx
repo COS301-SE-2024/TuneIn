@@ -316,13 +316,16 @@ const Home: React.FC = () => {
 	}, [refreshData]);
 
 	useEffect(() => {
-		if (roomError && !profileError) {
-			ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
-		} else if (!roomError && friendError) {
-			ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
-		} else if (profileError) {
-			ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+		if (!roomError || !friendError){
+			if (roomError && !friendError) {
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			} else if (!roomError && friendError) {
+				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+			} else if (profileError) {
+				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+			}
 		}
+			
 
 		if (cacheError) {
 			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
@@ -383,7 +386,7 @@ const Home: React.FC = () => {
 						// color={colors.backgroundColor}
 						style={{ marginTop: 260 }}
 					/>
-				) : !roomError && !friendError ? (
+				) : (!roomError || !friendError) ? (
 					<View style={styles.contentContainer}>
 						{!roomError && (
 							<>
