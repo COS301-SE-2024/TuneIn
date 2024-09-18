@@ -24,7 +24,6 @@ my-app/
 │   ├── components/
 │   │   ├── AppCarousel.tsx
 │   │   ├── FriendsGrid.tsx
-│   │   ├── NavBar.tsx
 │   │   ├── RoomCardWidget.tsx
 │   │   ├── TopNavBar.tsx
 │   │   └── ... (other reusable components)

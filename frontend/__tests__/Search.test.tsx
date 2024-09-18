@@ -24,11 +24,6 @@ jest.mock("../app/components/UserItem", () => {
 	return MockUserItem;
 });
 
-jest.mock("../app/components/NavBar", () => {
-	const MockNavBar = () => <div />;
-	MockNavBar.displayName = "MockNavBar";
-	return MockNavBar;
-});
 
 jest.mock("axios");
 
