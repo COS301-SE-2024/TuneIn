@@ -343,11 +343,7 @@ const Home: React.FC = () => {
 				}
 			>
 				{loading ? (
-					<ActivityIndicator
-						size={60}
-						// color={colors.backgroundColor}
-						style={{ marginTop: 260 }}
-					/>
+					<ActivityIndicator size={60} style={{ marginTop: 260 }} />
 				) : (
 					<View style={styles.contentContainer}>
 						{myRecents.length > 0 && (
@@ -395,13 +391,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: colors.backgroundColor,
 	},
-	scrollViewContent: {
-		paddingTop: 40,
-	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: "center",
-		paddingTop: 20,
 	},
 	sectionTitle: {
 		fontSize: 24,
