@@ -11,6 +11,7 @@ const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
+	const [friendError, setFriendError] = useState<boolean>(false);
 	const user = useLocalSearchParams();
 	useEffect(() => {
 		const fetchRequestsAndFollowers = async () => {
@@ -32,8 +33,12 @@ const Followers: React.FC = () => {
 				);
 				setFollowers(mappedFollowers);
 				setFilteredFollowers(mappedFollowers);
+				setFriendError(false);
 			} catch (error) {
-				console.error("Error fetching data:", error);
+				console.log("Error fetching data:", error);
+				setFollowers([]);
+				setFilteredFollowers([]);
+				setFriendError(true);
 			}
 		};
 
@@ -145,7 +150,7 @@ const Followers: React.FC = () => {
 						keyExtractor={(item) => item.username}
 					/>
 				) : (
-					<Text style={styles.noFollowersText}>No followers available.</Text>
+					<Text style={styles.noFollowersText}>{friendError ? "Failed to load followers" : "No followers available."}</Text>
 				)}
 			</View>
 		</View>

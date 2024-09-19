@@ -11,6 +11,7 @@ const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [following, setFollowing] = useState<Friend[]>([]);
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
+	const [fetchFollowingError, setFetchFollowingError] = useState<boolean>(false);
 
 	const user = useLocalSearchParams();
 	useEffect(() => {
@@ -30,8 +31,12 @@ const Following: React.FC = () => {
 				);
 				setFollowing(mappedFollowing);
 				setFilteredFollowing(mappedFollowing);
+				setFetchFollowingError(false);
 			} catch (error) {
-				console.error("Error fetching following:", error);
+				console.log("Error fetching following:", error);
+				setFollowing([]);
+				setFilteredFollowing([]);
+				setFetchFollowingError(true);
 			}
 		};
 		fetchFollowing();
@@ -107,7 +112,7 @@ const Following: React.FC = () => {
 					keyExtractor={(item) => item.username}
 				/>
 			) : (
-				<Text style={styles.noFollowingText}>No users found.</Text>
+				<Text style={styles.noFollowingText}>{fetchFollowingError ? "Failed to load users followed" : "No users found."}</Text>
 			)}
 		</View>
 	);

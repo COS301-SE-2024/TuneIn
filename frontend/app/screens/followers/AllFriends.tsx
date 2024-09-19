@@ -100,7 +100,7 @@ const AllFriends: React.FC = () => {
 
 			return mappedFriends;
 		} catch (error) {
-			console.error("Error fetching friends:", error);
+			console.log("Error fetching friends:", error);
 			setFriendError(true);
 			return [];
 		}
@@ -123,7 +123,7 @@ const AllFriends: React.FC = () => {
 
 			return mappedRequests;
 		} catch (error) {
-			console.error("Error fetching friend requests:", error);
+			console.log("Error fetching friend requests:", error);
 			setFriendReqError(true);
 			return [];
 		}
@@ -177,7 +177,7 @@ const AllFriends: React.FC = () => {
 
 			return mappedPotentialFriends;
 		} catch (error) {
-			console.error("Error fetching potential friends:", error);
+			console.log("Error fetching potential friends:", error);
 			setPotentialFriendError(true);
 			return [];
 		}
@@ -203,7 +203,7 @@ const AllFriends: React.FC = () => {
 			
 			return mappedPendingRequests;
 		} catch (error) {
-			console.error("Error fetching pending requests:", error);
+			console.log("Error fetching pending requests:", error);
 			setPendingError(true);
 			return [];
 		}
