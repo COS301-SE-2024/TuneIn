@@ -60,12 +60,6 @@ const MorePage: React.FC = () => {
 		[scrollY],
 	);
 
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	const renderResult = ({ item }: { item: any }) => {
 		if (params.type === "room") {
 			return (
@@ -170,13 +164,6 @@ const MorePage: React.FC = () => {
 				ListFooterComponent={renderFooter}
 				testID="flatlist"
 			/>
-
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			></Animated.View>
 		</View>
 	);
 };
@@ -330,13 +317,6 @@ const styles = StyleSheet.create({
 	closeButtonText: {
 		color: "white",
 		fontSize: 16,
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 	resultsContainer: {
 		paddingVertical: 10,

@@ -5,13 +5,13 @@ import { Track } from "../models/Track";
 
 interface SongListProps {
 	track: Track;
-	voteCount: number;
+	voteCount?: number;
 	showVoting?: boolean;
 	songNumber: number;
 	index: number; // Index of the song in the list
 	isCurrent: boolean; // Indicates if this song is the currently playing song
-	swapSongs: (index: number, direction: "up" | "down") => void; // Function to swap songs
-	setVoteCount: (newVoteCount: number) => void; // Function to update vote count
+	swapSongs?: (index: number, direction: "up" | "down") => void; // Function to swap songs
+	setVoteCount?: (newVoteCount: number) => void; // Function to update vote count
 }
 
 const SongList: React.FC<SongListProps> = ({
@@ -48,12 +48,19 @@ const SongList: React.FC<SongListProps> = ({
 				</Text>
 			</View>
 
-			<Voting
-				voteCount={voteCount}
-				setVoteCount={setVoteCount}
-				index={index}
-				swapSongs={swapSongs}
-			/>
+			{/* Conditionally render the Voting component */}
+			{showVoting &&
+				voteCount !== undefined &&
+				setVoteCount !== undefined &&
+				index !== undefined &&
+				swapSongs !== undefined && (
+					<Voting
+						voteCount={voteCount}
+						setVoteCount={setVoteCount}
+						index={index}
+						swapSongs={swapSongs}
+					/>
+				)}
 		</View>
 	);
 };

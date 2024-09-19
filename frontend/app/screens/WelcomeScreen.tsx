@@ -24,7 +24,7 @@ const WelcomeScreen: React.FC = () => {
 	};
 
 	const navigateToHelp = () => {
-		router.navigate("/screens/help/HelpScreen");
+		router.navigate("/screens/(tabs)/HelpScreenelpScreen");
 	};
 
 	return (

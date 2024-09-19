@@ -134,7 +134,7 @@ const RegisterOtherScreen: React.FC = () => {
 					);
 					await auth.setToken(tokens.token);
 					live.initialiseSocket();
-					router.navigate("screens/Home");
+					router.navigate("screens/(tabs)/Home");
 				};
 				doExchange();
 			} else {

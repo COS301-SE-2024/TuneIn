@@ -1,7 +1,7 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
-import HelpMenu from "../app/screens/help/HelpScreen"; // Adjust the import path as needed
+import HelpMenu from "../app/screens/(tabs)/HelpScreen"; // Adjust the import path as needed
 
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
