@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	Image,
+	TouchableOpacity,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
 import { router } from "expo-router";
@@ -37,38 +44,46 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 
 		if (storedToken) {
 			if (isFollowing) {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try{
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					setIsFollowing(false);
-				} else {
-					console.error("Issue unfollowing user");
+					if (response) {
+						setIsFollowing(false);
+					}
+				} catch (error) {
+					console.log("Issue unfollowing user");
+					ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 				}
+				
 			} else {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.username}/follow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try{
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${user.username}/follow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					console.log("Called Follow");
-					setIsFollowing(true);
-				} else {
-					console.error("Issue unfollowing user");
+					if (response) {
+						console.log("Called Follow");
+						setIsFollowing(true);
+					}
+				} catch (error) {
+					console.log("Issue following user");
+					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
 				}
+				
 			}
 		}
 	};
@@ -125,7 +140,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 5,
 	},
 	textContainer: {
-		flex: 1,
+		// flex: 1,
 		width: 120,
 	},
 	profileImage: {

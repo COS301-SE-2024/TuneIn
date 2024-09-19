@@ -106,6 +106,7 @@ const Search: React.FC = () => {
 	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
 	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+	const [searchError, setSearchError] = useState<boolean>(false);
 
 	const isAdvancedSearch = () => {
 		if (filter === "room") {
@@ -149,7 +150,6 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		console.log("Selected Genre: " + selectedGenre);
 		const getRecommendedRooms = async () => {
 			setLoading(true);
 			try {
@@ -183,10 +183,11 @@ const Search: React.FC = () => {
 					setResults(recommendedRooms);
 				}
 			} catch (error) {
-				console.error("Error fetching recommended rooms:", error);
+				console.log("Error fetching recommended rooms:", error);
 			}
 			setLoading(false);
 		};
+
 		if (searchTerm === "") {
 			if (filter === "room") {
 				setSearchSuggestions(roomSearchHistory.slice(0, 5));
@@ -436,9 +437,14 @@ const Search: React.FC = () => {
 						setResults(userResults);
 					}
 				}
+
+				setSearchError(false);
 			}
 		} catch (error) {
-			console.error("Error fetching search info:", error);
+			console.log("Error fetching search info:", error);
+			setResults([]);
+			setSearchError(true);
+			setLoading(false);
 			return null;
 		}
 		setLoading(false);
@@ -517,7 +523,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -543,7 +549,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -568,7 +574,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -593,7 +599,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -762,7 +768,7 @@ const Search: React.FC = () => {
 			) : results.length === 0 ? (
 				// Render No Results Message if no results
 				<View style={styles.noResult}>
-					<Text>No results found</Text>
+					<Text>{searchError ? "Failed to load search results" : "No results found"}</Text>
 				</View>
 			) : (
 				// Render FlatList if there are results
