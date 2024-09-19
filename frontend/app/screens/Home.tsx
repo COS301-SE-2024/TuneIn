@@ -78,7 +78,7 @@ const Home: React.FC = () => {
 
 	console.log("currentRoom: " + currentRoom);
 	const [errorMessage, setErrorMessage] = useState<string>("");
-	const [roomError, setRoomError] = useState<boolean>(true);
+	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const [cacheError, setCacheError] = useState<boolean>(false);

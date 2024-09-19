@@ -72,7 +72,6 @@ const ProfileScreen: React.FC = () => {
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [favRoomError, setFavRoomError] = useState<boolean>(false);
 	const [recentRoomError, setRecentRoomError] = useState<boolean>(false);
-	const [currentRoomError, setCurrentRoomError] = useState<boolean>(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -285,6 +284,7 @@ const ProfileScreen: React.FC = () => {
 				},
 			);
 			// console.log("Profile info: " + JSON.stringify(response));
+			setProfileError(false);
 			return response.data;
 		} catch (error) {
 			console.log("Error fetching profile info:", error);
@@ -317,7 +317,6 @@ const ProfileScreen: React.FC = () => {
 				setRoomCheck(true);
 			} else {
 				console.log("Error fetching current room info:", error);
-				setCurrentRoomError(true);
 			}
 		}
 	};
@@ -388,7 +387,7 @@ const ProfileScreen: React.FC = () => {
 		const storedToken = await auth.getToken();
 
 		if (storedToken) {
-			if (following) {
+			try{
 				const response = await axios.post(
 					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/unfollow`,
 					{},
@@ -404,28 +403,34 @@ const ProfileScreen: React.FC = () => {
 					primaryProfileData.followers.count--;
 					setFollowing(false);
 				}
-				// else {
-				// 	console.log("Issue unfollowing user");
-				// }
+			}
+			catch(error) {
+				console.log("Issue unfollowing user:", error);
+				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
+			};
+			if (following) {
+				
 			} else {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try{
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					// console.log("Called Follow");
-					primaryProfileData.followers.count++;
-					setFollowing(true);
-				}
-				// else {
-				// 	console.log("Issue following user");
-				// }
+					if (response) {
+						// console.log("Called Follow");
+						primaryProfileData.followers.count++;
+						setFollowing(true);
+					}
+				}catch(error) {
+					console.log("Issue following user:", error);
+					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
+				};
 			}
 		}
 	};
