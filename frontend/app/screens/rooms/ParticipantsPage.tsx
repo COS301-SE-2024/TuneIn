@@ -124,7 +124,14 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				<Text style={styles.header}>Participants</Text>
 			</View>
 			{(participantsInRoom.length === 0 && (
-				<Text>No participants in the room </Text>
+				<View style={styles.emptyQueueContainer}>
+					<Text style={styles.emptyQueueText}>
+						This room has no participants.{" "}
+						{/* {isMine = true
+							? "Add some songs to get started!"
+							: "Wait for the host to add some songs."} */}
+					</Text>
+				</View>
 			)) || (
 				<FlatList
 					data={participantsInRoom}
@@ -141,6 +148,17 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "white",
 		padding: 16,
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	headerContainer: {
 		flexDirection: "row",
