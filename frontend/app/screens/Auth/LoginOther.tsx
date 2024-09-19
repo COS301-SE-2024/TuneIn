@@ -1,33 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-// import {
-// 	Poppins_400Regular,
-// 	Poppins_500Medium,
-// 	Poppins_700Bold,
-// 	useFonts,
-// } from "@expo-google-fonts/poppins";
-import {
-	Ionicons,
-	FontAwesome,
-	MaterialIcons,
-	AntDesign,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../../styles/colors";
 
 const LoginOtherScreen: React.FC = () => {
 	const router = useRouter();
-
-	// let [fontsLoaded] = useFonts({
-	// 	Poppins_400Regular,
-	// 	Poppins_500Medium,
-	// 	Poppins_700Bold,
-	// });
-
-	// if (!fontsLoaded) {
-	// 	return null;
-	// }
 
 	const navigateToRegister = () => {
 		router.navigate("screens/Auth/RegisterOther");
@@ -40,7 +19,7 @@ const LoginOtherScreen: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
