@@ -8,9 +8,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
-import * as utils from "../../services/Utils";
-import auth from "../../services/AuthManagement";
 
 // Create a tab navigator
 const Tab = createMaterialTopTabNavigator();
@@ -18,36 +15,6 @@ const Tab = createMaterialTopTabNavigator();
 // Define the top tab navigator
 function MyTabs({ username }: { username: string }) {
 	const navigation = useNavigation(); // To handle navigation actions
-
-	// const [primaryProfileData, setPrimProfileData] = useState<any>(null);
-	// const fetchProfileInfo = async (token: string) => {
-	// 	try {
-	// 		if (token) {
-	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-	// 				headers: {
-	// 					Authorization: `Bearer ${token}`,
-	// 				},
-	// 			});
-
-	// 			return response.data;
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Error fetching profile info:", error);
-	// 	}
-	// };
-
-	// const refreshData = useCallback(async () => {
-	// 	// setLoading(true);
-	// 	const storedToken = await auth.getToken();
-	// 	console.log("Stored token:", storedToken);
-
-	// 	if (storedToken) {
-	// 		if (!userData) {
-	// 			const userInfo = await fetchProfileInfo(storedToken);
-	// 			setUserData(userInfo);
-	// 		}
-
-	// }, }[]);
 
 	return (
 		<>
