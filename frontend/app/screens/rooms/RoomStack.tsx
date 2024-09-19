@@ -65,6 +65,7 @@ function MyRoomTabs() {
 	}
 
 	useEffect(() => {
+		console.log("Room data: ", roomData);
 		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
@@ -135,7 +136,12 @@ function MyRoomTabs() {
 		if (roomData.mine) {
 			router.navigate("/screens/rooms/AdvancedSettings");
 		} else {
-			router.navigate("/screens/rooms/RoomInfo");
+			router.navigate({
+				pathname: "/screens/rooms/RoomInfo",
+				params: {
+					roomData: JSON.stringify(roomData),
+				},
+			});
 		}
 	};
 
