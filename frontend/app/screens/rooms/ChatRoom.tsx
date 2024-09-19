@@ -116,7 +116,7 @@ const ChatRoom = () => {
 			if (!token) {
 				throw new Error("No token found");
 			}
-			console.log("Joining room........", roomID, token);
+			console.log("Joining room........ from chatroom page?", roomID, token);
 			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages);
@@ -141,11 +141,6 @@ const ChatRoom = () => {
 			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
 	}, [readyToJoinRoom, joined, roomID]);
-
-	// handleJoinLeave();
-	useEffect(() => {
-		handleJoinLeave();
-	}, []);
 
 	const sendMessage = () => {
 		if (isSending) return;
