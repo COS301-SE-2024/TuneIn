@@ -6,6 +6,7 @@ import {
 	TextInput,
 	StyleSheet,
 	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import ChatItem, { ChatItemProps } from "../../components/ChatItem";
@@ -95,7 +96,8 @@ const ChatListScreen = () => {
 				setFilteredChats(createChats(chats, selfRef.current.userID));
 				setUserMessages(chats);
 			} catch (error) {
-				console.error(error);
+				console.log(error);
+				ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
 				throw error;
 			}
 		})();

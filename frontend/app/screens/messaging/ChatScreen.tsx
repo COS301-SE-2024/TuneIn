@@ -7,6 +7,7 @@ import {
 	TouchableOpacity,
 	Image,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,6 +27,7 @@ const ChatScreen = () => {
 	const [messages, setMessages] = useState<DirectMessage[]>([]);
 	const [connected, setConnected] = useState<boolean>(false);
 	const [isSending, setIsSending] = useState<boolean>(false);
+	const [dmError, setError] = useState<boolean>(false);
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
@@ -45,7 +47,9 @@ const ChatScreen = () => {
 			const [selfResponse, otherUserResponse] = await Promise.all(userPromises);
 			return [selfResponse.data as UserDto, otherUserResponse.data as UserDto];
 		} catch (error) {
-			console.error("Error fetching users' information", error);
+			console.log("Error fetching users' information", error);
+			setError(true);
+			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
 			throw error;
 		}
 	};
@@ -158,7 +162,7 @@ const ChatScreen = () => {
 					/>
 				)}
 				<Text style={styles.headerTitle}>
-					{otherUser?.profile_name || "Loading..."}
+					{dmError ? "Failed" : (otherUser?.profile_name || "Loading...")}
 				</Text>
 			</View>
 			<FlatList
@@ -167,7 +171,7 @@ const ChatScreen = () => {
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
 			/>
-			<View style={styles.inputContainer}>
+			{!dmError && (<View style={styles.inputContainer}>
 				<TextInput
 					placeholder="Message..."
 					style={styles.input}
@@ -183,7 +187,7 @@ const ChatScreen = () => {
 				>
 					<Feather name="send" size={24} color="black" />
 				</TouchableOpacity>
-			</View>
+			</View>)}
 		</View>
 	);
 };
