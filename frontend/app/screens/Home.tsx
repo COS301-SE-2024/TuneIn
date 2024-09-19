@@ -45,8 +45,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom, userData, setUserData } = playerContext;
-
+	const { userData, setUserData } = playerContext;
 	// An example of a well-typed & well-defined way to interact with the API
 	/* ********************************************************************** */
 	const { users, authenticated } = useAPI();
@@ -75,7 +74,6 @@ const Home: React.FC = () => {
 	}
 	/* ********************************************************************** */
 
-	console.log("currentRoom: " + currentRoom);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
