@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import RoomDetails, {
 	RoomDetailsProps,
 } from "../../components/rooms/RoomDetailsComponent";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 // import { colors } from "../../styles/colors";
 
 const roomDetails: RoomDetailsProps = {
@@ -21,12 +21,31 @@ const roomDetails: RoomDetailsProps = {
 	genre: "Jazz",
 	language: "English",
 	roomSize: "Medium",
-	isExplicit: true,
+	isExplicit: false,
 	isNsfw: true,
 };
 
 const RoomInfoScreen = () => {
 	const router = useRouter();
+	const { roomData } = useLocalSearchParams();
+	let _room: any;
+	if (Array.isArray(roomData)) {
+		_room = JSON.parse(roomData[0]);
+	} else {
+		_room = JSON.parse(roomData);
+	}
+	const room: RoomDetailsProps = {
+		image: _room.backgroundImage,
+		name: _room.name,
+		description: _room.description,
+		genre: _room.genre,
+		language: _room.language,
+		roomSize: _room.roomSize,
+		isExplicit: _room.isExplicit,
+		isNsfw: _room.isNsfw,
+		// tags: _room.tags,
+	};
+	console.log("Room data: ", _room);
 
 	return (
 		<ScrollView contentContainerStyle={styles.container} testID="room-details">
@@ -37,9 +56,9 @@ const RoomInfoScreen = () => {
 				>
 					<Ionicons name="close" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.roomName}>{roomDetails.name}</Text>
+				<Text style={styles.roomName}>{room.name}</Text>
 			</View>
-			<RoomDetails {...roomDetails} />
+			<RoomDetails {...room} />
 		</ScrollView>
 	);
 };
