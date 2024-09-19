@@ -58,8 +58,10 @@ function MyRoomTabs() {
 	let roomID: string;
 	if (roomData.id !== undefined) {
 		roomID = roomData.id;
-	} else {
+	} else if (roomData.roomID !== undefined) {
 		roomID = roomData.roomID;
+	} else {
+		roomID = currentRoom?.roomID ?? "";
 	}
 
 	useEffect(() => {
@@ -70,6 +72,7 @@ function MyRoomTabs() {
 	}, [currentRoom, roomID]);
 
 	const joinRoom = useCallback(() => {
+		console.log("Joining room for some reason i can't even understand");
 		const formattedRoom = formatRoomData(roomData);
 		setJoined(true);
 		setCurrentRoom(formattedRoom);
@@ -77,19 +80,25 @@ function MyRoomTabs() {
 
 	const leaveRoom = () => {
 		setCurrentRoom(null);
+		setJoined(false);
 	};
 
 	const handleJoinLeave = async () => {
 		console.log("joined", joined);
-		setJoined(!joined);
 		const token = await auth.getToken();
-		console.log("Token fr fr:", token);
+		if (!token) {
+			throw new Error("No token found");
+		}
 		if (!joined) {
-			if (!token) {
-				throw new Error("No token found");
+			const joinedRoom: boolean = await roomCurrent.leaveJoinRoom(
+				token,
+				roomID,
+				false,
+			);
+			if (!joinedRoom) {
+				console.log("Error joining room");
+				return;
 			}
-			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages);
 			setJoined(true);
@@ -99,9 +108,17 @@ function MyRoomTabs() {
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
+			const leftRoom: boolean = await roomCurrent.leaveJoinRoom(
+				token as string,
+				roomID,
+				true,
+			);
+			if (!leftRoom) {
+				console.log("Error leaving room");
+				return;
+			}
 			leaveRoom();
 			setJoined(false);
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			live.leaveRoom();
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
