@@ -123,11 +123,15 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			<FlatList
-				data={participantsInRoom}
-				renderItem={renderItem}
-				keyExtractor={(item) => item.id}
-			/>
+			{(participantsInRoom.length === 0 && (
+				<Text>No participants in the room </Text>
+			)) || (
+				<FlatList
+					data={participantsInRoom}
+					renderItem={renderItem}
+					keyExtractor={(item) => item.id}
+				/>
+			)}
 		</View>
 	);
 };
