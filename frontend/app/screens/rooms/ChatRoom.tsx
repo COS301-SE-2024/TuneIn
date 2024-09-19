@@ -71,10 +71,10 @@ const ChatRoom = () => {
 		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
+			live.joinRoom(roomID, setJoined, setMessages);
 		}
 	}, [currentRoom, roomID]);
 
-	const router = useRouter();
 	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState<LiveMessage[]>([]);
