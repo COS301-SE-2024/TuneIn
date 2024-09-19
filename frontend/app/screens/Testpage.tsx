@@ -1,14 +1,8 @@
 import React, { useState } from "react";
-import {
-	View,
-	Text,
-	Button,
-	StyleSheet,
-	Modal,
-	ScrollView,
-} from "react-native";
+import { View, Text, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { formatRoomData } from "../models/Room"; // Adjust the path to where formatRoomData is located
+import SplittingPopUp from "../components/rooms/SplittingRoomPopUp"; // Import the SplittingPopUp component
 
 // Example room and queue data
 const testRooms = [
@@ -91,7 +85,6 @@ const testQueues = [
 
 const TestPage: React.FC = () => {
 	const [isPopupVisible, setPopupVisible] = useState(false);
-	const [isRoomCardVisible, setRoomCardVisible] = useState(false);
 	const router = useRouter();
 
 	const navigateToSplittingRoom = () => {
@@ -112,6 +105,18 @@ const TestPage: React.FC = () => {
 		setPopupVisible(false);
 	};
 
+	// Handle confirmation from the popup
+	const handleConfirmPopup = async (choice: boolean) => {
+		console.log("User choice:", choice ? "Yes" : "No");
+		if (choice) {
+			// Navigate to splitting room or handle "Yes" action
+			navigateToSplittingRoom();
+		} else {
+			// Handle "No" action (cancel)
+			handleClosePopup();
+		}
+	};
+
 	const sampleRoomData = formatRoomData(testRooms[0]); // Use one of the sample rooms for demonstration
 
 	return (
@@ -121,6 +126,11 @@ const TestPage: React.FC = () => {
 			{/* Button to open the popup */}
 			<Button title="Test Popup" onPress={handleOpenPopup} />
 			{/* Popup component */}
+			<SplittingPopUp
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+				onConfirm={handleConfirmPopup}
+			/>
 		</View>
 	);
 };
@@ -136,24 +146,6 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 		marginBottom: 20,
-	},
-	modalOverlay: {
-		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	modalContent: {
-		width: "90%",
-		backgroundColor: "#fff",
-		borderRadius: 10,
-		padding: 20,
-		alignItems: "center",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
 	},
 });
 
