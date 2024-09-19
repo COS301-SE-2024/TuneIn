@@ -58,11 +58,11 @@ const Selector: React.FC<SelectorProps> = ({
 						onChangeText={setSearchQuery}
 						testID="genre-search-query"
 					/>
-					<ScrollView style={styles.scrollView}>
 						<FlatList
 							testID="flat-list"
 							data={filteredOptions}
 							keyExtractor={(item) => item}
+							style={styles.scrollView}
 							renderItem={({ item }) => (
 								<TouchableOpacity
 									style={styles.filterOption}
@@ -77,7 +77,6 @@ const Selector: React.FC<SelectorProps> = ({
 								</TouchableOpacity>
 							)}
 						/>
-					</ScrollView>
 					<TouchableOpacity
 						style={styles.closeButton}
 						onPress={() => {
