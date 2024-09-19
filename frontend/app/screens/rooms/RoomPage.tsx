@@ -653,7 +653,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>134 Participants</Text>
+							<Text>{participants.length + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}
