@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 interface Participant {
 	id: string;
@@ -24,6 +25,30 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	participants,
 }) => {
 	const navigation = useNavigation();
+	const router = useRouter();
+	let _roomParticipants = useLocalSearchParams();
+	let roomParticipants = _roomParticipants.participants;
+	const participantsInRoom: Participant[] = [];
+	if (typeof roomParticipants === "string") {
+		const roomParticipantsArray = JSON.parse(roomParticipants);
+		roomParticipantsArray.forEach(
+			(participant: {
+				userID: string;
+				username: string;
+				profile_picture_url: string;
+			}) => {
+				participantsInRoom.push({
+					id: participant.userID,
+					username: participant.username,
+					profilePictureUrl: participant.profile_picture_url,
+				});
+			},
+		);
+	} else if (Array.isArray(roomParticipants)) {
+		roomParticipants.forEach((participant) => {
+			participantsInRoom.push(JSON.parse(participant));
+		});
+	}
 
 	const navigateToProfile = (userId: string) => {};
 
@@ -99,7 +124,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				<Text style={styles.header}>Participants</Text>
 			</View>
 			<FlatList
-				data={mockData}
+				data={participantsInRoom}
 				renderItem={renderItem}
 				keyExtractor={(item) => item.id}
 			/>
