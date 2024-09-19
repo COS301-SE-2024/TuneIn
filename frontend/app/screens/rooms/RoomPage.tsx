@@ -94,6 +94,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
+	const [participants, setParticipants] = useState<any[]>([]);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
 	const bookmarker = useRef(new Bookmarker()).current;
@@ -386,6 +387,50 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			}
 		};
 	}, [isPlaying]);
+
+	useEffect(() => {
+		const fetchParticipants = async () => {
+			const storedToken = await auth.getToken();
+
+			if (!storedToken) {
+				console.error("No stored token found");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomID}/users`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error(
+						`Failed to fetch participants: ${response.status} ${response.statusText}`,
+						errorText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					setParticipants(data);
+					console.log("Participants:", data);
+				} else {
+					console.error("Unexpected response data format:", data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch participants:", error);
+			}
+		};
+		fetchParticipants();
+	}, [joined]);
 
 	useEffect(() => {
 		if (isPlaying) {
