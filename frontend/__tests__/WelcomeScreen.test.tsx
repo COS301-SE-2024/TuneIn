@@ -51,6 +51,8 @@ describe("WelcomeScreen", () => {
 		const helpButton = getByTestId("help-button"); // Add testID to the TouchableOpacity for the help button
 
 		fireEvent.press(helpButton);
-		expect(navigate).toHaveBeenCalledWith("/screens/help/HelpScreen");
+		expect(navigate).toHaveBeenCalledWith(
+			"/screens/(tabs)/HelpScreenelpScreen",
+		);
 	});
 });

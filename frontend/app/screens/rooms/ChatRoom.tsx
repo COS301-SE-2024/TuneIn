@@ -18,7 +18,7 @@ import {
 	Platform,
 	Dimensions,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";

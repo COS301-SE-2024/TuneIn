@@ -18,24 +18,23 @@ import {
 	RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import { Room } from "../models/Room";
-import { Friend } from "../models/friend";
-import AppCarousel from "../components/AppCarousel";
-import FriendsGrid from "../components/FriendsGrid";
-import Miniplayer from "../components/home/miniplayer";
-import NavBar from "../components/NavBar";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import { Room } from "../../models/Room";
+import { Friend } from "../../models/friend";
+import AppCarousel from "../../components/AppCarousel";
+import FriendsGrid from "../../components/FriendsGrid";
+import Miniplayer from "../../components/home/miniplayer";
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
-import { Player } from "../PlayerContext";
-import { colors } from "../styles/colors";
-import TopNavBar from "../components/TopNavBar";
-import { useAPI } from "../APIContext";
-import { UserDto } from "../../api";
-import { RequiredError } from "../../api/base";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
+import { Player } from "../../PlayerContext";
+import { colors } from "../../styles/colors";
+import TopNavBar from "../../components/TopNavBar";
+import { useAPI } from "../../APIContext";
+import { UserDto } from "../../../api";
+import { RequiredError } from "../../../api/base";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -329,13 +328,6 @@ const Home: React.FC = () => {
 		},
 		[scrollY],
 	);
-
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
@@ -349,11 +341,7 @@ const Home: React.FC = () => {
 				}
 			>
 				{loading ? (
-					<ActivityIndicator
-						size={60}
-						// color={colors.backgroundColor}
-						style={{ marginTop: 260 }}
-					/>
+					<ActivityIndicator size={60} style={{ marginTop: 260 }} />
 				) : (
 					<View style={styles.contentContainer}>
 						{myRecents.length > 0 && (
@@ -391,15 +379,7 @@ const Home: React.FC = () => {
 					</View>
 				)}
 			</ScrollView>
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			>
-				<Miniplayer />
-				<NavBar />
-			</Animated.View>
+			<Miniplayer />
 		</View>
 	);
 };
@@ -407,15 +387,11 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "white",
-	},
-	scrollViewContent: {
-		paddingTop: 40,
+		backgroundColor: colors.backgroundColor,
 	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: "center",
-		paddingTop: 20,
 	},
 	sectionTitle: {
 		fontSize: 24,
@@ -446,13 +422,6 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 32,
 		fontWeight: "bold",
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 });
 

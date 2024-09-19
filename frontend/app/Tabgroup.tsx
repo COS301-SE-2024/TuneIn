@@ -1,13 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../app/screens/Home";
-import Search from "../app/screens/Search";
-import Help from "../app/screens/help/HelpScreen";
-import RoomPage from "../app/screens/rooms/RoomPage";
+import Home from "../app/screens/(tabs)/Home";
+import Search from "../app/screens/(tabs)/Search";
+import Help from "../app/screens/(tabs)/HelpScreen";
 const Tab = createBottomTabNavigator();
 
 const TabGroup = () => (
 	<Tab.Navigator>
-		<Tab.Screen name="screens/rooms/RoomPage" component={RoomPage} />
 		<Tab.Screen
 			name="Home"
 			component={Home}

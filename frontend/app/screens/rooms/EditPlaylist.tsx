@@ -155,7 +155,7 @@ const EditPlaylist: React.FC = () => {
 		} catch (error) {
 			console.error("Error saving playlist:", error);
 		}
-		router.navigate("/screens/Home");
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -170,6 +170,7 @@ const EditPlaylist: React.FC = () => {
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>

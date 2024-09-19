@@ -24,7 +24,6 @@ my-app/
 │   ├── components/
 │   │   ├── AppCarousel.tsx
 │   │   ├── FriendsGrid.tsx
-│   │   ├── NavBar.tsx
 │   │   ├── RoomCardWidget.tsx
 │   │   ├── TopNavBar.tsx
 │   │   └── ... (other reusable components)
@@ -162,7 +161,7 @@ The Link component is a convenient way to navigate between screens declaratively
 2. **Link to the new screen using Link component:**
 
     ```tsx
-    // screens/Home.tsx
+    // screens/(tabs)/Home.tsx
     import React from 'react';
     import { View, Text } from 'react-native';
     import { Link } from 'expo-router';
@@ -206,7 +205,7 @@ For more programmatic navigation, use the router.navigate method.
 2. **Navigate to the new screen using router.navigate:**
 
     ```tsx
-    // screens/Home.tsx
+    // screens/(tabs)/Home.tsx
     import React from 'react';
     import { View, Text, Button } from 'react-native';
     import { useRouter } from 'expo-router';
