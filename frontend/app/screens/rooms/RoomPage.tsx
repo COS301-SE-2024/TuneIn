@@ -37,6 +37,7 @@ import EmojiPicker, {
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
+import * as path from "path";
 
 interface RoomPageProps {
 	joined: boolean;
@@ -550,7 +551,12 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	};
 
 	const handleViewParticipants = () => {
-		router.navigate("screens/rooms/ParticipantsPage"); // Change this to the correct page for participants
+		router.navigate({
+			pathname: "/screens/rooms/ParticipantsPage",
+			params: {
+				participants: JSON.stringify(participants),
+			},
+		}); // Change this to the correct page for participants
 	};
 
 	// const handleJoinLeave = async () => {
