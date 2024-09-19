@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "black",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 4,
+		borderRadius: 8,
 	},
 	rejectText: {
 		color: "white",
