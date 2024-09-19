@@ -24,7 +24,10 @@ class CurrentRoom {
 		}
 	};
 
-	isCurrentRoom = async (token: string, roomID: string) => {
+	isCurrentRoom = async (
+		token: string,
+		roomID: string,
+	): Promise<boolean | undefined> => {
 		try {
 			const response = await fetch(
 				`${utils.API_BASE_URL}/users/rooms/current`,
@@ -50,7 +53,11 @@ class CurrentRoom {
 		}
 	};
 
-	leaveJoinRoom = async (token: string, roomID: string, isLeaving: boolean) => {
+	leaveJoinRoom = async (
+		token: string,
+		roomID: string,
+		isLeaving: boolean,
+	): Promise<boolean> => {
 		console.log("leaveJoinRoom", token, roomID, isLeaving);
 		try {
 			const response = await fetch(
@@ -63,14 +70,14 @@ class CurrentRoom {
 					},
 				},
 			);
-			const data = await response.json();
-			console.log(data);
+			console.log("Response:", response);
 			if (response.status === 201) {
 				return true;
 			}
 			return false;
 		} catch (error) {
 			console.error("Error:", error);
+			return false;
 		}
 	};
 }
