@@ -345,6 +345,7 @@ const ProfileScreen: React.FC = () => {
 				const recentRooms = await Promise.all(recentRoomsPromises);
 
 				setRecentRoomData(recentRooms);
+				setRecentRoomError(false);
 			}
 		} catch (error) {
 			console.log("Error fetching recent room info:", error);
@@ -375,6 +376,7 @@ const ProfileScreen: React.FC = () => {
 				const favRooms = await Promise.all(favRoomsPromises);
 
 				setFavoriteRoomData(favRooms);
+				setFavRoomError(false);
 			}
 		} catch (error) {
 			console.log("Error fetching fav room info:", error);

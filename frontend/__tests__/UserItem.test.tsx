@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
 import * as StorageService from "../app/services/StorageService";
 import axios from "axios";
+import { ToastAndroid } from "react-native";
 
 const userMock: User = {
 	id: "id",
@@ -132,6 +133,39 @@ describe("UserItem component", () => {
 		await waitFor(() => {
 			expect(getByText("Follow")).toBeTruthy();
 		});
+	});
+
+	it("fails to unfollow when following", async () => {
+		const mockPlayerContextValue = {
+			userData: {
+				username: "follower",
+			},
+		};
+
+		(axios.post as jest.Mock).mockRejectedValue(new Error("Network Error"));
+		const toastSpy = jest
+			.spyOn(ToastAndroid, "show")
+			.mockImplementation(() => {});
+
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<UserItem user={userMock} />
+			</PlayerContextProviderMock>,
+		);
+
+		expect(getByText("Unfollow")).toBeTruthy();
+
+		fireEvent.press(getByTestId("follow-button"));
+
+		await waitFor(() => {
+			expect(toastSpy).toHaveBeenCalledWith(
+				"Failed to unfollow user",
+				ToastAndroid.SHORT,
+			);
+		});
+
+		// Restore the original ToastAndroid.show implementation
+		toastSpy.mockRestore();
 	});
 
 	it("handles follow request when not following", async () => {
