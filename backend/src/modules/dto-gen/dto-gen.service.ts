@@ -459,6 +459,7 @@ export class DtoGenService {
 		const sender: UserDto = await this.generateUserDto(message.sender);
 
 		const result: LiveChatMessageDto = {
+			messageID: messageID,
 			messageBody: message.contents,
 			sender: sender,
 			roomID: roomMessage.room_id,
@@ -519,6 +520,7 @@ export class DtoGenService {
 				}
 
 				const message: LiveChatMessageDto = {
+					messageID: m.message_id,
 					messageBody: m.contents,
 					sender: s,
 					roomID: roomMessage.room_id,

@@ -13,6 +13,10 @@ import { Type } from "class-transformer";
 export class LiveChatMessageDto {
 	@ApiProperty()
 	@IsString()
+	messageID: string;
+
+	@ApiProperty()
+	@IsString()
 	messageBody: string;
 
 	@ApiProperty()
