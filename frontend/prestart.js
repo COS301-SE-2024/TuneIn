@@ -2,7 +2,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const CONSTANTS_PATH = path.resolve("../common/constants.ts");
+//const CONSTANTS_PATH = path.resolve("../common/constants.ts");
+const CONSTANTS_PATH = path.resolve("../backend/src/common/constants.ts");
 fs.copyFileSync(CONSTANTS_PATH, path.resolve("constants.ts"));
 
 // check versions of node and npm
