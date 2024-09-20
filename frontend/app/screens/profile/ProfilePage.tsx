@@ -975,6 +975,7 @@ const styles = StyleSheet.create({
 		flex: 1, // Make the View take up the full screen
 		alignItems: "center",
 		justifyContent: "center",
+		paddingTop: 320,
 		width: "100%",
 	},
 });
