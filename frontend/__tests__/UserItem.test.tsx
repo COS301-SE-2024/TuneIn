@@ -191,4 +191,37 @@ describe("UserItem component", () => {
 			expect(getByText("Unfollow")).toBeTruthy();
 		});
 	});
+
+	it("fails to follow when not following", async () => {
+		const mockPlayerContextValue = {
+			userData: {
+				username: "unfollower",
+			},
+		};
+
+		(axios.post as jest.Mock).mockRejectedValue(new Error("Network Error"));
+		const toastSpy = jest
+			.spyOn(ToastAndroid, "show")
+			.mockImplementation(() => {});
+
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<UserItem user={userMock} />
+			</PlayerContextProviderMock>,
+		);
+
+		expect(getByText("Follow")).toBeTruthy();
+
+		fireEvent.press(getByTestId("follow-button"));
+
+		await waitFor(() => {
+			expect(toastSpy).toHaveBeenCalledWith(
+				"Failed to follow user",
+				ToastAndroid.SHORT,
+			);
+		});
+
+		// Restore the original ToastAndroid.show implementation
+		toastSpy.mockRestore();
+	});
 });
