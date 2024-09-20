@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "scheme": "tunein-app",
   "scripts": {
-    "prestart": "node check-versions.js && node node_modules/react-native-localhost/scripts/postinstall.js",
+    "prestart": "node prestart.js && node node_modules/react-native-localhost/scripts/postinstall.js",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
