@@ -2686,6 +2686,8 @@ components:
     LiveChatMessageDto:
       type: object
       properties:
+        messageID:
+          type: string
         messageBody:
           type: string
         sender:
@@ -2696,6 +2698,7 @@ components:
           format: date-time
           type: string
       required:
+        - messageID
         - messageBody
         - sender
         - roomID

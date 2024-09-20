@@ -314,6 +314,12 @@ export interface LiveChatMessageDto {
      * @type {string}
      * @memberof LiveChatMessageDto
      */
+    'messageID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof LiveChatMessageDto
+     */
     'messageBody': string;
     /**
      * 
