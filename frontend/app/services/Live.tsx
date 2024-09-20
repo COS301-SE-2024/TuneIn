@@ -12,6 +12,7 @@ import { DirectMessageDto } from "../models/DmDto";
 import { LiveChatMessageDto } from "../models/LiveChatMessageDto";
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { Emoji } from "rn-emoji-picker/dist/interfaces";
+import { ToastAndroid } from "react-native";
 
 const TIMEOUT = 5000000;
 
@@ -198,7 +199,8 @@ class LiveSocketService {
 				});
 				this.currentUser = response.data as UserDto;
 			} catch (error) {
-				console.error("Error fetching user's own info:", error);
+				console.log("Error fetching user's own info:", error);
+				ToastAndroid.show("Failed to fetch user info", ToastAndroid.SHORT);
 			}
 
 			console.log("Current user:", this.currentUser);
@@ -561,7 +563,8 @@ class LiveSocketService {
 			});
 			this.currentRoom = roomDto.data;
 		} catch (error) {
-			console.error("Error fetching room:", error);
+			console.log("Error fetching room:", error);
+			ToastAndroid.show("Failed to fetch room data", ToastAndroid.SHORT);
 		}
 
 		const u = this.currentUser;

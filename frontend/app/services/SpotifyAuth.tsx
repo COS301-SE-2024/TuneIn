@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as utils from "./Utils";
 import auth from "./AuthManagement";
+import { ToastAndroid } from "react-native";
 
 export type SpotifyTokenResponse = {
 	access_token: string;
@@ -47,7 +48,8 @@ export async function exchangeCodeWithBackend(
 		const r: SpotifyCallbackResponse = response.data;
 		return r;
 	} catch (error) {
-		console.error("Failed to exchange code with backend:", error);
+		console.log("Failed to exchange code with backend:", error);
+		ToastAndroid.show("Failed to authenticate spotify", ToastAndroid.SHORT);
 	}
 	throw new Error("Something went wrong while exchanging code with backend");
 }
@@ -68,7 +70,8 @@ export async function getTokens(): Promise<SpotifyTokenResponse> {
 			const r: SpotifyTokenResponse = response.data;
 			return r;
 		} catch (error) {
-			console.error("Failed to get tokens:", error);
+			console.log("Failed to get tokens:", error);
+			ToastAndroid.show("Failed to get spotify token", ToastAndroid.SHORT);
 		}
 		throw new Error("Something went wrong while getting Spotify tokens");
 	} else {

@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	TextInput,
 	ActivityIndicator,
+	ToastAndroid,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
@@ -46,7 +47,31 @@ const EditProfileScreen = () => {
 	const { userData, setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);
-	const [genres, setGenres] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([
+		"rock",
+		"pop",
+		"jazz",
+		"classical",
+		"hip hop",
+		"country",
+		"electronica",
+		"reggae",
+		"blues",
+		"folk",
+		"metal",
+		"punk",
+		"soul",
+		"r&b",
+		"funk",
+		"dancehall",
+		"techno",
+		"ambient",
+		"gospel",
+		"latin",
+		"reggaeton",
+		"ska",
+		"opera",
+	]);
 	let [flatLinks, setFlatLinks] = useState<string[]>(
 		Object.values(profileData.links.data).flat() as unknown as string[],
 	);
@@ -73,8 +98,13 @@ const EditProfileScreen = () => {
 
 	const handleUpdate = async () => {
 		setLoading(true);
-		await updateProfile();
-		setUserData(null);
+		const response = await updateProfile();
+		console.log("The response: " + JSON.stringify(response));
+		if (JSON.stringify(response) !== "[]") {
+			setUserData(null);
+		} else {
+			setLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -110,7 +140,8 @@ const EditProfileScreen = () => {
 			// console.log(response.data);
 			return response.data;
 		} catch (error) {
-			console.error("Error updating profile info:", error);
+			console.log("Error updating profile info:", error);
+			ToastAndroid.show("Failed to update profile info", ToastAndroid.SHORT);
 			return [];
 		}
 	};
@@ -358,7 +389,7 @@ const EditProfileScreen = () => {
 				setGenres(response.data);
 			}
 		} catch (error) {
-			console.error("Error fetching genres:", error);
+			console.log("Error fetching genres:", error);
 		}
 	};
 

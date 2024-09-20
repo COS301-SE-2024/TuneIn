@@ -58,26 +58,25 @@ const Selector: React.FC<SelectorProps> = ({
 						onChangeText={setSearchQuery}
 						testID="genre-search-query"
 					/>
-					<ScrollView style={styles.scrollView}>
-						<FlatList
-							testID="flat-list"
-							data={filteredOptions}
-							keyExtractor={(item) => item}
-							renderItem={({ item }) => (
-								<TouchableOpacity
-									style={styles.filterOption}
-									onPress={() => {
-										onSelect(item);
-										setSearchQuery("");
-										onClose();
-									}}
-									testID={`${item}-genre-option`}
-								>
-									<Text style={styles.filterText}>{item}</Text>
-								</TouchableOpacity>
-							)}
-						/>
-					</ScrollView>
+					<FlatList
+						testID="flat-list"
+						data={filteredOptions}
+						keyExtractor={(item) => item}
+						style={styles.scrollView}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.filterOption}
+								onPress={() => {
+									onSelect(item);
+									setSearchQuery("");
+									onClose();
+								}}
+								testID={`${item}-genre-option`}
+							>
+								<Text style={styles.filterText}>{item}</Text>
+							</TouchableOpacity>
+						)}
+					/>
 					<TouchableOpacity
 						style={styles.closeButton}
 						onPress={() => {
