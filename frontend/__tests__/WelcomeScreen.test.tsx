@@ -35,7 +35,7 @@ describe("WelcomeScreen", () => {
 		const loginButton = getByText("Login");
 
 		fireEvent.press(loginButton);
-		expect(navigate).toHaveBeenCalledWith("/screens/Auth/LoginScreen");
+		expect(navigate).toHaveBeenCalledWith("/screens/Auth/LoginOther");
 	});
 
 	it("should navigate to RegisterOther when Register button is pressed", () => {

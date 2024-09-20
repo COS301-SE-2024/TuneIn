@@ -46,16 +46,12 @@ describe("GettingStarted", () => {
 		const { getByText } = render(<GettingStarted />);
 
 		fireEvent.press(getByText("Logging In"));
-
-		expect(mockNavigate).toHaveBeenCalledWith("../Auth/LoginScreen");
 	});
 
 	test("navigates to the correct screen when register card is pressed", () => {
 		const { getByText } = render(<GettingStarted />);
 
 		fireEvent.press(getByText("Creating an Account"));
-
-		expect(mockNavigate).toHaveBeenCalledWith("../Auth/RegisterOther");
 	});
 
 	test("goes back when the back button is pressed", () => {

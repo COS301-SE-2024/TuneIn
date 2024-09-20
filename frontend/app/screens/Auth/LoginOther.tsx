@@ -1,34 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import {
-	Poppins_400Regular,
-	Poppins_500Medium,
-	Poppins_700Bold,
-	useFonts,
-} from "@expo-google-fonts/poppins";
-import {
-	Ionicons,
-	FontAwesome,
-	MaterialIcons,
-	AntDesign,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { colors } from "../../styles/colors";
 
 const LoginOtherScreen: React.FC = () => {
 	const router = useRouter();
 
-	let [fontsLoaded] = useFonts({
-		Poppins_400Regular,
-		Poppins_500Medium,
-		Poppins_700Bold,
-	});
-
-	if (!fontsLoaded) {
-		return null;
-	}
-
 	const navigateToRegister = () => {
-		router.navigate("screens/Auth/RegisterStreaming");
+		router.navigate("screens/Auth/RegisterOther");
 	};
 
 	const navigateToLogin = () => {
@@ -38,7 +19,7 @@ const LoginOtherScreen: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()}>
+				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
@@ -47,38 +28,8 @@ const LoginOtherScreen: React.FC = () => {
 
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<AntDesign name="google" size={24} color="#000" style={styles.icon} />
-					<Text style={styles.buttonText}>Google</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<FontAwesome
-						name="facebook"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Facebook</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<FontAwesome
-						name="apple"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Apple</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.button, styles.otherButton]}>
-					<MaterialIcons
-						name="email"
-						size={24}
-						color="#000"
-						style={styles.icon}
-					/>
-					<Text style={styles.buttonText}>Email</Text>
+					<Icon name="spotify" size={24} color="#000" style={styles.icon} />
+					<Text style={styles.buttonText}>Spotify</Text>
 				</TouchableOpacity>
 
 				<View style={styles.dividerContainer}>
@@ -128,7 +79,7 @@ const styles = StyleSheet.create({
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		// fontFamily: "Poppins_700Bold",
 		textAlign: "center",
 		marginTop: 30,
 		marginBottom: 50,
@@ -164,7 +115,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "bold",
 		color: "#000",
-		fontFamily: "Poppins_700Bold",
+		// fontFamily: "Poppins_700Bold",
 	},
 	dividerContainer: {
 		flexDirection: "row",
@@ -181,7 +132,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 10,
 		fontSize: 14,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		// fontFamily: "Poppins_500Medium",
 	},
 	registerContainer: {
 		position: "absolute",
@@ -193,12 +144,14 @@ const styles = StyleSheet.create({
 	},
 	registerText: {
 		fontSize: 16,
-		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		textAlign: "center",
+		fontWeight: "500",
+		// fontFamily: "Poppins_500Medium",
 	},
 	registerBoldText: {
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		color: colors.primary,
+		// fontFamily: "Poppins_700Bold",
 	},
 });
 
