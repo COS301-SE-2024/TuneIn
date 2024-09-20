@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TextInput } from "react-native";
+import {
+	View,
+	Text,
+	StyleSheet,
+	FlatList,
+	TextInput,
+	ToastAndroid,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
 import auth from "../../services/AuthManagement";
@@ -33,7 +40,8 @@ const AllFriends: React.FC = () => {
 	>([]);
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const [friendReqError, setFriendReqError] = useState<boolean>(false);
-	const [potentialFriendError, setPotentialFriendError] = useState<boolean>(false);
+	const [potentialFriendError, setPotentialFriendError] =
+		useState<boolean>(false);
 	const [pendingError, setPendingError] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -152,7 +160,8 @@ const AllFriends: React.FC = () => {
 					setPendingRequests([...pendingRequests, friend]);
 				}
 			} catch (error) {
-				console.error("Error sending request:", error);
+				console.log("Error sending request:", error);
+				ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
 			}
 		}
 	};
@@ -200,7 +209,7 @@ const AllFriends: React.FC = () => {
 				}),
 			);
 			setPendingError(false);
-			
+
 			return mappedPendingRequests;
 		} catch (error) {
 			console.log("Error fetching pending requests:", error);
@@ -232,7 +241,11 @@ const AllFriends: React.FC = () => {
 					console.log("Friend request cancelled successfully.");
 				}
 			} catch (error) {
-				console.error("Error cancelling request:", error);
+				console.log("Error cancelling request:", error);
+				ToastAndroid.show(
+					"Failed to cancel friend request.",
+					ToastAndroid.SHORT,
+				);
 			}
 		}
 	};
@@ -268,7 +281,11 @@ const AllFriends: React.FC = () => {
 					console.log("Friend request handled successfully.");
 				}
 			} catch (error) {
-				console.error("Error handling request:", error);
+				console.log("Error handling request:", error);
+				ToastAndroid.show(
+					"Unable to handle friend request.",
+					ToastAndroid.SHORT,
+				);
 			}
 		}
 	};
@@ -296,7 +313,8 @@ const AllFriends: React.FC = () => {
 					console.log("User unfriended successfully.");
 				}
 			} catch (error) {
-				console.error("Error following friend:", error);
+				console.log("Error unfriending:", error);
+				ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
 			}
 		}
 	};
@@ -352,7 +370,9 @@ const AllFriends: React.FC = () => {
 						keyExtractor={(item) => item.username}
 					/>
 				) : (
-					<Text style={styles.noFollowersText}>{friendError ? "Failed to load friends." : "You have no friends."}</Text>
+					<Text style={styles.noFollowersText}>
+						{friendError ? "Failed to load friends." : "You have no friends."}
+					</Text>
 				)}
 			</View>
 			<View style={styles.requestsSection}>
@@ -365,7 +385,11 @@ const AllFriends: React.FC = () => {
 						contentContainerStyle={styles.friendsList}
 					/>
 				) : (
-					<Text style={styles.noRequestsText}>{friendReqError ? "Failed to load friend requests." : "No friend requests found."}</Text>
+					<Text style={styles.noRequestsText}>
+						{friendReqError
+							? "Failed to load friend requests."
+							: "No friend requests found."}
+					</Text>
 				)}
 				{requests.length > 6 && (
 					<View style={styles.moreRequests}>
@@ -385,7 +409,11 @@ const AllFriends: React.FC = () => {
 						contentContainerStyle={styles.friendsList}
 					/>
 				) : (
-					<Text style={styles.noRequestsText}>{potentialFriendError ? "Failed to load potential friends." : "No potential friends found."}</Text>
+					<Text style={styles.noRequestsText}>
+						{potentialFriendError
+							? "Failed to load potential friends."
+							: "No potential friends found."}
+					</Text>
 				)}
 				{potentialFriends.length > 6 && (
 					<View style={styles.moreRequests}>
@@ -405,7 +433,11 @@ const AllFriends: React.FC = () => {
 						contentContainerStyle={styles.friendsList}
 					/>
 				) : (
-					<Text style={styles.noRequestsText}>{pendingError ? "Failed to load pending requests." : "No pending requests found."}</Text>
+					<Text style={styles.noRequestsText}>
+						{pendingError
+							? "Failed to load pending requests."
+							: "No pending requests found."}
+					</Text>
 				)}
 				{pendingRequests.length > 6 && (
 					<View style={styles.moreRequests}>

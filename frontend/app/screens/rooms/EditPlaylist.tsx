@@ -7,6 +7,7 @@ import {
 	Text,
 	Image,
 	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
 import SongCard from "../../components/Spotify/SongCard";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
@@ -153,7 +154,8 @@ const EditPlaylist: React.FC = () => {
 			const data = await response.json();
 			console.log("Playlist saved to backend:", data);
 		} catch (error) {
-			console.error("Error saving playlist:", error);
+			console.log("Error saving playlist:", error);
+			ToastAndroid.show("Failed to save playlist", ToastAndroid.SHORT);
 		}
 		router.navigate("/screens/Home");
 	};

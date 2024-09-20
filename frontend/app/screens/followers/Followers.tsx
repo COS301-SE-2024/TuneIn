@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
+import { View, Text, TextInput, FlatList, StyleSheet, ToastAndroid } from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
@@ -85,10 +85,16 @@ const Followers: React.FC = () => {
 					setFollowers(updatedFollowers);
 					setFilteredFollowers(updatedFollowers);
 				} else {
-					console.error("Error following user:", response);
+					console.log("Error following user:", response);
+					ToastAndroid.show(`Failed to ${action} user.`, ToastAndroid.SHORT);
 				}
+				throw false;
 			} catch (error) {
-				console.error("Error following user:", error);
+				console.log("Error following user:", error);
+				ToastAndroid.show(
+					`Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`,
+					ToastAndroid.SHORT,
+				);
 			}
 		}
 	};

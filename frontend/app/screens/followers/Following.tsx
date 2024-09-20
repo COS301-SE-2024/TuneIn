@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	TextInput,
+	FlatList,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
@@ -11,7 +18,8 @@ const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [following, setFollowing] = useState<Friend[]>([]);
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
-	const [fetchFollowingError, setFetchFollowingError] = useState<boolean>(false);
+	const [fetchFollowingError, setFetchFollowingError] =
+		useState<boolean>(false);
 
 	const user = useLocalSearchParams();
 	useEffect(() => {
@@ -78,7 +86,8 @@ const Following: React.FC = () => {
 				setFollowing(updatedFollowing);
 				setFilteredFollowing(updatedFollowing);
 			} catch (error) {
-				console.error("Error unfollowing user:", error);
+				console.log("Error unfollowing user:", error);
+				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 			}
 		}
 	};
@@ -112,7 +121,11 @@ const Following: React.FC = () => {
 					keyExtractor={(item) => item.username}
 				/>
 			) : (
-				<Text style={styles.noFollowingText}>{fetchFollowingError ? "Failed to load users followed" : "No users found."}</Text>
+				<Text style={styles.noFollowingText}>
+					{fetchFollowingError
+						? "Failed to load users followed"
+						: "No users found."}
+				</Text>
 			)}
 		</View>
 	);
