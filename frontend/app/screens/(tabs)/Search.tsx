@@ -716,7 +716,9 @@ const Search: React.FC = () => {
 			) : results.length === 0 ? (
 				// Render No Results Message if no results
 				<View style={styles.noResult}>
-					<Text>{searchError ? "Failed to load search results" : "No results found"}</Text>
+					<Text>
+						{searchError ? "Failed to load search results" : "No results found"}
+					</Text>
 				</View>
 			) : (
 				// Render FlatList if there are results

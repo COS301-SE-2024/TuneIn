@@ -162,7 +162,7 @@ const ChatScreen = () => {
 					/>
 				)}
 				<Text style={styles.headerTitle}>
-					{dmError ? "Failed" : (otherUser?.profile_name || "Loading...")}
+					{dmError ? "Failed" : otherUser?.profile_name || "Loading..."}
 				</Text>
 			</View>
 			<FlatList
@@ -171,23 +171,25 @@ const ChatScreen = () => {
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
 			/>
-			{!dmError && (<View style={styles.inputContainer}>
-				<TextInput
-					placeholder="Message..."
-					style={styles.input}
-					value={message}
-					onChangeText={setMessage}
-					onSubmitEditing={handleSend}
-					testID="messageInput"
-				/>
-				<TouchableOpacity
-					style={styles.sendButton}
-					testID="sendButton"
-					onPress={handleSend}
-				>
-					<Feather name="send" size={24} color="black" />
-				</TouchableOpacity>
-			</View>)}
+			{!dmError && (
+				<View style={styles.inputContainer}>
+					<TextInput
+						placeholder="Message..."
+						style={styles.input}
+						value={message}
+						onChangeText={setMessage}
+						onSubmitEditing={handleSend}
+						testID="messageInput"
+					/>
+					<TouchableOpacity
+						style={styles.sendButton}
+						testID="sendButton"
+						onPress={handleSend}
+					>
+						<Feather name="send" size={24} color="black" />
+					</TouchableOpacity>
+				</View>
+			)}
 		</View>
 	);
 };

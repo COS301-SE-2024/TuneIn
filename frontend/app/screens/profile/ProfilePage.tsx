@@ -387,7 +387,7 @@ const ProfileScreen: React.FC = () => {
 		const storedToken = await auth.getToken();
 
 		if (storedToken) {
-			try{
+			try {
 				const response = await axios.post(
 					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/unfollow`,
 					{},
@@ -403,15 +403,13 @@ const ProfileScreen: React.FC = () => {
 					primaryProfileData.followers.count--;
 					setFollowing(false);
 				}
-			}
-			catch(error) {
+			} catch (error) {
 				console.log("Issue unfollowing user:", error);
 				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
-			};
+			}
 			if (following) {
-				
 			} else {
-				try{
+				try {
 					const response = await axios.post(
 						`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
 						{},
@@ -427,10 +425,10 @@ const ProfileScreen: React.FC = () => {
 						primaryProfileData.followers.count++;
 						setFollowing(true);
 					}
-				}catch(error) {
+				} catch (error) {
 					console.log("Issue following user:", error);
 					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
-				};
+				}
 			}
 		}
 	};

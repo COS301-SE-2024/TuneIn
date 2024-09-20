@@ -28,7 +28,7 @@ const GeneralAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchRooms = async () => {
-			try{
+			try {
 				// make an axios request with the API_BASE_URL and the auth token
 				const accessToken: string | null = await AuthManagement.getToken();
 				console.log("access token fr", accessToken);
@@ -47,9 +47,8 @@ const GeneralAnalytics: React.FC = () => {
 				setSelectedRoom(room);
 			} catch (error) {
 				console.log("Error fetching rooms:", error);
-                ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
 			}
-			
 		};
 		fetchRooms();
 	}, [userRooms, selectedRoom]);

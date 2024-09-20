@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet, ToastAndroid } from "react-native";
+import {
+	View,
+	Text,
+	TextInput,
+	FlatList,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
@@ -156,7 +163,11 @@ const Followers: React.FC = () => {
 						keyExtractor={(item) => item.username}
 					/>
 				) : (
-					<Text style={styles.noFollowersText}>{friendError ? "Failed to load followers" : "No followers available."}</Text>
+					<Text style={styles.noFollowersText}>
+						{friendError
+							? "Failed to load followers"
+							: "No followers available."}
+					</Text>
 				)}
 			</View>
 		</View>

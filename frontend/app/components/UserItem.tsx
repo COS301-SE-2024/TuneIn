@@ -44,7 +44,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 
 		if (storedToken) {
 			if (isFollowing) {
-				try{
+				try {
 					const response = await axios.post(
 						`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
 						{},
@@ -62,9 +62,8 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 					console.log("Issue unfollowing user");
 					ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 				}
-				
 			} else {
-				try{
+				try {
 					const response = await axios.post(
 						`${utils.API_BASE_URL}/users/${user.username}/follow`,
 						{},
@@ -83,7 +82,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 					console.log("Issue following user");
 					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
 				}
-				
 			}
 		}
 	};

@@ -41,7 +41,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchUserRooms = async () => {
-			try{
+			try {
 				// make an axios request with the API_BASE_URL and the auth token
 				const accessToken: string | null = await AuthManagement.getToken();
 				console.log("access token fr", accessToken);
@@ -60,11 +60,10 @@ const InteractionsAnalytics: React.FC = () => {
 				const room = userRooms?.find((room) => room.room_name === currentRoom);
 				if (room !== undefined) setSelectedRoom(room);
 				console.log("selected room", selectedRoom);
-			} catch(error) {
+			} catch (error) {
 				console.log(error);
-                ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
 			}
-			
 		};
 
 		if (selectedRoom === null) fetchUserRooms();
@@ -73,7 +72,7 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
-			try{
+			try {
 				const accessToken: string | null = await AuthManagement.getToken();
 				const currentRoom = await StorageService.getItem("currentRoom");
 				console.log("current roooooom", currentRoom);
@@ -91,7 +90,6 @@ const InteractionsAnalytics: React.FC = () => {
 				console.log(error);
 				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
 			}
-			
 		};
 
 		fetchInteractionAnalytics();
@@ -103,7 +101,7 @@ const InteractionsAnalytics: React.FC = () => {
 	console.log("current room", selectedRoom);
 	// function that will be called when the user selects a room
 	const handleRoomSelect = async (room: string) => {
-		try{
+		try {
 			// find the room object that matches the selected room
 			const selected = userRooms?.find((r) => r.room_name === room);
 			const accessToken: string | null = await AuthManagement.getToken();
@@ -130,9 +128,8 @@ const InteractionsAnalytics: React.FC = () => {
 			// close the dropdown
 		} catch (error) {
 			console.log(error);
-            ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+			ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
 		}
-		
 	};
 
 	// Sample data for the past seven days

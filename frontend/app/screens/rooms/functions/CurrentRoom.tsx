@@ -69,9 +69,9 @@ class CurrentRoom {
 		} catch (error) {
 			console.log("Error:", error);
 			ToastAndroid.show(
-                `Failed to ${isLeaving? "leave" : "join"} room`,
-                ToastAndroid.SHORT,
-            );
+				`Failed to ${isLeaving ? "leave" : "join"} room`,
+				ToastAndroid.SHORT,
+			);
 		}
 	};
 }
