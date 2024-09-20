@@ -5,6 +5,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,18 +38,30 @@ const AnalyticsPage: React.FC = () => {
 
 	useEffect(() => {
 		const fetchKeyMetrics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const response = await fetch(`${API_BASE_URL}/rooms/analytics`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			const data = await response.json();
-			setKeyMetrics(data);
+			try{
+				const accessToken: string | null = await AuthManagement.getToken();
+				const response = await fetch(`${API_BASE_URL}/rooms/analytics`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
+				const data = await response.json();
+				
+				if(JSON.stringify(data) === "{}"){
+					ToastAndroid.show("Analytics are unavailable", ToastAndroid.SHORT);
+					return;
+				}
+				
+				setKeyMetrics(data);
+			} catch(error) {
+				console.log(error);
+				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+			}
+			
 		};
 		if (keymetrics === null) fetchKeyMetrics();
 		console.log("keymetrics", keymetrics);
-	});
+	}, []);
 	// const handleButtonPress = (button: string) => {
 	// 	setActiveButton(button);
 	// };

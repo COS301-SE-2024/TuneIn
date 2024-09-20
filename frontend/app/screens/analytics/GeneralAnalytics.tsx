@@ -5,6 +5,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import * as StorageService from "../../services/StorageService";
 import { useRouter } from "expo-router";
@@ -27,42 +28,53 @@ const GeneralAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchRooms = async () => {
-			// make an axios request with the API_BASE_URL and the auth token
-			const accessToken: string | null = await AuthManagement.getToken();
-			console.log("access token fr", accessToken);
-			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			const data = await response.json();
-			// console.log(data);
-			setRooms(data);
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("user rooms", userRooms, "and current room", currentRoom);
-			const room = userRooms.find((room) => room.room_name === currentRoom);
-			console.log("selected room", room);
-			setSelectedRoom(room);
+			try{
+				// make an axios request with the API_BASE_URL and the auth token
+				const accessToken: string | null = await AuthManagement.getToken();
+				console.log("access token fr", accessToken);
+				const response = await fetch(`${API_BASE_URL}/users/rooms`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
+				const data = await response.json();
+				// console.log(data);
+				setRooms(data);
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("user rooms", userRooms, "and current room", currentRoom);
+				const room = userRooms.find((room) => room.room_name === currentRoom);
+				console.log("selected room", room);
+				setSelectedRoom(room);
+			} catch (error) {
+				console.log("Error fetching rooms:", error);
+                ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			}
+			
 		};
 		fetchRooms();
 	}, [userRooms, selectedRoom]);
 
 	useEffect(() => {
 		const fetchGeneralAnalytics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current roooooom", currentRoom);
-			console.log(selectedRoom);
-			const response = await fetch(
-				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("current roooooom", currentRoom);
+				console.log(selectedRoom);
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
 					},
-				},
-			);
-			const data = await response.json();
-			setGeneralAnalytics(data);
+				);
+				const data = await response.json();
+				setGeneralAnalytics(data);
+			} catch (error) {
+				console.log("Error fetching general analytics:", error);
+				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+			}
 		};
 		fetchGeneralAnalytics();
 		console.log("general analytics", generalAnalytics);
@@ -100,26 +112,32 @@ const GeneralAnalytics: React.FC = () => {
 	const onRoomPick = async (room: string) => {
 		const selected = userRooms.find((r) => r.room_name === room);
 		setSelectedRoom(selected);
-		await StorageService.setItem("currentRoom", room);
-		const accessToken: string | null = await AuthManagement.getToken();
-		console.log("selected room", selectedRoom?.roomID);
-		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(
-			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
-			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+
+		try {
+			await StorageService.setItem("currentRoom", room);
+			const accessToken: string | null = await AuthManagement.getToken();
+			console.log("selected room", selectedRoom?.roomID);
+			const roomID: string = selectedRoom?.roomID ?? "";
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				},
-			},
-		);
-		const data = await response.json();
-		// if (data.statusCode !== 200) {
-		// 	console.log("error fetching interaction analytics");
-		// 	return;
-		// }
-		if (generalAnalytics?.room_previews === undefined)
-			setGeneralAnalytics(data);
-		console.log("Room picked", room);
+			);
+			const data = await response.json();
+			// if (data.statusCode !== 200) {
+			// 	console.log("error fetching interaction analytics");
+			// 	return;
+			// }
+			if (generalAnalytics?.room_previews === undefined)
+				setGeneralAnalytics(data);
+			console.log("Room picked", room);
+		} catch (error) {
+			console.log(error);
+			ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+		}
 	};
 
 	return (
