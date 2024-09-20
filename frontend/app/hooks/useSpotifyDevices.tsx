@@ -65,7 +65,7 @@ export const useSpotifyDevices = () => {
 			}
 		} catch (err) {
 			setError("An error occurred while getting the device ID");
-			console.error("An error occurred while getting the device ID", err);
+			console.log("An error occurred while getting the device ID", err);
 			return null;
 		}
 	};
@@ -86,7 +86,8 @@ export const useSpotifyDevices = () => {
 			);
 
 			if (!response.ok) {
-				console.error(`Error fetching devices: ${response.statusText}`);
+				console.log(`Error fetching devices: ${response.statusText}`);
+				setError("An error occurred while fetching devices");
 				return null; // Return null if response is not ok
 			}
 
@@ -96,7 +97,7 @@ export const useSpotifyDevices = () => {
 			return Array.isArray(data.devices) ? data.devices : null;
 		} catch (err) {
 			setError("An error occurred while fetching devices");
-			console.error("An error occurred while fetching devices", err);
+			console.log("An error occurred while fetching devices", err);
 			return null;
 		}
 	};
