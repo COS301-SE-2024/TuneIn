@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
+import { colors } from "../styles/colors";
 
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 
@@ -48,7 +49,12 @@ const FriendCard: React.FC<FriendCardProps> = ({
 					testID="friend-card-image"
 				/>
 			</Link>
-			<Text style={styles.username} testID="friend-card-username">
+			<Text
+				style={styles.username}
+				numberOfLines={1}
+				ellipsizeMode="tail"
+				testID="friend-card-username"
+			>
 				{username}
 			</Text>
 			{(cardType === "friend" && (
@@ -127,34 +133,38 @@ const styles = StyleSheet.create({
 		alignSelf: "center",
 	},
 	acceptButton: {
-		backgroundColor: "#4caf50",
+		backgroundColor: colors.primary,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 4,
+		borderRadius: 8,
 	},
 	unfriendButton: {
-		backgroundColor: "#f44336",
+		// backgroundColor: "white",
+		backgroundColor: "black",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 4,
+		borderRadius: 8,
+		borderWidth: 1,
+		// borderColor: "red",
 	},
 	rejectButton: {
-		backgroundColor: "#f44336",
+		backgroundColor: "black",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 4,
+		borderRadius: 8,
 	},
 	rejectText: {
-		color: "#fff",
+		color: "white",
 		fontWeight: "bold",
 	},
 	cardContainer: {
 		flexDirection: "row",
 		alignItems: "center",
 		padding: 16,
+		justifyContent: "space-between",
 		borderBottomWidth: 1,
-		borderBottomColor: "#ddd",
-		backgroundColor: "#f2f2f2",
+		borderBottomColor: "lightgray",
+		backgroundColor: "white", // White background
 		borderRadius: 15, // Rounded borders
 		overflow: "hidden", // Ensures the image and content respect the rounded corners
 		width: "100%", // Full width of the link container
@@ -172,7 +182,19 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 18,
 		fontWeight: "bold",
-		color: "#333",
+		color: "black",
+		flex: 1,
+	},
+	messageButton: {
+		backgroundColor: colors.primary,
+		paddingVertical: 8,
+		paddingHorizontal: 12,
+		borderRadius: 8,
+	},
+	messageButtonText: {
+		color: "white",
+		fontSize: 14,
+		fontWeight: "bold",
 	},
 });
 

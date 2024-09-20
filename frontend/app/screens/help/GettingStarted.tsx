@@ -16,13 +16,6 @@ import { useRouter } from "expo-router";
 
 export default function GettingStarted() {
 	const router = useRouter();
-	const navigateToLogin = () => {
-		router.navigate("../Auth/LoginScreen");
-	};
-
-	const navigateToRegister = () => {
-		router.navigate("../Auth/RegisterOther");
-	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -72,7 +65,7 @@ export default function GettingStarted() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.card} onPress={navigateToRegister}>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<MaterialCommunityIcons
 						name="account"
@@ -91,7 +84,7 @@ export default function GettingStarted() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.card} onPress={navigateToLogin}>
+			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<Ionicons
 						name="log-in-outline"
