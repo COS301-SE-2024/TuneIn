@@ -612,7 +612,10 @@ const ProfileScreen: React.FC = () => {
 				/>
 			}
 		>
-			<View style={{ padding: 15 }} testID="profile-screen">
+			<View
+				style={{ padding: 15, backgroundColor: "white" }}
+				testID="profile-screen"
+			>
 				<View style={styles.profileHeader}>
 					{/* Back Button */}
 					<TouchableOpacity

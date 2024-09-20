@@ -29,7 +29,7 @@ const RegisterScreen: React.FC = () => {
 	const router = useRouter();
 
 	const navigateToLogin = () => {
-		router.navigate("/screens/Auth/LoginScreen");
+		router.navigate("/screens/Auth/LoginOther");
 	};
 
 	const validateEmail = (email: string) => {
