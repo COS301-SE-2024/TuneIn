@@ -334,7 +334,6 @@ describe("Search Component", () => {
 				]),
 			]),
 		);
-
 	}, 30000);
 
 	it("Logs room history error", async () => {
@@ -342,11 +341,11 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockRejectedValueOnce(new Error("Network error"));
-			
-			(axios.get as jest.Mock)
-				.mockResolvedValueOnce({ data: uHistDtoMock })
-				.mockResolvedValueOnce({ data: roomMock })
-				.mockResolvedValueOnce({ data: ["jazz", "rock"] });
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: uHistDtoMock })
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: ["jazz", "rock"] });
 
 		(axios.get as jest.Mock).mockResolvedValue({ data: roomMock });
 		const consoleLogSpy = jest
@@ -373,7 +372,6 @@ describe("Search Component", () => {
 				]),
 			]),
 		);
-
 	}, 30000);
 
 	it("Logs room recs error", async () => {
