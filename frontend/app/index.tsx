@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import HomeScreen from "./screens/Home"; // Make sure to import the HomeScreen component
+import HomeScreen from "./screens/(tabs)/Home"; // Make sure to import the HomeScreen component
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
 import { live } from "./services/Live";
@@ -63,7 +63,7 @@ const App: React.FC = () => {
 				}
 
 				if (auth.authenticated()) {
-					router.replace("/screens/Home");
+					router.replace("/screens/(tabs)/Home");
 				} else {
 					console.log("clearing from index");
 					StorageService.clear();

@@ -157,7 +157,7 @@ const EditPlaylist: React.FC = () => {
 			console.log("Error saving playlist:", error);
 			ToastAndroid.show("Failed to save playlist", ToastAndroid.SHORT);
 		}
-		router.navigate("/screens/Home");
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -172,6 +172,7 @@ const EditPlaylist: React.FC = () => {
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>

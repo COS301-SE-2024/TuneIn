@@ -131,7 +131,7 @@ describe("AdvancedSettings", () => {
 		fireEvent.press(getByText("Yes"));
 
 		// Check if navigate to home is called
-		expect(mockNavigate).toHaveBeenCalledWith("/screens/Home");
+		expect(mockNavigate).toHaveBeenCalledWith("/screens/(tabs)/Home");
 	});
 
 	it("closes delete modal when No is pressed", () => {
