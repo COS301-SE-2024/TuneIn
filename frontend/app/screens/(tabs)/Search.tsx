@@ -191,55 +191,7 @@ const Search: React.FC = () => {
 			const token = await auth.getToken();
 
 			if (token) {
-				if (filter === "all") {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/search?q=${sh}`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
-						},
-					);
-					// console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.rooms.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
-								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}),
-					);
-
-					const users: SearchResult[] = response.data.users.map(
-						(item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}),
-					);
-
-					const combinedResult = results.concat(users);
-
-					// console.log("Formatted results: " + JSON.stringify(results));
-					setResults(combinedResult);
-				} else if (filter === "room") {
+				if (filter === "room") {
 					if (advanced) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${sh}`;
 						if (nsfw) {
@@ -571,14 +523,6 @@ const Search: React.FC = () => {
 	useEffect(() => {
 		getRoomHistory();
 	}, []);
-
-	const handleSelectGenre = (genre: string) => {
-		setSelectedGenre(genre);
-	};
-
-	const handleSelectLanguage = (language: string) => {
-		setSelectedLanguage(language);
-	};
 
 	return (
 		<View style={styles.container}>
