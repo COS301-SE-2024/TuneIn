@@ -69,6 +69,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.roomUsers.removeConnectedUser(client.id);
 			this.dmUsers.disconnectChat(client.id);
 			this.dmUsers.removeConnectedUser(client.id);
+			client.disconnect();
 		} catch (error) {
 			console.error(error);
 		}
@@ -101,12 +102,41 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (!payload.userID) {
 					throw new Error("No userID provided");
 				}
-				await this.roomUsers.addConnectedUser(client.id, payload.userID);
-				await this.dmUsers.addConnectedUser(client.id, payload.userID);
+				// get connected client ids
+				// pass to addConnectedUser
+				console.log("pre-room fetch");
+				if (
+					!this.server ||
+					!this.server.sockets ||
+					!this.server.sockets.adapter ||
+					!this.server.sockets.adapter.rooms
+				) {
+					console.error("One of the required properties is undefined:", {
+						server: !!this.server,
+						sockets: !!this.server?.sockets,
+						adapter: !!this.server?.sockets?.adapter,
+						rooms: !!this.server?.sockets?.adapter?.rooms,
+					});
+					await this.roomUsers.addConnectedUser(client.id, payload.userID);
+					await this.dmUsers.addConnectedUser(client.id, payload.userID);
+				} else {
+					const clientsSet: Set<string> | undefined =
+						this.server.sockets.adapter.rooms.get(client.id);
+					console.log("post-room fetch");
+					if (!clientsSet) {
+						throw new Error("No connected clients found");
+					}
+					const connectedClients: string[] = [...clientsSet];
+					for (const c of connectedClients) {
+						await this.roomUsers.addConnectedUser(c, payload.userID);
+						await this.dmUsers.addConnectedUser(c, payload.userID);
+					}
+				}
 				const response: ChatEventDto = {
 					userID: null,
 					date_created: new Date(),
 				};
+				client.join(payload.userID);
 				this.server.emit(SOCKET_EVENTS.CONNECTED, response);
 				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
 			} catch (error) {
@@ -330,19 +360,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.LEAVE_ROOM);
 			try {
-				//this.server.emit();
-				/*
-				validate auth
-
-				get room id
-				if room does not exist
-					return error
-
-				remove user from room data structure
-				remove user from socket room
-				emit to room: USER_LEFT, { userId: user.id }
-				*/
-
 				//auth
 
 				const payload: ChatEventDto = await this.validateChatEvent(p);
@@ -849,7 +866,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log("Received event: " + SOCKET_EVENTS.INIT_PAUSE);
 		this.handOverSocketServer(this.server);
 		try {
-			//this.server.emit();
 			console.log(p);
 
 			const roomID: string | null = this.roomUsers.getRoomId(client.id);
@@ -1036,7 +1052,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				if (!payload.createdAt) {
@@ -1081,7 +1096,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				if (!payload.createdAt) {
@@ -1126,7 +1140,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
 				const somethingChanged: boolean = await this.roomQueue.undoSongVote(
@@ -1167,7 +1180,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				if (!payload.createdAt) {
@@ -1212,7 +1224,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
 				if (!payload.createdAt) {
@@ -1256,7 +1267,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
 				const somethingChanged: boolean = await this.roomQueue.removeSong(
@@ -1296,7 +1306,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.REQUEST_QUEUE);
 			try {
-				//this.server.emit();
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
 				await this.sendQueueState(payload.roomID);
@@ -1308,9 +1317,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async sendMediaState(roomID: string): Promise<void> {
-		const song: RoomSongDto | null = await this.roomQueue.getNextSong(
-			roomID,
-		);
+		const song: RoomSongDto | null = await this.roomQueue.getNextSong(roomID);
 		if (song) {
 			const startTime: Date | undefined = await song.startTime;
 			if (!startTime) {
