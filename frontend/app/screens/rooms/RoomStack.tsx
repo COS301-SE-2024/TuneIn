@@ -116,9 +116,15 @@ function MyRoomTabs() {
 
 	const navigateBasedOnOwnership = () => {
 		if (roomData.mine) {
-			router.navigate("/screens/rooms/AdvancedSettings");
+			router.navigate({
+				pathname: "/screens/rooms/AdvancedSettings",
+				params: { room: room },
+			});
 		} else {
-			router.navigate("/screens/rooms/RoomInfo");
+			router.navigate({
+				pathname: "/screens/rooms/RoomInfo",
+				params: { room: JSON.stringify(room) },
+			});
 		}
 	};
 

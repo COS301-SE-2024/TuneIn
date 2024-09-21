@@ -7,6 +7,7 @@ import {
 	Switch,
 	Modal,
 	Pressable,
+	ScrollView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon
@@ -14,6 +15,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import CreateButton from "../../components/CreateButton";
 import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
+import RoomShareSheet from "../components/messaging/RoomShareSheet";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
@@ -24,6 +26,8 @@ const AdvancedSettings = () => {
 	const [toggle2, setToggle2] = useState(true);
 	const [toggle3, setToggle3] = useState(true);
 	const [toggle4, setToggle4] = useState(true);
+
+	const { room } = useLocalSearchParams();
 
 	const handleOptionSelect = (option) => {
 		setSelectedOption(option);
@@ -37,15 +41,7 @@ const AdvancedSettings = () => {
 	const goToEditScreen = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: {
-				name: _roomDetails.room_name,
-				description: _roomDetails.description,
-				isNsfw: _roomDetails.has_nsfw_content,
-				isExplicit: _roomDetails.has_explicit_content,
-				backgroundImage: _roomDetails.room_image,
-				roomID: _roomDetails.roomID,
-				language: _roomDetails.language,
-			},
+			params: { room: room },
 		});
 	};
 
@@ -83,149 +79,163 @@ const AdvancedSettings = () => {
 					/>
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
+				<Icon name="share" size={22} color={colors.primaryText} />
 			</View>
-
-			<Text style={styles.sectionHeader}>Who can join your room?</Text>
-			<View style={styles.optionsContainer}>
-				<TouchableOpacity
-					style={[styles.option, selectedOption === 1 && styles.selectedOption]}
-					onPress={() => handleOptionSelect(1)}
-				>
-					<Text style={styles.optionText}>Everyone</Text>
-					{selectedOption === 1 && <Text> ✓ </Text>}
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[styles.option, selectedOption === 2 && styles.selectedOption]}
-					onPress={() => handleOptionSelect(2)}
-				>
-					<Text style={styles.optionText}>People with the link</Text>
-					{selectedOption === 2 && <Text> ✓ </Text>}
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[styles.option, selectedOption === 3 && styles.selectedOption]}
-					onPress={() => handleOptionSelect(3)}
-				>
-					<Text style={styles.optionText}>Friends and people you follow</Text>
-					{selectedOption === 3 && <Text> ✓ </Text>}
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[styles.option, selectedOption === 4 && styles.selectedOption]}
-					onPress={() => handleOptionSelect(4)}
-				>
-					<Text style={styles.optionText}>Only Friends</Text>
-					{selectedOption === 4 && <Text> ✓ </Text>}
-				</TouchableOpacity>
-			</View>
-
-			<View style={styles.toggleContainer}>
-				<View style={styles.toggleItem}>
-					<Text style={styles.toggleHeader}>Searchability</Text>
-					<View style={styles.toggleSwitchContainer}>
-						<Switch value={toggle1} onValueChange={toggleSwitch1} />
-					</View>
-					<Text style={styles.toggleDescription}>
-						Make this room searchable
-					</Text>
+			<ScrollView>
+				<Text style={styles.sectionHeader}>Who can join your room?</Text>
+				<View style={styles.optionsContainer}>
+					<TouchableOpacity
+						style={[
+							styles.option,
+							selectedOption === 1 && styles.selectedOption,
+						]}
+						onPress={() => handleOptionSelect(1)}
+					>
+						<Text style={styles.optionText}>Everyone</Text>
+						{selectedOption === 1 && <Text> ✓ </Text>}
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.option,
+							selectedOption === 2 && styles.selectedOption,
+						]}
+						onPress={() => handleOptionSelect(2)}
+					>
+						<Text style={styles.optionText}>People with the link</Text>
+						{selectedOption === 2 && <Text> ✓ </Text>}
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.option,
+							selectedOption === 3 && styles.selectedOption,
+						]}
+						onPress={() => handleOptionSelect(3)}
+					>
+						<Text style={styles.optionText}>Friends and people you follow</Text>
+						{selectedOption === 3 && <Text> ✓ </Text>}
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.option,
+							selectedOption === 4 && styles.selectedOption,
+						]}
+						onPress={() => handleOptionSelect(4)}
+					>
+						<Text style={styles.optionText}>Only Friends</Text>
+						{selectedOption === 4 && <Text> ✓ </Text>}
+					</TouchableOpacity>
 				</View>
-				<View style={styles.toggleItem}>
-					<Text style={styles.toggleHeader}>Listeners can add</Text>
-					<View style={styles.toggleSwitchContainer}>
-						<Switch value={toggle2} onValueChange={toggleSwitch2} />
-					</View>
-					<Text style={styles.toggleDescription}>
-						Allow everyone to add tracks
-					</Text>
-				</View>
-				<View style={styles.toggleItem}>
-					<Text style={styles.toggleHeader}>Enable chat in room</Text>
-					<View style={styles.toggleSwitchContainer}>
-						<Switch value={toggle3} onValueChange={toggleSwitch3} />
-					</View>
-					<Text style={styles.toggleDescription}>
-						Listeners can use chat functionality
-					</Text>
-				</View>
-				<View style={styles.toggleItem}>
-					<Text style={styles.toggleHeader}>Can vote</Text>
-					<View style={styles.toggleSwitchContainer}>
-						<Switch value={toggle4} onValueChange={toggleSwitch4} />
-					</View>
-					<Text style={styles.toggleDescription}>
-						Listeners can vote for next song
-					</Text>
-				</View>
-			</View>
 
-			<TouchableOpacity style={styles.editButton} onPress={goToEditScreen}>
-				<Text style={styles.editButtonText}>Edit Room Details</Text>
-				<Icon name="edit" size={20} color="black" />
-			</TouchableOpacity>
+				<View style={styles.toggleContainer}>
+					<View style={styles.toggleItem}>
+						<Text style={styles.toggleHeader}>Searchability</Text>
+						<View style={styles.toggleSwitchContainer}>
+							<Switch value={toggle1} onValueChange={toggleSwitch1} />
+						</View>
+						<Text style={styles.toggleDescription}>
+							Make this room searchable
+						</Text>
+					</View>
+					<View style={styles.toggleItem}>
+						<Text style={styles.toggleHeader}>Listeners can add</Text>
+						<View style={styles.toggleSwitchContainer}>
+							<Switch value={toggle2} onValueChange={toggleSwitch2} />
+						</View>
+						<Text style={styles.toggleDescription}>
+							Allow everyone to add tracks
+						</Text>
+					</View>
+					<View style={styles.toggleItem}>
+						<Text style={styles.toggleHeader}>Enable chat in room</Text>
+						<View style={styles.toggleSwitchContainer}>
+							<Switch value={toggle3} onValueChange={toggleSwitch3} />
+						</View>
+						<Text style={styles.toggleDescription}>
+							Listeners can use chat functionality
+						</Text>
+					</View>
+					<View style={styles.toggleItem}>
+						<Text style={styles.toggleHeader}>Can vote</Text>
+						<View style={styles.toggleSwitchContainer}>
+							<Switch value={toggle4} onValueChange={toggleSwitch4} />
+						</View>
+						<Text style={styles.toggleDescription}>
+							Listeners can vote for next song
+						</Text>
+					</View>
+				</View>
 
-			{/* <TouchableOpacity style={styles.saveButton} onPress={() => router.back()}>
+				<TouchableOpacity style={styles.editButton} onPress={goToEditScreen}>
+					<Text style={styles.editButtonText}>Edit Room Details</Text>
+					<Icon name="edit" size={20} color="black" />
+				</TouchableOpacity>
+
+				{/* <TouchableOpacity style={styles.saveButton} onPress={() => router.back()}>
 				<Text style={styles.saveButtonText}>Save Changes</Text>
 			</TouchableOpacity> */}
-			<View style={styles.saveButton}>
-				<CreateButton title="Save Changes" onPress={handleSave} />
-				{/* <CreateButton title="Save Changes" onPress={() => router.back()} /> */}
-				{/* <DeleteButton title="Delete Room" onPress={navigateToHome} /> */}
-				<DeleteButton
-					title="Delete Room"
-					onPress={() => setShowDeleteModal(true)}
-				/>
-			</View>
-			{/* Delete Confirmation Modal */}
-			<Modal
-				animationType="slide"
-				transparent={true}
-				visible={showDeleteModal}
-				onRequestClose={() => setShowDeleteModal(false)}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalView}>
-						<Text style={styles.modalText}>
-							Are you sure you want to delete this room? The room will be
-							deleted forever.
-						</Text>
-						<View style={styles.modalButtonContainer}>
-							<Pressable
-								style={[styles.button, styles.buttonYes]}
-								onPress={handleDelete}
-							>
-								<Text style={styles.textStyle}>Yes</Text>
-							</Pressable>
-							<Pressable
-								style={[styles.button, styles.buttonNo]}
-								onPress={() => setShowDeleteModal(false)}
-							>
-								<Text style={styles.textStyle}>No</Text>
-							</Pressable>
+				<View style={styles.saveButton}>
+					<CreateButton title="Save Changes" onPress={handleSave} />
+					{/* <CreateButton title="Save Changes" onPress={() => router.back()} /> */}
+					{/* <DeleteButton title="Delete Room" onPress={navigateToHome} /> */}
+					<DeleteButton
+						title="Delete Room"
+						onPress={() => setShowDeleteModal(true)}
+					/>
+				</View>
+				{/* Delete Confirmation Modal */}
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={showDeleteModal}
+					onRequestClose={() => setShowDeleteModal(false)}
+				>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalView}>
+							<Text style={styles.modalText}>
+								Are you sure you want to delete this room? The room will be
+								deleted forever.
+							</Text>
+							<View style={styles.modalButtonContainer}>
+								<Pressable
+									style={[styles.button, styles.buttonYes]}
+									onPress={handleDelete}
+								>
+									<Text style={styles.textStyle}>Yes</Text>
+								</Pressable>
+								<Pressable
+									style={[styles.button, styles.buttonNo]}
+									onPress={() => setShowDeleteModal(false)}
+								>
+									<Text style={styles.textStyle}>No</Text>
+								</Pressable>
+							</View>
 						</View>
 					</View>
-				</View>
-			</Modal>
-			{/* Save Confirmation Modal */}
-			<Modal
-				animationType="fade"
-				transparent={true}
-				visible={showSaveModal}
-				onRequestClose={closeSaveModal}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalViewS}>
-						<TouchableOpacity
-							onPress={closeSaveModal}
-							style={styles.closeButtonS}
-						>
-							<MaterialCommunityIcons
-								name="window-close"
-								size={24}
-								color="black"
-							/>
-						</TouchableOpacity>
-						<Text style={styles.modalTextS}>Settings have been saved!</Text>
+				</Modal>
+				{/* Save Confirmation Modal */}
+				<Modal
+					animationType="fade"
+					transparent={true}
+					visible={showSaveModal}
+					onRequestClose={closeSaveModal}
+				>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalViewS}>
+							<TouchableOpacity
+								onPress={closeSaveModal}
+								style={styles.closeButtonS}
+							>
+								<MaterialCommunityIcons
+									name="window-close"
+									size={24}
+									color="black"
+								/>
+							</TouchableOpacity>
+							<Text style={styles.modalTextS}>Settings have been saved!</Text>
+						</View>
 					</View>
-				</View>
-			</Modal>
+				</Modal>
+			</ScrollView>
 		</View>
 	);
 };
