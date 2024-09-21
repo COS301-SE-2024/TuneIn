@@ -25,7 +25,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	participants,
 }) => {
 	const navigation = useNavigation();
-	const router = useRouter();
 	let _roomParticipants = useLocalSearchParams();
 	let roomParticipants = _roomParticipants.participants;
 	const participantsInRoom: Participant[] = [];
