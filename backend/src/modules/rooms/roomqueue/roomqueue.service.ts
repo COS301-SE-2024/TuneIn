@@ -586,6 +586,15 @@ export class ActiveRoom {
 						t = song.getPlaybackStartTime();
 					}
 					result = song;
+					// keep song in queue and replace
+					if (this.queue.size() > 1) {
+						this.queue.front().setPlaybackStartTime(new Date());
+						this.queue = PriorityQueue.fromArray(
+							sortRoomSongs(this.queue.toArray()),
+							this.compareRoomSongs,
+						);
+						result = this.queue.front();
+					}
 				}
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'getNextSong'`,
@@ -809,6 +818,9 @@ export class ActiveRoom {
 					`Acquire lock: ${this.getQueueLockName()} in function 'getSpotifyInfo'`,
 				);
 				//get spotify info for all songs
+				console.log(
+					`Getting spotify info for all songs in room ${this.room.roomID}`,
+				);
 				this.updateQueue();
 				const songs = this.queue.toArray();
 				const songsWithoutInfo: RoomSong[] = [];
@@ -818,6 +830,7 @@ export class ActiveRoom {
 						songsWithoutInfo.push(s);
 					}
 				}
+				console.log(`There are ${songsWithoutInfo.length} songs without info`);
 				if (songsWithoutInfo.length > 0) {
 					const songIDs: string[] = [];
 					for (const song of songsWithoutInfo) {
@@ -826,10 +839,22 @@ export class ActiveRoom {
 						}
 					}
 					const songInfo: Spotify.Track[] = [];
+					const promises: Promise<Spotify.Track[]>[] = [];
 					for (let i = 0, n = songIDs.length; i < n; i += 50) {
+						console.log(`Iteration ${i} of getting 50 songs out of ${n}`);
 						const ids = songIDs.slice(i, i + 50);
-						const info = await api.tracks.get(ids);
-						songInfo.push(...info);
+						const info = api.tracks.get(ids);
+						promises.push(info);
+					}
+					console.log(
+						`There are ${
+							promises.length
+						} promises to resolve. Starting at ${new Date()}`,
+					);
+					const results = await Promise.all(promises);
+					console.log(`All promises resolved at ${new Date()}`);
+					for (const r of results) {
+						songInfo.push(...r);
 					}
 					for (let i = 0, n = songs.length; i < n; i++) {
 						const song = songs[i];
