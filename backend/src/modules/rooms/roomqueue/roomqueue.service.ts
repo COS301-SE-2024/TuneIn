@@ -854,17 +854,10 @@ export class ActiveRoom {
 	}
 
 	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
-		let result: RoomSong | null = null;
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			5000,
-			async () => {
-				result = await this.getNextSong(murLockService);
-				if (result !== null) {
-					result.setPlaybackStartTime(new Date());
-				}
-			},
-		);
+		const result: RoomSong | null = await this.getNextSong(murLockService);
+		if (result !== null) {
+			result.setPlaybackStartTime(new Date());
+		}
 		return result;
 	}
 
