@@ -72,14 +72,14 @@ const initialState: SocketHandshakesState = {
 	dmsReceived: false,
 };
 
-const socketInitialised: SocketHandshakesState = {
+const socketConnected: SocketHandshakesState = {
 	...initialState,
-	socketInitialized: true,
+	socketConnected: true,
 };
 
-const socketConnected: SocketHandshakesState = {
-	...socketInitialised,
-	socketConnected: true,
+const socketInitialised: SocketHandshakesState = {
+	...socketConnected,
+	socketInitialized: true,
 };
 
 // Reducer function
@@ -96,13 +96,13 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 		/* ***** USER IDENTITY ***** */
 		case actionTypes.SENT_IDENTITY:
 			return {
-				...socketConnected,
+				...state,
 				sentIdentity: true,
 				identityConfirmed: false,
 			};
 		case actionTypes.IDENTITY_CONFIRMED:
 			return {
-				...socketConnected,
+				...state,
 				sentIdentity: true,
 				identityConfirmed: true,
 			};
