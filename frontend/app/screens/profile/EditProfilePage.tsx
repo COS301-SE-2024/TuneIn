@@ -559,7 +559,7 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Name</Text>
 					<TextInput
-						style={{ marginLeft: 42 }}
+						style={{ marginLeft: 42, borderBottomColor: "#000", borderBottomWidth: 1 }}
 						value={profileData.profile_name}
 						placeholder="Enter name here"
 						onChangeText={(newName: string) => {
@@ -574,7 +574,11 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Username</Text>
 					<TextInput
-						style={{ marginLeft: 11 }}
+						style={{
+							marginLeft: 11,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={`${profileData.username}`}
 						placeholder="Enter username here"
 						onChangeText={(newName: string) => {
@@ -589,7 +593,7 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
 					<TextInput
-						style={{ marginLeft: 60 }}
+						style={{ marginLeft: 60, borderBottomColor: "#000", borderBottomWidth: 1 }}
 						value={profileData.bio}
 						placeholder="Enter bio here"
 						onChangeText={(newName: string) => {
