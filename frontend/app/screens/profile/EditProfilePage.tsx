@@ -79,7 +79,8 @@ const EditProfileScreen = () => {
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
-	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [usrNmErrorMessage, setUsrNmErrorMessage] = useState<string>("");
+	const [nmErrorMessage, setNmErrorMessage] = useState<string>("");
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const [token, setToken] = useState<string | null>(null);
@@ -110,13 +111,25 @@ const EditProfileScreen = () => {
 	useEffect(() => {
 		const checkData = async () => {
 			if (JSON.stringify(profileInfo) !== JSON.stringify(profileData)) {
+				let validNames: boolean = true;
 				if (profileInfo.username !== profileData.username) {
 					const validUsername: boolean = await checkUsername();
-					setChanged(validUsername);
-				} else {
-					setChanged(true);
+					validNames = validUsername;
 				}
+				
+				if (
+					profileInfo.profile_name !== profileData.profile_name &&
+					profileData.profile_name === ""
+				) {
+					setNmErrorMessage("Name cannot be empty");
+					validNames = false;
+				} else {
+					setNmErrorMessage("");
+				}
+
+				setChanged(validNames);
 			} else {
+				setUsrNmErrorMessage("");
 				setChanged(false);
 			}
 		};
@@ -148,56 +161,56 @@ const EditProfileScreen = () => {
 
 	const checkUsername = async (): Promise<boolean> => {
 		if (profileData.username === "") {
-			setErrorMessage("Username cannot be empty");
+			setUsrNmErrorMessage("Username cannot be empty");
 			return false;
 		}
 
 		const regex = /^[a-z0-9]+$/;
-
 		if (!regex.test(profileData.username)) {
-			setErrorMessage(
+			setUsrNmErrorMessage(
 				"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
 			);
 			return false;
 		} else {
-			try {
-				if (timeoutRef.current) {
-					clearTimeout(timeoutRef.current);
-				}
+			setUsrNmErrorMessage("");
+		}
 
-				// Wait for the timeout to complete and handle the response
-				const response = await new Promise<boolean>((resolve) => {
-					timeoutRef.current = setTimeout(async () => {
-						try {
-							const response = await axios.get(
-								`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
-								{
-									headers: {
-										Authorization: `Bearer ${token}`,
-									},
-								},
-							);
-
-							if (response.data) {
-								setErrorMessage("Username already taken");
-								resolve(false);
-							} else {
-								setErrorMessage("");
-								resolve(true);
-							}
-						} catch (error) {
-							console.error("Error checking username:", error);
-							setErrorMessage("Error checking username");
-							resolve(false);
-						}
-					}, 500);
-				});
-
-				return response;
-			} catch (error) {
-				console.error("Error in checkUsername:", error);
-				return false;
+		try {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
 			}
+
+			// Wait for the timeout to complete and handle the response
+			const response = await new Promise<boolean>((resolve) => {
+				timeoutRef.current = setTimeout(async () => {
+					try {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+
+						if (response.data) {
+							setUsrNmErrorMessage("Username already taken");
+							resolve(false);
+						} else {
+							resolve(true);
+						}
+					} catch (error) {
+						console.log("Error checking username:", error);
+						setUsrNmErrorMessage("Error checking username");
+						resolve(false);
+					}
+				}, 500);
+			});
+
+			return response;
+		} catch (error) {
+			console.log("Error in checkUsername:", error);
+			return false;
 		}
 	};
 
@@ -554,6 +567,9 @@ const EditProfileScreen = () => {
 						}}
 					/>
 				</View>
+				{nmErrorMessage !== "" && (
+					<Text style={[styles.errorMessage]}>{nmErrorMessage}</Text>
+				)}
 				{/* Username */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Username</Text>
@@ -566,8 +582,8 @@ const EditProfileScreen = () => {
 						}}
 					/>
 				</View>
-				{errorMessage !== "" && (
-					<Text style={[styles.errorMessage]}>{errorMessage}</Text>
+				{usrNmErrorMessage !== "" && (
+					<Text style={[styles.errorMessage]}>{usrNmErrorMessage}</Text>
 				)}
 				{/* Bio */}
 				<View style={styles.listItem}>
