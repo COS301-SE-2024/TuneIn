@@ -147,7 +147,7 @@ const EditRoom: React.FC = () => {
 				return;
 			}
 			Alert.alert(
-				"Changes Savesss",
+				"Changes Saved",
 				"Your changes have been saved successfully.",
 				[{ text: "OK" }],
 				{ cancelable: false },
