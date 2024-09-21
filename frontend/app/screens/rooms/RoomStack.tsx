@@ -50,7 +50,7 @@ function MyRoomTabs() {
 		);
 	}
 
-	const { currentRoom, setCurrentRoom } = playerContext;
+	const { currentRoom, setCurrentRoom, userData } = playerContext;
 
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -60,6 +60,8 @@ function MyRoomTabs() {
 	} else if (room) {
 		roomData = JSON.parse(room);
 	}
+
+	roomData.mine = roomData.userID === userData?.userID;
 
 	let roomID: string;
 	if (roomData.id !== undefined) {
@@ -141,9 +143,16 @@ function MyRoomTabs() {
 	};
 
 	const navigateBasedOnOwnership = () => {
+		console.log("Room is mine? ", roomData.mine);
 		if (roomData.mine) {
-			router.navigate("/screens/rooms/AdvancedSettings");
+			router.navigate({
+				pathname: "/screens/rooms/AdvancedSettings",
+				params: {
+					roomData: JSON.stringify(roomData),
+				},
+			});
 		} else {
+			console.log("Going to room info page");
 			router.navigate({
 				pathname: "/screens/rooms/RoomInfo",
 				params: {
