@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
-import FriendServices from "../../services/FriendServices"; // Import the updated FriendServices
+import FriendServices from "../../services/FriendServices";
 import { useLocalSearchParams } from "expo-router";
 
 const Followers: React.FC = () => {

@@ -214,6 +214,52 @@ class FriendServices {
 			throw error;
 		}
 	}
+
+	// Fetch following users
+	static async fetchFollowing(): Promise<Friend[]> {
+		const token = await auth.getToken();
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/following`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data
+				.filter((user: any) => user.relationship === "following") // Filter for 'following' relationship
+				.map((user: any) => ({
+					profile_picture_url: user.profile_picture_url,
+					username: user.username,
+					friend_id: user.userID,
+					relationship: user.relationship,
+				}));
+		} catch (error) {
+			console.error("Error fetching following:", error);
+			throw error;
+		}
+	}
+
+	// Fetch pending friend requests
+	static async fetchPendingRequests(): Promise<Friend[]> {
+		const token = await auth.getToken();
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/pending`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data.map((user: any) => ({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+				friend_id: user.userID,
+				relationship: "pending",
+			}));
+		} catch (error) {
+			console.error("Error fetching pending friend requests:", error);
+			throw error;
+		}
+	}
 }
 
 export default FriendServices;

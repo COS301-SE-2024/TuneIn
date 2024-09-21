@@ -14,6 +14,7 @@ import { Friend } from "../../models/friend";
 import { API_BASE_URL } from "../../services/Utils";
 import auth from "../../services/AuthManagement";
 import { useLocalSearchParams } from "expo-router";
+import FriendServices from "../../services/FriendServices";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -26,81 +27,60 @@ const Following: React.FC = () => {
 	const [fetchFollowingError, setFetchFollowingError] =
 		useState<boolean>(false);
 	const [fetchPendingError, setFetchPendingError] = useState<boolean>(false);
-
 	const user = useLocalSearchParams();
 
 	useEffect(() => {
-		const fetchFollowing = async () => {
+		const loadFollowing = async () => {
 			try {
-				const token = await auth.getToken();
-				const response = await axios.get(`${API_BASE_URL}/users/following`, {
-					headers: { Authorization: `Bearer ${token}` },
-				});
-				const mappedFollowing: Friend[] = response.data.map((user: any) => ({
-					profile_picture_url: user.profile_picture_url,
-					username: user.username,
-					friend_id: user.userID,
-					relationship: user.relationship,
-				}));
+				const mappedFollowing = await FriendServices.fetchFollowing();
 				setFollowing(mappedFollowing);
 				setFilteredFollowing(mappedFollowing);
 				setFetchFollowingError(false);
-			} catch (error) {
-				console.log("Error fetching following:", error);
+			} catch {
 				setFollowing([]);
 				setFilteredFollowing([]);
 				setFetchFollowingError(true);
 			}
 		};
 
-		const fetchPendingRequests = async () => {
+		const loadPendingRequests = async () => {
 			try {
-				const token = await auth.getToken();
-				const response = await axios.get(
-					`${API_BASE_URL}/users/friends/pending`,
-					{
-						headers: { Authorization: `Bearer ${token}` },
-					},
-				);
-				const mappedPendingRequests: Friend[] = response.data.map(
-					(user: any) => ({
-						profile_picture_url: user.profile_picture_url,
-						username: user.username,
-						friend_id: user.userID,
-						relationship: "pending",
-					}),
-				);
+				const mappedPendingRequests =
+					await FriendServices.fetchPendingRequests();
 				setPendingRequests(mappedPendingRequests);
 				setFilteredPendingRequests(mappedPendingRequests);
 				setFetchPendingError(false);
-			} catch (error) {
-				console.log("Error fetching pending friend requests:", error);
+			} catch {
 				setPendingRequests([]);
 				setFilteredPendingRequests([]);
 				setFetchPendingError(true);
 			}
 		};
 
-		fetchFollowing();
-		fetchPendingRequests();
+		loadFollowing();
+		loadPendingRequests();
 	}, []);
 
 	useEffect(() => {
-		if (search === "") {
-			setFilteredFollowing(following);
-			setFilteredPendingRequests(pendingRequests);
-		} else {
-			setFilteredFollowing(
-				following.filter((user) =>
-					user.username.toLowerCase().includes(search.toLowerCase()),
-				),
-			);
-			setFilteredPendingRequests(
-				pendingRequests.filter((user) =>
-					user.username.toLowerCase().includes(search.toLowerCase()),
-				),
-			);
-		}
+		const filterData = () => {
+			if (search === "") {
+				setFilteredFollowing(following);
+				setFilteredPendingRequests(pendingRequests);
+			} else {
+				const lowerCaseSearch = search.toLowerCase();
+				setFilteredFollowing(
+					following.filter((user) =>
+						user.username.toLowerCase().includes(lowerCaseSearch),
+					),
+				);
+				setFilteredPendingRequests(
+					pendingRequests.filter((user) =>
+						user.username.toLowerCase().includes(lowerCaseSearch),
+					),
+				);
+			}
+		};
+		filterData();
 	}, [search, following, pendingRequests]);
 
 	const handleUnfollow = async (friend: Friend) => {
@@ -117,19 +97,31 @@ const Following: React.FC = () => {
 						},
 					},
 				);
-				if (!response.ok) {
-					console.error("Error unfollowing user:", response);
-					return;
-				}
+				if (!response.ok) throw new Error("Error unfollowing user.");
 				const updatedFollowing = following.filter(
 					(user) => user.username !== friend.username,
 				);
 				setFollowing(updatedFollowing);
 				setFilteredFollowing(updatedFollowing);
-			} catch (error) {
-				console.log("Error unfollowing user:", error);
+			} catch {
 				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 			}
+		}
+	};
+
+	const handleFriend = async (friend: Friend) => {
+		try {
+			// This function could handle accepting a friend request
+			await FriendServices.handleFriend(friend);
+			const updatedPendingRequests = pendingRequests.filter(
+				(item) => item.friend_id !== friend.friend_id,
+			);
+			setPendingRequests(updatedPendingRequests);
+			setFilteredPendingRequests(updatedPendingRequests);
+			friend.relationship = "mutual"; // Assuming you want to update the friend relationship
+			setFollowing((prev) => [...prev, friend]); // Optionally add to following list
+		} catch (error) {
+			ToastAndroid.show("Failed to handle friend request.", ToastAndroid.SHORT);
 		}
 	};
 
@@ -153,6 +145,7 @@ const Following: React.FC = () => {
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
+			handleRequest={() => handleFriend(item)} // Pass the handleFriend function
 		/>
 	);
 
