@@ -237,8 +237,7 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 		const currentStartTime = head.getPlaybackStartTime();
 		if (currentStartTime !== null) {
 			//update all start times to be sequential
-			const initStartTime = currentStartTime.getMilliseconds();
-			let pos = 0;
+			let pos = currentStartTime.getTime();
 			for (let i = 0; i < tempQueue.length; i++) {
 				const song: RoomSong = tempQueue[i];
 				if (song.spotifyInfo === null) {
@@ -247,7 +246,7 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 					);
 					break;
 				}
-				const t: Date = new Date(initStartTime + pos);
+				const t: Date = new Date(pos);
 				song.setPlaybackStartTime(t);
 				tempQueue[i] = song;
 				pos += song.spotifyInfo.duration_ms;
@@ -307,7 +306,8 @@ export class ActiveRoom {
 			const song = songs[i];
 			if (song) {
 				if (song.spotifyID === null) {
-					throw new Error("Song does not have a spotify id");
+					// throw new Error("Song does not have a spotify id");
+					continue;
 				}
 
 				const startTime = song.getPlaybackStartTime();
