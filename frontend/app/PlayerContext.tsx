@@ -46,28 +46,32 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	const [userData, setUserData] = useState<UserDto | null>(null);
 	useEffect(() => {
 		async function fetchData() {
-			const currentRoomHandler: CurrentRoom = new CurrentRoom();
-			const token: string | null = await getItem("token");
-			if (!token) {
-				console.log("no token");
-				return;
+			try {
+				const currentRoomHandler: CurrentRoom = new CurrentRoom();
+				const token: string | null = await getItem("token");
+				if (!token) {
+					console.log("no token");
+					return;
+				}
+				const result = await currentRoomHandler.getCurrentRoom(token);
+				if (!result) {
+					console.log("no result");
+					return;
+				}
+				const room: Room = {
+					userID: result.creator.userID,
+					roomID: result.roomID,
+					name: result.room_name,
+					description: result.description,
+					backgroundImage: result.room_image,
+					start_date: result.start_date,
+					end_date: result.end_date,
+					tags: result.tags,
+				};
+				setCurrentRoom(room);
+			} catch (error) {
+				console.error("Error fetching data: ", error);
 			}
-			const result = await currentRoomHandler.getCurrentRoom(token);
-			if (!result) {
-				console.log("no result");
-				return;
-			}
-			const room: Room = {
-				userID: result.creator.userID,
-				roomID: result.roomID,
-				name: result.room_name,
-				description: result.description,
-				backgroundImage: result.room_image,
-				start_date: result.start_date,
-				end_date: result.end_date,
-				tags: result.tags,
-			};
-			setCurrentRoom(room);
 		}
 		fetchData();
 	}, []);
