@@ -15,10 +15,12 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import CreateButton from "../../components/CreateButton";
 import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
-import RoomShareSheet from "../components/messaging/RoomShareSheet";
+import RoomShareSheet from "../../components/messaging/RoomShareSheet";
+import { formatRoomData } from "../../models/Room";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
+	const [isPopupVisible, setPopupVisible] = useState(false);
 	const _roomDetails = useLocalSearchParams(); // room details from previous screen
 	console.log(_roomDetails);
 	const [selectedOption, setSelectedOption] = useState(null);
@@ -33,6 +35,10 @@ const AdvancedSettings = () => {
 		setSelectedOption(option);
 	};
 
+	const handleOpenPopup = () => {
+		setPopupVisible(true);
+	};
+
 	const toggleSwitch1 = () => setToggle1((previousState) => !previousState);
 	const toggleSwitch2 = () => setToggle2((previousState) => !previousState);
 	const toggleSwitch3 = () => setToggle3((previousState) => !previousState);
@@ -43,6 +49,10 @@ const AdvancedSettings = () => {
 			pathname: "/screens/rooms/EditRoom",
 			params: { room: room },
 		});
+	};
+
+	const handleClosePopup = () => {
+		setPopupVisible(false);
 	};
 
 	const navigateToHome = () => {
@@ -79,8 +89,16 @@ const AdvancedSettings = () => {
 					/>
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
-				<Icon name="share" size={22} color={colors.primaryText} />
+				<TouchableOpacity onPress={handleOpenPopup}>
+					<Icon name="share" size={22} color={colors.primaryText} />
+				</TouchableOpacity>
 			</View>
+			{/* Popup component */}
+			<RoomShareSheet
+				room={formatRoomData(room)}
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+			/>
 			<ScrollView>
 				<Text style={styles.sectionHeader}>Who can join your room?</Text>
 				<View style={styles.optionsContainer}>
