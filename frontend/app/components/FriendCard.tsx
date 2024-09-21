@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 import { colors } from "../styles/colors";
+import { color } from "react-native-elements/dist/helpers";
 
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 
@@ -107,7 +108,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				)) ||
 				(cardType === "pending" && (
 					<TouchableOpacity
-						style={styles.rejectButton}
+						style={styles.unfriendButton}
 						onPress={(event) => {
 							event.stopPropagation();
 							handle(friend);
@@ -118,8 +119,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 					</TouchableOpacity>
 				)) ||
 				(cardType === "friend-follow" && ( // whomever is redesigning this, please make that a user cannot unfollow a friend so there ideally shouldn't be a button here
-					<Text style={styles.acceptText} testID="friend-card-username">
-						Friends/Pending
+					<Text style={styles.pendingText} testID="friend-card-username">
+						Pending...
 					</Text>
 				)) ||
 				null}
@@ -139,22 +140,16 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 	},
 	unfriendButton: {
-		// backgroundColor: "white",
-		backgroundColor: "black",
+		backgroundColor: colors.backgroundColor,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 8,
+		borderRadius: 20,
 		borderWidth: 1,
-		// borderColor: "red",
-	},
-	rejectButton: {
-		backgroundColor: "black",
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-		borderRadius: 8,
+		borderColor: "red",
+		color: "red",
 	},
 	rejectText: {
-		color: "white",
+		color: "red",
 		fontWeight: "bold",
 	},
 	cardContainer: {
@@ -176,8 +171,13 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	acceptText: {
-		color: "#fff",
+		color: colors.primaryText,
 		fontWeight: "bold",
+	},
+	pendingText: {
+		color: "purple",
+		fontWeight: "bold",
+		fontSize: 16,
 	},
 	username: {
 		fontSize: 18,
