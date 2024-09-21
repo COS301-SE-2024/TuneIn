@@ -125,7 +125,7 @@ export class UsersService {
 			updatedUser.username = updateProfileDto.username;
 		}
 
-		if (updateProfileDto.bio) {
+		if (updateProfileDto.bio || updateProfileDto.bio === "") {
 			updatedUser.bio = updateProfileDto.bio;
 		}
 
