@@ -74,7 +74,6 @@ const Home: React.FC = () => {
 	}
 	/* ********************************************************************** */
 
-
 	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
