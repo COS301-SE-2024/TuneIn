@@ -20,59 +20,7 @@ import { SpotifyService } from "../../../spotify/spotify.service";
 import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
 import { MurLockService } from "murlock";
 
-// Postgres tables:
-/*
-CREATE TABLE IF NOT EXISTS public.vote
-(
-    vote_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    is_upvote boolean NOT NULL DEFAULT true,
-    queue_id uuid NOT NULL,
-    CONSTRAINT vote_pkey PRIMARY KEY (vote_id),
-    CONSTRAINT queue_id FOREIGN KEY (queue_id)
-        REFERENCES public.queue (queue_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-
-CREATE TABLE IF NOT EXISTS public.queue
-(
-    room_id uuid NOT NULL,
-    song_id uuid NOT NULL,
-    is_done_playing boolean NOT NULL DEFAULT false,
-    queue_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    start_time timestamp with time zone,
-    CONSTRAINT queue_id PRIMARY KEY (queue_id),
-    CONSTRAINT room_id FOREIGN KEY (room_id)
-        REFERENCES public.room (room_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT song_id FOREIGN KEY (song_id)
-        REFERENCES public.song (song_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-        NOT VALID
-)
-
-CREATE TABLE IF NOT EXISTS public.room
-(
-    room_id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    room_creator uuid NOT NULL,
-    playlist_photo text COLLATE pg_catalog."default",
-    description text COLLATE pg_catalog."default" DEFAULT 'This room has no description'::text,
-    date_created timestamp with time zone NOT NULL DEFAULT now(),
-    nsfw boolean NOT NULL DEFAULT false,
-    is_temporary boolean DEFAULT false,
-    room_language text COLLATE pg_catalog."default" DEFAULT 'English'::text,
-    explicit boolean DEFAULT false,
-    tags text[] COLLATE pg_catalog."default",
-    CONSTRAINT room_pkey PRIMARY KEY (room_id),
-    CONSTRAINT room_creator FOREIGN KEY (room_creator)
-        REFERENCES public.users (user_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-)
-*/
+const QUEUE_LOCK_TIMEOUT = 20000;
 
 export class RoomSong {
 	private _score: number;
@@ -448,8 +396,9 @@ export class ActiveRoom {
 		/*
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(`Acquire lock: ${this.getQueueLockName()}`);
 				//ensure individual songs are in db
 
 				//get all songs in queue
@@ -582,6 +531,7 @@ export class ActiveRoom {
 				await prisma.vote.createMany({
 					data: newVotes,
 				});
+				console.log(`Release lock: ${this.getQueueLockName()}`);
 			},
 		);
 		*/
@@ -596,8 +546,11 @@ export class ActiveRoom {
 		let result: RoomSong | null = null;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'getNextSong'`,
+				);
 				this.updateQueue();
 				if (this.queue.isEmpty()) {
 					return;
@@ -622,15 +575,21 @@ export class ActiveRoom {
 						}
 
 						// remove them from the queue until we find an unplayed song
+						console.log("Removing song from queue, since it's already played");
+						console.log(song);
 						this.queue.dequeue();
 						song = this.queue.front();
 						if (song === null) {
 							return;
 						}
+
 						t = song.getPlaybackStartTime();
 					}
 					result = song;
 				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'getNextSong'`,
+				);
 			},
 		);
 		return result;
@@ -643,8 +602,11 @@ export class ActiveRoom {
 		let result = false;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'addVote'`,
+				);
 				this.updateQueue();
 				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
@@ -659,6 +621,9 @@ export class ActiveRoom {
 					this.compareRoomSongs,
 				);
 				this.printQueueBrief();
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'addVote'`,
+				);
 			},
 		);
 		return result;
@@ -671,8 +636,11 @@ export class ActiveRoom {
 		let result = false;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'removeVote'`,
+				);
 				this.updateQueue();
 				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
@@ -687,6 +655,10 @@ export class ActiveRoom {
 					this.compareRoomSongs,
 				);
 				this.printQueueBrief();
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'removeVote'`,
+				);
+				this.updateQueue();
 			},
 		);
 		return result;
@@ -701,8 +673,11 @@ export class ActiveRoom {
 		let result = false;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'swapVote'`,
+				);
 				this.updateQueue();
 				this.printQueueBrief();
 				const songs: RoomSong[] = this.queue.toArray();
@@ -717,6 +692,9 @@ export class ActiveRoom {
 					this.compareRoomSongs,
 				);
 				this.printQueueBrief();
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'swapVote'`,
+				);
 			},
 		);
 		return result;
@@ -731,8 +709,11 @@ export class ActiveRoom {
 		let result = false;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'addSong'`,
+				);
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				if (!songs.find((s) => s.spotifyID === spotifyID)) {
@@ -741,6 +722,9 @@ export class ActiveRoom {
 					);
 					result = true;
 				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'addSong'`,
+				);
 			},
 		);
 		return result;
@@ -754,8 +738,11 @@ export class ActiveRoom {
 		let result = false;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'removeSong'`,
+				);
 				this.updateQueue();
 				const songs: RoomSong[] = this.queue.toArray();
 				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
@@ -770,6 +757,9 @@ export class ActiveRoom {
 				songs.splice(index, 1);
 				this.queue = PriorityQueue.fromArray(songs, this.compareRoomSongs);
 				result = true;
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'removeSong'`,
+				);
 			},
 		);
 		return result;
@@ -812,9 +802,12 @@ export class ActiveRoom {
 	async getSpotifyInfo(api: SpotifyApi, murLockService: MurLockService) {
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
-			5000,
+			QUEUE_LOCK_TIMEOUT,
 			async () => {
 				// The lock has been acquired.
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'getSpotifyInfo'`,
+				);
 				//get spotify info for all songs
 				this.updateQueue();
 				const songs = this.queue.toArray();
@@ -853,6 +846,9 @@ export class ActiveRoom {
 				}
 
 				// Now the lock will be released.
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'getSpotifyInfo'`,
+				);
 			},
 		);
 	}
@@ -876,8 +872,9 @@ export class ActiveRoom {
 	// 	let result: RoomSong | null = null;
 	// 	await murLockService.runWithLock(
 	// 		this.getQueueLockName(),
-	// 		5000,
+	// 		QUEUE_LOCK_TIMEOUT,
 	// 		async () => {
+	// 			console.log(`Acquire lock: ${this.getQueueLockName()}`);
 	// 			this.updateQueue();
 	// 			if (this.queue.isEmpty()) {
 	// 				return;
@@ -888,6 +885,7 @@ export class ActiveRoom {
 	// 			}
 	// 			this.historicQueue.enqueue(song);
 	// 			result = song;
+	// 			console.log(`Release lock: ${this.getQueueLockName()}`);
 	// 		},
 	// 	);
 	// 	return result;
@@ -1145,7 +1143,7 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.initiatePlayback",
 			);
 		}
-		if (!activeRoom.isPlaying(this.murLockService)) {
+		if (!(await activeRoom.isPlaying(this.murLockService))) {
 			if (activeRoom.isEmpty()) {
 				return false;
 			} else {
