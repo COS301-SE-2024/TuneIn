@@ -11,7 +11,13 @@ import RoomPage from "./RoomPage";
 import Chat from "./ChatRoom";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import { formatRoomData } from "../../models/Room";
@@ -97,7 +103,10 @@ function MyRoomTabs() {
 				false,
 			);
 			if (!joinedRoom) {
-				console.log("Error joining room");
+				ToastAndroid.show(
+					"Couldn't join room. Please exit current room.",
+					ToastAndroid.SHORT,
+				);
 				return;
 			}
 			joinRoom();
@@ -115,7 +124,10 @@ function MyRoomTabs() {
 				true,
 			);
 			if (!leftRoom) {
-				console.log("Error leaving room");
+				ToastAndroid.show(
+					"Error leaving room. Please try again.",
+					ToastAndroid.SHORT,
+				);
 				return;
 			}
 			leaveRoom();
