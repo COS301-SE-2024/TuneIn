@@ -10,6 +10,7 @@ import {
 	Image,
 	StyleSheet,
 	Alert,
+	ToastAndroid,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Room } from "../../models/Room";
@@ -153,7 +154,8 @@ const EditRoom: React.FC = () => {
 			);
 			router.navigate("/screens/(tabs)/Home");
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to update room data.", ToastAndroid.SHORT);
 		}
 	};
 

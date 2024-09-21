@@ -15,6 +15,7 @@ import {
 	Dimensions,
 	Easing,
 	Alert,
+	ToastAndroid,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -371,7 +372,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					console.error("Unexpected response data format:", data);
 				}
 			} catch (error) {
-				console.error("Failed to fetch queue:", error);
+				console.log("Failed to fetch queue:", error);
+				ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
 			}
 		};
 

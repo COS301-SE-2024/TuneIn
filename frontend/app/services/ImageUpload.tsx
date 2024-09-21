@@ -10,6 +10,7 @@ import {
 	AWS_S3_REGION,
 	AWS_S3_ENDPOINT,
 } from "react-native-dotenv";
+import { ToastAndroid } from "react-native";
 
 if (!AWS_ACCESS_KEY_ID) {
 	throw new Error(
@@ -83,7 +84,8 @@ const uploadImage = async (imageURI: string, roomName: string) => {
 		console.log("Successfully uploaded image", data.Location);
 		return data.Location;
 	} catch (error) {
-		console.error("Error uploading image:", error);
+		console.log("Error uploading image:", error);
+		ToastAndroid.show("Failed to upload image", ToastAndroid.SHORT);
 		return null;
 	}
 };

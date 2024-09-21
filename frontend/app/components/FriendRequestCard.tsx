@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Friend } from "../models/friend"; // Adjust path accordingly
+import { colors } from "../styles/colors";
 
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 
@@ -68,23 +69,26 @@ const styles = StyleSheet.create({
 	},
 	username: {
 		fontSize: 16,
+		flex: 1,
 	},
 	acceptButton: {
-		backgroundColor: "green",
+		backgroundColor: colors.primary,
 		padding: 5,
 		borderRadius: 5,
 		marginRight: 5,
 	},
 	acceptText: {
 		color: "white",
+		fontWeight: "bold",
 	},
 	rejectButton: {
-		backgroundColor: "red",
+		backgroundColor: "black",
 		padding: 5,
 		borderRadius: 5,
 	},
 	rejectText: {
 		color: "white",
+		fontWeight: "bold",
 	},
 });
 

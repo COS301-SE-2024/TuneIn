@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	TextInput,
+	FlatList,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import axios from "axios";
 import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
 import { Friend } from "../../models/friend"; // Assume you have a Friend model
@@ -11,6 +18,7 @@ const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
+	const [friendError, setFriendError] = useState<boolean>(false);
 	const user = useLocalSearchParams();
 	useEffect(() => {
 		const fetchRequestsAndFollowers = async () => {
@@ -32,8 +40,12 @@ const Followers: React.FC = () => {
 				);
 				setFollowers(mappedFollowers);
 				setFilteredFollowers(mappedFollowers);
+				setFriendError(false);
 			} catch (error) {
-				console.error("Error fetching data:", error);
+				console.log("Error fetching data:", error);
+				setFollowers([]);
+				setFilteredFollowers([]);
+				setFriendError(true);
 			}
 		};
 
@@ -80,10 +92,16 @@ const Followers: React.FC = () => {
 					setFollowers(updatedFollowers);
 					setFilteredFollowers(updatedFollowers);
 				} else {
-					console.error("Error following user:", response);
+					console.log("Error following user:", response);
+					ToastAndroid.show(`Failed to ${action} user.`, ToastAndroid.SHORT);
 				}
+				throw false;
 			} catch (error) {
-				console.error("Error following user:", error);
+				console.log("Error following user:", error);
+				ToastAndroid.show(
+					`Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`,
+					ToastAndroid.SHORT,
+				);
 			}
 		}
 	};
@@ -145,7 +163,11 @@ const Followers: React.FC = () => {
 						keyExtractor={(item) => item.username}
 					/>
 				) : (
-					<Text style={styles.noFollowersText}>No followers available.</Text>
+					<Text style={styles.noFollowersText}>
+						{friendError
+							? "Failed to load followers"
+							: "No followers available."}
+					</Text>
 				)}
 			</View>
 		</View>
