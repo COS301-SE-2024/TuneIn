@@ -13,18 +13,6 @@ import RoomDetails, {
 import { useLocalSearchParams, useRouter } from "expo-router";
 // import { colors } from "../../styles/colors";
 
-const roomDetails: RoomDetailsProps = {
-	image:
-		"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
-	name: "Chill Vibes",
-	description: "A place to relax and unwind with great music.",
-	genre: "Jazz",
-	language: "English",
-	roomSize: "Medium",
-	isExplicit: false,
-	isNsfw: true,
-};
-
 const RoomInfoScreen = () => {
 	const router = useRouter();
 	const { roomData } = useLocalSearchParams();
@@ -45,7 +33,6 @@ const RoomInfoScreen = () => {
 		isNsfw: _room.isNsfw,
 		// tags: _room.tags,
 	};
-	console.log("Room data: ", _room);
 
 	return (
 		<ScrollView contentContainerStyle={styles.container} testID="room-details">
