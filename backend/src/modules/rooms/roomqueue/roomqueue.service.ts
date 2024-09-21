@@ -868,6 +868,7 @@ export class ActiveRoom {
 						sortRoomSongs(songs),
 						this.compareRoomSongs,
 					);
+					console.log("Queue updated with spotify info");
 				}
 
 				// Now the lock will be released.
@@ -943,6 +944,7 @@ export class ActiveRoom {
 @Injectable()
 export class RoomQueueService {
 	roomQueues: Map<string, ActiveRoom>; //map roomID to room data structure
+	activeQueueSongs: Map<string, Spotify.Track>; //map spotifyID to spotify track
 
 	constructor(
 		private readonly dbUtils: DbUtilsService,
@@ -953,6 +955,7 @@ export class RoomQueueService {
 		private readonly murLockService: MurLockService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
+		this.activeQueueSongs = new Map<string, Spotify.Track>();
 	}
 
 	async createRoomQueue(roomID: string): Promise<void> {
@@ -966,8 +969,13 @@ export class RoomQueueService {
 		console.log("2");
 		await activeRoom.reloadQueue(this.prisma);
 		console.log("3");
-		this.roomQueues.set(roomID, activeRoom);
+		await activeRoom.getSpotifyInfo(
+			this.spotifyAuth.getUserlessAPI(),
+			this.murLockService,
+		);
 		console.log("4");
+		this.roomQueues.set(roomID, activeRoom);
+		console.log("5");
 		console.log(
 			`Created room queue for room ${roomID} with active room: ${activeRoom}`,
 		);
@@ -1192,10 +1200,6 @@ export class RoomQueueService {
 				"Weird error. HashMap is broken: RoomQueueService.getNextSong",
 			);
 		}
-		await activeRoom.getSpotifyInfo(
-			this.spotifyAuth.getUserlessAPI(),
-			this.murLockService,
-		);
 		const song = await activeRoom.getNextSong(this.murLockService);
 		if (!song || song === null) {
 			return null;
