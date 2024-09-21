@@ -252,7 +252,7 @@ export class UsersService {
 				(fg) => fg.song.spotify_id,
 			);
 
-			// Step 2: Fetch song IDs for the provided song namespotify ids
+			// Step 2: Fetch song IDs for the provided song spotify ids
 			const songs = await prisma.song.findMany({
 				where: { spotify_id: { in: newSongIds } },
 				select: { song_id: true, spotify_id: true },
@@ -267,6 +267,17 @@ export class UsersService {
 			);
 
 			// Step 3: Insert missing songs into the database
+			await prisma.song.createMany({
+				data: missingSongs.map((song) => ({
+					name: song.title,
+					duration: song.duration,
+					artwork_url: song.cover ?? null,
+					spotify_id: song.spotify_id,
+					artists: song.artists,
+					audio_features: {},
+				})),
+			});
+
 			if (missingSongs.length > 0) {
 				// Re-fetch the newly added songs to update the songMap
 				const newlyInsertedSongs = await prisma.song.findMany({
@@ -286,6 +297,7 @@ export class UsersService {
 			const songsToAdd = newSongIds.filter(
 				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
 			);
+			console.log("Songs to add: " + songsToAdd);
 
 			const songsToRemove = currentSongSpotifyId
 				.filter((id): id is string => id !== null)
