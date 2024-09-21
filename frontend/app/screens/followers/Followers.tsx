@@ -20,8 +20,9 @@ const Followers: React.FC = () => {
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const user = useLocalSearchParams();
+
 	useEffect(() => {
-		const fetchRequestsAndFollowers = async () => {
+		const fetchFollowers = async () => {
 			try {
 				const token = await auth.getToken(); // Await the token to resolve the promise
 				const followersResponse = await axios.get<Friend[]>(
@@ -30,14 +31,21 @@ const Followers: React.FC = () => {
 						headers: { Authorization: `Bearer ${token}` },
 					},
 				);
-				const mappedFollowers = followersResponse.data.map(
-					(user: any): Friend => ({
-						profile_picture_url: user.profile_picture_url,
-						username: user.username,
-						friend_id: user.userID,
-						relationship: user.relationship,
-					}),
-				);
+				// Filter to only show users who are following you
+				const mappedFollowers = followersResponse.data
+					.filter(
+						(user: any) =>
+							user.relationship === "follower" ||
+							user.relationship === "mutual",
+					)
+					.map(
+						(user: any): Friend => ({
+							profile_picture_url: user.profile_picture_url,
+							username: user.username,
+							friend_id: user.userID,
+							relationship: user.relationship,
+						}),
+					);
 				setFollowers(mappedFollowers);
 				setFilteredFollowers(mappedFollowers);
 				setFriendError(false);
@@ -49,7 +57,7 @@ const Followers: React.FC = () => {
 			}
 		};
 
-		fetchRequestsAndFollowers();
+		fetchFollowers();
 	}, []);
 
 	useEffect(() => {
@@ -63,6 +71,7 @@ const Followers: React.FC = () => {
 			);
 		}
 	}, [search, followers]);
+
 	const handleFollow = async (friend: Friend) => {
 		const token = await auth.getToken();
 		if (token) {
@@ -115,9 +124,7 @@ const Followers: React.FC = () => {
 			cardType={
 				item.relationship === "mutual" || item.relationship === "following"
 					? "following"
-					: item.relationship === "friend" || item.relationship === "pending"
-						? "friend-follow"
-						: "follower"
+					: "follower"
 			}
 			handle={handleFollow}
 		/>
@@ -131,31 +138,7 @@ const Followers: React.FC = () => {
 				value={search}
 				onChangeText={setSearch}
 			/>
-			{/* <View style={styles.requestsSection}>
-				<Text style={styles.requestsTitle}>Requests</Text>
-				{requestsToShow.length > 0 ? (
-					<>
-						<FlatList
-							data={requestsToShow}
-							renderItem={renderRequest}
-							keyExtractor={(item) => item.username}
-							ListFooterComponent={
-								remainingRequests > 0 && (
-									<TouchableOpacity style={styles.moreRequests}>
-										<Text style={styles.moreRequestsText}>
-											+{remainingRequests} more requests
-										</Text>
-									</TouchableOpacity>
-								)
-							}
-						/>
-					</>
-				) : (
-					<Text style={styles.noRequestsText}>No requests available.</Text>
-				)}
-			</View> */}
 			<View style={styles.followersSection}>
-				{/* <Text style={styles.followersTitle}>Followers</Text> */}
 				{filteredFollowers.length > 0 ? (
 					<FlatList
 						data={filteredFollowers}
@@ -185,37 +168,12 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 4,
+		borderRadius: 20,
 		paddingHorizontal: 8,
 		marginBottom: 16,
 	},
-	requestsSection: {
-		marginBottom: 16,
-	},
-	requestsTitle: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 8,
-	},
-	moreRequests: {
-		paddingVertical: 8,
-		alignItems: "center",
-	},
-	moreRequestsText: {
-		fontSize: 16,
-		color: "#007BFF",
-	},
-	noRequestsText: {
-		fontSize: 16,
-		color: "#888",
-	},
 	followersSection: {
 		flex: 1,
-	},
-	followersTitle: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 8,
 	},
 	noFollowersText: {
 		fontSize: 16,
