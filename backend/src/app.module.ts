@@ -52,7 +52,7 @@ import { RecommendationsModule } from "./recommendations/recommendations.module"
 		MurLockModule.forRoot({
 			redisOptions: { url: "redis://localhost:6379" },
 			wait: 1000,
-			maxAttempts: 3,
+			maxAttempts: 10,
 			logLevel: "log",
 			ignoreUnlockFail: false,
 		}),
