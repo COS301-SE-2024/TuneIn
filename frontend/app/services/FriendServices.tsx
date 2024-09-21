@@ -162,6 +162,58 @@ class FriendServices {
 			throw error;
 		}
 	}
+
+	static async handleFollow(friend: Friend): Promise<void> {
+		const token = await auth.getToken();
+		if (!token) {
+			throw new Error("No token found.");
+		}
+		const action = friend.relationship === "mutual" ? "unfollow" : "follow";
+		const url = `${utils.API_BASE_URL}/users/${friend.username}/${action}`;
+
+		try {
+			const response = await axios.post(
+				url,
+				{},
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			if (response.status !== 200) throw new Error(`Failed to ${action} user.`);
+		} catch (error) {
+			console.error("Error following user:", error);
+			throw error;
+		}
+	}
+
+	// Fetch followers
+	static async fetchFollowers(): Promise<Friend[]> {
+		const token = await auth.getToken();
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/followers`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data
+				.filter(
+					(user: any) =>
+						user.relationship === "follower" || user.relationship === "mutual",
+				)
+				.map(
+					(user: any): Friend => ({
+						profile_picture_url: user.profile_picture_url,
+						username: user.username,
+						friend_id: user.userID,
+						relationship: user.relationship,
+					}),
+				);
+		} catch (error) {
+			console.error("Error fetching followers:", error);
+			throw error;
+		}
+	}
 }
 
 export default FriendServices;
