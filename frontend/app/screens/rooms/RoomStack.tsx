@@ -71,15 +71,12 @@ function MyRoomTabs() {
 	}
 
 	useEffect(() => {
-		console.log("Room data: ", roomData);
-		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
 	}, [currentRoom, roomID]);
 
 	const joinRoom = useCallback(() => {
-		console.log("Joining room for some reason i can't even understand");
 		const formattedRoom = formatRoomData(roomData);
 		setJoined(true);
 		setCurrentRoom(formattedRoom);
@@ -91,7 +88,6 @@ function MyRoomTabs() {
 	};
 
 	const handleJoinLeave = async () => {
-		console.log("joined", joined);
 		const token = await auth.getToken();
 		if (!token) {
 			throw new Error("No token found");
