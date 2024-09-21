@@ -7,26 +7,22 @@ import {
 	ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import RoomDetails, {
-	RoomDetailsProps,
-} from "../../components/rooms/RoomDetailsComponent";
-import { useRouter } from "expo-router";
-// import { colors } from "../../styles/colors";
-
-const roomDetails: RoomDetailsProps = {
-	image:
-		"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
-	name: "Chill Vibes",
-	description: "A place to relax and unwind with great music.",
-	genre: "Jazz",
-	language: "English",
-	roomSize: "Medium",
-	isExplicit: true,
-	isNsfw: true,
-};
+import RoomDetails from "../../components/rooms/RoomDetailsComponent";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { formatRoomData } from "../../models/Room";
 
 const RoomInfoScreen = () => {
 	const router = useRouter();
+	const { room } = useLocalSearchParams();
+
+	// Parse the room data if it's a JSON string
+	let roomData;
+	try {
+		roomData = typeof room === "string" ? JSON.parse(room) : room;
+	} catch (error) {
+		console.error("Invalid room data:", error);
+		roomData = null;
+	}
 
 	return (
 		<ScrollView contentContainerStyle={styles.container} testID="room-details">
@@ -37,9 +33,9 @@ const RoomInfoScreen = () => {
 				>
 					<Ionicons name="close" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.roomName}>{roomDetails.name}</Text>
+				<Text style={styles.roomName}>{roomData?.name || "Room"}</Text>
 			</View>
-			<RoomDetails {...roomDetails} />
+			{roomData && <RoomDetails room={formatRoomData(roomData)} />}
 		</ScrollView>
 	);
 };
@@ -50,7 +46,6 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	header: {
-		// backgroundColor: colors.primary,
 		padding: 16,
 		flexDirection: "row",
 		alignItems: "center",

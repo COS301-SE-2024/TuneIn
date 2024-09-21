@@ -123,7 +123,7 @@ function MyRoomTabs() {
 		} else {
 			router.navigate({
 				pathname: "/screens/rooms/RoomInfo",
-				params: { room: JSON.stringify(room) },
+				params: { room: room },
 			});
 		}
 	};

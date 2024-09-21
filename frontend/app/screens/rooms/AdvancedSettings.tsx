@@ -21,8 +21,6 @@ import { formatRoomData } from "../../models/Room";
 const AdvancedSettings = () => {
 	const router = useRouter();
 	const [isPopupVisible, setPopupVisible] = useState(false);
-	const _roomDetails = useLocalSearchParams(); // room details from previous screen
-	console.log(_roomDetails);
 	const [selectedOption, setSelectedOption] = useState(null);
 	const [toggle1, setToggle1] = useState(true);
 	const [toggle2, setToggle2] = useState(true);
@@ -31,7 +29,15 @@ const AdvancedSettings = () => {
 
 	const { room } = useLocalSearchParams();
 
-	const handleOptionSelect = (option) => {
+	let roomData;
+	try {
+		roomData = typeof room === "string" ? JSON.parse(room) : room;
+	} catch (error) {
+		console.error("Invalid room data:", error);
+		roomData = null;
+	}
+
+	const handleOptionSelect = (option: any) => {
 		setSelectedOption(option);
 	};
 
@@ -47,7 +53,7 @@ const AdvancedSettings = () => {
 	const goToEditScreen = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: { room: room },
+			params: { room: roomData },
 		});
 	};
 
@@ -95,7 +101,7 @@ const AdvancedSettings = () => {
 			</View>
 			{/* Popup component */}
 			<RoomShareSheet
-				room={formatRoomData(room)}
+				room={formatRoomData(roomData)}
 				isVisible={isPopupVisible}
 				onClose={handleClosePopup}
 			/>
