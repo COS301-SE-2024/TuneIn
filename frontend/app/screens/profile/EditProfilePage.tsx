@@ -548,6 +548,7 @@ const EditProfileScreen = () => {
 					<TextInput
 						style={{ marginLeft: 42 }}
 						value={profileData.profile_name}
+						placeholder="Enter name here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "name");
 						}}
@@ -559,6 +560,7 @@ const EditProfileScreen = () => {
 					<TextInput
 						style={{ marginLeft: 11 }}
 						value={`${profileData.username}`}
+						placeholder="Enter username here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "username");
 						}}
@@ -573,6 +575,7 @@ const EditProfileScreen = () => {
 					<TextInput
 						style={{ marginLeft: 60 }}
 						value={profileData.bio}
+						placeholder="Enter bio here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "bio");
 						}}
