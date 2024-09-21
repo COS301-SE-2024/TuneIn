@@ -71,21 +71,23 @@ const AdvancedSettings = () => {
 			ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
 		} catch (error) {
 			console.log("Error deleting room: ", error);
+			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
 		}
 	};
 	const handleDelete = () => {
-		console.log("Deleting room...", _roomDetails);
-		let room = JSON.parse(_roomDetails.roomData as string);
-		console.log("Room to delete: ", room);
 		setShowDeleteModal(false);
-		if (Array.isArray(_roomDetails)) {
-			room = JSON.parse(_roomDetails[0]);
-		} else if (typeof _roomDetails === "string") {
-			room = JSON.parse(_roomDetails);
+		if (_roomDetails.roomData) {
+			let room = JSON.parse(_roomDetails.roomData as string);
+			if (Array.isArray(_roomDetails)) {
+				room = JSON.parse(_roomDetails[0]);
+			} else if (typeof _roomDetails === "string") {
+				room = JSON.parse(_roomDetails);
+			}
+			deleteRoom(room.id);
+			navigateToHome(); // Proceed to delete and navigate home
+		} else {
+			console.log("No room data found");
 		}
-		deleteRoom(room.id);
-
-		navigateToHome(); // Proceed to delete and navigate home
 	};
 
 	const handleSave = () => {
