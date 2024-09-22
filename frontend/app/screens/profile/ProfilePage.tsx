@@ -738,6 +738,7 @@ const ProfileScreen: React.FC = () => {
 							onPress={() => {
 								setLinkDialogVisible(true);
 							}}
+							style={{paddingLeft: 15}}
 							testID="links-touchable"
 						>
 							{renderLinks()}
