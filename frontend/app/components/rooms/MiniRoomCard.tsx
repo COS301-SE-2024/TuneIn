@@ -48,6 +48,14 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 					</Text>
 				</View>
 			</View>
+
+			{/* Conditionally render explicit icon */}
+			{roomCard.isExplicit && (
+				<Image
+					source={require("../../../assets/Explicit.png")}
+					style={styles.explicitIcon}
+				/>
+			)}
 		</TouchableOpacity>
 	);
 };
@@ -65,7 +73,8 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 2,
 		elevation: 2,
-		alignItems: "center", // Ensure vertical alignment
+		alignItems: "center",
+		justifyContent: "space-between", // Adjust to position elements
 	},
 	roomImage: {
 		width: 80,
@@ -100,6 +109,11 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: "#333",
 		flexShrink: 1, // Allows the text to shrink if necessary
+	},
+	explicitIcon: {
+		width: 24,
+		height: 24,
+		marginLeft: 8, // Space between text and icon
 	},
 });
 
