@@ -3,13 +3,13 @@ import {
 	View,
 	Text,
 	TextInput,
-	TouchableOpacity,
 	Animated,
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
 } from "react-native";
+import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
@@ -524,156 +524,160 @@ const Search: React.FC = () => {
 	}, []);
 
 	return (
-		<View style={styles.container}>
-			<View style={styles.header}>
-				<TouchableOpacity
-					onPress={() => navigation.goBack()}
-					testID="back-button"
-				>
-					<Ionicons name="chevron-back" size={30} color="black" />
-				</TouchableOpacity>
-				<Text style={styles.title}>Search </Text>
-			</View>
-			<View style={styles.searchBarContainer}>
-				<TextInput
-					testID="search-input"
-					style={styles.searchBar}
-					placeholder="Search..."
-					value={searchTerm}
-					onBlur={() => {
-						setTimeout(() => {
-							setDropdownVisible(false);
-						}, 200);
-					}}
-					onFocus={() => {
-						setDropdownVisible(true);
-					}}
-					onChangeText={setSearchTerm}
-				/>
-				<TouchableOpacity
-					style={styles.searchIcon}
-					onPress={() => {
-						handleSearch();
-					}}
-					testID="search-button"
-				>
-					<Ionicons name="search-sharp" size={30} color={colors.primary} />
-				</TouchableOpacity>
-			</View>
-			{dropdownVisible && searchSuggestions.length !== 0 && (
-				<FlatList
-					data={searchSuggestions}
-					keyExtractor={(item) => item}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							style={styles.dropdownItem}
-							onPress={() => {
-								setSearchTerm(item);
-								handleSearch(item);
-							}}
-						>
-							<Text style={styles.dropdownItemText}>{item}</Text>
-						</TouchableOpacity>
-					)}
-					style={styles.dropdown}
-				/>
-			)}
-			<View style={styles.filterContainer}>
-				<TouchableOpacity
-					style={[
-						styles.filterButton,
-						filter === "room" && styles.activeFilter,
-					]}
-					onPress={() => handleSelection("room")}
-				>
-					<Text style={styles.filterText}>Rooms</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[
-						styles.filterButton,
-						filter === "user" && styles.activeFilter,
-					]}
-					onPress={() => handleSelection("user")}
-					testID="user-btn"
-				>
-					<Text style={styles.filterText}>Users</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.filterButton}
-					onPress={handleToggleMoreFilters}
-					testID="toggle-filters-button"
-				>
-					<Text style={styles.filterText}>{"View More Filters"}</Text>
-				</TouchableOpacity>
-			</View>
-
-			<FilterBottomSheet
-				filter={filter}
-				explicit={explicit}
-				nsfw={nsfw}
-				temporary={temporary}
-				isPrivate={isPrivate}
-				scheduled={scheduled}
-				showMoreFilters={showMoreFilters}
-				host={host}
-				roomCount={roomCount}
-				maxFollowers={maxFollowers}
-				minFollowers={minFollowers}
-				selectedGenre={selectedGenre}
-				selectedLanguage={selectedLanguage}
-				setExplicit={setExplicit}
-				setNsfw={setNsfw}
-				setTemporary={setTemporary}
-				setIsPrivate={setIsPrivate}
-				setScheduled={setScheduled}
-				setHost={setHost}
-				setRoomCount={setRoomCount}
-				setMaxFollowers={setMaxFollowers}
-				setMinFollowers={setMinFollowers}
-				setSelectedGenre={setSelectedGenre}
-				setSelectedLanguage={setSelectedLanguage}
-				setShowMoreFilters={setShowMoreFilters}
-			/>
-
-			{loading ? (
-				!showMoreFilters && (
-					// Render Skeleton if loading
-					<View style={styles.roomCardPadding}>
-						{filter === "room" ? (
-							<>
-								<SkeletonRoomCard />
-								<SkeletonRoomCard />
-								<SkeletonRoomCard />
-							</>
-						) : (
-							<>
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-							</>
-						)}
-					</View>
-				)
-			) : results.length === 0 ? (
-				// Render No Results Message if no results
-				<View style={styles.noResult}>
-					<Text>
-						{searchError ? "Failed to load search results" : "No results found"}
-					</Text>
+		<GestureHandlerRootView>
+			<View style={styles.container}>
+				<View style={styles.header}>
+					<TouchableOpacity
+						onPress={() => navigation.goBack()}
+						testID="back-button"
+					>
+						<Ionicons name="chevron-back" size={30} color="black" />
+					</TouchableOpacity>
+					<Text style={styles.title}>Search </Text>
 				</View>
-			) : (
-				// Render FlatList if there are results
-				<FlatList
-					data={results}
-					keyExtractor={(item) => item.id}
-					renderItem={renderResult}
-					contentContainerStyle={styles.resultsContainer}
-					onScroll={handleScroll}
+				<View style={styles.searchBarContainer}>
+					<TextInput
+						testID="search-input"
+						style={styles.searchBar}
+						placeholder="Search..."
+						value={searchTerm}
+						onBlur={() => {
+							setTimeout(() => {
+								setDropdownVisible(false);
+							}, 200);
+						}}
+						onFocus={() => {
+							setDropdownVisible(true);
+						}}
+						onChangeText={setSearchTerm}
+					/>
+					<TouchableOpacity
+						style={styles.searchIcon}
+						onPress={() => {
+							handleSearch();
+						}}
+						testID="search-button"
+					>
+						<Ionicons name="search-sharp" size={30} color={colors.primary} />
+					</TouchableOpacity>
+				</View>
+				{dropdownVisible && searchSuggestions.length !== 0 && (
+					<FlatList
+						data={searchSuggestions}
+						keyExtractor={(item) => item}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.dropdownItem}
+								onPress={() => {
+									setSearchTerm(item);
+									handleSearch(item);
+								}}
+							>
+								<Text style={styles.dropdownItemText}>{item}</Text>
+							</TouchableOpacity>
+						)}
+						style={styles.dropdown}
+					/>
+				)}
+				<View style={styles.filterContainer}>
+					<TouchableOpacity
+						style={[
+							styles.filterButton,
+							filter === "room" && styles.activeFilter,
+						]}
+						onPress={() => handleSelection("room")}
+					>
+						<Text style={styles.filterText}>Rooms</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.filterButton,
+							filter === "user" && styles.activeFilter,
+						]}
+						onPress={() => handleSelection("user")}
+						testID="user-btn"
+					>
+						<Text style={styles.filterText}>Users</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.filterButton}
+						onPress={handleToggleMoreFilters}
+						testID="toggle-filters-button"
+					>
+						<Text style={styles.filterText}>{"View More Filters"}</Text>
+					</TouchableOpacity>
+				</View>
+
+				<FilterBottomSheet
+					filter={filter}
+					explicit={explicit}
+					nsfw={nsfw}
+					temporary={temporary}
+					isPrivate={isPrivate}
+					scheduled={scheduled}
+					showMoreFilters={showMoreFilters}
+					host={host}
+					roomCount={roomCount}
+					maxFollowers={maxFollowers}
+					minFollowers={minFollowers}
+					selectedGenre={selectedGenre}
+					selectedLanguage={selectedLanguage}
+					setExplicit={setExplicit}
+					setNsfw={setNsfw}
+					setTemporary={setTemporary}
+					setIsPrivate={setIsPrivate}
+					setScheduled={setScheduled}
+					setHost={setHost}
+					setRoomCount={setRoomCount}
+					setMaxFollowers={setMaxFollowers}
+					setMinFollowers={setMinFollowers}
+					setSelectedGenre={setSelectedGenre}
+					setSelectedLanguage={setSelectedLanguage}
+					setShowMoreFilters={setShowMoreFilters}
 				/>
-			)}
-		</View>
+
+				{loading ? (
+					!showMoreFilters && (
+						// Render Skeleton if loading
+						<View style={styles.roomCardPadding}>
+							{filter === "room" ? (
+								<>
+									<SkeletonRoomCard />
+									<SkeletonRoomCard />
+									<SkeletonRoomCard />
+								</>
+							) : (
+								<>
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+								</>
+							)}
+						</View>
+					)
+				) : results.length === 0 ? (
+					// Render No Results Message if no results
+					<View style={styles.noResult}>
+						<Text>
+							{searchError
+								? "Failed to load search results"
+								: "No results found"}
+						</Text>
+					</View>
+				) : (
+					// Render FlatList if there are results
+					<FlatList
+						data={results}
+						keyExtractor={(item) => item.id}
+						renderItem={renderResult}
+						contentContainerStyle={styles.resultsContainer}
+						onScroll={handleScroll}
+					/>
+				)}
+			</View>
+		</GestureHandlerRootView>
 	);
 };
 
