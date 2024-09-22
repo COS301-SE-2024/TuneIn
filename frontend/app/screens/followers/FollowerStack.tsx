@@ -8,14 +8,14 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
 // Create a tab navigator
 const Tab = createMaterialTopTabNavigator();
 
 // Define the top tab navigator
-function MyTabs({ username }: { username: string }) {
-	const navigation = useNavigation(); // To handle navigation actions
-
+function MyTabs({ username }: { username: string[] }) {
+	const navigation = useNavigation();
 	return (
 		<>
 			{/* Custom Header */}
@@ -67,7 +67,8 @@ function MyTabs({ username }: { username: string }) {
 
 // Export the main component with navigation container
 export default function TopBarNavigator() {
-	const username = "User's Name"; // Replace with dynamic username if needed
+	const user = useLocalSearchParams();
+	const username = user.username; // Replace with dynamic username if needed
 
 	return <MyTabs username={username} />;
 }
