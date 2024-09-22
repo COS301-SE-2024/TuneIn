@@ -306,7 +306,7 @@ const Home: React.FC = () => {
 	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
 		router.navigate({
 			pathname: "/screens/rooms/MoreRooms",
-			params: { myRooms: JSON.stringify(rooms), name: Name },
+			params: { rooms: JSON.stringify(rooms), name: Name },
 		});
 	};
 

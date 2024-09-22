@@ -9,24 +9,16 @@ import {
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import MiniRoomCard from "../../components/rooms/MiniRoomCard";
 import { Ionicons } from "@expo/vector-icons";
-
-const testRooms = [
-	{
-		name: "Room 1",
-		description: "This is Room 1",
-		imageUrl: "https://example.com/room1.jpg",
-	},
-	{
-		name: "Room 2",
-		description: "This is Room 2",
-		imageUrl: "https://example.com/room2.jpg",
-	},
-	// Add more room objects here
-];
+import { Room, formatRoomData } from "../../models/Room"; // Import the Room interface and formatRoomData function
 
 const MoreRoomsPage = () => {
-	const { name } = useLocalSearchParams(); // Assuming 'name' is the room's name
+	const { name, rooms } = useLocalSearchParams();
 	const navigation = useNavigation();
+
+	// Parse the rooms parameter (JSON string) into an array and format each room using formatRoomData
+	const parsedRooms: Room[] = rooms
+		? JSON.parse(rooms as string).map((room: any) => formatRoomData(room))
+		: [];
 
 	return (
 		<View style={styles.container}>
@@ -42,13 +34,13 @@ const MoreRoomsPage = () => {
 			</View>
 
 			{/* Scrollable Room List */}
-			{/* <FlatList
-				data={testRooms}
-				keyExtractor={(item) => item.name}
-				renderItem={({ item }) => <MiniRoomCard room={item} />}
+			<FlatList
+				data={parsedRooms}
+				keyExtractor={(item) => item.roomID || item.name}
+				renderItem={({ item }) => <MiniRoomCard roomCard={item} />} // Use roomCard here
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
-			/> */}
+			/>
 		</View>
 	);
 };

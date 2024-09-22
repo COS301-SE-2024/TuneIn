@@ -14,7 +14,6 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	const navigateToRoomPage = () => {
 		console.log("Room:", room);
 		router.navigate({
-			// pathname: "/screens/rooms/RoomPage",
 			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(room) },
 		});
@@ -28,18 +27,28 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	};
 
 	return (
-		<View style={styles.cardContainer}>
-			<TouchableOpacity onPress={navigateToRoomPage}>
-				<View style={styles.textContainer}>
-					<Text style={styles.roomName}>{roomCard.name}</Text>
-					<Text style={styles.roomDescription}>{roomCard.description}</Text>
+		<TouchableOpacity onPress={navigateToRoomPage} style={styles.cardContainer}>
+			<Image
+				source={{ uri: roomCard.backgroundImage }}
+				style={styles.roomImage}
+			/>
+
+			<View style={styles.textContainer}>
+				<Text style={styles.roomName}>{roomCard.name}</Text>
+				<Text style={styles.roomDescription}>{roomCard.description}</Text>
+
+				{/* User profile and username inline */}
+				<View style={styles.userInfo}>
+					<Image
+						source={{ uri: roomCard.userProfile }}
+						style={styles.userProfile}
+					/>
+					<Text style={styles.username}>
+						{truncateText(roomCard.username, 12)}
+					</Text>
 				</View>
-				<Image
-					source={{ uri: roomCard.backgroundImage }}
-					style={styles.roomImage}
-				/>
-			</TouchableOpacity>
-		</View>
+			</View>
+		</TouchableOpacity>
 	);
 };
 
@@ -48,6 +57,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		padding: 10,
 		marginBottom: 10,
+		marginTop: 10,
 		backgroundColor: "#fff",
 		borderRadius: 10,
 		shadowColor: "#000",
@@ -55,10 +65,16 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 2,
 		elevation: 2,
+		alignItems: "center", // Ensure vertical alignment
+	},
+	roomImage: {
+		width: 80,
+		height: 80,
+		borderRadius: 10,
+		marginRight: 10,
 	},
 	textContainer: {
 		flex: 1,
-		paddingRight: 10,
 	},
 	roomName: {
 		fontSize: 16,
@@ -69,10 +85,21 @@ const styles = StyleSheet.create({
 		color: "#666",
 		marginTop: 5,
 	},
-	roomImage: {
-		width: 80,
-		height: 80,
-		borderRadius: 10,
+	userInfo: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 10,
+	},
+	userProfile: {
+		width: 30,
+		height: 30,
+		borderRadius: 15, // Circle shape
+		marginRight: 8,
+	},
+	username: {
+		fontSize: 12,
+		color: "#333",
+		flexShrink: 1, // Allows the text to shrink if necessary
 	},
 });
 
