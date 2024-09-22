@@ -36,6 +36,7 @@ import EmojiPicker, {
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
+import * as path from "path";
 
 interface RoomPageProps {
 	joined: boolean;
@@ -92,6 +93,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		null,
 	);
 	const [isSending, setIsSending] = useState(false);
+	const [participants, setParticipants] = useState<any[]>([]);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
 	const bookmarker = useRef(new Bookmarker()).current;
@@ -387,6 +389,50 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	}, [isPlaying]);
 
 	useEffect(() => {
+		const fetchParticipants = async () => {
+			const storedToken = await auth.getToken();
+
+			if (!storedToken) {
+				console.error("No stored token found");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomID}/users`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error(
+						`Failed to fetch participants: ${response.status} ${response.statusText}`,
+						errorText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					setParticipants(data);
+					console.log("Participants:", data);
+				} else {
+					console.error("Unexpected response data format:", data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch participants:", error);
+			}
+		};
+		fetchParticipants();
+	}, [joined]);
+
+	useEffect(() => {
 		if (isPlaying) {
 			trackPositionIntervalRef.current = window.setInterval(() => {
 				setSecondsPlayed((prevSeconds) => prevSeconds + 1);
@@ -504,7 +550,12 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	};
 
 	const handleViewParticipants = () => {
-		router.navigate("screens/rooms/ParticipantsPage"); // Change this to the correct page for participants
+		router.navigate({
+			pathname: "/screens/rooms/ParticipantsPage",
+			params: {
+				participants: JSON.stringify(participants),
+			},
+		}); // Change this to the correct page for participants
 	};
 
 	// const handleJoinLeave = async () => {
@@ -607,7 +658,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>134 Participants</Text>
+							<Text>{participants.length + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}

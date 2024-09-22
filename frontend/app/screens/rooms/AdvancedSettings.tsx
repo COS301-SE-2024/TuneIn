@@ -7,8 +7,10 @@ import {
 	Switch,
 	Modal,
 	Pressable,
+	ToastAndroid,
 	ScrollView,
 } from "react-native";
+import auth from "../../services/AuthManagement";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -60,9 +62,36 @@ const AdvancedSettings = () => {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
+	const deleteRoom = async (roomID: string) => {
+		// Delete room
+		const token = await auth.getToken();
+		try {
+			await fetch(`http://localhost:3000/rooms/${roomID}`, {
+				method: "DELETE",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+		} catch (error) {
+			console.log("Error deleting room: ", error);
+			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+		}
+	};
 	const handleDelete = () => {
 		setShowDeleteModal(false);
-		navigateToHome(); // Proceed to delete and navigate home
+		if (_roomDetails.roomData) {
+			let room = JSON.parse(_roomDetails.roomData as string);
+			if (Array.isArray(_roomDetails)) {
+				room = JSON.parse(_roomDetails[0]);
+			} else if (typeof _roomDetails === "string") {
+				room = JSON.parse(_roomDetails);
+			}
+			deleteRoom(room.id);
+			navigateToHome(); // Proceed to delete and navigate home
+		} else {
+			console.log("No room data found");
+		}
 	};
 
 	const handleSave = () => {

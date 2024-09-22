@@ -49,7 +49,7 @@ const EditRoom: React.FC = () => {
 
 	// useEffect without roomDetails as dependency
 	useEffect(() => {
-		const loadRoomDetails = () => {
+		const loadRoomDetails = async () => {
 			setRoomDetails({
 				roomID: roomData.id,
 				name: roomData.name,
@@ -95,7 +95,6 @@ const EditRoom: React.FC = () => {
 	};
 
 	const handleToggleChange = (field: keyof Room, value: boolean) => {
-		console.log("value:", value);
 		setRoomDetails({ ...roomDetails, [field]: value });
 	};
 
@@ -124,7 +123,6 @@ const EditRoom: React.FC = () => {
 				newRoom.backgroundImage = newImage;
 			}
 		}
-		console.log("newRoom:", newRoom);
 		const token = await auth.getToken();
 		try {
 			const data = await fetch(`${utils.API_BASE_URL}/rooms/${roomData.id}`, {
@@ -143,7 +141,6 @@ const EditRoom: React.FC = () => {
 				}),
 			});
 			if (!data.ok) {
-				console.log("Error:", data);
 				Alert.alert(
 					"Error",
 					"An error occurred while saving your changes.",

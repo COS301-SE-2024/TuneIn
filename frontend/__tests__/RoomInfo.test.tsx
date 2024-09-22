@@ -2,11 +2,12 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import RoomInfoScreen from "../app/screens/rooms/RoomInfo";
 // import RoomDetails from "../app/components/rooms/RoomDetailsComponent";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Mock the useRouter hook
 jest.mock("expo-router", () => ({
 	useRouter: jest.fn(),
+	useLocalSearchParams: jest.fn(),
 }));
 
 // Mock Ionicons from @expo/vector-icons
@@ -45,6 +46,9 @@ describe("RoomInfoScreen", () => {
 		// Mock the router back function
 		(useRouter as jest.Mock).mockReturnValue({
 			back: mockBack,
+		});
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			roomData: JSON.stringify(roomDetails),
 		});
 	});
 
