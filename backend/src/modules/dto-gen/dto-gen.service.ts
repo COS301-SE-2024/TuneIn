@@ -16,6 +16,12 @@ export class DtoGenService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
+	async getUsersWithSpotify(): Promise<string[]> {
+		return await this.prisma.authentication.findMany().then((users) => {
+			return users.map((u) => u.user_id);
+		});
+	}
+
 	async generateUserDto(
 		userID: string,
 		fully_qualify = true,
@@ -36,7 +42,7 @@ export class DtoGenService {
 		}
 
 		//get user info
-		const result: UserDto = this.generateBriefUserDto(user);
+		const result: UserDto = await this.generateBriefUserDto(user);
 		//result.links = await this.dbUtils.getLinks(user);
 		const preferences = await this.dbUtils.getPreferences(user);
 		result.fav_genres = preferences.fav_genres;
@@ -67,7 +73,7 @@ export class DtoGenService {
 				for (let i = 0; i < following.length; i++) {
 					const f = following[i];
 					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
+						const u: UserDto = await this.generateBriefUserDto(f);
 						result.following.data.push(u);
 					}
 				}
@@ -82,7 +88,7 @@ export class DtoGenService {
 				for (let i = 0; i < followers.length; i++) {
 					const f = followers[i];
 					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
+						const u: UserDto = await this.generateBriefUserDto(f);
 						result.followers.data.push(u);
 					}
 				}
@@ -154,7 +160,7 @@ export class DtoGenService {
 				"Friendship between " + selfID + " and " + friendID + " does not exist",
 			);
 		}
-		const result: UserDto = this.generateBriefUserDto(friend);
+		const result: UserDto = await this.generateBriefUserDto(friend);
 		const base = `/users/${result.username}`;
 		result.friendship = {
 			status: !friendship.is_pending,
@@ -164,10 +170,10 @@ export class DtoGenService {
 		return result;
 	}
 
-	generateBriefUserDto(
+	async generateBriefUserDto(
 		user: PrismaTypes.users,
 		add_friendship = false,
-	): UserDto {
+	): Promise<UserDto> {
 		let result: UserDto = {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
@@ -210,6 +216,9 @@ export class DtoGenService {
 				count: 0,
 				data: [],
 			},
+			hasSpotifyAccount: await this.getUsersWithSpotify().then((users) => {
+				return users.includes(user.user_id);
+			}),
 		};
 		if (add_friendship) {
 			result = {
@@ -386,7 +395,7 @@ export class DtoGenService {
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				const user = this.generateBriefUserDto(u);
+				const user = await this.generateBriefUserDto(u);
 				userDtos.push(user);
 			}
 		}

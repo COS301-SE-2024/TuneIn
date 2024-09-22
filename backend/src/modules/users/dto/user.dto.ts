@@ -204,4 +204,8 @@ export class UserDto {
 	@ValidateNested()
 	@Type(() => UserFriendship)
 	friendship?: UserFriendship;
+
+	@ApiProperty()
+	@IsBoolean()
+	hasSpotifyAccount: boolean;
 }
