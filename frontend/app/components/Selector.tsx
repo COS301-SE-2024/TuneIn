@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import {
 	View,
 	Text,
-	TouchableOpacity,
 	Modal,
 	FlatList,
 	TextInput,
 	StyleSheet,
 	ScrollView,
+	Pressable,
+	Keyboard,
 } from "react-native";
+
+import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
 
@@ -49,7 +52,7 @@ const Selector: React.FC<SelectorProps> = ({
 			onRequestClose={onClose}
 			testID="genre-selector"
 		>
-			<View style={styles.modalContainer}>
+			<GestureHandlerRootView style={styles.modalContainer}>
 				<View style={styles.modalContent}>
 					<TextInput
 						style={styles.searchInput}
@@ -76,18 +79,20 @@ const Selector: React.FC<SelectorProps> = ({
 								<Text style={styles.filterText}>{item}</Text>
 							</TouchableOpacity>
 						)}
+						keyboardShouldPersistTaps="always"
 					/>
 					<TouchableOpacity
 						style={styles.closeButton}
 						onPress={() => {
 							setSearchQuery("");
+							Keyboard.dismiss(); // Dismiss the keyboard manually when close button is tapped
 							onClose();
 						}}
 					>
 						<Text style={styles.filterText}>Close</Text>
 					</TouchableOpacity>
 				</View>
-			</View>
+			</GestureHandlerRootView>
 		</Modal>
 	);
 };
