@@ -107,7 +107,7 @@ const Selector: React.FC<SelectorProps> = ({
 							setSearchQuery("");
 							setSelected([]);
 							Keyboard.dismiss();
-                            
+
 							if (selected.length > 0) {
 								onSelect(selected);
 							}

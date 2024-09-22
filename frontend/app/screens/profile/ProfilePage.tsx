@@ -615,10 +615,14 @@ const ProfileScreen: React.FC = () => {
 			}
 		>
 			<View
-				style={{ paddingVertical: 15, paddingRight: 15, backgroundColor: "white" }}
+				style={{
+					paddingVertical: 15,
+					paddingRight: 15,
+					backgroundColor: "white",
+				}}
 				testID="profile-screen"
 			>
-				<View style={[styles.profileHeader, {paddingLeft: 15}]}>
+				<View style={[styles.profileHeader, { paddingLeft: 15 }]}>
 					{/* Back Button */}
 					<TouchableOpacity
 						onPress={() => navigation.goBack()}
@@ -738,7 +742,7 @@ const ProfileScreen: React.FC = () => {
 							onPress={() => {
 								setLinkDialogVisible(true);
 							}}
-							style={{paddingLeft: 15}}
+							style={{ paddingLeft: 15 }}
 							testID="links-touchable"
 						>
 							{renderLinks()}

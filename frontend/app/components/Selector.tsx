@@ -11,7 +11,10 @@ import {
 	Keyboard,
 } from "react-native";
 
-import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
+import {
+	GestureHandlerRootView,
+	TouchableOpacity,
+} from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
 
