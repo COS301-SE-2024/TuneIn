@@ -165,7 +165,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.username);
+							fetchCurrentRoomInfo(data.userID);
 						}
 					}
 				} catch (error) {
@@ -236,7 +236,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchCurrentRoomInfo(primaryProfileData.username);
+				fetchCurrentRoomInfo(primaryProfileData.userID);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
@@ -293,12 +293,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchCurrentRoomInfo = async (username: string) => {
+	const fetchCurrentRoomInfo = async (userID: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${username}/room/current`,
+					`${utils.API_BASE_URL}/users/${userID}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
