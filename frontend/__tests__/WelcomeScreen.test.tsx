@@ -35,7 +35,7 @@ describe("WelcomeScreen", () => {
 		const loginButton = getByText("Login");
 
 		fireEvent.press(loginButton);
-		expect(navigate).toHaveBeenCalledWith("/screens/Auth/LoginScreen");
+		expect(navigate).toHaveBeenCalledWith("/screens/Auth/LoginOther");
 	});
 
 	it("should navigate to RegisterOther when Register button is pressed", () => {
@@ -51,6 +51,8 @@ describe("WelcomeScreen", () => {
 		const helpButton = getByTestId("help-button"); // Add testID to the TouchableOpacity for the help button
 
 		fireEvent.press(helpButton);
-		expect(navigate).toHaveBeenCalledWith("/screens/help/HelpScreen");
+		expect(navigate).toHaveBeenCalledWith(
+			"/screens/(tabs)/HelpScreenelpScreen",
+		);
 	});
 });

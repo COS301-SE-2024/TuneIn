@@ -5,6 +5,7 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,24 +41,29 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchUserRooms = async () => {
-			// make an axios request with the API_BASE_URL and the auth token
-			const accessToken: string | null = await AuthManagement.getToken();
-			console.log("access token fr", accessToken);
-			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			const data = await response.json();
-			console.log(data);
-			setRooms(data);
+			try {
+				// make an axios request with the API_BASE_URL and the auth token
+				const accessToken: string | null = await AuthManagement.getToken();
+				console.log("access token fr", accessToken);
+				const response = await fetch(`${API_BASE_URL}/users/rooms`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
+				const data = await response.json();
+				console.log(data);
+				setRooms(data);
 
-			console.log("user rooms", userRooms);
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current room", currentRoom);
-			const room = userRooms?.find((room) => room.room_name === currentRoom);
-			if (room !== undefined) setSelectedRoom(room);
-			console.log("selected room", selectedRoom);
+				console.log("user rooms", userRooms);
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("current room", currentRoom);
+				const room = userRooms?.find((room) => room.room_name === currentRoom);
+				if (room !== undefined) setSelectedRoom(room);
+				console.log("selected room", selectedRoom);
+			} catch (error) {
+				console.log(error);
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			}
 		};
 
 		if (selectedRoom === null) fetchUserRooms();
@@ -66,19 +72,24 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current roooooom", currentRoom);
-			const response = await fetch(
-				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("current roooooom", currentRoom);
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
 					},
-				},
-			);
-			const data = await response.json();
-			if (interactionAnalytics === null) setInteractionAnalytics(data);
+				);
+				const data = await response.json();
+				if (interactionAnalytics === null) setInteractionAnalytics(data);
+			} catch (error) {
+				console.log(error);
+				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+			}
 		};
 
 		fetchInteractionAnalytics();
@@ -90,30 +101,35 @@ const InteractionsAnalytics: React.FC = () => {
 	console.log("current room", selectedRoom);
 	// function that will be called when the user selects a room
 	const handleRoomSelect = async (room: string) => {
-		// find the room object that matches the selected room
-		const selected = userRooms?.find((r) => r.room_name === room);
-		const accessToken: string | null = await AuthManagement.getToken();
-		// set the selected room to the room object
-		setSelectedRoom(selected);
-		console.log("selected room", selectedRoom?.roomID);
-		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(
-			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
-			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+		try {
+			// find the room object that matches the selected room
+			const selected = userRooms?.find((r) => r.room_name === room);
+			const accessToken: string | null = await AuthManagement.getToken();
+			// set the selected room to the room object
+			setSelectedRoom(selected);
+			console.log("selected room", selectedRoom?.roomID);
+			const roomID: string = selectedRoom?.roomID ?? "";
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				},
-			},
-		);
-		const data = await response.json();
-		// if (data.statusCode !== 200) {
-		// 	console.log("error fetching interaction analytics");
-		// 	return;
-		// }
-		if (interactionAnalytics?.bookmarked_count === undefined)
-			setInteractionAnalytics(data);
-		console.log("interaction analytics", interactionAnalytics);
-		// close the dropdown
+			);
+			const data = await response.json();
+			// if (data.statusCode !== 200) {
+			// 	console.log("error fetching interaction analytics");
+			// 	return;
+			// }
+			if (interactionAnalytics?.bookmarked_count === undefined)
+				setInteractionAnalytics(data);
+			console.log("interaction analytics", interactionAnalytics);
+			// close the dropdown
+		} catch (error) {
+			console.log(error);
+			ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+		}
 	};
 
 	// Sample data for the past seven days

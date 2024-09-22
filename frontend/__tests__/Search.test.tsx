@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import Search from "../app/screens/Search"; // Adjust the path as needed
+import Search from "../app/screens/(tabs)/Search"; // Adjust the path as needed
 import { useNavigation } from "expo-router";
 import axios from "axios";
 import auth from "../app/services/AuthManagement";
@@ -22,12 +22,6 @@ jest.mock("../app/components/UserItem", () => {
 	const MockUserItem = (props: Record<string, unknown>) => <div {...props} />;
 	MockUserItem.displayName = "MockUserItem";
 	return MockUserItem;
-});
-
-jest.mock("../app/components/NavBar", () => {
-	const MockNavBar = () => <div />;
-	MockNavBar.displayName = "MockNavBar";
-	return MockNavBar;
 });
 
 jest.mock("axios");
@@ -143,7 +137,7 @@ describe("Search Component", () => {
 			.mockResolvedValue({ data: uHistDtoMock });
 
 		// Render the page component (this triggers the mock usage)
-		const { getByText, getByTestId, queryByTestId } = render(<Search />);
+		const { getByText, getByTestId } = render(<Search />);
 
 		// Press the button to show more filters
 		fireEvent.press(getByText("View More Filters"));
@@ -306,5 +300,150 @@ describe("Search Component", () => {
 		// await waitFor(async () => {
 		// 	expect(getByTestId("search-button")).toBe("nothing");
 		// });
+	}, 30000);
+
+	it("should log search suggestion error", async () => {
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: uHistDtoMock })
+			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
+			.mockResolvedValueOnce({ data: [] })
+			.mockResolvedValue({ data: uHistDtoMock });
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockRejectedValueOnce(new Error("Network Error"));
+
+		const consoleLogSpy = jest
+			.spyOn(console, "log")
+			.mockImplementation(() => {});
+
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		await waitFor(
+			async () => {
+				const searchInput = getByPlaceholderText("Search...");
+				fireEvent.changeText(searchInput, "nothing");
+				fireEvent.press(getByTestId("search-button"));
+			},
+			{ timeout: 20000 },
+		);
+
+		await waitFor(async () => {
+			expect(consoleLogSpy.mock.calls).toEqual(
+				expect.arrayContaining([
+					expect.arrayContaining([
+						"Error fetching search history:",
+						expect.any(Error),
+					]),
+				]),
+			);
+		});
+	}, 30000);
+
+	it("should log error when search fails", async () => {
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: uHistDtoMock })
+			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
+			.mockResolvedValueOnce({ data: [] })
+			.mockResolvedValue({ data: uHistDtoMock });
+
+		(axios.get as jest.Mock).mockResolvedValueOnce("Failure");
+		const consoleLogSpy = jest
+			.spyOn(console, "log")
+			.mockImplementation(() => {});
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		await waitFor(
+			async () => {
+				const searchInput = getByPlaceholderText("Search...");
+				fireEvent.changeText(searchInput, "nothing");
+				fireEvent.press(getByTestId("search-button"));
+			},
+			{ timeout: 20000 },
+		);
+
+		expect(consoleLogSpy.mock.calls).toEqual(
+			expect.arrayContaining([
+				expect.arrayContaining([
+					"Error fetching search info:",
+					expect.any(Error),
+				]),
+			]),
+		);
+	}, 30000);
+
+	it("Logs room history error", async () => {
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockRejectedValueOnce(new Error("Network error"));
+
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: uHistDtoMock })
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: ["jazz", "rock"] });
+
+		(axios.get as jest.Mock).mockResolvedValue({ data: roomMock });
+		const consoleLogSpy = jest
+			.spyOn(console, "log")
+			.mockImplementation(() => {});
+
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		await waitFor(
+			async () => {
+				const searchInput = getByPlaceholderText("Search...");
+				fireEvent.changeText(searchInput, "nothing");
+				fireEvent.press(getByTestId("search-button"));
+			},
+			{ timeout: 20000 },
+		);
+
+		expect(consoleLogSpy.mock.calls).toEqual(
+			expect.arrayContaining([
+				expect.arrayContaining([
+					"Error fetching search history:",
+					expect.any(Error),
+				]),
+			]),
+		);
+	}, 30000);
+
+	it("Logs room recs error", async () => {
+		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: roomMock })
+			.mockResolvedValueOnce({ data: uHistDtoMock })
+			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
+			.mockResolvedValue({ data: uHistDtoMock });
+
+		const consoleLogSpy = jest
+			.spyOn(console, "log")
+			.mockImplementation(() => {});
+
+		const { getByPlaceholderText, getByTestId } = render(<Search />);
+		fireEvent.press(getByTestId("toggle-filters-button"));
+
+		await waitFor(
+			async () => {
+				const searchInput = getByPlaceholderText("Search...");
+				fireEvent.changeText(searchInput, "nothing");
+				fireEvent.press(getByTestId("search-button"));
+			},
+			{ timeout: 20000 },
+		);
+
+		expect(consoleLogSpy.mock.calls).toEqual(
+			expect.arrayContaining([
+				expect.arrayContaining([
+					"Error fetching recommended rooms:",
+					expect.any(Error),
+				]),
+			]),
+		);
 	}, 30000);
 });

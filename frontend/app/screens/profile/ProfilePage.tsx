@@ -10,6 +10,7 @@ import {
 	Modal,
 	TouchableWithoutFeedback,
 	RefreshControl,
+	ToastAndroid,
 } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
@@ -28,7 +29,6 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
-import RoomCard from "../../components/RoomCard";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -43,7 +43,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToHelp = () => {
-		router.navigate("/screens/help/HelpScreen");
+		router.navigate("/screens/(tabs)/HelpScreenelpScreen");
 	};
 
 	const navigateToFollowerStack = () => {
@@ -69,6 +69,9 @@ const ProfileScreen: React.FC = () => {
 	const [recentRoomData, setRecentRoomData] = useState<any>(null);
 	const [favoriteRoomData, setFavoriteRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
+	const [profileError, setProfileError] = useState<boolean>(false);
+	const [favRoomError, setFavRoomError] = useState<boolean>(false);
+	const [recentRoomError, setRecentRoomError] = useState<boolean>(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -166,7 +169,8 @@ const ProfileScreen: React.FC = () => {
 						}
 					}
 				} catch (error) {
-					console.error("Failed to retrieve profile data:", error);
+					console.log("Failed to retrieve profile data:", error);
+					setProfileError(true);
 				}
 			} else {
 				if (!userData) {
@@ -177,16 +181,26 @@ const ProfileScreen: React.FC = () => {
 							// setPrimProfileData(data);
 						}
 					} catch (error) {
-						console.error("Failed to retrieve profile data:", error);
+						console.log("Failed to retrieve profile data:", error);
+						setProfileError(true);
 					}
 				} else {
 					setPrimProfileData(userData);
 				}
 
-				if (recentRoomData === null && userData !== null) {
+				if (
+					recentRoomData === null &&
+					userData !== null &&
+					userData !== undefined
+				) {
+					// console.log("User Data for rec room: " + JSON.stringify(userData));
 					fetchRecentRoomInfo(userData.username);
 				}
-				if (favoriteRoomData === null && userData !== null) {
+				if (
+					favoriteRoomData === null &&
+					userData !== null &&
+					userData !== undefined
+				) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
 					fetchFavRoomInfo(userData.username);
 				}
@@ -270,9 +284,11 @@ const ProfileScreen: React.FC = () => {
 				},
 			);
 			// console.log("Profile info: " + JSON.stringify(response));
+			setProfileError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching profile info:", error);
+			console.log("Error fetching profile info:", error);
+			setProfileError(true);
 			return null;
 		}
 	};
@@ -300,7 +316,7 @@ const ProfileScreen: React.FC = () => {
 				setCurrentRoomData(null);
 				setRoomCheck(true);
 			} else {
-				console.error("Error fetching current room info:", error);
+				console.log("Error fetching current room info:", error);
 			}
 		}
 	};
@@ -329,9 +345,11 @@ const ProfileScreen: React.FC = () => {
 				const recentRooms = await Promise.all(recentRoomsPromises);
 
 				setRecentRoomData(recentRooms);
+				setRecentRoomError(false);
 			}
 		} catch (error) {
-			console.error("Error fetching recent room info:", error);
+			console.log("Error fetching recent room info:", error);
+			setRecentRoomError(true);
 			return null;
 		}
 	};
@@ -358,9 +376,11 @@ const ProfileScreen: React.FC = () => {
 				const favRooms = await Promise.all(favRoomsPromises);
 
 				setFavoriteRoomData(favRooms);
+				setFavRoomError(false);
 			}
 		} catch (error) {
-			console.error("Error fetching fav room info:", error);
+			console.log("Error fetching fav room info:", error);
+			setFavRoomError(true);
 			return null;
 		}
 	};
@@ -369,7 +389,7 @@ const ProfileScreen: React.FC = () => {
 		const storedToken = await auth.getToken();
 
 		if (storedToken) {
-			if (following) {
+			try {
 				const response = await axios.post(
 					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/unfollow`,
 					{},
@@ -384,53 +404,34 @@ const ProfileScreen: React.FC = () => {
 					// console.log("Called Unfollow");
 					primaryProfileData.followers.count--;
 					setFollowing(false);
-				} else {
-					// console.error("Issue unfollowing user");
 				}
+			} catch (error) {
+				console.log("Issue unfollowing user:", error);
+				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
+			}
+			if (following) {
 			} else {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try {
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${primaryProfileData.username}/follow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					// console.log("Called Follow");
-					primaryProfileData.followers.count++;
-					setFollowing(true);
-				} else {
-					console.error("Issue unfollowing user");
+					if (response) {
+						// console.log("Called Follow");
+						primaryProfileData.followers.count++;
+						setFollowing(true);
+					}
+				} catch (error) {
+					console.log("Issue following user:", error);
+					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
 				}
 			}
-		}
-	};
-
-	const handleJoinLeave = async () => {
-		try {
-			const token = await auth.getToken();
-			const response = await axios.post(
-				`${utils.API_BASE_URL}/joinLeaveRoom`,
-				{
-					roomId: primaryProfileData.current_room.roomId,
-					action: primaryProfileData.current_room.joined ? "leave" : "join",
-				},
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
-			const updatedProfileData = {
-				...primaryProfileData,
-				current_room: response.data,
-			};
-			setPrimProfileData(updatedProfileData);
-		} catch (error) {
-			console.error("Error updating room join/leave:", error);
 		}
 	};
 
@@ -516,54 +517,6 @@ const ProfileScreen: React.FC = () => {
 		return timeString;
 	};
 
-	const renderFavRooms = () => {
-		if (primaryProfileData.fav_rooms.count > 0) {
-			return (
-				<View
-					style={{ paddingHorizontal: 20, paddingTop: 10 }}
-					testID="fav-rooms"
-				>
-					<Text style={styles.title}>Favorite Rooms</Text>
-					<View style={styles.roomCardsContainer}>
-						{favoriteRoomData.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.roomId}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-								imageUrl={room.room_image}
-							/>
-						))}
-					</View>
-				</View>
-			);
-		}
-	};
-
-	const renderRecentRooms = () => {
-		if (primaryProfileData.recent_rooms.count > 0) {
-			// console.log("profileData:", profileData.recent_rooms.data.slice(0, 2));
-			return (
-				<View style={{ paddingHorizontal: 20 }} testID="recent-rooms">
-					<Text style={styles.title}>Recently Visited</Text>
-					<View style={styles.roomCardsContainer}>
-						{recentRoomData.slice(0, 2).map((room) => (
-							<RoomCard
-								key={room.roomId}
-								roomName={room.room_name}
-								songName={room.current_song.title}
-								artistName={room.current_song.artists}
-								username={room.creator.username}
-								imageUrl={room.room_image}
-							/>
-						))}
-					</View>
-				</View>
-			);
-		}
-	};
-
 	const renderItem = ({ item }: { item: Room }) => {
 		// console.log("Render item: " + JSON.stringify(favoriteRoomData));
 		return <RoomCardWidget roomCard={item} />;
@@ -583,15 +536,51 @@ const ProfileScreen: React.FC = () => {
 		}, 2000);
 	}, []);
 
-	if (
-		loading ||
-		ownsProfile === null ||
-		userData === null ||
-		primaryProfileData === null ||
-		!roomCheck ||
-		recentRoomData === null ||
-		favoriteRoomData === null
-	) {
+	const handleErrors = () => {
+		console.log("Called");
+		if (favRoomError || recentRoomError) {
+			ToastAndroid.show(
+				favRoomError && recentRoomError
+					? "Failed to load rooms"
+					: favRoomError
+						? "Failed to load favorite rooms"
+						: "Failed to load recent rooms",
+				ToastAndroid.SHORT,
+			);
+		}
+
+		if (currentRoom) {
+			ToastAndroid.show("Failed to load current room", ToastAndroid.SHORT);
+		}
+	};
+
+	const loadChecker = () => {
+		return (
+			loading ||
+			ownsProfile === null ||
+			userData === null ||
+			primaryProfileData === null ||
+			!roomCheck ||
+			recentRoomData === null ||
+			favoriteRoomData === null
+		);
+	};
+
+	useEffect(() => {
+		if (!loadChecker() && !profileError) {
+			handleErrors();
+		}
+	}, [
+		loading,
+		ownsProfile,
+		userData,
+		primaryProfileData,
+		roomCheck,
+		recentRoomData,
+		favoriteRoomData,
+	]);
+
+	if (loadChecker()) {
 		// console.log(
 		// 	"loading: " +
 		// 		loading +
@@ -625,7 +614,10 @@ const ProfileScreen: React.FC = () => {
 				/>
 			}
 		>
-			<View style={{ padding: 15 }} testID="profile-screen">
+			<View
+				style={{ padding: 15, backgroundColor: "white" }}
+				testID="profile-screen"
+			>
 				<View style={styles.profileHeader}>
 					{/* Back Button */}
 					<TouchableOpacity
@@ -641,253 +633,274 @@ const ProfileScreen: React.FC = () => {
 						</TouchableOpacity>
 					)}
 				</View>
-				{ownsProfile && (
-					<View style={styles.container}>
-						{/* Drawer Modal */}
-						<Modal
-							transparent={true}
-							visible={drawerVisible}
-							animationType="slide"
-							onRequestClose={() => setDrawerVisible(false)}
-						>
-							{/* Overlay */}
-							<TouchableWithoutFeedback onPress={() => setDrawerVisible(false)}>
-								<View style={styles.overlay} />
-							</TouchableWithoutFeedback>
+				{!profileError ? (
+					<>
+						{ownsProfile && (
+							<View style={styles.container}>
+								{/* Drawer Modal */}
+								<Modal
+									transparent={true}
+									visible={drawerVisible}
+									animationType="slide"
+									onRequestClose={() => setDrawerVisible(false)}
+								>
+									{/* Overlay */}
+									<TouchableWithoutFeedback
+										onPress={() => setDrawerVisible(false)}
+									>
+										<View style={styles.overlay} />
+									</TouchableWithoutFeedback>
 
-							{/* Drawer Content */}
-							<View style={styles.drawer}>
-								{/* Close Drawer Button */}
-								<View style={styles.closeButtonContainer}>
-									<TouchableOpacity onPress={toggleDrawer}>
-										<Ionicons name="close" size={24} color="black" />
-									</TouchableOpacity>
-								</View>
+									{/* Drawer Content */}
+									<View style={styles.drawer}>
+										{/* Close Drawer Button */}
+										<View style={styles.closeButtonContainer}>
+											<TouchableOpacity onPress={toggleDrawer}>
+												<Ionicons name="close" size={24} color="black" />
+											</TouchableOpacity>
+										</View>
 
-								{/* Drawer Items */}
-								<Text style={styles.drawerItem} onPress={navigateToAnayltics}>
-									Analytics
-								</Text>
-								<Text style={styles.drawerItem} onPress={navigateToHelp}>
-									Help Menu
-								</Text>
-								<Text style={styles.drawerItem} onPress={navigateToLogout}>
-									Logout
-								</Text>
+										{/* Drawer Items */}
+										<Text
+											style={styles.drawerItem}
+											onPress={navigateToAnayltics}
+										>
+											Analytics
+										</Text>
+										<Text style={styles.drawerItem} onPress={navigateToHelp}>
+											Help Menu
+										</Text>
+										<Text style={styles.drawerItem} onPress={navigateToLogout}>
+											Logout
+										</Text>
+									</View>
+								</Modal>
 							</View>
-						</Modal>
-					</View>
-				)}
-				<Text
-					style={{
-						fontWeight: "600",
-						fontSize: 20,
-						textAlign: "center",
-						marginTop: 20,
-					}}
-				>
-					Profile
-				</Text>
-				<View
-					style={{ alignItems: "center", marginTop: 20 }}
-					testID="profile-pic"
-				>
-					<Image
-						source={{ uri: primaryProfileData.profile_picture_url }}
-						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
-					/>
-				</View>
-				<Text style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}>
-					{primaryProfileData.profile_name}
-				</Text>
-				<Text style={{ fontWeight: "400", textAlign: "center" }}>
-					@{primaryProfileData.username}
-				</Text>
-				<View
-					style={{
-						flexDirection: "row",
-						justifyContent: "center",
-						marginTop: 10,
-					}}
-				>
-					<TouchableOpacity
-						style={{ alignItems: "center" }}
-						onPress={navigateToFollowerStack}
-					>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>
-							{primaryProfileData.following.count}
+						)}
+						<Text
+							style={{
+								fontWeight: "600",
+								fontSize: 20,
+								textAlign: "center",
+								marginTop: 20,
+							}}
+						>
+							Profile
 						</Text>
-						<Text style={{ fontSize: 15, fontWeight: "400" }}>Following</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{ marginLeft: 60, alignItems: "center" }}
-						onPress={navigateToFollowerStack}
-					>
-						<Text style={{ fontSize: 20, fontWeight: "600" }}>
-							{primaryProfileData.followers.count}
-						</Text>
-						<Text style={{ fontSize: 15, fontWeight: "400" }}>Followers</Text>
-					</TouchableOpacity>
-				</View>
-				<TouchableOpacity
-					onPress={() => {
-						setLinkDialogVisible(true);
-					}}
-					testID="links-touchable"
-				>
-					{renderLinks()}
-				</TouchableOpacity>
-				<LinkBottomSheet
-					isVisible={isLinkDialogVisible}
-					onClose={() => {
-						setLinkDialogVisible(false);
-					}}
-					links={primaryProfileData.links.data}
-				/>
-				{renderFollowOrEdit()}
-				{currentRoomData !== null && (
-					<TouchableOpacity
-						onPress={navigateToRoomPage}
-						style={{ paddingHorizontal: 20 }}
-						testID="now-playing"
-					>
-						<NowPlaying
-							name={currentRoomData.name}
-							creator={currentRoomData.username}
-							art={currentRoomData.backgroundImage}
-						/>
-					</TouchableOpacity>
-				)}
-				{primaryProfileData.bio !== "" && (
-					<View style={{ paddingHorizontal: 20 }} testID="bio">
-						<BioSection content={primaryProfileData.bio} />
-					</View>
-				)}
-				{primaryProfileData.fav_genres.count > 0 && (
-					<View style={{ paddingHorizontal: 20 }} testID="genres">
-						<GenreList items={primaryProfileData.fav_genres.data} />
-					</View>
-				)}
-				{primaryProfileData.fav_songs.count > 0 && (
-					<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
-						<View style={styles.profileHeader}>
-							<Text style={styles.title}>Favorite Songs</Text>
-							{primaryProfileData.fav_songs.count > 4 && (
-								<TouchableOpacity
-									onPress={() => {
-										navigateToMore(
-											"song",
-											primaryProfileData.fav_songs.data,
-											"Favorite Songs",
-										);
-									}}
-								>
-									<Text
-										style={{
-											fontWeight: "700",
-											textAlign: "center",
-										}}
-									>
-										More
-									</Text>
-								</TouchableOpacity>
-							)}
-						</View>
-						{primaryProfileData.fav_songs.data.slice(0, 4).map((song: any) => (
-							<FavoriteSongs
-								key={song.spotify_id}
-								songTitle={song.title}
-								artist={song.artists.join(", ")}
-								duration={
-									song.duration ? createTimeString(song.duration) : null
-								}
-								albumArt={song.cover}
-								onPress={() => {}}
+						<View
+							style={{ alignItems: "center", marginTop: 20 }}
+							testID="profile-pic"
+						>
+							<Image
+								source={{ uri: primaryProfileData.profile_picture_url }}
+								style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
 							/>
-						))}
-					</View>
-				)}
-				{primaryProfileData.fav_rooms.count > 0 && (
-					<>
-						<View style={styles.profileHeader} testID="fav-rooms">
-							<Text
-								style={[
-									styles.title,
-									{ paddingHorizontal: 20, paddingTop: 10 },
-								]}
-							>
-								Favorite Rooms
-							</Text>
-							{primaryProfileData.fav_rooms.count > 10 && (
-								<TouchableOpacity
-									onPress={() => {
-										navigateToMore("room", favoriteRoomData, "Favorite Rooms");
-									}}
-								>
-									<Text
-										style={{
-											fontWeight: "700",
-											textAlign: "center",
-											paddingRight: 15,
-										}}
-									>
-										More
-									</Text>
-								</TouchableOpacity>
-							)}
 						</View>
-						<AppCarousel
-							data={favoriteRoomData.slice(0, 10).map((room: RoomDto) => room)}
-							renderItem={renderItem}
-						/>
-					</>
-				)}
-				{primaryProfileData.recent_rooms.count > 0 && (
-					<>
-						<View style={styles.profileHeader} testID="recent-rooms">
-							<Text
-								style={[
-									styles.title,
-									{ paddingHorizontal: 20, paddingTop: 10 },
-								]}
+						<Text
+							style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}
+						>
+							{primaryProfileData.profile_name}
+						</Text>
+						<Text style={{ fontWeight: "400", textAlign: "center" }}>
+							@{primaryProfileData.username}
+						</Text>
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "center",
+								marginTop: 10,
+							}}
+						>
+							<TouchableOpacity
+								style={{ alignItems: "center" }}
+								onPress={navigateToFollowerStack}
 							>
-								Recent Rooms
-							</Text>
-							{primaryProfileData.recent_rooms.count > 10 && (
-								<TouchableOpacity
-									onPress={() => {
-										navigateToMore("room", recentRoomData, "Recent Rooms");
-									}}
-								>
-									<Text
-										style={{
-											fontWeight: "700",
-											textAlign: "center",
-											paddingRight: 15,
-										}}
-									>
-										More
-									</Text>
-								</TouchableOpacity>
-							)}
+								<Text style={{ fontSize: 20, fontWeight: "600" }}>
+									{primaryProfileData.following.count}
+								</Text>
+								<Text style={{ fontSize: 15, fontWeight: "400" }}>
+									Following
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={{ marginLeft: 60, alignItems: "center" }}
+								onPress={navigateToFollowerStack}
+							>
+								<Text style={{ fontSize: 20, fontWeight: "600" }}>
+									{primaryProfileData.followers.count}
+								</Text>
+								<Text style={{ fontSize: 15, fontWeight: "400" }}>
+									Followers
+								</Text>
+							</TouchableOpacity>
 						</View>
-						<AppCarousel
-							data={recentRoomData.slice(0, 10).map((room: RoomDto) => room)}
-							renderItem={renderItem}
-						/>
-					</>
-				)}
-				{primaryProfileData.current_room ? (
-					<View style={{ alignItems: "center", marginTop: 20 }}>
-						<TouchableOpacity style={styles.button} onPress={handleJoinLeave}>
-							<Text style={styles.buttonText}>
-								{primaryProfileData.current_room.joined
-									? "Leave Room"
-									: "Join Room"}
-							</Text>
+						<TouchableOpacity
+							onPress={() => {
+								setLinkDialogVisible(true);
+							}}
+							testID="links-touchable"
+						>
+							{renderLinks()}
 						</TouchableOpacity>
-					</View>
-				) : null}
+						<LinkBottomSheet
+							isVisible={isLinkDialogVisible}
+							onClose={() => {
+								setLinkDialogVisible(false);
+							}}
+							links={primaryProfileData.links.data}
+						/>
+						{renderFollowOrEdit()}
+						{currentRoomData !== null && (
+							<TouchableOpacity
+								onPress={navigateToRoomPage}
+								style={{ paddingHorizontal: 20 }}
+								testID="now-playing"
+							>
+								<NowPlaying
+									name={currentRoomData.name}
+									creator={currentRoomData.username}
+									art={currentRoomData.backgroundImage}
+								/>
+							</TouchableOpacity>
+						)}
+						{primaryProfileData.bio !== "" && (
+							<View style={{ paddingHorizontal: 20 }} testID="bio">
+								<BioSection content={primaryProfileData.bio} />
+							</View>
+						)}
+						{primaryProfileData.fav_genres.count > 0 && (
+							<View style={{ paddingHorizontal: 20 }} testID="genres">
+								<GenreList items={primaryProfileData.fav_genres.data} />
+							</View>
+						)}
+						{primaryProfileData.fav_songs.count > 0 && (
+							<View style={{ paddingHorizontal: 20 }} testID="fav-songs">
+								<View style={styles.profileHeader}>
+									<Text style={styles.title}>Favorite Songs</Text>
+									{primaryProfileData.fav_songs.count > 4 && (
+										<TouchableOpacity
+											onPress={() => {
+												navigateToMore(
+													"song",
+													primaryProfileData.fav_songs.data,
+													"Favorite Songs",
+												);
+											}}
+										>
+											<Text
+												style={{
+													fontWeight: "700",
+													textAlign: "center",
+												}}
+											>
+												More
+											</Text>
+										</TouchableOpacity>
+									)}
+								</View>
+								{primaryProfileData.fav_songs.data
+									.slice(0, 4)
+									.map((song: any) => (
+										<FavoriteSongs
+											key={song.spotify_id}
+											songTitle={song.title}
+											artist={song.artists.join(", ")}
+											duration={
+												song.duration ? createTimeString(song.duration) : null
+											}
+											albumArt={song.cover}
+											onPress={() => {}}
+										/>
+									))}
+							</View>
+						)}
+						{!favRoomError && primaryProfileData.fav_rooms.count > 0 && (
+							<>
+								<View style={styles.profileHeader} testID="fav-rooms">
+									<Text
+										style={[
+											styles.title,
+											{ paddingHorizontal: 20, paddingTop: 10 },
+										]}
+									>
+										Favorite Rooms
+									</Text>
+									{primaryProfileData.fav_rooms.count > 10 && (
+										<TouchableOpacity
+											onPress={() => {
+												navigateToMore(
+													"room",
+													favoriteRoomData,
+													"Favorite Rooms",
+												);
+											}}
+										>
+											<Text
+												style={{
+													fontWeight: "700",
+													textAlign: "center",
+													paddingRight: 15,
+												}}
+											>
+												More
+											</Text>
+										</TouchableOpacity>
+									)}
+								</View>
+								<AppCarousel
+									data={favoriteRoomData
+										.slice(0, 10)
+										.map((room: RoomDto) => room)}
+									renderItem={renderItem}
+								/>
+							</>
+						)}
+						{!recentRoomError && primaryProfileData.recent_rooms.count > 0 && (
+							<>
+								<View style={styles.profileHeader} testID="recent-rooms">
+									<Text
+										style={[
+											styles.title,
+											{ paddingHorizontal: 20, paddingTop: 10 },
+										]}
+									>
+										Recent Rooms
+									</Text>
+									{primaryProfileData.recent_rooms.count > 10 && (
+										<TouchableOpacity
+											onPress={() => {
+												navigateToMore("room", recentRoomData, "Recent Rooms");
+											}}
+										>
+											<Text
+												style={{
+													fontWeight: "700",
+													textAlign: "center",
+													paddingRight: 15,
+												}}
+											>
+												More
+											</Text>
+										</TouchableOpacity>
+									)}
+								</View>
+								<AppCarousel
+									data={recentRoomData
+										.slice(0, 10)
+										.map((room: RoomDto) => room)}
+									renderItem={renderItem}
+								/>
+							</>
+						)}
+					</>
+				) : (
+					<>
+						<View style={styles.errorMessage}>
+							<Text>Failed to load content</Text>
+							<Text>Try refreshing</Text>
+						</View>
+					</>
+				)}
 			</View>
 		</ScrollView>
 	);
@@ -960,6 +973,13 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		borderBottomWidth: 1,
 		borderBottomColor: "#ddd",
+	},
+	errorMessage: {
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
+		paddingTop: 320,
+		width: "100%",
 	},
 });
 

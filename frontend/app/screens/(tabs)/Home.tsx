@@ -16,26 +16,26 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	RefreshControl,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import { Room } from "../models/Room";
-import { Friend } from "../models/friend";
-import AppCarousel from "../components/AppCarousel";
-import FriendsGrid from "../components/FriendsGrid";
-import Miniplayer from "../components/home/miniplayer";
-import NavBar from "../components/NavBar";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import { Room } from "../../models/Room";
+import { Friend } from "../../models/friend";
+import AppCarousel from "../../components/AppCarousel";
+import FriendsGrid from "../../components/FriendsGrid";
+import Miniplayer from "../../components/home/miniplayer";
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
-import { Player } from "../PlayerContext";
-import { colors } from "../styles/colors";
-import TopNavBar from "../components/TopNavBar";
-import { useAPI } from "../APIContext";
-import { UserDto } from "../../api";
-import { RequiredError } from "../../api/base";
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
+import { Player } from "../../PlayerContext";
+import { colors } from "../../styles/colors";
+import TopNavBar from "../../components/TopNavBar";
+import { useAPI } from "../../APIContext";
+import { UserDto } from "../../../api";
+import { RequiredError } from "../../../api/base";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -76,6 +76,11 @@ const Home: React.FC = () => {
 	/* ********************************************************************** */
 
 	console.log("currentRoom: " + currentRoom);
+	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [roomError, setRoomError] = useState<boolean>(false);
+	const [profileError, setProfileError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState<boolean>(false);
+	const [cacheError, setCacheError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -100,9 +105,11 @@ const Home: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
+			setRoomError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching rooms:", error);
+			console.log("Error fetching rooms:", error);
+			setRoomError(true);
 			return [];
 		}
 	};
@@ -114,9 +121,11 @@ const Home: React.FC = () => {
 			});
 
 			// console.log("Friends: " + JSON.stringify(response.data));
+			setFriendError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching friends:", error);
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
 			return [];
 		}
 	};
@@ -129,11 +138,12 @@ const Home: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-
+				setProfileError(false);
 				return response.data;
 			}
 		} catch (error) {
-			console.error("Error fetching profile info:", error);
+			console.log("Error fetching profile info:", error);
+			setProfileError(true);
 		}
 	};
 
@@ -189,8 +199,10 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
+			setCacheError(false);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
+			setCacheError(true);
 		}
 	};
 
@@ -302,6 +314,22 @@ const Home: React.FC = () => {
 		return;
 	}, [refreshData]);
 
+	useEffect(() => {
+		if (!roomError || !friendError) {
+			if (roomError && !friendError) {
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			} else if (!roomError && friendError) {
+				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+			} else if (profileError) {
+				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+			}
+		}
+
+		if (cacheError) {
+			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
+		}
+	}, [roomError, friendError, profileError, cacheError]);
+
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
@@ -331,13 +359,6 @@ const Home: React.FC = () => {
 		},
 		[scrollY],
 	);
-
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
@@ -351,33 +372,35 @@ const Home: React.FC = () => {
 				}
 			>
 				{loading ? (
-					<ActivityIndicator
-						size={60}
-						// color={colors.backgroundColor}
-						style={{ marginTop: 260 }}
-					/>
-				) : (
+					<ActivityIndicator size={60} style={{ marginTop: 260 }} />
+				) : !roomError || !friendError ? (
 					<View style={styles.contentContainer}>
-						{myRecents.length > 0 && (
+						{!roomError && (
 							<>
-								<Text style={styles.sectionTitle}>Recent Rooms</Text>
-								<AppCarousel data={myRecents} renderItem={renderItem} />
+								{myRecents.length > 0 && (
+									<>
+										<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										<AppCarousel data={myRecents} renderItem={renderItem} />
+									</>
+								)}
+								<Text style={styles.sectionTitle}>Picks for you</Text>
+								<AppCarousel data={myPicks} renderItem={renderItem} />
 							</>
 						)}
-						<Text style={styles.sectionTitle}>Picks for you</Text>
-						<AppCarousel data={myPicks} renderItem={renderItem} />
-						<TouchableOpacity
-							style={styles.navigateButton}
-							onPress={navigateToAllFriends}
-						>
-							<Text style={styles.sectionTitle}>Friends</Text>
-						</TouchableOpacity>
-						{userData && userData.username ? (
-							<FriendsGrid
-								friends={friends}
-								user={userData.username}
-								maxVisible={8}
-							/>
+						{!friendError && userData && userData.username ? (
+							<>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={navigateToAllFriends}
+								>
+									<Text style={styles.sectionTitle}>Friends</Text>
+								</TouchableOpacity>
+								<FriendsGrid
+									friends={friends}
+									user={userData.username}
+									maxVisible={8}
+								/>
+							</>
 						) : null}
 						<TouchableOpacity
 							style={styles.navigateButton}
@@ -391,17 +414,16 @@ const Home: React.FC = () => {
 							showAddRoomCard={true} // Conditionally show the AddRoomCard
 						/>
 					</View>
+				) : (
+					<>
+						<View style={styles.errorMessage}>
+							<Text>Failed to load content</Text>
+							<Text>Try refreshing</Text>
+						</View>
+					</>
 				)}
 			</ScrollView>
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			>
-				<Miniplayer />
-				<NavBar />
-			</Animated.View>
+			<Miniplayer />
 		</View>
 	);
 };
@@ -409,15 +431,17 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "white",
-	},
-	scrollViewContent: {
-		paddingTop: 40,
+		backgroundColor: colors.backgroundColor,
 	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: "center",
-		paddingTop: 20,
+	},
+	errorMessage: {
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
+		width: "100%",
 	},
 	sectionTitle: {
 		fontSize: 24,
@@ -448,13 +472,6 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 32,
 		fontWeight: "bold",
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 });
 

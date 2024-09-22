@@ -3,7 +3,6 @@ import React, {
 	useState,
 	useRef,
 	useCallback,
-	memo,
 	useContext,
 } from "react";
 import {
@@ -16,10 +15,10 @@ import {
 	Dimensions,
 	Easing,
 	Alert,
+	ToastAndroid,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -47,7 +46,6 @@ interface RoomPageProps {
 const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -372,7 +370,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					console.error("Unexpected response data format:", data);
 				}
 			} catch (error) {
-				console.error("Failed to fetch queue:", error);
+				console.log("Failed to fetch queue:", error);
+				ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
 			}
 		};
 

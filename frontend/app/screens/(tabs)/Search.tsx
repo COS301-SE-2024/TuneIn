@@ -12,18 +12,18 @@ import {
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import UserItem from "../components/UserItem";
-import { colors } from "../styles/colors";
-import { Room } from "../models/Room";
-import { User } from "../models/user";
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import UserItem from "../../components/UserItem";
+import { colors } from "../../styles/colors";
+import { Room } from "../../models/Room";
+import { User } from "../../models/user";
 import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
-import { SearchHistoryDto } from "../models/SearchHistoryDto";
-import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
-import SkeletonUserItem from "../components/SkeletonUserItem";
-import FilterBottomSheet from "../components/FilterBottomSheet";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import { SearchHistoryDto } from "../../models/SearchHistoryDto";
+import SkeletonRoomCard from "../../components/rooms/SkeletonRoomCard";
+import SkeletonUserItem from "../../components/SkeletonUserItem";
+import FilterBottomSheet from "../../components/FilterBottomSheet";
 
 type SearchResult = {
 	id: string;
@@ -32,52 +32,6 @@ type SearchResult = {
 	roomData?: Room;
 	userData?: User;
 };
-
-// Sample genre data with additional genres
-let genres: string[] = [
-	"Rock",
-	"Pop",
-	"Jazz",
-	"Classical",
-	"Hip Hop",
-	"Country",
-	"Electronic",
-	"Reggae",
-	"Blues",
-	"Folk",
-	"Metal",
-	"Punk",
-	"Soul",
-	"R&B",
-	"Funk",
-	"Alternative",
-	"Indie",
-	"Dance",
-	"Techno",
-	"Ambient",
-	"Gospel",
-	"Latin",
-	"Reggaeton",
-	"Ska",
-	"Opera",
-];
-
-// Sample language data
-const languages = [
-	"English",
-	"Spanish",
-	"French",
-	"German",
-	"Chinese",
-	"Japanese",
-	"Korean",
-	"Portuguese",
-	"Russian",
-	"Arabic",
-	"Italian",
-	"Turkish",
-	"Swedish",
-];
 
 const Search: React.FC = () => {
 	const navigation = useNavigation();
@@ -106,6 +60,7 @@ const Search: React.FC = () => {
 	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
 	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+	const [searchError, setSearchError] = useState<boolean>(false);
 
 	const isAdvancedSearch = () => {
 		if (filter === "room") {
@@ -149,89 +104,48 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		console.log("Selected Genre: " + selectedGenre);
-		const getRecommendations = async () => {
-			console.log("Getting recommendations", filter);
+		const getRecommendedRooms = async () => {
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					let response;
-					if (filter === "room") {
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/rooms/foryou`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+					const response = await axios.get(
+						`${utils.API_BASE_URL}/users/rooms/foryou`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
-						if (response.status !== 200) {
-							console.error("Error fetching recommended rooms:", response);
-							return;
-						}
-						const recommendedRooms: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: filter,
+						},
+					);
+					const recommendedRooms: SearchResult[] = response.data.map(
+						(item: any) => ({
+							id: item.roomID,
+							type: "room",
+							name: item.room_name,
+							roomData: {
+								roomID: item.roomID,
+								backgroundImage: item.room_image,
 								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
-									backgroundImage: item.room_image,
-									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									tags: item.tags,
-								},
-							}),
-						);
-						console.log("recommended rooms:", recommendedRooms);
-						console.log("Recommended rooms length: " + recommendedRooms.length);
-						setResults(recommendedRooms);
-					} else {
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/recommended/users`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+								description: item.description,
+								userID: item.creator.userID,
+								tags: item.tags,
 							},
-						);
-						if (response.status !== 200) {
-							console.error("Error fetching recommended users:", response);
-							return;
-						}
-						console.log(
-							"Recommended users response: " + JSON.stringify(response),
-						);
-						const recommendedUsers: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.userID,
-								type: filter,
-								name: item.username,
-								userData: {
-									id: item.id,
-									profile_picture_url: item.profile_picture_url,
-									profile_name: item.profile_name,
-									username: item.username,
-									followers: item.followers.data,
-								},
-							}),
-						);
-						console.log("recommended users:", recommendedUsers);
-						console.log("Recommended users length: " + recommendedUsers.length);
-						setResults(recommendedUsers);
-					}
+						}),
+					);
+					console.log("recommended rooms:", recommendedRooms);
+					console.log("Recommended rooms length: " + recommendedRooms.length);
+					setResults(recommendedRooms);
 				}
 			} catch (error) {
-				console.error("Error fetching recommendations:", error);
+				console.log("Error fetching recommended rooms:", error);
 			}
 			setLoading(false);
 		};
+
 		if (searchTerm === "") {
-			getRecommendations();
 			if (filter === "room") {
 				setSearchSuggestions(roomSearchHistory.slice(0, 5));
+				getRecommendedRooms();
 			} else if (filter === "user") {
 				setSearchSuggestions(userSearchHistory.slice(0, 5));
 			}
@@ -248,7 +162,7 @@ const Search: React.FC = () => {
 				}
 			}, 300);
 		}
-	}, [searchTerm, filter]);
+	}, [searchTerm]);
 
 	useEffect(() => {
 		if (searchTerm !== "") {
@@ -277,55 +191,7 @@ const Search: React.FC = () => {
 			const token = await auth.getToken();
 
 			if (token) {
-				if (filter === "all") {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/search?q=${sh}`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
-						},
-					);
-					// console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.rooms.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
-								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}),
-					);
-
-					const users: SearchResult[] = response.data.users.map(
-						(item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}),
-					);
-
-					const combinedResult = results.concat(users);
-
-					// console.log("Formatted results: " + JSON.stringify(results));
-					setResults(combinedResult);
-				} else if (filter === "room") {
+				if (filter === "room") {
 					if (advanced) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${sh}`;
 						if (nsfw) {
@@ -477,9 +343,14 @@ const Search: React.FC = () => {
 						setResults(userResults);
 					}
 				}
+
+				setSearchError(false);
 			}
 		} catch (error) {
-			console.error("Error fetching search info:", error);
+			console.log("Error fetching search info:", error);
+			setResults([]);
+			setSearchError(true);
+			setLoading(false);
 			return null;
 		}
 		setLoading(false);
@@ -507,12 +378,6 @@ const Search: React.FC = () => {
 		[scrollY],
 	);
 
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	const renderResult = ({ item }: { item: SearchResult }) => {
 		if (item.type === "room" && item.roomData) {
 			// console.log("Render Called");
@@ -534,7 +399,6 @@ const Search: React.FC = () => {
 	};
 
 	const handleSelection = (selectedFilter: string) => {
-		console.log("Selected Filter: " + selectedFilter);
 		setFilter(selectedFilter);
 	};
 
@@ -559,7 +423,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -585,7 +449,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -610,7 +474,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -635,7 +499,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
@@ -659,14 +523,6 @@ const Search: React.FC = () => {
 	useEffect(() => {
 		getRoomHistory();
 	}, []);
-
-	const handleSelectGenre = (genre: string) => {
-		setSelectedGenre(genre);
-	};
-
-	const handleSelectLanguage = (language: string) => {
-		setSelectedLanguage(language);
-	};
 
 	return (
 		<View style={styles.container}>
@@ -804,7 +660,9 @@ const Search: React.FC = () => {
 			) : results.length === 0 ? (
 				// Render No Results Message if no results
 				<View style={styles.noResult}>
-					<Text>No results found</Text>
+					<Text>
+						{searchError ? "Failed to load search results" : "No results found"}
+					</Text>
 				</View>
 			) : (
 				// Render FlatList if there are results
@@ -816,13 +674,6 @@ const Search: React.FC = () => {
 					onScroll={handleScroll}
 				/>
 			)}
-
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			></Animated.View>
 		</View>
 	);
 };

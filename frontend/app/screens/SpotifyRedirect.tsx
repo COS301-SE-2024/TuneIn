@@ -116,7 +116,7 @@ const SpotifyRedirect = () => {
 			setSuccess(true);
 		} catch (error) {
 			setError(`Failed to exchange code for tokens: ${error.message}`);
-			console.error("Failed to exchange code for tokens:", error);
+			console.log("Failed to exchange code for tokens:", error);
 		}
 	};
 

@@ -1,7 +1,9 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import AnalyticsPage from "../app/screens/analytics/AnalyticsPage"; // Update the import path accordingly
+import { ToastAndroid } from "react-native";
 
 // Mock the useRouter hook
 jest.mock("expo-router", () => ({
@@ -31,6 +33,7 @@ describe("AnalyticsPage", () => {
 
 	beforeEach(() => {
 		(useRouter as jest.Mock).mockReturnValue({ navigate, back: goBack });
+		(AsyncStorage.getItem as jest.Mock).mockClear();
 	});
 
 	it("should render correctly", async () => {
@@ -83,5 +86,26 @@ describe("AnalyticsPage", () => {
 			// expect(getByText("Returning Visitors")).toBeTruthy();
 			expect(getByText("Average Session Duration")).toBeTruthy();
 		});
+	});
+
+	it("logs failure to fetch and display data correctly", async () => {
+		global.fetch = jest.fn(
+			() => Promise.reject(new Error("Network error")), // Simulate network error
+		);
+		const toastSpy = jest
+			.spyOn(ToastAndroid, "show")
+			.mockImplementation(() => {});
+
+		const {} = render(<AnalyticsPage />);
+
+		await waitFor(() => {
+			expect(toastSpy).toHaveBeenCalledWith(
+				"Failed to load analytics",
+				ToastAndroid.SHORT,
+			);
+		});
+
+		// Restore the original ToastAndroid.show implementation
+		toastSpy.mockRestore();
 	});
 });

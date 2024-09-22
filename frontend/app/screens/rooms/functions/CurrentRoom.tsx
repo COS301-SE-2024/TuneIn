@@ -1,3 +1,4 @@
+import { ToastAndroid } from "react-native";
 import * as utils from "../../../services/Utils";
 
 class CurrentRoom {
@@ -17,7 +18,8 @@ class CurrentRoom {
 			}
 			return data;
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to load current room", ToastAndroid.SHORT);
 		}
 	};
 
@@ -40,7 +42,8 @@ class CurrentRoom {
 			}
 			return false;
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to check current room", ToastAndroid.SHORT);
 		}
 	};
 
@@ -62,9 +65,13 @@ class CurrentRoom {
 			if (response.status === 201) {
 				return true;
 			}
-			return false;
+			throw false;
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show(
+				`Failed to ${isLeaving ? "leave" : "join"} room`,
+				ToastAndroid.SHORT,
+			);
 		}
 	};
 }

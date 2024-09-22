@@ -74,45 +74,47 @@ export class DtoGenService {
 			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
 				count: recent_rooms.count,
-				data: recent_rooms.data || [],
+				data: recent_rooms.data || [], // I'm assuming that recent_rooms.data is an array of room IDs
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
 				where: { user_id: userID },
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-			result.fav_rooms = {
-				count: favRoomIDs.length,
-				data: favRoomIDs,
-			};
+
+			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
+				favRoomIDs,
+			);
+			if (roomDtoArray && roomDtoArray !== null) {
+				result.fav_rooms = {
+					count: roomDtoArray.length,
+					data: roomDtoArray.map((r) => r.roomID),
+				};
+			}
 		}
 
 		const following: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
-		if (following && following !== null) {
-			result.following.count = following.length;
-			if (fully_qualify) {
-				for (let i = 0; i < following.length; i++) {
-					const f = following[i];
-					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
-						result.following.data.push(u);
-					}
+		result.following.count = following.length;
+		if (fully_qualify) {
+			for (let i = 0; i < following.length; i++) {
+				const f = following[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.following.data.push(u);
 				}
 			}
 		}
 
 		const followers: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowers(userID);
-		if (followers && followers !== null) {
-			result.followers.count = followers.length;
-			if (fully_qualify) {
-				for (let i = 0; i < followers.length; i++) {
-					const f = followers[i];
-					if (f && f !== null) {
-						const u: UserDto = this.generateBriefUserDto(f);
-						result.followers.data.push(u);
-					}
+		result.followers.count = followers.length;
+		if (fully_qualify) {
+			for (let i = 0; i < followers.length; i++) {
+				const f = followers[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.followers.data.push(u);
 				}
 			}
 		}
@@ -400,6 +402,9 @@ export class DtoGenService {
 	}
 
 	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
+		if (room_ids.length === 0) {
+			return [];
+		}
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: { room_id: { in: room_ids } },
 		});

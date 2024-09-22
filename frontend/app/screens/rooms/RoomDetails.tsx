@@ -103,7 +103,7 @@ const RoomDetails: React.FC = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				router.navigate({
-					pathname: "/screens/Home",
+					pathname: "/screens/(tabs)/Home",
 					params: data,
 				});
 			})
