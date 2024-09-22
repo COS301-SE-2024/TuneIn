@@ -615,10 +615,10 @@ const ProfileScreen: React.FC = () => {
 			}
 		>
 			<View
-				style={{ paddingVertical: 15, paddingLeft: 5, paddingRight: 10, backgroundColor: "white" }}
+				style={{ paddingVertical: 15, paddingRight: 15, backgroundColor: "white" }}
 				testID="profile-screen"
 			>
-				<View style={styles.profileHeader}>
+				<View style={[styles.profileHeader, {paddingLeft: 15}]}>
 					{/* Back Button */}
 					<TouchableOpacity
 						onPress={() => navigation.goBack()}
