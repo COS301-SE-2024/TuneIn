@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between", // Adjust to position elements
 	},
 	roomImage: {
-		width: 80,
-		height: 80,
+		width: 95,
+		height: 90,
 		borderRadius: 10,
 		marginRight: 10,
 	},
@@ -113,7 +113,10 @@ const styles = StyleSheet.create({
 	explicitIcon: {
 		width: 24,
 		height: 24,
-		marginLeft: 8, // Space between text and icon
+		marginLeft: 8,
+		position: "absolute", // Use absolute positioning
+		bottom: 10, // Position from the bottom
+		right: 10, // Position from the right
 	},
 });
 
