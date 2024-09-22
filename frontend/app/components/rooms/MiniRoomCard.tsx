@@ -12,11 +12,13 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	const room = JSON.parse(JSON.stringify(roomCard));
 
 	const navigateToRoomPage = () => {
-		console.log("Room:", room);
-		router.navigate({
-			pathname: "/screens/rooms/RoomStack",
-			params: { room: JSON.stringify(room) },
-		});
+		if (!isBeforeStartDate && !isAfterEndDate) {
+			console.log("Room:", room);
+			router.navigate({
+				pathname: "/screens/rooms/RoomStack",
+				params: { room: JSON.stringify(room) },
+			});
+		}
 	};
 
 	const truncateText = (text: string | undefined, maxLength: number) => {
@@ -26,16 +28,66 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 		return text;
 	};
 
+	const currentDate = new Date();
+	const startDate = new Date(roomCard.start_date);
+	const endDate = new Date(roomCard.end_date);
+
+	const isBeforeStartDate = currentDate < startDate;
+	const isAfterEndDate = currentDate > endDate;
+
 	return (
-		<TouchableOpacity onPress={navigateToRoomPage} style={styles.cardContainer}>
-			<Image
-				source={{ uri: roomCard.backgroundImage }}
-				style={styles.roomImage}
-			/>
+		<TouchableOpacity
+			onPress={navigateToRoomPage}
+			style={styles.cardContainer}
+			disabled={isBeforeStartDate || isAfterEndDate}
+		>
+			<View style={styles.imageContainer}>
+				<Image
+					source={{ uri: roomCard.backgroundImage }}
+					style={styles.roomImage}
+				/>
+				{(isBeforeStartDate || isAfterEndDate) && (
+					<View style={styles.greyOverlay} />
+				)}
+			</View>
 
 			<View style={styles.textContainer}>
 				<Text style={styles.roomName}>{roomCard.name}</Text>
-				<Text style={styles.roomDescription}>{roomCard.description}</Text>
+
+				{/* Display opening or closing date */}
+				{isBeforeStartDate ? (
+					<Text style={styles.roomStatus}>
+						This room will open on{" "}
+						{startDate.toLocaleDateString("en-GB", {
+							day: "2-digit",
+							month: "short",
+							year: "numeric",
+						})}{" "}
+						at{" "}
+						{startDate.toLocaleTimeString([], {
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</Text>
+				) : isAfterEndDate ? (
+					<Text style={styles.roomStatus}>
+						This room closed on{" "}
+						{endDate.toLocaleDateString("en-GB", {
+							day: "2-digit",
+							month: "short",
+							year: "numeric",
+						})}{" "}
+						at{" "}
+						{endDate.toLocaleTimeString([], {
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</Text>
+				) : (
+					<Text style={styles.roomDescription}>
+						{truncateText(roomCard.description, 50)}
+					</Text>
+				)}
 
 				{/* User profile and username inline */}
 				<View style={styles.userInfo}>
@@ -74,13 +126,26 @@ const styles = StyleSheet.create({
 		shadowRadius: 2,
 		elevation: 2,
 		alignItems: "center",
-		justifyContent: "space-between", // Adjust to position elements
+		justifyContent: "space-between",
+	},
+	imageContainer: {
+		position: "relative",
 	},
 	roomImage: {
 		width: 95,
 		height: 90,
 		borderRadius: 10,
 		marginRight: 10,
+	},
+	greyOverlay: {
+		position: "absolute",
+		top: 0,
+		bottom: 0,
+		width: 95,
+		left: 0,
+		right: 0,
+		backgroundColor: "rgba(128, 128, 128, 0.7)", // Grey overlay
+		borderRadius: 10,
 	},
 	textContainer: {
 		flex: 1,
@@ -94,6 +159,12 @@ const styles = StyleSheet.create({
 		color: "#666",
 		marginTop: 5,
 	},
+	roomStatus: {
+		fontSize: 12,
+		color: "#666",
+		marginTop: 5,
+		fontStyle: "italic",
+	},
 	userInfo: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -102,21 +173,21 @@ const styles = StyleSheet.create({
 	userProfile: {
 		width: 30,
 		height: 30,
-		borderRadius: 15, // Circle shape
+		borderRadius: 15,
 		marginRight: 8,
 	},
 	username: {
 		fontSize: 12,
 		color: "#333",
-		flexShrink: 1, // Allows the text to shrink if necessary
+		flexShrink: 1,
 	},
 	explicitIcon: {
 		width: 24,
 		height: 24,
 		marginLeft: 8,
-		position: "absolute", // Use absolute positioning
-		bottom: 10, // Position from the bottom
-		right: 10, // Position from the right
+		position: "absolute",
+		bottom: 10,
+		right: 10,
 	},
 });
 
