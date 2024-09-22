@@ -17,12 +17,13 @@ import {
 } from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
+import EditGenreBubble from "./EditGenreBubble";
 
 interface SelectorProps {
 	options: string[];
 	placeholder: string;
 	visible: boolean;
-	onSelect: (option: string) => void;
+	onSelect: (selected: string[]) => void;
 	onClose: () => void;
 }
 
@@ -34,10 +35,11 @@ const Selector: React.FC<SelectorProps> = ({
 	onClose,
 }) => {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [selected, setSelected] = useState<string[]>([]);
 
 	// useEffect(() => {
-	// 	// setItems(options);
-	// }, [options]);
+	// 	setSelected(options);
+	// }, [selected]);
 
 	const fuseOptions = {
 		includeScore: true,
@@ -64,6 +66,21 @@ const Selector: React.FC<SelectorProps> = ({
 						onChangeText={setSearchQuery}
 						testID="genre-search-query"
 					/>
+					<View style={styles.chipsContainer}>
+						<ScrollView horizontal>
+							<View style={styles.chipWrapper}>
+								{selected.map((genre, index) => (
+									<EditGenreBubble
+										key={index}
+										text={genre}
+										onPress={() =>
+											setSelected(selected.filter((i) => i !== genre))
+										}
+									/>
+								))}
+							</View>
+						</ScrollView>
+					</View>
 					<FlatList
 						testID="flat-list"
 						data={filteredOptions}
@@ -73,9 +90,9 @@ const Selector: React.FC<SelectorProps> = ({
 							<TouchableOpacity
 								style={styles.filterOption}
 								onPress={() => {
-									onSelect(item);
-									setSearchQuery("");
-									onClose();
+									if (!selected.includes(item)) {
+										setSelected([...selected, item]);
+									}
 								}}
 								testID={`${item}-genre-option`}
 							>
@@ -88,11 +105,24 @@ const Selector: React.FC<SelectorProps> = ({
 						style={styles.closeButton}
 						onPress={() => {
 							setSearchQuery("");
-							Keyboard.dismiss(); // Dismiss the keyboard manually when close button is tapped
+							setSelected([]);
+							Keyboard.dismiss();
+
+							if (selected.length > 0) {
+								onSelect(selected);
+							}
+
 							onClose();
 						}}
+						testID="close-button"
 					>
-						<Text style={styles.filterText}>Close</Text>
+						<Text style={styles.filterText}>
+							{selected.length === 0
+								? "Close"
+								: selected.length === 1
+									? "Add Genre"
+									: "Add Genres"}
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</GestureHandlerRootView>
@@ -145,6 +175,19 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		backgroundColor: colors.primary,
 		borderRadius: 5,
+	},
+	chipsContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		marginTop: 10,
+		paddingBottom: 15,
+		borderBottomWidth: 1,
+		borderBottomColor: "#eee",
+		width: "100%",
+	},
+	chipWrapper: {
+		flexDirection: "row", // Arrange items in a row
+		flexWrap: "wrap", // Allow wrapping to the next line
 	},
 });
 

@@ -8,6 +8,14 @@ import { useLocalSearchParams } from "expo-router";
 import { Player } from "../app/PlayerContext";
 import EditProfileScreen from "../app/screens/profile/EditProfilePage";
 
+jest.mock("react-native-gesture-handler", () => {
+	const MockView = (props) => <div {...props} />;
+	return {
+		GestureHandlerRootView: MockView,
+		TouchableOpacity: MockView,
+	};
+});
+
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
 	getItem: jest.fn(),
