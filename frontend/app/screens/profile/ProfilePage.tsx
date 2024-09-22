@@ -615,7 +615,7 @@ const ProfileScreen: React.FC = () => {
 			}
 		>
 			<View
-				style={{ padding: 15, backgroundColor: "white" }}
+				style={{ paddingVertical: 15, paddingLeft: 5, paddingRight: 10, backgroundColor: "white" }}
 				testID="profile-screen"
 			>
 				<View style={styles.profileHeader}>
