@@ -20,10 +20,10 @@ import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
-import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
+import GenreAdder from "../../components/GenreAdder";
 
 type InputRef = TextInput | null;
 
@@ -116,7 +116,7 @@ const EditProfileScreen = () => {
 					const validUsername: boolean = await checkUsername();
 					validNames = validUsername;
 				}
-				
+
 				if (
 					profileInfo.profile_name !== profileData.profile_name &&
 					profileData.profile_name === ""
@@ -434,18 +434,19 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const addGenre = (genreToAdd) => {
+	const addGenres = (genresToAdd: string[]) => {
 		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
-			// Check if the genre already exists
-			if (!profileData.fav_genres.data.includes(genreToAdd)) {
-				setProfileData((prevProfileData) => ({
-					...prevProfileData,
-					fav_genres: {
-						...prevProfileData.fav_genres,
-						data: [...prevProfileData.fav_genres.data, genreToAdd],
-					},
-				}));
-			}
+			genresToAdd.forEach((genre) => {
+				if (!profileData.fav_genres.data.includes(genre)) {
+					setProfileData((prevProfileData) => ({
+						...prevProfileData,
+						fav_genres: {
+							...prevProfileData.fav_genres,
+							data: [...prevProfileData.fav_genres.data, genre],
+						},
+					}));
+				}
+			});
 		}
 	};
 
@@ -559,7 +560,11 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Name</Text>
 					<TextInput
-						style={{ marginLeft: 42, borderBottomColor: "#000", borderBottomWidth: 1 }}
+						style={{
+							marginLeft: 42,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={profileData.profile_name}
 						placeholder="Enter name here"
 						onChangeText={(newName: string) => {
@@ -593,7 +598,11 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
 					<TextInput
-						style={{ marginLeft: 60, borderBottomColor: "#000", borderBottomWidth: 1 }}
+						style={{
+							marginLeft: 60,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={profileData.bio}
 						placeholder="Enter bio here"
 						onChangeText={(newName: string) => {
@@ -667,11 +676,11 @@ const EditProfileScreen = () => {
 							Add +
 						</Text>
 					</TouchableOpacity>
-					<Selector
+					<GenreAdder
 						options={genres}
 						placeholder={"Search Genres"}
 						visible={isGenreDialogVisible}
-						onSelect={addGenre}
+						onSelect={addGenres}
 						onClose={toggleGenreSelector}
 					/>
 				</View>
