@@ -684,7 +684,7 @@ const Search: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingHorizontal: 30,
+		paddingHorizontal: 10,
 		paddingTop: 30,
 	},
 	roomCardPadding: {
