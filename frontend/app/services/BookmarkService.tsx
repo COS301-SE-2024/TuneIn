@@ -83,10 +83,7 @@ class BookmarkService {
 			});
 	};
 
-	unbookmarkRoom = async (
-		rooms: RoomsApi,
-		roomID: string,
-	): Promise<void> => {
+	unbookmarkRoom = async (rooms: RoomsApi, roomID: string): Promise<void> => {
 		// make a request to the backend to check if the room is bookmarked
 		rooms
 			.unbookmarkRoom(roomID)

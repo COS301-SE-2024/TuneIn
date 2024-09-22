@@ -66,9 +66,9 @@ const EditPlaylist: React.FC = () => {
 	const [newQueue, setNewQueue] = useState<RoomSongDto[]>([]);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
-	useEffect(() => {
-		roomControls.requestRoomQueue();
-	}, []);
+	// useEffect(() => {
+	// 	roomControls.requestRoomQueue();
+	// }, []);
 
 	useEffect(() => {
 		if (unsavedChanges) {
