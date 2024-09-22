@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 import { colors } from "../styles/colors";
 import { color } from "react-native-elements/dist/helpers";
@@ -39,17 +39,21 @@ const FriendCard: React.FC<FriendCardProps> = ({
 
 	return (
 		<View style={styles.cardContainer} testID="friend-card-container">
-			<Link
-				href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
-				style={(styles.link, { pointerEvents: "box-none" })}
+			<TouchableOpacity
+				onPress={() =>
+					router.push(
+						`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`,
+					)
+				}
 				testID="friend-card-link"
 			>
 				<Image
 					source={profileImageSource}
-					style={styles.profileImage}
+					style={styles.profileImage} // Styles should now be applied correctly
 					testID="friend-card-image"
 				/>
-			</Link>
+			</TouchableOpacity>
+
 			<Text
 				style={styles.username}
 				numberOfLines={1}
@@ -167,7 +171,7 @@ const styles = StyleSheet.create({
 	profileImage: {
 		width: 50,
 		height: 50,
-		borderRadius: 25, // Rounded profile image
+		borderRadius: 25,
 		marginRight: 16,
 	},
 	acceptText: {
