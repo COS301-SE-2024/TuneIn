@@ -23,6 +23,13 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 
+	const currentDate = new Date();
+	const startDate = new Date(roomCard.start_date);
+	const endDate = new Date(roomCard.end_date);
+
+	const isBeforeStartDate = currentDate < startDate;
+	const isAfterEndDate = currentDate > endDate;
+
 	const navigateToEditRoom = () => {
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
@@ -31,12 +38,13 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	};
 
 	const navigateToRoomPage = () => {
-		console.log("Room:", room);
-		router.navigate({
-			// pathname: "/screens/rooms/RoomPage",
-			pathname: "/screens/rooms/RoomStack",
-			params: { room: JSON.stringify(room) },
-		});
+		if (roomCard.mine) {
+			console.log("Room:", room);
+			router.navigate({
+				pathname: "/screens/rooms/RoomStack",
+				params: { room: JSON.stringify(room) },
+			});
+		}
 	};
 
 	const renderSongInfo = () => {
@@ -65,8 +73,64 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 		return text;
 	};
 
+	const displayTagText = () => {
+		let adjustedTags = roomCard.tags.join(" • ");
+		if (adjustedTags.length > 20) {
+			const tags = roomCard.tags;
+			adjustedTags = tags.slice(0, -1).join(" • ");
+		}
+		return adjustedTags;
+	};
+
+	const renderOverlayText = () => {
+		if (isBeforeStartDate) {
+			return (
+				<View style={styles.overlayTextContainer}>
+					<Text style={styles.overlayText}>This room will start on</Text>
+					<Text style={styles.overlayText}>
+						{startDate.toLocaleDateString("en-GB", {
+							day: "2-digit",
+							month: "short",
+							year: "numeric",
+						})}
+					</Text>
+					<Text style={styles.overlayText}>
+						{startDate.toLocaleTimeString([], {
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</Text>
+				</View>
+			);
+		}
+		if (isAfterEndDate) {
+			return (
+				<View style={styles.overlayTextContainer}>
+					<Text style={styles.overlayText}>This room ended on</Text>
+					<Text style={styles.overlayText}>
+						{endDate.toLocaleDateString("en-GB", {
+							day: "2-digit",
+							month: "short",
+							year: "numeric",
+						})}
+					</Text>
+					<Text style={styles.overlayText}>
+						{endDate.toLocaleTimeString([], {
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</Text>
+				</View>
+			);
+		}
+		return null;
+	};
+
 	return (
-		<TouchableOpacity onPress={navigateToRoomPage}>
+		<TouchableOpacity
+			onPress={navigateToRoomPage}
+			disabled={isBeforeStartDate || isAfterEndDate}
+		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
 					source={{ uri: roomCard.backgroundImage }}
@@ -74,7 +138,15 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					imageStyle={styles.imageBackgroundStyle}
 					testID="room-card-background"
 				>
-					<View style={styles.overlay} />
+					<View
+						style={[
+							styles.overlay,
+							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
+						]}
+					/>
+					{(isBeforeStartDate || isAfterEndDate) && (
+						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
+					)}
 					<View style={styles.textContainer}>
 						<Text style={styles.roomName}>
 							{truncateText(roomCard.name, 20)}
@@ -82,9 +154,11 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						{renderSongInfo()}
 					</View>
 					<View style={styles.contentContainer}>
-						<Text style={styles.description}>
-							{truncateText(roomCard.description, 100)}
-						</Text>
+						{!isBeforeStartDate && !isAfterEndDate && (
+							<Text style={styles.description}>
+								{truncateText(roomCard.description, 100)}
+							</Text>
+						)}
 						{roomCard.mine ? (
 							<View style={styles.actionsContainer}>
 								<TouchableOpacity
@@ -93,7 +167,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 								>
 									<Text style={styles.editButtonText}>✎</Text>
 								</TouchableOpacity>
-								<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
+								<Text style={styles.tags}>{displayTagText()}</Text>
 							</View>
 						) : (
 							<View style={styles.userInfoContainer}>
@@ -106,10 +180,17 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 										{truncateText(roomCard.username, 13)}
 									</Text>
 								</View>
-								<Text style={styles.tags}>{roomCard.tags.join(" • ")}</Text>
+								<Text style={styles.tags}>{displayTagText()}</Text>
 							</View>
 						)}
 					</View>
+					{/* Conditionally render explicit icon */}
+					{roomCard.isExplicit && (
+						<Image
+							source={require("../../../assets/Explicit.png")}
+							style={styles.explicitIcon}
+						/>
+					)}
 				</ImageBackground>
 			</Animated.View>
 		</TouchableOpacity>
@@ -141,6 +222,22 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+	greyOverlay: {
+		backgroundColor: "rgba(128, 128, 128, 0.95)", // Grey overlay
+	},
+	overlayTextContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		textAlign: "center",
+		paddingTop: 50,
+		paddingLeft: 32,
+	},
+	overlayText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 	textContainer: {
 		position: "absolute",
@@ -212,6 +309,14 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 16,
 		color: "white",
+		marginRight: 15,
+	},
+	explicitIcon: {
+		width: 26,
+		height: 26,
+		position: "absolute", // Use absolute positioning
+		top: 10, // Position from the bottom
+		right: 10, // Position from the right
 	},
 });
 
