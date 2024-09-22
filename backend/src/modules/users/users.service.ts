@@ -1218,7 +1218,8 @@ export class UsersService {
 	}
 
 	async getCurrentRoomDto(username: string): Promise<RoomDto> {
-		const userID = (await this.getProfileByUsername(username)).userID;
+		// const userID = (await this.getProfileByUsername(username)).userID;
+		const userID: string = username;
 
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);

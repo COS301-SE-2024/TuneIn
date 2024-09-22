@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 interface Participant {
 	id: string;
@@ -24,6 +25,29 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	participants,
 }) => {
 	const navigation = useNavigation();
+	let _roomParticipants = useLocalSearchParams();
+	let roomParticipants = _roomParticipants.participants;
+	const participantsInRoom: Participant[] = [];
+	if (typeof roomParticipants === "string") {
+		const roomParticipantsArray = JSON.parse(roomParticipants);
+		roomParticipantsArray.forEach(
+			(participant: {
+				userID: string;
+				username: string;
+				profile_picture_url: string;
+			}) => {
+				participantsInRoom.push({
+					id: participant.userID,
+					username: participant.username,
+					profilePictureUrl: participant.profile_picture_url,
+				});
+			},
+		);
+	} else if (Array.isArray(roomParticipants)) {
+		roomParticipants.forEach((participant) => {
+			participantsInRoom.push(JSON.parse(participant));
+		});
+	}
 
 	const navigateToProfile = (userId: string) => {};
 
@@ -98,11 +122,22 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			<FlatList
-				data={mockData}
-				renderItem={renderItem}
-				keyExtractor={(item) => item.id}
-			/>
+			{(participantsInRoom.length === 0 && (
+				<View style={styles.emptyQueueContainer}>
+					<Text style={styles.emptyQueueText}>
+						This room has no participants.{" "}
+						{/* {isMine = true
+							? "Add some songs to get started!"
+							: "Wait for the host to add some songs."} */}
+					</Text>
+				</View>
+			)) || (
+				<FlatList
+					data={participantsInRoom}
+					renderItem={renderItem}
+					keyExtractor={(item) => item.id}
+				/>
+			)}
 		</View>
 	);
 };
@@ -112,6 +147,17 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "white",
 		padding: 16,
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	headerContainer: {
 		flexDirection: "row",
