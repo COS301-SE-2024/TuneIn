@@ -1,22 +1,44 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { Room } from "../../models/Room";
+import { useRouter } from "expo-router";
 
 interface MiniRoomCardProps {
-	room: {
-		name: string;
-		description: string;
-		imageUrl: string;
-	};
+	roomCard: Room;
 }
 
-const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ room }) => {
+const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
+	const router = useRouter();
+	const room = JSON.parse(JSON.stringify(roomCard));
+
+	const navigateToRoomPage = () => {
+		console.log("Room:", room);
+		router.navigate({
+			// pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
+			params: { room: JSON.stringify(room) },
+		});
+	};
+
+	const truncateText = (text: string | undefined, maxLength: number) => {
+		if (text && text.length > maxLength) {
+			return text.substring(0, maxLength - 3) + "...";
+		}
+		return text;
+	};
+
 	return (
 		<View style={styles.cardContainer}>
-			<View style={styles.textContainer}>
-				<Text style={styles.roomName}>{room.name}</Text>
-				<Text style={styles.roomDescription}>{room.description}</Text>
-			</View>
-			<Image source={{ uri: room.imageUrl }} style={styles.roomImage} />
+			<TouchableOpacity onPress={navigateToRoomPage}>
+				<View style={styles.textContainer}>
+					<Text style={styles.roomName}>{roomCard.name}</Text>
+					<Text style={styles.roomDescription}>{roomCard.description}</Text>
+				</View>
+				<Image
+					source={{ uri: roomCard.backgroundImage }}
+					style={styles.roomImage}
+				/>
+			</TouchableOpacity>
 		</View>
 	);
 };

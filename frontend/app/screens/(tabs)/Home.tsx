@@ -303,6 +303,13 @@ const Home: React.FC = () => {
 		});
 	};
 
+	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
+		router.navigate({
+			pathname: "/screens/rooms/MoreRooms",
+			params: { myRooms: JSON.stringify(rooms), name: Name },
+		});
+	};
+
 	useEffect(() => {
 		const initialize = async () => {
 			await loadCachedData();
@@ -377,11 +384,26 @@ const Home: React.FC = () => {
 							<>
 								{myRecents.length > 0 && (
 									<>
-										<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(myRecents, "Recent Rooms")
+											}
+										>
+											<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										</TouchableOpacity>
+
 										<AppCarousel data={myRecents} renderItem={renderItem} />
 									</>
 								)}
-								<Text style={styles.sectionTitle}>Picks for you</Text>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={() =>
+										navigateToMoreRooms(myRecents, "Picks for you")
+									}
+								>
+									<Text style={styles.sectionTitle}>Picks for you</Text>
+								</TouchableOpacity>
 								<AppCarousel data={myPicks} renderItem={renderItem} />
 							</>
 						)}

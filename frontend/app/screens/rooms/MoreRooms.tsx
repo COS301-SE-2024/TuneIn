@@ -42,13 +42,13 @@ const MoreRoomsPage = () => {
 			</View>
 
 			{/* Scrollable Room List */}
-			<FlatList
+			{/* <FlatList
 				data={testRooms}
 				keyExtractor={(item) => item.name}
 				renderItem={({ item }) => <MiniRoomCard room={item} />}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
-			/>
+			/> */}
 		</View>
 	);
 };
