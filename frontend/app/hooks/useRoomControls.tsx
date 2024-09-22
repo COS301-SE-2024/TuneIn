@@ -35,13 +35,6 @@ export type LiveMessage = {
 	me: boolean;
 };
 
-export type DirectMessage = {
-	message: DirectMessageDto;
-	me?: boolean;
-	messageSent: boolean;
-	isOptimistic: boolean;
-};
-
 const validTrackUri = (uri: string): boolean => {
 	if (uri.startsWith("spotify:album:")) {
 		throw new Error("Album URIs are not supported");

@@ -49,36 +49,7 @@ if (!clientId) {
 	);
 }
 
-const TIMEOUT = 5000000;
-export type LiveMessage = {
-	message: LiveChatMessageDto;
-	me: boolean;
-};
-
-export type DirectMessage = {
-	message: DirectMessageDto;
-	me?: boolean;
-	messageSent: boolean;
-	isOptimistic: boolean;
-};
-
-const validTrackUri = (uri: string): boolean => {
-	if (uri.startsWith("spotify:album:")) {
-		throw new Error("Album URIs are not supported");
-	}
-
-	if (uri.startsWith("spotify:artist:")) {
-		throw new Error("Artist URIs are not supported");
-	}
-
-	//validate with regex
-	const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
-	if (!uriRegex.test(uri)) {
-		throw new Error("Invalid URI");
-	}
-	return true;
-};
-
+const TIMEOUT = 300000;
 interface SpotifyAuth {
 	exchangeCodeWithBackend: (
 		code: string,
@@ -86,6 +57,7 @@ interface SpotifyAuth {
 		redirectURI: string,
 	) => Promise<SpotifyCallbackResponse>;
 	getSpotifyTokens: () => Promise<SpotifyTokenPair | null>;
+	userlessAPI: SpotifyApi;
 }
 
 interface LiveContextType {
@@ -131,50 +103,6 @@ interface LiveContextType {
 	currentRoomVotes: VoteDto[];
 
 	spotifyAuth: SpotifyAuth;
-}
-
-interface QueueControls {
-	enqueueSong: (song: RoomSongDto) => void;
-	dequeueSong: (song: RoomSongDto) => void;
-	upvoteSong: (song: RoomSongDto) => void;
-	downvoteSong: (song: RoomSongDto) => void;
-	swapSongVote: (song: RoomSongDto) => void;
-	undoSongVote: (song: RoomSongDto) => void;
-}
-
-interface RoomControls {
-	sendLiveChatMessage: (message: string) => void;
-	sendReaction: (emoji: string) => void;
-	requestLiveChatHistory: () => void;
-	canControlRoom: () => boolean;
-	requestRoomQueue: () => void;
-	playbackHandler: Playback;
-	queue: QueueControls;
-}
-
-interface DirectMessageControls {
-	sendDirectMessage: (message: DirectMessage) => void;
-	editDirectMessage: (message: DirectMessage) => void;
-	deleteDirectMessage: (message: DirectMessage) => void;
-	requestDirectMessageHistory: () => void;
-}
-
-interface Playback {
-	spotifyDevices: Devices;
-	handlePlayback: (
-		action: string,
-		deviceID: string,
-		offset?: number,
-	) => Promise<void>;
-	getFirstDevice: () => Promise<string | null>;
-	getDevices: () => Promise<Device[]>;
-	getDeviceIDs: () => Promise<string[]>;
-	setActiveDevice: (deviceID: string | null) => void;
-	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
-	startPlayback: () => void;
-	pausePlayback: () => void;
-	stopPlayback: () => void;
-	nextTrack: () => void;
 }
 
 export type SpotifyTokenRefreshResponse = {

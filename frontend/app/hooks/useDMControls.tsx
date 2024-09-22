@@ -12,11 +12,6 @@ if (!clientId) {
 	);
 }
 
-export type LiveMessage = {
-	message: LiveChatMessageDto;
-	me: boolean;
-};
-
 export type DirectMessage = {
 	message: DirectMessageDto;
 	me?: boolean;
@@ -24,17 +19,16 @@ export type DirectMessage = {
 	isOptimistic: boolean;
 };
 
-interface DirectMessageControls {
+export interface DirectMessageControls {
 	sendDirectMessage: (message: DirectMessage) => void;
 	editDirectMessage: (message: DirectMessage) => void;
 	deleteDirectMessage: (message: DirectMessage) => void;
 	requestDirectMessageHistory: () => void;
 }
-
 interface DmControlProps {
 	currentUser: UserDto | undefined;
 	dmParticipants: UserDto[];
-	getSocket: () => Socket | null;
+	socket: Socket | null;
 	pollLatency: () => void;
 }
 
