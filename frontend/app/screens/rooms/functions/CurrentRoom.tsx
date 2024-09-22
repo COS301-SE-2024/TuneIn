@@ -4,13 +4,16 @@ import * as utils from "../../../services/Utils";
 class CurrentRoom {
 	getCurrentRoom = async (token: string) => {
 		try {
-			const response = await fetch(`${utils.API_BASE_URL}/rooms/current/room`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
+			const response = await fetch(
+				`${utils.API_BASE_URL}/users/rooms/current`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
 			// if status code is 404, it means there is no current room
 			if (response.status === 404) {
@@ -23,15 +26,21 @@ class CurrentRoom {
 		}
 	};
 
-	isCurrentRoom = async (token: string, roomID: string) => {
+	isCurrentRoom = async (
+		token: string,
+		roomID: string,
+	): Promise<boolean | undefined> => {
 		try {
-			const response = await fetch(`${utils.API_BASE_URL}/rooms/current/room`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
+			const response = await fetch(
+				`${utils.API_BASE_URL}/users/rooms/current`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			});
+			);
 			const data = await response.json();
 			// if status code is 404, it means there is no current room
 			if (response.status === 404) {
@@ -47,7 +56,11 @@ class CurrentRoom {
 		}
 	};
 
-	leaveJoinRoom = async (token: string, roomID: string, isLeaving: boolean) => {
+	leaveJoinRoom = async (
+		token: string,
+		roomID: string,
+		isLeaving: boolean,
+	): Promise<boolean> => {
 		console.log("leaveJoinRoom", token, roomID, isLeaving);
 		try {
 			const response = await fetch(
@@ -60,8 +73,7 @@ class CurrentRoom {
 					},
 				},
 			);
-			const data = await response.json();
-			console.log(data);
+			console.log("Response:", response);
 			if (response.status === 201) {
 				return true;
 			}
@@ -72,6 +84,7 @@ class CurrentRoom {
 				`Failed to ${isLeaving ? "leave" : "join"} room`,
 				ToastAndroid.SHORT,
 			);
+			return false;
 		}
 	};
 }

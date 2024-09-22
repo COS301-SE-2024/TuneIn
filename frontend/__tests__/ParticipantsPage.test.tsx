@@ -2,10 +2,15 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import ParticipantsPage from "../app/screens/rooms/ParticipantsPage"; // Adjust the import path as needed
 import { useNavigation } from "@react-navigation/native";
-
+import { useLocalSearchParams } from "expo-router";
 // Mock useNavigation from React Navigation
 jest.mock("@react-navigation/native", () => ({
 	useNavigation: jest.fn(),
+}));
+
+jest.mock("expo-router", () => ({
+	useLocalSearchParams: jest.fn(),
+	useRouter: jest.fn(),
 }));
 
 describe("ParticipantsPage", () => {
@@ -17,6 +22,21 @@ describe("ParticipantsPage", () => {
 		(useNavigation as jest.Mock).mockReturnValue({
 			navigate: mockNavigate,
 			goBack: mockGoBack,
+		});
+
+		(useLocalSearchParams as jest.Mock).mockReturnValue({
+			participants: JSON.stringify([
+				{
+					userID: "1",
+					username: "JohnDoe",
+					profile_picture_url: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+				},
+				{
+					userID: "2",
+					username: "JaneSmith",
+					profile_picture_url: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+				},
+			]),
 		});
 	});
 

@@ -45,8 +45,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom, userData, setUserData } = playerContext;
-
+	const { userData, setUserData } = playerContext;
 	// An example of a well-typed & well-defined way to interact with the API
 	/* ********************************************************************** */
 	const { users, authenticated } = useAPI();
@@ -75,7 +74,6 @@ const Home: React.FC = () => {
 	}
 	/* ********************************************************************** */
 
-	console.log("currentRoom: " + currentRoom);
 	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);

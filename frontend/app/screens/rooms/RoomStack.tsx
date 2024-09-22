@@ -11,7 +11,13 @@ import RoomPage from "./RoomPage";
 import Chat from "./ChatRoom";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import { formatRoomData } from "../../models/Room";
@@ -44,7 +50,7 @@ function MyRoomTabs() {
 		);
 	}
 
-	const { currentRoom, setCurrentRoom } = playerContext;
+	const { currentRoom, setCurrentRoom, userData } = playerContext;
 
 	const { room } = useLocalSearchParams();
 	const roomCurrent = new CurrentRoom();
@@ -55,15 +61,18 @@ function MyRoomTabs() {
 		roomData = JSON.parse(room);
 	}
 
+	roomData.mine = roomData.userID === userData?.userID;
+
 	let roomID: string;
 	if (roomData.id !== undefined) {
 		roomID = roomData.id;
-	} else {
+	} else if (roomData.roomID !== undefined) {
 		roomID = roomData.roomID;
+	} else {
+		roomID = currentRoom?.roomID ?? "";
 	}
 
 	useEffect(() => {
-		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -77,19 +86,27 @@ function MyRoomTabs() {
 
 	const leaveRoom = () => {
 		setCurrentRoom(null);
+		setJoined(false);
 	};
 
 	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined(!joined);
 		const token = await auth.getToken();
-		console.log("Token fr fr:", token);
+		if (!token) {
+			throw new Error("No token found");
+		}
 		if (!joined) {
-			if (!token) {
-				throw new Error("No token found");
+			const joinedRoom: boolean = await roomCurrent.leaveJoinRoom(
+				token,
+				roomID,
+				false,
+			);
+			if (!joinedRoom) {
+				ToastAndroid.show(
+					"Couldn't join room. Please exit current room.",
+					ToastAndroid.SHORT,
+				);
+				return;
 			}
-			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages);
 			setJoined(true);
@@ -99,9 +116,20 @@ function MyRoomTabs() {
 				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
 			);
 		} else {
+			const leftRoom: boolean = await roomCurrent.leaveJoinRoom(
+				token as string,
+				roomID,
+				true,
+			);
+			if (!leftRoom) {
+				ToastAndroid.show(
+					"Error leaving room. Please try again.",
+					ToastAndroid.SHORT,
+				);
+				return;
+			}
 			leaveRoom();
 			setJoined(false);
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			live.leaveRoom();
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
@@ -115,10 +143,22 @@ function MyRoomTabs() {
 	};
 
 	const navigateBasedOnOwnership = () => {
+		console.log("Room is mine? ", roomData.mine);
 		if (roomData.mine) {
-			router.navigate("/screens/rooms/AdvancedSettings");
+			router.navigate({
+				pathname: "/screens/rooms/AdvancedSettings",
+				params: {
+					roomData: JSON.stringify(roomData),
+				},
+			});
 		} else {
-			router.navigate("/screens/rooms/RoomInfo");
+			console.log("Going to room info page");
+			router.navigate({
+				pathname: "/screens/rooms/RoomInfo",
+				params: {
+					roomData: JSON.stringify(roomData),
+				},
+			});
 		}
 	};
 
