@@ -144,10 +144,10 @@ const Search: React.FC = () => {
 
 		if (searchTerm === "") {
 			if (filter === "room") {
-				setSearchSuggestions(roomSearchHistory.slice(0, 5));
+				getRoomHistory();
 				getRecommendedRooms();
 			} else if (filter === "user") {
-				setSearchSuggestions(userSearchHistory.slice(0, 5));
+				getUserHistory();
 			}
 		} else {
 			if (timeoutRef.current) {
@@ -280,7 +280,6 @@ const Search: React.FC = () => {
 						);
 
 						setResults(formatResults);
-						// console.log("Results: " + JSON.stringify(results));
 					}
 				} else if (filter === "user") {
 					if (advanced) {

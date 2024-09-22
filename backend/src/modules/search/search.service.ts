@@ -399,6 +399,9 @@ export class SearchService {
 					},
 				],
 			},
+			orderBy: {
+				timestamp: "desc",
+			},
 		});
 		console.log("Result: " + JSON.stringify(result));
 
@@ -675,15 +678,6 @@ export class SearchService {
 	}
 
 	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
-		console.log(userID);
-		// const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
-		// SELECT *
-		// FROM search_history
-		// WHERE user_id::text = ${userID}
-		// AND (url LIKE '/user/%'
-		// OR url LIKE '/search/user/%')
-		// ORDER BY timestamp DESC
-		// LIMIT 10;`;
 		const result = await this.prisma.search_history.findMany({
 			where: {
 				user_id: userID,
@@ -699,6 +693,9 @@ export class SearchService {
 						},
 					},
 				],
+			},
+			orderBy: {
+				timestamp: "desc"
 			},
 		});
 
