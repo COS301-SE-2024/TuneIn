@@ -114,6 +114,7 @@ const Selector: React.FC<SelectorProps> = ({
 
 							onClose();
 						}}
+						testID="close-button"
 					>
 						<Text style={styles.filterText}>
 							{selected.length === 0
