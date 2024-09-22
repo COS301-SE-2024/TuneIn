@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { DirectMessage } from  "../LiveContext";
+import { DirectMessage } from "../LiveContext";
 import { colors } from "../styles/colors";
 
 interface MessageItemProps {

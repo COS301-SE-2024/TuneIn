@@ -140,17 +140,19 @@ export const useAPI = () => {
 	}
 
 	const fetchTokenAndUpdateContext = async () => {
-		const t = await auth.getToken();
+		if (auth.authenticated()) {
+			const t = await auth.getToken();
 
-		// TypeScript won't shut up without this check
-		if (!context) {
-			throw new Error("useAPI must be used within an APIProvider");
-		}
+			// TypeScript won't shut up without this check
+			if (!context) {
+				throw new Error("useAPI must be used within an APIProvider");
+			}
 
-		if (context.tokenState.token !== t && t !== null) {
-			console.log("Updating APIContext token to: ", t);
-			context.tokenState.setToken(t);
-			context = createAPIGroup(t, context.tokenState.setToken, true);
+			if (context.tokenState.token !== t && t !== null) {
+				console.log("Updating APIContext token to: ", t);
+				context.tokenState.setToken(t);
+				context = createAPIGroup(t, context.tokenState.setToken, true);
+			}
 		}
 	};
 	fetchTokenAndUpdateContext().then(() => {
