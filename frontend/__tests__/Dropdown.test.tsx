@@ -2,6 +2,14 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import Dropdown from "../app/components/Dropdown";
 
+jest.mock("react-native-gesture-handler", () => {
+	const MockView = (props) => <div {...props} />;
+	return {
+		GestureHandlerRootView: MockView,
+		TouchableOpacity: MockView,
+	};
+});
+
 describe("Dropdown Component", () => {
 	const options = ["Option 1", "Option 2", "Option 3"];
 	const placeholder = "Select an option";
