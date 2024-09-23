@@ -155,11 +155,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						{renderSongInfo()}
 					</View>
 					<View style={styles.contentContainer}>
-						{!isBeforeStartDate && !isAfterEndDate && (
-							<Text style={styles.description}>
-								{truncateText(roomCard.description, 100)}
-							</Text>
-						)}
+						{/* {!isBeforeStartDate && !isAfterEndDate && (
+	
+						)} */}
+						<Text style={styles.description}>
+							{truncateText(roomCard.description, 100)}
+						</Text>
 						{roomCard.mine ? (
 							<View style={styles.actionsContainer}>
 								<TouchableOpacity
