@@ -108,9 +108,71 @@ export function useRoomControls({
 	console.log("currentUser:", currentUser);
 	console.log("currentRoom:", currentRoom);
 	const { socketState, updateState } = useLiveState();
+	const spotify: SpotifyApi | undefined = useMemo(() => {
+		if (currentUser && currentUser.hasSpotifyAccount && spotifyTokens) {
+			return SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
+		}
+		return undefined;
+	}, [currentUser, spotifyTokens]);
 	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
 		devices: [],
 	});
+	const [activeDevice, setActiveDevice] = useReducer(
+		(
+			state: Device | undefined,
+			action: {
+				deviceID: string | null;
+				userSelected: boolean;
+			},
+		) => {
+			let result: Device | undefined = state;
+			if (action.deviceID !== null) {
+				for (const device of spotifyDevices.devices) {
+					if (device.id === action.deviceID) {
+						result = device;
+					}
+				}
+			}
+
+			// if updating state to match Spotify API
+			if (!action.userSelected) {
+				return result;
+			}
+
+			//else update Spotify to match state
+			if (!spotify) {
+				throw new Error(
+					"User either does not have a Spotify account or is not logged in",
+				);
+			}
+
+			if (!result || result.is_active) {
+				return result;
+			}
+
+			if (result.id === null) {
+				console.error("Device ID is null for an unknown reason.");
+				setDeviceError("Device ID is null for an unknown reason.");
+				return result;
+			}
+
+			spotify.player
+				.transferPlayback([result.id])
+				.then(() => {
+					console.log("Playback transferred to device:", action);
+					setDeviceError(null);
+				})
+				.catch((err) => {
+					console.error("An error occurred while transferring playback", err);
+					setDeviceError(
+						"An error occurred while transferring playback: " + err,
+					);
+				});
+			return result;
+		},
+		undefined,
+	);
+	const [deviceError, setDeviceError] = React.useState<string | null>(null);
 
 	const getDevices = useCallback(
 		async function (): Promise<Device[]> {
@@ -122,6 +184,11 @@ export function useRoomControls({
 				const devices: Devices = await api.player.getAvailableDevices();
 				setSpotifyDevices(devices);
 				setDeviceError(null);
+				const state: PlaybackState = await api.player.getPlaybackState();
+				setActiveDevice({
+					deviceID: state.device.id,
+					userSelected: false,
+				});
 				return devices.devices;
 			} catch (err) {
 				console.error(
@@ -163,7 +230,6 @@ export function useRoomControls({
 					throw new Error("Invalid track URI");
 				}
 
-				const activeDevice = await getFirstDevice();
 				if (!activeDevice) {
 					Alert.alert("Please connect a device to Spotify");
 					return;
@@ -239,39 +305,6 @@ export function useRoomControls({
 		console.log("getDeviceIDs function has been recreated");
 	}, [getDeviceIDs]);
 
-	const setActiveDevice = useCallback(
-		async function (deviceID: string | null): Promise<void> {
-			if (!spotifyTokens) {
-				throw new Error("Spotify tokens not found");
-			}
-			if (!deviceID) {
-				throw new Error("Cannot set active device to null");
-			}
-			try {
-				const api = SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
-
-				//fetch devices again to get the latest list
-				const devices = await api.player.getAvailableDevices();
-				for (const device of devices.devices) {
-					if (device.id === deviceID) {
-						await api.player.transferPlayback([deviceID]);
-						console.log("Playback transferred to device:", deviceID);
-						return;
-					}
-				}
-				throw new Error("Device not found");
-			} catch (err) {
-				console.error("An error occurred while transferring playback", err);
-				throw err;
-			}
-		},
-		[spotifyTokens],
-	);
-
-	useEffect(() => {
-		console.log("setActiveDevice function has been recreated");
-	}, [setActiveDevice]);
-
 	const userListeningToRoom = useCallback(
 		async function (currentTrackUri: string): Promise<boolean> {
 			if (!spotifyTokens) {
@@ -287,13 +320,17 @@ export function useRoomControls({
 				if (!playbackState) {
 					return false;
 				}
+				setActiveDevice({
+					deviceID: playbackState.device.id,
+					userSelected: false,
+				});
 				if (playbackState.item.uri === currentTrackUri) {
 					return true;
 				}
 			}
 			return false;
 		},
-		[spotifyTokens, roomPlaying],
+		[playbackState, spotifyTokens, roomPlaying],
 	);
 
 	useEffect(() => {
@@ -461,20 +498,22 @@ export function useRoomControls({
 			handlePlayback: handlePlayback,
 			getDevices: getDevices,
 			getDeviceIDs: getDeviceIDs,
+			activeDevice: activeDevice,
 			setActiveDevice: setActiveDevice,
 			userListeningToRoom: userListeningToRoom,
 			startPlayback: startPlayback,
 			pausePlayback: pausePlayback,
 			stopPlayback: stopPlayback,
 			nextTrack: nextTrack,
+			prevTrack: prevTrack,
 		};
 	}, [
+		activeDevice,
 		getDeviceIDs,
 		getDevices,
 		handlePlayback,
 		nextTrack,
 		pausePlayback,
-		setActiveDevice,
 		prevTrack,
 		spotifyDevices,
 		startPlayback,
