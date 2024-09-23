@@ -7,6 +7,8 @@ import {
 	Animated,
 	Switch,
 	Modal,
+	Easing,
+	TouchableWithoutFeedback,
 } from "react-native";
 import axios from "axios";
 import auth from "../services/AuthManagement";
@@ -74,7 +76,8 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	selectedGenre = null,
 	selectedLanguage = null,
 }) => {
-	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
+	// const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
+
 	const [genres, setGenres] = useState([
 		"rock",
 		"pop",
@@ -140,184 +143,184 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		}
 	};
 
-	useEffect(() => {
-		setShowMoreFilters(showMoreFilters); // Update visibility state when prop changes
-	}, [showMoreFilters]);
+	const slideAnim = useRef(new Animated.Value(300)).current;
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [isModalVisible, setIsModalVisible] = useState(false);
 
-	const [panResponder] = useState(
-		PanResponder.create({
-			onStartShouldSetPanResponder: () => true,
-			onMoveShouldSetPanResponder: () => true,
-			onPanResponderMove: Animated.event([null, { dy: animation }], {
-				useNativeDriver: false,
-				listener: (evt, gestureState) => {
-					if (gestureState.dy > 0) {
-						// Allow dragging only downwards
-						if (gestureState.dy < 300) {
-							// Limit the maximum peeking height
-							animation.setValue(gestureState.dy);
-						}
-					}
-				},
-			}),
-			onPanResponderRelease: (evt, gestureState) => {
-				if (gestureState.dy > 100) {
-					// If dragged sufficiently, close the modal
-					Animated.timing(animation, {
-						toValue: 300, // Animate to the closed position
-						duration: 300,
-						useNativeDriver: false,
-					}).start(() => {
-						setShowMoreFilters(false); // Close the modal after animation
-					});
-				} else {
-					// Otherwise, snap back to the open position
-					Animated.spring(animation, {
-						toValue: 0, // Fully open position
-						useNativeDriver: false,
-					}).start();
-				}
-			},
-		}),
-	);
-
-	// Reset animation when modal is opened or closed
 	useEffect(() => {
 		if (showMoreFilters) {
-			// When modal is opened, reset animation to open position
-			Animated.timing(animation, {
-				toValue: 0, // Fully open position
-				duration: 300,
-				useNativeDriver: false,
-			}).start();
+			// Set modal visible state
+			setIsModalVisible(true);
+
+			// Animate the modal opening
+			timeoutRef.current = setTimeout(() => {
+				Animated.timing(slideAnim, {
+					toValue: 0, // Fully visible
+					duration: 300,
+					easing: Easing.out(Easing.ease),
+					useNativeDriver: true,
+				}).start();
+			}, 0);
+
+			return () => {
+				clearTimeout(timeoutRef.current!); // Clean up timeout
+			};
 		} else {
-			// When modal is closed, reset animation to closed position
-			animation.setValue(300); // Move the sheet off-screen
+			// Animate the modal closing
+			Animated.timing(slideAnim, {
+				toValue: 300, // Slide down to hide
+				duration: 300,
+				easing: Easing.in(Easing.ease),
+				useNativeDriver: true,
+			}).start(() => {
+				setShowMoreFilters(false); // Close modal after animation
+				setIsModalVisible(false); // Update visibility state
+			});
 		}
 	}, [showMoreFilters]);
 
+	const handleClose = () => {
+		if (isModalVisible) {
+			// Check if modal is currently visible
+			Animated.timing(slideAnim, {
+				toValue: 300, // Slide down to hide
+				duration: 300,
+				easing: Easing.in(Easing.ease),
+				useNativeDriver: true,
+			}).start(() => setShowMoreFilters(false)); // Close modal after animation
+		}
+	};
+
 	return (
 		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
-			<View style={styles.modalContainer}>
-				<Animated.View
-					style={[styles.modal, { transform: [{ translateY: animation }] }]}
-				>
-					<View style={styles.dragHandleContainer}>
-						<View style={styles.dragHandle} {...panResponder.panHandlers} />
-					</View>
-					{(!filter || filter === "user" || filter === "room") && (
-						<>
-							{(filter === "user" || !filter) && (
-								<View style={styles.additionalFilters}>
-									{showMoreFilters && (
-										<View style={styles.includeSection}>
-											<Text style={styles.includeHeader}>Search by:</Text>
-											<View style={styles.searchBy}>
-												<ToggleButton
-													label="Minimum Followers"
-													value={minFollowers}
-													onValueChange={setMinFollowers}
-													testID="minFol-btn"
-												/>
-												<ToggleButton
-													label="Minimum Following"
-													value={maxFollowers}
-													onValueChange={setMaxFollowers}
-													testID="maxFl-btn"
-												/>
+			<TouchableWithoutFeedback onPress={handleClose}>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalOverlay}>
+						<TouchableWithoutFeedback>
+							<Animated.View
+								style={[
+									styles.modal,
+									{
+										transform: [{ translateY: slideAnim }],
+									},
+								]}
+							>
+								{(!filter || filter === "user" || filter === "room") && (
+									<>
+										{(filter === "user" || !filter) && (
+											<View style={styles.additionalFilters}>
+												{showMoreFilters && (
+													<View style={styles.includeSection}>
+														<Text style={styles.includeHeader}>Search by:</Text>
+														<View style={styles.searchBy}>
+															<ToggleButton
+																label="Minimum Followers"
+																value={minFollowers}
+																onValueChange={setMinFollowers}
+																testID="minFol-btn"
+															/>
+															<ToggleButton
+																label="Minimum Following"
+																value={maxFollowers}
+																onValueChange={setMaxFollowers}
+																testID="maxFl-btn"
+															/>
+														</View>
+													</View>
+												)}
 											</View>
-										</View>
-									)}
-								</View>
-							)}
+										)}
 
-							{(filter === "room" || !filter) && (
-								<View style={styles.additionalFilters}>
-									<View style={styles.includeSection}>
-										<Text style={styles.includeHeader}>Search by:</Text>
-										<View style={styles.searchBy}>
-											<ToggleButton
-												label="Host"
-												testID="host-toggle"
-												value={host}
-												onValueChange={setHost}
-											/>
-											<ToggleButton
-												label="Room Count"
-												testID="room-count-toggle"
-												value={roomCount}
-												onValueChange={setRoomCount}
-											/>
-										</View>
-									</View>
-									<View style={styles.includeSection}>
-										<Text style={styles.includeHeader}>Include:</Text>
-										<View style={styles.switchContainer}>
-											<Text style={styles.switchLabel}>Explicit</Text>
-											<Switch
-												testID="explicit-switch"
-												value={explicit}
-												onValueChange={setExplicit}
-											/>
-										</View>
-										<View style={styles.switchContainer}>
-											<Text style={styles.switchLabel}>NSFW</Text>
-											<Switch
-												testID="nsfw-switch"
-												value={nsfw}
-												onValueChange={setNsfw}
-											/>
-										</View>
-									</View>
-									<View style={styles.dropContainer}>
-										<Dropdown
-											options={genres}
-											placeholder="Select Genre"
-											onSelect={setSelectedGenre}
-											selectedOption={selectedGenre}
-											setSelectedOption={setSelectedGenre}
-										/>
-										<Dropdown
-											options={languages}
-											placeholder="Select Language"
-											onSelect={handleSelectLanguage}
-											selectedOption={selectedLanguage}
-											setSelectedOption={setSelectedLanguage}
-										/>
-									</View>
-									<View style={styles.includeSection}>
-										<Text style={styles.includeHeader}>Other:</Text>
-										<View style={styles.switchContainer}>
-											<Text style={styles.switchLabel}>Temporary</Text>
-											<Switch
-												value={temporary}
-												onValueChange={setTemporary}
-												testID="temp-switch"
-											/>
-										</View>
-										<View style={styles.switchContainer}>
-											<Text style={styles.switchLabel}>Private</Text>
-											<Switch
-												value={isPrivate}
-												onValueChange={setIsPrivate}
-												testID="priv-switch"
-											/>
-										</View>
-										<View style={styles.switchContainer}>
-											<Text style={styles.switchLabel}>Scheduled</Text>
-											<Switch
-												value={scheduled}
-												onValueChange={setScheduled}
-												testID="scheduled-switch"
-											/>
-										</View>
-									</View>
-								</View>
-							)}
-						</>
-					)}
-				</Animated.View>
-			</View>
+										{(filter === "room" || !filter) && (
+											<View style={styles.additionalFilters}>
+												<View style={styles.includeSection}>
+													<Text style={styles.includeHeader}>Search by:</Text>
+													<View style={styles.searchBy}>
+														<ToggleButton
+															label="Host"
+															testID="host-toggle"
+															value={host}
+															onValueChange={setHost}
+														/>
+														<ToggleButton
+															label="Room Count"
+															testID="room-count-toggle"
+															value={roomCount}
+															onValueChange={setRoomCount}
+														/>
+													</View>
+												</View>
+												<View style={styles.includeSection}>
+													<Text style={styles.includeHeader}>Include:</Text>
+													<View style={styles.switchContainer}>
+														<Text style={styles.switchLabel}>Explicit</Text>
+														<Switch
+															testID="explicit-switch"
+															value={explicit}
+															onValueChange={setExplicit}
+														/>
+													</View>
+													<View style={styles.switchContainer}>
+														<Text style={styles.switchLabel}>NSFW</Text>
+														<Switch
+															testID="nsfw-switch"
+															value={nsfw}
+															onValueChange={setNsfw}
+														/>
+													</View>
+												</View>
+												<View style={styles.dropContainer}>
+													<Dropdown
+														options={genres}
+														placeholder="Select Genre"
+														onSelect={setSelectedGenre}
+														selectedOption={selectedGenre}
+														setSelectedOption={setSelectedGenre}
+													/>
+													<Dropdown
+														options={languages}
+														placeholder="Select Language"
+														onSelect={handleSelectLanguage}
+														selectedOption={selectedLanguage}
+														setSelectedOption={setSelectedLanguage}
+													/>
+												</View>
+												<View style={styles.includeSection}>
+													<Text style={styles.includeHeader}>Other:</Text>
+													<View style={styles.switchContainer}>
+														<Text style={styles.switchLabel}>Temporary</Text>
+														<Switch
+															value={temporary}
+															onValueChange={setTemporary}
+															testID="temp-switch"
+														/>
+													</View>
+													<View style={styles.switchContainer}>
+														<Text style={styles.switchLabel}>Private</Text>
+														<Switch
+															value={isPrivate}
+															onValueChange={setIsPrivate}
+															testID="priv-switch"
+														/>
+													</View>
+													<View style={styles.switchContainer}>
+														<Text style={styles.switchLabel}>Scheduled</Text>
+														<Switch
+															value={scheduled}
+															onValueChange={setScheduled}
+															testID="scheduled-switch"
+														/>
+													</View>
+												</View>
+											</View>
+										)}
+									</>
+								)}
+							</Animated.View>
+						</TouchableWithoutFeedback>
+					</View>
+				</View>
+			</TouchableWithoutFeedback>
 		</Modal>
 	);
 };
@@ -341,12 +344,17 @@ const styles = StyleSheet.create({
 		height: 5,
 		backgroundColor: "#ccc",
 		borderRadius: 5,
-		marginBottom: 10,
+	},
+	touchableArea: {
+		padding: 20, // Increases the touchable area
+		alignItems: "center", // Keeps the handle centered within the touchable area
+		justifyContent: "center",
 	},
 	dragHandleContainer: {
 		alignItems: "center", // Ensures the drag handle is centered horizontally
 		marginBottom: 10,
 	},
+
 	additionalFilters: {
 		paddingHorizontal: 20,
 		marginTop: 10,
@@ -381,6 +389,11 @@ const styles = StyleSheet.create({
 		paddingBottom: 10,
 		alignItems: "center", // Ensures the ToggleButtons align vertically in the center
 		width: "100%", // Ensure it takes full width
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+		justifyContent: "flex-end", // Align at the bottom
 	},
 });
 
