@@ -38,13 +38,10 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	};
 
 	const navigateToRoomPage = () => {
-		if (roomCard.mine) {
-			console.log("Room:", room);
-			router.navigate({
-				pathname: "/screens/rooms/RoomStack",
-				params: { room: JSON.stringify(room) },
-			});
-		}
+		router.navigate({
+			pathname: "/screens/rooms/RoomStack",
+			params: { room: JSON.stringify(room) },
+		});
 	};
 
 	const renderSongInfo = () => {
@@ -129,7 +126,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	return (
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
-			disabled={isBeforeStartDate || isAfterEndDate}
+			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
 		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
@@ -138,15 +135,15 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					imageStyle={styles.imageBackgroundStyle}
 					testID="room-card-background"
 				>
-					<View
+					{/* <View
 						style={[
 							styles.overlay,
 							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
 						]}
-					/>
-					{(isBeforeStartDate || isAfterEndDate) && (
+					/> */}
+					{/* {(isBeforeStartDate || isAfterEndDate) && (
 						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
-					)}
+					)} */}
 					<View style={styles.textContainer}>
 						<Text style={styles.roomName}>
 							{truncateText(roomCard.name, 20)}

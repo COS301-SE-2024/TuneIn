@@ -12,13 +12,10 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	const room = JSON.parse(JSON.stringify(roomCard));
 
 	const navigateToRoomPage = () => {
-		if (!isBeforeStartDate && !isAfterEndDate) {
-			console.log("Room:", room);
-			router.navigate({
-				pathname: "/screens/rooms/RoomStack",
-				params: { room: JSON.stringify(room) },
-			});
-		}
+		router.navigate({
+			pathname: "/screens/rooms/RoomStack",
+			params: { room: JSON.stringify(room) },
+		});
 	};
 
 	const truncateText = (text: string | undefined, maxLength: number) => {
@@ -39,23 +36,23 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
 			style={styles.cardContainer}
-			disabled={isBeforeStartDate || isAfterEndDate}
+			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
 		>
 			<View style={styles.imageContainer}>
 				<Image
 					source={{ uri: roomCard.backgroundImage }}
 					style={styles.roomImage}
 				/>
-				{(isBeforeStartDate || isAfterEndDate) && (
+				{/* {(isBeforeStartDate || isAfterEndDate) && (
 					<View style={styles.greyOverlay} />
-				)}
+				)} */}
 			</View>
 
 			<View style={styles.textContainer}>
 				<Text style={styles.roomName}>{roomCard.name}</Text>
 
 				{/* Display opening or closing date */}
-				{isBeforeStartDate ? (
+				{/* {isBeforeStartDate ? (
 					<Text style={styles.roomStatus}>
 						This room will open on{" "}
 						{startDate.toLocaleDateString("en-GB", {
@@ -84,11 +81,11 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 						})}
 					</Text>
 				) : (
-					<Text style={styles.roomDescription}>
-						{truncateText(roomCard.description, 50)}
-					</Text>
-				)}
-
+					
+				)} */}
+				<Text style={styles.roomDescription}>
+					{truncateText(roomCard.description, 50)}
+				</Text>
 				{/* User profile and username inline */}
 				<View style={styles.userInfo}>
 					<Image
