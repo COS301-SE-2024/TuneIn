@@ -81,6 +81,7 @@ export interface Playback {
 	pausePlayback: () => void;
 	stopPlayback: () => void;
 	nextTrack: () => void;
+	prevTrack: () => void;
 }
 
 interface RoomControlProps {
@@ -423,6 +424,37 @@ export function useRoomControls({
 		console.log("nextTrack function has been recreated");
 	}, [nextTrack]);
 
+	const prevTrack = useCallback(
+		function (): void {
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
+			pollLatency();
+			if (!currentUser) {
+				console.error("User is not logged in");
+				return;
+			}
+			if (!currentRoom) {
+				console.error("User is not in a room");
+				return;
+			}
+			const input: PlaybackEventDto = {
+				userID: currentUser.userID,
+				roomID: currentRoom.roomID,
+				spotifyID: null,
+				UTC_time: null,
+			};
+			socket.emit(SOCKET_EVENTS.INIT_PREV, JSON.stringify(input));
+		},
+		[currentRoom, currentUser, socket, pollLatency],
+	);
+
+	useEffect(() => {
+		console.log("prevTrack function has been recreated");
+	}, [prevTrack]);
+
 	const playbackHandler: Playback = useMemo(() => {
 		return {
 			spotifyDevices: spotifyDevices,
@@ -443,6 +475,7 @@ export function useRoomControls({
 		nextTrack,
 		pausePlayback,
 		setActiveDevice,
+		prevTrack,
 		spotifyDevices,
 		startPlayback,
 		stopPlayback,
