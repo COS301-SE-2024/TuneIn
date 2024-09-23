@@ -1,11 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useCallback,
-	memo,
-	useContext,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback, memo } from "react";
 import {
 	View,
 	Text,
@@ -30,9 +23,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import CurrentRoom from "./functions/CurrentRoom";
 import DevicePicker from "../../components/DevicePicker";
 import { useLive } from "../../LiveContext";
-import { Player } from "../../PlayerContext";
 import * as rs from "../../models/RoomSongDto";
-import { formatRoomData } from "../../models/Room";
 import { FlyingView } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
@@ -52,6 +43,7 @@ const RoomPage = () => {
 		leaveRoom,
 		roomEmojiObjects,
 		currentSong,
+		currentRoom,
 		roomQueue,
 		roomMessages,
 		userBookmarks,
@@ -72,28 +64,9 @@ const RoomPage = () => {
 		roomID = roomData.roomID;
 	}
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
-	const { currentRoom: thisCurrentRoom, setCurrentRoom: setThisCurrentRoom } =
-		playerContext;
-	const [joined, setJoined] = useState(false);
-
-	useEffect(() => {
-		console.log("Room ID: " + thisCurrentRoom?.roomID);
-		if (thisCurrentRoom && thisCurrentRoom?.roomID === roomID) {
-			setJoined(true);
-		}
-	}, [thisCurrentRoom, roomID]);
-
 	const router = useRouter();
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
@@ -140,12 +113,6 @@ const RoomPage = () => {
 		}
 	};
 
-	const joinThisRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setThisCurrentRoom(formattedRoom);
-	}, [roomData, setThisCurrentRoom]);
-
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const collapsedHeight = 60;
@@ -154,21 +121,15 @@ const RoomPage = () => {
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	useEffect(() => {
-		roomControls.requestRoomQueue();
-	}, [roomData.roomID, roomID]);
-
-	useEffect(() => {
-		return () => {
-			if (trackPositionIntervalRef.current) {
-				clearInterval(trackPositionIntervalRef.current);
-			}
-		};
-	}, [isPlaying]);
-
-	useEffect(() => {
-		if (isPlaying) {
+		if (roomPlaying) {
 			trackPositionIntervalRef.current = window.setInterval(() => {
-				setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+				const s = currentSong;
+				if (s) {
+					const st = s.startTime;
+					if (st) {
+						setSecondsPlayed(new Date().valueOf() - st.valueOf());
+					}
+				}
 			}, 1000);
 		} else {
 			if (trackPositionIntervalRef.current !== null) {
@@ -182,7 +143,7 @@ const RoomPage = () => {
 				clearInterval(trackPositionIntervalRef.current);
 			}
 		};
-	}, [isPlaying]);
+	}, [currentSong, roomPlaying]);
 
 	const playPauseTrack = useCallback(
 		async (index: number = currentTrackIndex, offset: number = 0) => {
@@ -195,22 +156,27 @@ const RoomPage = () => {
 					console.log("stopping playback");
 					roomControls.playbackHandler.stopPlayback();
 				}
-				setCurrentTrackIndex(index);
-				setIsPlaying(roomPlaying);
+				const i = currentSong?.index;
+				if (i) setCurrentTrackIndex(i);
 			}
+			roomControls.requestRoomQueue();
 		},
-		//[queue, playbackManager],
-		[roomID],
+		[currentSong?.index, currentTrackIndex, roomControls, roomPlaying],
 	);
 
 	const playNextTrack = () => {
+		console.log("playNextTrack playNextTrack playNextTrack");
 		if (roomControls.canControlRoom()) {
+			roomControls.playbackHandler.nextTrack();
 		}
+		roomControls.requestRoomQueue();
 	};
 
 	const playPreviousTrack = () => {
 		if (roomControls.canControlRoom()) {
+			roomControls.playbackHandler.prevTrack();
 		}
+		roomControls.requestRoomQueue();
 	};
 
 	const toggleChat = () => {
@@ -224,6 +190,7 @@ const RoomPage = () => {
 	};
 
 	const navigateToPlaylist = () => {
+		roomControls.requestRoomQueue();
 		router.navigate({
 			pathname: "/screens/rooms/Playlist",
 			params: {
@@ -234,44 +201,30 @@ const RoomPage = () => {
 	};
 
 	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined(!joined);
 		const token = await auth.getToken();
 		if (!token) {
 			throw new Error("No token found");
 		}
-		if (!joined) {
+
+		// only join if not in room or if in another room
+		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
 			console.log("Joining room........", roomID, token);
 			roomCurrent.leaveJoinRoom(token, roomID, false);
-			joinThisRoom();
 			joinRoom(roomID);
-			setJoined(true);
 			const i = currentSong ? currentSong.index : 0;
 			console.log(
 				`Joined: Song Index - ${i}, Seconds Played - ${secondsPlayed}`,
 			);
 			roomControls.requestRoomQueue();
-		} else {
+
+			// only leave if you're in the room
+		} else if (currentRoom && currentRoom.roomID === roomID) {
 			leaveRoom();
-			setJoined(false);
 			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			leaveRoom();
-			const deviceID = await roomControls.playbackHandler.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				await roomControls.playbackHandler.handlePlayback("pause", deviceID);
-			}
-			setIsPlaying(false);
-			setThisCurrentRoom(null);
+			await roomControls.playbackHandler.handlePlayback("pause");
 		}
 	};
-
-	useEffect(() => {
-		if (!joined) {
-			console.log("Joining room...");
-			console.log(joined);
-			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
-		}
-	}, [joined, roomID]);
 
 	// on component mount
 	useEffect(() => {
@@ -281,7 +234,7 @@ const RoomPage = () => {
 				break;
 			}
 		}
-	}, []);
+	}, [roomID, userBookmarks]);
 
 	const sendMessage = () => {
 		if (isSending) return;
@@ -340,7 +293,7 @@ const RoomPage = () => {
 							onPress={handleJoinLeave}
 						>
 							<Text style={styles.joinLeaveButtonText}>
-								{joined ? "Leave" : "Join"}
+								{currentRoom?.roomID === roomID ? "Leave" : "Join"}
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -479,7 +432,7 @@ const RoomPage = () => {
 							<ScrollView style={{ flex: 1, marginTop: 10 }}>
 								{roomMessages.map((msg, index) => (
 									<MemoizedCommentWidget
-										key={index}
+										key={msg.message.messageID}
 										username={msg.message.sender.username}
 										message={msg.message.messageBody}
 										profilePictureUrl={msg.message.sender.profile_picture_url}
