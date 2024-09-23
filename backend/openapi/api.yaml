@@ -2352,6 +2352,8 @@ components:
             user is not friends with the current user
           allOf:
             - $ref: '#/components/schemas/UserFriendship'
+        hasSpotifyAccount:
+          type: boolean
       required:
         - profile_name
         - userID
@@ -2364,6 +2366,7 @@ components:
         - fav_songs
         - fav_rooms
         - recent_rooms
+        - hasSpotifyAccount
     FollowersAndFollowing:
       type: object
       properties:
@@ -2432,6 +2435,8 @@ components:
             user is not friends with the current user
           allOf:
             - $ref: '#/components/schemas/UserFriendship'
+        hasSpotifyAccount:
+          type: boolean
     DirectMessageDto:
       type: object
       properties:

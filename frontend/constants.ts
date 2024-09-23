@@ -1,8 +1,8 @@
 // `common/constants.ts`
 export const SOCKET_EVENTS = {
 	//shared
-	CONNECT: "connectUser",
-	DISCONNECT: "disconnectUser",
+	CONNECT_USER: "connectUser",
+	DISCONNECT_USER: "disconnectUser",
 	JOIN_ROOM: "joinRoom",
 	LEAVE_ROOM: "leaveRoom",
 	ERROR: "error",
@@ -29,6 +29,7 @@ export const SOCKET_EVENTS = {
 	INIT_PAUSE: "initPause",
 	INIT_STOP: "initStop",
 	INIT_SKIP: "initSkip",
+	INIT_PREV: "initPrev",
 	SEEK_MEDIA: "seekMedia",
 	CURRENT_MEDIA: "currentMedia",
 	MEDIA_SYNC: "mediaSync",

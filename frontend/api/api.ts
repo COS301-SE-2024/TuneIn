@@ -1274,6 +1274,12 @@ export interface UpdateUserDto {
      * @memberof UpdateUserDto
      */
     'friendship'?: UserFriendship;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateUserDto
+     */
+    'hasSpotifyAccount'?: boolean;
 }
 /**
  * 
@@ -1384,6 +1390,12 @@ export interface UserDto {
      * @memberof UserDto
      */
     'friendship'?: UserFriendship;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserDto
+     */
+    'hasSpotifyAccount': boolean;
 }
 /**
  * 
