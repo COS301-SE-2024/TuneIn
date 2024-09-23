@@ -34,6 +34,7 @@ export const SOCKET_EVENTS = {
 	CURRENT_MEDIA: "currentMedia",
 	MEDIA_SYNC: "mediaSync",
 	REQUEST_QUEUE: "requestQueue",
+	CLEAR_QUEUE: "clearQueue",
 
 	//for queue & voting
 	UPVOTE_SONG: "upvoteSong",

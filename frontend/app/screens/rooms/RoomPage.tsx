@@ -20,7 +20,6 @@ import CommentWidget from "../../components/CommentWidget";
 import { LinearGradient } from "expo-linear-gradient";
 import auth from "../../services/AuthManagement";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import CurrentRoom from "./functions/CurrentRoom";
 import DevicePicker from "../../components/DevicePicker";
 import { useLive } from "../../LiveContext";
 import * as rs from "../../models/RoomSongDto";
@@ -49,7 +48,6 @@ const RoomPage = () => {
 		userBookmarks,
 	} = useLive();
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);

@@ -1092,19 +1092,19 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 				const somethingChanged: boolean = await this.roomQueue.upvoteSong(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
+					payload.songs[0].spotifyID,
+					payload.songs[0].userID,
 					payload.createdAt,
 				);
 				if (somethingChanged) {
 					const song = await this.roomQueue.getSongAsRoomSongDto(
 						payload.roomID,
-						payload.song.spotifyID,
+						payload.songs[0].spotifyID,
 					);
 					if (song) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: [song],
 						};
 						this.server
 							.to(payload.roomID)
@@ -1136,19 +1136,19 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 				const somethingChanged: boolean = await this.roomQueue.downvoteSong(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
+					payload.songs[0].spotifyID,
+					payload.songs[0].userID,
 					payload.createdAt,
 				);
 				if (somethingChanged) {
 					const song = await this.roomQueue.getSongAsRoomSongDto(
 						payload.roomID,
-						payload.song.spotifyID,
+						payload.songs[0].spotifyID,
 					);
 					if (song) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: [song],
 						};
 						this.server
 							.to(payload.roomID)
@@ -1177,18 +1177,18 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
 				const somethingChanged: boolean = await this.roomQueue.undoSongVote(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
+					payload.songs[0].spotifyID,
+					payload.songs[0].userID,
 				);
 				if (somethingChanged) {
 					const song = await this.roomQueue.getSongAsRoomSongDto(
 						payload.roomID,
-						payload.song.spotifyID,
+						payload.songs[0].spotifyID,
 					);
 					if (song) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: [song],
 						};
 						this.server
 							.to(payload.roomID)
@@ -1220,19 +1220,19 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 				const somethingChanged: boolean = await this.roomQueue.swapSongVote(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
+					payload.songs[0].spotifyID,
+					payload.songs[0].userID,
 					payload.createdAt,
 				);
 				if (somethingChanged) {
 					const song = await this.roomQueue.getSongAsRoomSongDto(
 						payload.roomID,
-						payload.song.spotifyID,
+						payload.songs[0].spotifyID,
 					);
 					if (song) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: [song],
 						};
 						this.server
 							.to(payload.roomID)
@@ -1262,21 +1262,23 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (!payload.createdAt) {
 					throw new Error("No createdAt provided");
 				}
-				const somethingChanged: boolean = await this.roomQueue.addSong(
+				const somethingChanged: boolean = await this.roomQueue.addSongs(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
-					payload.createdAt,
+					payload.songs,
 				);
 				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
-						payload.roomID,
-						payload.song.spotifyID,
+					const queueState: {
+						room: RoomDto;
+						songs: RoomSongDto[];
+						votes: VoteDto[];
+					} = await this.roomQueue.getQueueState(payload.roomID);
+					const newSongs: RoomSongDto[] = queueState.songs.filter((s) =>
+						payload.songs.some((p) => p.spotifyID === s.spotifyID),
 					);
-					if (song) {
+					if (newSongs.length > 0) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: newSongs,
 						};
 						this.server
 							.to(payload.roomID)
@@ -1302,20 +1304,23 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			try {
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
-				const somethingChanged: boolean = await this.roomQueue.removeSong(
+				const somethingChanged: boolean = await this.roomQueue.removeSongs(
 					payload.roomID,
-					payload.song.spotifyID,
-					payload.song.userID,
+					payload.songs,
 				);
 				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
-						payload.roomID,
-						payload.song.spotifyID,
+					const queueState: {
+						room: RoomDto;
+						songs: RoomSongDto[];
+						votes: VoteDto[];
+					} = await this.roomQueue.getQueueState(payload.roomID);
+					const newSongs: RoomSongDto[] = queueState.songs.filter((s) =>
+						payload.songs.some((p) => p.spotifyID === s.spotifyID),
 					);
-					if (song) {
+					if (newSongs.length > 0) {
 						const response: QueueEventDto = {
 							roomID: payload.roomID,
-							song: song,
+							songs: newSongs,
 						};
 						this.server
 							.to(payload.roomID)
@@ -1340,8 +1345,8 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.REQUEST_QUEUE);
 			try {
 				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
-				await this.sendQueueState(payload.roomID);
+				const obj: { roomID: string } = JSON.parse(p) as { roomID: string };
+				await this.sendQueueState(obj.roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

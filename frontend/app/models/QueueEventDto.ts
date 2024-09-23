@@ -1,7 +1,7 @@
 import { RoomSongDto } from "./RoomSongDto";
 
 export type QueueEventDto = {
-	song: RoomSongDto;
+	songs: RoomSongDto[];
 	roomID: string;
 	createdAt?: Date;
 };

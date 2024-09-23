@@ -6,7 +6,7 @@ export class QueueEventDto {
 	@ApiProperty()
 	@IsObject()
 	@ValidateNested()
-	song: RoomSongDto;
+	songs: RoomSongDto[];
 
 	@ApiProperty()
 	@IsString()

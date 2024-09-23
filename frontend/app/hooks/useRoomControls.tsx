@@ -58,8 +58,8 @@ const validTrackUri = (uri: string): boolean => {
 };
 
 export interface QueueControls {
-	enqueueSong: (song: RoomSongDto) => void;
-	dequeueSong: (song: RoomSongDto) => void;
+	enqueueSongs: (songs: RoomSongDto[]) => void;
+	dequeueSongs: (songs: RoomSongDto[]) => void;
 	upvoteSong: (song: RoomSongDto) => void;
 	downvoteSong: (song: RoomSongDto) => void;
 	swapSongVote: (song: RoomSongDto) => void;
@@ -102,6 +102,7 @@ interface RoomControlProps {
 	socket: Socket | null;
 	currentSong: RoomSongDto | undefined;
 	roomQueue: RoomSongDto[];
+	setRoomQueue: React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
 	spotifyTokens: SpotifyTokenPair | undefined;
 	roomPlaying: boolean;
 	pollLatency: () => void;
@@ -114,6 +115,7 @@ export function useRoomControls({
 	socket,
 	currentSong,
 	roomQueue,
+	setRoomQueue,
 	spotifyTokens,
 	roomPlaying,
 	pollLatency,
@@ -650,67 +652,99 @@ export function useRoomControls({
 		console.log("playbackHandler object has been recreated");
 	}, [playbackHandler]);
 
-	const enqueueSong = useCallback(
-		function (song: RoomSongDto): void {
+	const clearQueue = useCallback(
+		function (): void {
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
 			}
 
-			console.log("Enqueueing song", song);
 			if (!currentRoom) {
 				return;
 			}
 			if (!currentUser) {
 				return;
 			}
+			const input = {
+				roomID: currentRoom.roomID,
+			};
+			socket.emit(SOCKET_EVENTS.CLEAR_QUEUE, JSON.stringify(input));
+			console.log(`emitted: ${SOCKET_EVENTS.CLEAR_QUEUE}`);
+			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			console.log(`emitted: ${SOCKET_EVENTS.REQUEST_QUEUE}`);
+		},
+		[currentRoom, currentUser, socket],
+	);
+
+	useEffect(() => {
+		console.log("clearQueue function has been recreated");
+	}, [clearQueue]);
+
+	const enqueueSongs = useCallback(
+		function (songs: RoomSongDto[]): void {
+			if (!socket) {
+				console.error("Socket connection not initialized");
+				return;
+			}
+
+			console.log("Enqueueing songs");
+			console.log(songs);
+			if (!currentRoom) {
+				return;
+			}
+			if (!currentUser) {
+				return;
+			}
+			roomQueue.push(...songs);
 			const input: QueueEventDto = {
-				song: song,
+				songs: songs,
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
 			socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
-			console.log("emitted: enqueueSong");
+			console.log("emitted: enqueueSongs");
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
-		[currentRoom, currentUser, socket],
+		[currentRoom, currentUser, roomQueue, socket],
 	);
 
 	useEffect(() => {
-		console.log("enqueueSong function has been recreated");
-	}, [enqueueSong]);
+		console.log("enqueueSongs function has been recreated");
+	}, [enqueueSongs]);
 
-	const dequeueSong = useCallback(
-		function (song: RoomSongDto): void {
+	const dequeueSongs = useCallback(
+		function (songs: RoomSongDto[]): void {
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
 			}
 
-			console.log("Dequeueing song", song);
+			console.log("Dequeueing song");
+			console.log(songs);
 			if (!currentRoom) {
 				return;
 			}
 			if (!currentUser) {
 				return;
 			}
+			setRoomQueue(roomQueue.filter((s) => !songs.includes(s)));
 			const input: QueueEventDto = {
-				song: song,
+				songs: songs,
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
 			socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
-			console.log("emitted: dequeueSong");
+			console.log("emitted: dequeueSongs");
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
-		[currentRoom, currentUser, socket],
+		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
 	);
 
 	useEffect(() => {
-		console.log("dequeueSong function has been recreated");
-	}, [dequeueSong]);
+		console.log("dequeueSongs function has been recreated");
+	}, [dequeueSongs]);
 
 	const upvoteSong = useCallback(
 		function (song: RoomSongDto): void {
@@ -726,7 +760,7 @@ export function useRoomControls({
 				return;
 			}
 			const input: QueueEventDto = {
-				song: song,
+				songs: [song],
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
@@ -753,7 +787,7 @@ export function useRoomControls({
 				return;
 			}
 			const input: QueueEventDto = {
-				song: song,
+				songs: [song],
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
@@ -780,7 +814,7 @@ export function useRoomControls({
 				return;
 			}
 			const input: QueueEventDto = {
-				song: song,
+				songs: [song],
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
@@ -807,7 +841,7 @@ export function useRoomControls({
 				return;
 			}
 			const input: QueueEventDto = {
-				song: song,
+				songs: [song],
 				roomID: currentRoom.roomID,
 				createdAt: new Date(),
 			};
@@ -822,16 +856,16 @@ export function useRoomControls({
 
 	const queueControls: QueueControls = useMemo(() => {
 		return {
-			enqueueSong: enqueueSong,
-			dequeueSong: dequeueSong,
+			enqueueSongs: enqueueSongs,
+			dequeueSongs: dequeueSongs,
 			upvoteSong: upvoteSong,
 			downvoteSong: downvoteSong,
 			swapSongVote: swapSongVote,
 			undoSongVote: undoSongVote,
 		};
 	}, [
-		enqueueSong,
-		dequeueSong,
+		enqueueSongs,
+		dequeueSongs,
 		upvoteSong,
 		downvoteSong,
 		swapSongVote,
@@ -1001,14 +1035,8 @@ export function useRoomControls({
 			if (!currentUser) {
 				return;
 			}
-			const input: QueueEventDto = {
-				song: {
-					spotifyID: "123",
-					userID: currentUser.userID,
-					index: -1,
-				},
+			const input = {
 				roomID: currentRoom.roomID,
-				createdAt: new Date(),
 			};
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 		},

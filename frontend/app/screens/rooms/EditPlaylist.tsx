@@ -71,7 +71,7 @@ const EditPlaylist: React.FC = () => {
 	// }, []);
 
 	useEffect(() => {
-		if (unsavedChanges) {
+		if (!unsavedChanges) {
 			setNewQueue(roomQueue);
 		} else {
 			if (!currentUser) {
@@ -173,20 +173,26 @@ const EditPlaylist: React.FC = () => {
 
 		if (unsavedChanges) {
 			try {
-				for (let i = 0; i < removedSongs.length; i++) {
-					const track = removedSongs[i];
-					const song = newQueue.find((s) => s.spotifyID === track.id);
-					if (song) {
-						roomControls.queue.dequeueSong(song);
-					}
-				}
+				const dequeue: RoomSongDto[] = [];
 				for (let i = 0; i < addedSongs.length; i++) {
 					const track = addedSongs[i];
 					const song = newQueue.find((s) => s.spotifyID === track.id);
 					if (song) {
-						roomControls.queue.enqueueSong(song);
+						dequeue.push(song);
 					}
 				}
+				roomControls.queue.dequeueSongs(dequeue);
+
+				const enqueue: RoomSongDto[] = [];
+				for (let i = 0; i < removedSongs.length; i++) {
+					const track = removedSongs[i];
+					const song = newQueue.find((s) => s.spotifyID === track.id);
+					if (song) {
+						enqueue.push(song);
+					}
+				}
+				roomControls.queue.enqueueSongs(enqueue);
+
 				setUnsavedChanges(false);
 			} catch (error) {
 				console.error("Error saving playlist:", error);
@@ -248,10 +254,8 @@ const EditPlaylist: React.FC = () => {
 								<Text style={styles.explicitTag}>Explicit</Text>
 							)}
 						</View>
-						{currentRoom?.creator.userID === currentUser?.userID &&
-						addedSongs.some(
-							(addedTrack) => addedTrack.id === rs.getID(song),
-						) ? (
+						{currentRoom?.creator.userID === currentUser?.userID ||
+						song.userID === currentUser?.userID ? (
 							<TouchableOpacity
 								style={styles.removeButton}
 								onPress={() => removeFromPlaylist(rs.getID(song))}
