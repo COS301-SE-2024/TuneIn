@@ -231,7 +231,12 @@ export function useLiveState() {
 	const [socketState, updateState] = useReducer(stateReducer, initialState);
 	const [socketEventsReceived, handleReceivedEvent] = useReducer(
 		(state: Map<string, number>, action: string) => {
-			if (action === RESET_EVENTS) {
+			if (
+				action === RESET_EVENTS ||
+				action === "connect_error" ||
+				action === "disconnect"
+			) {
+				updateState({ type: actionTypes.RESET });
 				return new Map<string, number>();
 			} else if (action === NEW_ROOM) {
 				updateState({ type: actionTypes.CLEAR_ROOM_STATE });
@@ -263,11 +268,7 @@ export function useLiveState() {
 				state.set(SOCKET_EVENTS.CHAT_MODIFIED, 0);
 				state.set(SOCKET_EVENTS.DM_HISTORY, 0);
 				return state;
-			} else if (
-				socketEvents.includes(action) ||
-				action === "connect" ||
-				action === "disconnect"
-			) {
+			} else if (socketEvents.includes(action) || action === "connect") {
 				console.log(`SOCKET MESSAGE RECEIVED: ${action}`);
 				const count = state.get(action) || 0;
 				state.set(action, count + 1);
