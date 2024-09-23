@@ -8,7 +8,6 @@ import {
 	Alert,
 	ActivityIndicator,
 } from "react-native";
-import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
 import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
@@ -17,49 +16,19 @@ import { useLive } from "../LiveContext";
 import { Device } from "@spotify/web-api-ts-sdk";
 
 const DevicePicker = () => {
-	const { getDeviceIDs, error } = useSpotifyDevices();
 	const { roomControls } = useLive();
 	const [isVisible, setIsVisible] = useState(false);
-	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const [accessToken, setAccessToken] = useState<string>("");
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-
-	/*
-	useEffect(() => {
-		const fetchToken = async () => {
-			try {
-				const allTokens = await spotifyAuth.getTokens();
-				const token = allTokens.access_token;
-				setAccessToken(token);
-			} catch (err) {
-				console.error("An error occurred while fetching the token", err);
-			}
-		};
-
-		fetchToken();
-	}, []);
-	*/
 
 	useEffect(() => {
 		// Declare intervalId using useRef to ensure it maintains its value across renders
-
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
-					//const deviceList = await getDeviceIDs();
 					const deviceList: Device[] =
 						await roomControls.playbackHandler.getDevices();
 					console.log("deviceList: ", deviceList);
-					if (deviceList) {
-						//setDevices(deviceList);
-						const activeDevice = deviceList.find((device) => device.is_active);
-						if (activeDevice) {
-							setSelectedDevice(activeDevice.id);
-						}
-					} else {
-						console.warn("Received null or undefined deviceList");
-					}
 				} catch (err) {
 					console.error("An error occurred while fetching devices", err);
 				}
@@ -83,7 +52,11 @@ const DevicePicker = () => {
 				clearInterval(intervalIdRef.current);
 			}
 		}
-	}, [isVisible, getDeviceIDs]);
+	}, [
+		isVisible,
+		roomControls.playbackHandler,
+		roomControls.playbackHandler.spotifyDevices.devices,
+	]);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
@@ -92,37 +65,6 @@ const DevicePicker = () => {
 	const handleClosePopup = () => {
 		setIsVisible(false);
 	};
-
-	/*
-	const handleDeviceSelect = async (deviceId: string | null) => {
-		if (!deviceId) {
-			Alert.alert("Error", "No device ID was provided.");
-			return;
-		}
-		setIsLoading(true);
-		setSelectedDevice(deviceId);
-		try {
-			const response = await fetch("https://api.spotify.com/v1/me/player", {
-				method: "PUT",
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					device_ids: [deviceId],
-				}),
-			});
-			if (!response.ok) {
-				throw new Error("Failed to transfer playback to the selected device.");
-			}
-		} catch (error) {
-			const errorMessage = (error as Error).message;
-			Alert.alert("Error", errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-	*/
 
 	const renderDeviceName = (device: Device) => {
 		let icon = null;
@@ -159,10 +101,12 @@ const DevicePicker = () => {
 				<Modal visible={isVisible} transparent={true} animationType="fade">
 					<View style={styles.modalBackground}>
 						<View style={styles.popupContainer}>
-							{error ? (
+							{roomControls.playbackHandler.deviceError ? (
 								<>
 									<Text style={styles.popupTitle}>Error Fetching Devices</Text>
-									<Text style={styles.popupMessage}>{error}</Text>
+									<Text style={styles.popupMessage}>
+										{roomControls.playbackHandler.deviceError}
+									</Text>
 								</>
 							) : !roomControls.playbackHandler.spotifyDevices.devices ||
 							  roomControls.playbackHandler.spotifyDevices.devices.length ===
@@ -186,16 +130,18 @@ const DevicePicker = () => {
 														key={index}
 														style={styles.deviceOption}
 														onPress={() =>
-															roomControls.playbackHandler.setActiveDevice(
-																device.id,
-															)
+															roomControls.playbackHandler.setActiveDevice({
+																deviceID: device.id,
+																userSelected: true,
+															})
 														}
 													>
 														<RadioButton
 															value={device.id}
 															testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
 															status={
-																selectedDevice === device.id
+																roomControls.playbackHandler.activeDevice ===
+																device
 																	? "checked"
 																	: "unchecked"
 															}
