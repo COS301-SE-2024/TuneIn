@@ -109,6 +109,7 @@ const Search: React.FC = () => {
 			try {
 				const token = await auth.getToken();
 				if (token) {
+					// console.log("getting recommendations")
 					const response = await axios.get(
 						`${utils.API_BASE_URL}/users/rooms/foryou`,
 						{
@@ -117,6 +118,7 @@ const Search: React.FC = () => {
 							},
 						},
 					);
+					// console.log("Recommended response: " + JSON.stringify(response));
 					const recommendedRooms: SearchResult[] = response.data.map(
 						(item: any) => ({
 							id: item.roomID,
@@ -183,7 +185,7 @@ const Search: React.FC = () => {
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
-		console.log("handle search genre: " + selectedGenre);
+		// console.log("handle search");
 		const advanced = isAdvancedSearch();
 		setDropdownVisible(false);
 		setLoading(true);
@@ -402,6 +404,7 @@ const Search: React.FC = () => {
 	};
 
 	const getRoomHistory = async () => {
+		// console.log("Get Room History");
 		try {
 			const token = await auth.getToken();
 
@@ -428,6 +431,7 @@ const Search: React.FC = () => {
 	};
 
 	const getUserHistory = async () => {
+		// console.log("Get User History");
 		try {
 			const token = await auth.getToken();
 
@@ -454,6 +458,7 @@ const Search: React.FC = () => {
 	};
 
 	const getRoomsSuggestions = async (q: string) => {
+		// console.log("GetRoomsSuggestions");
 		try {
 			const token = await auth.getToken();
 
@@ -473,12 +478,13 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.log("Error fetching search history:", error);
+			console.log("Error fetching search suggestions:", error);
 			return null;
 		}
 	};
 
 	const getUsersSuggestions = async (q: string) => {
+		// console.log("GetUsersSuggestions");
 		try {
 			const token = await auth.getToken();
 
@@ -498,7 +504,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.log("Error fetching search history:", error);
+			console.log("Error fetching search suggestions:", error);
 			return null;
 		}
 	};

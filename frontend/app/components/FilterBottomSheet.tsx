@@ -109,29 +109,12 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		"opera",
 	]);
 
-	// Sample language data
-	const languages = [
-		"English",
-		"Spanish",
-		"French",
-		"German",
-		"Chinese",
-		"Japanese",
-		"Korean",
-		"Portuguese",
-		"Russian",
-		"Arabic",
-		"Italian",
-		"Turkish",
-		"Swedish",
-	];
-
 	useEffect(() => {
 		getGenres();
-		console.log("Genre effect called");
 	}, []);
 
 	const getGenres = async () => {
+		// console.log("Getting genres");
 		try {
 			const token = await auth.getToken();
 
@@ -144,7 +127,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 				setGenres(response.data);
 			}
 		} catch (error) {
-			console.error("Error fetching genres:", error);
+			console.log("Error fetching genres:", error);
 		}
 	};
 
