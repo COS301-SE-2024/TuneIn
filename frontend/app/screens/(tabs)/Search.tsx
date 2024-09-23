@@ -556,6 +556,7 @@ const Search: React.FC = () => {
 							setDropdownVisible(true);
 						}}
 						onChangeText={setSearchTerm}
+						onSubmitEditing={() => {handleSearch();}}
 					/>
 					<TouchableOpacity
 						style={styles.searchIcon}
