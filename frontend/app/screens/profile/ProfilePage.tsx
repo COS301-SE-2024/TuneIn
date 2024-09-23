@@ -84,7 +84,7 @@ const ProfileScreen: React.FC = () => {
 
 	const navigateToRoomPage = () => {
 		router.push({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(currentRoomData) },
 		});
 	};
@@ -758,7 +758,7 @@ const ProfileScreen: React.FC = () => {
 						{currentRoomData !== null && (
 							<TouchableOpacity
 								onPress={navigateToRoomPage}
-								style={{ paddingHorizontal: 20 }}
+								style={{ paddingLeft: 20 }}
 								testID="now-playing"
 							>
 								<NowPlaying
