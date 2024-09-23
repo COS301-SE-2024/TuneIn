@@ -36,6 +36,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
 			style={styles.cardContainer}
+			testID="minicard"
 			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
 		>
 			<View style={styles.imageContainer}>

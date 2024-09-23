@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import RoomInfoScreen from "../app/screens/rooms/RoomInfo";
-// import RoomDetails from "../app/components/rooms/RoomDetailsComponent";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Mock the useRouter hook
@@ -14,15 +13,7 @@ jest.mock("expo-router", () => ({
 jest.mock("@expo/vector-icons", () => {
 	const { Text } = require("react-native");
 	return {
-		Ionicons: ({
-			name,
-			size,
-			color,
-		}: {
-			name: string;
-			size: number;
-			color: string;
-		}) => {
+		Ionicons: ({ name }: { name: string }) => {
 			return <Text>{name}</Text>; // Mock icon as simple text for testing
 		},
 	};
@@ -31,15 +22,19 @@ jest.mock("@expo/vector-icons", () => {
 describe("RoomInfoScreen", () => {
 	const mockBack = jest.fn();
 	const roomDetails = {
-		image:
+		roomID: "2",
+		backgroundImage:
 			"https://as2.ftcdn.net/v2/jpg/05/72/82/85/1000_F_572828530_ofzCYowQVnlOwkcoBJnZqT36klbJzWdn.jpg",
-		name: "Chill Vibes",
-		description: "A place to relax and unwind with great music.",
-		genre: "Jazz",
+		name: "Private Room",
+		description: "A private room with restricted content.",
+		genre: "Adult",
 		language: "English",
-		roomSize: "Medium",
+		tags: [],
 		isExplicit: true,
+		userID: "Test-User2",
 		isNsfw: true,
+		start_date: new Date(),
+		end_date: new Date(),
 	};
 
 	beforeEach(() => {
@@ -48,7 +43,7 @@ describe("RoomInfoScreen", () => {
 			back: mockBack,
 		});
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
-			roomData: JSON.stringify(roomDetails),
+			room: JSON.stringify(roomDetails), // Correctly mock the room param
 		});
 	});
 
@@ -70,7 +65,7 @@ describe("RoomInfoScreen", () => {
 		const { getByText } = render(<RoomInfoScreen />);
 
 		// Press the close button (mocked Ionicon close icon)
-		fireEvent.press(getByText("close"));
+		fireEvent.press(getByText("close")); // Assuming you see the text "close" from the mocked icon
 
 		// Check if router.back was called
 		expect(mockBack).toHaveBeenCalledTimes(1);
