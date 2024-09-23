@@ -80,15 +80,13 @@ const AdvancedSettings = () => {
 	};
 	const handleDelete = () => {
 		setShowDeleteModal(false);
-		if (_roomDetails.roomData) {
-			let room = JSON.parse(_roomDetails.roomData as string);
-			if (Array.isArray(_roomDetails)) {
-				room = JSON.parse(_roomDetails[0]);
-			} else if (typeof _roomDetails === "string") {
-				room = JSON.parse(_roomDetails);
+		if (room) {
+			let roomData = typeof room === "string" ? JSON.parse(room) : room;
+			if (Array.isArray(roomData)) {
+				roomData = JSON.parse(roomData[0]);
 			}
-			deleteRoom(room.id);
-			navigateToHome(); // Proceed to delete and navigate home
+			deleteRoom(roomData.id);
+			navigateToHome();
 		} else {
 			console.log("No room data found");
 		}
