@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Socket } from "socket.io-client";
 import {
-	DirectMessageDto,
 	LiveChatMessageDto,
 	RoomDto,
 	SpotifyTokenPair,
@@ -52,7 +51,7 @@ const validTrackUri = (uri: string): boolean => {
 	return true;
 };
 
-interface QueueControls {
+export interface QueueControls {
 	enqueueSong: (song: RoomSongDto) => void;
 	dequeueSong: (song: RoomSongDto) => void;
 	upvoteSong: (song: RoomSongDto) => void;
@@ -61,7 +60,7 @@ interface QueueControls {
 	undoSongVote: (song: RoomSongDto) => void;
 }
 
-interface RoomControls {
+export interface RoomControls {
 	sendLiveChatMessage: (message: string) => void;
 	sendReaction: (emoji: string) => void;
 	requestLiveChatHistory: () => void;
@@ -71,7 +70,7 @@ interface RoomControls {
 	queue: QueueControls;
 }
 
-interface Playback {
+export interface Playback {
 	spotifyDevices: Devices;
 	handlePlayback: (
 		action: string,
@@ -94,11 +93,10 @@ interface RoomControlProps {
 	currentRoom: RoomDto | undefined;
 	spotifyDevices: Devices;
 	setSpotifyDevices: React.Dispatch<React.SetStateAction<Devices>>;
-	getSocket: () => Socket | null;
+	socket: Socket | null;
 	currentSong: RoomSongDto | undefined;
 	spotifyTokens: SpotifyTokenPair | undefined;
 	roomPlaying: boolean;
-	setRoomPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 	pollLatency: () => void;
 }
 
@@ -107,7 +105,7 @@ export function useRoomControls({
 	currentRoom,
 	spotifyDevices,
 	setSpotifyDevices,
-	getSocket,
+	socket,
 	currentSong,
 	spotifyTokens,
 	roomPlaying,
@@ -356,7 +354,6 @@ export function useRoomControls({
 
 	const startPlayback = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -379,7 +376,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PLAY, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket, pollLatency],
+		[currentRoom, currentUser, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -388,7 +385,6 @@ export function useRoomControls({
 
 	const pausePlayback = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -411,7 +407,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PAUSE, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket, pollLatency],
+		[currentRoom, currentUser, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -420,7 +416,6 @@ export function useRoomControls({
 
 	const stopPlayback = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -443,7 +438,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.INIT_STOP, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket, pollLatency],
+		[currentRoom, currentUser, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -452,7 +447,6 @@ export function useRoomControls({
 
 	const nextTrack = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -475,7 +469,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.INIT_SKIP, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket, pollLatency],
+		[currentRoom, currentUser, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -516,7 +510,6 @@ export function useRoomControls({
 
 	const enqueueSong = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -539,7 +532,7 @@ export function useRoomControls({
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -548,7 +541,6 @@ export function useRoomControls({
 
 	const dequeueSong = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -571,7 +563,7 @@ export function useRoomControls({
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -580,7 +572,6 @@ export function useRoomControls({
 
 	const upvoteSong = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -599,7 +590,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.UPVOTE_SONG, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -608,7 +599,6 @@ export function useRoomControls({
 
 	const downvoteSong = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -627,7 +617,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.DOWNVOTE_SONG, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -636,7 +626,6 @@ export function useRoomControls({
 
 	const swapSongVote = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -655,7 +644,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.SWAP_SONG_VOTE, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -664,7 +653,6 @@ export function useRoomControls({
 
 	const undoSongVote = useCallback(
 		function (song: RoomSongDto): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -683,7 +671,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.UNDO_SONG_VOTE, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -714,7 +702,6 @@ export function useRoomControls({
 
 	const sendLiveChatMessage = useCallback(
 		function (message: string): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -745,7 +732,7 @@ export function useRoomControls({
 				socket.emit(SOCKET_EVENTS.LIVE_MESSAGE, JSON.stringify(input));
 			}
 		},
-		[currentRoom, currentUser, getSocket, pollLatency],
+		[currentRoom, currentUser, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -754,7 +741,6 @@ export function useRoomControls({
 
 	const sendReaction = useCallback(
 		function (emoji: string): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -776,7 +762,7 @@ export function useRoomControls({
 				JSON.stringify(newReaction),
 			);
 		},
-		[currentUser, getSocket],
+		[currentUser, socket],
 	);
 
 	useEffect(() => {
@@ -785,7 +771,6 @@ export function useRoomControls({
 
 	const requestLiveChatHistory = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;

@@ -35,14 +35,13 @@ interface DmControlProps {
 export function useDirectMessageControls({
 	currentUser,
 	dmParticipants,
-	getSocket,
+	socket,
 	pollLatency,
 }: DmControlProps): DirectMessageControls {
 	console.log("useDirectMessageControls()");
 	const { socketState, updateState } = useLiveState();
 	const sendDirectMessage = useCallback(
 		function (message: DirectMessage): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -68,7 +67,7 @@ export function useDirectMessageControls({
 				);
 			}
 		},
-		[currentUser, dmParticipants, getSocket, pollLatency],
+		[currentUser, dmParticipants, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -77,7 +76,6 @@ export function useDirectMessageControls({
 
 	const editDirectMessage = useCallback(
 		function (message: DirectMessage): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -104,7 +102,7 @@ export function useDirectMessageControls({
 				socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
 			}
 		},
-		[currentUser, dmParticipants, getSocket, pollLatency],
+		[currentUser, dmParticipants, socket, pollLatency],
 	);
 
 	useEffect(() => {
@@ -113,7 +111,6 @@ export function useDirectMessageControls({
 
 	const deleteDirectMessage = useCallback(
 		function (message: DirectMessage): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -137,7 +134,7 @@ export function useDirectMessageControls({
 			};
 			socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
 		},
-		[currentUser, dmParticipants, getSocket],
+		[currentUser, dmParticipants, socket],
 	);
 
 	useEffect(() => {
@@ -146,7 +143,6 @@ export function useDirectMessageControls({
 
 	const requestDirectMessageHistory = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
@@ -177,7 +173,7 @@ export function useDirectMessageControls({
 			);
 			updateState({ type: actionTypes.DMS_REQUESTED });
 		},
-		[currentUser, dmParticipants, getSocket, socketState, updateState],
+		[currentUser, dmParticipants, socket, socketState, updateState],
 	);
 
 	useEffect(() => {

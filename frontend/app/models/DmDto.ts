@@ -1,4 +1,4 @@
-import { UserDto } from "./UserDto";
+import { UserDto } from "../../api";
 
 export type DirectMessageDto = {
 	index: number;
