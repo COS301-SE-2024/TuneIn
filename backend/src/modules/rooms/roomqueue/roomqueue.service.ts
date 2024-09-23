@@ -32,6 +32,7 @@ export class RoomSong {
 	private spotifyDetails: Spotify.Track | null = null;
 	private internalSongID: string;
 	private internalQueueItemID: string;
+	public pauseTime: Date | null = null;
 
 	constructor(
 		spotifyID: string,
@@ -144,6 +145,9 @@ export class RoomSong {
 		if (this.spotifyDetails) {
 			result.track = this.spotifyDetails;
 		}
+		if (this.pauseTime !== null) {
+			result.pauseTime = this.pauseTime;
+		}
 		return result;
 	}
 
@@ -204,14 +208,34 @@ export class RoomSong {
 			console.log("this.spotifyDetails: ", this.spotifyDetails);
 			throw new Error("Song does not have spotify info");
 		}
+		if (this.pauseTime !== null) {
+			return false;
+		}
 		return (
 			this.playbackStartTime.valueOf() + this.spotifyDetails.duration_ms >=
 			new Date().valueOf()
 		);
 	}
+
+	isPaused(): boolean {
+		if (!this.playbackStartTime || this.playbackStartTime === null) {
+			return false;
+		}
+		if (!this.spotifyDetails || this.spotifyDetails === null) {
+			console.log("this.spotifyDetails: ", this.spotifyDetails);
+			throw new Error("Song does not have spotify info");
+		}
+		if (this.pauseTime !== null) {
+			return true;
+		}
+		return false;
+	}
 }
 
 function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
+	if (queue.length === 0) {
+		return queue;
+	}
 	console.log("###################################");
 	console.log("===================================");
 	console.log("SORTING QUEUE");
@@ -225,15 +249,25 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 				song.insertTime,
 		);
 	}
+	const head: RoomSong = queue[0];
 	const tempQueue: RoomSong[] = queue;
+	let sortedWithHead = true;
+	// the current playing song must stay in the front of the queue
+	if (head.isPaused() || head.isPlaying()) {
+		// remove head from tempQueue
+		tempQueue.shift();
+		sortedWithHead = false;
+	}
 	tempQueue.sort((a, b) => {
 		if (a.score === b.score) {
 			return a.insertTime.valueOf() - b.insertTime.valueOf();
 		}
 		return b.score - a.score;
 	});
+	if (!sortedWithHead) {
+		tempQueue.unshift(head);
+	}
 	if (tempQueue.length > 0) {
-		const head: RoomSong = tempQueue[0];
 		const currentStartTime = head.getPlaybackStartTime();
 		if (currentStartTime !== null) {
 			//update all start times to be sequential
@@ -919,11 +953,13 @@ export class ActiveRoom {
 		return song !== null && song.isPlaying();
 	}
 
-	/*
-	isPaused(): boolean {}
-	*/
-	isEmpty(): boolean {
-		return this.queue.isEmpty();
+	async isPaused(murLockService: MurLockService): Promise<boolean> {
+		await this.updateQueue(murLockService);
+		if (this.queue.isEmpty()) {
+			return false;
+		}
+		const song = this.queue.front();
+		return song.isPaused();
 	}
 
 	printQueueBrief() {
@@ -1207,35 +1243,14 @@ export class RoomQueueService {
 		return song.asRoomSongDto();
 	}
 
-	//is song playing
 	async isPlaying(roomID: string): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			console.log("creating room queue");
-			await this.createRoomQueue(roomID);
-		}
-		console.log("getting active room");
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		console.log("got active room");
-		console.log(activeRoom);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.isPlaying",
-			);
-		}
+		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.isPlaying(this.murLockService);
 	}
 
 	async isPaused(roomID: string): Promise<boolean> {
-		console.log(`room (${roomID}) is never paused`);
-		return false;
-		// if (!this.roomQueues.has(roomID)) {
-		// await this.createRoomQueue(roomID);
-		// }
-		// const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		// if (!activeRoom || activeRoom === undefined) {
-		// 	throw new Error("Weird error. HashMap is broken");
-		// }
-		// return activeRoom.isPaused();
+		const activeRoom = await this.getRoom(roomID);
+		return await activeRoom.isPaused(this.murLockService);
 	}
 
 	async playSongNow(roomID: string): Promise<RoomSongDto | null> {
@@ -1255,46 +1270,10 @@ export class RoomQueueService {
 		return song.asRoomSongDto();
 	}
 
-	/*
 	async pauseSong(roomID: string): Promise<void> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error("Weird error. HashMap is broken");
-		}
-		await activeRoom.pauseSong();
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.pauseSong(this.murLockService);
 	}
-		*/
-
-	/*
-	async stopSong(roomID: string): Promise<void> {
-		const queue: PrismaTypes.queue | null = await this.prisma.queue.findFirst({
-			where: {
-				room_id: roomID,
-				is_done_playing: false,
-				start_time: {
-					not: null,
-				},
-			},
-			orderBy: {
-				start_time: "asc",
-			},
-		});
-		if (!queue || queue === null) {
-			throw new Error("There is no song playing");
-		}
-		await this.prisma.queue.update({
-			where: {
-				queue_id: queue.queue_id,
-			},
-			data: {
-				is_done_playing: true,
-			},
-		});
-	}
-	*/
 
 	async skipSong(roomID: string): Promise<void> {
 		if (!this.roomQueues.has(roomID)) {

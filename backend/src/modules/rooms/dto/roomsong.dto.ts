@@ -24,6 +24,10 @@ export class RoomSongDto {
 	startTime?: Date;
 
 	@ApiProperty()
+	@IsDate()
+	pauseTime?: Date;
+
+	@ApiProperty()
 	@IsObject()
 	track?: Track;
 }

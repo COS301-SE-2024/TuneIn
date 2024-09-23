@@ -84,4 +84,5 @@ export type RoomSongDto = {
 	index: number;
 	startTime?: Date;
 	track?: Track;
+	pauseTime?: Date;
 };
