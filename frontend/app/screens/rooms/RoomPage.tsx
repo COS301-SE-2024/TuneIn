@@ -209,18 +209,18 @@ const RoomPage = () => {
 		// only join if not in room or if in another room
 		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
 			console.log("Joining room........", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
+			await rooms.joinRoom(roomID);
 			joinRoom(roomID);
-			const i = currentSong ? currentSong.index : 0;
-			console.log(
-				`Joined: Song Index - ${i}, Seconds Played - ${secondsPlayed}`,
-			);
+			if (currentSong) {
+				console.log(
+					`Joined: Song Index - ${currentSong.index}, Seconds Played - ${secondsPlayed}`,
+				);
+			}
 			roomControls.requestRoomQueue();
 
 			// only leave if you're in the room
 		} else if (currentRoom && currentRoom.roomID === roomID) {
-			leaveRoom();
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
+			await rooms.leaveRoom(roomID);
 			leaveRoom();
 			if (await roomControls.playbackHandler.userListeningToRoom()) {
 				await roomControls.playbackHandler.handlePlayback("pause");
