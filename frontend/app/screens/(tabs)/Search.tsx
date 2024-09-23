@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 3.84,
 		elevation: 5,
 		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 30,
+		marginLeft: 10,
 	},
 	searchContainer: {
 		flex: 1,
