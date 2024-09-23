@@ -79,6 +79,8 @@ interface LiveContextType {
 	};
 
 	currentUser: UserDto | undefined;
+	refreshUser: boolean;
+	setRefreshUser: React.Dispatch<React.SetStateAction<boolean>>;
 	userBookmarks: RoomDto[];
 
 	sendPing: (timeout?: number) => Promise<void>;
@@ -190,6 +192,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				console.log(s.connected);
 				if (!socketState.sentIdentity) {
 					sendIdentity(s);
+	const [refreshUser, setRefreshUser] = useState<boolean>(false);
 				}
 				s.on(SOCKET_EVENTS.CONNECTED, (response) => {
 					console.log("Identity confirmed by server");
@@ -1887,6 +1890,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		currentRoomVotes,
 		socketState,
 	]);
+
+	useEffect(() => {
+		getUserDetails(spotifyAuth);
+	}, [refreshUser]);
 
 	useEffect(() => {}, []);
 

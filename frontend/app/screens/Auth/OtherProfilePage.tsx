@@ -20,10 +20,12 @@ import axios from "axios";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import { colors } from "../../styles/colors";
+import { useLive } from "../../LiveContext";
 
 const ProfileScreen: React.FC = () => {
 	const params = useLocalSearchParams();
 	const username = params.username;
+	const { currentUser } = useLive();
 
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
 	const [isMusicDialogVisible, setMusicDialogVisible] = useState(false);
@@ -49,21 +51,6 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchUserProfileInfo = async (token: string) => {
-		try {
-			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			console.log(response);
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
-			return [];
-		}
-	};
-
 	const [profileData, setProfileData] = useState<any>(null);
 	const [setUserProfileData] = useState<any>(null);
 
@@ -71,16 +58,14 @@ const ProfileScreen: React.FC = () => {
 		const getTokenAndData = async () => {
 			try {
 				const storedToken = await auth.getToken();
-				setToken(storedToken);
 
 				if (storedToken) {
 					const data = await fetchProfileInfo(storedToken);
-					const userData = await fetchUserProfileInfo(storedToken);
 					setProfileData(data);
-					setUserProfileData(userData);
+					setUserProfileData(currentUser);
 
 					const isFollowing = data.followers.data.some(
-						(item) => item.userID === userData.userID,
+						(item) => item.userID === currentUser.userID,
 					);
 					console.log(isFollowing);
 					setFollowing(isFollowing);
@@ -178,7 +163,6 @@ const ProfileScreen: React.FC = () => {
 
 	const followHandler = async () => {
 		const t = await auth.getToken();
-		setToken(t);
 		if (following) {
 			const response = await axios.post(
 				`${utils.API_BASE_URL}/users/${profileData.username}/unfollow`,

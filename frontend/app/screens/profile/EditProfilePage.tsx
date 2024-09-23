@@ -20,7 +20,7 @@ import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
-import { Player } from "../../PlayerContext";
+import { useLive } from "../../LiveContext";
 
 const EditProfileScreen = () => {
 	const router = useRouter();
@@ -31,15 +31,7 @@ const EditProfileScreen = () => {
 		: params.profile;
 	const profileInfo = JSON.parse(profile as string);
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
-	const { setUserData } = playerContext;
-
+	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([]);
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -80,7 +72,9 @@ const EditProfileScreen = () => {
 						},
 					},
 				);
-
+				if (!refreshUser) {
+					setRefreshUser(true);
+				}
 				// console.log(response.data);
 				return response.data;
 			} catch (error) {

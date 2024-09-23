@@ -49,35 +49,7 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom, userData, setUserData } = playerContext;
-
-	// An example of a well-typed & well-defined way to interact with the API
-	/* ********************************************************************** */
-	const { users, authenticated } = useAPI();
-	const [currentUser, setCurrentUser] = useState<UserDto>();
-	if (authenticated && !currentUser) {
-		users
-			.getProfile()
-			.then((user: AxiosResponse<UserDto>) => {
-				console.log("User: " + user);
-				if (user.status === 401) {
-					//Unauthorized
-					//Auth header is either missing or invalid
-				} else if (user.status === 500) {
-					//Internal Server Error
-					//Something went wrong in the backend (unlikely lmao)
-				}
-				setCurrentUser(user.data);
-			})
-			.catch((error) => {
-				if (error instanceof RequiredError) {
-					// a required field is missing
-				} else {
-					// some other error
-				}
-			});
-	}
-	/* ********************************************************************** */
+	const { currentRoom, userData } = playerContext;
 
 	console.log("currentRoom: " + currentRoom);
 	const [scrollY] = useState(new Animated.Value(0));
@@ -118,22 +90,6 @@ const Home: React.FC = () => {
 		} catch (error) {
 			console.error("Error fetching friends:", error);
 			return [];
-		}
-	};
-
-	const fetchProfileInfo = async (token: string) => {
-		try {
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				return response.data;
-			}
-		} catch (error) {
-			console.error("Error fetching profile info:", error);
 		}
 	};
 
@@ -219,11 +175,6 @@ const Home: React.FC = () => {
 				"cachedMyRooms",
 				JSON.stringify(formattedMyRooms),
 			);
-
-			if (!userData) {
-				const userInfo = await fetchProfileInfo(storedToken);
-				setUserData(userInfo);
-			}
 
 			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);

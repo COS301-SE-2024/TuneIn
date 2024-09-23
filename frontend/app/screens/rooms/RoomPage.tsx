@@ -154,7 +154,7 @@ const RoomPage = () => {
 					roomControls.playbackHandler.startPlayback();
 				} else {
 					console.log("stopping playback");
-					roomControls.playbackHandler.stopPlayback();
+					roomControls.playbackHandler.pausePlayback();
 				}
 				const i = currentSong?.index;
 				if (i) setCurrentTrackIndex(i);
@@ -222,7 +222,9 @@ const RoomPage = () => {
 			leaveRoom();
 			roomCurrent.leaveJoinRoom(token as string, roomID, true);
 			leaveRoom();
-			await roomControls.playbackHandler.handlePlayback("pause");
+			if (await roomControls.playbackHandler.userListeningToRoom()) {
+				await roomControls.playbackHandler.handlePlayback("pause");
+			}
 		}
 	};
 

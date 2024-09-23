@@ -29,6 +29,7 @@ import { formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 
 const ProfileScreen: React.FC = () => {
+	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const navigation = useNavigation();
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -70,7 +71,7 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData, currentRoom } = playerContext;
+	const { currentRoom } = playerContext;
 
 	const navigateToRoomPage = () => {
 		router.push({
@@ -133,9 +134,9 @@ const ProfileScreen: React.FC = () => {
 						);
 						setPrimProfileData(data);
 
-						if (userData !== null && data.followers.count > 0) {
+						if (currentUser !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
-								(item: any) => item.username === userData.username,
+								(item: any) => item.username === currentUser.username,
 							);
 							setFollowing(isFollowing);
 						}
@@ -147,18 +148,12 @@ const ProfileScreen: React.FC = () => {
 					console.error("Failed to retrieve profile data:", error);
 				}
 			} else {
-				if (!userData) {
-					try {
-						const storedToken = await auth.getToken();
-						if (storedToken) {
-							const data = await fetchProfileInfo(storedToken, "");
-							// setPrimProfileData(data);
-						}
-					} catch (error) {
-						console.error("Failed to retrieve profile data:", error);
+				if (!currentUser) {
+					if (!refreshUser) {
+						setRefreshUser(true);
 					}
 				} else {
-					setPrimProfileData(userData);
+					setPrimProfileData(currentUser);
 				}
 				if (roomData === null) {
 					setRoomData(currentRoom);
@@ -166,12 +161,12 @@ const ProfileScreen: React.FC = () => {
 				}
 			}
 
-			// console.log("Completed effect: " + JSON.stringify(userData));
+			// console.log("Completed effect: " + JSON.stringify(currentUser));
 			setLoading(false);
 		};
 
 		initializeProfile();
-	}, [userData, setUserData]);
+	}, [currentUser]);
 
 	useEffect(() => {
 		if (ownsProfile && primaryProfileData) {
@@ -214,22 +209,6 @@ const ProfileScreen: React.FC = () => {
 
 	const fetchProfileInfo = async (token: string, username: string) => {
 		try {
-			if (!userData) {
-				// console.log("Fetching profile info");
-				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				// console.log("Fetching profile info data: " + JSON.stringify(response));
-				setUserData(response.data);
-				if (ownsProfile) {
-					// console.log("Profile return: " + JSON.stringify(response.data));
-					return response.data;
-				}
-			}
-			// console.log("Fetching with data: " + JSON.stringify(friend));
-
 			const response = await axios.get(
 				`${utils.API_BASE_URL}/users/${username}`,
 				{
@@ -462,11 +441,8 @@ const ProfileScreen: React.FC = () => {
 
 	const onRefresh = React.useCallback(async () => {
 		setLoading(true);
-		const storedToken = await auth.getToken();
-
-		if (storedToken) {
-			setUserData(null);
-			fetchProfileInfo(storedToken, "");
+		if (!refreshUser) {
+			setRefreshUser(true);
 		}
 
 		setTimeout(() => {
@@ -477,15 +453,15 @@ const ProfileScreen: React.FC = () => {
 	if (
 		loading ||
 		ownsProfile === null ||
-		userData === null ||
+		currentUser === null ||
 		primaryProfileData === null ||
 		!roomCheck
 	) {
 		// console.log(
 		// 	"loading: " +
 		// 		loading +
-		// 		" userData: " +
-		// 		userData +
+		// 		" currentUser: " +
+		// 		currentUser +
 		// 		" primaryProfile: " +
 		// 		primaryProfileData +
 		// 		" roomData: " +

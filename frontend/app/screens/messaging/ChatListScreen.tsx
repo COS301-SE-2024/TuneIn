@@ -18,6 +18,7 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
 import { DirectMessageDto, UserDto } from "../../../api";
+import { useLive } from "../../LiveContext";
 
 const initialChats: Chat[] = [
 	{
@@ -53,7 +54,7 @@ const createChats = (
 };
 
 const ChatListScreen = () => {
-	const selfRef = React.useRef<UserDto>();
+	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
@@ -64,17 +65,18 @@ const ChatListScreen = () => {
 	useEffect(() => {
 		// Fetch chats from backend
 		(async () => {
+			if (!currentUser) {
+				if (!refreshUser) {
+					setRefreshUser(true);
+				}
+				return;
+			}
 			try {
 				const token = await auth.getToken();
 
 				const promises = [];
 				promises.push(
 					axios.get(`${utils.API_BASE_URL}/users/dms`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users`, {
 						headers: { Authorization: `Bearer ${token}` },
 					}),
 				);
@@ -87,19 +89,17 @@ const ChatListScreen = () => {
 				const responses = await Promise.all(promises);
 				const chats = responses[0].data as DirectMessageDto[];
 				console.log(chats);
-				selfRef.current = responses[1].data as UserDto;
-				console.log(selfRef.current);
-				setFriends(responses[2].data as UserDto[]);
-				console.log(responses[2].data);
+				setFriends(responses[1].data as UserDto[]);
+				console.log(responses[1].data);
 
-				setFilteredChats(createChats(chats, selfRef.current.userID));
+				setFilteredChats(createChats(chats, currentUser.userID));
 				setUserMessages(chats);
 			} catch (error) {
 				console.error(error);
 				throw error;
 			}
 		})();
-	}, []);
+	}, [currentUser]);
 
 	useEffect(() => {
 		/*
@@ -113,18 +113,18 @@ const ChatListScreen = () => {
 		}
 			*/
 		if (searchQuery === "") {
-			if (selfRef.current !== undefined) {
-				setFilteredChats(createChats(userMessages, selfRef.current.userID));
+			if (currentUser !== undefined) {
+				setFilteredChats(createChats(userMessages, currentUser.userID));
 			}
 		} else {
-			if (selfRef.current !== undefined) {
+			if (currentUser !== undefined) {
 				const filtered = userMessages.filter((chat) => {
 					return chat.sender.profile_name
 						.toLowerCase()
 						.includes(searchQuery.toLowerCase());
 				});
 
-				setFilteredChats(createChats(filtered, selfRef.current.userID));
+				setFilteredChats(createChats(filtered, currentUser.userID));
 			}
 		}
 	}, [searchQuery]);

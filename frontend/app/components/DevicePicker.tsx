@@ -52,11 +52,7 @@ const DevicePicker = () => {
 				clearInterval(intervalIdRef.current);
 			}
 		}
-	}, [
-		isVisible,
-		roomControls.playbackHandler,
-		roomControls.playbackHandler.spotifyDevices.devices,
-	]);
+	}, [isVisible, roomControls.playbackHandler]);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
