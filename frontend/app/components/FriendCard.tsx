@@ -1,9 +1,8 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 import { colors } from "../styles/colors";
-import { color } from "react-native-elements/dist/helpers";
 
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 

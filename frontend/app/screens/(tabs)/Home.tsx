@@ -74,6 +74,7 @@ const Home: React.FC = () => {
 	}
 	/* ********************************************************************** */
 
+	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
@@ -89,8 +90,10 @@ const Home: React.FC = () => {
 		live.initialiseSocket();
 	}
 
-	const BackgroundIMG: string = require("../../../assets/imageholder.jpg");
-	const ProfileIMG: string = require("../../../assets/profile-icon.png");
+	const BackgroundIMG: string =
+		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
+	const ProfileIMG: string =
+		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
 	const fetchRooms = async (token: string | null, type?: string) => {
 		try {
@@ -100,11 +103,8 @@ const Home: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
-
 			setRoomError(false);
-
-			const rooms = response.data;
-			return rooms;
+			return response.data;
 		} catch (error) {
 			console.log("Error fetching rooms:", error);
 			setRoomError(true);
@@ -145,45 +145,42 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const formatRoomData = useCallback(
-		(rooms: any, mine = false) => {
-			if (!Array.isArray(rooms)) {
-				return [];
+	const formatRoomData = (rooms: any, mine = false) => {
+		if (!Array.isArray(rooms)) {
+			return [];
+		}
+
+		return rooms.map((room, index) => {
+			// Print out the raw room data for the first room only
+			if (index === 0) {
+				console.log("Raw room data before formatting:", room);
 			}
 
-			return rooms.map((room, index) => {
-				// Print out the raw room data for the first room only
-				if (index === 0) {
-					console.log("Raw room data before formatting:", room);
-				}
-
-				return {
-					id: room.roomID,
-					backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
-					name: room.room_name,
-					language: room.language,
-					songName: room.current_song ? room.current_song.title : null,
-					artistName: room.current_song
-						? room.current_song.artists.join(", ")
-						: null,
-					description: room.description,
-					userID: room.creator.userID,
-					userProfile: room.creator
-						? room.creator.profile_picture_url
-						: ProfileIMG,
-					username: room.creator ? room.creator.username : "Unknown",
-					roomSize: 50,
-					tags: room.tags ? room.tags : [],
-					mine: mine,
-					isNsfw: room.has_nsfw_content,
-					isExplicit: room.has_explicit_content,
-					start_date: room.start_date,
-					end_date: room.end_date,
-				};
-			});
-		},
-		[], // Add dependencies here if needed, such as BackgroundIMG, ProfileIMG, etc.
-	);
+			return {
+				id: room.roomID,
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				name: room.room_name,
+				language: room.language,
+				songName: room.current_song ? room.current_song.title : null,
+				artistName: room.current_song
+					? room.current_song.artists.join(", ")
+					: null,
+				description: room.description,
+				userID: room.creator.userID,
+				userProfile: room.creator
+					? room.creator.profile_picture_url
+					: ProfileIMG,
+				username: room.creator ? room.creator.username : "Unknown",
+				roomSize: 50,
+				tags: room.tags ? room.tags : [],
+				mine: mine,
+				isNsfw: room.has_nsfw_content,
+				isExplicit: room.has_explicit_content,
+				start_date: room.start_date,
+				end_date: room.end_date,
+			};
+		});
+	};
 
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
@@ -208,6 +205,8 @@ const Home: React.FC = () => {
 	};
 
 	const refreshData = useCallback(async () => {
+		// await StorageService.clear();
+		// console.log("CLEARED STORAGE");
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		console.log("Stored token:", storedToken);
@@ -271,7 +270,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, [setUserData, userData, ProfileIMG, formatRoomData]);
+	}, [setUserData, userData, ProfileIMG]);
 
 	const [refreshing] = React.useState(false);
 

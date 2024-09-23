@@ -130,17 +130,21 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
-					source={{ uri: roomCard.backgroundImage }}
+					source={
+						roomCard.backgroundImage
+							? { uri: roomCard.backgroundImage }
+							: require("../../../assets/imageholder.jpg") // Fallback image
+					}
 					style={styles.imageBackground}
 					imageStyle={styles.imageBackgroundStyle}
 					testID="room-card-background"
 				>
-					{/* <View
+					<View
 						style={[
 							styles.overlay,
-							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
+							// isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
 						]}
-					/> */}
+					/>
 					{/* {(isBeforeStartDate || isAfterEndDate) && (
 						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
 					)} */}

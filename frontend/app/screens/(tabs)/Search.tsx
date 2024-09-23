@@ -180,6 +180,7 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
+		searchTerm,
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
@@ -530,10 +531,11 @@ const Search: React.FC = () => {
 				<TouchableOpacity
 					onPress={() => navigation.goBack()}
 					testID="back-button"
+					style={styles.backButton} // Optional to add padding or margin
 				>
 					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.title}>Search </Text>
+				<Text style={styles.title}>Search</Text>
 			</View>
 			<View style={styles.searchBarContainer}>
 				<TextInput
@@ -681,8 +683,8 @@ const Search: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingHorizontal: 30,
-		paddingTop: 30,
+		paddingHorizontal: 20,
+		paddingTop: 50,
 	},
 	roomCardPadding: {
 		marginTop: 20,
@@ -692,7 +694,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 20,
+		marginBottom: 40,
+		position: "relative", // Ensures proper alignment for absolute positioning
 	},
 	noResult: {
 		flex: 1, // Make the View take up the full screen
@@ -704,7 +707,13 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "#333",
 		textAlign: "center",
-		flex: 1,
+		position: "absolute", // Ensures the title is centered regardless of the other elements
+		left: 0,
+		right: 0, // Centers the text horizontally
+	},
+	backButton: {
+		position: "absolute", // Keeps the back button aligned to the left
+		left: 10, // Adjust this for your desired padding
 	},
 	searchBarContainer: {
 		flexDirection: "row",
@@ -713,7 +722,7 @@ const styles = StyleSheet.create({
 		borderColor: "#ccc",
 		borderWidth: 1,
 		borderRadius: 56,
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
 	},
 	searchBar: {
 		flex: 1,
@@ -729,8 +738,9 @@ const styles = StyleSheet.create({
 	},
 	filterButton: {
 		paddingVertical: 10,
-		paddingHorizontal: 20,
+		paddingHorizontal: 15,
 		borderRadius: 20,
+		marginRight: 10,
 		borderWidth: 1,
 		borderColor: "#ccc",
 	},
@@ -914,16 +924,17 @@ const styles = StyleSheet.create({
 		backgroundColor: "#f2f2f2",
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 5,
-		maxHeight: 150, // Optional: limits the height of the dropdown
+		borderRadius: 20,
+		maxHeight: 200, // Optional: limits the height of the dropdown
 		zIndex: 1,
 		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
 		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 30,
+		paddingHorizontal: 10, // Padding inside the dropdown
+		marginLeft: 20, // Move the dropdown 10px to the left (30 - 10 = 20)
+		marginTop: 7, // Move the dropdown
 	},
 	searchContainer: {
 		flex: 1,
@@ -931,7 +942,7 @@ const styles = StyleSheet.create({
 		paddingTop: 50,
 	},
 	dropdownItem: {
-		// paddingVertical: 5,
+		paddingVertical: 5,
 		paddingHorizontal: 15,
 		borderBottomWidth: 5,
 		borderBottomColor: "#eee",
