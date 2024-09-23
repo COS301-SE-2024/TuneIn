@@ -102,7 +102,7 @@ const EditPlaylist: React.FC = () => {
 			}
 			setNewQueue(tempQueue);
 		}
-	}, [roomQueue]);
+	}, [addedSongs, currentUser, removedSongs, roomQueue, unsavedChanges]);
 
 	const addToPlaylist = (track: RoomSongDto | Spotify.Track) => {
 		if (!currentUser) {
@@ -233,7 +233,7 @@ const EditPlaylist: React.FC = () => {
 			{/* Selected Playlist Section */}
 			<ScrollView style={styles.selectedContainer}>
 				<Text style={styles.sectionTitle}>Selected Tracks</Text>
-				{roomQueue.map((song) => (
+				{newQueue.map((song) => (
 					<View key={rs.getID(song)} style={styles.trackContainer}>
 						<Image
 							source={{ uri: rs.getAlbumArtUrl(song) }}

@@ -25,7 +25,7 @@ const Miniplayer: React.FC = () => {
 			"PlayerContext must be used within a PlayerContextProvider",
 		);
 	}
-	const { NumberOfPeople, currentRoom } = playerContext;
+	const { currentRoom } = playerContext;
 
 	const combinedLength =
 		(currentRoom?.songName?.length || 0) +
