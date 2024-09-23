@@ -72,11 +72,6 @@ export interface RoomControls {
 
 export interface Playback {
 	spotifyDevices: Devices;
-	handlePlayback: (
-		action: string,
-		deviceID: string,
-		offset?: number,
-	) => Promise<void>;
 	getFirstDevice: () => Promise<string | null>;
 	getDevices: () => Promise<Device[]>;
 	getDeviceIDs: () => Promise<string[]>;
@@ -146,15 +141,18 @@ export function useRoomControls({
 	}, [getDevices]);
 
 	const handlePlayback = useCallback(
-		async function (
-			action: string,
-			deviceID: string,
-			offset?: number,
-		): Promise<void> {
+		async function (action: string): Promise<void> {
 			try {
 				if (!spotifyTokens) {
 					throw new Error("Spotify tokens not found");
 				}
+
+				if (!spotify) {
+					throw new Error(
+						"User either does not have a Spotify account or is not logged in",
+					);
+				}
+
 				if (!currentSong) {
 					throw new Error("No song is currently playing");
 				}
@@ -169,70 +167,53 @@ export function useRoomControls({
 					Alert.alert("Please connect a device to Spotify");
 					return;
 				}
+
+				if (activeDevice.id === null) {
+					console.error("Active Device ID is null for an unknown reason.");
+					setDeviceError("Active Device ID is null for an unknown reason.");
+					return;
+				}
 				console.log("active device:", activeDevice);
-				console.log("(action, uri, offset):", action, uri, offset);
-
-				let url = "";
-				let method = "";
-				let body: any = null;
-
-				switch (action) {
-					case "play":
-						if (uri) {
-							body = {
-								uris: [uri],
-								position_ms: offset || 0,
-							};
-						}
-						url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
-						method = "PUT";
-						break;
-					case "pause":
-						url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
-						method = "PUT";
-						break;
-					case "next":
-						url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
-						method = "POST";
-						break;
-					case "previous":
-						url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
-						method = "POST";
-						break;
-					default:
-						throw new Error("Unknown action");
+				let offsetMs = 0;
+				if (currentSong.startTime) {
+					const startTime = currentSong.startTime;
+					const currentTime = new Date();
+					offsetMs = currentTime.getTime() - startTime.getTime();
 				}
 
-				const response = await fetch(url, {
-					method,
-					headers: {
-						Authorization: `Bearer ${spotifyTokens.tokens.access_token}`,
-						"Content-Type": "application/json",
-					},
-					body: body ? JSON.stringify(body) : undefined,
-				});
-
-				console.log("Request URL:", url);
-				console.log("Request Method:", method);
-				if (body) {
-					console.log("Request Body:", JSON.stringify(body, null, 2));
-				}
-
-				if (response.ok) {
+				try {
+					switch (action) {
+						case "play":
+							await spotify.player.startResumePlayback(
+								activeDevice.id,
+								uri,
+								[uri],
+								undefined,
+								offsetMs,
+							);
+							break;
+						case "pause":
+							await spotify.player.pausePlayback(activeDevice.id);
+							break;
+						case "next":
+							await spotify.player.skipToNext(activeDevice.id);
+							break;
+						case "previous":
+							await spotify.player.skipToPrevious(activeDevice.id);
+							break;
+						default:
+							throw new Error("Unknown action");
+					}
 					console.log("Playback action successful");
-					// if (action === "play") {
-					// 	this._isPlaying = true;
-					// } else if (action === "pause") {
-					// 	this._isPlaying = false;
-					// }
-				} else {
-					throw new Error(`HTTP error! Status: ${response.status}`);
+				} catch (err) {
+					console.error("An error occurred while controlling playback", err);
+					throw err;
 				}
 			} catch (err) {
 				console.error("An error occurred while controlling playback", err);
 			}
 		},
-		[spotifyTokens, currentSong, getFirstDevice],
+		[spotifyTokens, spotify, currentSong, activeDevice],
 	);
 
 	useEffect(() => {
@@ -811,7 +792,6 @@ export function useRoomControls({
 
 	const requestRoomQueue = useCallback(
 		function (): void {
-			const socket = getSocket();
 			if (!socket) {
 				console.error("Socket connection not initialized");
 				return;
