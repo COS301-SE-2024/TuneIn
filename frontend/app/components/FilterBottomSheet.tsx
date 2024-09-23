@@ -185,7 +185,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 				<View style={styles.modalContainer}>
 					<View style={styles.modalOverlay}>
 						<KeyboardAvoidingView
-							behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+							behavior={Platform.OS === "ios" ? "padding" : "height"}
 						>
 							<TouchableWithoutFeedback>
 								<ScrollView>

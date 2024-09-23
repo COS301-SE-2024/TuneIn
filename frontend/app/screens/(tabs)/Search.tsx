@@ -9,7 +9,10 @@ import {
 	NativeSyntheticEvent,
 	FlatList,
 } from "react-native";
-import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
+import {
+	GestureHandlerRootView,
+	TouchableOpacity,
+} from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
@@ -186,6 +189,10 @@ const Search: React.FC = () => {
 
 	const handleSearch = async (sh: string = searchTerm) => {
 		// console.log("handle search");
+		if (searchTerm.trim() === "") {
+			return;
+		}
+
 		const advanced = isAdvancedSearch();
 		setDropdownVisible(false);
 		setLoading(true);
@@ -556,7 +563,9 @@ const Search: React.FC = () => {
 							setDropdownVisible(true);
 						}}
 						onChangeText={setSearchTerm}
-						onSubmitEditing={() => {handleSearch();}}
+						onSubmitEditing={() => {
+							handleSearch();
+						}}
 					/>
 					<TouchableOpacity
 						style={styles.searchIcon}

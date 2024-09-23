@@ -403,7 +403,7 @@ export class SearchService {
 				timestamp: "desc",
 			},
 		});
-		console.log("Result: " + JSON.stringify(result));
+		// console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
@@ -417,7 +417,10 @@ export class SearchService {
 
 				// Process records and filter duplicates
 				searchIds.forEach((record) => {
-					if (!uniqueRecordsMap.has(record.url)) {
+					if (
+						!uniqueRecordsMap.has(record.url) &&
+						record.search_term.trim() !== ""
+					) {
 						const dto: SearchHistoryDto = {
 							search_term: record.search_term,
 							search_time: record.search_time,
@@ -695,7 +698,7 @@ export class SearchService {
 				],
 			},
 			orderBy: {
-				timestamp: "desc"
+				timestamp: "desc",
 			},
 		});
 

@@ -17,7 +17,6 @@ jest.mock("react-native-gesture-handler", () => {
 	};
 });
 
-
 // Mocking modules
 jest.mock("expo-router", () => ({
 	useNavigation: jest.fn(),
@@ -327,19 +326,16 @@ describe("Search Component", () => {
 		fireEvent.changeText(searchInput, "nothing");
 		fireEvent.press(getByTestId("search-button"));
 
-		await waitFor(
-			() => {
-				
-				expect(consoleLogSpy.mock.calls).toEqual(
+		await waitFor(() => {
+			expect(consoleLogSpy.mock.calls).toEqual(
+				expect.arrayContaining([
 					expect.arrayContaining([
-						expect.arrayContaining([
-							"Error fetching search suggestions:",
-							expect.any(Error),
-						]),
+						"Error fetching search suggestions:",
+						expect.any(Error),
 					]),
-				);
-			},
-		);
+				]),
+			);
+		});
 	});
 
 	it("should log error when search fails", async () => {
