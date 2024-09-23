@@ -25,6 +25,7 @@ interface BottomSheetProps {
 	scheduled?: boolean;
 	showMoreFilters: boolean;
 	host?: string;
+	language?: string;
 	roomCount?: string;
 	maxFollowers?: string;
 	minFollowers?: string;
@@ -70,6 +71,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 	scheduled = false,
 	showMoreFilters = true,
 	host = "",
+	language = "",
 	roomCount = "",
 	maxFollowers = "",
 	minFollowers = "",
@@ -249,7 +251,6 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 															value={host}
 															onValueChange={setHost}
 														/>
-														<View style={{width: 10}}></View>
 														<ToggleButton
 															label="Room Count"
 															testID="room-count-toggle"
@@ -277,20 +278,21 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 														/>
 													</View>
 												</View>
-												<View style={styles.dropContainer}>
+												<View style={styles.searchBy}>
+													<ToggleButton
+														label="Language"
+														testID="language-toggle"
+														value={language}
+														onValueChange={setSelectedLanguage}
+													/>
+												</View>
+												<View style={styles.searchBy}>
 													<Dropdown
 														options={genres}
-														placeholder="Select Genre"
+														placeholder="Genre"
 														onSelect={setSelectedGenre}
 														selectedOption={selectedGenre}
 														setSelectedOption={setSelectedGenre}
-													/>
-													<Dropdown
-														options={languages}
-														placeholder="Select Language"
-														onSelect={handleSelectLanguage}
-														selectedOption={selectedLanguage}
-														setSelectedOption={setSelectedLanguage}
 													/>
 												</View>
 												<View style={styles.includeSection}>

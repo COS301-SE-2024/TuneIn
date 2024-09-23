@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import {
 	View,
 	Text,
-	TouchableOpacity,
 	Modal,
 	FlatList,
 	TextInput,
 	StyleSheet,
-	ScrollView,
 } from "react-native";
+import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
 
@@ -49,45 +48,47 @@ const Selector: React.FC<SelectorProps> = ({
 			onRequestClose={onClose}
 			testID="genre-selector"
 		>
-			<View style={styles.modalContainer}>
-				<View style={styles.modalContent}>
-					<TextInput
-						style={styles.searchInput}
-						placeholder={`Search ${placeholder.toLowerCase()}...`}
-						value={searchQuery}
-						onChangeText={setSearchQuery}
-						testID="genre-search-query"
-					/>
-					<FlatList
-						testID="flat-list"
-						data={filteredOptions}
-						keyExtractor={(item) => item}
-						style={styles.scrollView}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								style={styles.filterOption}
-								onPress={() => {
-									onSelect(item);
-									setSearchQuery("");
-									onClose();
-								}}
-								testID={`${item}-genre-option`}
-							>
-								<Text style={styles.filterText}>{item}</Text>
-							</TouchableOpacity>
-						)}
-					/>
-					<TouchableOpacity
-						style={styles.closeButton}
-						onPress={() => {
-							setSearchQuery("");
-							onClose();
-						}}
-					>
-						<Text style={styles.filterText}>Close</Text>
-					</TouchableOpacity>
+			<GestureHandlerRootView>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<TextInput
+							style={styles.searchInput}
+							placeholder={`Search ${placeholder.toLowerCase()}...`}
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+							testID="genre-search-query"
+						/>
+						<FlatList
+							testID="flat-list"
+							data={filteredOptions}
+							keyExtractor={(item) => item}
+							style={styles.scrollView}
+							renderItem={({ item }) => (
+								<TouchableOpacity
+									style={styles.filterOption}
+									onPress={() => {
+										onSelect(item);
+										setSearchQuery("");
+										onClose();
+									}}
+									testID={`${item}-genre-option`}
+								>
+									<Text style={styles.filterText}>{item}</Text>
+								</TouchableOpacity>
+							)}
+						/>
+						<TouchableOpacity
+							style={styles.closeButton}
+							onPress={() => {
+								setSearchQuery("");
+								onClose();
+							}}
+						>
+							<Text style={styles.filterText}>Close</Text>
+						</TouchableOpacity>
+					</View>
 				</View>
-			</View>
+			</GestureHandlerRootView>
 		</Modal>
 	);
 };
