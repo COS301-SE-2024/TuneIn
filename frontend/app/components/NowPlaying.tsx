@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 	},
 	playingContainer: {
-		width: 310,
+		width: "95%",
 		flexDirection: "row",
 		alignItems: "center",
 		paddingHorizontal: 20,
