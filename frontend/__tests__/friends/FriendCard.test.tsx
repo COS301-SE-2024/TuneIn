@@ -1,11 +1,20 @@
 import React from "react";
 import FriendCard from "../../app/components/FriendCard";
 import { Friend } from "../../app/models/friend"; // Adjust the import path as needed
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, fireEvent } from "@testing-library/react-native";
+import { router } from "expo-router"; // Import router to mock navigation
+
+jest.mock("expo-router", () => ({
+	router: {
+		push: jest.fn(), // Mock the push function for navigation
+	},
+}));
 
 const mockFriend: Friend = {
 	profile_picture_url: "https://example.com/profile.jpg",
 	username: "Test User",
+	friend_id: "123", // Add any additional fields required by your Friend interface
+	relationship: "friend",
 };
 
 describe("FriendCard", () => {
@@ -18,6 +27,8 @@ describe("FriendCard", () => {
 				username={mockFriend.username}
 				friend={mockFriend}
 				user={user}
+				cardType="friend"
+				handle={jest.fn()} // Mock the handle function
 			/>,
 		);
 
@@ -37,12 +48,17 @@ describe("FriendCard", () => {
 				username={mockFriend.username}
 				friend={mockFriend}
 				user={user}
+				cardType="friend"
+				handle={jest.fn()} // Mock the handle function
 			/>,
 		);
 
-		// Check if the Link component has the correct href attribute
+		// Simulate pressing the TouchableOpacity for navigation
 		const linkElement = screen.getByTestId("friend-card-link");
-		expect(linkElement.props.href).toBe(
+		fireEvent.press(linkElement);
+
+		// Check that router.push was called with the correct arguments
+		expect(router.push).toHaveBeenCalledWith(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify(
 				mockFriend,
 			)}&user=${user}`,
