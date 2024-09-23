@@ -203,6 +203,9 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 									{
 										transform: [{ translateY: slideAnim }],
 									},
+									filter === "room"
+										? { minHeight: "30%" }
+										: { minHeight: "20%" },
 								]}
 							>
 								{(!filter || filter === "user" || filter === "room") && (
@@ -212,7 +215,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 												{showMoreFilters && (
 													<View style={styles.includeSection}>
 														<Text style={styles.includeHeader}>Search by:</Text>
-														<View style={styles.searchBy}>
+														<View style={[styles.searchBy, { paddingTop: 15 }]}>
 															<ToggleButton
 																label="Minimum Followers"
 																value={minFollowers}
@@ -234,7 +237,11 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 										{(filter === "room" || !filter) && (
 											<View style={styles.additionalFilters}>
 												<View style={styles.includeSection}>
-													<Text style={styles.includeHeader}>Search by:</Text>
+													<Text
+														style={[styles.includeHeader, { marginBottom: 10 }]}
+													>
+														Search by:
+													</Text>
 													<View style={styles.searchBy}>
 														<ToggleButton
 															label="Host"
@@ -242,6 +249,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 															value={host}
 															onValueChange={setHost}
 														/>
+														<View style={{width: 10}}></View>
 														<ToggleButton
 															label="Room Count"
 															testID="room-count-toggle"
@@ -339,30 +347,13 @@ const styles = StyleSheet.create({
 		width: "100%",
 		minHeight: "30%", // Adjust the minimum height here
 	},
-	dragHandle: {
-		width: 60,
-		height: 5,
-		backgroundColor: "#ccc",
-		borderRadius: 5,
-	},
-	touchableArea: {
-		padding: 20, // Increases the touchable area
-		alignItems: "center", // Keeps the handle centered within the touchable area
-		justifyContent: "center",
-	},
-	dragHandleContainer: {
-		alignItems: "center", // Ensures the drag handle is centered horizontally
-		marginBottom: 10,
-	},
-
 	additionalFilters: {
 		paddingHorizontal: 20,
-		marginTop: 10,
-		marginBottom: 40,
+		marginTop: 15,
 		flexGrow: 1,
 	},
 	includeSection: {
-		paddingVertical: 10,
+		paddingVertical: 5,
 	},
 	includeHeader: {
 		fontSize: 18,
@@ -381,12 +372,11 @@ const styles = StyleSheet.create({
 	dropContainer: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		paddingBottom: 10,
+		paddingBottom: 5,
 	},
 	searchBy: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		paddingBottom: 10,
 		alignItems: "center", // Ensures the ToggleButtons align vertically in the center
 		width: "100%", // Ensure it takes full width
 	},
