@@ -1,13 +1,12 @@
 import { useReducer } from "react";
+import { SOCKET_EVENTS } from "../../constants";
 
 // Action types
 export const actionTypes = {
 	RESET: "RESET",
 	SOCKET_INITIALIZED: "SOCKET_INITIALIZED",
-	SOCKET_CONNECTED: "SOCKET_CONNECTED",
 
 	SENT_IDENTITY: "SENT_IDENTITY",
-	IDENTITY_CONFIRMED: "IDENTITY_CONFIRMED",
 
 	SENT_ROOM_JOIN: "SENT_ROOM_JOIN",
 	ROOM_JOIN_CONFIRMED: "ROOM_JOIN_CONFIRMED",
@@ -15,10 +14,8 @@ export const actionTypes = {
 	ROOM_LEAVE_CONFIRMED: "ROOM_LEAVE_CONFIRMED",
 
 	ROOM_QUEUE_REQUESTED: "ROOM_QUEUE_REQUESTED",
-	ROOM_QUEUE_RECEIVED: "ROOM_QUEUE_RECEIVED",
 
 	ROOM_CHAT_REQUESTED: "ROOM_CHAT_REQUESTED",
-	ROOM_CHAT_RECEIVED: "ROOM_CHAT_RECEIVED",
 
 	REQUEST_DM_JOIN: "REQUEST_DM_JOIN",
 	DM_JOIN_CONFIRMED: "DM_JOIN_CONFIRMED",
@@ -27,10 +24,18 @@ export const actionTypes = {
 	DM_LEAVE_CONFIRMED: "DM_LEAVE_CONFIRMED",
 
 	DMS_REQUESTED: "DMS_REQUESTED",
-	DMS_RECEIVED: "DMS_RECEIVED",
 
 	REVALIDATE: "REVALIDATE",
 	CLEAR_ROOM_STATE: "CLEAR_ROOM_STATE",
+	CLEAR_DM_STATE: "CLEAR_DM_STATE",
+};
+
+const internalActions = {
+	SOCKET_CONNECTED: "SOCKET_CONNECTED",
+	IDENTITY_CONFIRMED: "IDENTITY_CONFIRMED",
+	ROOM_QUEUE_RECEIVED: "ROOM_QUEUE_RECEIVED",
+	ROOM_CHAT_RECEIVED: "ROOM_CHAT_RECEIVED",
+	DMS_RECEIVED: "DMS_RECEIVED",
 };
 
 export type SocketHandshakesState = {
@@ -83,15 +88,21 @@ const socketInitialised: SocketHandshakesState = {
 };
 
 // Reducer function
-function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
+function stateReducer(
+	state: SocketHandshakesState,
+	action: SocketHandshakesAction,
+) {
+	console.log("CHANGING SOCKET STATE DUE TO INPUT: " + action.type);
 	switch (action.type) {
 		/* ***** SOCKET OBJECT ***** */
 		case actionTypes.RESET:
 			return { ...initialState };
 		case actionTypes.SOCKET_INITIALIZED:
-			return { ...socketInitialised };
-		case actionTypes.SOCKET_CONNECTED:
-			return { ...socketConnected };
+			//return { ...socketInitialised };
+			return { ...state, socketConnected: true, socketInitialized: true };
+		case internalActions.SOCKET_CONNECTED:
+			//return { ...socketConnected };
+			return { ...state, socketConnected: true };
 
 		/* ***** USER IDENTITY ***** */
 		case actionTypes.SENT_IDENTITY:
@@ -100,7 +111,7 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 				sentIdentity: true,
 				identityConfirmed: false,
 			};
-		case actionTypes.IDENTITY_CONFIRMED:
+		case internalActions.IDENTITY_CONFIRMED:
 			return {
 				...state,
 				sentIdentity: true,
@@ -111,6 +122,7 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 		case actionTypes.SENT_ROOM_JOIN:
 			return { ...state, sentRoomJoin: true, roomJoined: false };
 		case actionTypes.ROOM_JOIN_CONFIRMED:
+			console.log("RECEIVED: ROOM_JOIN_CONFIRMED");
 			return { ...state, sentRoomJoin: true, roomJoined: true };
 		case actionTypes.START_ROOM_LEAVE:
 			return { ...state, roomJoined: false, sentRoomJoin: false };
@@ -128,13 +140,13 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 		/* ***** ROOM QUEUE ***** */
 		case actionTypes.ROOM_QUEUE_REQUESTED:
 			return { ...state, roomQueueRequested: true, roomQueueReceived: false };
-		case actionTypes.ROOM_QUEUE_RECEIVED:
+		case internalActions.ROOM_QUEUE_RECEIVED:
 			return { ...state, roomQueueRequested: false, roomQueueReceived: true };
 
 		/* ***** ROOM CHAT ***** */
 		case actionTypes.ROOM_CHAT_REQUESTED:
 			return { ...state, roomChatRequested: true, roomChatReceived: false };
-		case actionTypes.ROOM_CHAT_RECEIVED:
+		case internalActions.ROOM_CHAT_RECEIVED:
 			return { ...state, roomChatRequested: false, roomChatReceived: true };
 
 		/* ***** DM CONNECTION ***** */
@@ -177,7 +189,7 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 				dmsRequested: true,
 				dmsReceived: false,
 			};
-		case actionTypes.DMS_RECEIVED:
+		case internalActions.DMS_RECEIVED:
 			return {
 				...state,
 				dmsRequested: false,
@@ -197,12 +209,114 @@ function reducer(state: SocketHandshakesState, action: SocketHandshakesAction) {
 				roomQueueRequested: false,
 				roomQueueReceived: false,
 			};
+		case actionTypes.CLEAR_DM_STATE:
+			return {
+				...state,
+				sentDMJoin: false,
+				dmJoined: false,
+				dmsRequested: false,
+				dmsReceived: false,
+			};
 		default:
 			return state;
 	}
 }
 
+export const RESET_EVENTS = "RESET_EVENT";
+export const NEW_ROOM = "NEW_ROOM";
+export const NEW_DM = "NEW_DM";
+
+const socketEvents = Object.values(SOCKET_EVENTS);
 export function useLiveState() {
-	const [socketState, updateState] = useReducer(reducer, initialState);
-	return { socketState, updateState };
+	const [socketState, updateState] = useReducer(stateReducer, initialState);
+	const [socketEventsReceived, handleReceivedEvent] = useReducer(
+		(state: Map<string, number>, action: string) => {
+			if (action === RESET_EVENTS) {
+				return new Map<string, number>();
+			} else if (action === NEW_ROOM) {
+				updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+				state.set(SOCKET_EVENTS.ROOM_JOINED, 0);
+				state.set(SOCKET_EVENTS.ROOM_LEFT, 0);
+				state.set(SOCKET_EVENTS.MESSAGE_SENT, 0);
+				state.set(SOCKET_EVENTS.MESSAGE_RECEIVED, 0);
+				state.set(SOCKET_EVENTS.USER_JOINED_ROOM, 0);
+				state.set(SOCKET_EVENTS.USER_LEFT_ROOM, 0);
+				state.set(SOCKET_EVENTS.LIVE_CHAT_HISTORY, 0);
+				state.set(SOCKET_EVENTS.PLAY_MEDIA, 0);
+				state.set(SOCKET_EVENTS.PAUSE_MEDIA, 0);
+				state.set(SOCKET_EVENTS.STOP_MEDIA, 0);
+				state.set(SOCKET_EVENTS.SONG_ADDED, 0);
+				state.set(SOCKET_EVENTS.SONG_REMOVED, 0);
+				state.set(SOCKET_EVENTS.VOTE_UPDATED, 0);
+				state.set(SOCKET_EVENTS.QUEUE_STATE, 0);
+				state.set(SOCKET_EVENTS.ROOM_SETTINGS_CHANGED, 0);
+				state.set(SOCKET_EVENTS.LIVE_MESSAGE, 0);
+				state.set(SOCKET_EVENTS.CURRENT_MEDIA, 0);
+				return state;
+			} else if (action === NEW_DM) {
+				updateState({ type: actionTypes.CLEAR_DM_STATE });
+				state.set(SOCKET_EVENTS.DIRECT_MESSAGE, 0);
+				state.set(SOCKET_EVENTS.TYPING, 0);
+				state.set(SOCKET_EVENTS.STOP_TYPING, 0);
+				state.set(SOCKET_EVENTS.USER_ONLINE, 0);
+				state.set(SOCKET_EVENTS.USER_OFFLINE, 0);
+				state.set(SOCKET_EVENTS.CHAT_MODIFIED, 0);
+				state.set(SOCKET_EVENTS.DM_HISTORY, 0);
+				return state;
+			} else if (
+				socketEvents.includes(action) ||
+				action === "connect" ||
+				action === "disconnect"
+			) {
+				console.log(`SOCKET MESSAGE RECEIVED: ${action}`);
+				const count = state.get(action) || 0;
+				state.set(action, count + 1);
+
+				const socketConnectCount = state.get("connect") || 0;
+				if (socketConnectCount > 0) {
+					updateState({ type: internalActions.SOCKET_CONNECTED });
+				}
+
+				const serverConnectedCount = state.get(SOCKET_EVENTS.CONNECTED) || 0;
+				if (serverConnectedCount > 0) {
+					updateState({ type: internalActions.SOCKET_CONNECTED });
+					updateState({ type: actionTypes.SOCKET_INITIALIZED });
+					updateState({ type: internalActions.IDENTITY_CONFIRMED });
+				}
+
+				const serverDisconnectedCount =
+					state.get(SOCKET_EVENTS.DISCONNECTED) || 0;
+				if (serverDisconnectedCount > 0) {
+					updateState({ type: actionTypes.RESET });
+				}
+
+				const roomQueueReceivedCount =
+					state.get(SOCKET_EVENTS.QUEUE_STATE) || 0;
+				if (roomQueueReceivedCount > 0) {
+					updateState({ type: internalActions.ROOM_QUEUE_RECEIVED });
+				}
+
+				const roomChatReceivedCount =
+					state.get(SOCKET_EVENTS.LIVE_CHAT_HISTORY) || 0;
+				if (roomChatReceivedCount > 0) {
+					updateState({ type: internalActions.ROOM_CHAT_RECEIVED });
+				}
+
+				const dmHistoryReceivedCount = state.get(SOCKET_EVENTS.DM_HISTORY) || 0;
+				if (dmHistoryReceivedCount > 0) {
+					updateState({ type: internalActions.DMS_RECEIVED });
+				}
+				return state;
+			}
+			return state;
+		},
+		new Map<string, number>(),
+	);
+
+	return {
+		socketState,
+		updateState,
+		socketEventsReceived,
+		handleReceivedEvent,
+	};
 }
