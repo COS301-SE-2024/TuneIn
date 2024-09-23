@@ -187,30 +187,37 @@ export function useRoomControls({
 
 	const getDevices = useCallback(
 		async function (): Promise<Device[]> {
-			if (!spotifyTokens) {
-				throw new Error("Spotify tokens not found");
-			}
-			try {
-				const api = SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
-				const devices: Devices = await api.player.getAvailableDevices();
-				setSpotifyDevices(devices);
-				setDeviceError(null);
-				const state: PlaybackState = await api.player.getPlaybackState();
-				setPlaybackState(state);
-				setActiveDevice({
-					deviceID: state.device.id,
-					userSelected: false,
-				});
-				return devices.devices;
-			} catch (err) {
+			if (!spotify) {
 				console.error(
-					"An error occurred while fetching devices. Spotify:",
-					err,
+					"User either does not have a Spotify account or is not logged in",
 				);
-				setDeviceError(
-					"An error occurred while fetching devices. Spotify: " + err,
-				);
-				throw err;
+				return [];
+			} else {
+				try {
+					const devices: Devices = await spotify.player.getAvailableDevices();
+					setSpotifyDevices(devices);
+					setDeviceError(null);
+					const state: PlaybackState = await spotify.player.getPlaybackState();
+					console.log("Playback state:", state);
+					if (state === null) {
+						return [];
+					}
+					setPlaybackState(state);
+					setActiveDevice({
+						deviceID: state.device.id,
+						userSelected: false,
+					});
+					return devices.devices;
+				} catch (err) {
+					console.error(
+						"An error occurred while fetching devices. Spotify:",
+						err,
+					);
+					setDeviceError(
+						"An error occurred while fetching devices. Spotify: " + err,
+					);
+					throw err;
+				}
 			}
 		},
 		[spotifyTokens, setSpotifyDevices],
@@ -414,36 +421,36 @@ export function useRoomControls({
 		console.log("pausePlayback function has been recreated");
 	}, [pausePlayback]);
 
-	const stopPlayback = useCallback(
-		function (): void {
-			if (!socket) {
-				console.error("Socket connection not initialized");
-				return;
-			}
+	// const stopPlayback = useCallback(
+	// 	function (): void {
+	// 		if (!socket) {
+	// 			console.error("Socket connection not initialized");
+	// 			return;
+	// 		}
 
-			pollLatency();
-			if (!currentUser) {
-				console.error("User is not logged in");
-				return;
-			}
-			if (!currentRoom) {
-				console.error("User is not in a room");
-				return;
-			}
-			const input: PlaybackEventDto = {
-				userID: currentUser.userID,
-				roomID: currentRoom.roomID,
-				spotifyID: null,
-				UTC_time: null,
-			};
-			socket.emit(SOCKET_EVENTS.INIT_STOP, JSON.stringify(input));
-		},
-		[currentRoom, currentUser, socket, pollLatency],
-	);
+	// 		pollLatency();
+	// 		if (!currentUser) {
+	// 			console.error("User is not logged in");
+	// 			return;
+	// 		}
+	// 		if (!currentRoom) {
+	// 			console.error("User is not in a room");
+	// 			return;
+	// 		}
+	// 		const input: PlaybackEventDto = {
+	// 			userID: currentUser.userID,
+	// 			roomID: currentRoom.roomID,
+	// 			spotifyID: null,
+	// 			UTC_time: null,
+	// 		};
+	// 		socket.emit(SOCKET_EVENTS.INIT_STOP, JSON.stringify(input));
+	// 	},
+	// 	[currentRoom, currentUser, socket, pollLatency],
+	// );
 
-	useEffect(() => {
-		console.log("stopPlayback function has been recreated");
-	}, [stopPlayback]);
+	// useEffect(() => {
+	// 	console.log("stopPlayback function has been recreated");
+	// }, [stopPlayback]);
 
 	const nextTrack = useCallback(
 		function (): void {
