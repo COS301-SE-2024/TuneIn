@@ -21,6 +21,7 @@ import * as utils from "../../services/Utils";
 import { useRouter } from "expo-router";
 import CreateButton from "../../components/CreateButton";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
 	},
 	inputField: {
 		borderWidth: 1,
-		borderColor: "#D1D5DB",
+		borderColor: colors.primary,
 		borderRadius: 10,
 		padding: 10,
 		backgroundColor: "#F9FAFB",
