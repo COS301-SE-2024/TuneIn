@@ -69,45 +69,9 @@ export const useSpotifyDevices = () => {
 		}
 	};
 
-	// Updated getDeviceIDs function to return an array of Devices
-	const getDeviceIDs = async (): Promise<Device[] | null> => {
-		try {
-			let result: Device[] | null = null;
-			fetchToken().then(async (token) => {
-				const response = await fetch(
-					"https://api.spotify.com/v1/me/player/devices",
-					{
-						method: "GET",
-						headers: {
-							Authorization: `Bearer ${token}`,
-							"Content-Type": "application/json",
-						},
-					},
-				);
-
-				if (!response.ok) {
-					console.error(`Error fetching devices: ${response.statusText}`);
-					return null; // Return null if response is not ok
-				}
-
-				const data = await response.json();
-
-				// Return the devices array or null if it's undefined
-				result = Array.isArray(data.devices) ? data.devices : null;
-				console.log("getDeviceIDs result: ", result);
-			});
-			return result;
-		} catch (err) {
-			setError("An error occurred while fetching devices");
-			console.error("An error occurred while fetching devices", err);
-			return null;
-		}
-	};
-
 	return {
 		devices,
 		getFirstDevice,
-		getDeviceIDs,
 		error,
 	};
 };
