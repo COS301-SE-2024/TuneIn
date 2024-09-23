@@ -47,7 +47,12 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 			{isSelected ? (
 				<TextInput
 					ref={inputRef}
-					style={styles.input}
+					style={[
+						styles.input,
+						label === "Minimum Followers" || label === "Minimum Following"
+							? { fontSize: 12 }
+							: {},
+					]}
 					value={text}
 					onBlur={() => setIsSelected(false)}
 					onChangeText={changeText}
