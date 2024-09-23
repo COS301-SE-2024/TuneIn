@@ -9,12 +9,15 @@ import {
 	Modal,
 	Easing,
 	TouchableWithoutFeedback,
+	KeyboardAvoidingView,
+	Platform,
 } from "react-native";
 import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "../services/Utils";
 import ToggleButton from "./ToggleButton";
 import Dropdown from "./Dropdown";
+import { ScrollView } from "react-native-gesture-handler";
 
 interface BottomSheetProps {
 	filter: string;
@@ -198,136 +201,153 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 			<TouchableWithoutFeedback onPress={handleClose}>
 				<View style={styles.modalContainer}>
 					<View style={styles.modalOverlay}>
-						<TouchableWithoutFeedback>
-							<Animated.View
-								style={[
-									styles.modal,
-									{
-										transform: [{ translateY: slideAnim }],
-									},
-									filter === "room"
-										? { minHeight: "30%" }
-										: { minHeight: "20%" },
-								]}
-							>
-								{(!filter || filter === "user" || filter === "room") && (
-									<>
-										{(filter === "user" || !filter) && (
-											<View style={styles.additionalFilters}>
-												{showMoreFilters && (
-													<View style={styles.includeSection}>
-														<Text style={styles.includeHeader}>Search by:</Text>
-														<View style={[styles.searchBy, { paddingTop: 15 }]}>
+						<KeyboardAvoidingView
+							behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+						>
+							<TouchableWithoutFeedback>
+								<ScrollView>
+									<Animated.View
+										style={[
+											styles.modal,
+											{
+												transform: [{ translateY: slideAnim }],
+											},
+											filter === "room"
+												? { minHeight: "30%" }
+												: { minHeight: "20%" },
+										]}
+									>
+										{(!filter || filter === "user" || filter === "room") && (
+											<>
+												{(filter === "user" || !filter) && (
+													<View style={styles.additionalFilters}>
+														{showMoreFilters && (
+															<View style={styles.includeSection}>
+																<Text style={styles.includeHeader}>
+																	Search by:
+																</Text>
+																<View
+																	style={[styles.searchBy, { paddingTop: 15 }]}
+																>
+																	<ToggleButton
+																		label="Minimum Followers"
+																		value={minFollowers}
+																		onValueChange={setMinFollowers}
+																		testID="minFol-btn"
+																	/>
+																	<ToggleButton
+																		label="Minimum Following"
+																		value={maxFollowers}
+																		onValueChange={setMaxFollowers}
+																		testID="maxFl-btn"
+																	/>
+																</View>
+															</View>
+														)}
+													</View>
+												)}
+
+												{(filter === "room" || !filter) && (
+													<View style={styles.additionalFilters}>
+														<View style={styles.includeSection}>
+															<Text
+																style={[
+																	styles.includeHeader,
+																	{ marginBottom: 10 },
+																]}
+															>
+																Search by:
+															</Text>
+															<View style={styles.searchBy}>
+																<ToggleButton
+																	label="Host"
+																	testID="host-toggle"
+																	value={host}
+																	onValueChange={setHost}
+																/>
+																<ToggleButton
+																	label="Room Count"
+																	testID="room-count-toggle"
+																	value={roomCount}
+																	onValueChange={setRoomCount}
+																/>
+															</View>
+														</View>
+														<View style={styles.includeSection}>
+															<Text style={styles.includeHeader}>Include:</Text>
+															<View style={styles.switchContainer}>
+																<Text style={styles.switchLabel}>Explicit</Text>
+																<Switch
+																	testID="explicit-switch"
+																	value={explicit}
+																	onValueChange={setExplicit}
+																/>
+															</View>
+															<View style={styles.switchContainer}>
+																<Text style={styles.switchLabel}>NSFW</Text>
+																<Switch
+																	testID="nsfw-switch"
+																	value={nsfw}
+																	onValueChange={setNsfw}
+																/>
+															</View>
+														</View>
+														<View style={styles.searchBy}>
 															<ToggleButton
-																label="Minimum Followers"
-																value={minFollowers}
-																onValueChange={setMinFollowers}
-																testID="minFol-btn"
+																label="Language"
+																testID="language-toggle"
+																value={language}
+																onValueChange={setSelectedLanguage}
 															/>
-															<ToggleButton
-																label="Minimum Following"
-																value={maxFollowers}
-																onValueChange={setMaxFollowers}
-																testID="maxFl-btn"
+														</View>
+														<View style={styles.searchBy}>
+															<Dropdown
+																options={genres}
+																placeholder="Genre"
+																onSelect={setSelectedGenre}
+																selectedOption={selectedGenre}
+																setSelectedOption={setSelectedGenre}
 															/>
+														</View>
+														<View style={styles.includeSection}>
+															<Text style={styles.includeHeader}>Other:</Text>
+															<View style={styles.switchContainer}>
+																<Text style={styles.switchLabel}>
+																	Temporary
+																</Text>
+																<Switch
+																	value={temporary}
+																	onValueChange={setTemporary}
+																	testID="temp-switch"
+																/>
+															</View>
+															<View style={styles.switchContainer}>
+																<Text style={styles.switchLabel}>Private</Text>
+																<Switch
+																	value={isPrivate}
+																	onValueChange={setIsPrivate}
+																	testID="priv-switch"
+																/>
+															</View>
+															<View style={styles.switchContainer}>
+																<Text style={styles.switchLabel}>
+																	Scheduled
+																</Text>
+																<Switch
+																	value={scheduled}
+																	onValueChange={setScheduled}
+																	testID="scheduled-switch"
+																/>
+															</View>
 														</View>
 													</View>
 												)}
-											</View>
+											</>
 										)}
-
-										{(filter === "room" || !filter) && (
-											<View style={styles.additionalFilters}>
-												<View style={styles.includeSection}>
-													<Text
-														style={[styles.includeHeader, { marginBottom: 10 }]}
-													>
-														Search by:
-													</Text>
-													<View style={styles.searchBy}>
-														<ToggleButton
-															label="Host"
-															testID="host-toggle"
-															value={host}
-															onValueChange={setHost}
-														/>
-														<ToggleButton
-															label="Room Count"
-															testID="room-count-toggle"
-															value={roomCount}
-															onValueChange={setRoomCount}
-														/>
-													</View>
-												</View>
-												<View style={styles.includeSection}>
-													<Text style={styles.includeHeader}>Include:</Text>
-													<View style={styles.switchContainer}>
-														<Text style={styles.switchLabel}>Explicit</Text>
-														<Switch
-															testID="explicit-switch"
-															value={explicit}
-															onValueChange={setExplicit}
-														/>
-													</View>
-													<View style={styles.switchContainer}>
-														<Text style={styles.switchLabel}>NSFW</Text>
-														<Switch
-															testID="nsfw-switch"
-															value={nsfw}
-															onValueChange={setNsfw}
-														/>
-													</View>
-												</View>
-												<View style={styles.searchBy}>
-													<ToggleButton
-														label="Language"
-														testID="language-toggle"
-														value={language}
-														onValueChange={setSelectedLanguage}
-													/>
-												</View>
-												<View style={styles.searchBy}>
-													<Dropdown
-														options={genres}
-														placeholder="Genre"
-														onSelect={setSelectedGenre}
-														selectedOption={selectedGenre}
-														setSelectedOption={setSelectedGenre}
-													/>
-												</View>
-												<View style={styles.includeSection}>
-													<Text style={styles.includeHeader}>Other:</Text>
-													<View style={styles.switchContainer}>
-														<Text style={styles.switchLabel}>Temporary</Text>
-														<Switch
-															value={temporary}
-															onValueChange={setTemporary}
-															testID="temp-switch"
-														/>
-													</View>
-													<View style={styles.switchContainer}>
-														<Text style={styles.switchLabel}>Private</Text>
-														<Switch
-															value={isPrivate}
-															onValueChange={setIsPrivate}
-															testID="priv-switch"
-														/>
-													</View>
-													<View style={styles.switchContainer}>
-														<Text style={styles.switchLabel}>Scheduled</Text>
-														<Switch
-															value={scheduled}
-															onValueChange={setScheduled}
-															testID="scheduled-switch"
-														/>
-													</View>
-												</View>
-											</View>
-										)}
-									</>
-								)}
-							</Animated.View>
-						</TouchableWithoutFeedback>
+									</Animated.View>
+								</ScrollView>
+							</TouchableWithoutFeedback>
+						</KeyboardAvoidingView>
 					</View>
 				</View>
 			</TouchableWithoutFeedback>
