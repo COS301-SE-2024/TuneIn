@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useReducer,
+	useState,
+} from "react";
 import { Socket } from "socket.io-client";
 import {
 	LiveChatMessageDto,
@@ -72,10 +78,15 @@ export interface RoomControls {
 
 export interface Playback {
 	spotifyDevices: Devices;
-	getFirstDevice: () => Promise<string | null>;
+	deviceError: string | null;
+	handlePlayback: (action: string, offset?: number) => Promise<void>;
 	getDevices: () => Promise<Device[]>;
 	getDeviceIDs: () => Promise<string[]>;
-	setActiveDevice: (deviceID: string | null) => void;
+	activeDevice: Device | undefined;
+	setActiveDevice: React.Dispatch<{
+		deviceID: string | null;
+		userSelected: boolean;
+	}>;
 	userListeningToRoom: (currentTrackUri: string) => Promise<boolean>;
 	startPlayback: () => void;
 	pausePlayback: () => void;
@@ -101,7 +112,6 @@ export function useRoomControls({
 	currentSong,
 	spotifyTokens,
 	roomPlaying,
-	setRoomPlaying,
 	pollLatency,
 }: RoomControlProps): RoomControls {
 	console.log("useRoomControls()");
@@ -117,6 +127,7 @@ export function useRoomControls({
 	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
 		devices: [],
 	});
+	const [playbackState, setPlaybackState] = useState<PlaybackState>();
 	const [activeDevice, setActiveDevice] = useReducer(
 		(
 			state: Device | undefined,
@@ -185,6 +196,7 @@ export function useRoomControls({
 				setSpotifyDevices(devices);
 				setDeviceError(null);
 				const state: PlaybackState = await api.player.getPlaybackState();
+				setPlaybackState(state);
 				setActiveDevice({
 					deviceID: state.device.id,
 					userSelected: false,
@@ -307,6 +319,11 @@ export function useRoomControls({
 
 	const userListeningToRoom = useCallback(
 		async function (currentTrackUri: string): Promise<boolean> {
+			if (playbackState) {
+				if (playbackState.item.uri === currentTrackUri) {
+					return true;
+				}
+			}
 			if (!spotifyTokens) {
 				throw new Error("Spotify tokens not found");
 			}
@@ -317,9 +334,7 @@ export function useRoomControls({
 				const api = SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
 				const playbackState: PlaybackState =
 					await api.player.getPlaybackState();
-				if (!playbackState) {
-					return false;
-				}
+				setPlaybackState(playbackState);
 				setActiveDevice({
 					deviceID: playbackState.device.id,
 					userSelected: false,
@@ -506,9 +521,11 @@ export function useRoomControls({
 			stopPlayback: stopPlayback,
 			nextTrack: nextTrack,
 			prevTrack: prevTrack,
+			deviceError: deviceError,
 		};
 	}, [
 		activeDevice,
+		deviceError,
 		getDeviceIDs,
 		getDevices,
 		handlePlayback,
