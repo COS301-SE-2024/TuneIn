@@ -91,8 +91,6 @@ export interface Playback {
 interface RoomControlProps {
 	currentUser: UserDto | undefined;
 	currentRoom: RoomDto | undefined;
-	spotifyDevices: Devices;
-	setSpotifyDevices: React.Dispatch<React.SetStateAction<Devices>>;
 	socket: Socket | null;
 	currentSong: RoomSongDto | undefined;
 	spotifyTokens: SpotifyTokenPair | undefined;
@@ -103,8 +101,6 @@ interface RoomControlProps {
 export function useRoomControls({
 	currentUser,
 	currentRoom,
-	spotifyDevices,
-	setSpotifyDevices,
 	socket,
 	currentSong,
 	spotifyTokens,
@@ -116,6 +112,9 @@ export function useRoomControls({
 	console.log("currentUser:", currentUser);
 	console.log("currentRoom:", currentRoom);
 	const { socketState, updateState } = useLiveState();
+	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
+		devices: [],
+	});
 
 	const getDevices = useCallback(
 		async function (): Promise<Device[]> {
@@ -124,11 +123,18 @@ export function useRoomControls({
 			}
 			try {
 				const api = SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
-				const data: Devices = await api.player.getAvailableDevices();
-				setSpotifyDevices(data);
-				return data.devices;
+				const devices: Devices = await api.player.getAvailableDevices();
+				setSpotifyDevices(devices);
+				setDeviceError(null);
+				return devices.devices;
 			} catch (err) {
-				console.error("An error occurred while fetching devices", err);
+				console.error(
+					"An error occurred while fetching devices. Spotify:",
+					err,
+				);
+				setDeviceError(
+					"An error occurred while fetching devices. Spotify: " + err,
+				);
 				throw err;
 			}
 		},
@@ -138,41 +144,6 @@ export function useRoomControls({
 	useEffect(() => {
 		console.log("getDevices function has been recreated");
 	}, [getDevices]);
-
-	const getFirstDevice = useCallback(
-		async function (): Promise<string | null> {
-			if (!spotifyTokens) {
-				throw new Error("Spotify tokens not found");
-			}
-			try {
-				let d = spotifyDevices;
-				if (!d.devices || d.devices.length === 0) {
-					d = {
-						devices: await getDevices(),
-					};
-				}
-
-				if (d.devices.length > 0) {
-					const first: Device = d.devices[0];
-					if (!first.id) {
-						throw new Error("Device ID not found");
-					}
-					return first.id;
-				} else {
-					Alert.alert("No Devices Found", "No devices are currently active.");
-					throw new Error("No devices found");
-				}
-			} catch (err) {
-				console.error("An error occurred while getting the device ID", err);
-				throw err;
-			}
-		},
-		[spotifyTokens, spotifyDevices, getDevices],
-	);
-
-	useEffect(() => {
-		console.log("getFirstDevice function has been recreated");
-	}, [getFirstDevice]);
 
 	const handlePlayback = useCallback(
 		async function (
@@ -270,12 +241,7 @@ export function useRoomControls({
 
 	const getDeviceIDs = useCallback(
 		async function (): Promise<string[]> {
-			let devices: Device[];
-			if (spotifyDevices.devices.length === 0) {
-				devices = await getDevices();
-			} else {
-				devices = spotifyDevices.devices;
-			}
+			let devices: Device[] = spotifyDevices.devices;
 			const result: string[] = [];
 			for (const device of devices) {
 				if (device.id) {
@@ -284,7 +250,7 @@ export function useRoomControls({
 			}
 			return result;
 		},
-		[spotifyDevices, getDevices],
+		[spotifyDevices],
 	);
 
 	useEffect(() => {
@@ -480,7 +446,6 @@ export function useRoomControls({
 		return {
 			spotifyDevices: spotifyDevices,
 			handlePlayback: handlePlayback,
-			getFirstDevice: getFirstDevice,
 			getDevices: getDevices,
 			getDeviceIDs: getDeviceIDs,
 			setActiveDevice: setActiveDevice,
@@ -493,7 +458,6 @@ export function useRoomControls({
 	}, [
 		getDeviceIDs,
 		getDevices,
-		getFirstDevice,
 		handlePlayback,
 		nextTrack,
 		pausePlayback,
@@ -719,7 +683,8 @@ export function useRoomControls({
 			}
 
 			if (message.trim()) {
-				const newMessage = {
+				const newMessage: LiveChatMessageDto = {
+					messageID: "",
 					messageBody: message,
 					sender: currentUser,
 					roomID: currentRoom.roomID,
@@ -792,6 +757,7 @@ export function useRoomControls({
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
 				body: {
+					messageID: "",
 					messageBody: "",
 					sender: currentUser,
 					roomID: currentRoom.roomID,
@@ -804,7 +770,7 @@ export function useRoomControls({
 		[
 			currentRoom,
 			currentUser,
-			getSocket,
+			socket,
 			socketState.roomChatRequested,
 			updateState,
 		],
@@ -841,7 +807,7 @@ export function useRoomControls({
 	useEffect(() => {
 		console.log("canControlRoom function has been recreated");
 		console.log("currentRoom here:", currentRoom);
-	}, [canControlRoom]);
+	}, [canControlRoom, currentRoom]);
 
 	const requestRoomQueue = useCallback(
 		function (): void {
@@ -869,7 +835,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, getSocket],
+		[currentRoom, currentUser, socket],
 	);
 
 	useEffect(() => {
