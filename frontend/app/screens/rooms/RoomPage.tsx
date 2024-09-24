@@ -779,7 +779,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
-				<View style={styles.userInfoContainer}>
+				{/* <View style={styles.userInfoContainer}>
 					<Image
 						source={{ uri: roomData.userProfile }}
 						style={styles.userImage}
@@ -787,7 +787,20 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					<Text style={styles.username}>
 						{truncateUsername(roomData.username)}
 					</Text>
-				</View>
+				</View> */}
+				<TouchableOpacity
+					// onPress={handleUserPress}
+					style={styles.userInfoContainer}
+				>
+					<Image
+						source={{ uri: roomData.userProfile }}
+						style={styles.userImage}
+					/>
+					<Text style={styles.username}>
+						{truncateUsername(roomData.username)}
+					</Text>
+				</TouchableOpacity>
+
 				{/* Right side */}
 				<View style={styles.joinLeaveButtonContainer}>
 					<View style={styles.sideBySideClose}>
