@@ -1,5 +1,5 @@
 // import * as React from "react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import AllFriends from "./AllFriends";
 import Followers from "./Followers";
@@ -8,6 +8,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { Player } from "../../PlayerContext";
 
 // Create a tab navigator
 const Tab = createMaterialTopTabNavigator();
@@ -67,7 +68,14 @@ function MyTabs({ username }: { username: string }) {
 
 // Export the main component with navigation container
 export default function TopBarNavigator() {
-	const username = "User's Name"; // Replace with dynamic username if needed
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+	const { userData } = playerContext;
+	const username = userData?.username ?? "Username"; // Replace with dynamic username if needed
 
 	return <MyTabs username={username} />;
 }
