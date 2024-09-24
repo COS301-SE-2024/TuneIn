@@ -40,11 +40,14 @@ const AnalyticsPage: React.FC = () => {
 		const fetchKeyMetrics = async () => {
 			try {
 				const accessToken: string | null = await AuthManagement.getToken();
-				const response = await fetch(`${API_BASE_URL}/rooms/analytics/keymetrics`, {
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/analytics/${activeButton.toLowerCase()}/keymetrics`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
 					},
-				});
+				);
 				const data = await response.json();
 
 				if (JSON.stringify(data) === "{}") {
@@ -59,8 +62,7 @@ const AnalyticsPage: React.FC = () => {
 			}
 		};
 		fetchKeyMetrics();
-		console.log("keymetrics", keymetrics);
-	}, []);
+	}, [activeButton]);
 	const handleButtonPress = (button: string) => {
 		setActiveButton(button);
 	};
@@ -216,8 +218,8 @@ const AnalyticsPage: React.FC = () => {
 								keymetrics?.returning_visitors?.percentage_change?.toString() ===
 								undefined
 									? "0"
-									: (
-											keymetrics?.unique_visitors?.percentage_change * 100
+									: Math.floor(
+											keymetrics?.unique_visitors?.percentage_change * 100,
 										).toString()
 							}
 						/>
@@ -228,8 +230,8 @@ const AnalyticsPage: React.FC = () => {
 								keymetrics?.returning_visitors?.percentage_change?.toString() ===
 								undefined
 									? "0"
-									: (
-											keymetrics?.returning_visitors?.percentage_change * 100
+									: Math.floor(
+											keymetrics?.returning_visitors?.percentage_change * 100,
 										).toString()
 							}
 						/>
@@ -244,9 +246,9 @@ const AnalyticsPage: React.FC = () => {
 								keymetrics?.average_session_duration?.percentage_change?.toString() ===
 								undefined
 									? "0"
-									: (
+									: Math.floor(
 											keymetrics?.average_session_duration?.percentage_change *
-											100
+												100,
 										).toString()
 							}
 						/>
