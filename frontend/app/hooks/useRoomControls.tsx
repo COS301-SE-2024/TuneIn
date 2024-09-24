@@ -234,10 +234,6 @@ export function useRoomControls({
 		[spotify],
 	);
 
-	useEffect(() => {
-		console.log("getDevices function has been recreated");
-	}, [getDevices]);
-
 	const handlePlayback = useCallback(
 		async function (action: string, song?: RoomSongDto): Promise<void> {
 			try {
@@ -364,10 +360,6 @@ export function useRoomControls({
 		],
 	);
 
-	useEffect(() => {
-		console.log("handlePlayback function has been recreated");
-	}, [handlePlayback]);
-
 	const getDeviceIDs = useCallback(
 		async function (): Promise<string[]> {
 			let devices: Device[] = spotifyDevices.devices;
@@ -381,10 +373,6 @@ export function useRoomControls({
 		},
 		[spotifyDevices],
 	);
-
-	useEffect(() => {
-		console.log("getDeviceIDs function has been recreated");
-	}, [getDeviceIDs]);
 
 	const userListeningToRoom = useCallback(
 		async function (): Promise<boolean> {
@@ -423,10 +411,6 @@ export function useRoomControls({
 		[currentSong, spotify, roomPlaying],
 	);
 
-	useEffect(() => {
-		console.log("userListeningToRoom function has been recreated");
-	}, [userListeningToRoom]);
-
 	const startPlayback = useCallback(
 		function (): void {
 			if (!socket) {
@@ -454,10 +438,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("startPlayback function has been recreated");
-	}, [startPlayback]);
-
 	const pausePlayback = useCallback(
 		function (): void {
 			if (!socket) {
@@ -484,10 +464,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket, pollLatency],
 	);
-
-	useEffect(() => {
-		console.log("pausePlayback function has been recreated");
-	}, [pausePlayback]);
 
 	// const stopPlayback = useCallback(
 	// 	function (): void {
@@ -547,10 +523,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("nextTrack function has been recreated");
-	}, [nextTrack]);
-
 	const prevTrack = useCallback(
 		function (): void {
 			if (!socket) {
@@ -577,10 +549,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket, pollLatency],
 	);
-
-	useEffect(() => {
-		console.log("prevTrack function has been recreated");
-	}, [prevTrack]);
 
 	useEffect(() => {
 		console.log("useEffect for syncing user with room has been called");
@@ -661,10 +629,6 @@ export function useRoomControls({
 		userListeningToRoom,
 	]);
 
-	useEffect(() => {
-		console.log("playbackHandler object has been recreated");
-	}, [playbackHandler]);
-
 	const clearQueue = useCallback(
 		function (): void {
 			if (!socket) {
@@ -688,10 +652,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket],
 	);
-
-	useEffect(() => {
-		console.log("clearQueue function has been recreated");
-	}, [clearQueue]);
 
 	const enqueueSongs = useCallback(
 		function (songs: RoomSongDto[]): void {
@@ -722,10 +682,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, roomQueue, socket],
 	);
 
-	useEffect(() => {
-		console.log("enqueueSongs function has been recreated");
-	}, [enqueueSongs]);
-
 	const dequeueSongs = useCallback(
 		function (songs: RoomSongDto[]): void {
 			if (!socket) {
@@ -755,10 +711,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
 	);
 
-	useEffect(() => {
-		console.log("dequeueSongs function has been recreated");
-	}, [dequeueSongs]);
-
 	const upvoteSong = useCallback(
 		function (song: RoomSongDto): void {
 			if (!socket) {
@@ -781,10 +733,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket],
 	);
-
-	useEffect(() => {
-		console.log("upvoteSong function has been recreated");
-	}, [upvoteSong]);
 
 	const downvoteSong = useCallback(
 		function (song: RoomSongDto): void {
@@ -809,10 +757,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket],
 	);
 
-	useEffect(() => {
-		console.log("downvoteSong function has been recreated");
-	}, [downvoteSong]);
-
 	const swapSongVote = useCallback(
 		function (song: RoomSongDto): void {
 			if (!socket) {
@@ -835,10 +779,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket],
 	);
-
-	useEffect(() => {
-		console.log("swapSongVote function has been recreated");
-	}, [swapSongVote]);
 
 	const undoSongVote = useCallback(
 		function (song: RoomSongDto): void {
@@ -863,10 +803,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket],
 	);
 
-	useEffect(() => {
-		console.log("undoSongVote function has been recreated");
-	}, [undoSongVote]);
-
 	const queueControls: QueueControls = useMemo(() => {
 		return {
 			clearQueue: clearQueue,
@@ -886,10 +822,6 @@ export function useRoomControls({
 		swapSongVote,
 		undoSongVote,
 	]);
-
-	useEffect(() => {
-		console.log("queueControls object has been recreated");
-	}, [queueControls]);
 
 	const sendLiveChatMessage = useCallback(
 		function (message: string): void {
@@ -927,10 +859,6 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("sendLiveChatMessage function has been recreated");
-	}, [sendLiveChatMessage]);
-
 	const sendReaction = useCallback(
 		function (emoji: string): void {
 			if (!socket) {
@@ -956,10 +884,6 @@ export function useRoomControls({
 		},
 		[currentUser, socket],
 	);
-
-	useEffect(() => {
-		console.log("sendReaction function has been recreated");
-	}, [sendReaction]);
 
 	const requestLiveChatHistory = useCallback(
 		function (): void {
@@ -1003,10 +927,6 @@ export function useRoomControls({
 		],
 	);
 
-	useEffect(() => {
-		console.log("requestLiveChatHistory function has been recreated");
-	}, [requestLiveChatHistory]);
-
 	const canControlRoom = useCallback(
 		function (): boolean {
 			console.log("canControlRoom currentUser:", currentUser);
@@ -1031,11 +951,6 @@ export function useRoomControls({
 		[currentRoom, currentUser],
 	);
 
-	useEffect(() => {
-		console.log("canControlRoom function has been recreated");
-		console.log("currentRoom here:", currentRoom);
-	}, [canControlRoom, currentRoom]);
-
 	const requestRoomQueue = useCallback(
 		function (): void {
 			if (!socket) {
@@ -1057,10 +972,6 @@ export function useRoomControls({
 		},
 		[currentRoom, currentUser, socket],
 	);
-
-	useEffect(() => {
-		console.log("requestRoomQueue function has been recreated");
-	}, [requestRoomQueue]);
 
 	const roomControls: RoomControls = useMemo(() => {
 		return {
