@@ -1174,4 +1174,40 @@ describe("UsersService follow function", () => {
 			expect(result).toBe(expectedPopularity);
 		});
 	});
+	describe("calculateMutualFriends", () => {
+		it("should return the correct number of mutual friends", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockMutualFriends: PrismaTypes.users[] = [
+				{ user_id: "friend1" } as PrismaTypes.users,
+				{ user_id: "friend2" } as PrismaTypes.users,
+			];
+
+			jest
+				.spyOn(dbUtilsService, "getMutualFriends")
+				.mockResolvedValue(mockMutualFriends);
+
+			const result = await usersService.calculateMutualFriends(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(mockMutualFriends.length);
+			expect(dbUtilsService.getMutualFriends).toHaveBeenCalledWith(
+				mockUserID1,
+				mockUserID2,
+			);
+		});
+
+		it("should throw an error if mutual friends are not found", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+
+			jest.spyOn(dbUtilsService, "getMutualFriends").mockResolvedValue(null);
+
+			await expect(
+				usersService.calculateMutualFriends(mockUserID1, mockUserID2),
+			).rejects.toThrow("Failed to calculate mutual friends");
+		});
+	});
 });
