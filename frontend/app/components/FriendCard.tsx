@@ -64,9 +64,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 			{(cardType === "friend" && (
 				<TouchableOpacity
 					style={styles.unfriendButton}
-					onPress={(event) => {
-						event.stopPropagation();
-						handle(friend);
+					onPress={() => {
+						handle(friend); // Removed event.stopPropagation()
 					}}
 					testID="unfriend-button"
 				>
@@ -76,9 +75,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "following" && (
 					<TouchableOpacity
 						style={styles.unfriendButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="unfollow-button"
 					>
@@ -88,9 +86,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "follower" && (
 					<TouchableOpacity
 						style={styles.acceptButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="follow-button"
 					>
@@ -100,9 +97,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "mutual" && (
 					<TouchableOpacity
 						style={styles.acceptButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="add-friend-button"
 					>
@@ -112,16 +108,15 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "pending" && (
 					<TouchableOpacity
 						style={styles.unfriendButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="reject-button"
 					>
 						<Text style={styles.rejectText}>Cancel</Text>
 					</TouchableOpacity>
 				)) ||
-				(cardType === "friend-follow" && ( // whomever is redesigning this, please make that a user cannot unfollow a friend so there ideally shouldn't be a button here
+				(cardType === "friend-follow" && (
 					<Text style={styles.pendingText} testID="friend-card-username">
 						Pending...
 					</Text>

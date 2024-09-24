@@ -64,4 +64,94 @@ describe("FriendCard", () => {
 			)}&user=${user}`,
 		);
 	});
+
+	it("handles 'Unfriend' button press", () => {
+		const handleMock = jest.fn();
+
+		render(
+			<FriendCard
+				profilePicture={mockFriend.profile_picture_url || ""}
+				username={mockFriend.username}
+				friend={mockFriend}
+				user={user}
+				cardType="friend"
+				handle={handleMock} // Mock the handle function
+			/>,
+		);
+
+		// Simulate pressing the "Unfriend" button
+		const unfriendButton = screen.getByTestId("unfriend-button");
+		fireEvent.press(unfriendButton);
+
+		// Check that the handle function was called with the correct friend
+		expect(handleMock).toHaveBeenCalledWith(mockFriend);
+	});
+
+	it("renders 'Follow' button for 'follower' card type", () => {
+		render(
+			<FriendCard
+				profilePicture={mockFriend.profile_picture_url || ""}
+				username={mockFriend.username}
+				friend={mockFriend}
+				user={user}
+				cardType="follower"
+				handle={jest.fn()} // Mock the handle function
+			/>,
+		);
+
+		// Check if the 'Follow' button is rendered
+		const followButton = screen.getByTestId("follow-button");
+		expect(followButton).toBeTruthy();
+	});
+
+	it("renders 'Unfollow' button for 'following' card type", () => {
+		render(
+			<FriendCard
+				profilePicture={mockFriend.profile_picture_url || ""}
+				username={mockFriend.username}
+				friend={mockFriend}
+				user={user}
+				cardType="following"
+				handle={jest.fn()} // Mock the handle function
+			/>,
+		);
+
+		// Check if the 'Unfollow' button is rendered
+		const unfollowButton = screen.getByTestId("unfollow-button");
+		expect(unfollowButton).toBeTruthy();
+	});
+
+	it("renders 'Add Friend' button for 'mutual' card type", () => {
+		render(
+			<FriendCard
+				profilePicture={mockFriend.profile_picture_url || ""}
+				username={mockFriend.username}
+				friend={mockFriend}
+				user={user}
+				cardType="mutual"
+				handle={jest.fn()} // Mock the handle function
+			/>,
+		);
+
+		// Check if the 'Add Friend' button is rendered
+		const addFriendButton = screen.getByTestId("add-friend-button");
+		expect(addFriendButton).toBeTruthy();
+	});
+
+	it("renders 'Pending...' text for 'friend-follow' card type", () => {
+		render(
+			<FriendCard
+				profilePicture={mockFriend.profile_picture_url || ""}
+				username={mockFriend.username}
+				friend={mockFriend}
+				user={user}
+				cardType="friend-follow"
+				handle={jest.fn()} // Mock the handle function
+			/>,
+		);
+
+		// Check if the 'Pending...' text is rendered
+		const pendingText = screen.getByText("Pending...");
+		expect(pendingText).toBeTruthy();
+	});
 });
