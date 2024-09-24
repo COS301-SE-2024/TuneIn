@@ -1775,9 +1775,6 @@ export class UsersService {
 	}
 
 	async calculateActivity(userID: string): Promise<number> {
-		// activity should be calculated on how active the user is in the app
-		// the metric should consider the number of rooms the user has created, the number of rooms the user has joined, the number of bookmarked rooms and friends the user has
-		// include number of messages they've sent and received in the last 30 days
 		const rooms: RoomDto[] = await this.getUserRooms(userID);
 
 		const friends: PrismaTypes.users[] | null =
@@ -1790,29 +1787,21 @@ export class UsersService {
 		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
 		const date30DaysAgo: Date = new Date();
 		date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
-		const messages: PrismaTypes.message[] | null =
-			await this.prisma.message.findMany({
-				where: { sender: userID, date_sent: { gte: date30DaysAgo } },
-			});
-		if (!messages) {
-			throw new Error("Failed to calculate activity (no messages)");
-		}
-		const roomMessages: PrismaTypes.room_message[] | null =
+		const messages: PrismaTypes.message[] = await this.prisma.message.findMany({
+			where: { sender: userID, date_sent: { gte: date30DaysAgo } },
+		});
+		const roomMessages: PrismaTypes.room_message[] =
 			await this.prisma.room_message.findMany({
 				where: {
 					message_id: { in: messages.map((message) => message.message_id) },
 				},
 			});
-		if (!roomMessages) {
-			throw new Error("Failed to calculate activity (no room messages)");
-		}
 		const activity: number =
 			rooms.length +
 			friends.length +
 			bookmarks.length +
 			messages.length +
 			roomMessages.length;
-		console.log("Activity for user " + userID + ": " + activity);
 		return activity;
 	}
 
