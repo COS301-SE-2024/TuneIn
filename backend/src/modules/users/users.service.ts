@@ -673,7 +673,15 @@ export class UsersService {
 		// const recommender: RecommenderService = new RecommenderService();
 		const rooms: (PrismaTypes.room & {
 			songs: PrismaTypes.song[] | undefined;
-		})[] = (await this.prisma.room.findMany()).map((room) => ({
+		})[] = (
+			await this.prisma.room.findMany({
+				where: {
+					room_creator: {
+						not: userID,
+					},
+				},
+			})
+		).map((room) => ({
 			...room,
 			songs: undefined,
 		}));
