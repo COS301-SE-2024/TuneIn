@@ -653,4 +653,97 @@ export class DbUtilsService {
 
 		return favorites.map((f) => f.song);
 	}
+
+	async getUserFriends(userID: string): Promise<PrismaTypes.users[] | null> {
+		const friends: PrismaTypes.friends[] | null =
+			await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID, is_pending: false },
+						{ friend2: userID, is_pending: false },
+					],
+					is_pending: false,
+				},
+			});
+
+		if (!friends || friends === null) {
+			throw new Error("No friends found.");
+		}
+		const friendsIDs: string[] = [];
+		friends.forEach((f) => {
+			if (f.friend1 === userID) {
+				friendsIDs.push(f.friend2);
+			} else {
+				friendsIDs.push(f.friend1);
+			}
+		});
+
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
+			where: { user_id: { in: friendsIDs } },
+		});
+
+		if (!users || users === null) {
+			throw new Error("No friends found.");
+		}
+		return users;
+	}
+	async getMutualFriends(
+		userID1: string,
+		userID2: string,
+	): Promise<PrismaTypes.users[] | null> {
+		const friends1: PrismaTypes.friends[] | null =
+			await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID1, is_pending: false },
+						{ friend2: userID1, is_pending: false },
+					],
+				},
+			});
+		const friends2: PrismaTypes.friends[] | null =
+			await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID2, is_pending: false },
+						{ friend2: userID2, is_pending: false },
+					],
+				},
+			});
+
+		if (!friends1 || friends1 === null || !friends2 || friends2 === null) {
+			throw new Error("No friends found.");
+		}
+		const friends1IDs: string[] = [];
+		const friends2IDs: string[] = [];
+		friends1.forEach((f) => {
+			if (f.friend1 === userID1) {
+				friends1IDs.push(f.friend2);
+			} else {
+				friends1IDs.push(f.friend1);
+			}
+		});
+		friends2.forEach((f) => {
+			if (f.friend1 === userID2) {
+				friends2IDs.push(f.friend2);
+			} else {
+				friends2IDs.push(f.friend1);
+			}
+		});
+
+		const mutualFriends: string[] = [];
+		friends1IDs.forEach((f1) => {
+			if (friends2IDs.includes(f1)) {
+				mutualFriends.push(f1);
+			}
+		});
+
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
+			where: { user_id: { in: mutualFriends } },
+		});
+
+		if (!users || users === null) {
+			throw new Error("No mutual friends found.");
+		}
+		return users;
+	}
 }

@@ -33,10 +33,10 @@ export class RecommendationsService {
 	setPlaylists(playlists: { [key: string]: any[] }) {
 		// check whether the individual songs in playlists are not null or undefined
 		for (const [playlistName, songs] of Object.entries(playlists)) {
+			console.log("playlistName: ", playlistName);
 			if (songs.some((song) => !song)) {
 				throw new Error("Invalid song in playlist");
 			}
-			console.log(playlistName);
 		}
 
 		this.playlists = playlists;
@@ -84,7 +84,6 @@ export class RecommendationsService {
 
 	getPlaylistSimilarityScores(): { [key: string]: number } {
 		const playlistScores: { [key: string]: number } = {};
-		console.log("Playlist: ", this.playlists);
 		for (const [playlistName, songs] of Object.entries(this.playlists)) {
 			const totalSimilarity = songs.reduce((sum, song) => {
 				return (
