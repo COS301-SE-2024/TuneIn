@@ -1820,17 +1820,14 @@ export class UsersService {
 		userID1: string,
 		userID2: string,
 	): Promise<number> {
-		const user1: PrismaTypes.favorite_genres[] | null =
+		const user1: PrismaTypes.favorite_genres[] =
 			await this.prisma.favorite_genres.findMany({
 				where: { user_id: userID1 },
 			});
-		const user2: PrismaTypes.favorite_genres[] | null =
+		const user2: PrismaTypes.favorite_genres[] =
 			await this.prisma.favorite_genres.findMany({
 				where: { user_id: userID2 },
 			});
-		if (!user1 || !user2) {
-			throw new Error("Failed to calculate genre similarity");
-		}
 
 		const user1Genres: string[] = user1.map(
 			(genre: PrismaTypes.favorite_genres) => genre.genre_id,
