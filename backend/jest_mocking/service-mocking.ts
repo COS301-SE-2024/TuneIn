@@ -449,5 +449,6 @@ export const mockDbUtilsService = {
 	getUserFavoriteSongs: jest.fn(),
 	getUserFollowing: jest.fn(),
 	getUserFriends: jest.fn(),
+	getUserFollowers: jest.fn(),
 	// mock properties and methods as needed
 };
