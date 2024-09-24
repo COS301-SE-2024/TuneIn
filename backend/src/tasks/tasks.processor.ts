@@ -26,6 +26,7 @@ export class TasksProcessor {
 
 	@Process("import-library")
 	async importUserLibrary(job: Job) {
+		console.log(`${job.name} job started`);
 		const tk: SpotifyTokenPair = job.data.token;
 		const userID: string = job.data.user_id;
 		if (new Date().getTime() > tk.epoch_expiry) {
@@ -159,6 +160,7 @@ export class TasksProcessor {
 
 	@Process("get-room-spotify-info")
 	async getRoomSpotifyInfo(job: Job) {
+		console.log(`${job.name} job started`);
 		const {
 			room,
 			api,
@@ -182,5 +184,11 @@ export class TasksProcessor {
 		console.log(
 			`Finished getting Spotify info for room '${room.room.room_name}' (${room.room.roomID}) in ${milliseconds}ms`,
 		);
+	}
+
+	@Process("fix-spotify-info")
+	async fixSpotifyInfo(job: Job) {
+		console.log(`${job.name} job started`);
+		await this.spotifyService.fixSpotifyInfo();
 	}
 }

@@ -5,6 +5,7 @@ import { Queue } from "bull";
 import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
 import { ActiveRoom } from "../modules/rooms/roomqueue/roomqueue.service";
 import * as Spotify from "@spotify/web-api-ts-sdk";
+import { Cron } from "@nestjs/schedule";
 
 @Injectable()
 export class TasksService {
@@ -26,5 +27,12 @@ export class TasksService {
 			room: room,
 			api: spotifyApi,
 		});
+	}
+
+	@Cron("0 */5 * * * *") // Run this every 5 minutes
+	async fixSpotifyInfo() {
+		console.log("Running 'fixSpotifyInfo' based on CRON job");
+		await this.taskQueue.add("fix-spotify-info", {});
+		console.log("Added 'fixSpotifyInfo' task to queue");
 	}
 }
