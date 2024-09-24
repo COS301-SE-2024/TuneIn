@@ -1722,7 +1722,7 @@ export class UsersService {
 		return result;
 	}
 
-	private async calculateMutualFriends(
+	async calculateMutualFriends(
 		userID1: string,
 		userID2: string,
 	): Promise<number> {
@@ -1738,7 +1738,7 @@ export class UsersService {
 		return mutualFriends.length;
 	}
 
-	private async calculatePopularity(userID: string): Promise<number> {
+	async calculatePopularity(userID: string): Promise<number> {
 		const followers: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowers(userID);
 		const following: PrismaTypes.users[] | null =
@@ -1762,7 +1762,7 @@ export class UsersService {
 		return popularity;
 	}
 
-	private async calculateActivity(userID: string): Promise<number> {
+	async calculateActivity(userID: string): Promise<number> {
 		// activity should be calculated on how active the user is in the app
 		// the metric should consider the number of rooms the user has created, the number of rooms the user has joined, the number of bookmarked rooms and friends the user has
 		// include number of messages they've sent and received in the last 30 days
@@ -1804,7 +1804,7 @@ export class UsersService {
 		return activity;
 	}
 
-	private async calculateGenreSimilarity(
+	async calculateGenreSimilarity(
 		userID1: string,
 		userID2: string,
 	): Promise<number> {
