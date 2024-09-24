@@ -901,7 +901,7 @@ export class RoomsController {
 		description: "Bearer token for authentication",
 	})
 	*/
-	@Get("analytics/keymetrics")
+	@Get("analytics/:period/keymetrics")
 	@ApiTags("room analytics")
 	@ApiOperation({
 		summary: "Get key metrics for user's rooms",
@@ -919,9 +919,10 @@ export class RoomsController {
 	})
 	async getKeyMetrics(
 		@Request() req: Request,
+		@Param("period") period: string,
 	): Promise<RoomAnalyticsKeyMetricsDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.roomAnalytics.getKeyMetrics(userInfo.id);
+		return this.roomAnalytics.getKeyMetrics(userInfo.id, period);
 	}
 
 	@Get(":roomID/kicked")
