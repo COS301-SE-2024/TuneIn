@@ -118,11 +118,27 @@ const GeneralAnalytics: React.FC = () => {
 			};
 		}) ?? [];
 
-	const headers = ["Room", "Longest", "Shortest"];
+	const headers = ["Statistic", "Value"];
+	const toTime = (time: number) => {
+		const hours = Math.floor(time / 60);
+		const minutes = Math.floor(time % 60);
+		const seconds = Math.floor((time % 1) * 60);
+		let result = "";
+		if (hours > 0) {
+			result += `${hours}h `;
+		}
+		if (minutes > 0) {
+			result += `${minutes}m `;
+		}
+		if (seconds > 0) {
+			result += `${seconds}s`;
+		}
+		return result === "" ? "0s" : result;
+	};
 	const dataTable = [
-		["Room A", "3 hrs", "5 min"],
-		["Room B", "2 hrs 30min", "7 min"],
-		["Room C", "2hrs", "4 min"],
+		["Average", toTime(generalAnalytics?.session_data?.all_time?.avg_duration)],
+		["Minimum", toTime(generalAnalytics?.session_data?.all_time?.min_duration)],
+		["Maximum", toTime(generalAnalytics?.session_data?.all_time?.max_duration)],
 	];
 
 	const onRoomPick = async (room: string) => {
@@ -187,20 +203,25 @@ const GeneralAnalytics: React.FC = () => {
 					data={sessionDurationAverages}
 					title="Average Session Durations"
 				/>
-				<HorizontalBarGraphCard
-					data={[
-						{ label: "Task 1", value: 253 },
-						{ label: "Task 2", value: 343 },
-						{ label: "Task 3", value: 55 },
-						{ label: "Task 4", value: 221 },
-						{ label: "Task 5", value: 15 },
-						{ label: "Task 6", value: 41 },
-					]}
-					title="Average Session Duration"
-					unit="minutes" // Pass "minutes" to format the total as hours and minutes
-				/>
+				<View style={styles.cardsContainer}>
+					<MetricsCard
+						title="Expected Return Count"
+						number={
+							generalAnalytics?.return_visits?.expected_return_count?.toString() ??
+							"0"
+						}
+					/>
+					<MetricsCard
+						title="Probability of Return"
+						number={
+							Math.floor(
+								generalAnalytics?.return_visits?.probability_of_return * 100,
+							)?.toString() + "%"
+						}
+					/>
+				</View>
 				<TableCard
-					title="Session Duration Extremes"
+					title="Session Data Statistics"
 					headers={headers}
 					data={dataTable}
 				/>
