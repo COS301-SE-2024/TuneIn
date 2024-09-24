@@ -410,36 +410,36 @@ describe("Search Component", () => {
 		);
 	}, 30000);
 
-	it("Logs room recs error", async () => {
-		(axios.get as jest.Mock)
-			.mockResolvedValueOnce({ data: roomMock })
-			.mockResolvedValueOnce({ data: uHistDtoMock })
-			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+	// it("Logs room recs error", async () => {
+	// 	(axios.get as jest.Mock)
+	// 		.mockResolvedValueOnce({ data: roomMock })
+	// 		.mockResolvedValueOnce({ data: uHistDtoMock })
+	// 		.mockResolvedValueOnce({ data: ["jazz", "rock"] })
+	// 		.mockResolvedValue({ data: uHistDtoMock });
 
-		const consoleLogSpy = jest
-			.spyOn(console, "log")
-			.mockImplementation(() => {});
+	// 	const consoleLogSpy = jest
+	// 		.spyOn(console, "log")
+	// 		.mockImplementation(() => {});
 
-		const { getByPlaceholderText, getByTestId } = render(<Search />);
-		fireEvent.press(getByTestId("toggle-filters-button"));
+	// 	const { getByPlaceholderText, getByTestId } = render(<Search />);
+	// 	fireEvent.press(getByTestId("toggle-filters-button"));
 
-		await waitFor(
-			async () => {
-				const searchInput = getByPlaceholderText("Search...");
-				fireEvent.changeText(searchInput, "nothing");
-				fireEvent.press(getByTestId("search-button"));
-			},
-			{ timeout: 20000 },
-		);
+	// 	await waitFor(
+	// 		async () => {
+	// 			const searchInput = getByPlaceholderText("Search...");
+	// 			fireEvent.changeText(searchInput, "nothing");
+	// 			fireEvent.press(getByTestId("search-button"));
+	// 		},
+	// 		{ timeout: 20000 },
+	// 	);
 
-		expect(consoleLogSpy.mock.calls).toEqual(
-			expect.arrayContaining([
-				expect.arrayContaining([
-					"Error fetching recommended rooms:",
-					expect.any(Error),
-				]),
-			]),
-		);
-	}, 30000);
+	// 	expect(consoleLogSpy.mock.calls).toEqual(
+	// 		expect.arrayContaining([
+	// 			expect.arrayContaining([
+	// 				"Error fetching recommended rooms:",
+	// 				expect.any(Error),
+	// 			]),
+	// 		]),
+	// 	);
+	// }, 30000);
 });

@@ -20,10 +20,11 @@ import {
 	UserFriendship,
 } from "./dto/user.dto";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
-import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { HttpException } from "@nestjs/common";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-mocking";
+import * as PrismaTypes from "@prisma/client";
+import { RecommendationsService } from "../../../src/recommendations/recommendations.service";
 
 const mockUserDto: UserDto = {
 	profile_name: "Testing",
@@ -920,5 +921,293 @@ describe("UsersService follow function", () => {
 			expect(result.fav_genres.data).toEqual(["j-pop"]);
 			expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
 		}, 50000);
+	});
+
+	describe("UsersService", () => {
+		it("should throw an error if user does not exist", async () => {
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValue(null);
+
+			await expect(
+				usersService.getRecommendedUsers("nonexistentUserID"),
+			).rejects.toThrow("User does not exist");
+		});
+
+		it("should return recommendations if user exists but has no friends", async () => {
+			const mockUser = { user_id: "userID" } as PrismaTypes.users;
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValue(mockUser);
+			jest.spyOn(prismaService.users, "findMany").mockResolvedValue([mockUser]);
+			jest.spyOn(dbUtilsService, "getUserFollowing").mockResolvedValue([]);
+			jest.spyOn(usersService, "calculateMutualFriends").mockResolvedValue(0);
+			jest.spyOn(usersService, "calculatePopularity").mockResolvedValue(0);
+			jest.spyOn(usersService, "calculateActivity").mockResolvedValue(0);
+			jest.spyOn(usersService, "calculateGenreSimilarity").mockResolvedValue(0);
+			jest
+				.spyOn(dtoGenService, "generateMultipleUserDto")
+				.mockResolvedValue([]);
+
+			const result = await usersService.getRecommendedUsers("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should return recommendations if user exists and has friends", async () => {
+			const mockUser = { user_id: "userID" } as PrismaTypes.users;
+			const mockFriend = { user_id: "friendID" } as PrismaTypes.users;
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValue(mockUser);
+			jest
+				.spyOn(prismaService.users, "findMany")
+				.mockResolvedValue([mockUser, mockFriend]);
+			jest
+				.spyOn(dbUtilsService, "getUserFollowing")
+				.mockResolvedValue([mockFriend]);
+			jest.spyOn(usersService, "calculateMutualFriends").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculatePopularity").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculateActivity").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculateGenreSimilarity").mockResolvedValue(1);
+			jest
+				.spyOn(dtoGenService, "generateMultipleUserDto")
+				.mockResolvedValue([]);
+
+			const result = await usersService.getRecommendedUsers("userID");
+			expect(result).toEqual([]);
+		});
+
+		it("should return top 5 recommendations if user exists, has friends, and recommendations are generated", async () => {
+			const mockUser = { user_id: "userID" } as PrismaTypes.users;
+			const mockFriend = { user_id: "friendID" } as PrismaTypes.users;
+			const mockRecommendedUser = {
+				user_id: "recommendedUserID",
+			} as PrismaTypes.users;
+			jest.spyOn(prismaService.users, "findUnique").mockResolvedValue(mockUser);
+			jest
+				.spyOn(prismaService.users, "findMany")
+				.mockResolvedValue([mockUser, mockFriend, mockRecommendedUser]);
+			jest
+				.spyOn(dbUtilsService, "getUserFollowing")
+				.mockResolvedValue([mockFriend]);
+			jest.spyOn(usersService, "calculateMutualFriends").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculatePopularity").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculateActivity").mockResolvedValue(1);
+			jest.spyOn(usersService, "calculateGenreSimilarity").mockResolvedValue(1);
+			jest
+				.spyOn(dtoGenService, "generateMultipleUserDto")
+				.mockResolvedValue([
+					{ user_id: "recommendedUserID" } as unknown as UserDto,
+				]);
+
+			const result = await usersService.getRecommendedUsers("userID");
+			expect(result).toEqual([
+				{ user_id: "recommendedUserID" } as unknown as UserDto,
+			]);
+		});
+	});
+	describe("calculateGenreSimilarity", () => {
+		it("should return genre similarity percentage between two users", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockGenresUser1: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id1",
+					user_id: mockUserID1,
+					genre_id: "genre1",
+				},
+				{
+					favorite_id: "favorite_id2",
+					user_id: mockUserID1,
+					genre_id: "genre2",
+				},
+			];
+			const mockGenresUser2: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id3",
+					user_id: mockUserID2,
+					genre_id: "genre2",
+				},
+				{
+					favorite_id: "favorite_id4",
+					user_id: mockUserID2,
+					genre_id: "genre3",
+				},
+			];
+
+			jest
+				.spyOn(prismaService.favorite_genres, "findMany")
+				.mockResolvedValueOnce(mockGenresUser1)
+				.mockResolvedValueOnce(mockGenresUser2);
+
+			const result = await usersService.calculateGenreSimilarity(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(25); // (1 common genre / (2 + 2) genres) * 100
+			expect(prismaService.favorite_genres.findMany).toHaveBeenCalledWith({
+				where: { user_id: mockUserID1 },
+			});
+			expect(prismaService.favorite_genres.findMany).toHaveBeenCalledWith({
+				where: { user_id: mockUserID2 },
+			});
+		});
+
+		it("should return 0 if no common genres are found", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockGenresUser1: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id1",
+					user_id: mockUserID1,
+					genre_id: "genre1",
+				},
+			];
+			const mockGenresUser2: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id2",
+					user_id: mockUserID2,
+					genre_id: "genre2",
+				},
+			];
+
+			jest
+				.spyOn(prismaService.favorite_genres, "findMany")
+				.mockResolvedValueOnce(mockGenresUser1)
+				.mockResolvedValueOnce(mockGenresUser2);
+
+			const result = await usersService.calculateGenreSimilarity(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(0);
+		});
+	});
+	describe("calculateActivity", () => {
+		it("should return the correct activity score", async () => {
+			const mockUserID = "userID1";
+			const mockRooms: RoomDto[] = [
+				{ room_id: "room1" } as unknown as RoomDto,
+				{ room_id: "room2" } as unknown as RoomDto,
+			];
+			const mockFriends: PrismaTypes.users[] = [
+				{ user_id: "friend1" } as PrismaTypes.users,
+				{ user_id: "friend2" } as PrismaTypes.users,
+			];
+			const mockBookmarks: RoomDto[] = [
+				{ room_id: "bookmark1" } as unknown as RoomDto,
+				{ room_id: "bookmark2" } as unknown as RoomDto,
+			];
+			const mockMessages: PrismaTypes.message[] = [
+				{ message_id: "message1" } as PrismaTypes.message,
+				{ message_id: "message2" } as PrismaTypes.message,
+			];
+			const mockRoomMessages: PrismaTypes.room_message[] = [
+				{ message_id: "message1" } as PrismaTypes.room_message,
+				{ message_id: "message2" } as PrismaTypes.room_message,
+			];
+
+			jest.spyOn(usersService, "getUserRooms").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(dbUtilsService, "getUserFriends")
+				.mockResolvedValue(mockFriends);
+			jest
+				.spyOn(usersService, "getBookmarksById")
+				.mockResolvedValue(mockBookmarks);
+			jest
+				.spyOn(prismaService.message, "findMany")
+				.mockResolvedValue(mockMessages);
+			jest
+				.spyOn(prismaService.room_message, "findMany")
+				.mockResolvedValue(mockRoomMessages);
+
+			const result = await usersService.calculateActivity(mockUserID);
+
+			expect(result).toBe(
+				mockRooms.length +
+					mockFriends.length +
+					mockBookmarks.length +
+					mockMessages.length +
+					mockRoomMessages.length,
+			);
+		});
+
+		it("should throw an error if no friends are found", async () => {
+			const mockUserID = "userID1";
+
+			jest.spyOn(usersService, "getUserRooms").mockResolvedValue([]);
+			jest.spyOn(dbUtilsService, "getUserFriends").mockResolvedValue(null);
+			jest.spyOn(usersService, "getBookmarksById").mockResolvedValue([]);
+			jest.spyOn(prismaService.message, "findMany").mockResolvedValue([]);
+			jest.spyOn(prismaService.room_message, "findMany").mockResolvedValue([]);
+
+			await expect(usersService.calculateActivity(mockUserID)).rejects.toThrow(
+				"Failed to calculate activity (no friends)",
+			);
+		});
+	});
+	describe("calculatePopularity", () => {
+		it("should return the correct popularity score", async () => {
+			const mockUserID = "userID1";
+			const mockFollowers: PrismaTypes.users[] = [
+				{ user_id: "follower1" } as PrismaTypes.users,
+				{ user_id: "follower2" } as PrismaTypes.users,
+			];
+			const mockFollowing: PrismaTypes.users[] = [
+				{ user_id: "following1" } as PrismaTypes.users,
+			];
+			const mockUsers: PrismaTypes.users[] = [
+				{ user_id: "user1" } as PrismaTypes.users,
+				{ user_id: "user2" } as PrismaTypes.users,
+				{ user_id: "user3" } as PrismaTypes.users,
+			];
+
+			jest
+				.spyOn(dbUtilsService, "getUserFollowers")
+				.mockResolvedValue(mockFollowers);
+			jest
+				.spyOn(dbUtilsService, "getUserFollowing")
+				.mockResolvedValue(mockFollowing);
+			jest.spyOn(prismaService.users, "findMany").mockResolvedValue(mockUsers);
+
+			const result = await usersService.calculatePopularity(mockUserID);
+
+			const expectedPopularity =
+				(mockFollowers.length / (mockFollowing.length + 1)) *
+				Math.log(mockUsers.length);
+			expect(result).toBe(expectedPopularity);
+		});
+	});
+	describe("calculateMutualFriends", () => {
+		it("should return the correct number of mutual friends", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockMutualFriends: PrismaTypes.users[] = [
+				{ user_id: "friend1" } as PrismaTypes.users,
+				{ user_id: "friend2" } as PrismaTypes.users,
+			];
+
+			jest
+				.spyOn(dbUtilsService, "getMutualFriends")
+				.mockResolvedValue(mockMutualFriends);
+
+			const result = await usersService.calculateMutualFriends(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(mockMutualFriends.length);
+			expect(dbUtilsService.getMutualFriends).toHaveBeenCalledWith(
+				mockUserID1,
+				mockUserID2,
+			);
+		});
+
+		it("should throw an error if mutual friends are not found", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+
+			jest.spyOn(dbUtilsService, "getMutualFriends").mockResolvedValue(null);
+
+			await expect(
+				usersService.calculateMutualFriends(mockUserID1, mockUserID2),
+			).rejects.toThrow("Failed to calculate mutual friends");
+		});
 	});
 });

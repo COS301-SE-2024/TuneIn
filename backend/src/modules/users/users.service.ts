@@ -685,7 +685,15 @@ export class UsersService {
 		// const recommender: RecommenderService = new RecommenderService();
 		const rooms: (PrismaTypes.room & {
 			songs: PrismaTypes.song[] | undefined;
-		})[] = (await this.prisma.room.findMany()).map((room) => ({
+		})[] = (
+			await this.prisma.room.findMany({
+				where: {
+					room_creator: {
+						not: userID,
+					},
+				},
+			})
+		).map((room) => ({
 			...room,
 			songs: undefined,
 		}));
@@ -725,7 +733,6 @@ export class UsersService {
 			);
 			return r === null ? [] : r;
 		}
-		console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
 			favoriteSongs.map((song: PrismaTypes.song) => song.audio_features),
 		);
@@ -1230,8 +1237,20 @@ export class UsersService {
 	}
 
 	async getCurrentRoomDto(username: string): Promise<RoomDto> {
-		// const userID = (await this.getProfileByUsername(username)).userID;
-		const userID: string = username;
+		let userID = "";
+		// regex to check if username is infact, userID
+		// const isUserID = /^[0-9a-fA-F]{36}$/;
+		// user id is 36 characters long, is alphanumeric and has no spaces. also contains hyphens
+		// example: 711c5238-3081-7008-9055-510a6bebc7e9
+		const isUserID =
+			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+		console.log("username: ", username, username.length);
+		if (isUserID.test(username)) {
+			userID = username;
+		} else {
+			userID = (await this.getProfileByUsername(username)).userID;
+		}
+		// const userID: string = username;
 
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
@@ -1636,5 +1655,178 @@ export class UsersService {
 			totalListenedSongs: 0,
 		};
 		return stats;
+	}
+
+	async getRecommendedUsers(userID: string): Promise<UserDto[]> {
+		let users: PrismaTypes.users[] = await this.prisma.users.findMany();
+		const currentUser: PrismaTypes.users | null =
+			await this.prisma.users.findUnique({
+				where: { user_id: userID },
+			});
+
+		if (!currentUser) {
+			throw new Error("User does not exist");
+		}
+
+		const userFriends: PrismaTypes.users[] | null =
+			await this.dbUtils.getUserFollowing(userID);
+		if (userFriends !== null) {
+			const friendIDs: string[] = userFriends.map(
+				(user: PrismaTypes.users) => user.user_id,
+			);
+			users = users.filter(
+				(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
+			);
+		}
+
+		const userScores: { [key: string]: number } = {};
+
+		for (const user of users) {
+			if (user.user_id === userID) continue;
+			let start: number = new Date().getTime();
+			let end: number;
+			const mutualFriends = await this.calculateMutualFriends(
+				userID,
+				user.user_id,
+			);
+			end = new Date().getTime();
+			console.log("Time taken to calculate mutual friends: " + (end - start));
+			start = new Date().getTime();
+			const popularity = await this.calculatePopularity(user.user_id);
+			end = new Date().getTime();
+			console.log("Time taken to calculate popularity: " + (end - start));
+			start = new Date().getTime();
+			const activity = await this.calculateActivity(user.user_id);
+			end = new Date().getTime();
+			console.log("Time taken to calculate activity: " + (end - start));
+			start = new Date().getTime();
+			const genreSimilarity = await this.calculateGenreSimilarity(
+				currentUser.user_id,
+				user.user_id,
+			);
+			end = new Date().getTime();
+			console.log("Time taken to calculate genre similarity: " + (end - start));
+			const score =
+				mutualFriends * 0.4 +
+				popularity * 0.3 +
+				activity * 0.2 +
+				genreSimilarity * 0.1;
+			userScores[user.user_id] = score;
+			console.log(
+				"------Score for user " + user.username + ": " + score + "\n",
+			);
+		}
+
+		// filter undefined scores
+		const sortedUserIds = Object.keys(userScores).sort(
+			(a, b) => (userScores[b] ?? 0) - (userScores[a] ?? 0),
+		);
+		const topUserIds: string[] = sortedUserIds.slice(0, 5); // Top 10 recommendations
+
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			topUserIds,
+		);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating UserDto for recommended users. Received null.",
+			);
+		}
+		return result;
+	}
+
+	async calculateMutualFriends(
+		userID1: string,
+		userID2: string,
+	): Promise<number> {
+		const mutualFriends: PrismaTypes.users[] | null =
+			await this.dbUtils.getMutualFriends(userID1, userID2);
+		if (!mutualFriends) {
+			throw new Error("Failed to calculate mutual friends");
+		}
+		console.log(
+			"Mutual friends between " + userID1 + " and " + userID2 + ": ",
+			mutualFriends.length,
+		);
+		return mutualFriends.length;
+	}
+
+	async calculatePopularity(userID: string): Promise<number> {
+		const followers: PrismaTypes.users[] = await this.dbUtils.getUserFollowers(
+			userID,
+		);
+		const following: PrismaTypes.users[] = await this.dbUtils.getUserFollowing(
+			userID,
+		);
+		const followersCount: number = followers.length;
+		const followingCount: number = following.length;
+
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany();
+		const userCount: number = users.length;
+		const popularity: number =
+			(followersCount / (followingCount + 1)) * Math.log(userCount);
+		console.log("Popularity for user " + userID + ": " + popularity);
+		return popularity;
+	}
+
+	async calculateActivity(userID: string): Promise<number> {
+		const rooms: RoomDto[] = await this.getUserRooms(userID);
+
+		const friends: PrismaTypes.users[] | null =
+			await this.dbUtils.getUserFriends(userID);
+
+		if (!friends) {
+			throw new Error("Failed to calculate activity (no friends)");
+		}
+
+		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
+		const date30DaysAgo: Date = new Date();
+		date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+		const messages: PrismaTypes.message[] = await this.prisma.message.findMany({
+			where: { sender: userID, date_sent: { gte: date30DaysAgo } },
+		});
+		const roomMessages: PrismaTypes.room_message[] =
+			await this.prisma.room_message.findMany({
+				where: {
+					message_id: { in: messages.map((message) => message.message_id) },
+				},
+			});
+		const activity: number =
+			rooms.length +
+			friends.length +
+			bookmarks.length +
+			messages.length +
+			roomMessages.length;
+		return activity;
+	}
+
+	async calculateGenreSimilarity(
+		userID1: string,
+		userID2: string,
+	): Promise<number> {
+		const user1: PrismaTypes.favorite_genres[] =
+			await this.prisma.favorite_genres.findMany({
+				where: { user_id: userID1 },
+			});
+		const user2: PrismaTypes.favorite_genres[] =
+			await this.prisma.favorite_genres.findMany({
+				where: { user_id: userID2 },
+			});
+
+		const user1Genres: string[] = user1.map(
+			(genre: PrismaTypes.favorite_genres) => genre.genre_id,
+		);
+		const user2Genres: string[] = user2.map(
+			(genre: PrismaTypes.favorite_genres) => genre.genre_id,
+		);
+		const commonGenres: string[] = user1Genres.filter((genre) =>
+			user2Genres.includes(genre),
+		);
+		const genreSimilarity: number =
+			(commonGenres.length / (user1Genres.length + user2Genres.length)) * 100;
+		console.log(
+			"Genre similarity between " + userID1 + " and " + userID2 + ": ",
+			genreSimilarity,
+		);
+		return Number.isNaN(genreSimilarity) ? 0 : genreSimilarity;
 	}
 }
