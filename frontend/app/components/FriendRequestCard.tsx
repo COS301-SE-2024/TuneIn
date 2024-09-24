@@ -56,8 +56,8 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				style={[
 					styles.button,
 					acceptPressed
-						? { backgroundColor: colors.primary }
-						: { backgroundColor: colors.backgroundColor },
+						? { backgroundColor: colors.backgroundColor }
+						: { backgroundColor: colors.primary },
 					{ borderColor: colors.primary },
 				]}
 				onPress={handleAcceptPress}
@@ -67,8 +67,8 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 					style={[
 						styles.acceptText,
 						acceptPressed
-							? { color: colors.backgroundColor }
-							: { color: colors.primary },
+							? { color: colors.primary }
+							: { color: colors.backgroundColor },
 					]}
 				>
 					Accept
@@ -78,9 +78,9 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				style={[
 					styles.button,
 					rejectPressed
-						? { backgroundColor: "red" }
-						: { backgroundColor: colors.backgroundColor },
-					{ borderColor: "red" },
+						? { backgroundColor: "black" }
+						: { backgroundColor: "black" },
+					{ borderColor: "black" },
 				]}
 				onPress={handleRejectPress}
 				testID="reject-button"
@@ -90,7 +90,7 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 						styles.rejectText,
 						rejectPressed
 							? { color: colors.backgroundColor }
-							: { color: "red" },
+							: { color: "white" },
 					]}
 				>
 					Reject

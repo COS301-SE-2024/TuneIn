@@ -138,16 +138,16 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 	},
 	unfriendButton: {
-		backgroundColor: colors.backgroundColor,
+		backgroundColor: "white",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 20,
 		borderWidth: 1,
-		borderColor: "red",
-		color: "red",
+		borderColor: "black",
+		color: "black",
 	},
 	rejectText: {
-		color: "red",
+		color: "black",
 		fontWeight: "bold",
 	},
 	cardContainer: {
