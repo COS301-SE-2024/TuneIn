@@ -105,6 +105,40 @@ export class SpotifyService {
 		return userPlaylistsDeduped;
 	}
 
+	async getPlaylistTracks(
+		tk: SpotifyTokenPair,
+		playlistID: string,
+	): Promise<Spotify.Track[]> {
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
+
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		const playlistInfo: Spotify.Playlist<Spotify.Track> =
+			await api.playlists.getPlaylist(playlistID);
+
+		let i = 0;
+		const promises: Promise<
+			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+		>[] = [];
+		while (i < playlistInfo.tracks.total) {
+			promises.push(
+				api.playlists.getPlaylistItems(playlistID, undefined, undefined, 50, i),
+			);
+			i += 50;
+		}
+
+		const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+			await Promise.all(promises);
+		const result: Spotify.Track[] = [];
+		for (const s of songs) {
+			const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+			const tracks = items.map((item) => item.track);
+			result.push(...tracks);
+		}
+		return result;
+	}
+
 	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
 		if (new Date().getTime() > tk.epoch_expiry) {
 			throw new Error("Token has expired");

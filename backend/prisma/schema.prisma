@@ -217,6 +217,7 @@ model song {
   spotify_id     String           @unique
   audio_features Json             @db.Json
   artists        String[]
+  track_info     Json             @default("{}") @db.Json
   favorite_songs favorite_songs[]
   queue          queue[]
 }
@@ -305,3 +306,7 @@ model favorite_songs {
   song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
   users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model child_room {
+// }
