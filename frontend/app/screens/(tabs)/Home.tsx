@@ -45,7 +45,8 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData } = playerContext;
+	const { userData, setUserData, currentRoom } = playerContext;
+	console.log("current room: ", currentRoom);
 	// An example of a well-typed & well-defined way to interact with the API
 	/* ********************************************************************** */
 	const { users, authenticated } = useAPI();
@@ -54,7 +55,6 @@ const Home: React.FC = () => {
 		users
 			.getProfile()
 			.then((user: AxiosResponse<UserDto>) => {
-				console.log("User: " + user);
 				if (user.status === 401) {
 					//Unauthorized
 					//Auth header is either missing or invalid
@@ -117,8 +117,6 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-
-			// console.log("Friends: " + JSON.stringify(response.data));
 			setFriendError(false);
 			return response.data;
 		} catch (error) {
@@ -259,8 +257,6 @@ const Home: React.FC = () => {
 				: [];
 
 			setFriends(formattedFriends);
-
-			console.log("Friends after format: " + JSON.stringify(formattedFriends));
 
 			await StorageService.setItem(
 				"cachedFriends",
