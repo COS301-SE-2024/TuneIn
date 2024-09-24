@@ -84,7 +84,7 @@ const ProfileScreen: React.FC = () => {
 
 	const navigateToRoomPage = () => {
 		router.push({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(currentRoomData) },
 		});
 	};
@@ -165,7 +165,7 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.username);
+							fetchCurrentRoomInfo(data.userID);
 						}
 					}
 				} catch (error) {
@@ -236,7 +236,7 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		if (!ownsProfile && primaryProfileData) {
 			const intervalId = setInterval(() => {
-				fetchCurrentRoomInfo(primaryProfileData.username);
+				fetchCurrentRoomInfo(primaryProfileData.userID);
 			}, 10000);
 
 			return () => clearInterval(intervalId);
@@ -293,12 +293,12 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
-	const fetchCurrentRoomInfo = async (username: string) => {
+	const fetchCurrentRoomInfo = async (userID: string) => {
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${username}/room/current`,
+					`${utils.API_BASE_URL}/users/${userID}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -615,10 +615,14 @@ const ProfileScreen: React.FC = () => {
 			}
 		>
 			<View
-				style={{ padding: 15, backgroundColor: "white" }}
+				style={{
+					paddingVertical: 15,
+					paddingRight: 15,
+					backgroundColor: "white",
+				}}
 				testID="profile-screen"
 			>
-				<View style={styles.profileHeader}>
+				<View style={[styles.profileHeader, { paddingLeft: 15 }]}>
 					{/* Back Button */}
 					<TouchableOpacity
 						onPress={() => navigation.goBack()}
@@ -738,6 +742,7 @@ const ProfileScreen: React.FC = () => {
 							onPress={() => {
 								setLinkDialogVisible(true);
 							}}
+							style={{ paddingLeft: 15 }}
 							testID="links-touchable"
 						>
 							{renderLinks()}
@@ -753,7 +758,7 @@ const ProfileScreen: React.FC = () => {
 						{currentRoomData !== null && (
 							<TouchableOpacity
 								onPress={navigateToRoomPage}
-								style={{ paddingHorizontal: 20 }}
+								style={{ paddingLeft: 20 }}
 								testID="now-playing"
 							>
 								<NowPlaying

@@ -5,6 +5,18 @@ import { useNavigation } from "expo-router";
 import axios from "axios";
 import auth from "../app/services/AuthManagement";
 
+jest.mock("react-native-gesture-handler", () => {
+	const GestureHandler = jest.requireActual("react-native-gesture-handler");
+
+	return {
+		...GestureHandler,
+		GestureHandlerRootView: (props) => <div {...props} />,
+		Swipeable: (props) => <div {...props} />,
+		DrawerLayout: (props) => <div {...props} />,
+		TouchableOpacity: (props) => <div {...props} />,
+	};
+});
+
 // Mocking modules
 jest.mock("expo-router", () => ({
 	useNavigation: jest.fn(),
@@ -120,7 +132,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 
 		const { getByPlaceholderText } = render(<Search />);
 		const searchInput = getByPlaceholderText("Search...");
@@ -134,7 +146,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 
 		// Render the page component (this triggers the mock usage)
 		const { getByText, getByTestId } = render(<Search />);
@@ -163,7 +175,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const explicitSwitch = getByTestId("explicit-switch");
@@ -182,7 +194,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const nsfwSwitch = getByTestId("nsfw-switch");
@@ -201,7 +213,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const tempSwitch = getByTestId("temp-switch");
@@ -220,7 +232,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const privSwitch = getByTestId("priv-switch");
@@ -237,7 +249,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByTestId, getByText } = render(<Search />);
 		fireEvent.press(getByText("View More Filters"));
 		const scheduledSwitch = getByTestId("scheduled-switch");
@@ -258,7 +270,7 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: roomMock })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 		const { getByPlaceholderText, getByTestId } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
@@ -282,9 +294,8 @@ describe("Search Component", () => {
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
 			.mockResolvedValueOnce({ data: [] })
-			.mockResolvedValue({ data: uHistDtoMock });
+			.mockResolvedValueOnce({ data: uHistDtoMock });
 
-		(axios.get as jest.Mock).mockResolvedValueOnce({ data: roomMock });
 		const { getByPlaceholderText, getByTestId } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
 
@@ -296,21 +307,12 @@ describe("Search Component", () => {
 			},
 			{ timeout: 20000 },
 		);
-
-		// await waitFor(async () => {
-		// 	expect(getByTestId("search-button")).toBe("nothing");
-		// });
 	}, 30000);
 
 	it("should log search suggestion error", async () => {
 		(axios.get as jest.Mock)
-			.mockResolvedValueOnce({ data: roomMock })
-			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
-			.mockResolvedValueOnce({ data: [] })
-			.mockResolvedValue({ data: uHistDtoMock });
-
-		(axios.get as jest.Mock)
+			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockRejectedValueOnce(new Error("Network Error"));
 
@@ -320,27 +322,21 @@ describe("Search Component", () => {
 
 		const { getByPlaceholderText, getByTestId } = render(<Search />);
 		fireEvent.press(getByTestId("toggle-filters-button"));
+		const searchInput = getByPlaceholderText("Search...");
+		fireEvent.changeText(searchInput, "nothing");
+		fireEvent.press(getByTestId("search-button"));
 
-		await waitFor(
-			async () => {
-				const searchInput = getByPlaceholderText("Search...");
-				fireEvent.changeText(searchInput, "nothing");
-				fireEvent.press(getByTestId("search-button"));
-			},
-			{ timeout: 20000 },
-		);
-
-		await waitFor(async () => {
+		await waitFor(() => {
 			expect(consoleLogSpy.mock.calls).toEqual(
 				expect.arrayContaining([
 					expect.arrayContaining([
-						"Error fetching search history:",
+						"Error fetching search suggestions:",
 						expect.any(Error),
 					]),
 				]),
 			);
 		});
-	}, 30000);
+	});
 
 	it("should log error when search fails", async () => {
 		(axios.get as jest.Mock)

@@ -399,8 +399,11 @@ export class SearchService {
 					},
 				],
 			},
+			orderBy: {
+				timestamp: "desc",
+			},
 		});
-		console.log("Result: " + JSON.stringify(result));
+		// console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
@@ -414,7 +417,10 @@ export class SearchService {
 
 				// Process records and filter duplicates
 				searchIds.forEach((record) => {
-					if (!uniqueRecordsMap.has(record.url)) {
+					if (
+						!uniqueRecordsMap.has(record.url) &&
+						record.search_term.trim() !== ""
+					) {
 						const dto: SearchHistoryDto = {
 							search_term: record.search_term,
 							search_time: record.search_time,
@@ -675,15 +681,6 @@ export class SearchService {
 	}
 
 	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
-		console.log(userID);
-		// const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
-		// SELECT *
-		// FROM search_history
-		// WHERE user_id::text = ${userID}
-		// AND (url LIKE '/user/%'
-		// OR url LIKE '/search/user/%')
-		// ORDER BY timestamp DESC
-		// LIMIT 10;`;
 		const result = await this.prisma.search_history.findMany({
 			where: {
 				user_id: userID,
@@ -699,6 +696,9 @@ export class SearchService {
 						},
 					},
 				],
+			},
+			orderBy: {
+				timestamp: "desc",
 			},
 		});
 
