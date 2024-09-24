@@ -14,7 +14,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
 	number,
 	percentage,
 }) => {
-	const isPositive = percentage.startsWith("+");
+	const isPositive = !percentage.startsWith("-");
 	return (
 		<View style={styles.card}>
 			<Text style={styles.cardTitle}>{title}</Text>
