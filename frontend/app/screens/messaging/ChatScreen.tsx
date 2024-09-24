@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
 	View,
 	Text,
@@ -31,7 +31,14 @@ const ChatScreen = () => {
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
-	console.log("Username:", u);
+	const flatListRef = useRef<FlatList>(null); // FlatList reference
+
+	// Scroll to the bottom whenever messages change
+	useEffect(() => {
+		if (messages.length > 0) {
+			flatListRef.current?.scrollToEnd({ animated: true });
+		}
+	}, [messages]);
 
 	const getUsers = async () => {
 		try {
@@ -73,7 +80,7 @@ const ChatScreen = () => {
 		}
 	}, [messages, u]);
 
-	//on component mount
+	// on component mount
 	useEffect(() => {
 		const initialize = async () => {
 			try {
@@ -84,8 +91,6 @@ const ChatScreen = () => {
 				setSelf(fetchedSelf);
 				setOtherUser(fetchedOtherUser);
 				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
-				console.log(self);
-				console.log(otherUser);
 				await live.enterDM(
 					fetchedSelf.userID,
 					fetchedOtherUser.userID,
@@ -166,10 +171,14 @@ const ChatScreen = () => {
 				</Text>
 			</View>
 			<FlatList
+				ref={flatListRef} // Reference to control scrolling
 				data={messages}
 				keyExtractor={(item) => item.message.index.toString()}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
+				onContentSizeChange={() =>
+					flatListRef.current?.scrollToEnd({ animated: true })
+				} // Scroll on content size change
 			/>
 			{!dmError && (
 				<View style={styles.inputContainer}>
@@ -193,7 +202,6 @@ const ChatScreen = () => {
 		</View>
 	);
 };
-
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { Room } from "../../models/Room";
+import * as ImagePicker from "expo-image-picker";
+import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import {
 	View,
 	Text,
@@ -12,16 +19,6 @@ import {
 	Alert,
 	ToastAndroid,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Room } from "../../models/Room";
-import uploadImage from "../../services/ImageUpload";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
-import { useRouter } from "expo-router";
-import CreateButton from "../../components/CreateButton";
-import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../styles/colors";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -29,7 +26,10 @@ const EditRoom: React.FC = () => {
 	const router = useRouter();
 	const route = useRoute<EditRoomRouteProp>();
 	const { params } = route;
-	let roomData = JSON.parse(params.room);
+
+	// Memoize roomData to avoid re-parsing on each render
+	const roomData = useMemo(() => JSON.parse(params.room), [params.room]);
+
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -42,12 +42,12 @@ const EditRoom: React.FC = () => {
 		roomSize: 50,
 		isExplicit: false,
 		isNsfw: false,
-		start_date: new Date(), // Use ISO string for consistency
-		end_date: new Date(), // Use ISO string for consistency
+		start_date: new Date(),
+		end_date: new Date(),
 	});
-
 	const [image, setImage] = useState<string | null>(null);
 
+	// useEffect without roomDetails as dependency
 	useEffect(() => {
 		const loadRoomDetails = async () => {
 			setRoomDetails({
@@ -66,7 +66,7 @@ const EditRoom: React.FC = () => {
 		};
 
 		loadRoomDetails();
-	}, []);
+	}, [roomData]); // Only roomData is a dependency now
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {

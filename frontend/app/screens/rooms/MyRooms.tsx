@@ -206,6 +206,9 @@ const styles = StyleSheet.create({
 	},
 	scrollViewContent: {
 		paddingVertical: 20,
+		justifyContent: "center",
+		alignItems: "center",
+		padding: 10,
 	},
 	monthContainer: {
 		marginBottom: 20,

@@ -6,8 +6,6 @@ import {
 	FlatList,
 	TextInput,
 	StyleSheet,
-	ScrollView,
-	Pressable,
 	Keyboard,
 } from "react-native";
 

@@ -1,5 +1,5 @@
 // import * as React from "react";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import AllFriends from "./AllFriends";
 import Followers from "./Followers";
@@ -8,17 +8,19 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
 // Create a tab navigator
 const Tab = createMaterialTopTabNavigator();
 
-// Define the top tab navigator
-function MyTabs({ username }: { username: string }) {
-	const navigation = useNavigation(); // To handle navigation actions
+function MyTabs({ username }: { username: string | string[] }) {
+	const navigation = useNavigation();
 
+	const displayUsername = Array.isArray(username)
+		? username.join(", ")
+		: username;
 	return (
 		<>
-			{/* Custom Header */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.backButton}
@@ -27,10 +29,7 @@ function MyTabs({ username }: { username: string }) {
 				>
 					<Ionicons name="chevron-back" size={24} color="#000" />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>{username}</Text>
-				{/* <Text style={{ fontWeight: "400", textAlign: "center" }}>
-					@{primaryProfileData.username}
-				</Text> */}
+				<Text style={styles.headerTitle}>{displayUsername}</Text>
 			</View>
 
 			{/* Tab Navigator */}
@@ -45,21 +44,9 @@ function MyTabs({ username }: { username: string }) {
 					tabBarItemStyle: styles.tabBarItemStyle, // Tab item style (for height)
 				}}
 			>
-				<Tab.Screen
-					name="Following"
-					component={Following}
-					options={{ tabBarLabel: "Following" }}
-				/>
-				<Tab.Screen
-					name="Friends"
-					component={AllFriends}
-					options={{ tabBarLabel: "Friends" }}
-				/>
-				<Tab.Screen
-					name="Followers"
-					component={Followers}
-					options={{ tabBarLabel: "Followers" }}
-				/>
+				<Tab.Screen name="Following" component={Following} />
+				<Tab.Screen name="Friends" component={AllFriends} />
+				<Tab.Screen name="Followers" component={Followers} />
 			</Tab.Navigator>
 		</>
 	);
@@ -67,7 +54,8 @@ function MyTabs({ username }: { username: string }) {
 
 // Export the main component with navigation container
 export default function TopBarNavigator() {
-	const username = "User's Name"; // Replace with dynamic username if needed
+	const user = useLocalSearchParams();
+	const username = user.username; // Replace with dynamic username if needed
 
 	return <MyTabs username={username} />;
 }
@@ -86,12 +74,12 @@ const styles = StyleSheet.create({
 		left: 10,
 	},
 	headerTitle: {
-		fontSize: 18,
+		fontSize: 19,
 		fontWeight: "bold",
 		color: "#000",
 	},
 	tabBarLabel: {
-		fontSize: 12,
+		fontSize: 16,
 		fontWeight: "bold",
 		textTransform: "none",
 	},
@@ -100,10 +88,10 @@ const styles = StyleSheet.create({
 		height: 4,
 	},
 	tabBarStyle: {
-		// backgroundColor: colors.backgroundColor,
-		height: 45,
+		height: 55,
+		backgroundColor: colors.backgroundColor,
 	},
 	tabBarItemStyle: {
-		height: 45,
+		height: 55,
 	},
 });

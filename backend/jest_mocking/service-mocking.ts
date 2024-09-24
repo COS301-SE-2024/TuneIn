@@ -396,6 +396,21 @@ export const mockPrismaService = {
 		updateMany: jest.fn(),
 		upsert: jest.fn(),
 	},
+	favorite_genres: {
+		create: jest.fn(),
+		createMany: jest.fn(),
+		createManyAndReturn: jest.fn(),
+		delete: jest.fn(),
+		deleteMany: jest.fn(),
+		findUnique: jest.fn(),
+		findUniqueOrThrow: jest.fn(),
+		findFirst: jest.fn(),
+		findFirstOrThrow: jest.fn(),
+		findMany: jest.fn(),
+		update: jest.fn(),
+		updateMany: jest.fn(),
+		upsert: jest.fn(),
+	},
 };
 
 export const mockDtoGenService = {
@@ -410,6 +425,10 @@ export const mockAuthService = {
 
 export const mockUsersService = {
 	// mock properties and methods as needed
+	calculateMutualFriends: jest.fn(),
+	calculatePopularity: jest.fn(),
+	calculateActivity: jest.fn(),
+	calculateGenreSimilarity: jest.fn(),
 };
 
 export const mockRecommendationsService = {
@@ -428,5 +447,9 @@ export const mockDbUtilsService = {
 	isFriendsOrPending: jest.fn(),
 	getRoomSongs: jest.fn(),
 	getUserFavoriteSongs: jest.fn(),
+	getUserFollowing: jest.fn(),
+	getUserFriends: jest.fn(),
+	getUserFollowers: jest.fn(),
+	getMutualFriends: jest.fn(),
 	// mock properties and methods as needed
 };
