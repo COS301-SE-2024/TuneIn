@@ -69,13 +69,20 @@ describe("ProfileCard", () => {
 		const { getByTestId } = renderComponent({ isSelected: true });
 
 		const container = getByTestId("chat-item-touchable");
+		const avatar = getByTestId("chat-item-avatar");
 
-		// Check for specific styles in the received style object
+		// Ensure specific properties exist in the style object
 		expect(container.props.style).toEqual(
 			expect.objectContaining({
-				backgroundColor: expect.any(String), // Adjust according to your background color logic
-				borderColor: "#08BDBD", // Adjust with actual color value
+				backgroundColor: expect.any(String), // This ensures that background color is present
 			}),
+		);
+
+		// Check for border color when selected
+		expect(avatar.props.style).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ borderColor: "#08BDBD" }), // Adjust with actual color value
+			]),
 		);
 	});
 
