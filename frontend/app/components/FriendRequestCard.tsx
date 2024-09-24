@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 import { colors } from "../styles/colors";
@@ -18,12 +18,29 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 	friend,
 	handleRequest,
 }) => {
-	// Check if the profile picture is null, undefined, or the default URL
+	// State to track if buttons are pressed
+	const [acceptPressed, setAcceptPressed] = useState(false);
+	const [rejectPressed, setRejectPressed] = useState(false);
+
 	const profileImageSource =
 		!profilePicture ||
 		profilePicture === "https://example.com/default-profile-picture.png"
 			? defaultProfileIcon
 			: { uri: profilePicture };
+
+	// Handle Accept button press
+	const handleAcceptPress = () => {
+		setAcceptPressed(true);
+		setRejectPressed(false);
+		handleRequest(friend, true);
+	};
+
+	// Handle Reject button press
+	const handleRejectPress = () => {
+		setRejectPressed(true);
+		setAcceptPressed(false);
+		handleRequest(friend, false);
+	};
 
 	return (
 		<View style={styles.cardContainer} testID="friend-request-card-container">
@@ -36,18 +53,48 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				{username}
 			</Text>
 			<TouchableOpacity
-				style={styles.acceptButton}
-				onPress={() => handleRequest(friend, true)}
+				style={[
+					styles.button,
+					acceptPressed
+						? { backgroundColor: colors.primary }
+						: { backgroundColor: colors.backgroundColor },
+					{ borderColor: colors.primary },
+				]}
+				onPress={handleAcceptPress}
 				testID="accept-button"
 			>
-				<Text style={styles.acceptText}>Accept</Text>
+				<Text
+					style={[
+						styles.acceptText,
+						acceptPressed
+							? { color: colors.backgroundColor }
+							: { color: colors.primary },
+					]}
+				>
+					Accept
+				</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
-				style={styles.rejectButton}
-				onPress={() => handleRequest(friend, false)}
+				style={[
+					styles.button,
+					rejectPressed
+						? { backgroundColor: "red" }
+						: { backgroundColor: colors.backgroundColor },
+					{ borderColor: "red" },
+				]}
+				onPress={handleRejectPress}
 				testID="reject-button"
 			>
-				<Text style={styles.rejectText}>Reject</Text>
+				<Text
+					style={[
+						styles.rejectText,
+						rejectPressed
+							? { color: colors.backgroundColor }
+							: { color: "red" },
+					]}
+				>
+					Reject
+				</Text>
 			</TouchableOpacity>
 		</View>
 	);
@@ -71,23 +118,17 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		flex: 1,
 	},
-	acceptButton: {
-		backgroundColor: colors.primary,
-		padding: 5,
-		borderRadius: 5,
-		marginRight: 5,
+	button: {
+		paddingVertical: 8,
+		paddingHorizontal: 12,
+		borderRadius: 20,
+		borderWidth: 1,
+		marginRight: 10, // Add some space between buttons
 	},
 	acceptText: {
-		color: "white",
 		fontWeight: "bold",
 	},
-	rejectButton: {
-		backgroundColor: "black",
-		padding: 5,
-		borderRadius: 5,
-	},
 	rejectText: {
-		color: "white",
 		fontWeight: "bold",
 	},
 });

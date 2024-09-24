@@ -14,6 +14,7 @@ const AppTabs = () => {
 					paddingBottom: 5,
 					paddingTop: 5,
 				},
+				tabBarHideOnKeyboard: true,
 			}}
 		>
 			<Tabs.Screen

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -7,31 +7,38 @@ import {
 	ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import RoomDetails, {
-	RoomDetailsProps,
-} from "../../components/rooms/RoomDetailsComponent";
+import RoomDetails from "../../components/rooms/RoomDetailsComponent";
 import { useLocalSearchParams, useRouter } from "expo-router";
-// import { colors } from "../../styles/colors";
+import { formatRoomData } from "../../models/Room";
+import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon
+import { colors } from "../../styles/colors";
+import RoomShareSheet from "../../components/messaging/RoomShareSheet";
 
 const RoomInfoScreen = () => {
 	const router = useRouter();
-	const { roomData } = useLocalSearchParams();
-	let _room: any;
-	if (Array.isArray(roomData)) {
-		_room = JSON.parse(roomData[0]);
-	} else {
-		_room = JSON.parse(roomData);
+	const { room } = useLocalSearchParams();
+	const [isPopupVisible, setPopupVisible] = useState(false);
+
+	// Parse the room data if it's a JSON string
+	let roomData;
+	try {
+		roomData = typeof room === "string" ? JSON.parse(room) : room;
+	} catch (error) {
+		console.error("Invalid room data:", error);
+		roomData = null;
 	}
-	const room: RoomDetailsProps = {
-		image: _room.backgroundImage,
-		name: _room.name,
-		description: _room.description,
-		genre: _room.genre,
-		language: _room.language,
-		roomSize: _room.roomSize,
-		isExplicit: _room.isExplicit,
-		isNsfw: _room.isNsfw,
-		// tags: _room.tags,
+
+	const handleOpenPopup = () => {
+		setPopupVisible(true);
+	};
+
+	const handleClosePopup = () => {
+		setPopupVisible(false);
+	};
+
+	// Function to truncate room name if it's longer than 18 characters
+	const getTruncatedRoomName = (name: string) => {
+		return name.length > 18 ? name.slice(0, 15) + "..." : name;
 	};
 
 	return (
@@ -43,9 +50,24 @@ const RoomInfoScreen = () => {
 				>
 					<Ionicons name="close" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.roomName}>{room.name}</Text>
+
+				{/* Truncate the room name if necessary */}
+				<Text style={styles.roomName}>
+					{roomData?.name ? getTruncatedRoomName(roomData.name) : "Room"}
+				</Text>
+
+				<TouchableOpacity onPress={handleOpenPopup}>
+					<Icon name="share" size={22} color={colors.primaryText} />
+				</TouchableOpacity>
 			</View>
-			<RoomDetails {...room} />
+
+			{roomData && <RoomDetails room={formatRoomData(roomData)} />}
+
+			<RoomShareSheet
+				room={formatRoomData(room)}
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+			/>
 		</ScrollView>
 	);
 };
@@ -56,7 +78,6 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	header: {
-		// backgroundColor: colors.primary,
 		padding: 16,
 		flexDirection: "row",
 		alignItems: "center",

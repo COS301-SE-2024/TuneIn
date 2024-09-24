@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		marginBottom: 15,
-		marginRight: 0,
+		marginLeft: -8,
 	},
 	contentContainer: {
 		paddingHorizontal: 20,
-		paddingRight: 20,
+		paddingRight: 10,
 	},
 	separator: {
 		width: 15,
