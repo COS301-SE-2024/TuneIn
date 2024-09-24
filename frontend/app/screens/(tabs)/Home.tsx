@@ -254,7 +254,8 @@ const Home: React.FC = () => {
 						profile_picture_url: friend.profile_picture_url
 							? friend.profile_picture_url
 							: ProfileIMG,
-						username: friend.username, // Ensure you include the profile_name property
+						username: friend.username,
+						friend_id: friend.friend_id, // Include the friend_id property
 					}))
 				: [];
 
@@ -269,7 +270,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, [setUserData, userData]);
+	}, [setUserData, userData, ProfileIMG]);
 
 	const [refreshing] = React.useState(false);
 
@@ -300,6 +301,13 @@ const Home: React.FC = () => {
 		router.navigate({
 			pathname: "/screens/rooms/MyRooms",
 			params: { myRooms: JSON.stringify(myRooms) },
+		});
+	};
+
+	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
+		router.navigate({
+			pathname: "/screens/rooms/MoreRooms",
+			params: { rooms: JSON.stringify(rooms), name: Name },
 		});
 	};
 
@@ -364,7 +372,6 @@ const Home: React.FC = () => {
 				ref={scrollViewRef}
 				onScroll={handleScroll}
 				scrollEventThrottle={16}
-				contentContainerStyle={styles.scrollViewContent}
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
 				}
@@ -377,11 +384,26 @@ const Home: React.FC = () => {
 							<>
 								{myRecents.length > 0 && (
 									<>
-										<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(myRecents, "Recent Rooms")
+											}
+										>
+											<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										</TouchableOpacity>
+
 										<AppCarousel data={myRecents} renderItem={renderItem} />
 									</>
 								)}
-								<Text style={styles.sectionTitle}>Picks for you</Text>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={() =>
+										navigateToMoreRooms(myRecents, "Picks for you")
+									}
+								>
+									<Text style={styles.sectionTitle}>Picks for you</Text>
+								</TouchableOpacity>
 								<AppCarousel data={myPicks} renderItem={renderItem} />
 							</>
 						)}

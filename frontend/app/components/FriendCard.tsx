@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { Friend } from "../models/friend"; // Adjust path accordingly
 import { colors } from "../styles/colors";
 
@@ -38,17 +38,21 @@ const FriendCard: React.FC<FriendCardProps> = ({
 
 	return (
 		<View style={styles.cardContainer} testID="friend-card-container">
-			<Link
-				href={`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`}
-				style={(styles.link, { pointerEvents: "box-none" })}
+			<TouchableOpacity
+				onPress={() =>
+					router.push(
+						`/screens/profile/ProfilePage?friend=${JSON.stringify(friend)}&user=${user}`,
+					)
+				}
 				testID="friend-card-link"
 			>
 				<Image
 					source={profileImageSource}
-					style={styles.profileImage}
+					style={styles.profileImage} // Styles should now be applied correctly
 					testID="friend-card-image"
 				/>
-			</Link>
+			</TouchableOpacity>
+
 			<Text
 				style={styles.username}
 				numberOfLines={1}
@@ -60,9 +64,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 			{(cardType === "friend" && (
 				<TouchableOpacity
 					style={styles.unfriendButton}
-					onPress={(event) => {
-						event.stopPropagation();
-						handle(friend);
+					onPress={() => {
+						handle(friend); // Removed event.stopPropagation()
 					}}
 					testID="unfriend-button"
 				>
@@ -72,9 +75,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "following" && (
 					<TouchableOpacity
 						style={styles.unfriendButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="unfollow-button"
 					>
@@ -84,9 +86,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "follower" && (
 					<TouchableOpacity
 						style={styles.acceptButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="follow-button"
 					>
@@ -96,9 +97,8 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				(cardType === "mutual" && (
 					<TouchableOpacity
 						style={styles.acceptButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="add-friend-button"
 					>
@@ -107,19 +107,18 @@ const FriendCard: React.FC<FriendCardProps> = ({
 				)) ||
 				(cardType === "pending" && (
 					<TouchableOpacity
-						style={styles.rejectButton}
-						onPress={(event) => {
-							event.stopPropagation();
-							handle(friend);
+						style={styles.unfriendButton}
+						onPress={() => {
+							handle(friend); // Remove stopPropagation if not needed
 						}}
 						testID="reject-button"
 					>
 						<Text style={styles.rejectText}>Cancel</Text>
 					</TouchableOpacity>
 				)) ||
-				(cardType === "friend-follow" && ( // whomever is redesigning this, please make that a user cannot unfollow a friend so there ideally shouldn't be a button here
-					<Text style={styles.acceptText} testID="friend-card-username">
-						Friends/Pending
+				(cardType === "friend-follow" && (
+					<Text style={styles.pendingText} testID="friend-card-username">
+						Pending...
 					</Text>
 				)) ||
 				null}
@@ -139,22 +138,16 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 	},
 	unfriendButton: {
-		// backgroundColor: "white",
-		backgroundColor: "black",
+		backgroundColor: colors.backgroundColor,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 8,
+		borderRadius: 20,
 		borderWidth: 1,
-		// borderColor: "red",
-	},
-	rejectButton: {
-		backgroundColor: "black",
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-		borderRadius: 8,
+		borderColor: "red",
+		color: "red",
 	},
 	rejectText: {
-		color: "white",
+		color: "red",
 		fontWeight: "bold",
 	},
 	cardContainer: {
@@ -172,12 +165,17 @@ const styles = StyleSheet.create({
 	profileImage: {
 		width: 50,
 		height: 50,
-		borderRadius: 25, // Rounded profile image
+		borderRadius: 25,
 		marginRight: 16,
 	},
 	acceptText: {
-		color: "#fff",
+		color: colors.primaryText,
 		fontWeight: "bold",
+	},
+	pendingText: {
+		color: "purple",
+		fontWeight: "bold",
+		fontSize: 16,
 	},
 	username: {
 		fontSize: 18,
