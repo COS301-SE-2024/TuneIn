@@ -132,13 +132,13 @@ const AnalyticsPage: React.FC = () => {
 						>
 							<Text style={styles.drawerItem}>Interactions Analytics</Text>
 						</TouchableOpacity>
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							onPress={() =>
 								router.push("/screens/analytics/PlaylistAnalytics")
 							}
 						>
 							<Text style={styles.drawerItem}>Playlist Analytics</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 					</View>
 				</View>
 			)}
