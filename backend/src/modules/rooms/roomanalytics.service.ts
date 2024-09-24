@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { SongInfoDto } from "./dto/songinfo.dto";
+// import { SongInfoDto } from "./dto/songinfo.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
@@ -13,56 +13,53 @@ import {
 	startOfDay,
 } from "date-fns";
 import {
-	RoomAnalyticsQueueDto,
+	// RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
 	RoomAnalyticsInteractionsDto,
-	RoomAnalyticsVotesDto,
-	RoomAnalyticsSongsDto,
-	RoomAnalyticsContributorsDto,
-	RoomAnalyticsDto,
+	// RoomAnalyticsVotesDto,
+	// RoomAnalyticsSongsDto,
+	// RoomAnalyticsContributorsDto,
+	// RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
-import { RoomsService } from "./rooms.service";
+// import { RoomsService } from "./rooms.service";
 
 @Injectable()
 export class RoomAnalyticsService {
 	constructor(
-		private readonly prisma: PrismaService,
-		// private readonly dtogen: DtoGenService,
-		// private readonly dbUtils: DbUtilsService,
-		private readonly rooms: RoomsService,
+		private readonly prisma: PrismaService, // private readonly dtogen: DtoGenService, // private readonly dbUtils: DbUtilsService, // private readonly rooms: RoomsService,
 	) {}
 
-	async getRoomAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsDto();
-	}
+	// async getRoomAnalytics(
+	// 	roomID: string,
+	// 	userID: string,
+	// ): Promise<RoomAnalyticsDto> {
+	// 	console.log(
+	// 		"Getting room analytics for room",
+	// 		roomID,
+	// 		" and given userID: ",
+	// 		userID,
+	// 	);
+	// 	return new RoomAnalyticsDto();
+	// }
 
-	async getRoomQueueAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsQueueDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		const roomQueueAnalytics: RoomAnalyticsQueueDto =
-			new RoomAnalyticsQueueDto();
-		const roomQueue: SongInfoDto[] = await this.rooms.getRoomQueue(roomID);
-		roomQueueAnalytics.total_songs_queued = roomQueue.length;
-		roomQueueAnalytics.total_queue_exports = 0; // TODO: Implement logic to get total queue exports
-		return roomQueueAnalytics;
-	}
+	// async getRoomQueueAnalytics(
+	// 	roomID: string,
+	// 	userID: string,
+	// ): Promise<RoomAnalyticsQueueDto> {
+	// 	console.log(
+	// 		"Getting room analytics for room",
+	// 		roomID,
+	// 		" and given userID: ",
+	// 		userID,
+	// 	);
+	// 	const roomQueueAnalytics: RoomAnalyticsQueueDto =
+	// 		new RoomAnalyticsQueueDto();
+	// 	const roomQueue: SongInfoDto[] = await this.rooms.getRoomQueue(roomID);
+	// 	roomQueueAnalytics.total_songs_queued = roomQueue.length;
+	// 	roomQueueAnalytics.total_queue_exports = 0; // TODO: Implement logic to get total queue exports
+	// 	return roomQueueAnalytics;
+	// }
 
 	async getRoomJoinAnalytics(
 		roomID: string,
@@ -80,7 +77,10 @@ export class RoomAnalyticsService {
 			},
 		};
 		console.log("Getting room join analytics for room", roomID);
-		const userActivityPerDay: any = await this.prisma.$queryRaw`
+		const userActivityPerDay: {
+			day: Date;
+			count: number;
+		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
 				COUNT("user_id") as count
 			FROM "user_activity"
@@ -88,7 +88,10 @@ export class RoomAnalyticsService {
 			GROUP BY day, room_id
 			ORDER BY day ASC;
 		`;
-		const uniqueUserActivityPerDay: any = await this.prisma.$queryRaw`
+		const uniqueUserActivityPerDay: {
+			day: Date;
+			count: number;
+		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
 				COUNT(DISTINCT "user_id") as count
 			FROM "user_activity"
@@ -105,26 +108,28 @@ export class RoomAnalyticsService {
 		});
 		const roomCreationDate: Date | null = room?.date_created ?? null;
 
-		if (userActivityPerDay.length === 0) {
+		if (userActivityPerDay.length === 0 || userActivityPerDay === undefined) {
 			return joins;
 		}
 
 		for (let i = 0; i < userActivityPerDay.length; i++) {
-			userActivityPerDay[i].count = Number(userActivityPerDay[i].count);
-			total_joins += userActivityPerDay[i].count;
+			if (!userActivityPerDay || userActivityPerDay[i]?.count === undefined) {
+				continue;
+			}
+			total_joins += Number(userActivityPerDay[i]?.count ?? 0);
 		}
 		for (let i = 0; i < uniqueUserActivityPerDay.length; i++) {
-			uniqueUserActivityPerDay[i].count = Number(
-				uniqueUserActivityPerDay[i].count,
-			);
-			unique_joins += uniqueUserActivityPerDay[i].count;
+			unique_joins += Number(uniqueUserActivityPerDay[i]?.count ?? 0);
 		}
 		// fill in the missing days
 		// get all the days from the first day the room was created until today if the room is not older than 7 days
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
 		const today: Date = new Date();
-		const firstDay: Date = userActivityPerDay[0].day;
+		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
+		if (!firstDay) {
+			return joins;
+		}
 		let day: Date = roomCreationDate ?? firstDay;
 		if (isBefore(day, subHours(today, 24 * 7))) {
 			day = subHours(today, 24 * 7);
@@ -139,25 +144,23 @@ export class RoomAnalyticsService {
 		}
 		// add the missing days
 		for (const d of allDays) {
-			const dayExists: boolean = userActivityPerDay.find(
-				(u: any) => u.day === d,
-			);
+			const dayExists: boolean =
+				userActivityPerDay.find((u) => u.day === d) === undefined;
 			if (!dayExists) {
 				userActivityPerDay.push({ day: d, count: 0 });
 			}
 		}
 		// add the missing days
 		for (const d of allDays) {
-			const dayExists: boolean = uniqueUserActivityPerDay.find(
-				(u: any) => u.day === d,
-			);
+			const dayExists: boolean =
+				uniqueUserActivityPerDay.find((u) => u.day === d) === undefined;
 			if (!dayExists) {
 				uniqueUserActivityPerDay.push({ day: d, count: 0 });
 			}
 		}
 		// sort the arrays
-		userActivityPerDay.sort((a: any, b: any) => a.day - b.day);
-		uniqueUserActivityPerDay.sort((a: any, b: any) => a.day - b.day);
+		userActivityPerDay.sort((a, b) => a.day.getTime() - b.day.getTime());
+		uniqueUserActivityPerDay.sort((a, b) => a.day.getTime() - b.day.getTime());
 		joins.per_day = {
 			total_joins: userActivityPerDay,
 			unique_joins: uniqueUserActivityPerDay,
@@ -166,7 +169,6 @@ export class RoomAnalyticsService {
 			total_joins: total_joins,
 			unique_joins: unique_joins,
 		};
-
 		return joins;
 	}
 
@@ -184,7 +186,12 @@ export class RoomAnalyticsService {
 			},
 			per_day: [],
 		};
-		const sessionDurations: any = await this.prisma.$queryRaw`
+		const sessionDurations: {
+			avg_duration: number;
+			min_duration: number;
+			max_duration: number;
+			day: Date;
+		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', room_join_time) AS day,
 				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS avg_duration,
 				MIN(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS min_duration,
@@ -209,8 +216,11 @@ export class RoomAnalyticsService {
 		// fill in the missing days
 		const allDays: Date[] = [];
 		const today: Date = new Date();
-		const firstDay: Date = sessionDurations[0].day;
-		let day: Date = roomCreationDate ?? firstDay;
+		const firstDay: Date | undefined = sessionDurations[0]?.day;
+		let day: Date | undefined = roomCreationDate ?? firstDay;
+		if (!day) {
+			return sessionData;
+		}
 		if (isBefore(day, subHours(today, 24 * 7))) {
 			day = subHours(today, 24 * 7);
 		}
@@ -220,10 +230,15 @@ export class RoomAnalyticsService {
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
+		console.log(
+			"All days",
+			allDays.sort((a, b) => a.getTime() - b.getTime()),
+		);
 		day = startOfDay(day);
 		// add the missing days
 		for (const d of allDays) {
-			const dayExists: boolean = sessionDurations.find((u: any) => u.day === d);
+			const dayExists: boolean =
+				sessionDurations.find((u) => u.day === d) !== undefined;
 			if (!dayExists) {
 				sessionDurations.push({
 					day: d,
@@ -234,10 +249,13 @@ export class RoomAnalyticsService {
 			}
 		}
 		// sort the array
-		sessionDurations.sort((a: any, b: any) => a.day - b.day);
+		sessionDurations.sort((a, b) => a.day.getTime() - b.day.getTime());
 		// find the all time min, max, and avg
 		for (let i = 0; i < sessionDurations.length; i++) {
 			const session = sessionDurations[i];
+			if (session === undefined) {
+				continue;
+			}
 			session.avg_duration = Number(session.avg_duration);
 			session.min_duration = Number(session.min_duration);
 			session.max_duration = Number(session.max_duration);
@@ -249,7 +267,12 @@ export class RoomAnalyticsService {
 		sessionData.all_time.avg_duration = avg_duration;
 		sessionData.all_time.min_duration = min_duration;
 		sessionData.all_time.max_duration = max_duration;
-		sessionData.per_day = sessionDurations;
+		sessionData.per_day = sessionDurations
+			.map((session) => ({
+				...session,
+				duration: session.avg_duration,
+			}))
+			.sort((a, b) => a.day.getTime() - b.day.getTime());
 		return sessionData;
 	}
 	async getHourlyParticipantAnalytics(
@@ -260,7 +283,10 @@ export class RoomAnalyticsService {
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
 		console.log("Today", today, "Yesterday", yesterday);
-		const userActivityPerHour: any = await this.prisma.$queryRaw`
+		const userActivityPerHour: {
+			hour: Date;
+			count: number;
+		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('hour', room_join_time) AS hour,
 				COUNT("user_id") as count
 			FROM "user_activity"
@@ -288,7 +314,11 @@ export class RoomAnalyticsService {
 		const roomCreationDate: Date | null = room?.date_created ?? null;
 
 		const allHours: Date[] = [];
-		let hour: Date = roomCreationDate ?? userActivityPerHour[0].hour;
+		let hour: Date | undefined =
+			roomCreationDate ?? userActivityPerHour[0]?.hour;
+		if (!hour) {
+			return participantsPerHour;
+		}
 		if (isBefore(hour, subHours(today, 24))) {
 			hour = subHours(today, 24);
 		}
@@ -301,9 +331,8 @@ export class RoomAnalyticsService {
 		}
 		// add the missing hours
 		for (const h of allHours) {
-			const hourExists: boolean = userActivityPerHour.find(
-				(u: any) => u.hour === h,
-			);
+			const hourExists: boolean =
+				userActivityPerHour.find((u: any) => u.hour === h) !== undefined;
 			if (!hourExists) {
 				userActivityPerHour.push({ hour: h, count: 0 });
 			}
@@ -325,11 +354,12 @@ export class RoomAnalyticsService {
 	}
 
 	async getRoomPreviews(roomID: string): Promise<number> {
-		const previews: any = await this.prisma.room_previews.findMany({
-			where: {
-				room_id: roomID,
-			},
-		});
+		const previews: PrismaTypes.room_previews[] | null =
+			await this.prisma.room_previews.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
 		return previews.length;
 	}
 
@@ -370,8 +400,10 @@ export class RoomAnalyticsService {
 			expected_return_count: 0,
 			probability_of_return: 0,
 		};
-		console.log("Getting room return visits analytics for room", roomID);
-		const result: any = await this.prisma.$queryRaw`
+		const result: {
+			user_count: number;
+			user_id: string;
+		}[] = await this.prisma.$queryRaw`
 		SELECT
 			COUNT(user_id) as user_count,
 			user_id
@@ -387,7 +419,6 @@ export class RoomAnalyticsService {
 		if (result.length === 0) {
 			return returnVisits;
 		}
-		console.log("Return visits", result);
 		const returnCount: number = result.length;
 		const averageVisits: number =
 			result
@@ -416,7 +447,10 @@ export class RoomAnalyticsService {
 		});
 
 		const roomCreationDate: Date | null = room?.date_created ?? null;
-		const messageActivityPerHour: any = await this.prisma.$queryRaw`
+		const messageActivityPerHour: {
+			hour: Date;
+			count: number;
+		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('hour', date_sent) AS hour,
 				COUNT(message.message_id) as count
 			FROM "message"
@@ -455,15 +489,14 @@ export class RoomAnalyticsService {
 		allHours = allHours.slice(0, allHours.length - 1);
 		// add the missing hours
 		for (const h of allHours) {
-			const hourExists: boolean = messageActivityPerHour.find(
-				(u: any) => u.hour === h,
-			);
+			const hourExists: boolean =
+				messageActivityPerHour.find((u) => u.hour === h) !== undefined;
 			if (!hourExists) {
 				messageActivityPerHour.push({ hour: h, count: 0 });
 			}
 		}
 		// sort the array
-		messageActivityPerHour.sort((a: any, b: any) => a.hour - b.hour);
+		messageActivityPerHour.sort((a, b) => a.hour.getTime() - b.hour.getTime());
 		console.log("Message activity per hour", messageActivityPerHour);
 		for (const hour of messageActivityPerHour) {
 			const m = {
@@ -482,17 +515,12 @@ export class RoomAnalyticsService {
 	}
 
 	async getNumberOfReactions(roomID: string): Promise<number> {
-		const reactions: any = await this.prisma.chat_reactions.findMany({
-			where: {
-				room_id: roomID,
-			},
-		});
-		console.log(
-			"Getting number of reactions for room",
-			roomID,
-			"and reactions",
-			reactions,
-		);
+		const reactions: PrismaTypes.chat_reactions[] =
+			await this.prisma.chat_reactions.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
 		if (!reactions || reactions === null) {
 			return 0;
 		}
@@ -500,7 +528,7 @@ export class RoomAnalyticsService {
 	}
 
 	async getNumberOfBookmarks(roomID: string): Promise<number> {
-		const bookmarks: PrismaTypes.bookmark[] | null =
+		const bookmarks: PrismaTypes.bookmark[] =
 			await this.prisma.bookmark.findMany({
 				where: {
 					room_id: roomID,
@@ -536,158 +564,170 @@ export class RoomAnalyticsService {
 		return roomInteractionAnalytics;
 	}
 
-	async getTotalVotes(roomID: string): Promise<any> {
-		const votes: any = await this.prisma.$queryRaw`
-			select
-				count(*) as count,
-				room_id,
-				is_upvote,
-				queue.room_id
-			from
-				vote
-			inner join queue on queue.queue_id = vote.queue_id
-			group by
-				is_upvote,
-				room_id
-			having
-				room_id = ${roomID}::UUID;
+	// async getTotalVotes(roomID: string): Promise<{
+	// 	upvotes: number;
+	// 	downvotes: number;
+	// }> {
+	// 	const votes: {
+	// 		count: number;
+	// 		room_id: string;
+	// 		is_upvote: boolean;
+	// 	}[] = await this.prisma.$queryRaw`
+	// 		select
+	// 			count(*) as count,
+	// 			room_id,
+	// 			is_upvote,
+	// 			queue.room_id
+	// 		from
+	// 			vote
+	// 		inner join queue on queue.queue_id = vote.queue_id
+	// 		group by
+	// 			is_upvote,
+	// 			room_id
+	// 		having
+	// 			room_id = ${roomID}::UUID;
 
-		`;
-		console.log("Getting total votes for room", roomID, "and votes", votes);
-		const numOfUpvotes = Number(votes.filter((v: any) => v.is_upvote)[0].count);
-		const numOfDownvotes = Number(
-			votes.filter((v: any) => !v.is_upvote)[0].count,
-		);
-		return {
-			upvotes: numOfUpvotes,
-			downvotes: numOfDownvotes,
-		};
-	}
+	// 	`;
+	// 	if (votes.length === 0 || votes === undefined) {
+	// 		return {
+	// 			upvotes: 0,
+	// 			downvotes: 0,
+	// 		};
+	// 	}
+	// 	const upvoteResult = votes.filter((v) => v.is_upvote)[0];
+	// 	const numOfUpvotes = upvoteResult ? Number(upvoteResult.count) : 0;
+	// 	const downvoteResult = votes.filter((v) => !v.is_upvote)[0];
+	// 	const numOfDownvotes = downvoteResult ? Number(downvoteResult.count) : 0;
+	// 	return {
+	// 		upvotes: numOfUpvotes,
+	// 		downvotes: numOfDownvotes,
+	// 	};
+	// }
 
-	async getPercentageChangeInVotes(roomID: string): Promise<any> {
-		// get total votes from today and yesterday
-		const today: Date = new Date();
-		const yesterday: Date = subHours(today, 24);
-		const votesToday: any = await this.prisma.$queryRaw`
-			select
-				count(*) as count,
-				room_id,
-				is_upvote,
-				queue.room_id
-			from
-				vote
-			inner join queue on queue.queue_id = vote.queue_id
-			where
-				vote_time > ${yesterday}
-			group by
-				is_upvote,
-				room_id
-			having
-				room_id = ${roomID}::UUID;
-		`;
-		const votesYesterday: any = await this.prisma.$queryRaw`
-			select
-				count(*) as count,
-				room_id,
-				is_upvote,
-				queue.room_id
-			from
-				vote
-			inner join queue on queue.queue_id = vote.queue_id
-			where
-				vote_time < ${yesterday}
-			group by
-				is_upvote,
-				room_id
-			having
-				room_id = ${roomID}::UUID;
-		`;
-		if (votesToday.length === 0 || votesYesterday.length === 0) {
-			return {
-				daily_percentage_change_in_upvotes: 0,
-				daily_percentage_change_in_downvotes: 0,
-			};
-		}
-		console.log(
-			"Getting percentage change in votes for room",
-			roomID,
-			"and votes",
-			votesToday,
-			votesYesterday,
-		);
-		const numOfUpvotesToday = Number(
-			votesToday.filter((v: any) => v.is_upvote)[0].count,
-		);
-		const numOfDownvotesToday = Number(
-			votesToday.filter((v: any) => !v.is_upvote)[0].count,
-		);
-		const numOfUpvotesYesterday = Number(
-			votesYesterday.filter((v: any) => v.is_upvote)[0].count,
-		);
-		const numOfDownvotesYesterday = Number(
-			votesYesterday.filter((v: any) => !v.is_upvote)[0].count,
-		);
-		const upvoteChange: number = numOfUpvotesToday - numOfUpvotesYesterday;
-		const downvoteChange: number =
-			numOfDownvotesToday - numOfDownvotesYesterday;
-		const upvotePercentageChange: number =
-			(upvoteChange / numOfUpvotesYesterday) * 100;
-		const downvotePercentageChange: number =
-			(downvoteChange / numOfDownvotesYesterday) * 100;
-		return {
-			daily_percentage_change_in_upvotes: upvotePercentageChange,
-			daily_percentage_change_in_downvotes: downvotePercentageChange,
-		};
-	}
+	// async getPercentageChangeInVotes(roomID: string): Promise<any> {
+	// 	// get total votes from today and yesterday
+	// 	const today: Date = new Date();
+	// 	const yesterday: Date = subHours(today, 24);
+	// 	const votesToday: any = await this.prisma.$queryRaw`
+	// 		select
+	// 			count(*) as count,
+	// 			room_id,
+	// 			is_upvote,
+	// 			queue.room_id
+	// 		from
+	// 			vote
+	// 		inner join queue on queue.queue_id = vote.queue_id
+	// 		where
+	// 			vote_time > ${yesterday}
+	// 		group by
+	// 			is_upvote,
+	// 			room_id
+	// 		having
+	// 			room_id = ${roomID}::UUID;
+	// 	`;
+	// 	const votesYesterday: any = await this.prisma.$queryRaw`
+	// 		select
+	// 			count(*) as count,
+	// 			room_id,
+	// 			is_upvote,
+	// 			queue.room_id
+	// 		from
+	// 			vote
+	// 		inner join queue on queue.queue_id = vote.queue_id
+	// 		where
+	// 			vote_time < ${yesterday}
+	// 		group by
+	// 			is_upvote,
+	// 			room_id
+	// 		having
+	// 			room_id = ${roomID}::UUID;
+	// 	`;
+	// 	if (votesToday.length === 0 || votesYesterday.length === 0) {
+	// 		return {
+	// 			daily_percentage_change_in_upvotes: 0,
+	// 			daily_percentage_change_in_downvotes: 0,
+	// 		};
+	// 	}
+	// 	console.log(
+	// 		"Getting percentage change in votes for room",
+	// 		roomID,
+	// 		"and votes",
+	// 		votesToday,
+	// 		votesYesterday,
+	// 	);
+	// 	const numOfUpvotesToday = Number(
+	// 		votesToday.filter((v: any) => v.is_upvote)[0].count,
+	// 	);
+	// 	const numOfDownvotesToday = Number(
+	// 		votesToday.filter((v: any) => !v.is_upvote)[0].count,
+	// 	);
+	// 	const numOfUpvotesYesterday = Number(
+	// 		votesYesterday.filter((v: any) => v.is_upvote)[0].count,
+	// 	);
+	// 	const numOfDownvotesYesterday = Number(
+	// 		votesYesterday.filter((v: any) => !v.is_upvote)[0].count,
+	// 	);
+	// 	const upvoteChange: number = numOfUpvotesToday - numOfUpvotesYesterday;
+	// 	const downvoteChange: number =
+	// 		numOfDownvotesToday - numOfDownvotesYesterday;
+	// 	const upvotePercentageChange: number =
+	// 		(upvoteChange / numOfUpvotesYesterday) * 100;
+	// 	const downvotePercentageChange: number =
+	// 		(downvoteChange / numOfDownvotesYesterday) * 100;
+	// 	return {
+	// 		daily_percentage_change_in_upvotes: upvotePercentageChange,
+	// 		daily_percentage_change_in_downvotes: downvotePercentageChange,
+	// 	};
+	// }
 
-	async getRoomVotesAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsVotesDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		const roomVotesAnalytics: RoomAnalyticsVotesDto =
-			new RoomAnalyticsVotesDto();
-		const votes: any = await this.getTotalVotes(roomID);
-		roomVotesAnalytics.total_upvotes = votes.upvotes;
-		roomVotesAnalytics.total_downvotes = votes.downvotes;
-		const percentageChange: any = await this.getPercentageChangeInVotes(roomID);
-		roomVotesAnalytics.daily_percentage_change_in_upvotes =
-			percentageChange.daily_percentage_change_in_upvotes;
-		roomVotesAnalytics.daily_percentage_change_in_downvotes =
-			percentageChange.daily_percentage_change_in_downvotes;
-		return roomVotesAnalytics;
-	}
+	// async getRoomVotesAnalytics(
+	// 	roomID: string,
+	// 	userID: string,
+	// ): Promise<RoomAnalyticsVotesDto> {
+	// 	console.log(
+	// 		"Getting room analytics for room",
+	// 		roomID,
+	// 		" and given userID: ",
+	// 		userID,
+	// 	);
+	// 	const roomVotesAnalytics: RoomAnalyticsVotesDto =
+	// 		new RoomAnalyticsVotesDto();
+	// 	const votes: any = await this.getTotalVotes(roomID);
+	// 	roomVotesAnalytics.total_upvotes = votes.upvotes;
+	// 	roomVotesAnalytics.total_downvotes = votes.downvotes;
+	// 	const percentageChange: any = await this.getPercentageChangeInVotes(roomID);
+	// 	roomVotesAnalytics.daily_percentage_change_in_upvotes =
+	// 		percentageChange.daily_percentage_change_in_upvotes;
+	// 	roomVotesAnalytics.daily_percentage_change_in_downvotes =
+	// 		percentageChange.daily_percentage_change_in_downvotes;
+	// 	return roomVotesAnalytics;
+	// }
 
-	async getRoomSongsAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsSongsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsSongsDto();
-	}
+	// async getRoomSongsAnalytics(
+	// 	roomID: string,
+	// 	userID: string,
+	// ): Promise<RoomAnalyticsSongsDto> {
+	// 	console.log(
+	// 		"Getting room analytics for room",
+	// 		roomID,
+	// 		" and given userID: ",
+	// 		userID,
+	// 	);
+	// 	return new RoomAnalyticsSongsDto();
+	// }
 
-	async getRoomContributorsAnalytics(
-		roomID: string,
-		userID: string,
-	): Promise<RoomAnalyticsContributorsDto> {
-		console.log(
-			"Getting room analytics for room",
-			roomID,
-			" and given userID: ",
-			userID,
-		);
-		return new RoomAnalyticsContributorsDto();
-	}
+	// async getRoomContributorsAnalytics(
+	// 	roomID: string,
+	// 	userID: string,
+	// ): Promise<RoomAnalyticsContributorsDto> {
+	// 	console.log(
+	// 		"Getting room analytics for room",
+	// 		roomID,
+	// 		" and given userID: ",
+	// 		userID,
+	// 	);
+	// 	return new RoomAnalyticsContributorsDto();
+	// }
 
 	async getKeyMetrics(
 		userID: string,
