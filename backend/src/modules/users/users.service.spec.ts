@@ -1142,4 +1142,36 @@ describe("UsersService follow function", () => {
 			);
 		});
 	});
+	describe("calculatePopularity", () => {
+		it("should return the correct popularity score", async () => {
+			const mockUserID = "userID1";
+			const mockFollowers: PrismaTypes.users[] = [
+				{ user_id: "follower1" } as PrismaTypes.users,
+				{ user_id: "follower2" } as PrismaTypes.users,
+			];
+			const mockFollowing: PrismaTypes.users[] = [
+				{ user_id: "following1" } as PrismaTypes.users,
+			];
+			const mockUsers: PrismaTypes.users[] = [
+				{ user_id: "user1" } as PrismaTypes.users,
+				{ user_id: "user2" } as PrismaTypes.users,
+				{ user_id: "user3" } as PrismaTypes.users,
+			];
+
+			jest
+				.spyOn(dbUtilsService, "getUserFollowers")
+				.mockResolvedValue(mockFollowers);
+			jest
+				.spyOn(dbUtilsService, "getUserFollowing")
+				.mockResolvedValue(mockFollowing);
+			jest.spyOn(prismaService.users, "findMany").mockResolvedValue(mockUsers);
+
+			const result = await usersService.calculatePopularity(mockUserID);
+
+			const expectedPopularity =
+				(mockFollowers.length / (mockFollowing.length + 1)) *
+				Math.log(mockUsers.length);
+			expect(result).toBe(expectedPopularity);
+		});
+	});
 });
