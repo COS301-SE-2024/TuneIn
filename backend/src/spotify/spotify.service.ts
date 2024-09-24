@@ -101,33 +101,24 @@ export class SpotifyService {
 		}
 
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		let total = Number.MAX_SAFE_INTEGER;
-		let retrieved = 0;
-		const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
-		while (retrieved < total) {
-			const playlists = await api.currentUser.playlists.playlists(
-				50,
-				retrieved,
-			);
-			if (total === Number.MAX_SAFE_INTEGER) {
-				total = playlists.total;
-			}
-			playlists.items.forEach((playlist) => {
-				console.log(playlist.name);
-			});
-			userPlaylists.push(...playlists.items);
-			retrieved += playlists.items.length;
-			await sleep(1000);
+		const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
+			await api.currentUser.playlists.playlists();
+		const total = initialPlaylistsFetch.total;
+		const promises = [];
+		let i = 0;
+		while (i < total) {
+			const p = api.currentUser.playlists.playlists(50, i);
+			promises.push(p);
+			i += 50;
+			await this.wait(500); // for rate limiting
 		}
-
-		//dedupe
-		const seen = new Set();
-		const userPlaylistsDeduped = userPlaylists.filter((el) => {
-			const duplicate = seen.has(el.id);
-			seen.add(el.id);
-			return !duplicate;
-		});
-		return userPlaylistsDeduped;
+		const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
+			await Promise.all(promises);
+		const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
+		for (const p of playlists) {
+			userPlaylists.push(...p.items);
+		}
+		return userPlaylists;
 	}
 
 	async getPlaylistTracks(
