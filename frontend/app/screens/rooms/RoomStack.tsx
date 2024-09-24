@@ -133,7 +133,6 @@ function MyRoomTabs() {
 			live.leaveRoom();
 			setJoinedSongIndex(null);
 			setJoinedSecondsPlayed(null);
-			// 	//playbackManager.pause();
 			const deviceID = await playback.getFirstDevice();
 			if (deviceID && deviceID !== null) {
 				playback.handlePlayback("pause", deviceID);

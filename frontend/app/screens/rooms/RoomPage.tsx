@@ -12,8 +12,6 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	Animated,
-	Dimensions,
-	Easing,
 	Alert,
 	ToastAndroid,
 } from "react-native";
@@ -23,20 +21,14 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Bookmarker from "./functions/Bookmarker";
-import CurrentRoom from "./functions/CurrentRoom";
 import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
-import { live, LiveMessage } from "../../services/Live";
+import { live } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
-import { ObjectConfig } from "react-native-flying-objects";
-import EmojiPicker, {
-	EmojiPickerRef,
-} from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
-import * as path from "path";
 
 interface RoomPageProps {
 	joined: boolean;
@@ -85,14 +77,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-	const [isChatExpanded, setChatExpanded] = useState(false);
-	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-		null,
-	);
-	const [isSending, setIsSending] = useState(false);
 	const [participants, setParticipants] = useState<any[]>([]);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
@@ -101,21 +85,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
-	};
-
-	//Emoji picker
-	const [object, setObject] = useState<ObjectConfig[]>([]);
-	const emojiPickerRef = useRef<EmojiPickerRef>(null);
-
-	const handleSelectEmoji = (emoji: string) => {
-		setObject((prev) => [
-			...prev,
-			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
-		]);
-	};
-
-	const passEmojiToTextField = (emoji: string) => {
-		emojiPickerRef.current?.passEmojiToTextField(emoji);
 	};
 
 	const checkBookmark = useCallback(async () => {
@@ -135,9 +104,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	const handleBookmark = async () => {
 		live.startPlayback(roomID);
-
-		// make a request to the backend to check if the room is bookmarked
-		// if it is bookmarked, set isBookmarked to true
 		setIsBookmarked(!isBookmarked);
 		const token = await auth.getToken();
 
@@ -168,161 +134,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		const formattedRoom = formatRoomData(roomData);
 		setJoined(true);
 		setCurrentRoom(formattedRoom);
-		// if (userRef.current && socket.current) {
-		// 	const u: UserDto = userRef.current;
-		// 	const input: ChatEventDto = {
-		// 		userID: u.userID,
-		// 		body: {
-		// 			messageBody: "",
-		// 			sender: u,
-		// 			roomID: roomID,
-		// 			dateCreated: new Date(),
-		// 		},
-		// 	};
-		// 	socket.current.emit("joinRoom", JSON.stringify(input));
-		//
-		// }
 	}, [roomData, setCurrentRoom]);
-
-	const leaveRoom = () => {
-		// if (userRef.current && socket.current) {
-		// 	const u: UserDto = userRef.current;
-		// 	const input: ChatEventDto = {
-		// 		userID: u.userID,
-		// 		body: {
-		// 			messageBody: "",
-		// 			sender: u,
-		// 			roomID: roomID,
-		// 			dateCreated: new Date(),
-		// 		},
-		// 	};
-		// 	console.log("Socket emit: leaveRoom", input);
-		// 	socket.current.emit("leaveRoom", JSON.stringify(input));
-		// 	setJoined(false);
-
-		// }
-		setCurrentRoom(null);
-	};
-	//init & connect to socket
-	// useEffect(() => {
-	// 	const getTokenAndSelf = async () => {
-	// 		const storedToken = await auth.getToken();
-	// 		console.log("token:", token);
-	// 		token.current = storedToken;
-	// 		console.log("Stored token:", token.current);
-	// 		try {
-	// 			const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-	// 				headers: {
-	// 					Authorization: `Bearer ${storedToken}`,
-	// 				},
-	// 			});
-	// 			userRef.current = response.data as UserDto;
-	// 		} catch (error) {
-	// 			console.error("Error fetching user's own info:", error);
-	// 		}
-
-	// 		try {
-	// 			const roomDto = await axios.get(
-	// 				`${utils.API_BASE_URL}/rooms/${roomID}`,
-	// 				{
-	// 					headers: {
-	// 						Authorization: `Bearer ${storedToken}`,
-	// 					},
-	// 				},
-	// 			);
-	// 			roomObjRef.current = roomDto.data;
-	// 		} catch (error) {
-	// 			console.error("Error fetching room:", error);
-	// 		}
-	// 	};
-
-	// 	const setupSocketEventHandlers = () => {
-	// 		console.log("Setting up socket event handlers...");
-	// 		if (socket.current) {
-	// 			socket.current.on("userJoinedRoom", (response: ChatEventDto) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					console.log("User joined room:", response);
-	// 					const input: ChatEventDto = {
-	// 						userID: u.userID,
-	// 						body: {
-	// 							messageBody: "",
-	// 							sender: u,
-	// 							roomID: roomID,
-	// 							dateCreated: new Date(),
-	// 						},
-	// 					};
-
-	// 					console.log("Socket emit: getChatHistory", input);
-	// 					if (socket.current)
-	// 						socket.current.emit("getChatHistory", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("chatHistory", (history: LiveChatMessageDto[]) => {
-	// 				const u = userRef.current;
-	// 				if (u) {
-	// 					const chatHistory = history.map((msg) => ({
-	// 						message: msg,
-	// 						me: msg.sender.userID === u.userID,
-	// 					}));
-	// 					setMessages(chatHistory);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("liveMessage", (newMessage: ChatEventDto) => {
-	// 				console.log("Received live message:", newMessage);
-	// 				const message = newMessage.body;
-	// 				const u = userRef.current;
-	// 				if (message && u) {
-	// 					const me: boolean = message.sender.userID === u.userID;
-	// 					if (me) {
-	// 						setMessage("");
-	// 					}
-	// 					setMessages((prevMessages) => [
-	// 						...prevMessages,
-	// 						{ message, me: message.sender.userID === u.userID },
-	// 					]);
-	// 				}
-	// 			});
-
-	// 			socket.current.on("userLeftRoom", (response: ChatEventDto) => {
-	// 				console.log("User left room:", response);
-	// 			});
-
-	// 			socket.current.on("error", (response: ChatEventDto) => {
-	// 				console.error("Error:", response.errorMessage);
-	// 			});
-	// 		}
-
-	// 		if (socket.current) {
-	// 			socket.current.on("connect", () => {
-	// 				if (userRef.current) {
-	// 					const input: ChatEventDto = {
-	// 						userID: userRef.current.userID,
-	// 					};
-	// 					if (socket.current)
-	// 						socket.current.emit("connectUser", JSON.stringify(input));
-	// 				}
-	// 			});
-
-	// 			socket.current.on("connected", (response: ChatEventDto) => {
-	// 				if (!joined && readyToJoinRoom) {
-	// 					// joinRoom();
-	// 				}
-	// 			});
-	// 		}
-	// 	};
-
-	// 	getTokenAndSelf();
-	// 	checkBookmark();
 
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
-	const collapsedHeight = 60;
-	const screenHeight = Dimensions.get("window").height;
-	const expandedHeight = screenHeight - 350;
-	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	useEffect(() => {
 		const fetchQueue = async () => {
@@ -451,49 +266,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		};
 	}, [isPlaying]);
 
-	// const handleJoinLeave = async () => {
-	// 	console.log("Joining/Leaving room...", joined);
-	// 	setJoined((prevJoined) => !prevJoined);
-	// 	if (!joined) {
-	// 		// joinRoom();
-	// 		const token = await auth.getToken();
-	// 		currentRoom.leaveJoinRoom(token as string, roomID, false);
-	// 		setJoined(true);
-	// 		live.joinRoom(roomID, setJoined, setMessages, setMessage);
-	// 		//setJoined(true);
-	// 		setJoinedSongIndex(currentTrackIndex);
-	// 		setJoinedSecondsPlayed(secondsPlayed);
-	// 		console.log(
-	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-	// 		);
-	// 	} else {
-	// 		const token = await auth.getToken();
-	// 		currentRoom.leaveJoinRoom(token as string, roomID, true);
-	// 		// leaveRoom();
-	// 		setJoined(false);
-	// 		playbackManager.pause();
-	// 		//leaveRoom();
-	// 		live.leaveRoom();
-	// 		//setJoined(false);
-	// 		setJoinedSongIndex(null);
-	// 		setJoinedSecondsPlayed(null);
-	// 		//playbackManager.pause();
-	// 		const deviceID = await playback.getFirstDevice();
-	// 		if (deviceID && deviceID !== null) {
-	// 			playback.handlePlayback(deviceID, "pause");
-	// 		}
-	// 		setIsPlaying(false);
-	// 	}
-	// };
-
 	const playPauseTrack = useCallback(
 		async (index: number, offset: number) => {
-			/*
-			playbackManager.playPauseTrack(queue[index], index, offset);
-			setCurrentTrackIndex(index);
-			setIsPlaying(playbackManager.getIsPlaying());
-			setSecondsPlayed(playbackManager.getSecondsPlayed());
-			*/
 			if (live.canControlRoom()) {
 				if (playback.isPlaying()) {
 					live.startPlayback(roomID);
@@ -502,51 +276,19 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				}
 				setCurrentTrackIndex(index);
 				setIsPlaying(playback.isPlaying());
-				//setSecondsPlayed(playbackManager.getSecondsPlayed());
 			}
 		},
-		//[queue, playbackManager],
 		[playback, roomID],
 	);
 
 	const playNextTrack = () => {
-		/*
-		playbackManager.playPreviousTrack();
-		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
-		*/
 		if (live.canControlRoom()) {
 		}
 	};
 
 	const playPreviousTrack = () => {
-		/*
-		playbackManager.playPreviousTrack();
-		setCurrentTrackIndex(playbackManager.getCurrentTrackIndex());
-		*/
 		if (live.canControlRoom()) {
 		}
-	};
-
-	const toggleChat = () => {
-		Animated.timing(animatedHeight, {
-			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
-			duration: 300,
-			easing: Easing.ease,
-			useNativeDriver: false,
-		}).start();
-		setChatExpanded(!isChatExpanded);
-	};
-
-	const navigateToPlaylist = () => {
-		router.navigate({
-			pathname: "/screens/rooms/Playlist",
-			params: {
-				queue: JSON.stringify(queue),
-				currentTrackIndex,
-				Room_id: roomID,
-				mine: roomData.mine,
-			},
-		});
 	};
 
 	const handleViewParticipants = () => {
@@ -558,41 +300,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		}); // Change this to the correct page for participants
 	};
 
-	// const handleJoinLeave = async () => {
-	// 	console.log("joined", joined);
-	// 	setJoined(!joined);
-	// 	const token = await auth.getToken();
-	// 	console.log("Token fr fr:", token);
-	// 	if (!joined) {
-	// 		if (!token) {
-	// 			throw new Error("No token found");
-	// 		}
-	// 		console.log("Joining room........", roomID, token);
-	// 		roomCurrent.leaveJoinRoom(token, roomID, false);
-	// 		joinRoom();
-	// 		live.joinRoom(roomID, setJoined, setMessages);
-	// 		setJoined(true);
-	// 		setJoinedSongIndex(currentTrackIndex);
-	// 		setJoinedSecondsPlayed(secondsPlayed);
-	// 		console.log(
-	// 			`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-	// 		);
-	// 	} else {
-	// 		leaveRoom();
-	// 		setJoined(false);
-	// 		roomCurrent.leaveJoinRoom(token as string, roomID, true);
-	// 		live.leaveRoom();
-	// 		setJoinedSongIndex(null);
-	// 		setJoinedSecondsPlayed(null);
-	// 		//playbackManager.pause();
-	// 		const deviceID = await playback.getFirstDevice();
-	// 		if (deviceID && deviceID !== null) {
-	// 			playback.handlePlayback("pause", deviceID);
-	// 		}
-	// 		setIsPlaying(false);
-	// 	}
-	// };
-
 	if (!readyToJoinRoom) {
 		setReadyToJoinRoom(true);
 		console.log("Ready to join room...");
@@ -602,16 +309,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		if (readyToJoinRoom && !joined) {
 			console.log("Joining room...");
 			console.log(readyToJoinRoom, joined);
-			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
 	}, [readyToJoinRoom, joined, roomID]);
-
-	const sendMessage = () => {
-		if (isSending) return;
-		setIsSending(true);
-		live.sendLiveChatMessage(message, setIsSending);
-		setMessage("");
-	};
 
 	const exampleTrack: SongRoomWidget = {
 		name: "Song Title",
@@ -627,27 +326,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	return (
 		<View style={styles.container}>
-			{/* <Image
-				source={{ uri: roomData.backgroundImage }}
-				style={styles.backgroundImage}
-			/> */}
-			{/* <LinearGradient
-				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
-				style={styles.gradientOverlay}
-			/> */}
-
 			<View style={styles.contentContainer}>
-				{/* <View style={styles.roomDetails}>
-					<Text style={styles.roomName}>{roomData.name}</Text>
-					<Text style={styles.description}>{roomData.description}</Text>
-					<View style={styles.tagsContainer}>
-						{roomData.tags.map((tag: string, index: number) => (
-							<Text key={index} style={styles.tag}>
-								{tag}
-							</Text>
-						))}
-					</View>
-				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
@@ -696,14 +375,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						))}
 					</Text>
 				</View>
-				{/* <SongRoomWidget
-					songName="Eternal Sunshine"
-					artist="Ariana Grande"
-					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
-					progress={0.5}
-					time1="1:30"
-					time2="3:00"
-				/> */}
 
 				{roomData.mine ? (
 					<View style={styles.controls}>
@@ -733,14 +404,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				) : (
 					<View></View>
 				)}
-
-				{/* <TouchableOpacity
-					style={styles.queueButton}
-					onPress={navigateToPlaylist}
-				>
-					<MaterialIcons name="queue-music" size={55} color="Black" />
-					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -805,102 +468,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					</View>
 				</View>
 			</View>
-
-			{/* <Animated.View
-				style={{
-					position: "absolute",
-					bottom: 0,
-					left: 0,
-					right: 0,
-					height: animatedHeight,
-					backgroundColor: "#E8EBF2",
-					borderTopLeftRadius: 20,
-					borderTopRightRadius: 20,
-					elevation: 5,
-					paddingHorizontal: 10,
-					paddingTop: 10,
-				}}
-			>
-				<TouchableOpacity
-					onPress={toggleChat}
-					style={{
-						flexDirection: "row",
-						justifyContent: "space-between",
-						alignItems: "center",
-						paddingBottom: 10,
-					}}
-				>
-					<Text style={{ fontSize: 18, fontWeight: "bold" }}>
-						{isChatExpanded ? "Hide Chat" : "Show Chat"}
-					</Text>
-					<MaterialIcons
-						name={isChatExpanded ? "keyboard-arrow-down" : "keyboard-arrow-up"}
-						size={34}
-						style={{ marginLeft: 10 }}
-					/>
-				</TouchableOpacity>
-				{isChatExpanded && (
-					<>
-						<View style={styles.container}>
-							<ScrollView style={{ flex: 1, marginTop: 10 }}>
-								{messages.map((msg, index) => (
-									<MemoizedCommentWidget
-										key={index}
-										username={msg.message.sender.username}
-										message={msg.message.messageBody}
-										profilePictureUrl={msg.message.sender.profile_picture_url}
-										me={msg.me}
-									/>
-								))}
-							</ScrollView>
-							<FlyingView
-								object={object}
-								containerProps={{
-									style: styles.flyingView,
-								}}
-							/>
-						</View>
-						<KeyboardAvoidingView
-							behavior={Platform.OS === "ios" ? "padding" : "height"}
-							keyboardVerticalOffset={90}
-						>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-									marginBottom: 10,
-								}}
-							>
-								<TextInput
-									style={{
-										flex: 1,
-										borderWidth: 1,
-										borderColor: "#ccc",
-										borderRadius: 20,
-										paddingHorizontal: 10,
-										paddingVertical: 5,
-									}}
-									placeholder="Type your message..."
-									value={message}
-									onChangeText={setMessage}
-									onSubmitEditing={sendMessage}
-								/>
-
-								<EmojiPicker
-									ref={emojiPickerRef}
-									onSelectEmoji={handleSelectEmoji}
-								/>
-								<TouchableOpacity
-									onPress={sendMessage}
-									style={{ marginLeft: 10 }}
-								>
-									<MaterialIcons name="send" size={24} color="#007AFF" />
-								</TouchableOpacity>
-							</View>
-						</KeyboardAvoidingView>
-					</>
-				)}
-			</Animated.View> */}
 		</View>
 	);
 };
@@ -909,7 +476,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		position: "relative",
-		// marginHorizontal: 10,
 		backgroundColor: "white",
 	},
 	scrollView: {

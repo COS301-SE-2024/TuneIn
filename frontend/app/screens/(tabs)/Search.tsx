@@ -541,13 +541,6 @@ const Search: React.FC = () => {
 		<GestureHandlerRootView>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => navigation.goBack()}
-						testID="back-button"
-						style={styles.backButton} // Optional to add padding or margin
-					>
-						<Ionicons name="chevron-back" size={30} color="black" />
-					</TouchableOpacity>
 					<Text style={styles.title}>Search</Text>
 				</View>
 				<View style={styles.searchBarContainer}>
@@ -731,8 +724,8 @@ const styles = StyleSheet.create({
 		right: 0, // Centers the text horizontally
 	},
 	backButton: {
-		position: "absolute", // Keeps the back button aligned to the left
-		left: 10, // Adjust this for your desired padding
+		position: "absolute",
+		left: 10,
 	},
 	searchBarContainer: {
 		flexDirection: "row",
