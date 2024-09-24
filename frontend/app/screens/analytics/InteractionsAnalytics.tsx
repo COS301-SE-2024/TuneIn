@@ -99,13 +99,17 @@ const InteractionsAnalytics: React.FC = () => {
 				);
 				if (response.ok) {
 					const data = await response.json();
+					console.log("interaction analytics", data);
 					setInteractionAnalytics(data);
 				} else {
 					console.error("Failed to fetch interaction analytics");
 				}
 			} catch (error) {
 				console.log("Failed to fetch interaction analytics", error);
-				ToastAndroid.show("Failed to load interaction analytics", ToastAndroid.SHORT);
+				ToastAndroid.show(
+					"Failed to load interaction analytics",
+					ToastAndroid.SHORT,
+				);
 			}
 		};
 
