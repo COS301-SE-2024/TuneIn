@@ -396,6 +396,21 @@ export const mockPrismaService = {
 		updateMany: jest.fn(),
 		upsert: jest.fn(),
 	},
+	favorite_genres: {
+		create: jest.fn(),
+		createMany: jest.fn(),
+		createManyAndReturn: jest.fn(),
+		delete: jest.fn(),
+		deleteMany: jest.fn(),
+		findUnique: jest.fn(),
+		findUniqueOrThrow: jest.fn(),
+		findFirst: jest.fn(),
+		findFirstOrThrow: jest.fn(),
+		findMany: jest.fn(),
+		update: jest.fn(),
+		updateMany: jest.fn(),
+		upsert: jest.fn(),
+	},
 };
 
 export const mockDtoGenService = {
