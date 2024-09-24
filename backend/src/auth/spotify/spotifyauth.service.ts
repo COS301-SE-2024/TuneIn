@@ -357,7 +357,7 @@ export class SpotifyAuthService {
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
-			//await this.tasksService.addImportLibraryTask(tk, response.user_id);
+			await this.tasksService.addImportLibraryTask(tk, response.user_id);
 			return response;
 		} catch (err) {
 			console.log(err);

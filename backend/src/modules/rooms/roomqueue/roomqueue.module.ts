@@ -6,6 +6,7 @@ import { DbUtilsModule } from "../../db-utils/db-utils.module";
 import { SpotifyModule } from "../../../spotify/spotify.module";
 import { SpotifyAuthModule } from "../../../auth/spotify/spotifyauth.module";
 import { MurLockModule } from "murlock";
+import { TasksModule } from "../../../tasks/tasks.module";
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import { MurLockModule } from "murlock";
 		SpotifyModule,
 		SpotifyAuthModule,
 		MurLockModule,
+		TasksModule,
 	],
 	providers: [RoomQueueService],
 	exports: [RoomQueueService],

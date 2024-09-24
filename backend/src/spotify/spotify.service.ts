@@ -21,6 +21,7 @@ export class SpotifyService {
 	private clientSecret;
 	private redirectUri;
 	private authHeader;
+	private userlessAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -51,6 +52,15 @@ export class SpotifyService {
 		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
 			"base64",
 		);
+
+		this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
+			this.clientId,
+			this.clientSecret,
+		);
+	}
+
+	async wait(ms: number) {
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
@@ -59,13 +69,28 @@ export class SpotifyService {
 		return user;
 	}
 
-	async getAudioFeatures(
-		token: SpotifyTokenResponse,
-		songID: string,
-	): Promise<Spotify.AudioFeatures> {
-		const api = SpotifyApi.withAccessToken(this.clientId, token);
-		const audioFeatures = await api?.tracks?.audioFeatures(songID);
+	async getAudioFeatures(spotifyID: string): Promise<Spotify.AudioFeatures> {
+		const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
+			spotifyID,
+		);
 		return audioFeatures;
+	}
+
+	async getManyAudioFeatures(
+		spotifyIDs: string[],
+	): Promise<Spotify.AudioFeatures[]> {
+		const promises: Promise<Spotify.AudioFeatures[]>[] = [];
+		for (let i = 0; i < spotifyIDs.length; i += 100) {
+			const ids = spotifyIDs.slice(i, i + 100);
+			promises.push(this.userlessAPI.tracks.audioFeatures(ids));
+			await this.wait(500); // for rate limiting
+		}
+		const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
+		const features: Spotify.AudioFeatures[] = [];
+		for (const result of results) {
+			features.push(...result);
+		}
+		return features;
 	}
 
 	async getUserPlaylists(
