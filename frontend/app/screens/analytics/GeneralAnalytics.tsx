@@ -84,45 +84,34 @@ const GeneralAnalytics: React.FC = () => {
 
 	// fetch data from the analytics/participation endpoint for the selected room and store it in generalAnalytics
 	const rooms = userRooms.map((room) => room.room_name);
-	console.log("mapped rooms", rooms);
-
-	// Sample data for the horizontal bar graph
-	console.log("rooms fr this time", userRooms);
-	const datah = [
-		{ label: "Room A fr", value: 562 },
-		{ label: "Room B", value: 747 },
-		{ label: "Room C", value: 191 },
-		{ label: "Room D", value: 435 },
-		{ label: "Room E", value: 85 },
-		{ label: "Room F", value: 241 },
-	];
 	const uniqueJoinsPerDay =
 		generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
 			return {
-				label: join.day,
+				label: join.day.substring(5, 10),
 				value: join.count,
 			};
 		}) ?? [];
 	const totalJoinsPerDay =
 		generalAnalytics?.joins?.per_day?.total_joins?.map((join: any) => {
 			return {
-				label: join.day,
+				label: join.day.substring(5, 10),
 				value: join.count,
 			};
 		}) ?? [];
 	const sessionDurationAverages =
 		generalAnalytics?.session_data?.per_day?.map((session: any) => {
 			return {
-				label: session.day,
+				label: session.day.substring(5, 10),
 				value: session.avg_duration,
 			};
 		}) ?? [];
 
 	const headers = ["Statistic", "Value"];
 	const toTime = (time: number) => {
-		const hours = Math.floor(time / 60);
-		const minutes = Math.floor(time % 60);
-		const seconds = Math.floor((time % 1) * 60);
+		// time is in ms
+		const seconds = Math.floor(time / 1000) % 60;
+		const minutes = Math.floor(time / (1000 * 60)) % 60;
+		const hours = Math.floor(time / (1000 * 60 * 60));
 		let result = "";
 		if (hours > 0) {
 			result += `${hours}h `;
