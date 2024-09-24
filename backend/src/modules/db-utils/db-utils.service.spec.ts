@@ -656,4 +656,87 @@ describe("DbUtilsService", () => {
 			expect(result).toEqual([{ user_id: "userA" }, { user_id: "userB" }]);
 		});
 	});
+	describe("getUserFriends", () => {
+		it("should return an array of user friends", async () => {
+			const mockUserID = "user-1";
+			const mockFriends: PrismaTypes.friends[] = [
+				{
+					friend1: mockUserID,
+					friend2: "user-2",
+					is_pending: false,
+				} as unknown as PrismaTypes.friends,
+				{
+					friend1: "user-3",
+					friend2: mockUserID,
+					is_pending: false,
+				} as unknown as PrismaTypes.friends,
+			];
+			const mockUsers: PrismaTypes.users[] = [
+				{ user_id: "user-2", full_name: "User 2" } as PrismaTypes.users,
+				{ user_id: "user-3", full_name: "User 3" } as PrismaTypes.users,
+			];
+
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(mockFriends);
+			jest
+				.spyOn(mockPrismaService.users, "findMany")
+				.mockResolvedValueOnce(mockUsers);
+
+			const result = await service.getUserFriends(mockUserID);
+
+			expect(result).toEqual(mockUsers);
+			expect(mockPrismaService.friends.findMany).toHaveBeenCalledWith({
+				where: {
+					OR: [
+						{ friend1: mockUserID, is_pending: false },
+						{ friend2: mockUserID, is_pending: false },
+					],
+					is_pending: false,
+				},
+			});
+			expect(mockPrismaService.users.findMany).toHaveBeenCalledWith({
+				where: { user_id: { in: ["user-2", "user-3"] } },
+			});
+		});
+
+		it("should throw an error if no friends are found", async () => {
+			const mockUserID = "user-1";
+
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(null);
+
+			await expect(service.getUserFriends(mockUserID)).rejects.toThrow(
+				"No friends found.",
+			);
+		});
+
+		it("should throw an error if no users are found", async () => {
+			const mockUserID = "user-1";
+			const mockFriends: PrismaTypes.friends[] = [
+				{
+					friend1: mockUserID,
+					friend2: "user-2",
+					is_pending: false,
+				} as unknown as PrismaTypes.friends,
+				{
+					friend1: "user-3",
+					friend2: mockUserID,
+					is_pending: false,
+				} as unknown as PrismaTypes.friends,
+			];
+
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(mockFriends);
+			jest
+				.spyOn(mockPrismaService.users, "findMany")
+				.mockResolvedValueOnce(null);
+
+			await expect(service.getUserFriends(mockUserID)).rejects.toThrow(
+				"No friends found.",
+			);
+		});
+	});
 });
