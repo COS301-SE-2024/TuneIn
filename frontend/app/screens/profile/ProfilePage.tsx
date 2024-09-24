@@ -29,6 +29,7 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
+import { Friend } from "../../models/friend";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -69,9 +70,14 @@ const ProfileScreen: React.FC = () => {
 	const [recentRoomData, setRecentRoomData] = useState<any>(null);
 	const [favoriteRoomData, setFavoriteRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
+	const [friends, setFriends] = useState<Friend[]>([]);
+	const [potentialFriends, setPotentialFriends] = useState<Friend[]>([]);
+	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
+	const [requests, setRequests] = useState<Friend[]>([]);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [favRoomError, setFavRoomError] = useState<boolean>(false);
 	const [recentRoomError, setRecentRoomError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState<boolean>(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -149,7 +155,18 @@ const ProfileScreen: React.FC = () => {
 							storedToken,
 							parsedFriend.username,
 						);
+						
 						setPrimProfileData(data);
+
+						const fData = await getFriends(storedToken);
+						const potFData = await getPotentialFriends(storedToken);
+						const penFData = await getPendingRequests(storedToken);
+						const reqFData = await getFriendRequests(storedToken);
+
+						setFriends(fData);
+						setPotentialFriends(potFData);
+						setPendingRequests(penFData);
+						setRequests(reqFData);
 
 						if (recentRoomData === null) {
 							fetchRecentRoomInfo(data.username);
@@ -318,6 +335,104 @@ const ProfileScreen: React.FC = () => {
 			} else {
 				console.log("Error fetching current room info:", error);
 			}
+		}
+	};
+
+	const getFriends = async (token: string): Promise<Friend[]> => {
+		const _token = await auth.getToken();
+		try {
+			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
+				headers: { Authorization: `Bearer ${_token}` },
+			});
+			const mappedFriends: Friend[] = response.data.map((friend: any) => ({
+				profile_picture_url: friend.profile_picture_url,
+				friend_id: friend.userID,
+				username: friend.username,
+				relationship: friend.relationship,
+			}));
+			setFriendError(false);
+			console.log("Friends: " + JSON.stringify(mappedFriends));
+
+			return mappedFriends;
+		} catch (error) {
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/potential`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPotentialFriends: Friend[] = response.data.map(
+				(friend: any) => ({
+					profile_picture_url: friend.profile_picture_url,
+					friend_id: friend.userID,
+					username: friend.username,
+					relationship: "mutual",
+				}),
+			);
+			setFriendError(false);
+			console.log("Potential Friends: " + JSON.stringify(mappedPotentialFriends));
+
+			return mappedPotentialFriends;
+		} catch (error) {
+			console.log("Error fetching potential friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getPendingRequests = async (token: string): Promise<Friend[]> => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/pending`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPendingRequests: Friend[] = response.data.map(
+				(request: any) => ({
+					profile_picture_url: request.profile_picture_url,
+					friend_id: request.userID,
+					username: request.username,
+					relationship: "pending",
+				}),
+			);
+			setFriendError(false);
+			console.log("Pending requests:", JSON.stringify(mappedPendingRequests));
+
+			return mappedPendingRequests;
+		} catch (error) {
+			console.log("Error fetching pending requests:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getFriendRequests = async (token: string): Promise<Friend[]> => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/requests`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedRequests: Friend[] = response.data.map((request: any) => ({
+				profile_picture_url: request.profile_picture_url,
+				friend_id: request.userID,
+				username: request.username,
+			}));
+			setFriendError(false);
+			console.log("Friend requests: " + JSON.stringify(mappedRequests));	
+
+			return mappedRequests;
+		} catch (error) {
+			console.log("Error fetching friend requests:", error);
+			setFriendError(true);
+			return [];
 		}
 	};
 
