@@ -82,7 +82,7 @@ export class RoomAnalyticsService {
 			count: number;
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
-				COUNT("user_id") as count
+				COUNT("user_id")::INTEGER as count
 			FROM "user_activity"
 			WHERE room_id = ${roomID}::UUID
 			GROUP BY day, room_id
@@ -93,7 +93,7 @@ export class RoomAnalyticsService {
 			count: number;
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', "room_join_time") AS day,
-				COUNT(DISTINCT "user_id") as count
+				COUNT(DISTINCT "user_id")::INTEGER as count
 			FROM "user_activity"
 			WHERE room_id = ${roomID}::UUID
 			GROUP BY day, room_id
@@ -193,9 +193,9 @@ export class RoomAnalyticsService {
 			day: Date;
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', room_join_time) AS day,
-				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS avg_duration,
-				MIN(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS min_duration,
-				MAX(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) AS max_duration
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS avg_duration,
+				MIN(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS min_duration,
+				MAX(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS max_duration
 			FROM "user_activity"
 			WHERE room_id = ${roomID}::UUID
 			GROUP BY day, room_id
@@ -270,7 +270,7 @@ export class RoomAnalyticsService {
 		sessionData.per_day = sessionDurations
 			.map((session) => ({
 				...session,
-				duration: session.avg_duration,
+				duration: Number(session.avg_duration),
 			}))
 			.sort((a, b) => a.day.getTime() - b.day.getTime());
 		return sessionData;
@@ -283,12 +283,13 @@ export class RoomAnalyticsService {
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
 		console.log("Today", today, "Yesterday", yesterday);
+		//type cast count in the query to number
 		const userActivityPerHour: {
 			hour: Date;
 			count: number;
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('hour', room_join_time) AS hour,
-				COUNT("user_id") as count
+				COUNT("user_id")::INTEGER as count
 			FROM "user_activity"
 			WHERE room_id = ${roomID}::UUID
 			AND room_join_time > ${yesterday}
@@ -381,14 +382,26 @@ export class RoomAnalyticsService {
 			await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour =
 			await this.getHourlyParticipantAnalytics(roomID);
+		console.log(
+			"Room analytics participation, participant per hour",
+			roomAnalyticsParticipation.participants_per_hour,
+		);
 		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(
 			roomID,
+		);
+		console.log(
+			"Room analytics participation, room previews",
+			roomAnalyticsParticipation.room_previews,
 		);
 		roomAnalyticsParticipation.return_visits =
 			await this.getReturnVisitsAnalytics(
 				roomID,
 				roomAnalyticsParticipation.joins.all_time.total_joins,
 			);
+		console.log(
+			"Room analytics participation, return visits",
+			roomAnalyticsParticipation.return_visits,
+		);
 		return roomAnalyticsParticipation;
 	}
 
@@ -405,7 +418,7 @@ export class RoomAnalyticsService {
 			user_id: string;
 		}[] = await this.prisma.$queryRaw`
 		SELECT
-			COUNT(user_id) as user_count,
+			COUNT(user_id)::INTEGER as user_count,
 			user_id
 		FROM
 			user_activity
@@ -424,8 +437,8 @@ export class RoomAnalyticsService {
 			result
 				.map((r: any) => Number(r.user_count))
 				.reduce((a: number, b: number) => a + b, 0) / result.length;
-		returnVisits.probability_of_return = returnCount / totalVisits;
-		returnVisits.expected_return_count = averageVisits;
+		returnVisits.probability_of_return = Number(returnCount / totalVisits);
+		returnVisits.expected_return_count = Number(averageVisits);
 		return returnVisits;
 	}
 
@@ -452,7 +465,7 @@ export class RoomAnalyticsService {
 			count: number;
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('hour', date_sent) AS hour,
-				COUNT(message.message_id) as count
+				COUNT(message.message_id)::INTEGER as count
 			FROM "message"
 			INNER JOIN room_message ON room_message.message_id = message.message_id
 			WHERE room_id = ${roomID}::UUID
@@ -777,7 +790,7 @@ export class RoomAnalyticsService {
 		const uniqueVisitorsYesterday: { count: number }[] = await this.prisma
 			.$queryRaw(Prisma.sql`
 			SELECT
-				COUNT(DISTINCT user_id) as count
+				COUNT(DISTINCT user_id)::INTEGER as count
 			FROM
 				user_activity
 			WHERE
@@ -790,7 +803,7 @@ export class RoomAnalyticsService {
 		const uniqueVisitorsToday: { count: number }[] = await this.prisma
 			.$queryRaw(Prisma.sql`
 			SELECT
-				COUNT(DISTINCT user_id) as count
+				COUNT(DISTINCT user_id)::INTEGER as count
 			FROM
 				user_activity
 			WHERE
@@ -844,7 +857,7 @@ export class RoomAnalyticsService {
 		const averageSessionDurationYesterday: { avg_duration: number }[] =
 			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
-				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
 			FROM
 				user_activity
 			WHERE
@@ -854,7 +867,7 @@ export class RoomAnalyticsService {
 		const averageSessionDurationToday: { avg_duration: number }[] = await this
 			.prisma.$queryRaw(Prisma.sql`
 			SELECT
-				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
 			FROM
 				user_activity
 			WHERE
@@ -865,7 +878,7 @@ export class RoomAnalyticsService {
 		const averageSessionDurationAllTime: { avg_duration: number }[] = await this
 			.prisma.$queryRaw(Prisma.sql`
 			SELECT
-				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time))) as avg_duration
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
 			FROM
 				user_activity
 			WHERE
@@ -918,7 +931,7 @@ export class RoomAnalyticsService {
 		const returningVisitorsYesterday: { count: number; user_id: string }[] =
 			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
-				COUNT(user_id) as count,
+				COUNT(user_id)::INTEGER as count,
 				user_id
 			FROM
 				user_activity
@@ -933,7 +946,7 @@ export class RoomAnalyticsService {
 		const returningVisitorsToday: { count: number; user_id: string }[] =
 			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
-				COUNT(user_id) as count,
+				COUNT(user_id)::INTEGER as count,
 				user_id
 			FROM
 				user_activity
