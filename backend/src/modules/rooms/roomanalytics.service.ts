@@ -697,9 +697,10 @@ export class RoomAnalyticsService {
 		const keyMetrics: RoomAnalyticsKeyMetricsDto =
 			new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID, period);
-		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
+		keyMetrics.returning_visitors = await this.getReturningVisitors(userID, period);
 		keyMetrics.average_session_duration = await this.getAverageSessionDuration(
 			userID,
+			period,
 		);
 		return keyMetrics;
 	}
@@ -839,6 +840,7 @@ export class RoomAnalyticsService {
 	}
 	async getReturningVisitors(
 		userID: string,
+		period: string,
 	): Promise<RoomAnalyticsKeyMetricsDto["returning_visitors"]> {
 		const returningVisitors: RoomAnalyticsKeyMetricsDto["returning_visitors"] =
 			{
@@ -855,17 +857,14 @@ export class RoomAnalyticsService {
 		const roomIDs: Prisma.Sql[] = rooms.map(
 			(r) => Prisma.sql`${r.room_id}::UUID`,
 		);
-		console.log(
-			"Getting returning visitors for user",
-			userID,
-			"and rooms",
-			roomIDs,
-			Prisma.join(roomIDs),
-		);
-		// get returning visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
-		// returning visitors are users who have joined a room more than once
 		const today: Date = new Date();
-		const yesterday: Date = subHours(today, 24);
+		let multiple = 1;
+		if (period === "week") {
+			multiple = 7;
+		} else if (period === "month") {
+			multiple = 30;
+		}
+		const yesterday: Date = subHours(today, 24 * multiple);
 		const returningVisitorsYesterday: { count: number; user_id: string }[] =
 			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
@@ -896,9 +895,7 @@ export class RoomAnalyticsService {
 			HAVING
 				COUNT(user_id) > 1;
 		`);
-		// if (returningVisitorsYesterday.length === 0 || returningVisitorsToday.length === 0) {
-		// 	return returningVisitors;
-		// }
+
 		console.log(returningVisitorsYesterday, returningVisitorsToday);
 		const countYesterday = Number(returningVisitorsYesterday.length);
 		const countToday = Number(returningVisitorsToday.length);
