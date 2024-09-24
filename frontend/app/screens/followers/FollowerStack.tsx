@@ -9,7 +9,6 @@ import { colors } from "../../styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { Player } from "../../PlayerContext";
 
 // Create a tab navigator
 const Tab = createMaterialTopTabNavigator();
