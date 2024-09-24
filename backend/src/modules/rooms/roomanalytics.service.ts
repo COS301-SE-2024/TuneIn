@@ -689,11 +689,14 @@ export class RoomAnalyticsService {
 		return new RoomAnalyticsContributorsDto();
 	}
 
-	async getKeyMetrics(userID: string): Promise<RoomAnalyticsKeyMetricsDto> {
+	async getKeyMetrics(
+		userID: string,
+		period: string,
+	): Promise<RoomAnalyticsKeyMetricsDto> {
 		console.log(" and given userID: ", userID);
 		const keyMetrics: RoomAnalyticsKeyMetricsDto =
 			new RoomAnalyticsKeyMetricsDto();
-		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID);
+		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID, period);
 		keyMetrics.returning_visitors = await this.getReturningVisitors(userID);
 		keyMetrics.average_session_duration = await this.getAverageSessionDuration(
 			userID,
@@ -703,6 +706,7 @@ export class RoomAnalyticsService {
 
 	async getUniqueVisitors(
 		userID: string,
+		period: string,
 	): Promise<RoomAnalyticsKeyMetricsDto["unique_visitors"]> {
 		const uniqueVisitors: RoomAnalyticsKeyMetricsDto["unique_visitors"] = {
 			count: 0,
@@ -717,30 +721,15 @@ export class RoomAnalyticsService {
 		const roomIDs: Prisma.Sql[] = rooms.map(
 			(r) => Prisma.sql`${r.room_id}::UUID`,
 		);
-		console.log(
-			"Getting unique visitors for user",
-			userID,
-			"and rooms",
-			roomIDs,
-		);
 		// get unique visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
 		const today: Date = new Date();
-		const yesterday: Date = subHours(today, 24);
-		// make the query to get the unique visitors
-
-		/**
-		 * SELECT
-		 * 	COUNT(DISTINCT user_id) as count
-		 * FROM
-		 * 	user_activity
-		 * WHERE
-		 * 	room_id IN (roomIDs)
-		 * 	AND room_join_time < yesterday
-		 * GROUP BY
-		 * 	user_id
-		 *
-		 * PROVIDE THE PRISMA QUERY FOR THIS
-		 */
+		let multiple = 1;
+		if (period === "week") {
+			multiple = 7;
+		} else if (period === "month") {
+			multiple = 30;
+		}
+		const yesterday: Date = subHours(today, 24 * multiple);
 		const uniqueVisitorsYesterday: { count: number }[] = await this.prisma
 			.$queryRaw(Prisma.sql`
 			SELECT
@@ -762,19 +751,10 @@ export class RoomAnalyticsService {
 				user_activity
 			WHERE
 				room_id IN (${Prisma.join(roomIDs)})
-				AND room_join_time > ${yesterday}
+				AND room_join_time >= ${yesterday}
 			GROUP BY
 				user_id;
 		`);
-		console.log(
-			"Unique visitors yesterday",
-			uniqueVisitorsYesterday,
-			"Unique visitors today",
-			uniqueVisitorsToday,
-		);
-		// if (uniqueVisitorsYesterday.length === 0 || uniqueVisitorsToday.length === 0) {
-		// 	return uniqueVisitors;
-		// }
 
 		const countYesterday = Number(uniqueVisitorsYesterday.length);
 		const countToday = Number(uniqueVisitorsToday.length);
