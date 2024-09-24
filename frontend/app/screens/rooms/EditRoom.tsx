@@ -19,6 +19,9 @@ import {
 	Alert,
 	ToastAndroid,
 } from "react-native";
+import CreateButton from "../../components/CreateButton";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
