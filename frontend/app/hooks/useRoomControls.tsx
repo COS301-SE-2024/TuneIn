@@ -27,6 +27,7 @@ import {
 import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 import { SOCKET_EVENTS } from "../../constants";
 import { actionTypes, useLiveState } from "../hooks/useSocketState";
+import { SpotifyAuth } from "../LiveContext";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -58,6 +59,7 @@ const validTrackUri = (uri: string): boolean => {
 };
 
 export interface QueueControls {
+	clearQueue: () => void;
 	enqueueSongs: (songs: RoomSongDto[]) => void;
 	dequeueSongs: (songs: RoomSongDto[]) => void;
 	upvoteSong: (song: RoomSongDto) => void;
@@ -104,6 +106,7 @@ interface RoomControlProps {
 	roomQueue: RoomSongDto[];
 	setRoomQueue: React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
 	spotifyTokens: SpotifyTokenPair | undefined;
+	spotifyAuth: SpotifyAuth;
 	roomPlaying: boolean;
 	pollLatency: () => void;
 }
@@ -117,6 +120,7 @@ export function useRoomControls({
 	roomQueue,
 	setRoomQueue,
 	spotifyTokens,
+	spotifyAuth,
 	roomPlaying,
 	pollLatency,
 }: RoomControlProps): RoomControls {
@@ -124,6 +128,7 @@ export function useRoomControls({
 	console.log("currentUser:", currentUser);
 	console.log("currentRoom:", currentRoom);
 	const { socketState, updateState } = useLiveState();
+	const [lastSync, setLastSync] = useState<Date>(new Date(0));
 	const spotify: SpotifyApi | undefined = useMemo(() => {
 		if (currentUser && currentUser.hasSpotifyAccount && spotifyTokens) {
 			return SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
@@ -385,18 +390,21 @@ export function useRoomControls({
 		async function (): Promise<boolean> {
 			if (!currentSong) {
 				// throw new Error("No song is currently playing");
+				console.log(`userListeningToRoom false because !current`);
 				return false;
 			}
 			if (!spotify) {
 				// throw new Error(
 				// 	"User either does not have a Spotify account or is not logged in",
 				// );
+				console.log(`userListeningToRoom false because !spotify`);
 				return false;
 			}
 			if (roomPlaying) {
 				const state: PlaybackState = await spotify.player.getPlaybackState();
 				console.log("Playback state:", state);
 				if (state === null) {
+					console.log(`userListeningToRoom false because state is null`);
 					return false;
 				}
 				setPlaybackState(state);
@@ -407,6 +415,8 @@ export function useRoomControls({
 				if (state.item.id === currentSong.spotifyID) {
 					return true;
 				}
+			} else {
+				console.log(`userListeningToRoom false because !roomPlaying`);
 			}
 			return false;
 		},
@@ -574,6 +584,10 @@ export function useRoomControls({
 
 	useEffect(() => {
 		console.log("useEffect for syncing user with room has been called");
+		const now = Date.now();
+		if (now.valueOf() - lastSync.valueOf() < 1000) return; // Step 2: Check if less than a second has passed
+
+		spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
 		if (keepUserSynced && currentRoom && currentSong && spotify) {
 			const syncUserSpotify = async () => {
 				try {
@@ -604,17 +618,16 @@ export function useRoomControls({
 			};
 			syncUserSpotify();
 		}
+		setLastSync(new Date());
 	}, [
-		playbackState,
-		activeDevice,
-		spotifyDevices,
-		deviceError,
+		lastSync,
+		spotifyAuth,
 		keepUserSynced,
+		currentRoom,
+		currentSong,
+		spotify,
 		userListeningToRoom,
 		handlePlayback,
-		currentSong,
-		currentRoom,
-		spotify,
 	]);
 
 	const playbackHandler: Playback = useMemo(() => {
@@ -856,6 +869,7 @@ export function useRoomControls({
 
 	const queueControls: QueueControls = useMemo(() => {
 		return {
+			clearQueue: clearQueue,
 			enqueueSongs: enqueueSongs,
 			dequeueSongs: dequeueSongs,
 			upvoteSong: upvoteSong,
@@ -864,6 +878,7 @@ export function useRoomControls({
 			undoSongVote: undoSongVote,
 		};
 	}, [
+		clearQueue,
 		enqueueSongs,
 		dequeueSongs,
 		upvoteSong,

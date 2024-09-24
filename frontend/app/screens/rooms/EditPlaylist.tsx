@@ -146,7 +146,11 @@ const EditPlaylist: React.FC = () => {
 			console.error("Song not found in queue.");
 			return;
 		}
-		if (s && s.userID !== currentUser.userID) {
+		if (
+			s &&
+			s.userID !== currentUser.userID &&
+			!roomControls.canControlRoom()
+		) {
 			alert("You can only remove songs that you added.");
 			return;
 		}
@@ -165,6 +169,7 @@ const EditPlaylist: React.FC = () => {
 	};
 
 	const savePlaylist = async () => {
+		console.log("room queue:", roomQueue);
 		console.log("New queue:", newQueue);
 		console.log("in room :", Room_id);
 
@@ -173,25 +178,29 @@ const EditPlaylist: React.FC = () => {
 
 		if (unsavedChanges) {
 			try {
-				const dequeue: RoomSongDto[] = [];
+				const enqueue: RoomSongDto[] = [];
 				for (let i = 0; i < addedSongs.length; i++) {
 					const track = addedSongs[i];
-					const song = newQueue.find((s) => s.spotifyID === track.id);
-					if (song) {
-						dequeue.push(song);
-					}
-				}
-				roomControls.queue.dequeueSongs(dequeue);
-
-				const enqueue: RoomSongDto[] = [];
-				for (let i = 0; i < removedSongs.length; i++) {
-					const track = removedSongs[i];
 					const song = newQueue.find((s) => s.spotifyID === track.id);
 					if (song) {
 						enqueue.push(song);
 					}
 				}
-				roomControls.queue.enqueueSongs(enqueue);
+				console.log("enqueue:", enqueue);
+				if (enqueue.length > 0) roomControls.queue.enqueueSongs(enqueue);
+
+				const dequeue: RoomSongDto[] = [];
+				for (let i = 0; i < removedSongs.length; i++) {
+					const track = removedSongs[i];
+					dequeue.push({
+						spotifyID: track.id,
+						userID: currentUser?.userID || "",
+						track: track,
+						index: -1,
+					});
+				}
+				console.log("dequeue:", dequeue);
+				if (dequeue.length > 0) roomControls.queue.dequeueSongs(dequeue);
 
 				setUnsavedChanges(false);
 			} catch (error) {
@@ -205,6 +214,10 @@ const EditPlaylist: React.FC = () => {
 				mine: mine,
 			},
 		});
+	};
+
+	const clearQueue = () => {
+		roomControls.queue.dequeueSongs(roomQueue);
 	};
 
 	const playPreview = (previewUrl: string) => {
@@ -282,6 +295,13 @@ const EditPlaylist: React.FC = () => {
 					/>
 				))}
 			</ScrollView>
+
+			{/* Clear Button */}
+			{currentRoom?.creator.userID === currentUser?.userID && (
+				<TouchableOpacity style={styles.clearButton} onPress={clearQueue}>
+					<Text style={styles.buttonText}>Clear Queue</Text>
+				</TouchableOpacity>
+			)}
 
 			{/* Save Button */}
 			<TouchableOpacity
@@ -366,6 +386,15 @@ const styles = StyleSheet.create({
 		elevation: 5,
 		marginTop: 5,
 		marginBottom: 10,
+	},
+	clearButton: {
+		backgroundColor: colors.secondary,
+		borderRadius: 30,
+		height: 50,
+		alignItems: "center",
+		justifyContent: "center",
+		elevation: 5,
+		marginTop: 10,
 	},
 	saveButton: {
 		backgroundColor: colors.secondary,
