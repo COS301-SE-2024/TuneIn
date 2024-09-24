@@ -14,7 +14,6 @@ import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiBody,
-	ApiHeader,
 	ApiNotFoundResponse,
 	ApiOkResponse,
 	ApiOperation,
@@ -32,7 +31,6 @@ import { UserDto } from "../users/dto/user.dto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
 import {
 	RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
@@ -51,7 +49,6 @@ export class RoomsController {
 		private readonly roomsService: RoomsService,
 		private readonly roomAnalytics: RoomAnalyticsService,
 		private readonly auth: AuthService,
-		private readonly dtogen: DtoGenService,
 	) {}
 
 	@Get("new")
@@ -386,38 +383,38 @@ export class RoomsController {
 		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
 	}
 
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Delete(":roomID/songs")
-	@ApiTags("rooms")
-	@ApiParam({
-		name: "roomID",
-		description: "The ID of the room to clear the queue for.",
-		required: true,
-		type: String,
-		format: "uuid",
-		example: "123e4567-e89b-12d3-a456-426614174000",
-		allowEmptyValue: false,
-	})
-	@ApiOperation({
-		summary: "Clear the queue of a room",
-		description: "Clears the queue of the room except for the current song.",
-		operationId: "clearRoomQueue",
-	})
-	clearRoomQueue(
-		@Request() req: Request,
-		@Param("roomID") roomID: string,
-	): void {
-		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		this.roomsService.clearRoomQueue(userInfo.id, roomID);
-	}
+	// @ApiBearerAuth()
+	// @ApiSecurity("bearer")
+	// @UseGuards(JwtAuthGuard)
+	// /*
+	// @ApiHeader({
+	// 	name: "Authorization",
+	// 	description: "Bearer token for authentication",
+	// })
+	// */
+	// @Delete(":roomID/songs")
+	// @ApiTags("rooms")
+	// @ApiParam({
+	// 	name: "roomID",
+	// 	description: "The ID of the room to clear the queue for.",
+	// 	required: true,
+	// 	type: String,
+	// 	format: "uuid",
+	// 	example: "123e4567-e89b-12d3-a456-426614174000",
+	// 	allowEmptyValue: false,
+	// })
+	// @ApiOperation({
+	// 	summary: "Clear the queue of a room",
+	// 	description: "Clears the queue of the room except for the current song.",
+	// 	operationId: "clearRoomQueue",
+	// })
+	// clearRoomQueue(
+	// 	@Request() req: Request,
+	// 	@Param("roomID") roomID: string,
+	// ): void {
+	// 	const userInfo: JWTPayload = this.auth.getUserInfo(req);
+	// 	this.roomsService.clearRoomQueue(userInfo.id, roomID);
+	// }
 
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
@@ -950,10 +947,7 @@ export class RoomsController {
 		type: UserDto,
 		isArray: true,
 	})
-	async getKickedUsers(
-		@Request() req: Request,
-		@Param("roomID") roomID: string,
-	): Promise<UserDto[]> {
+	async getKickedUsers(@Param("roomID") roomID: string): Promise<UserDto[]> {
 		return await this.roomsService.getKickedUsers(roomID);
 	}
 
@@ -1059,10 +1053,7 @@ export class RoomsController {
 		description:
 			"An array of UserDto representing the banned users in the room.",
 	})
-	async getBannedUsers(
-		@Request() req: Request,
-		@Param("roomID") roomID: string,
-	): Promise<UserDto[]> {
+	async getBannedUsers(@Param("roomID") roomID: string): Promise<UserDto[]> {
 		return await this.roomsService.getBannedUsers(roomID);
 	}
 
@@ -1222,6 +1213,7 @@ export class RoomsController {
 		description: "Bad request",
 	})
 	async saveRoomAsPlaylist(@Param("roomID") roomID: string): Promise<string> {
+		console.log("saveRoomAsPlaylist for room: " + roomID);
 		return "";
 	}
 

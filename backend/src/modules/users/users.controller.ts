@@ -8,14 +8,12 @@ import {
 	UseGuards,
 	Request,
 	Param,
-	RawBodyRequest,
 } from "@nestjs/common";
 import { UserListeningStatsDto, UsersService } from "./users.service";
 import {
 	ApiBadRequestResponse,
 	ApiBearerAuth,
 	ApiBody,
-	ApiHeader,
 	ApiOkResponse,
 	ApiOperation,
 	ApiParam,
@@ -27,8 +25,6 @@ import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
-import { DbUtilsService } from "../db-utils/db-utils.service";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
@@ -38,8 +34,6 @@ import { DirectMessageDto } from "./dto/dm.dto";
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
 		private readonly auth: AuthService,
 	) {}
 
@@ -297,10 +291,41 @@ export class UsersController {
 		type: RoomDto,
 		isArray: true,
 	})
+	@ApiBadRequestResponse({
+		description: "Invalid request parameters or missing required headers.",
+	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const ids: string[] = await this.usersService.getRecentRooms(userInfo.id);
-		return await this.dtogen.generateMultipleRoomDto(ids);
+		return await this.usersService.getRecentRoomsById(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/rooms/recent")
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRoomsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getRecentRoomsByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getRecentRoomByUsername(username);
 	}
 
 	@ApiBearerAuth()
@@ -398,6 +423,47 @@ export class UsersController {
 	async getFriendRequests(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.getFriendRequests(userInfo.id);
+	}
+
+	// add endpoint for getting a user's pending requests
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/pending")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get a user's sent friend requests",
+		operationId: "getPendingRequests",
+	})
+	@ApiOkResponse({
+		description: "The user's sent friend requests as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting pending friend requests.",
+	})
+	async getPendingRequests(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPendingRequests(userInfo.id);
+	}
+
+	// add an endpoint to get potential friends
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/potential")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get potential friends for the user" })
+	@ApiOkResponse({
+		description: "The user's potential friends as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting potential friends.",
+	})
+	async getPotentialFriends(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPotentialFriends(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -498,7 +564,40 @@ export class UsersController {
 	})
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarks(userInfo.id);
+		return await this.usersService.getBookmarksById(userInfo.id);
+	}
+
+	@Get(":username/bookmarks")
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getBookmarksByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarksByUsername(username);
+	}
+
+	@Get(":username/taken")
+	@ApiOperation({
+		summary: "Check if a username is taken",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "isUsernameTaken",
+	})
+	@ApiOkResponse({
+		description: "True if taken, false if not.",
+	})
+	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
+		return await this.usersService.usernameTaken(username);
 	}
 
 	@ApiBearerAuth()
@@ -531,6 +630,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
+		console.log("called /users/:username");
 		return this.usersService.getProfileByUsername(username);
 	}
 
@@ -670,11 +770,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error ending friendship.",
-		type: Boolean,
 	})
 	async unfriendUser(
 		@Request() req: Request,
@@ -762,13 +860,61 @@ export class UsersController {
 		await this.usersService.rejectFriendRequest(userInfo.id, username);
 	}
 
+	// add an endpoint for cancelling a friend request
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":userId/room/current")
-	@ApiOperation({ summary: "Get a user's current room based on user id" })
+	@Post(":username/cancel")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Cancel a friend request to the given user",
+		operationId: "cancelFriendRequest",
+	})
 	@ApiParam({
-		name: "userId",
-		description: "The user id of user's current room to search for.",
+		name: "username",
+		description: "The username of the user to cancel the friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully cancelled friend request.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error cancelling friend request.",
+	})
+	async cancelFriendRequest(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.cancelFriendRequest(userInfo.id, username);
+	}
+
+	// create endpoint to get a user's recommended users
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@ApiSecurity("bearer")
+	@Get("recommended/users")
+	@ApiOperation({ summary: "Get recommended users" })
+	@ApiOkResponse({
+		description: "Recommended users retrieved successfully",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("users")
+	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		console.log("called /users/recommended/users");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedUsers(userInfo.id);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get(":username/room/current")
+	@ApiOperation({ summary: "Get a user's current room based on username" })
+	@ApiParam({
+		name: "username",
+		description: "The username of user's current room to search for.",
 	})
 	@ApiOkResponse({
 		description: "User's current room retrieved successfully",
@@ -777,11 +923,14 @@ export class UsersController {
 	@ApiUnauthorizedResponse({
 		description: "Unauthorized",
 	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
 	@ApiTags("rooms")
 	async getCurrentRoomByUserId(
-		@Param("userId") userId: string,
+		@Param("username") username: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoomDto(userId);
+		return await this.usersService.getCurrentRoomDto(username);
 	}
 
 	@Post(":username/block")
@@ -883,11 +1032,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully reported the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error reporting the user.",
-		type: Boolean,
 	})
 	async reportUser(
 		@Request() req: Request,

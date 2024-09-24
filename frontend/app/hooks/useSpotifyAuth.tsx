@@ -4,6 +4,7 @@ import axios from "axios";
 import * as StorageService from "../services/StorageService";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
 import * as utils from "./../services/Utils";
+import { ToastAndroid } from "react-native";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -109,7 +110,8 @@ export const useSpotifyAuth = () => {
 			await handleTokenChange(data.access_token, data.expires_in);
 		} catch (err) {
 			setError("An error occurred while refreshing token");
-			console.error("An error occurred while refreshing token", err);
+			console.log("An error occurred while refreshing token", err);
+			ToastAndroid.show("Failed to refresh spotify token", ToastAndroid.SHORT);
 		}
 	};
 
@@ -139,7 +141,8 @@ export const useSpotifyAuth = () => {
 			await handleTokenChange(data.access_token, data.expires_in);
 		} catch (err) {
 			setError("An error occurred while refreshing token");
-			console.error("An error occurred while refreshing token", err);
+			console.log("An error occurred while refreshing token", err);
+			ToastAndroid.show("Failed to refresh spotify token", ToastAndroid.SHORT);
 		}
 	};
 

@@ -1,12 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import {
-	IsString,
-	IsDateString,
-	IsObject,
-	ValidateNested,
-	IsDate,
-} from "class-validator";
+import { IsString, IsObject, ValidateNested, IsDate } from "class-validator";
 
 //for Emoji and Category, see: https://github.com/woodybury/rn-emoji-picker
 export interface Emoji {

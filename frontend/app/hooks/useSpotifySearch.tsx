@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as spotifyAuth from "../services/SpotifyAuth";
+import { ToastAndroid } from "react-native";
 
 export const useSpotifySearch = () => {
 	const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -33,7 +34,8 @@ export const useSpotifySearch = () => {
 			setSearchResults(data.tracks.items);
 		} catch (err) {
 			setError("An error occurred while searching");
-			console.error("An error occurred while searching", err);
+			console.log("An error occurred while searching", err);
+			ToastAndroid.show("Failed to load search results", ToastAndroid.SHORT);
 		}
 	};
 

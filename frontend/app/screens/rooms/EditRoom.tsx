@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { Room } from "../../models/Room";
+import * as ImagePicker from "expo-image-picker";
+import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import {
 	View,
 	Text,
@@ -10,18 +17,19 @@ import {
 	Image,
 	StyleSheet,
 	Alert,
+	ToastAndroid,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Room } from "../../models/Room";
-import uploadImage from "../../services/ImageUpload";
-import { useRoute, RouteProp } from "@react-navigation/native";
+
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
 const EditRoom: React.FC = () => {
+	const router = useRouter();
 	const route = useRoute<EditRoomRouteProp>();
 	const { params } = route;
-	let roomData: any;
-	roomData = params.room;
+
+	// Memoize roomData to avoid re-parsing on each render
+	const roomData = useMemo(() => JSON.parse(params.room), [params.room]);
+
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -34,25 +42,36 @@ const EditRoom: React.FC = () => {
 		roomSize: 50,
 		isExplicit: false,
 		isNsfw: false,
+		start_date: new Date(),
+		end_date: new Date(),
 	});
-
 	const [image, setImage] = useState<string | null>(null);
 
+	// useEffect without roomDetails as dependency
 	useEffect(() => {
 		const loadRoomDetails = async () => {
-			setRoomDetails(roomData as unknown as Room);
+			setRoomDetails({
+				roomID: roomData.id,
+				name: roomData.name,
+				description: roomData.description,
+				backgroundImage: roomData.backgroundImage,
+				language: roomData.language,
+				tags: roomData.tags,
+				userID: roomData.userID,
+				roomSize: 50,
+				isExplicit: roomData.isExplicit,
+				isNsfw: roomData.isNsfw,
+			} as Room);
 			setImage(roomData.backgroundImage as string);
 		};
 
 		loadRoomDetails();
-	}, [roomData, roomDetails]);
+	}, [roomData]); // Only roomData is a dependency now
 
 	const screenWidth = Dimensions.get("window").width;
-
 	const navigateToEditPlaylist = () => {
-		// router.navigate("/screens/rooms/EditPlaylist");
+		router.navigate("/screens/EditPlaylist");
 	};
-
 	const pickImage = async () => {
 		let result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -75,8 +94,8 @@ const EditRoom: React.FC = () => {
 		}
 	};
 
-	const handleToggleChange = (value: boolean) => {
-		setRoomDetails({ ...roomDetails, isExplicit: value });
+	const handleToggleChange = (field: keyof Room, value: boolean) => {
+		setRoomDetails({ ...roomDetails, [field]: value });
 	};
 
 	const saveChanges = async () => {
@@ -104,28 +123,44 @@ const EditRoom: React.FC = () => {
 				newRoom.backgroundImage = newImage;
 			}
 		}
-		// const token = await auth.getToken();
-		// try {
-		// 	const data = await fetch(`${utils.API_BASE_URL}rooms/${roomData.id}`, {
-		// 		method: "PATCH",
-		// 		headers: {
-		// 			"Content-Type": "application/json",
-		// 			Authorization: "Bearer " + token,
-		// 		},
-		// 		body: JSON.stringify(newRoom),
-		// 	});
-		// 	Alert.alert(
-		// 		"Changes Saved",
-		// 		"Your changes have been saved successfully.",
-		// 		[{ text: "OK" }],
-		// 		{ cancelable: false },
-		// 	);
-		// 	router.navigate({
-		// 		pathname: "/screens/Home",
-		// 	});
-		// } catch (error) {
-		// 	console.error("Error:", error);
-		// }
+		const token = await auth.getToken();
+		try {
+			const data = await fetch(`${utils.API_BASE_URL}/rooms/${roomData.id}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer " + token,
+				},
+				body: JSON.stringify({
+					room_name: newRoom.name,
+					description: newRoom.description,
+					has_explicit_content: newRoom.isExplicit,
+					has_nsfw_content: newRoom.isNsfw,
+					room_image: newRoom.backgroundImage,
+					language: newRoom.language,
+				}),
+			});
+			if (!data.ok) {
+				Alert.alert(
+					"Error",
+					"An error occurred while saving your changes.",
+					[{ text: "OK" }],
+					{ cancelable: false },
+				);
+				alert("An error occurred while saving your changes.");
+				return;
+			}
+			Alert.alert(
+				"Changes Saved",
+				"Your changes have been saved successfully.",
+				[{ text: "OK" }],
+				{ cancelable: false },
+			);
+			router.navigate("/screens/(tabs)/Home");
+		} catch (error) {
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to update room data.", ToastAndroid.SHORT);
+		}
 	};
 
 	return (
@@ -146,7 +181,7 @@ const EditRoom: React.FC = () => {
 						"Description",
 						roomDetails.description,
 						(value) => handleInputChange("description", value),
-						4,
+						2,
 					)}
 					{buildInputField("Genre", roomDetails.genre ?? "", (value) =>
 						handleInputChange("genre", value),
@@ -157,12 +192,12 @@ const EditRoom: React.FC = () => {
 					{buildInputField("Room Size", "50".toString(), (value) =>
 						handleInputChange("roomSize", value),
 					)}
-					{buildToggle(
-						"Explicit",
-						roomDetails.isExplicit ?? false,
-						handleToggleChange,
+					{buildToggle("Explicit", roomDetails.isExplicit ?? false, () =>
+						handleToggleChange("isExplicit", !roomDetails.isExplicit),
 					)}
-					{buildToggle("NSFW", roomDetails.isNsfw ?? false, handleToggleChange)}
+					{buildToggle("NSFW", roomDetails.isNsfw ?? false, () =>
+						handleToggleChange("isNsfw", !roomDetails.isNsfw),
+					)}
 
 					<View style={styles.imagePickerContainer}>
 						<Text style={styles.imagePickerLabel}>Change Photo</Text>

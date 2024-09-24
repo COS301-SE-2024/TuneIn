@@ -3,8 +3,8 @@ import { SongInfoDto } from "./dto/songinfo.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
-import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+// import { DtoGenService } from "../dto-gen/dto-gen.service";
+// import { DbUtilsService } from "../db-utils/db-utils.service";
 import {
 	subHours,
 	addHours,
@@ -28,8 +28,8 @@ import { RoomsService } from "./rooms.service";
 export class RoomAnalyticsService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly dtogen: DtoGenService,
-		private readonly dbUtils: DbUtilsService,
+		// private readonly dtogen: DtoGenService,
+		// private readonly dbUtils: DbUtilsService,
 		private readonly rooms: RoomsService,
 	) {}
 

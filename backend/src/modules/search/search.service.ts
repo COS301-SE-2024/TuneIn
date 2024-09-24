@@ -5,7 +5,6 @@ import { SearchHistoryDto } from "./dto/searchhistorydto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, ValidateNested } from "class-validator";
 import * as PrismaTypes from "@prisma/client";
-import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import * as sqlstring from "sqlstring";
 import { PrismaService } from "../../../prisma/prisma.service";
@@ -51,7 +50,6 @@ export class CombinedSearchHistory {
 export class SearchService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 	) {}
 
@@ -94,28 +92,23 @@ export class SearchService {
 	// 	console.log(result);
 	// }
 
-	// async insertSearchHistory(
-	// 	endpoint: string,
-	// 	params: any,
-	// 	user_id: string,
-	// 	ctx: Context,
-	// ) {
-	// 	let url = `${endpoint}?q=${params.q}`;
+	async insertSearchHistory(endpoint: string, params: any, user_id: string) {
+		let url = `${endpoint}?q=${params.q}`;
 
-	// 	if (params.creator) {
-	// 		url += `&creator=${params.creator}`;
-	// 	}
+		if (params.creator) {
+			url += `&creator=${params.creator}`;
+		}
 
-	// 	const result = await ctx.prisma.search_history.create({
-	// 		data: {
-	// 			user_id: user_id,
-	// 			search_term: params.q,
-	// 			url: url,
-	// 		},
-	// 	});
+		const result = await this.prisma.search_history.create({
+			data: {
+				user_id: user_id,
+				search_term: params.q,
+				url: url,
+			},
+		});
 
-	// 	console.log("Insertion result: " + result);
-	// }
+		console.log("Insertion result: " + result);
+	}
 
 	async combinedSearch(params: {
 		q: string;
@@ -172,7 +165,11 @@ export class SearchService {
 			// console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -361,10 +358,13 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
 			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
-			console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -383,27 +383,117 @@ export class SearchService {
 		// OR url LIKE '/search/rooms/%')
 		// ORDER BY timestamp DESC
 		// LIMIT 10;`;
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
-		SELECT *
-		FROM search_history
-		WHERE user_id::text = ${userID}
-		AND (url LIKE '/rooms/%'
-		OR url LIKE '/search/rooms/%')
-		ORDER BY timestamp DESC
-		LIMIT 10;`;
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+			orderBy: {
+				timestamp: "desc",
+			},
+		});
+		// console.log("Result: " + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (
+						!uniqueRecordsMap.has(record.url) &&
+						record.search_term.trim() !== ""
+					) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
+		return [];
+	}
+
+	async searchRoomsSuggestions(q: string): Promise<SearchHistoryDto[]> {
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url,
+				url: row.url as string,
 			}));
-			// console.log("Called");
-			// console.log(searchIds);
 
 			if (searchIds) {
-				return searchIds;
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -424,9 +514,10 @@ export class SearchService {
 		// LIMIT 5;`;
 		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
 		SELECT *,
-		LEVENSHTEIN(username, ${q}) AS distance
+		LEAST(levenshtein(full_name, ${q}), levenshtein(username, ${q})) AS distance
 		FROM users
-		WHERE similarity(username, ${q}) > 0.2
+		WHERE similarity(full_name, ${q}) > 0.2
+		OR similarity(username, ${q}) > 0.2
 		ORDER BY distance ASC
 		LIMIT 5;`;
 
@@ -440,7 +531,11 @@ export class SearchService {
 			console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -520,7 +615,7 @@ export class SearchService {
 
 		query += ` WHERE similarity(username, ${sqlstring.escape(
 			params.q,
-		)}) > 0.2 AND similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
+		)}) > 0.2 OR similarity(full_name, ${sqlstring.escape(params.q)}) > 0.2`;
 
 		if (params.following !== undefined || params.followers !== undefined) {
 			query += ` GROUP BY users.user_id`;
@@ -572,7 +667,11 @@ export class SearchService {
 			// console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -582,33 +681,113 @@ export class SearchService {
 	}
 
 	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
-		console.log(userID);
-		// const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
-		// SELECT *
-		// FROM search_history
-		// WHERE user_id::text = ${userID}
-		// AND (url LIKE '/user/%'
-		// OR url LIKE '/search/user/%')
-		// ORDER BY timestamp DESC
-		// LIMIT 10;`;
-		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
-		SELECT *
-		FROM search_history
-		WHERE user_id::text = ${userID}
-		AND (url LIKE '/user/%'
-		OR url LIKE '/search/user/%')
-		ORDER BY timestamp DESC
-		LIMIT 10;`;
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+			orderBy: {
+				timestamp: "desc",
+			},
+		});
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
 				search_term: row.search_term,
 				search_time: row.timestamp,
-				url: row.url,
+				url: row.url as string,
 			}));
 
 			if (searchIds) {
-				return searchIds;
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
+
+		return [];
+	}
+
+	async searchUsersSuggestions(q: string): Promise<SearchHistoryDto[]> {
+		const result = await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+		});
+		console.log("Result: " + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap = new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) => {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto = {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] = Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -617,26 +796,149 @@ export class SearchService {
 		return [new SearchHistoryDto()];
 	}
 
-	/*
-	async searchGenres(q: string): Promise<string[]> {
-		
+	getQueryParams(url: string): {
+		pathSegment: string | null;
+		queryParams: Record<string, string>;
+	} {
+		// Extract the path segment and query string part from the URL
+		const [pathAndQuery] = url.split("?");
+		if (!pathAndQuery) {
+			return { pathSegment: null, queryParams: {} };
+		}
+		const [pathSegment] = pathAndQuery.split("/").slice(-1);
+
+		// Extract the query string part
+		const paramsString = url.split("?")[1] || "";
+
+		// Process query parameters
+		const queryParams = paramsString
+			.split("&")
+			.reduce((params: Record<string, string>, param) => {
+				const [key, value] = param.split("=");
+				if (key) {
+					params[key] = value !== undefined ? decodeURIComponent(value) : "";
+				}
+				return params;
+			}, {});
+
+		return {
+			pathSegment: pathSegment || null,
+			queryParams,
+		};
 	}
-	*/
 
 	async searchHistory(userID: string): Promise<CombinedSearchHistory[]> {
-		console.log(userID);
+		const result = await this.prisma.$queryRaw<PrismaTypes.room>`
+		SELECT *
+		FROM search_history
+		WHERE user_id::text = ${userID}
+		ORDER BY timestamp DESC
+		LIMIT 10;`;
+
+		if (Array.isArray(result)) {
+			const searchIds: (SearchHistoryDto & {
+				params: {
+					pathSegment: string | null;
+					queryParams: Record<string, string>;
+				};
+			})[] = result.map((row) => ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url,
+				params: this.getQueryParams(row.url),
+			}));
+
+			const results: CombinedSearchHistory[] = await Promise.all(
+				searchIds.map(async (id) => {
+					let searchResult: (RoomDto | UserDto)[] | string = "";
+
+					if (id.params.pathSegment === "rooms") {
+						if (id.params.queryParams.creator) {
+							searchResult = await this.searchRooms({
+								q: id.params.queryParams.q as string,
+								creator: id.params.queryParams.creator as string,
+							});
+						}
+						searchResult = await this.searchRooms({
+							q: id.params.queryParams.q as string,
+						});
+					} else if (id.params.pathSegment === "users") {
+						searchResult = await this.searchUsers(
+							id.params.queryParams.q as string,
+						);
+					} else {
+						if (id.params.queryParams.creator) {
+							const combo = await this.combinedSearch({
+								q: id.params.queryParams.q as string,
+								creator: id.params.queryParams.creator as string,
+							});
+							searchResult = [combo.rooms, combo.users].flat();
+						}
+						const combo = await this.combinedSearch({
+							q: id.params.queryParams.q as string,
+							creator: id.params.queryParams.creator as string,
+						});
+						searchResult = [combo.rooms, combo.users].flat();
+					}
+
+					return { results: [id.search_term, ...searchResult].flat() };
+				}),
+			);
+			return results;
+		} else {
+			console.error("Unexpected query result format, expected an array.");
+		}
 		return [];
 	}
 
 	async clearSearchHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+			},
+		});
 		console.log(userID);
 	}
 
 	async clearRoomsHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/rooms/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/rooms?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log(userID);
 	}
 
 	async clearUsersHistory(userID: string): Promise<void> {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: "/users/",
+						},
+					},
+					{
+						url: {
+							startsWith: "/search/users?q=",
+						},
+					},
+				],
+			},
+		});
 		console.log(userID);
 	}
 }

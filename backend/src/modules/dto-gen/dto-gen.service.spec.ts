@@ -1,8 +1,8 @@
 import { TestingModule } from "@nestjs/testing";
 import { DtoGenService } from "./dto-gen.service";
 import { createDtoGenTestingModule } from "../../../jest_mocking/module-mocking";
-import { mockPrismaService } from "../../../jest_mocking/service-mocking";
-import * as PrismaTypes from "@prisma/client";
+// import { mockPrismaService } from "../../../jest_mocking/service-mocking";
+// import * as PrismaTypes from "@prisma/client";
 
 describe("DtoGenService", () => {
 	let service: DtoGenService;

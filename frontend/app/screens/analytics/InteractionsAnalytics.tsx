@@ -5,12 +5,13 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LineGraphCard from "../../components/LineGraphCard";
-import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
-import TableCard from "../../components/TableCard";
+// import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
+// import TableCard from "../../components/TableCard";
 import IconProgressCard from "../../components/IconProgressCard";
 import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
@@ -47,26 +48,31 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchUserRooms = async () => {
-			// make an axios request with the API_BASE_URL and the auth token
-			const accessToken: string | null = await AuthManagement.getToken();
-			if (!accessToken) {
-				console.error("No access token found");
-				return;
-			}
-			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				if (!accessToken) {
+					console.error("No access token found");
+					return;
+				}
+				const response = await fetch(`${API_BASE_URL}/users/rooms`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
 
-			if (response.ok) {
-				const data = await response.json();
-				console.log("data", data);
-				setRooms(data);
-				setSelectedRoom(data[0]);
-			} else {
-				console.error("Failed to fetch user rooms");
+				if (response.ok) {
+					const data = await response.json();
+					console.log("data", data);
+					setRooms(data);
+					setSelectedRoom(data[0]);
+				} else {
+					console.error("Failed to fetch user rooms");
+				}
+			} catch (error) {
+				console.log("Failed to fetch user rooms", error);
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
 			}
+			// make an axios request with the API_BASE_URL and the auth token
 		};
 
 		fetchUserRooms();
@@ -75,26 +81,31 @@ const InteractionsAnalytics: React.FC = () => {
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current roooooom", currentRoom);
-			if (!accessToken || !selectedRoom) {
-				console.error("Cannot fetch interaction analytics without a room");
-				return;
-			}
-			const response = await fetch(
-				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("current roooooom", currentRoom);
+				if (!accessToken || !selectedRoom) {
+					console.error("Cannot fetch interaction analytics without a room");
+					return;
+				}
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
 					},
-				},
-			);
-			if (response.ok) {
-				const data = await response.json();
-				setInteractionAnalytics(data);
-			} else {
-				console.error("Failed to fetch interaction analytics");
+				);
+				if (response.ok) {
+					const data = await response.json();
+					setInteractionAnalytics(data);
+				} else {
+					console.error("Failed to fetch interaction analytics");
+				}
+			} catch (error) {
+				console.log("Failed to fetch interaction analytics", error);
+				ToastAndroid.show("Failed to load interaction analytics", ToastAndroid.SHORT);
 			}
 		};
 

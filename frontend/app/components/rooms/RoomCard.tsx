@@ -18,7 +18,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
 }) => {
 	const renderSongInfo = () => {
 		if (!songName || !artistName) {
-			return <Text style={styles.nowPlaying}>No song playing</Text>;
+			return <Text style={styles.nowPlaying}></Text>;
 		}
 
 		return (
@@ -46,6 +46,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
 				source={{ uri: imageUrl }}
 				style={styles.imageBackground}
 				imageStyle={styles.imageBackgroundStyle}
+				testID="imageBackground"
 			>
 				<View style={styles.overlay} />
 				<View style={styles.textContainer}>

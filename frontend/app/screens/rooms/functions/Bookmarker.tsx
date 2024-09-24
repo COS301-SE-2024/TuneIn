@@ -1,3 +1,4 @@
+import { ToastAndroid } from "react-native";
 import * as utils from "../../../services/Utils";
 
 class Bookmarker {
@@ -20,7 +21,8 @@ class Bookmarker {
 			}
 			console.log(data);
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to check bookmark", ToastAndroid.SHORT);
 		}
 	};
 
@@ -49,7 +51,11 @@ class Bookmarker {
 			}
 			return false;
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show(
+				`Failed to ${isBookmarked ? "unbookmark" : "bookmark"}`,
+				ToastAndroid.SHORT,
+			);
 		}
 	};
 }

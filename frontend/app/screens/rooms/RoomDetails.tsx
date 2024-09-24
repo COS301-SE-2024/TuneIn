@@ -18,6 +18,7 @@ import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
+import CreateButton from "../../components/CreateButton";
 
 const RoomDetails: React.FC = () => {
 	const router = useRouter();
@@ -102,7 +103,7 @@ const RoomDetails: React.FC = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				router.navigate({
-					pathname: "/screens/Home",
+					pathname: "/screens/(tabs)/Home",
 					params: data,
 				});
 			})
@@ -214,7 +215,7 @@ const RoomDetails: React.FC = () => {
 							/>
 						)}
 					</View>
-					<CyanButton title="Share" onPress={navigateToChatRoom} />
+					<CreateButton title="Share" onPress={navigateToChatRoom} />
 				</View>
 			</View>
 		</ScrollView>

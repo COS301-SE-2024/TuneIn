@@ -73,8 +73,10 @@ export const APIProvider: React.FC<{ children: ReactNode }> = ({
 
 	useEffect(() => {
 		const fetchToken = async () => {
-			const t = await auth.getToken();
-			setToken(t);
+			if (auth.authenticated()) {
+				const t = await auth.getToken();
+				setToken(t);
+			}
 		};
 		fetchToken();
 	}, []);

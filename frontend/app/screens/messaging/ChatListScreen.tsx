@@ -6,10 +6,10 @@ import {
 	TextInput,
 	StyleSheet,
 	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import ChatItem, { ChatItemProps } from "../../components/ChatItem";
-import { Chat } from "../../models/chat";
 import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
@@ -20,23 +20,23 @@ import * as utils from "../../services/Utils";
 import axios from "axios";
 import { UserDto } from "../../models/UserDto";
 
-const initialChats: Chat[] = [
-	{
-		id: "1",
-		name: "John Doe",
-		lastMessage: "Hey there!",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "2",
-		name: "Jane Smith",
-		lastMessage: "What's up?",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	// Add more dummy chats
-];
+// const initialChats: Chat[] = [
+// 	{
+// 		id: "1",
+// 		name: "John Doe",
+// 		lastMessage: "Hey there!",
+// 		avatar:
+// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+// 	},
+// 	{
+// 		id: "2",
+// 		name: "Jane Smith",
+// 		lastMessage: "What's up?",
+// 		avatar:
+// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+// 	},
+// 	// Add more dummy chats
+// ];
 
 const createChats = (
 	messages: DirectMessageDto[],
@@ -96,7 +96,8 @@ const ChatListScreen = () => {
 				setFilteredChats(createChats(chats, selfRef.current.userID));
 				setUserMessages(chats);
 			} catch (error) {
-				console.error(error);
+				console.log(error);
+				ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
 				throw error;
 			}
 		})();
@@ -128,7 +129,7 @@ const ChatListScreen = () => {
 				setFilteredChats(createChats(filtered, selfRef.current.userID));
 			}
 		}
-	}, [searchQuery]);
+	}, [searchQuery, userMessages]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);

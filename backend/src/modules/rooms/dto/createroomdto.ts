@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import {
-	IsString,
-	IsBoolean,
-	IsDateString,
-	IsOptional,
-	IsDate,
-} from "class-validator";
+import { IsString, IsBoolean, IsOptional, IsDate } from "class-validator";
 
 export class CreateRoomDto {
 	@ApiProperty()
