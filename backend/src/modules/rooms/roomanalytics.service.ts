@@ -697,7 +697,10 @@ export class RoomAnalyticsService {
 		const keyMetrics: RoomAnalyticsKeyMetricsDto =
 			new RoomAnalyticsKeyMetricsDto();
 		keyMetrics.unique_visitors = await this.getUniqueVisitors(userID, period);
-		keyMetrics.returning_visitors = await this.getReturningVisitors(userID, period);
+		keyMetrics.returning_visitors = await this.getReturningVisitors(
+			userID,
+			period,
+		);
 		keyMetrics.average_session_duration = await this.getAverageSessionDuration(
 			userID,
 			period,
@@ -767,6 +770,7 @@ export class RoomAnalyticsService {
 
 	async getAverageSessionDuration(
 		userID: string,
+		period: string,
 	): Promise<RoomAnalyticsKeyMetricsDto["average_session_duration"]> {
 		const averageSessionDuration: RoomAnalyticsKeyMetricsDto["average_session_duration"] =
 			{
@@ -790,7 +794,13 @@ export class RoomAnalyticsService {
 		);
 		// get the average session duration from more than 24 hours ago, then get the average session duration from the last 24 hours to calculate the percentage change
 		const today: Date = new Date();
-		const yesterday: Date = subHours(today, 24);
+		let multiple = 1;
+		if (period === "week") {
+			multiple = 7;
+		} else if (period === "month") {
+			multiple = 30;
+		}
+		const yesterday: Date = subHours(today, 24 * multiple);
 		const averageSessionDurationYesterday: { avg_duration: number }[] =
 			await this.prisma.$queryRaw(Prisma.sql`
 			SELECT
