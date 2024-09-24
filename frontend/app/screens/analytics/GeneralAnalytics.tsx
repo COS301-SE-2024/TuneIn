@@ -27,7 +27,28 @@ const GeneralAnalytics: React.FC = () => {
 		room_name: string;
 		roomID: string;
 	} | null>(null);
-
+	const fetchGeneralAnalytics = async () => {
+		try {
+			const accessToken: string | null = await AuthManagement.getToken();
+			const currentRoom = await StorageService.getItem("currentRoom");
+			console.log("current roooooom", currentRoom);
+			console.log(selectedRoom);
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				},
+			);
+			const data = await response.json();
+			console.log("general analytics", data);
+			setGeneralAnalytics(data);
+		} catch (error) {
+			console.log("Error fetching general analytics:", error);
+			ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+		}
+	};
 	useEffect(() => {
 		const fetchRooms = async () => {
 			try {
@@ -44,7 +65,7 @@ const GeneralAnalytics: React.FC = () => {
 				setRooms(data);
 				const currentRoom = await StorageService.getItem("currentRoom");
 				console.log("user rooms", userRooms, "and current room", currentRoom);
-				const room = userRooms.find((room) => room.room_name === currentRoom);
+				const room = data.find((room: any) => room.room_name === currentRoom);
 				console.log("selected room", room);
 				setSelectedRoom(room);
 			} catch (error) {
@@ -53,31 +74,11 @@ const GeneralAnalytics: React.FC = () => {
 			}
 		};
 		fetchRooms();
+		fetchGeneralAnalytics();
+		console.log("general analytics initial", generalAnalytics);
 	}, []);
 
 	useEffect(() => {
-		const fetchGeneralAnalytics = async () => {
-			try {
-				const accessToken: string | null = await AuthManagement.getToken();
-				const currentRoom = await StorageService.getItem("currentRoom");
-				console.log("current roooooom", currentRoom);
-				console.log(selectedRoom);
-				const response = await fetch(
-					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					},
-				);
-				const data = await response.json();
-				console.log("general analytics", data);
-				setGeneralAnalytics(data);
-			} catch (error) {
-				console.log("Error fetching general analytics:", error);
-				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
-			}
-		};
 		fetchGeneralAnalytics();
 		console.log("general analytics", generalAnalytics);
 	}, [selectedRoom]);
