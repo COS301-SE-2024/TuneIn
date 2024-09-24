@@ -180,6 +180,12 @@ const InteractionsAnalytics: React.FC = () => {
 					number={interactionAnalytics?.reactions_sent?.toString() ?? "0"}
 					progress={interactionAnalytics?.reactions_sent ?? 0} // Progress from 0 to 1
 				/>
+				<IconProgressCard
+					icon="bookmark"
+					header="Bookmarks"
+					number={interactionAnalytics?.bookmarked_count.toString() ?? "0"}
+					progress={interactionAnalytics?.bookmarked_count ?? 0} // Progress from 0 to 1
+				/>
 				{/* <HorizontalBarGraphCard data={datah} title="Playlist Contributions" />
 				<TableCard
 					title="Top Playlist Contributors"
