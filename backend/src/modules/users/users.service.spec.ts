@@ -1079,4 +1079,67 @@ describe("UsersService follow function", () => {
 			expect(result).toBe(0);
 		});
 	});
+	describe("calculateActivity", () => {
+		it("should return the correct activity score", async () => {
+			const mockUserID = "userID1";
+			const mockRooms: RoomDto[] = [
+				{ room_id: "room1" } as unknown as RoomDto,
+				{ room_id: "room2" } as unknown as RoomDto,
+			];
+			const mockFriends: PrismaTypes.users[] = [
+				{ user_id: "friend1" } as PrismaTypes.users,
+				{ user_id: "friend2" } as PrismaTypes.users,
+			];
+			const mockBookmarks: RoomDto[] = [
+				{ room_id: "bookmark1" } as unknown as RoomDto,
+				{ room_id: "bookmark2" } as unknown as RoomDto,
+			];
+			const mockMessages: PrismaTypes.message[] = [
+				{ message_id: "message1" } as PrismaTypes.message,
+				{ message_id: "message2" } as PrismaTypes.message,
+			];
+			const mockRoomMessages: PrismaTypes.room_message[] = [
+				{ message_id: "message1" } as PrismaTypes.room_message,
+				{ message_id: "message2" } as PrismaTypes.room_message,
+			];
+
+			jest.spyOn(usersService, "getUserRooms").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(dbUtilsService, "getUserFriends")
+				.mockResolvedValue(mockFriends);
+			jest
+				.spyOn(usersService, "getBookmarksById")
+				.mockResolvedValue(mockBookmarks);
+			jest
+				.spyOn(prismaService.message, "findMany")
+				.mockResolvedValue(mockMessages);
+			jest
+				.spyOn(prismaService.room_message, "findMany")
+				.mockResolvedValue(mockRoomMessages);
+
+			const result = await usersService.calculateActivity(mockUserID);
+
+			expect(result).toBe(
+				mockRooms.length +
+					mockFriends.length +
+					mockBookmarks.length +
+					mockMessages.length +
+					mockRoomMessages.length,
+			);
+		});
+
+		it("should throw an error if no friends are found", async () => {
+			const mockUserID = "userID1";
+
+			jest.spyOn(usersService, "getUserRooms").mockResolvedValue([]);
+			jest.spyOn(dbUtilsService, "getUserFriends").mockResolvedValue(null);
+			jest.spyOn(usersService, "getBookmarksById").mockResolvedValue([]);
+			jest.spyOn(prismaService.message, "findMany").mockResolvedValue([]);
+			jest.spyOn(prismaService.room_message, "findMany").mockResolvedValue([]);
+
+			await expect(usersService.calculateActivity(mockUserID)).rejects.toThrow(
+				"Failed to calculate activity (no friends)",
+			);
+		});
+	});
 });
