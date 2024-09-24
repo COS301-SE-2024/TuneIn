@@ -109,11 +109,15 @@ const GeneralAnalytics: React.FC = () => {
 
 	const headers = ["Statistic", "Value"];
 	const toTime = (time: number) => {
-		// time is in ms
-		const seconds = Math.floor(time / 1000) % 60;
-		const minutes = Math.floor(time / (1000 * 60)) % 60;
-		const hours = Math.floor(time / (1000 * 60 * 60));
+		// time is in seconds
+		const days = Math.floor(time / 86400);
+		const hours = Math.floor(time / 3600);
+		const minutes = Math.floor((time % 3600) / 60);
+		const seconds = Math.floor(time % 60);
 		let result = "";
+		if (days > 0) {
+			result += `${days}d `;
+		}
 		if (hours > 0) {
 			result += `${hours}h `;
 		}
