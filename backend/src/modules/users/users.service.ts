@@ -1751,23 +1751,17 @@ export class UsersService {
 	}
 
 	async calculatePopularity(userID: string): Promise<number> {
-		const followers: PrismaTypes.users[] | null =
-			await this.dbUtils.getUserFollowers(userID);
-		const following: PrismaTypes.users[] | null =
-			await this.dbUtils.getUserFollowing(userID);
-		if (!followers || !following) {
-			throw new Error("Failed to calculate popularity");
-		}
+		const followers: PrismaTypes.users[] = await this.dbUtils.getUserFollowers(
+			userID,
+		);
+		const following: PrismaTypes.users[] = await this.dbUtils.getUserFollowing(
+			userID,
+		);
 		const followersCount: number = followers.length;
 		const followingCount: number = following.length;
 
-		const users: PrismaTypes.users[] | null =
-			await this.prisma.users.findMany();
-		if (!users) {
-			throw new Error("Failed to calculate popularity");
-		}
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany();
 		const userCount: number = users.length;
-
 		const popularity: number =
 			(followersCount / (followingCount + 1)) * Math.log(userCount);
 		console.log("Popularity for user " + userID + ": " + popularity);
