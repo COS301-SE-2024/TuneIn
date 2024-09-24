@@ -1000,4 +1000,83 @@ describe("UsersService follow function", () => {
 			]);
 		});
 	});
+	describe("calculateGenreSimilarity", () => {
+		it("should return genre similarity percentage between two users", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockGenresUser1: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id1",
+					user_id: mockUserID1,
+					genre_id: "genre1",
+				},
+				{
+					favorite_id: "favorite_id2",
+					user_id: mockUserID1,
+					genre_id: "genre2",
+				},
+			];
+			const mockGenresUser2: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id3",
+					user_id: mockUserID2,
+					genre_id: "genre2",
+				},
+				{
+					favorite_id: "favorite_id4",
+					user_id: mockUserID2,
+					genre_id: "genre3",
+				},
+			];
+
+			jest
+				.spyOn(prismaService.favorite_genres, "findMany")
+				.mockResolvedValueOnce(mockGenresUser1)
+				.mockResolvedValueOnce(mockGenresUser2);
+
+			const result = await usersService.calculateGenreSimilarity(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(25); // (1 common genre / (2 + 2) genres) * 100
+			expect(prismaService.favorite_genres.findMany).toHaveBeenCalledWith({
+				where: { user_id: mockUserID1 },
+			});
+			expect(prismaService.favorite_genres.findMany).toHaveBeenCalledWith({
+				where: { user_id: mockUserID2 },
+			});
+		});
+
+		it("should return 0 if no common genres are found", async () => {
+			const mockUserID1 = "userID1";
+			const mockUserID2 = "userID2";
+			const mockGenresUser1: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id1",
+					user_id: mockUserID1,
+					genre_id: "genre1",
+				},
+			];
+			const mockGenresUser2: PrismaTypes.favorite_genres[] = [
+				{
+					favorite_id: "favorite_id2",
+					user_id: mockUserID2,
+					genre_id: "genre2",
+				},
+			];
+
+			jest
+				.spyOn(prismaService.favorite_genres, "findMany")
+				.mockResolvedValueOnce(mockGenresUser1)
+				.mockResolvedValueOnce(mockGenresUser2);
+
+			const result = await usersService.calculateGenreSimilarity(
+				mockUserID1,
+				mockUserID2,
+			);
+
+			expect(result).toBe(0);
+		});
+	});
 });
