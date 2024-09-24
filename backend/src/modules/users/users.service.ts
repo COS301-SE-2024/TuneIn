@@ -713,7 +713,6 @@ export class UsersService {
 			);
 			return r === null ? [] : r;
 		}
-		console.log("favoriteSongs:", favoriteSongs);
 		this.recommender.setMockSongs(
 			favoriteSongs.map((song: PrismaTypes.song) => song.audio_features),
 		);
@@ -1218,8 +1217,20 @@ export class UsersService {
 	}
 
 	async getCurrentRoomDto(username: string): Promise<RoomDto> {
-		// const userID = (await this.getProfileByUsername(username)).userID;
-		const userID: string = username;
+		let userID = "";
+		// regex to check if username is infact, userID
+		// const isUserID = /^[0-9a-fA-F]{36}$/;
+		// user id is 36 characters long, is alphanumeric and has no spaces. also contains hyphens
+		// example: 711c5238-3081-7008-9055-510a6bebc7e9
+		const isUserID =
+			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+		console.log("username: ", username, username.length);
+		if (isUserID.test(username)) {
+			userID = username;
+		} else {
+			userID = (await this.getProfileByUsername(username)).userID;
+		}
+		// const userID: string = username;
 
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
@@ -1652,24 +1663,38 @@ export class UsersService {
 
 		for (const user of users) {
 			if (user.user_id === userID) continue;
-
+			let start: number = new Date().getTime();
+			let end: number;
 			const mutualFriends = await this.calculateMutualFriends(
 				userID,
 				user.user_id,
 			);
+			end = new Date().getTime();
+			console.log("Time taken to calculate mutual friends: " + (end - start));
+			start = new Date().getTime();
 			const popularity = await this.calculatePopularity(user.user_id);
+			end = new Date().getTime();
+			console.log("Time taken to calculate popularity: " + (end - start));
+			start = new Date().getTime();
 			const activity = await this.calculateActivity(user.user_id);
+			end = new Date().getTime();
+			console.log("Time taken to calculate activity: " + (end - start));
+			start = new Date().getTime();
 			const genreSimilarity = await this.calculateGenreSimilarity(
 				currentUser.user_id,
 				user.user_id,
 			);
-
+			end = new Date().getTime();
+			console.log("Time taken to calculate genre similarity: " + (end - start));
 			const score =
 				mutualFriends * 0.4 +
 				popularity * 0.3 +
 				activity * 0.2 +
 				genreSimilarity * 0.1;
 			userScores[user.user_id] = score;
+			console.log(
+				"------Score for user " + user.username + ": " + score + "\n",
+			);
 		}
 
 		// filter undefined scores
@@ -1698,6 +1723,10 @@ export class UsersService {
 		if (!mutualFriends) {
 			throw new Error("Failed to calculate mutual friends");
 		}
+		console.log(
+			"Mutual friends between " + userID1 + " and " + userID2 + ": ",
+			mutualFriends.length,
+		);
 		return mutualFriends.length;
 	}
 
@@ -1721,6 +1750,7 @@ export class UsersService {
 
 		const popularity: number =
 			(followersCount / (followingCount + 1)) * Math.log(userCount);
+		console.log("Popularity for user " + userID + ": " + popularity);
 		return popularity;
 	}
 
@@ -1793,6 +1823,10 @@ export class UsersService {
 		);
 		const genreSimilarity: number =
 			(commonGenres.length / (user1Genres.length + user2Genres.length)) * 100;
-		return genreSimilarity;
+		console.log(
+			"Genre similarity between " + userID1 + " and " + userID2 + ": ",
+			genreSimilarity,
+		);
+		return Number.isNaN(genreSimilarity) ? 0 : genreSimilarity;
 	}
 }
