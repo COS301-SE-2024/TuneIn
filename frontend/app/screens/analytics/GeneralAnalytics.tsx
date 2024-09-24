@@ -16,6 +16,8 @@ import TableCard from "../../components/TableCard";
 import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
+import { Line } from "react-native-svg";
+import MetricsCard from "../../components/MetricsCard";
 
 const GeneralAnalytics: React.FC = () => {
 	const router = useRouter();
@@ -69,6 +71,7 @@ const GeneralAnalytics: React.FC = () => {
 					},
 				);
 				const data = await response.json();
+				console.log("general analytics", data);
 				setGeneralAnalytics(data);
 			} catch (error) {
 				console.log("Error fetching general analytics:", error);
@@ -93,11 +96,25 @@ const GeneralAnalytics: React.FC = () => {
 		{ label: "Room E", value: 85 },
 		{ label: "Room F", value: 241 },
 	];
-	const data =
+	const uniqueJoinsPerDay =
 		generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
 			return {
 				label: join.day,
 				value: join.count,
+			};
+		}) ?? [];
+	const totalJoinsPerDay =
+		generalAnalytics?.joins?.per_day?.total_joins?.map((join: any) => {
+			return {
+				label: join.day,
+				value: join.count,
+			};
+		}) ?? [];
+	const sessionDurationAverages =
+		generalAnalytics?.session_data?.per_day?.map((session: any) => {
+			return {
+				label: session.day,
+				value: session.avg_duration,
 			};
 		}) ?? [];
 
@@ -150,10 +167,25 @@ const GeneralAnalytics: React.FC = () => {
 					<View style={styles.headerSpacer} />
 				</View>
 				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick} />
-				<LineGraphCard data={data} title="Weekly Participants" />
-				<HorizontalBarGraphCard
-					data={datah}
-					title="Room Popularity by Clicks"
+				<LineGraphCard data={uniqueJoinsPerDay} title="Unique Joins" />
+				<LineGraphCard data={totalJoinsPerDay} title="Total Joins" />
+				<View style={styles.cardsContainer}>
+					<MetricsCard
+						title="Unique Joins"
+						number={
+							generalAnalytics?.joins?.all_time?.unique_joins.toString() ?? "0"
+						}
+					/>
+					<MetricsCard
+						title="Returning Visitors"
+						number={
+							generalAnalytics?.joins?.all_time?.total_joins.toString() ?? "0"
+						}
+					/>
+				</View>
+				<LineGraphCard
+					data={sessionDurationAverages}
+					title="Average Session Durations"
 				/>
 				<HorizontalBarGraphCard
 					data={[
@@ -183,6 +215,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "space-between", // To space out the items evenly
 		marginBottom: 20,
+	},
+	cardsContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginTop: 20,
 	},
 	backButton: {
 		flex: 1,
