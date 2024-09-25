@@ -141,7 +141,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 												}}
 											>
 												<Text style={{ fontSize: 20, fontWeight: "bold" }}>
-													Profile Name
+													{friend.username}
 												</Text>
 											</View>
 											<View>
