@@ -147,17 +147,12 @@ function MyRoomTabs() {
 		if (roomData.mine) {
 			router.navigate({
 				pathname: "/screens/rooms/AdvancedSettings",
-				params: {
-					roomData: JSON.stringify(roomData),
-				},
+				params: { room: room },
 			});
 		} else {
-			console.log("Going to room info page");
 			router.navigate({
 				pathname: "/screens/rooms/RoomInfo",
-				params: {
-					roomData: JSON.stringify(roomData),
-				},
+				params: { room: room },
 			});
 		}
 	};

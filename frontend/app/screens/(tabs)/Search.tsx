@@ -107,39 +107,77 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const getRecommendedRooms = async () => {
+		const getRecommendations = async () => {
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					// console.log("getting recommendations")
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/users/rooms/foryou`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
+					let response;
+					if (filter === "room") {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/rooms/foryou`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						},
-					);
-					// console.log("Recommended response: " + JSON.stringify(response));
-					const recommendedRooms: SearchResult[] = response.data.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended rooms:", response);
+							return;
+						}
+						const recommendedRooms: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: filter,
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+								},
+							}),
+						);
+						console.log("recommended rooms:", recommendedRooms);
+						console.log("Recommended rooms length: " + recommendedRooms.length);
+						setResults(recommendedRooms);
+					} else {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						}),
-					);
-					console.log("recommended rooms:", recommendedRooms);
-					console.log("Recommended rooms length: " + recommendedRooms.length);
-					setResults(recommendedRooms);
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended users:", response);
+							return;
+						}
+						console.log(
+							"Recommended users response: " + JSON.stringify(response),
+						);
+						const recommendedUsers: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: filter,
+								name: item.username,
+								userData: {
+									id: item.id,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						console.log("recommended users:", recommendedUsers);
+						console.log("Recommended users length: " + recommendedUsers.length);
+						setResults(recommendedUsers);
+					}
 				}
 			} catch (error) {
 				console.log("Error fetching recommended rooms:", error);
@@ -148,9 +186,9 @@ const Search: React.FC = () => {
 		};
 
 		if (searchTerm === "") {
+			getRecommendations();
 			if (filter === "room") {
 				getRoomHistory();
-				getRecommendedRooms();
 			} else if (filter === "user") {
 				getUserHistory();
 			}
@@ -167,7 +205,7 @@ const Search: React.FC = () => {
 				}
 			}, 300);
 		}
-	}, [searchTerm]);
+	}, [searchTerm, filter]);
 
 	useEffect(() => {
 		if (searchTerm !== "") {
@@ -185,6 +223,7 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
+		searchTerm,
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
@@ -543,10 +582,11 @@ const Search: React.FC = () => {
 					<TouchableOpacity
 						onPress={() => navigation.goBack()}
 						testID="back-button"
+						style={styles.backButton} // Optional to add padding or margin
 					>
 						<Ionicons name="chevron-back" size={30} color="black" />
 					</TouchableOpacity>
-					<Text style={styles.title}>Search </Text>
+					<Text style={styles.title}>Search</Text>
 				</View>
 				<View style={styles.searchBarContainer}>
 					<TextInput
@@ -700,8 +740,8 @@ const Search: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingHorizontal: 10,
-		paddingTop: 30,
+		paddingHorizontal: 20,
+		paddingTop: 50,
 	},
 	roomCardPadding: {
 		marginTop: 20,
@@ -711,7 +751,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 20,
+		marginBottom: 40,
+		position: "relative", // Ensures proper alignment for absolute positioning
 	},
 	noResult: {
 		flex: 1, // Make the View take up the full screen
@@ -723,7 +764,13 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "#333",
 		textAlign: "center",
-		flex: 1,
+		position: "absolute", // Ensures the title is centered regardless of the other elements
+		left: 0,
+		right: 0, // Centers the text horizontally
+	},
+	backButton: {
+		position: "absolute", // Keeps the back button aligned to the left
+		left: 10, // Adjust this for your desired padding
 	},
 	searchBarContainer: {
 		flexDirection: "row",
@@ -732,7 +779,7 @@ const styles = StyleSheet.create({
 		borderColor: "#ccc",
 		borderWidth: 1,
 		borderRadius: 56,
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
 	},
 	searchBar: {
 		flex: 1,
@@ -748,8 +795,9 @@ const styles = StyleSheet.create({
 	},
 	filterButton: {
 		paddingVertical: 10,
-		paddingHorizontal: 20,
+		paddingHorizontal: 15,
 		borderRadius: 20,
+		marginRight: 10,
 		borderWidth: 1,
 		borderColor: "#ccc",
 	},
@@ -933,16 +981,17 @@ const styles = StyleSheet.create({
 		backgroundColor: "#f2f2f2",
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 5,
-		maxHeight: 150, // Optional: limits the height of the dropdown
+		borderRadius: 20,
+		maxHeight: 200, // Optional: limits the height of the dropdown
 		zIndex: 1,
 		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
 		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 10,
+		paddingHorizontal: 10, // Padding inside the dropdown
+		marginLeft: 20, // Move the dropdown 10px to the left (30 - 10 = 20)
+		marginTop: 7, // Move the dropdown
 	},
 	searchContainer: {
 		flex: 1,
@@ -950,7 +999,7 @@ const styles = StyleSheet.create({
 		paddingTop: 50,
 	},
 	dropdownItem: {
-		// paddingVertical: 5,
+		paddingVertical: 5,
 		paddingHorizontal: 15,
 		borderBottomWidth: 5,
 		borderBottomColor: "#eee",

@@ -630,6 +630,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
+		console.log("called /users/:username");
 		return this.usersService.getProfileByUsername(username);
 	}
 
@@ -884,6 +885,27 @@ export class UsersController {
 	): Promise<boolean> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		return await this.usersService.cancelFriendRequest(userInfo.id, username);
+	}
+
+	// create endpoint to get a user's recommended users
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@ApiSecurity("bearer")
+	@Get("recommended/users")
+	@ApiOperation({ summary: "Get recommended users" })
+	@ApiOkResponse({
+		description: "Recommended users retrieved successfully",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("users")
+	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		console.log("called /users/recommended/users");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedUsers(userInfo.id);
 	}
 
 	@ApiBearerAuth()

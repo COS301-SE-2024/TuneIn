@@ -120,7 +120,12 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				onPress={followHandler}
 				testID="follow-button"
 			>
-				<Text style={styles.followButtonText}>
+				<Text
+					style={[
+						styles.followButtonText,
+						{ color: isFollowing ? "red" : colors.primary },
+					]}
+				>
 					{isFollowing ? "Unfollow" : "Follow"}
 				</Text>
 			</TouchableOpacity>
@@ -135,24 +140,23 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: "#ccc",
 		paddingBottom: 20,
+		paddingLeft: 20,
 		paddingHorizontal: 5,
+		marginTop: 20,
 	},
 	textContainer: {
-		// flex: 1,
 		width: 120,
 	},
 	profileImage: {
-		width: 70,
-		height: 70,
+		width: 50,
+		height: 50,
 		borderRadius: 40,
 		marginRight: 20,
-		marginTop: 20,
 	},
 	profileName: {
 		fontSize: 16,
 		fontWeight: "bold",
 		color: "#333",
-		marginTop: 20,
 	},
 	username: {
 		fontSize: 14,
@@ -161,18 +165,17 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 	},
 	followButton: {
-		marginTop: 20,
-		paddingVertical: 5,
-		borderRadius: 15,
-		backgroundColor: colors.primary,
-		alignItems: "center",
-		width: "30%",
+		backgroundColor: colors.backgroundColor,
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 20,
+		borderWidth: 1,
+		borderColor: colors.primary,
 	},
 	unfollowButton: {
-		backgroundColor: colors.secondary,
+		borderColor: "red",
 	},
 	followButtonText: {
-		color: "#fff",
 		fontWeight: "bold",
 	},
 });

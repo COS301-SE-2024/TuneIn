@@ -14,11 +14,10 @@ class CurrentRoom {
 					},
 				},
 			);
-			const data = await response.json();
-			// if status code is 404, it means there is no current room
-			if (response.status === 404) {
+			if (!response.ok) {
 				return null;
 			}
+			const data = await response.json();
 			return data;
 		} catch (error) {
 			console.log("Error:", error);
@@ -43,7 +42,7 @@ class CurrentRoom {
 			);
 			const data = await response.json();
 			// if status code is 404, it means there is no current room
-			if (response.status === 404) {
+			if (!response.ok) {
 				return false;
 			}
 			if (data.room.room_id === roomID) {
@@ -74,10 +73,10 @@ class CurrentRoom {
 				},
 			);
 			console.log("Response:", response);
-			if (response.status === 201) {
+			if (response.ok) {
 				return true;
 			}
-			throw false;
+			return false;
 		} catch (error) {
 			console.log("Error:", error);
 			ToastAndroid.show(

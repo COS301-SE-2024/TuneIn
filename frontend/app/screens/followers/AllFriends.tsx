@@ -9,24 +9,15 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
-import auth from "../../services/AuthManagement";
-import axios from "axios";
-import * as utils from "../../services/Utils";
-import FriendRequestCard from "../../components/FriendRequestCard";
+import FriendServices from "../../services/FriendServices";
 import { Friend } from "../../models/friend";
-import { set } from "react-datepicker/dist/date_utils";
-
-// interface Friend {
-// 	profile_picture_url: string | null;
-// 	username: string;
-// 	friend_id: string;
-// }
+import FriendRequestCard from "../../components/FriendRequestCard";
 
 const AllFriends: React.FC = () => {
 	const params = useLocalSearchParams();
 	const myUsername = params.username;
-	const [friends, setFriends] = useState<Friend[]>([]); // State to hold friends list
-	const [search, setSearch] = useState(""); // State to hold search input value
+	const [friends, setFriends] = useState<Friend[]>([]);
+	const [search, setSearch] = useState("");
 	const [filteredFriends, setFilteredFriends] = useState<Friend[]>([]);
 	const [requests, setRequests] = useState<Friend[]>([]);
 	const [filteredRequests, setFilteredRequests] = useState<Friend[]>([]);
@@ -38,24 +29,33 @@ const AllFriends: React.FC = () => {
 	const [filteredPendingRequests, setFilteredPendingRequests] = useState<
 		Friend[]
 	>([]);
-	const [friendError, setFriendError] = useState<boolean>(false);
-	const [friendReqError, setFriendReqError] = useState<boolean>(false);
-	const [potentialFriendError, setPotentialFriendError] =
-		useState<boolean>(false);
-	const [pendingError, setPendingError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState(false);
+	const [friendReqError, setFriendReqError] = useState(false);
+	const [potentialFriendError, setPotentialFriendError] = useState(false);
+	const [pendingError, setPendingError] = useState(false);
 
 	useEffect(() => {
 		const fetchFriends = async () => {
-			const token = await auth.getToken(); // Await the token to resolve the promise
-			if (token) {
-				const friendsData = await getFriends(token);
-				const requestsData = await getFriendRequests(token);
-				const potentialFriendsData = await getPotentialFriends(token);
-				const pendingRequestsData = await getPendingRequests(token);
+			try {
+				const [
+					friendsData,
+					requestsData,
+					potentialFriendsData,
+					pendingRequestsData,
+				] = await Promise.all([
+					FriendServices.getFriends(),
+					FriendServices.getFriendRequests(),
+					FriendServices.getPotentialFriends(),
+					FriendServices.getPendingRequests(),
+				]);
+
 				setFriends(friendsData);
 				setRequests(requestsData);
 				setPotentialFriends(potentialFriendsData);
 				setPendingRequests(pendingRequestsData);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+				setFriendError(true);
 			}
 		};
 
@@ -69,184 +69,55 @@ const AllFriends: React.FC = () => {
 			setFilteredPotentialRequests(potentialFriends);
 			setFilteredPendingRequests(pendingRequests);
 		} else {
+			const lowerSearch = search.toLowerCase();
 			setFilteredRequests(
 				requests.filter((request) =>
-					request.username.toLowerCase().includes(search.toLowerCase()),
+					request.username.toLowerCase().includes(lowerSearch),
 				),
 			);
 			setFilteredFriends(
 				friends.filter((friend) =>
-					friend.username.toLowerCase().includes(search.toLowerCase()),
+					friend.username.toLowerCase().includes(lowerSearch),
 				),
 			);
 			setFilteredPotentialRequests(
 				potentialFriends.filter((friend) =>
-					friend.username.toLowerCase().includes(search.toLowerCase()),
+					friend.username.toLowerCase().includes(lowerSearch),
 				),
 			);
 			setFilteredPendingRequests(
 				pendingRequests.filter((request) =>
-					request.username.toLowerCase().includes(search.toLowerCase()),
+					request.username.toLowerCase().includes(lowerSearch),
 				),
 			);
 		}
 	}, [search, requests, friends, potentialFriends, pendingRequests]);
 
-	const getFriends = async (token: string): Promise<Friend[]> => {
-		const _token = await auth.getToken();
-		try {
-			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
-				headers: { Authorization: `Bearer ${_token}` },
-			});
-			const mappedFriends: Friend[] = response.data.map((friend: any) => ({
-				profile_picture_url: friend.profile_picture_url,
-				friend_id: friend.userID,
-				username: friend.username,
-				relationship: friend.relationship,
-			}));
-			setFriendError(false);
-
-			return mappedFriends;
-		} catch (error) {
-			console.log("Error fetching friends:", error);
-			setFriendError(true);
-			return [];
-		}
-	};
-
-	const getFriendRequests = async (token: string): Promise<Friend[]> => {
-		try {
-			const response = await axios.get<Friend[]>(
-				`${utils.API_BASE_URL}/users/friends/requests`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			const mappedRequests: Friend[] = response.data.map((request: any) => ({
-				profile_picture_url: request.profile_picture_url,
-				friend_id: request.userID,
-				username: request.username,
-			}));
-			setFriendReqError(false);
-
-			return mappedRequests;
-		} catch (error) {
-			console.log("Error fetching friend requests:", error);
-			setFriendReqError(true);
-			return [];
-		}
-	};
-
 	const handleSendRequest = async (friend: Friend): Promise<void> => {
-		const token = await auth.getToken();
-		if (token) {
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.username}/befriend`,
-					{
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-				if (response.status === 201) {
-					console.log("Friend request sent successfully.");
-					const updatedPotentialFriends = potentialFriends.filter(
-						(_friend) => _friend.friend_id !== friend.friend_id,
-					);
-					setPotentialFriends(updatedPotentialFriends);
-					friend.relationship = "pending";
-					setPendingRequests([...pendingRequests, friend]);
-				}
-			} catch (error) {
-				console.log("Error sending request:", error);
-				ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
-			}
-		}
-	};
-
-	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
 		try {
-			const response = await axios.get<Friend[]>(
-				`${utils.API_BASE_URL}/users/friends/potential`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
+			await FriendServices.handleSendRequest(friend);
+			const updatedPotentialFriends = potentialFriends.filter(
+				(item) => item.friend_id !== friend.friend_id,
 			);
-			const mappedPotentialFriends: Friend[] = response.data.map(
-				(friend: any) => ({
-					profile_picture_url: friend.profile_picture_url,
-					friend_id: friend.userID,
-					username: friend.username,
-					relationship: "mutual",
-				}),
-			);
-			setPotentialFriendError(false);
-
-			return mappedPotentialFriends;
+			setPotentialFriends(updatedPotentialFriends);
+			friend.relationship = "pending";
+			setPendingRequests((prev) => [...prev, friend]);
 		} catch (error) {
-			console.log("Error fetching potential friends:", error);
-			setPotentialFriendError(true);
-			return [];
-		}
-	};
-
-	const getPendingRequests = async (token: string): Promise<Friend[]> => {
-		try {
-			const response = await axios.get<Friend[]>(
-				`${utils.API_BASE_URL}/users/friends/pending`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			const mappedPendingRequests: Friend[] = response.data.map(
-				(request: any) => ({
-					profile_picture_url: request.profile_picture_url,
-					friend_id: request.userID,
-					username: request.username,
-					relationship: "pending",
-				}),
-			);
-			setPendingError(false);
-
-			return mappedPendingRequests;
-		} catch (error) {
-			console.log("Error fetching pending requests:", error);
-			setPendingError(true);
-			return [];
+			ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
 		}
 	};
 
 	const handleCancelRequest = async (friend: Friend): Promise<void> => {
-		const token = await auth.getToken();
-		if (token) {
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.username}/cancel`,
-					{
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-				if (response.status === 201) {
-					const updatedRequests = pendingRequests.filter(
-						(request) => request.friend_id !== friend.friend_id,
-					);
-					setPendingRequests(updatedRequests);
-					friend.relationship = "mutual";
-					setPotentialFriends([...potentialFriends, friend]);
-					console.log("Friend request cancelled successfully.");
-				}
-			} catch (error) {
-				console.log("Error cancelling request:", error);
-				ToastAndroid.show(
-					"Failed to cancel friend request.",
-					ToastAndroid.SHORT,
-				);
-			}
+		try {
+			await FriendServices.handleCancelRequest(friend);
+			const updatedRequests = pendingRequests.filter(
+				(request) => request.friend_id !== friend.friend_id,
+			);
+			setPendingRequests(updatedRequests);
+			friend.relationship = "mutual";
+			setPotentialFriends((prev) => [...prev, friend]);
+		} catch (error) {
+			ToastAndroid.show("Failed to cancel friend request.", ToastAndroid.SHORT);
 		}
 	};
 
@@ -254,68 +125,35 @@ const AllFriends: React.FC = () => {
 		friend: Friend,
 		accept: boolean,
 	): Promise<void> => {
-		const token = await auth.getToken();
-		if (token) {
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.username}/${accept ? "accept" : "reject"}`,
-					{
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-				if (response.status === 201) {
-					const updatedRequests = requests.filter(
-						(request) => request.friend_id !== friend.friend_id,
-					);
-					setRequests(updatedRequests);
-					if (accept) {
-						friend.relationship = "friend";
-						setFriends([...friends, friend]);
-					} else {
-						friend.relationship = "mutual";
-						setPotentialFriends([...potentialFriends, friend]);
-					}
-					console.log("Friend request handled successfully.");
-				}
-			} catch (error) {
-				console.log("Error handling request:", error);
-				ToastAndroid.show(
-					"Unable to handle friend request.",
-					ToastAndroid.SHORT,
-				);
+		try {
+			await FriendServices.handleFriendRequest(friend, accept);
+			const updatedRequests = requests.filter(
+				(request) => request.friend_id !== friend.friend_id,
+			);
+			setRequests(updatedRequests);
+			if (accept) {
+				friend.relationship = "friend";
+				setFriends((prev) => [...prev, friend]);
+			} else {
+				friend.relationship = "mutual";
+				setPotentialFriends((prev) => [...prev, friend]);
 			}
+		} catch (error) {
+			ToastAndroid.show("Unable to handle friend request.", ToastAndroid.SHORT);
 		}
 	};
 
 	const handleFriend = async (friend: Friend): Promise<void> => {
-		const token = await auth.getToken();
-		if (token) {
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/users/${friend.username}/unfriend`,
-					{
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${token}`,
-						},
-					},
-				);
-				if (response.status === 201) {
-					const updatedFriends = friends.filter(
-						(_friend) => _friend.friend_id !== friend.friend_id,
-					);
-					setFriends(updatedFriends);
-					friend.relationship = "mutual";
-					setPotentialFriends([...potentialFriends, friend]);
-					console.log("User unfriended successfully.");
-				}
-			} catch (error) {
-				console.log("Error unfriending:", error);
-				ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
-			}
+		try {
+			await FriendServices.handleFriend(friend);
+			const updatedFriends = friends.filter(
+				(item) => item.friend_id !== friend.friend_id,
+			);
+			setFriends(updatedFriends);
+			friend.relationship = "mutual";
+			setPotentialFriends((prev) => [...prev, friend]);
+		} catch (error) {
+			ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
 		}
 	};
 
@@ -336,9 +174,7 @@ const AllFriends: React.FC = () => {
 				mutual: handleSendRequest,
 			};
 
-			return item.relationship === undefined
-				? () => {}
-				: handlers[item.relationship as string];
+			return handlers[item.relationship as string] || (() => {});
 		};
 
 		return (
@@ -391,13 +227,6 @@ const AllFriends: React.FC = () => {
 							: "No friend requests found."}
 					</Text>
 				)}
-				{requests.length > 6 && (
-					<View style={styles.moreRequests}>
-						<Text style={styles.moreRequestsText}>
-							View more friend requests
-						</Text>
-					</View>
-				)}
 			</View>
 			<View style={styles.requestsSection}>
 				<Text style={styles.requestsTitle}>Potential Friends</Text>
@@ -415,13 +244,6 @@ const AllFriends: React.FC = () => {
 							: "No potential friends found."}
 					</Text>
 				)}
-				{potentialFriends.length > 6 && (
-					<View style={styles.moreRequests}>
-						<Text style={styles.moreRequestsText}>
-							View more potential friends
-						</Text>
-					</View>
-				)}
 			</View>
 			<View style={styles.requestsSection}>
 				<Text style={styles.requestsTitle}>Pending Requests</Text>
@@ -438,13 +260,6 @@ const AllFriends: React.FC = () => {
 							? "Failed to load pending requests."
 							: "No pending requests found."}
 					</Text>
-				)}
-				{pendingRequests.length > 6 && (
-					<View style={styles.moreRequests}>
-						<Text style={styles.moreRequestsText}>
-							View more pending requests
-						</Text>
-					</View>
 				)}
 			</View>
 		</View>
@@ -471,7 +286,7 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 4,
+		borderRadius: 20,
 		paddingHorizontal: 8,
 		marginBottom: 16,
 	},
