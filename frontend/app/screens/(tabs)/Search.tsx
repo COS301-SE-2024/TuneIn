@@ -8,6 +8,8 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
+	TouchableWithoutFeedback,
+	Keyboard,
 } from "react-native";
 import {
 	GestureHandlerRootView,
@@ -60,6 +62,12 @@ const Search: React.FC = () => {
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 	const [dropdownVisible, setDropdownVisible] = useState(false);
+	const [roomRecommendations, setRoomRecommendations] = useState<
+		SearchResult[]
+	>([]);
+	const [userRecommendations, setUserRecommendations] = useState<
+		SearchResult[]
+	>([]);
 	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
 	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
@@ -107,90 +115,16 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const getRecommendations = async () => {
-			setLoading(true);
-			try {
-				const token = await auth.getToken();
-				if (token) {
-					let response;
-					if (filter === "room") {
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/rooms/foryou`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							},
-						);
-						if (response.status !== 200) {
-							console.error("Error fetching recommended rooms:", response);
-							return;
-						}
-						const recommendedRooms: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: filter,
-								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
-									backgroundImage: item.room_image,
-									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									tags: item.tags,
-								},
-							}),
-						);
-						console.log("recommended rooms:", recommendedRooms);
-						console.log("Recommended rooms length: " + recommendedRooms.length);
-						setResults(recommendedRooms);
-					} else {
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/recommended/users`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							},
-						);
-						if (response.status !== 200) {
-							console.error("Error fetching recommended users:", response);
-							return;
-						}
-						console.log(
-							"Recommended users response: " + JSON.stringify(response),
-						);
-						const recommendedUsers: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.userID,
-								type: filter,
-								name: item.username,
-								userData: {
-									id: item.id,
-									profile_picture_url: item.profile_picture_url,
-									profile_name: item.profile_name,
-									username: item.username,
-									followers: item.followers.data,
-								},
-							}),
-						);
-						console.log("recommended users:", recommendedUsers);
-						console.log("Recommended users length: " + recommendedUsers.length);
-						setResults(recommendedUsers);
-					}
-				}
-			} catch (error) {
-				console.log("Error fetching recommended rooms:", error);
-			}
-			setLoading(false);
-		};
+		
 
-		if (searchTerm === "") {
-			getRecommendations();
+		if (searchTerm.trim() === "") {
+			
 			if (filter === "room") {
 				getRoomHistory();
+				setResults(roomRecommendations);
 			} else if (filter === "user") {
 				getUserHistory();
+				setResults(userRecommendations);
 			}
 		} else {
 			if (timeoutRef.current) {
@@ -208,9 +142,7 @@ const Search: React.FC = () => {
 	}, [searchTerm, filter]);
 
 	useEffect(() => {
-		if (searchTerm !== "") {
-			handleSearch();
-		}
+		handleSearch();
 	}, [
 		nsfw,
 		explicit,
@@ -223,10 +155,10 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
-		searchTerm,
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
+		console.log("Handle Search: " + sh);
 		// console.log("handle search");
 		if (searchTerm.trim() === "") {
 			return;
@@ -573,166 +505,245 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		getRoomHistory();
+		const getRecommendations = async () => {
+			setLoading(true);
+			try {
+				const token = await auth.getToken();
+				if (token) {
+					let response;
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/rooms/foryou`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						if (response.status !== 200) {
+							console.log("Error fetching recommended rooms:", response);
+							return;
+						}
+						const recommendedRooms: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: filter,
+								name: item.room_name,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+								},
+							}),
+						);
+						// console.log("recommended rooms:", recommendedRooms);
+						// console.log("Recommended rooms length: " + recommendedRooms.length);
+						setRoomRecommendations(recommendedRooms);
+						setResults(recommendedRooms);
+
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						if (response.status !== 200) {
+							console.log("Error fetching recommended users:", response);
+							return;
+						}
+						console.log(
+							"Recommended users response: " + JSON.stringify(response),
+						);
+						const recommendedUsers: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: filter,
+								name: item.username,
+								userData: {
+									id: item.id,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						// console.log("recommended users:", recommendedUsers);
+						// console.log("Recommended users length: " + recommendedUsers.length);
+						setUserRecommendations(recommendedUsers);
+				}
+			} catch (error) {
+				console.log("Error fetching recommended rooms:", error);
+			}
+			setLoading(false);
+		};
+		getRecommendations();
 	}, []);
 
 	return (
 		<GestureHandlerRootView>
-			<View style={styles.container}>
-				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => navigation.goBack()}
-						testID="back-button"
-						style={styles.backButton} // Optional to add padding or margin
-					>
-						<Ionicons name="chevron-back" size={30} color="black" />
-					</TouchableOpacity>
-					<Text style={styles.title}>Search</Text>
-				</View>
-				<View style={styles.searchBarContainer}>
-					<TextInput
-						testID="search-input"
-						style={styles.searchBar}
-						placeholder="Search..."
-						value={searchTerm}
-						onBlur={() => {
-							setTimeout(() => {
-								setDropdownVisible(false);
-							}, 200);
-						}}
-						onFocus={() => {
-							setDropdownVisible(true);
-						}}
-						onChangeText={setSearchTerm}
-						onSubmitEditing={() => {
-							handleSearch();
-						}}
-					/>
-					<TouchableOpacity
-						style={styles.searchIcon}
-						onPress={() => {
-							handleSearch();
-						}}
-						testID="search-button"
-					>
-						<Ionicons name="search-sharp" size={30} color={colors.primary} />
-					</TouchableOpacity>
-				</View>
-				{dropdownVisible && searchSuggestions.length !== 0 && (
-					<FlatList
-						data={searchSuggestions}
-						keyExtractor={(item) => item}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={() => {
-									setSearchTerm(item);
-									handleSearch(item);
-								}}
-							>
-								<Text style={styles.dropdownItemText}>{item}</Text>
-							</TouchableOpacity>
-						)}
-						style={styles.dropdown}
-					/>
-				)}
-				<View style={styles.filterContainer}>
-					<TouchableOpacity
-						style={[
-							styles.filterButton,
-							filter === "room" && styles.activeFilter,
-						]}
-						onPress={() => handleSelection("room")}
-					>
-						<Text style={styles.filterText}>Rooms</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[
-							styles.filterButton,
-							filter === "user" && styles.activeFilter,
-						]}
-						onPress={() => handleSelection("user")}
-						testID="user-btn"
-					>
-						<Text style={styles.filterText}>Users</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={styles.filterButton}
-						onPress={handleToggleMoreFilters}
-						testID="toggle-filters-button"
-					>
-						<Text style={styles.filterText}>{"View More Filters"}</Text>
-					</TouchableOpacity>
-				</View>
-
-				<FilterBottomSheet
-					filter={filter}
-					explicit={explicit}
-					nsfw={nsfw}
-					temporary={temporary}
-					isPrivate={isPrivate}
-					scheduled={scheduled}
-					showMoreFilters={showMoreFilters}
-					host={host}
-					roomCount={roomCount}
-					maxFollowers={maxFollowers}
-					minFollowers={minFollowers}
-					selectedGenre={selectedGenre}
-					selectedLanguage={selectedLanguage}
-					setExplicit={setExplicit}
-					setNsfw={setNsfw}
-					setTemporary={setTemporary}
-					setIsPrivate={setIsPrivate}
-					setScheduled={setScheduled}
-					setHost={setHost}
-					setRoomCount={setRoomCount}
-					setMaxFollowers={setMaxFollowers}
-					setMinFollowers={setMinFollowers}
-					setSelectedGenre={setSelectedGenre}
-					setSelectedLanguage={setSelectedLanguage}
-					setShowMoreFilters={setShowMoreFilters}
-				/>
-
-				{loading ? (
-					!showMoreFilters && (
-						// Render Skeleton if loading
-						<View style={styles.roomCardPadding}>
-							{filter === "room" ? (
-								<>
-									<SkeletonRoomCard />
-									<SkeletonRoomCard />
-									<SkeletonRoomCard />
-								</>
-							) : (
-								<>
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-								</>
-							)}
-						</View>
-					)
-				) : results.length === 0 ? (
-					// Render No Results Message if no results
-					<View style={styles.noResult}>
-						<Text>
-							{searchError
-								? "Failed to load search results"
-								: "No results found"}
-						</Text>
+			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+				<View style={styles.container}>
+					<View style={styles.header}>
+						<TouchableOpacity
+							onPress={() => navigation.goBack()}
+							testID="back-button"
+							style={styles.backButton} // Optional to add padding or margin
+						>
+							<Ionicons name="chevron-back" size={30} color="black" />
+						</TouchableOpacity>
+						<Text style={styles.title}>Search</Text>
 					</View>
-				) : (
-					// Render FlatList if there are results
-					<FlatList
-						data={results}
-						keyExtractor={(item) => item.id}
-						renderItem={renderResult}
-						contentContainerStyle={styles.resultsContainer}
-						onScroll={handleScroll}
+					<View style={styles.searchBarContainer}>
+						<TextInput
+							testID="search-input"
+							style={styles.searchBar}
+							placeholder="Search..."
+							value={searchTerm}
+							onBlur={() => {
+								setTimeout(() => {
+									setDropdownVisible(false);
+								}, 200);
+							}}
+							onFocus={() => {
+								setDropdownVisible(true);
+							}}
+							onChangeText={setSearchTerm}
+							onSubmitEditing={() => {
+								handleSearch();
+							}}
+						/>
+						<TouchableOpacity
+							style={styles.searchIcon}
+							onPress={() => {
+								handleSearch();
+							}}
+							testID="search-button"
+						>
+							<Ionicons name="search-sharp" size={30} color={colors.primary} />
+						</TouchableOpacity>
+					</View>
+					{dropdownVisible && searchSuggestions.length !== 0 && (
+						<FlatList
+							data={searchSuggestions}
+							keyExtractor={(item) => item}
+							renderItem={({ item }) => (
+								<TouchableOpacity
+									style={styles.dropdownItem}
+									onPress={() => {
+										setSearchTerm(item);
+										handleSearch(item);
+									}}
+								>
+									<Text style={styles.dropdownItemText}>{item}</Text>
+								</TouchableOpacity>
+							)}
+							style={styles.dropdown}
+						/>
+					)}
+					<View style={styles.filterContainer}>
+						<TouchableOpacity
+							style={[
+								styles.filterButton,
+								filter === "room" && styles.activeFilter,
+							]}
+							onPress={() => handleSelection("room")}
+						>
+							<Text style={styles.filterText}>Rooms</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={[
+								styles.filterButton,
+								filter === "user" && styles.activeFilter,
+							]}
+							onPress={() => handleSelection("user")}
+							testID="user-btn"
+						>
+							<Text style={styles.filterText}>Users</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.filterButton}
+							onPress={handleToggleMoreFilters}
+							testID="toggle-filters-button"
+						>
+							<Text style={styles.filterText}>{"View More Filters"}</Text>
+						</TouchableOpacity>
+					</View>
+
+					<FilterBottomSheet
+						filter={filter}
+						explicit={explicit}
+						nsfw={nsfw}
+						temporary={temporary}
+						isPrivate={isPrivate}
+						scheduled={scheduled}
+						showMoreFilters={showMoreFilters}
+						host={host}
+						roomCount={roomCount}
+						maxFollowers={maxFollowers}
+						minFollowers={minFollowers}
+						selectedGenre={selectedGenre}
+						selectedLanguage={selectedLanguage}
+						setExplicit={setExplicit}
+						setNsfw={setNsfw}
+						setTemporary={setTemporary}
+						setIsPrivate={setIsPrivate}
+						setScheduled={setScheduled}
+						setHost={setHost}
+						setRoomCount={setRoomCount}
+						setMaxFollowers={setMaxFollowers}
+						setMinFollowers={setMinFollowers}
+						setSelectedGenre={setSelectedGenre}
+						setSelectedLanguage={setSelectedLanguage}
+						setShowMoreFilters={setShowMoreFilters}
 					/>
-				)}
-			</View>
+
+					{loading ? (
+						!showMoreFilters && (
+							// Render Skeleton if loading
+							<View style={styles.roomCardPadding}>
+								{filter === "room" ? (
+									<>
+										<SkeletonRoomCard />
+										<SkeletonRoomCard />
+										<SkeletonRoomCard />
+									</>
+								) : (
+									<>
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+									</>
+								)}
+							</View>
+						)
+					) : results.length === 0 ? (
+						// Render No Results Message if no results
+						<View style={styles.noResult}>
+							<Text>
+								{searchError
+									? "Failed to load search results"
+									: "No results found"}
+							</Text>
+						</View>
+					) : (
+						// Render FlatList if there are results
+						<FlatList
+							data={results}
+							keyExtractor={(item) => item.id}
+							renderItem={renderResult}
+							contentContainerStyle={styles.resultsContainer}
+							onScroll={handleScroll}
+						/>
+					)}
+				</View>
+			</TouchableWithoutFeedback>
 		</GestureHandlerRootView>
 	);
 };
