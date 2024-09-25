@@ -4,10 +4,7 @@ import { Track } from "../models/Track";
 
 const { width, height } = Dimensions.get("window");
 
-// Define a threshold for small screens
-// const isSmallScreen = height < 800;
 const isSmallScreen = width < 380 || height < 700;
-const isBigScreen = width < 400;
 
 interface SongRoomWidgetProps {
 	track: Track;
