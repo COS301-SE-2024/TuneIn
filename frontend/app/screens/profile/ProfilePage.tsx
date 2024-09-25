@@ -108,6 +108,13 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
+	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
+		router.navigate({
+			pathname: "/screens/rooms/MoreRooms",
+			params: { rooms: JSON.stringify(rooms), name: Name },
+		});
+	};
+
 	if (params && JSON.stringify(params) !== "{}") {
 		ownsProfile = false;
 	}
@@ -1151,11 +1158,7 @@ const ProfileScreen: React.FC = () => {
 									{primaryProfileData.fav_rooms.count > 10 && (
 										<TouchableOpacity
 											onPress={() => {
-												navigateToMore(
-													"room",
-													favoriteRoomData,
-													"Favorite Rooms",
-												);
+												navigateToMoreRooms(favoriteRoomData, "Favorite Rooms");
 											}}
 										>
 											<Text
@@ -1192,7 +1195,7 @@ const ProfileScreen: React.FC = () => {
 									{primaryProfileData.recent_rooms.count > 10 && (
 										<TouchableOpacity
 											onPress={() => {
-												navigateToMore("room", recentRoomData, "Recent Rooms");
+												navigateToMoreRooms(recentRoomData, "Recent Rooms");
 											}}
 										>
 											<Text
