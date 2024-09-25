@@ -30,6 +30,7 @@ import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
 import { Friend } from "../../models/friend";
+import FollowBottomSheet from "../../components/FollowBottomSheet";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -60,6 +61,7 @@ const ProfileScreen: React.FC = () => {
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isFriendDialogVisible, setFriendDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
 	const [roomCheck, setRoomCheck] = useState<boolean>(false);
@@ -74,6 +76,10 @@ const ProfileScreen: React.FC = () => {
 	const [potentialFriends, setPotentialFriends] = useState<Friend[]>([]);
 	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
 	const [requests, setRequests] = useState<Friend[]>([]);
+	const [areFriends, setAreFriends] = useState<boolean>(false);
+	const [arePotentialFriends, setArePotentialFriends] = useState<boolean>(false);
+	const [isPendingRequest, setIsPendingRequest] = useState<boolean>(false);
+	const [hasRequested, setHasRequested] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [favRoomError, setFavRoomError] = useState<boolean>(false);
 	const [recentRoomError, setRecentRoomError] = useState<boolean>(false);
@@ -155,7 +161,7 @@ const ProfileScreen: React.FC = () => {
 							storedToken,
 							parsedFriend.username,
 						);
-						
+
 						setPrimProfileData(data);
 
 						const fData = await getFriends(storedToken);
@@ -181,6 +187,27 @@ const ProfileScreen: React.FC = () => {
 							);
 							setFollowing(isFollowing);
 						}
+
+						const friends = fData.some((f) => f.username === parsedFriend.username);
+
+						setAreFriends(friends);
+
+						const potential = potFData.some(
+							(pot) => pot.username === parsedFriend.username,
+						);
+
+						setArePotentialFriends(potential);
+
+						const pending = penFData.some(
+							(pen) => pen.username === parsedFriend.username,
+						);
+
+						setIsPendingRequest(pending);
+
+						const req = reqFData.some((req) => req.username === parsedFriend.username);
+
+						setHasRequested(req);
+
 						if (currentRoomData === null) {
 							fetchCurrentRoomInfo(data.userID);
 						}
@@ -377,7 +404,6 @@ const ProfileScreen: React.FC = () => {
 				}),
 			);
 			setFriendError(false);
-			console.log("Potential Friends: " + JSON.stringify(mappedPotentialFriends));
 
 			return mappedPotentialFriends;
 		} catch (error) {
@@ -426,13 +452,159 @@ const ProfileScreen: React.FC = () => {
 				username: request.username,
 			}));
 			setFriendError(false);
-			console.log("Friend requests: " + JSON.stringify(mappedRequests));	
+			console.log("Friend requests: " + JSON.stringify(mappedRequests));
 
 			return mappedRequests;
 		} catch (error) {
 			console.log("Error fetching friend requests:", error);
 			setFriendError(true);
 			return [];
+		}
+	};
+
+	const handleSendRequest = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/befriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Friend request response: " + JSON.stringify(response));
+				if (response.status === 201) {
+					console.log("Friend request sent successfully.");
+					const updatedPotentialFriends = potentialFriends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setPotentialFriends(updatedPotentialFriends);
+					setIsPendingRequest(true);
+					setPendingRequests([...pendingRequests, friend]);
+				}
+				else if (response.status === 201) {
+					ToastAndroid.show(
+						"Cannot send request to user who does not follow you.",
+						ToastAndroid.SHORT,
+					);
+				}
+			} catch (error) {
+				console.log("Error sending request:", error);
+				ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
+			}
+		}
+	};
+
+	const handleCancelRequest = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/cancel`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedRequests = pendingRequests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setPendingRequests(updatedRequests);
+					setIsPendingRequest(false);
+					setPotentialFriends([...potentialFriends, friend]);
+					console.log("Friend request cancelled successfully.");
+				}
+			} catch (error) {
+				console.log("Error cancelling request:", error);
+				ToastAndroid.show(
+					"Failed to cancel friend request.",
+					ToastAndroid.SHORT,
+				);
+			}
+		}
+	};
+
+	const handleFriendRequest = async (
+		friend: { username: string; friend_id: string },
+		accept: boolean,
+	): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/${accept ? "accept" : "reject"}`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedRequests = requests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setRequests(updatedRequests);
+					if (accept) {
+						setFriends([...friends, friend]);
+						setAreFriends(true);
+					} else {
+						setPotentialFriends([...potentialFriends, friend]);
+					}
+					setArePotentialFriends(false);
+					console.log("Friend request handled successfully.");
+				}
+			} catch (error) {
+				console.log("Error handling request:", error);
+				ToastAndroid.show(
+					"Unable to handle friend request.",
+					ToastAndroid.SHORT,
+				);
+			}
+		}
+	};
+
+	const handleFriend = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/unfriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedFriends = friends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setFriends(updatedFriends);
+					setAreFriends(false);
+					setPotentialFriends([...potentialFriends, friend]);
+					console.log("User unfriended successfully.");
+				}
+			} catch (error) {
+				console.log("Error unfriending:", error);
+				ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
+			}
 		}
 	};
 
@@ -609,15 +781,46 @@ const ProfileScreen: React.FC = () => {
 
 		return (
 			<View style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}>
-				<TouchableOpacity
-					style={styles.button}
-					onPress={() => followHandler()}
-					testID="follow-button"
-				>
-					<Text style={styles.buttonText}>
-						{following ? "Unfollow" : "Follow"}
-					</Text>
-				</TouchableOpacity>
+				<>
+					<TouchableOpacity
+						style={[
+							styles.button,
+							{ flex: 1, flexDirection: "row", paddingVertical: 5, alignItems: "center", },
+						]}
+						onPress={() => {
+							if (following) {
+								setFriendDialogVisible(true);
+							} else {
+								followHandler();
+							}
+						}}
+						testID="follow-button"
+					>
+						<Text style={styles.buttonText}>
+							{following ? "Following  " : "Follow"}
+						</Text>
+						{following && (
+							<Ionicons style={{paddingTop: 2}} name="chevron-down" size={15} color="black" />
+						)}
+					</TouchableOpacity>
+					<FollowBottomSheet
+						friend={{
+							username: primaryProfileData.username,
+							friend_id: primaryProfileData.userID,
+						}}
+						showFollowOptions={isFriendDialogVisible}
+						isFriend={areFriends}
+						isPotential={arePotentialFriends}
+						isRequesting={hasRequested}
+						isPending={isPendingRequest}
+						handleUnfollow={followHandler}
+						handleRequest={handleFriendRequest}
+						handleUnfriend={handleFriend}
+						handleCancel={handleCancelRequest}
+						sendRequest={handleSendRequest}
+						setShowMoreOptions={setFriendDialogVisible}
+					></FollowBottomSheet>
+				</>
 			</View>
 		);
 	};

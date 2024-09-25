@@ -11,29 +11,52 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import {
+	GestureHandlerRootView,
+	ScrollView,
+} from "react-native-gesture-handler";
+import { Friend } from "../models/friend";
 
 interface BottomSheetProps {
+	friend: { username: string; friend_id: string };
 	showFollowOptions: boolean;
 	isFriend?: boolean;
 	isPending?: boolean;
+	isRequesting?: boolean;
 	isPotential?: boolean;
-	handleUnfollow?: () => void;
-	handleRequest?: (value: boolean) => void;
-	handleUnfriend?: () => void;
-	handleCancel?: () => void;
-	sendRequest?: () => void;
+	handleUnfollow?: (friend: {
+		username: string;
+		friend_id: string;
+	}) => Promise<void>;
+	handleRequest?: (
+		friend: { username: string; friend_id: string },
+		value: boolean,
+	) => Promise<void>;
+	handleUnfriend?: (friend: {
+		username: string;
+		friend_id: string;
+	}) => Promise<void>;
+	handleCancel?: (friend: {
+		username: string;
+		friend_id: string;
+	}) => Promise<void>;
+	sendRequest?: (friend: {
+		username: string;
+		friend_id: string;
+	}) => Promise<void>;
 	setShowMoreOptions: (value: boolean) => void;
 }
 
 // Define the functional component with default values set in the parameters
 const FollowBottomSheet: React.FC<BottomSheetProps> = ({
+	friend,
 	isFriend = false,
 	isPending = false,
 	isPotential = false,
+	isRequesting = false,
 	setShowMoreOptions: setShowMoreFilters = () => {},
 	handleUnfollow = () => {},
-	handleRequest = (value: boolean) => {},
+	handleRequest = () => {},
 	sendRequest = () => {},
 	handleUnfriend = () => {},
 	handleCancel = () => {},
@@ -44,10 +67,12 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 	const [isModalVisible, setIsModalVisible] = useState(false);
 
 	useEffect(() => {
+	}, [isFriend, isPending, isPotential]);
+
+	useEffect(() => {
 		if (showMoreFilters) {
 			// Set modal visible state
 			setIsModalVisible(true);
-
 			// Animate the modal opening
 			timeoutRef.current = setTimeout(() => {
 				Animated.timing(slideAnim, {
@@ -89,125 +114,152 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 
 	return (
 		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
-			<TouchableWithoutFeedback onPress={handleClose}>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalOverlay}>
-						<KeyboardAvoidingView
-							behavior={Platform.OS === "ios" ? "padding" : "height"}
-						>
-							<TouchableWithoutFeedback>
-								<ScrollView>
-									<Animated.View
-										style={[
-											styles.modal,
-											{
-												transform: [{ translateY: slideAnim }],
-											},
-											{ minHeight: "20%" },
-										]}
-									>
-										<View
-											style={{
-												padding: 10,
-												alignItems: "center",
-												borderBottomWidth: 1,
-												borderColor: "#ccc",
-											}}
+			<GestureHandlerRootView>
+				<TouchableWithoutFeedback onPress={handleClose}>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalOverlay}>
+							<KeyboardAvoidingView
+								behavior={Platform.OS === "ios" ? "padding" : "height"}
+							>
+								<TouchableWithoutFeedback>
+									<ScrollView>
+										<Animated.View
+											style={[
+												styles.modal,
+												{
+													transform: [{ translateY: slideAnim }],
+												},
+												{ minHeight: "20%" },
+											]}
 										>
-											<Text style={{ fontSize: 20, fontWeight: "bold" }}>
-												Profile Name
-											</Text>
-										</View>
-										<View>
-											{!isFriend ? (
-												<>
+											<View
+												style={{
+													padding: 10,
+													alignItems: "center",
+													borderBottomWidth: 1,
+													borderColor: "#ccc",
+												}}
+											>
+												<Text style={{ fontSize: 20, fontWeight: "bold" }}>
+													Profile Name
+												</Text>
+											</View>
+											<View>
+												{!isFriend ? (
+													<>
+														<TouchableOpacity
+															style={{ paddingTop: 20 }}
+															hitSlop={{
+																top: 5,
+																bottom: 5,
+																left: 50,
+																right: 50,
+															}}
+															onPress={() => {
+																handleUnfollow(friend);
+																handleClose();
+															}}
+														>
+															<Text style={{ fontSize: 18 }}>Unfollow</Text>
+														</TouchableOpacity>
+														{isPending ? (
+															<TouchableOpacity
+																style={{ paddingTop: 20 }}
+																hitSlop={{
+																	top: 5,
+																	bottom: 5,
+																	left: 50,
+																	right: 50,
+																}}
+																onPress={() => {
+																	handleCancel(friend);
+																	handleClose();
+																}}
+															>
+																<Text style={{ fontSize: 18 }}>
+																	Cancel Friend Request
+																</Text>
+															</TouchableOpacity>
+														) : isRequesting ? (
+															<>
+																<TouchableOpacity
+																	style={{ paddingTop: 20 }}
+																	hitSlop={{
+																		top: 5,
+																		bottom: 5,
+																		left: 50,
+																		right: 50,
+																	}}
+																	onPress={() => {
+																		handleRequest(friend, true);
+																		handleClose();
+																	}}
+																>
+																	<Text style={{ fontSize: 18 }}>
+																		Accept Friend Request
+																	</Text>
+																</TouchableOpacity>
+																<TouchableOpacity
+																	style={{ paddingTop: 20 }}
+																	hitSlop={{
+																		top: 5,
+																		bottom: 5,
+																		left: 50,
+																		right: 50,
+																	}}
+																	onPress={() => {
+																		handleRequest(friend, false);
+																		handleClose();
+																	}}
+																>
+																	<Text style={{ fontSize: 18 }}>
+																		Reject Friend Request
+																	</Text>
+																</TouchableOpacity>
+															</>
+														) : (
+															isPotential && (
+																<TouchableOpacity
+																	style={{ paddingTop: 20 }}
+																	hitSlop={{
+																		top: 5,
+																		bottom: 5,
+																		left: 50,
+																		right: 50,
+																	}}
+																	onPress={() => {
+																		sendRequest(friend);
+																		handleClose();
+																	}}
+																>
+																	<Text style={{ fontSize: 18 }}>
+																		Send Friend Request
+																	</Text>
+																</TouchableOpacity>
+															)
+														)}
+													</>
+												) : (
 													<TouchableOpacity
 														style={{ paddingTop: 20 }}
 														hitSlop={{ top: 5, bottom: 5, left: 50, right: 50 }}
-														onPress={handleUnfollow}
+														onPress={() => {
+															handleUnfriend(friend);
+															handleClose();
+														}}
 													>
-														<Text style={{ fontSize: 18 }}>Unfollow</Text>
+														<Text style={{ fontSize: 18 }}>Unfriend</Text>
 													</TouchableOpacity>
-													{isPending ? (
-														<TouchableOpacity
-															style={{ paddingTop: 20 }}
-															hitSlop={{
-																top: 5,
-																bottom: 5,
-																left: 50,
-																right: 50,
-															}}
-															onPress={handleCancel}
-														>
-															<Text style={{ fontSize: 18 }}>
-																Cancel Friend Request
-															</Text>
-														</TouchableOpacity>
-													) : isPotential ? (
-														<>
-															<TouchableOpacity
-																style={{ paddingTop: 20 }}
-																hitSlop={{
-																	top: 5,
-																	bottom: 5,
-																	left: 50,
-																	right: 50,
-																}}
-																onPress={() => handleRequest(true)}
-															>
-																<Text style={{ fontSize: 18 }}>
-																	Accept Friend Request
-																</Text>
-															</TouchableOpacity>
-															<TouchableOpacity
-																style={{ paddingTop: 20 }}
-																hitSlop={{
-																	top: 5,
-																	bottom: 5,
-																	left: 50,
-																	right: 50,
-																}}
-																onPress={() => handleRequest(false)}
-															>
-																<Text style={{ fontSize: 18 }}>
-																	Reject Friend Request
-																</Text>
-															</TouchableOpacity>
-														</>
-													) : (
-														<TouchableOpacity
-															style={{ paddingTop: 20 }}
-															hitSlop={{
-																top: 5,
-																bottom: 5,
-																left: 50,
-																right: 50,
-															}}
-															onPress={sendRequest}
-														>
-															<Text style={{ fontSize: 18 }}>
-																Send Friend Request
-															</Text>
-														</TouchableOpacity>
-													)}
-												</>
-											) : (
-												<TouchableOpacity
-													style={{ paddingTop: 20 }}
-													hitSlop={{ top: 5, bottom: 5, left: 50, right: 50 }}
-													onPress={handleUnfriend}
-												>
-													<Text style={{ fontSize: 18 }}>Unfriend</Text>
-												</TouchableOpacity>
-											)}
-										</View>
-									</Animated.View>
-								</ScrollView>
-							</TouchableWithoutFeedback>
-						</KeyboardAvoidingView>
+												)}
+											</View>
+										</Animated.View>
+									</ScrollView>
+								</TouchableWithoutFeedback>
+							</KeyboardAvoidingView>
+						</View>
 					</View>
-				</View>
-			</TouchableWithoutFeedback>
+				</TouchableWithoutFeedback>
+			</GestureHandlerRootView>
 		</Modal>
 	);
 };
