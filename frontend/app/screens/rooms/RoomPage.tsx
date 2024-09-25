@@ -38,6 +38,9 @@ import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import * as path from "path";
 
+const { width, height } = Dimensions.get("window");
+const isSmallScreen = height < 800;
+
 interface RoomPageProps {
 	joined: boolean;
 	handleJoinLeave: () => Promise<void>;
@@ -706,7 +709,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				/> */}
 
 				{roomData.mine ? (
-					<View style={styles.controls}>
+					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
@@ -1089,6 +1092,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		marginTop: 50,
 	},
+	smallControls: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 10,
+	},
 	controlButton: {
 		marginHorizontal: 40,
 	},
@@ -1141,7 +1150,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	songRoomWidget: {
-		marginTop: -50,
+		marginTop: -80,
 	},
 });
 
