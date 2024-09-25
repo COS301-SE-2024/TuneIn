@@ -31,6 +31,7 @@ import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
+import { User } from "../../models/user";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -943,6 +944,7 @@ const ProfileScreen: React.FC = () => {
 				style={{
 					paddingVertical: 15,
 					paddingRight: 15,
+					paddingLeft: 1,
 					backgroundColor: "white",
 				}}
 				testID="profile-screen"
@@ -1042,7 +1044,18 @@ const ProfileScreen: React.FC = () => {
 						>
 							<TouchableOpacity
 								style={{ alignItems: "center" }}
-								onPress={navigateToFollowerStack}
+								onPress={() => {
+									const following: User = primaryProfileData.following.data.map(
+										(item: any) => ({
+											id: item.userID,
+											profile_picture_url: item.profile_picture_url,
+											profile_name: item.profile_name,
+											username: item.username,
+											followers: item.followers.data,
+										}),
+									);
+									navigateToMore("user", following, "Following");
+								}}
 							>
 								<Text style={{ fontSize: 20, fontWeight: "600" }}>
 									{primaryProfileData.following.count}
@@ -1053,7 +1066,16 @@ const ProfileScreen: React.FC = () => {
 							</TouchableOpacity>
 							<TouchableOpacity
 								style={{ marginLeft: 60, alignItems: "center" }}
-								onPress={navigateToFollowerStack}
+								onPress={() => {
+										const followers: User = primaryProfileData.followers.data.map((item: any) => ({
+										id: item.userID,
+										profile_picture_url: item.profile_picture_url,
+										profile_name: item.profile_name,
+										username: item.username,
+										followers: item.followers.data,
+									}));
+									navigateToMore("user", followers, "Followers");
+								}}
 							>
 								<Text style={{ fontSize: 20, fontWeight: "600" }}>
 									{primaryProfileData.followers.count}
@@ -1158,7 +1180,11 @@ const ProfileScreen: React.FC = () => {
 									{primaryProfileData.fav_rooms.count > 10 && (
 										<TouchableOpacity
 											onPress={() => {
-												navigateToMoreRooms(favoriteRoomData, "Favorite Rooms");
+												navigateToMore(
+													"room",
+													favoriteRoomData,
+													"Favorite Rooms",
+												);
 											}}
 										>
 											<Text
