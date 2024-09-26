@@ -488,4 +488,78 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toBe(0);
 		});
 	});
+	describe("getRoomInteractionAnalytics", () => {
+		it("should return correct room interaction analytics", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserID = "userID1";
+
+			const mockMessages = {
+				per_hour: [
+					{ hour: new Date("2023-01-01T01:00:00Z"), count: 5 },
+					{ hour: new Date("2023-01-01T02:00:00Z"), count: 10 },
+				],
+				total: 15,
+			};
+			const mockBookmarkedCount = 5;
+			const mockReactionsSent = 10;
+
+			jest
+				.spyOn(service, "getMessageInteractionsAnalytics")
+				.mockResolvedValue(mockMessages);
+			jest
+				.spyOn(service, "getNumberOfBookmarks")
+				.mockResolvedValue(mockBookmarkedCount);
+			jest
+				.spyOn(service, "getNumberOfReactions")
+				.mockResolvedValue(mockReactionsSent);
+
+			const result = await service.getRoomInteractionAnalytics(
+				mockRoomID,
+				mockUserID,
+			);
+
+			const expectedResult = {
+				messages: mockMessages,
+				bookmarked_count: mockBookmarkedCount,
+				reactions_sent: mockReactionsSent,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no data available", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserID = "userID1";
+
+			const mockMessages = {
+				per_hour: [],
+				total: 0,
+			};
+			const mockBookmarkedCount = 0;
+			const mockReactionsSent = 0;
+
+			jest
+				.spyOn(service, "getMessageInteractionsAnalytics")
+				.mockResolvedValue(mockMessages);
+			jest
+				.spyOn(service, "getNumberOfBookmarks")
+				.mockResolvedValue(mockBookmarkedCount);
+			jest
+				.spyOn(service, "getNumberOfReactions")
+				.mockResolvedValue(mockReactionsSent);
+
+			const result = await service.getRoomInteractionAnalytics(
+				mockRoomID,
+				mockUserID,
+			);
+
+			const expectedResult = {
+				messages: mockMessages,
+				bookmarked_count: mockBookmarkedCount,
+				reactions_sent: mockReactionsSent,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
