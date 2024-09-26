@@ -8,7 +8,7 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
@@ -18,11 +18,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 const groupRoomsByMonth = (rooms: Room[]) => {
 	return rooms.reduce(
 		(groups, room) => {
-			// Convert the start_date string to a Date object
 			const createdAt = room.start_date ? new Date(room.start_date) : null;
 
 			if (!createdAt || isNaN(createdAt.getTime())) {
-				// Skip if the date is invalid
 				console.warn("Invalid start_date for room:", room.roomID);
 				return groups;
 			}
@@ -43,6 +41,7 @@ const groupRoomsByMonth = (rooms: Room[]) => {
 
 const MyRooms: React.FC = () => {
 	const { myRooms } = useLocalSearchParams();
+	const router = useRouter(); // Initialize router
 	const [groupedRooms, setGroupedRooms] = useState<Record<string, Room[]>>({});
 	const [loading, setLoading] = useState(true);
 	const [sortBy, setSortBy] = useState<"start_date" | "end_date">("start_date");
@@ -53,13 +52,13 @@ const MyRooms: React.FC = () => {
 	const sortRooms = useCallback(
 		(rooms: Room[]) => {
 			return rooms.sort((a, b) => {
-				const dateA = a[sortBy] as Date;
-				const dateB = b[sortBy] as Date;
+				const dateA = new Date(a[sortBy] as Date).getTime();
+				const dateB = new Date(b[sortBy] as Date).getTime();
 
 				if (sortDirection === "asc") {
-					return dateA > dateB ? 1 : -1;
+					return dateA - dateB;
 				} else {
-					return dateA < dateB ? 1 : -1;
+					return dateB - dateA;
 				}
 			});
 		},
@@ -112,7 +111,19 @@ const MyRooms: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.pageTitle}>My Rooms</Text>
+			<View style={styles.titleContainer}>
+				<Text style={styles.pageTitle}>My Rooms</Text>
+				<TouchableOpacity
+					onPress={() => router.push("screens/rooms/CreateRoom")} // Navigate to another page
+					style={styles.addButton}
+				>
+					<MaterialCommunityIcons
+						name="plus"
+						size={30}
+						color={colors.primaryText}
+					/>
+				</TouchableOpacity>
+			</View>
 
 			<View style={styles.sortContainer}>
 				<Picker
@@ -170,12 +181,24 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: colors.backgroundColor,
 	},
+	titleContainer: {
+		flexDirection: "row",
+		justifyContent: "center", // Center the title
+		alignItems: "center",
+		marginTop: 20,
+		paddingHorizontal: 10,
+		position: "relative", // Allows absolute positioning of the button
+	},
+	addButton: {
+		position: "absolute",
+		right: 10, // Position the button on the right side
+		padding: 10,
+	},
+
 	pageTitle: {
 		fontSize: 24,
 		fontWeight: "bold",
 		color: colors.primary,
-		textAlign: "center",
-		marginTop: 20,
 	},
 	sortContainer: {
 		flexDirection: "row",
@@ -199,10 +222,6 @@ const styles = StyleSheet.create({
 		padding: 10,
 		backgroundColor: colors.backgroundColor,
 		borderRadius: 25,
-	},
-	sortButtonText: {
-		color: colors.primaryText,
-		fontWeight: "bold",
 	},
 	scrollViewContent: {
 		paddingVertical: 20,

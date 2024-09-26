@@ -20,7 +20,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
-import { Room, formatRoomData } from "../../models/Room";
+import { Room } from "../../models/Room";
 import { Friend } from "../../models/friend";
 import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
