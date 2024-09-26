@@ -333,24 +333,43 @@ export class ActiveRoom {
 		);
 	}
 
-	reflushRoomSongs(songs: RoomSong[]) {
-		this.initQueues();
-		for (let i = 0; i < songs.length; i++) {
-			const song = songs[i];
-			if (song) {
-				if (song.spotifyID === null) {
-					// throw new Error("Song does not have a spotify id");
-					continue;
+	/**
+	 * Sets the room queue to the given songs
+	 * @param songs The songs to set the queue to
+	 * @param murLockService
+	 */
+	async setQueue(songs: RoomSong[], murLockService: MurLockService) {
+		this.inactive = false;
+		this.minutesInactive = 0;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'setQueue'`,
+				);
+				try {
+					this.queue = PriorityQueue.fromArray(
+						sortRoomSongs(songs),
+						this.compareRoomSongs,
+					);
+				} catch (e) {
+					console.error("Error in setQueue");
+					console.error(e);
 				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'setQueue'`,
+				);
+			},
+		);
+	}
 
-				const startTime = song.getPlaybackStartTime();
-				if (startTime !== null && startTime.valueOf() < Date.now().valueOf()) {
-					this.historicQueue.enqueue(song);
-				} else {
-					this.queue.enqueue(song);
-				}
-			}
-		}
+	/**
+	 * Refreshes the song order in the queue
+	 * @param murLockService
+	 */
+	async refreshQueue(murLockService: MurLockService) {
+		await this.setQueue(this.queue.toArray(), murLockService);
 	}
 
 	async reloadQueue(prisma: PrismaService) {
