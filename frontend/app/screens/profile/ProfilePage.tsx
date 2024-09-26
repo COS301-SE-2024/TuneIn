@@ -78,7 +78,8 @@ const ProfileScreen: React.FC = () => {
 	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
 	const [requests, setRequests] = useState<Friend[]>([]);
 	const [areFriends, setAreFriends] = useState<boolean>(false);
-	const [arePotentialFriends, setArePotentialFriends] = useState<boolean>(false);
+	const [arePotentialFriends, setArePotentialFriends] =
+		useState<boolean>(false);
 	const [isPendingRequest, setIsPendingRequest] = useState<boolean>(false);
 	const [hasRequested, setHasRequested] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
@@ -196,13 +197,17 @@ const ProfileScreen: React.FC = () => {
 							setFollowing(isFollowing);
 						}
 
-						const friends = fData.some((f) => f.username === parsedFriend.username);
+						const friends = fData.some(
+							(f) => f.username === parsedFriend.username,
+						);
 
 						setAreFriends(friends);
 
 						const potential = potFData.some(
 							(pot) => pot.username === parsedFriend.username,
 						);
+
+						console.log("Potential: " + potential);
 
 						setArePotentialFriends(potential);
 
@@ -212,7 +217,9 @@ const ProfileScreen: React.FC = () => {
 
 						setIsPendingRequest(pending);
 
-						const req = reqFData.some((req) => req.username === parsedFriend.username);
+						const req = reqFData.some(
+							(req) => req.username === parsedFriend.username,
+						);
 
 						setHasRequested(req);
 
@@ -310,9 +317,9 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchProfileInfo = async (token: string, username: string) => {
+		console.log("Fetching profile info");
 		try {
 			if (!userData) {
-				// console.log("Fetching profile info");
 				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -346,6 +353,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchCurrentRoomInfo = async (userID: string) => {
+		console.log("fetch current room");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -374,6 +382,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const getFriends = async (token: string): Promise<Friend[]> => {
+		console.log("Getting friends");
 		const _token = await auth.getToken();
 		try {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
@@ -386,7 +395,7 @@ const ProfileScreen: React.FC = () => {
 				relationship: friend.relationship,
 			}));
 			setFriendError(false);
-			console.log("Friends: " + JSON.stringify(mappedFriends));
+			// console.log("Friends: " + JSON.stringify(mappedFriends));
 
 			return mappedFriends;
 		} catch (error) {
@@ -396,6 +405,7 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
+		console.log("get potential friends");
 		try {
 			const response = await axios.get<Friend[]>(
 				`${utils.API_BASE_URL}/users/friends/potential`,
@@ -412,6 +422,9 @@ const ProfileScreen: React.FC = () => {
 				}),
 			);
 			setFriendError(false);
+			console.log(
+				"Potential friends: " + JSON.stringify(mappedPotentialFriends),
+			);
 
 			return mappedPotentialFriends;
 		} catch (error) {
@@ -421,6 +434,7 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 	const getPendingRequests = async (token: string): Promise<Friend[]> => {
+		console.log("get pending requests");
 		try {
 			const response = await axios.get<Friend[]>(
 				`${utils.API_BASE_URL}/users/friends/pending`,
@@ -447,6 +461,7 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 	const getFriendRequests = async (token: string): Promise<Friend[]> => {
+		console.log("Getting friend requests");
 		try {
 			const response = await axios.get<Friend[]>(
 				`${utils.API_BASE_URL}/users/friends/requests`,
@@ -495,8 +510,7 @@ const ProfileScreen: React.FC = () => {
 					setPotentialFriends(updatedPotentialFriends);
 					setIsPendingRequest(true);
 					setPendingRequests([...pendingRequests, friend]);
-				}
-				else if (response.status === 201) {
+				} else if (response.status === 201) {
 					ToastAndroid.show(
 						"Cannot send request to user who does not follow you.",
 						ToastAndroid.SHORT,
@@ -617,6 +631,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchRecentRoomInfo = async (username: string) => {
+		console.log("fetching recent room info");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -650,6 +665,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchFavRoomInfo = async (username: string) => {
+		console.log("fetching fav room info");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -793,7 +809,12 @@ const ProfileScreen: React.FC = () => {
 					<TouchableOpacity
 						style={[
 							styles.button,
-							{ flex: 1, flexDirection: "row", paddingVertical: 5, alignItems: "center", },
+							{
+								flex: 1,
+								flexDirection: "row",
+								paddingVertical: 5,
+								alignItems: "center",
+							},
 						]}
 						onPress={() => {
 							if (following) {
@@ -808,7 +829,12 @@ const ProfileScreen: React.FC = () => {
 							{following ? "Following  " : "Follow"}
 						</Text>
 						{following && (
-							<Ionicons style={{paddingTop: 2}} name="chevron-down" size={15} color="black" />
+							<Ionicons
+								style={{ paddingTop: 2 }}
+								name="chevron-down"
+								size={15}
+								color="black"
+							/>
 						)}
 					</TouchableOpacity>
 					<FollowBottomSheet
@@ -1056,6 +1082,7 @@ const ProfileScreen: React.FC = () => {
 									);
 									navigateToMore("user", following, "Following");
 								}}
+								testID="following-count"
 							>
 								<Text style={{ fontSize: 20, fontWeight: "600" }}>
 									{primaryProfileData.following.count}
@@ -1067,13 +1094,15 @@ const ProfileScreen: React.FC = () => {
 							<TouchableOpacity
 								style={{ marginLeft: 60, alignItems: "center" }}
 								onPress={() => {
-										const followers: User = primaryProfileData.followers.data.map((item: any) => ({
-										id: item.userID,
-										profile_picture_url: item.profile_picture_url,
-										profile_name: item.profile_name,
-										username: item.username,
-										followers: item.followers.data,
-									}));
+									const followers: User = primaryProfileData.followers.data.map(
+										(item: any) => ({
+											id: item.userID,
+											profile_picture_url: item.profile_picture_url,
+											profile_name: item.profile_name,
+											username: item.username,
+											followers: item.followers.data,
+										}),
+									);
 									navigateToMore("user", followers, "Followers");
 								}}
 							>

@@ -267,13 +267,15 @@ const mockRooms = [
 	},
 ];
 
-const mockUsers = [{
-	id: "id",
-	profile_picture_url: "picture",
-	profile_name: "John",
-	username: "johndoe",
-	followers: [],
-}];
+const mockUsers = [
+	{
+		id: "id",
+		profile_picture_url: "picture",
+		profile_name: "John",
+		username: "johndoe",
+		followers: [],
+	},
+];
 
 const mockSongs = [
 	{
@@ -335,7 +337,7 @@ describe("ProfileScreen", () => {
 			items: JSON.stringify(mockUsers),
 			title: "Followers",
 		});
-		
+
 		const mockProfileData = {
 			profile_name: "John Doe",
 			username: "johndoe",
@@ -373,8 +375,10 @@ describe("ProfileScreen", () => {
 		};
 
 		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock value={mockPlayerContextValue}><MorePage />
-			</PlayerContextProviderMock>,);
+			<PlayerContextProviderMock value={mockPlayerContextValue}>
+				<MorePage />
+			</PlayerContextProviderMock>,
+		);
 
 		expect(getByText("Followers")).toBeTruthy();
 		expect(getByText("johndoe")).toBeTruthy();

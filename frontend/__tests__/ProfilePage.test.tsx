@@ -1363,9 +1363,9 @@ describe("ProfileScreen", () => {
 				fireEvent.press(touchableOpacity);
 
 				// await waitFor(() => {
-					expect(getByTestId("follow-bottom-sheet")).toBeTruthy();
-					fireEvent.press(getByTestId("send-request"));
-						
+				expect(getByTestId("follow-bottom-sheet")).toBeTruthy();
+				fireEvent.press(getByTestId("send-request"));
+
 				// });
 			});
 		});
@@ -1373,7 +1373,7 @@ describe("ProfileScreen", () => {
 		// await waitFor(() => {
 		// 	expect(getByTestId("send-request")).toBeTruthy();
 		// });
-		
+
 		toastSpy.mockRestore();
 	});
 

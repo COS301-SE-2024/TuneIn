@@ -66,8 +66,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [isModalVisible, setIsModalVisible] = useState(false);
 
-	useEffect(() => {
-	}, [isFriend, isPending, isPotential]);
+	useEffect(() => {}, [isFriend, isPending, isPotential]);
 
 	useEffect(() => {
 		if (showMoreFilters) {

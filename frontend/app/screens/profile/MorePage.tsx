@@ -59,8 +59,8 @@ const MorePage: React.FC = () => {
 	);
 
 	const renderResult = ({ item }: { item: any }) => {
-		if(params.type === "user") {
-			return <UserItem user={item}></UserItem>
+		if (params.type === "user") {
+			return <UserItem user={item}></UserItem>;
 		}
 
 		if (params.type === "song") {
@@ -87,7 +87,7 @@ const MorePage: React.FC = () => {
 				>
 					<Ionicons name="chevron-back" size={30} color="black" />
 				</TouchableOpacity>
-				<Text style={[styles.title, {paddingRight: 30}]}>{params.title}</Text>
+				<Text style={[styles.title, { paddingRight: 30 }]}>{params.title}</Text>
 			</View>
 			<FlatList
 				ref={flatListRef}
