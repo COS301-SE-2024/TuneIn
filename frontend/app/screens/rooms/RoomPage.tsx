@@ -699,14 +699,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						))}
 					</Text>
 				</View>
-				{/* <SongRoomWidget
-					songName="Eternal Sunshine"
-					artist="Ariana Grande"
-					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
-					progress={0.5}
-					time1="1:30"
-					time2="3:00"
-				/> */}
 
 				{roomData.mine ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
@@ -782,15 +774,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
-				{/* <View style={styles.userInfoContainer}>
-					<Image
-						source={{ uri: roomData.userProfile }}
-						style={styles.userImage}
-					/>
-					<Text style={styles.username}>
-						{truncateUsername(roomData.username)}
-					</Text>
-				</View> */}
 				<TouchableOpacity
 					// onPress={handleUserPress}
 					style={styles.userInfoContainer}

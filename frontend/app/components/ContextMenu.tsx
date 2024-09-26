@@ -25,7 +25,11 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 }) => {
 	return (
 		<Modal transparent visible={isVisible} animationType="fade">
-			<TouchableOpacity style={styles.overlay} onPress={onClose}>
+			<TouchableOpacity
+				style={styles.overlay}
+				onPress={onClose}
+				testID="overlay"
+			>
 				<View style={styles.menuContainer}>
 					{/* Conditional rendering based on user ownership */}
 					{isHost ? (
