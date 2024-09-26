@@ -13,6 +13,7 @@ import { IsNumber } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
+import { MailerService } from "@nestjs-modules/mailer";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -32,7 +33,41 @@ export class UsersService {
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private recommender: RecommendationsService,
+		private readonly mailerService: MailerService,
 	) {}
+
+	async sendEmail(userID: string, message: string): Promise<void> {
+		// const mailerService = new MailerService();
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		if (!user) {
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		}
+		const email = user.email;
+		console.log("Email: ", email, "Message: ", message);
+		if (!email) {
+			throw new HttpException(
+				"User does not have an email address",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		try {
+			await this.mailerService.sendMail({
+				to: process.env.EMAIL_ADDRESS ?? "",
+				from: email,
+				subject: "TuneIn Feedback",
+				text: message,
+			});
+		} catch (e) {
+			console.error(e);
+			throw new HttpException(
+				"Failed to send email",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+		throw new HttpException("Email sent successfully", HttpStatus.OK);
+	}
 
 	// Tutorial CRUD operations
 	create(createUserDto: Partial<UserDto>) {
