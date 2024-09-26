@@ -461,4 +461,31 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toBe(0);
 		});
 	});
+	describe("getNumberOfBookmarks", () => {
+		it("should return the correct number of bookmarks", async () => {
+			const mockRoomID = "roomID1";
+			const mockBookmarks = [
+				{ bookmark_id: "bookmark1", room_id: mockRoomID },
+				{ bookmark_id: "bookmark2", room_id: mockRoomID },
+			];
+
+			jest
+				.spyOn(prismaService.bookmark, "findMany")
+				.mockResolvedValue(mockBookmarks as unknown as PrismaTypes.bookmark[]);
+
+			const result = await service.getNumberOfBookmarks(mockRoomID);
+
+			expect(result).toBe(mockBookmarks.length);
+		});
+
+		it("should return 0 if no bookmarks are found", async () => {
+			const mockRoomID = "roomID1";
+
+			jest.spyOn(prismaService.bookmark, "findMany").mockResolvedValue([]);
+
+			const result = await service.getNumberOfBookmarks(mockRoomID);
+
+			expect(result).toBe(0);
+		});
+	});
 });
