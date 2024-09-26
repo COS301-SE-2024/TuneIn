@@ -20,7 +20,12 @@ const IconProgressCard: React.FC<IconProgressCardProps> = ({
 }) => {
 	return (
 		<View style={styles.card}>
-			<Entypo name={icon} size={32} color={iconColor} style={styles.icon} />
+			<Entypo
+				name={icon as any} // Cast to any to avoid TypeScript error
+				size={32}
+				color={iconColor}
+				style={styles.icon}
+			/>
 			<View style={styles.textContainer}>
 				<Text style={styles.header}>{header}</Text>
 				<Text style={styles.number}>{number}</Text>

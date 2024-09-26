@@ -77,7 +77,7 @@ const mockUserDto: UserDto = {
 	},
 };
 
-describe("UsersService follow function", () => {
+describe("UsersService", () => {
 	let usersService: UsersService;
 	let prismaService: PrismaService;
 	let dbUtilsService: DbUtilsService;

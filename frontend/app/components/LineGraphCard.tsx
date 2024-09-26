@@ -13,12 +13,6 @@ interface LineGraphCardProps {
 const needsScrolling = true;
 
 const LineGraphCard: React.FC<LineGraphCardProps> = ({ data, title }) => {
-	console.log("data", data);
-	console.log(
-		"data from the thing",
-		data.map((item) => item.label),
-		data.map((item) => item.value),
-	);
 	return (
 		<View style={styles.card}>
 			<Text style={styles.cardTitle}>{title}</Text>
@@ -26,42 +20,46 @@ const LineGraphCard: React.FC<LineGraphCardProps> = ({ data, title }) => {
 				horizontal={needsScrolling}
 				showsHorizontalScrollIndicator={needsScrolling}
 			>
-				<LineChart
-					data={{
-						labels: data?.map((item) => item?.label),
-						datasets: [
-							{
-								data: data?.map((item) => item?.value),
+				{data.length !== 0 ? (
+					<LineChart
+						data={{
+							labels: data?.map((item) => item?.label),
+							datasets: [
+								{
+									data: data?.map((item) => item?.value),
+								},
+							],
+						}}
+						width={
+							needsScrolling
+								? data.length * 50
+								: Dimensions.get("window").width - 40
+						} // From StyleSheet
+						height={220}
+						yAxisLabel=""
+						yAxisSuffix=""
+						chartConfig={{
+							backgroundColor: "#fff",
+							backgroundGradientFrom: "#fff",
+							backgroundGradientTo: "#fff",
+							decimalPlaces: 2,
+							color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the graph line
+							style: {
+								borderRadius: 16,
 							},
-						],
-					}}
-					width={
-						needsScrolling
-							? data.length * 50
-							: Dimensions.get("window").width - 40
-					} // From StyleSheet
-					height={220}
-					yAxisLabel=""
-					yAxisSuffix=""
-					chartConfig={{
-						backgroundColor: "#fff",
-						backgroundGradientFrom: "#fff",
-						backgroundGradientTo: "#fff",
-						decimalPlaces: 2,
-						color: (opacity = 1) => `rgba(8, 189, 189, ${opacity})`, // Primary color for the graph line
-						style: {
-							borderRadius: 16,
-						},
-						// Customization for labels
-						propsForLabels: {
-							fontFamily: "System", // Use system font for labels
-							fontSize: 12,
-							color: "#000", // Set label color to black
-						},
-					}}
-					bezier
-					style={styles.chart}
-				/>
+							// Customization for labels
+							propsForLabels: {
+								fontFamily: "System", // Use system font for labels
+								fontSize: 12,
+								color: "#000", // Set label color to black
+							},
+						}}
+						bezier
+						style={styles.chart}
+					/>
+				) : (
+					<Text style={styles.noData}>No data to display</Text>
+				)}
 			</ScrollView>
 		</View>
 	);
@@ -78,6 +76,16 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
+	},
+	// italics to no data. font color to light grey
+	noData: {
+		fontSize: 16,
+		textAlign: "center",
+		marginBottom: 20,
+		marginLeft: 10,
+		marginTop: 10,
+		fontStyle: "italic",
+		color: "#ccc",
 	},
 	cardTitle: {
 		fontSize: 20,
