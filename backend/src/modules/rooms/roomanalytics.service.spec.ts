@@ -562,4 +562,81 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+	describe("getKeyMetrics", () => {
+		it("should return correct key metrics", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "2023-01";
+
+			const mockUniqueVisitors: {
+				count: number;
+				percentage_change: number;
+			} = { count: 100, percentage_change: 0.5 };
+			const mockReturningVisitors: {
+				count: number;
+				percentage_change: number;
+			} = { count: 50, percentage_change: 0.25 };
+			const mockAverageSessionDuration: {
+				duration: number;
+				percentage_change: number;
+			} = { duration: 300, percentage_change: 0.1 };
+
+			jest
+				.spyOn(service, "getUniqueVisitors")
+				.mockResolvedValue(mockUniqueVisitors);
+			jest
+				.spyOn(service, "getReturningVisitors")
+				.mockResolvedValue(mockReturningVisitors);
+			jest
+				.spyOn(service, "getAverageSessionDuration")
+				.mockResolvedValue(mockAverageSessionDuration);
+
+			const result = await service.getKeyMetrics(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				unique_visitors: mockUniqueVisitors,
+				returning_visitors: mockReturningVisitors,
+				average_session_duration: mockAverageSessionDuration,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no data available", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "2023-01";
+
+			const mockUniqueVisitors: {
+				count: number;
+				percentage_change: number;
+			} = { count: 100, percentage_change: 0.5 };
+			const mockReturningVisitors: {
+				count: number;
+				percentage_change: number;
+			} = { count: 50, percentage_change: 0.25 };
+			const mockAverageSessionDuration: {
+				duration: number;
+				percentage_change: number;
+			} = { duration: 300, percentage_change: 0.1 };
+
+			jest
+				.spyOn(service, "getUniqueVisitors")
+				.mockResolvedValue(mockUniqueVisitors);
+			jest
+				.spyOn(service, "getReturningVisitors")
+				.mockResolvedValue(mockReturningVisitors);
+			jest
+				.spyOn(service, "getAverageSessionDuration")
+				.mockResolvedValue(mockAverageSessionDuration);
+
+			const result = await service.getKeyMetrics(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				unique_visitors: mockUniqueVisitors,
+				returning_visitors: mockReturningVisitors,
+				average_session_duration: mockAverageSessionDuration,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
