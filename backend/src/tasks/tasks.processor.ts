@@ -158,33 +158,32 @@ export class TasksProcessor {
 		);
 	}
 
-	@Process("get-room-spotify-info")
-	async getRoomSpotifyInfo(job: Job) {
-		console.log(`${job.name} job started`);
-		const {
-			room,
-			api,
-		}: {
-			room: ActiveRoom;
-			api: Spotify.SpotifyApi;
-		} = job.data;
-		console.log(
-			`Getting Spotify info for room '${room.room.room_name}' (${room.room.roomID})`,
-		);
-		const start = new Date().valueOf();
-		await room.getSpotifyInfo(api, this.prisma, this.murLockService);
-		await room.flushtoDB(
-			this.spotifyService,
-			api,
-			this.prisma,
-			this.murLockService,
-		);
-		const end = new Date().valueOf();
-		const milliseconds = end - start;
-		console.log(
-			`Finished getting Spotify info for room '${room.room.room_name}' (${room.room.roomID}) in ${milliseconds}ms`,
-		);
-	}
+	// @Process("get-room-spotify-info")
+	// async getRoomSpotifyInfo(job: Job) {
+	// 	console.log(`${job.name} job started`);
+	// 	const {
+	// 		room,
+	// 	}: {
+	// 		room: ActiveRoom;
+	// 	} = job.data;
+	// 	const api: Spotify.SpotifyApi = this.spotifyService.getUserlessAPI();
+	// 	console.log(
+	// 		`Getting Spotify info for room '${room.room.room_name}' (${room.room.roomID})`,
+	// 	);
+	// 	const start = new Date().valueOf();
+	// 	await room.getSpotifyInfo(api, this.prisma, this.murLockService);
+	// 	await room.flushtoDB(
+	// 		this.spotifyService,
+	// 		api,
+	// 		this.prisma,
+	// 		this.murLockService,
+	// 	);
+	// 	const end = new Date().valueOf();
+	// 	const milliseconds = end - start;
+	// 	console.log(
+	// 		`Finished getting Spotify info for room '${room.room.room_name}' (${room.room.roomID}) in ${milliseconds}ms`,
+	// 	);
+	// }
 
 	@Process("fix-spotify-info")
 	async fixSpotifyInfo(job: Job) {

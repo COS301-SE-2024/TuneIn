@@ -22,14 +22,13 @@ export class TasksService {
 		await this.taskQueue.add("import-library", { token: tk, user_id: userID });
 	}
 
-	async getRoomSpotifyInfo(room: ActiveRoom, spotifyApi: Spotify.SpotifyApi) {
-		await this.taskQueue.add("get-room-spotify-info", {
-			room: room,
-			api: spotifyApi,
-		});
-	}
+	// async getRoomSpotifyInfo(room: ActiveRoom) {
+	// 	await this.taskQueue.add("get-room-spotify-info", {
+	// 		room: room,
+	// 	});
+	// }
 
-	@Cron("0 */5 * * * *") // Run this every 5 minutes
+	@Cron("*/30 * * * * *") // Run this every 30 seconds
 	async fixSpotifyInfo() {
 		console.log("Running 'fixSpotifyInfo' based on CRON job");
 		await this.taskQueue.add("fix-spotify-info", {});
