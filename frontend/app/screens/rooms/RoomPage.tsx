@@ -706,7 +706,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				) : (
 					<View></View>
 				)}
-
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
