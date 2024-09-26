@@ -6,7 +6,7 @@ import { colors } from "../styles/colors";
 interface MetricsCardProps {
 	title: string;
 	number: string;
-	percentage: string;
+	percentage?: string;
 }
 
 const MetricsCard: React.FC<MetricsCardProps> = ({
@@ -14,26 +14,28 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
 	number,
 	percentage,
 }) => {
-	const isPositive = percentage.startsWith("+");
+	const isPositive = !percentage?.startsWith("-");
 	return (
 		<View style={styles.card}>
 			<Text style={styles.cardTitle}>{title}</Text>
 			<Text style={styles.cardNumber}>{number}</Text>
-			<View style={styles.percentageContainer}>
-				<Text
-					style={[
-						styles.cardPercentage,
-						isPositive ? styles.positive : styles.negative,
-					]}
-				>
-					{percentage}
-				</Text>
-				<AntDesign
-					name={isPositive ? "arrowup" : "arrowdown"}
-					size={16}
-					color={isPositive ? "green" : "red"}
-				/>
-			</View>
+			{percentage && (
+				<View style={styles.percentageContainer}>
+					<Text
+						style={[
+							styles.cardPercentage,
+							isPositive ? styles.positive : styles.negative,
+						]}
+					>
+						{percentage + "%"}
+					</Text>
+					<AntDesign
+						name={isPositive ? "arrowup" : "arrowdown"}
+						size={16}
+						color={isPositive ? "green" : "red"}
+					/>
+				</View>
+			)}
 		</View>
 	);
 };

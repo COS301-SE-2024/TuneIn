@@ -165,7 +165,11 @@ export class SearchService {
 			// console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -354,10 +358,13 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
 			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
-			console.log(roomDtos);
 
 			if (roomDtos) {
-				return roomDtos;
+				const sortedRooms = roomIds
+					.map((id) => roomDtos.find((room) => room.roomID === id))
+					.filter((room): room is RoomDto => room !== undefined);
+
+				return sortedRooms;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -392,8 +399,11 @@ export class SearchService {
 					},
 				],
 			},
+			orderBy: {
+				timestamp: "desc",
+			},
 		});
-		console.log("Result: " + JSON.stringify(result));
+		// console.log("Result: " + JSON.stringify(result));
 
 		if (Array.isArray(result)) {
 			const searchIds: SearchHistoryDto[] = result.map((row) => ({
@@ -407,7 +417,10 @@ export class SearchService {
 
 				// Process records and filter duplicates
 				searchIds.forEach((record) => {
-					if (!uniqueRecordsMap.has(record.url)) {
+					if (
+						!uniqueRecordsMap.has(record.url) &&
+						record.search_term.trim() !== ""
+					) {
 						const dto: SearchHistoryDto = {
 							search_term: record.search_term,
 							search_time: record.search_time,
@@ -501,9 +514,10 @@ export class SearchService {
 		// LIMIT 5;`;
 		const result = await this.prisma.$queryRaw<PrismaTypes.users>`
 		SELECT *,
-		LEVENSHTEIN(username, ${q}) AS distance
+		LEAST(levenshtein(full_name, ${q}), levenshtein(username, ${q})) AS distance
 		FROM users
-		WHERE similarity(username, ${q}) > 0.2
+		WHERE similarity(full_name, ${q}) > 0.2
+		OR similarity(username, ${q}) > 0.2
 		ORDER BY distance ASC
 		LIMIT 5;`;
 
@@ -517,7 +531,11 @@ export class SearchService {
 			console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -649,7 +667,11 @@ export class SearchService {
 			// console.log(userDtos);
 
 			if (userDtos) {
-				return userDtos;
+				const sortedUsers = userIds
+					.map((id) => userDtos.find((user) => user.userID === id))
+					.filter((user): user is UserDto => user !== undefined);
+
+				return sortedUsers;
 			}
 		} else {
 			console.error("Unexpected query result format, expected an array.");
@@ -659,15 +681,6 @@ export class SearchService {
 	}
 
 	async searchUsersHistory(userID: string): Promise<SearchHistoryDto[]> {
-		console.log(userID);
-		// const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
-		// SELECT *
-		// FROM search_history
-		// WHERE user_id::text = ${userID}
-		// AND (url LIKE '/user/%'
-		// OR url LIKE '/search/user/%')
-		// ORDER BY timestamp DESC
-		// LIMIT 10;`;
 		const result = await this.prisma.search_history.findMany({
 			where: {
 				user_id: userID,
@@ -683,6 +696,9 @@ export class SearchService {
 						},
 					},
 				],
+			},
+			orderBy: {
+				timestamp: "desc",
 			},
 		});
 
@@ -779,12 +795,6 @@ export class SearchService {
 
 		return [new SearchHistoryDto()];
 	}
-
-	/*
-	async searchGenres(q: string): Promise<string[]> {
-		
-	}
-	*/
 
 	getQueryParams(url: string): {
 		pathSegment: string | null;

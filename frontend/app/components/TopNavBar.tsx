@@ -39,7 +39,7 @@ const TopNavBar: React.FC = () => {
 					}
 				}
 			} catch (error) {
-				console.error("Error fetching profile info:", error);
+				console.log("Error fetching profile info:", error);
 				setProfileImage(defaultProfileIcon); // Fallback in case of error
 			}
 		};

@@ -5,78 +5,87 @@ import {
 	TextInput,
 	FlatList,
 	StyleSheet,
-	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
-import axios from "axios";
-import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
-import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import FriendCard from "../../components/FriendCard";
+import { Friend } from "../../models/friend";
+import FriendServices from "../../services/FriendServices";
+import { useLocalSearchParams } from "expo-router";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
-	const [requests, setRequests] = useState<Friend[]>([]);
-	const [filteredRequests, setFilteredRequests] = useState<Friend[]>([]);
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
+	const [friendError, setFriendError] = useState<boolean>(false);
+	const user = useLocalSearchParams();
 
 	useEffect(() => {
-		const fetchRequestsAndFollowers = async () => {
+		const getFollowers = async () => {
 			try {
-				const [requestsResponse, followersResponse] = await Promise.all([
-					axios.get(`${API_BASE_URL}/users/requests`),
-					axios.get(`${API_BASE_URL}/users/followers`),
-				]);
-				setRequests(requestsResponse.data);
-				setFollowers(followersResponse.data);
-				setFilteredRequests(requestsResponse.data);
-				setFilteredFollowers(followersResponse.data);
+				const mappedFollowers = await FriendServices.fetchFollowers();
+				setFollowers(mappedFollowers);
+				setFilteredFollowers(mappedFollowers);
+				setFriendError(false);
 			} catch (error) {
-				console.error("Error fetching data:", error);
+				console.log("Error fetching data:", error);
+				setFollowers([]);
+				setFilteredFollowers([]);
+				setFriendError(true);
 			}
 		};
 
-		fetchRequestsAndFollowers();
+		getFollowers();
 	}, []);
 
 	useEffect(() => {
 		if (search === "") {
-			setFilteredRequests(requests);
 			setFilteredFollowers(followers);
 		} else {
-			setFilteredRequests(
-				requests.filter((request) =>
-					request.username.toLowerCase().includes(search.toLowerCase()),
-				),
-			);
 			setFilteredFollowers(
 				followers.filter((follower) =>
 					follower.username.toLowerCase().includes(search.toLowerCase()),
 				),
 			);
 		}
-	}, [search, requests, followers]);
+	}, [search, followers]);
 
-	const renderRequest = ({ item }: { item: Friend }) => (
-		<FriendCard
-			profile_picture_url={item.profile_picture_url}
-			username={item.username}
-			friend={item}
-			user="current_user" // Replace with actual current user info
-		/>
-	);
+	const handleFollow = async (friend: Friend) => {
+		try {
+			await FriendServices.handleFollow(friend);
+			const updatedFollowers = followers.map((follower) => {
+				if (follower.username === friend.username) {
+					return {
+						...follower,
+						relationship:
+							friend.relationship === "mutual" ? "follower" : "mutual",
+					};
+				}
+				return follower;
+			});
+			setFollowers(updatedFollowers);
+			setFilteredFollowers(updatedFollowers);
+		} catch (error) {
+			ToastAndroid.show(
+				`Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`,
+				ToastAndroid.SHORT,
+			);
+		}
+	};
 
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username}
+			cardType={
+				item.relationship === "mutual" || item.relationship === "following"
+					? "following"
+					: "follower"
+			}
+			handle={handleFollow}
 		/>
 	);
-
-	const requestsToShow = filteredRequests.slice(0, 6);
-	const remainingRequests = filteredRequests.length - requestsToShow.length;
 
 	return (
 		<View style={styles.container}>
@@ -86,31 +95,7 @@ const Followers: React.FC = () => {
 				value={search}
 				onChangeText={setSearch}
 			/>
-			<View style={styles.requestsSection}>
-				<Text style={styles.requestsTitle}>Requests</Text>
-				{requestsToShow.length > 0 ? (
-					<>
-						<FlatList
-							data={requestsToShow}
-							renderItem={renderRequest}
-							keyExtractor={(item) => item.username}
-							ListFooterComponent={
-								remainingRequests > 0 && (
-									<TouchableOpacity style={styles.moreRequests}>
-										<Text style={styles.moreRequestsText}>
-											+{remainingRequests} more requests
-										</Text>
-									</TouchableOpacity>
-								)
-							}
-						/>
-					</>
-				) : (
-					<Text style={styles.noRequestsText}>No requests available.</Text>
-				)}
-			</View>
 			<View style={styles.followersSection}>
-				<Text style={styles.followersTitle}>Followers</Text>
 				{filteredFollowers.length > 0 ? (
 					<FlatList
 						data={filteredFollowers}
@@ -118,13 +103,16 @@ const Followers: React.FC = () => {
 						keyExtractor={(item) => item.username}
 					/>
 				) : (
-					<Text style={styles.noFollowersText}>No followers available.</Text>
+					<Text style={styles.noFollowersText}>
+						{friendError
+							? "Failed to load followers"
+							: "No followers available."}
+					</Text>
 				)}
 			</View>
 		</View>
 	);
 };
-
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -136,37 +124,12 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 4,
+		borderRadius: 20,
 		paddingHorizontal: 8,
 		marginBottom: 16,
 	},
-	requestsSection: {
-		marginBottom: 16,
-	},
-	requestsTitle: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 8,
-	},
-	moreRequests: {
-		paddingVertical: 8,
-		alignItems: "center",
-	},
-	moreRequestsText: {
-		fontSize: 16,
-		color: "#007BFF",
-	},
-	noRequestsText: {
-		fontSize: 16,
-		color: "#888",
-	},
 	followersSection: {
 		flex: 1,
-	},
-	followersTitle: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 8,
 	},
 	noFollowersText: {
 		fontSize: 16,

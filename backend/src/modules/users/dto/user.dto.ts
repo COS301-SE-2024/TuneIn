@@ -205,4 +205,20 @@ export class UserDto {
 	@ValidateNested()
 	@Type(() => UserFriendship)
 	friendship?: UserFriendship;
+
+	// optional field for relationship status
+	@ApiPropertyOptional({
+		description:
+			"The relationship status between the current user and the user in question",
+		type: String,
+	})
+	@Type(() => String)
+	@IsString()
+	relationship?:
+		| "following"
+		| "follower"
+		| "mutual"
+		| "friend"
+		| "pending"
+		| "none";
 }

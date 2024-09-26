@@ -425,6 +425,47 @@ export class UsersController {
 		return await this.usersService.getFriendRequests(userInfo.id);
 	}
 
+	// add endpoint for getting a user's pending requests
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/pending")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Get a user's sent friend requests",
+		operationId: "getPendingRequests",
+	})
+	@ApiOkResponse({
+		description: "The user's sent friend requests as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting pending friend requests.",
+	})
+	async getPendingRequests(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPendingRequests(userInfo.id);
+	}
+
+	// add an endpoint to get potential friends
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("friends/potential")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get potential friends for the user" })
+	@ApiOkResponse({
+		description: "The user's potential friends as an array of UserDto.",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting potential friends.",
+	})
+	async getPotentialFriends(@Request() req: Request): Promise<UserDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getPotentialFriends(userInfo.id);
+	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -554,7 +595,6 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "True if taken, false if not.",
-		type: Boolean,
 	})
 	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
 		return await this.usersService.usernameTaken(username);
@@ -590,6 +630,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
+		console.log("called /users/:username");
 		return this.usersService.getProfileByUsername(username);
 	}
 
@@ -729,11 +770,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully ended friendship.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error ending friendship.",
-		type: Boolean,
 	})
 	async unfriendUser(
 		@Request() req: Request,
@@ -819,6 +858,54 @@ export class UsersController {
 	): Promise<void> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.usersService.rejectFriendRequest(userInfo.id, username);
+	}
+
+	// add an endpoint for cancelling a friend request
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post(":username/cancel")
+	@ApiTags("users")
+	@ApiOperation({
+		summary: "Cancel a friend request to the given user",
+		operationId: "cancelFriendRequest",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to cancel the friend request to.",
+	})
+	@ApiOkResponse({
+		description: "Successfully cancelled friend request.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error cancelling friend request.",
+	})
+	async cancelFriendRequest(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<boolean> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.cancelFriendRequest(userInfo.id, username);
+	}
+
+	// create endpoint to get a user's recommended users
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@ApiSecurity("bearer")
+	@Get("recommended/users")
+	@ApiOperation({ summary: "Get recommended users" })
+	@ApiOkResponse({
+		description: "Recommended users retrieved successfully",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("users")
+	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		console.log("called /users/recommended/users");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedUsers(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -945,11 +1032,9 @@ export class UsersController {
 	})
 	@ApiOkResponse({
 		description: "Successfully reported the user.",
-		type: Boolean,
 	})
 	@ApiBadRequestResponse({
 		description: "Error reporting the user.",
-		type: Boolean,
 	})
 	async reportUser(
 		@Request() req: Request,

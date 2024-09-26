@@ -5,119 +5,148 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import LineGraphCard from "../../components/LineGraphCard";
-import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
-import TableCard from "../../components/TableCard";
+// import HorizontalBarGraphCard from "../../components/HorizontalBarGraphCard";
+// import TableCard from "../../components/TableCard";
 import IconProgressCard from "../../components/IconProgressCard";
 import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
 import * as StorageService from "../../services/StorageService";
 
+// create an interface class for user rooms
+interface UserRoom {
+	room_name: string;
+	roomID: string;
+}
+
+// create an interface class for interaction analytics
+interface InteractionAnalytics {
+	messages: {
+		per_hour: {
+			count: number;
+			hour: Date;
+		}[];
+		total: number;
+	};
+	bookmarked_count: number;
+	reactions_sent: number;
+}
+
 const InteractionsAnalytics: React.FC = () => {
 	const router = useRouter();
 
-	const [selectedRoom, setSelectedRoom] = useState<{
-		room_name: string;
-		roomID: string;
-	} | null>(null);
-	const [userRooms, setRooms] = useState<any[]>();
+	const [selectedRoom, setSelectedRoom] = useState<UserRoom | null>(null);
+	const [userRooms, setRooms] = useState<UserRoom[] | null>(null);
 
-	const [interactionAnalytics, setInteractionAnalytics] = useState<{
-		messages: {
-			per_hour: {
-				count: number;
-				hour: Date;
-			}[];
-			total: number;
-		};
-		bookmarked_count: number;
-		reactions_sent: number;
-	} | null>(null);
+	const [interactionAnalytics, setInteractionAnalytics] =
+		useState<InteractionAnalytics | null>(null);
 
 	useEffect(() => {
 		const fetchUserRooms = async () => {
-			// make an axios request with the API_BASE_URL and the auth token
-			const accessToken: string | null = await AuthManagement.getToken();
-			console.log("access token fr", accessToken);
-			const response = await fetch(`${API_BASE_URL}/users/rooms`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			const data = await response.json();
-			console.log(data);
-			setRooms(data);
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				if (!accessToken) {
+					console.error("No access token found");
+					return;
+				}
+				const response = await fetch(`${API_BASE_URL}/users/rooms`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
 
-			console.log("user rooms", userRooms);
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current room", currentRoom);
-			const room = userRooms?.find((room) => room.room_name === currentRoom);
-			if (room !== undefined) setSelectedRoom(room);
-			console.log("selected room", selectedRoom);
+				if (response.ok) {
+					const data = await response.json();
+					console.log("data", data);
+					setRooms(data);
+					setSelectedRoom(data[0]);
+				} else {
+					console.error("Failed to fetch user rooms");
+				}
+			} catch (error) {
+				console.log("Failed to fetch user rooms", error);
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			}
+			// make an axios request with the API_BASE_URL and the auth token
 		};
 
-		if (selectedRoom === null) fetchUserRooms();
+		fetchUserRooms();
 		console.log("selectedRoom", selectedRoom);
-	}, [selectedRoom]);
+	}, []);
 
 	useEffect(() => {
 		const fetchInteractionAnalytics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const currentRoom = await StorageService.getItem("currentRoom");
-			console.log("current roooooom", currentRoom);
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				const currentRoom = await StorageService.getItem("currentRoom");
+				console.log("current roooooom", currentRoom);
+				if (!accessToken || !selectedRoom) {
+					console.log("Cannot fetch interaction analytics without a room");
+					ToastAndroid.show(
+						"Cannot fetch interaction analytics without a room",
+						ToastAndroid.SHORT,
+					);
+					return;
+				}
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					},
+				);
+				if (response.ok) {
+					const data = await response.json();
+					console.log("interaction analytics", data);
+					setInteractionAnalytics(data);
+				} else {
+					console.error("Failed to fetch interaction analytics");
+				}
+			} catch (error) {
+				console.log("Failed to fetch interaction analytics", error);
+				ToastAndroid.show(
+					"Failed to load interaction analytics",
+					ToastAndroid.SHORT,
+				);
+			}
+		};
+
+		fetchInteractionAnalytics();
+		console.log("interaction analytics", interactionAnalytics);
+	}, [selectedRoom]);
+
+	// function that will be called when the user selects a room
+	const handleRoomSelect = async (room: string) => {
+		const selected: UserRoom | null =
+			userRooms?.find((r: UserRoom) => r.room_name === room) ?? null;
+		const accessToken: string | null = await AuthManagement.getToken();
+		setSelectedRoom(selected);
+		const roomID: string = selectedRoom?.roomID ?? "";
+		try {
 			const response = await fetch(
-				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/interactions`,
+				`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
 				{
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
 					},
 				},
 			);
-			const data = await response.json();
-			if (interactionAnalytics === null) setInteractionAnalytics(data);
-		};
-
-		fetchInteractionAnalytics();
-		console.log("interaction analytics", interactionAnalytics);
-	}, [interactionAnalytics]);
-
-	const rooms = userRooms?.map((room) => room.room_name as string);
-	console.log("rooms", rooms);
-	console.log("current room", selectedRoom);
-	// function that will be called when the user selects a room
-	const handleRoomSelect = async (room: string) => {
-		// find the room object that matches the selected room
-		const selected = userRooms?.find((r) => r.room_name === room);
-		const accessToken: string | null = await AuthManagement.getToken();
-		// set the selected room to the room object
-		setSelectedRoom(selected);
-		console.log("selected room", selectedRoom?.roomID);
-		const roomID: string = selectedRoom?.roomID ?? "";
-		const response = await fetch(
-			`${API_BASE_URL}/rooms/${roomID}/analytics/interactions`,
-			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			},
-		);
-		const data = await response.json();
-		// if (data.statusCode !== 200) {
-		// 	console.log("error fetching interaction analytics");
-		// 	return;
-		// }
-		if (interactionAnalytics?.bookmarked_count === undefined)
-			setInteractionAnalytics(data);
-		console.log("interaction analytics", interactionAnalytics);
-		// close the dropdown
+			if (response.ok) {
+				const data = await response.json();
+				setInteractionAnalytics(data);
+			} else {
+				console.error("Failed to fetch interaction analytics");
+			}
+		} catch (error) {
+			console.error(error);
+		}
 	};
-
-	// Sample data for the past seven days
-	console.log("interaction stuffs", interactionAnalytics);
 
 	const data = interactionAnalytics?.messages?.per_hour?.map((hour) => {
 		return {
@@ -125,30 +154,6 @@ const InteractionsAnalytics: React.FC = () => {
 			value: hour.count,
 		};
 	});
-	console.log("data", data);
-
-	const datah = [
-		{ label: "Room A", value: 57 },
-		{ label: "Room B", value: 75 },
-		{ label: "Room C", value: 18 },
-		{ label: "Room D", value: 48 },
-		{ label: "Room E", value: 6 },
-	];
-
-	const headers = ["User", "Songs", "Upvotes"];
-	const dataTable = [
-		["User A", "50", "200"],
-		["User B", "35", "165"],
-		["User C", "23", "155"],
-	];
-
-	const datah2 = [
-		{ label: "Room A", value: 12 },
-		{ label: "Room B", value: 57 },
-		{ label: "Room C", value: 38 },
-		{ label: "Room D", value: 48 },
-		// { label: "Room E", value: 75 },
-	];
 
 	return (
 		<ScrollView contentContainerStyle={styles.scrollView}>
@@ -161,7 +166,9 @@ const InteractionsAnalytics: React.FC = () => {
 					<View style={styles.headerSpacer} />
 				</View>
 				<RoomDropdown
-					initialRooms={rooms ?? []}
+					initialRooms={
+						userRooms?.map((room) => room.room_name as string) ?? []
+					}
 					onRoomPick={handleRoomSelect}
 				/>
 				<LineGraphCard data={data ?? []} title="Daily Messages" />
@@ -176,6 +183,12 @@ const InteractionsAnalytics: React.FC = () => {
 					header="Reactions"
 					number={interactionAnalytics?.reactions_sent?.toString() ?? "0"}
 					progress={interactionAnalytics?.reactions_sent ?? 0} // Progress from 0 to 1
+				/>
+				<IconProgressCard
+					icon="bookmark"
+					header="Bookmarks"
+					number={interactionAnalytics?.bookmarked_count.toString() ?? "0"}
+					progress={interactionAnalytics?.bookmarked_count ?? 0} // Progress from 0 to 1
 				/>
 				{/* <HorizontalBarGraphCard data={datah} title="Playlist Contributions" />
 				<TableCard

@@ -1,5 +1,7 @@
 import { Upload } from "@aws-sdk/lib-storage";
 import { S3 } from "@aws-sdk/client-s3";
+import "react-native-get-random-values";
+import { Buffer } from "buffer"; // Import Buffer
 
 import {
 	AWS_ACCESS_KEY_ID,
@@ -8,6 +10,7 @@ import {
 	AWS_S3_REGION,
 	AWS_S3_ENDPOINT,
 } from "react-native-dotenv";
+import { ToastAndroid } from "react-native";
 
 if (!AWS_ACCESS_KEY_ID) {
 	throw new Error(
@@ -50,14 +53,28 @@ const s3 = new S3({
 	logger: console,
 });
 
+const blobToBuffer = (blob: Blob): Promise<Buffer> => {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => {
+			resolve(Buffer.from(reader.result as ArrayBuffer));
+		};
+		reader.onerror = (error) => {
+			reject(error);
+		};
+		reader.readAsArrayBuffer(blob);
+	});
+};
+
 const uploadImage = async (imageURI: string, roomName: string) => {
 	try {
 		const response = await fetch(imageURI);
-		const blob = await response.blob();
+		const blob: Blob = await response.blob();
+		const buffer = await blobToBuffer(blob); // Convert Blob to Buffer
 		const params = {
 			Bucket: AWS_S3_BUCKET_NAME, // replace with your bucket name
 			Key: `${new Date().toISOString()}-${roomName.replace(" ", "-").toLowerCase()}.jpeg`, // replace with the destination key
-			Body: blob,
+			Body: buffer,
 			ContentType: blob.type,
 		};
 		const data = await new Upload({
@@ -67,7 +84,8 @@ const uploadImage = async (imageURI: string, roomName: string) => {
 		console.log("Successfully uploaded image", data.Location);
 		return data.Location;
 	} catch (error) {
-		console.error("Error uploading image:", error);
+		console.log("Error uploading image:", error);
+		ToastAndroid.show("Failed to upload image", ToastAndroid.SHORT);
 		return null;
 	}
 };

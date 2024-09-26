@@ -5,16 +5,17 @@ import {
 	StyleSheet,
 	Modal,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 	Alert,
 	ActivityIndicator,
 } from "react-native";
 import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
-import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
+import Icon from "react-native-vector-icons/FontAwesome";
 import { Devices } from "../models/Devices";
-import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import * as spotifyAuth from "../services/SpotifyAuth";
 import { colors } from "../styles/colors";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const DevicePicker = () => {
 	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
@@ -24,6 +25,7 @@ const DevicePicker = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [accessToken, setAccessToken] = useState<string>("");
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
@@ -39,8 +41,6 @@ const DevicePicker = () => {
 	}, []);
 
 	useEffect(() => {
-		// Declare intervalId using useRef to ensure it maintains its value across renders
-
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
@@ -59,20 +59,15 @@ const DevicePicker = () => {
 				}
 			};
 
-			// Initial fetchDevices call
 			fetchDevices();
-
-			// Set interval to call fetchDevices every 4 seconds
 			intervalIdRef.current = setInterval(fetchDevices, 4000);
 
-			// Clean up interval on component unmount or dependency change
 			return () => {
 				if (intervalIdRef.current) {
 					clearInterval(intervalIdRef.current);
 				}
 			};
 		} else {
-			// Clear interval when isVisible becomes false
 			if (intervalIdRef.current) {
 				clearInterval(intervalIdRef.current);
 			}
@@ -121,7 +116,6 @@ const DevicePicker = () => {
 			case "Computer":
 				icon = <Icon name="desktop" size={30} color="#555" />;
 				break;
-			// Add more cases for other types as needed
 			default:
 				break;
 		}
@@ -139,58 +133,69 @@ const DevicePicker = () => {
 			<TouchableOpacity
 				onPress={handleOpenPopup}
 				testID="Speaker-button"
-				style={{ marginLeft: 10 }}
+				style={{ marginLeft: 0 }}
 			>
-				<SpeakerIcon />
+				<MaterialIcons name="speaker" size={34} color="black" />
 			</TouchableOpacity>
 			<View style={styles.container}>
-				<Modal visible={isVisible} transparent={true} animationType="fade">
-					<View style={styles.modalBackground}>
-						<View style={styles.popupContainer}>
-							{error ? (
-								<>
-									<Text style={styles.popupTitle}>Error Fetching Devices</Text>
-									<Text style={styles.popupMessage}>{error}</Text>
-								</>
-							) : !devices || devices.length === 0 ? (
-								<>
-									<Text style={styles.popupTitle}>No Devices Available</Text>
-									<Text style={styles.popupMessage}>
-										Please activate Spotify on at least one of your devices.
-									</Text>
-								</>
-							) : (
-								<>
-									<Text style={styles.popupTitle}>Select a Device</Text>
-									{isLoading ? (
-										<ActivityIndicator size="large" color={colors.primary} />
+				<Modal visible={isVisible} transparent={true} animationType="slide">
+					<TouchableWithoutFeedback onPress={handleClosePopup}>
+						<View style={styles.modalBackground}>
+							<TouchableWithoutFeedback>
+								<View style={styles.popupContainer}>
+									{error ? (
+										<>
+											<Text style={styles.popupTitle}>
+												Error Fetching Devices
+											</Text>
+											<Text style={styles.popupMessage}>{error}</Text>
+										</>
+									) : !devices || devices.length === 0 ? (
+										<>
+											<Text style={styles.popupTitle}>
+												No Devices Available
+											</Text>
+											<Text style={styles.popupMessage}>
+												Please activate Spotify on at least one of your devices.
+											</Text>
+										</>
 									) : (
-										devices.map((device: Devices, index: number) => (
-											<TouchableOpacity
-												key={index}
-												style={styles.deviceOption}
-												onPress={() => handleDeviceSelect(device.id)}
-											>
-												<RadioButton
-													value={device.id}
-													testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
-													status={
-														selectedDevice === device.id
-															? "checked"
-															: "unchecked"
-													}
+										<>
+											<Text style={styles.popupTitle}>Select a Device</Text>
+											{isLoading ? (
+												<ActivityIndicator
+													size="large"
+													color={colors.primary}
 												/>
-												{renderDeviceName(device)}
-											</TouchableOpacity>
-										))
+											) : (
+												devices.map((device: Devices, index: number) => (
+													<TouchableOpacity
+														key={index}
+														style={styles.deviceOption}
+														onPress={() => handleDeviceSelect(device.id)}
+													>
+														<RadioButton
+															value={device.id}
+															testID={`radio-button-${device.id}`}
+															status={
+																selectedDevice === device.id
+																	? "checked"
+																	: "unchecked"
+															}
+														/>
+														{renderDeviceName(device)}
+													</TouchableOpacity>
+												))
+											)}
+										</>
 									)}
-								</>
-							)}
-							<TouchableOpacity onPress={handleClosePopup}>
-								<Text style={styles.closeButtonText}>Close</Text>
-							</TouchableOpacity>
+									<TouchableOpacity onPress={handleClosePopup}>
+										<Text style={styles.closeButtonText}>Close</Text>
+									</TouchableOpacity>
+								</View>
+							</TouchableWithoutFeedback>
 						</View>
-					</View>
+					</TouchableWithoutFeedback>
 				</Modal>
 			</View>
 		</>
@@ -204,14 +209,14 @@ const styles = StyleSheet.create({
 	modalBackground: {
 		flex: 1,
 		backgroundColor: "rgba(0, 0, 0, 0.8)",
-		justifyContent: "center",
-		alignItems: "center",
+		justifyContent: "flex-end",
 	},
 	popupContainer: {
 		backgroundColor: "white",
 		padding: 20,
-		borderRadius: 15,
-		width: 315,
+		borderTopLeftRadius: 15,
+		borderTopRightRadius: 15,
+		width: "100%",
 	},
 	popupTitle: {
 		alignSelf: "center",

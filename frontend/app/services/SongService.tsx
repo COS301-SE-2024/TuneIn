@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ToastAndroid } from "react-native";
 import * as utils from "./Utils";
 
 class SongService {
@@ -9,7 +10,8 @@ class SongService {
 			);
 			return response.data.id;
 		} catch (error) {
-			console.error("Error fetching user's own info:", error);
+			console.log("Error fetching user's own info:", error);
+			ToastAndroid.show("Failed to get song's spotify id", ToastAndroid.SHORT);
 			throw error;
 		}
 	}

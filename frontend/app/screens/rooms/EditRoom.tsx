@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { Room } from "../../models/Room";
+import * as ImagePicker from "expo-image-picker";
+import uploadImage from "../../services/ImageUpload";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import {
 	View,
 	Text,
@@ -10,21 +17,19 @@ import {
 	Image,
 	StyleSheet,
 	Alert,
+	ToastAndroid,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Room } from "../../models/Room";
-import uploadImage from "../../services/ImageUpload";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
-import { router, useRouter } from "expo-router";
+
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
 const EditRoom: React.FC = () => {
 	const router = useRouter();
 	const route = useRoute<EditRoomRouteProp>();
 	const { params } = route;
-	let roomData = JSON.parse(params.room);
+
+	// Memoize roomData to avoid re-parsing on each render
+	const roomData = useMemo(() => JSON.parse(params.room), [params.room]);
+
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -37,13 +42,14 @@ const EditRoom: React.FC = () => {
 		roomSize: 50,
 		isExplicit: false,
 		isNsfw: false,
+		start_date: new Date(),
+		end_date: new Date(),
 	});
-
 	const [image, setImage] = useState<string | null>(null);
 
+	// useEffect without roomDetails as dependency
 	useEffect(() => {
 		const loadRoomDetails = async () => {
-			console.log("type of:", typeof roomData);
 			setRoomDetails({
 				roomID: roomData.id,
 				name: roomData.name,
@@ -60,8 +66,7 @@ const EditRoom: React.FC = () => {
 		};
 
 		loadRoomDetails();
-		console.log(roomDetails);
-	}, []);
+	}, [roomData]); // Only roomData is a dependency now
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {
@@ -90,7 +95,6 @@ const EditRoom: React.FC = () => {
 	};
 
 	const handleToggleChange = (field: keyof Room, value: boolean) => {
-		console.log("value:", value);
 		setRoomDetails({ ...roomDetails, [field]: value });
 	};
 
@@ -119,7 +123,6 @@ const EditRoom: React.FC = () => {
 				newRoom.backgroundImage = newImage;
 			}
 		}
-		console.log("newRoom:", newRoom);
 		const token = await auth.getToken();
 		try {
 			const data = await fetch(`${utils.API_BASE_URL}/rooms/${roomData.id}`, {
@@ -138,7 +141,6 @@ const EditRoom: React.FC = () => {
 				}),
 			});
 			if (!data.ok) {
-				console.log("Error:", data);
 				Alert.alert(
 					"Error",
 					"An error occurred while saving your changes.",
@@ -154,9 +156,10 @@ const EditRoom: React.FC = () => {
 				[{ text: "OK" }],
 				{ cancelable: false },
 			);
-			router.navigate("/screens/Home");
+			router.navigate("/screens/(tabs)/Home");
 		} catch (error) {
-			console.error("Error:", error);
+			console.log("Error:", error);
+			ToastAndroid.show("Failed to update room data.", ToastAndroid.SHORT);
 		}
 	};
 

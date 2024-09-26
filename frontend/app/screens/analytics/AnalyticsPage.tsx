@@ -5,15 +5,16 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import MetricsCard from "../../components/MetricsCard";
 import PieChartCard from "../../components/PieChartCard";
-import { Room } from "../../models/Room";
+// import { Room } from "../../models/Room";
 import { API_BASE_URL } from "../../services/Utils";
-import * as StorageService from "../../services/StorageService";
+// import * as StorageService from "../../services/StorageService";
 import AuthManagement from "../../services/AuthManagement";
 
 const AnalyticsPage: React.FC = () => {
@@ -37,18 +38,31 @@ const AnalyticsPage: React.FC = () => {
 
 	useEffect(() => {
 		const fetchKeyMetrics = async () => {
-			const accessToken: string | null = await AuthManagement.getToken();
-			const response = await fetch(`${API_BASE_URL}/rooms/analytics`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			const data = await response.json();
-			setKeyMetrics(data);
+			try {
+				const accessToken: string | null = await AuthManagement.getToken();
+				const response = await fetch(
+					`${API_BASE_URL}/rooms/analytics/${activeButton.toLowerCase()}/keymetrics`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					},
+				);
+				const data = await response.json();
+
+				if (JSON.stringify(data) === "{}") {
+					ToastAndroid.show("Analytics are unavailable", ToastAndroid.SHORT);
+					return;
+				}
+
+				setKeyMetrics(data);
+			} catch (error) {
+				console.log(error);
+				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+			}
 		};
-		if (keymetrics === null) fetchKeyMetrics();
-		console.log("keymetrics", keymetrics);
-	});
+		fetchKeyMetrics();
+	}, [activeButton]);
 	const handleButtonPress = (button: string) => {
 		setActiveButton(button);
 	};
@@ -104,11 +118,11 @@ const AnalyticsPage: React.FC = () => {
 						/>
 					</TouchableOpacity>
 					<View style={styles.drawerContent}>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							onPress={() => router.push("/screens/analytics/GeneralAnalytics")}
 						>
 							<Text style={styles.drawerItem}>General Analytics</Text>
-						</TouchableOpacity> */}
+						</TouchableOpacity>
 						<TouchableOpacity
 							onPress={() =>
 								router.navigate({
@@ -142,7 +156,7 @@ const AnalyticsPage: React.FC = () => {
 							<Ionicons name="menu" size={24} color="black" />
 						</TouchableOpacity>
 					</View>
-					{/* <View style={styles.buttonContainer}>
+					<View style={styles.buttonContainer}>
 						<TouchableOpacity
 							style={[
 								styles.timeButton,
@@ -194,22 +208,31 @@ const AnalyticsPage: React.FC = () => {
 								Month
 							</Text>
 						</TouchableOpacity>
-					</View> */}
+					</View>
 
 					<View style={styles.cardsContainer}>
 						<MetricsCard
 							title="Unique Visitors"
-							number={keymetrics?.unique_visitors.count.toString() ?? "0"}
+							number={keymetrics?.unique_visitors?.count?.toString() ?? "0"}
 							percentage={
-								keymetrics?.unique_visitors.percentage_change.toString() ?? "0"
+								keymetrics?.returning_visitors?.percentage_change?.toString() ===
+								undefined
+									? "0"
+									: Math.floor(
+											keymetrics?.unique_visitors?.percentage_change * 100,
+										).toString()
 							}
 						/>
 						<MetricsCard
 							title="Returning Visitors"
-							number={keymetrics?.returning_visitors.count.toString() ?? "0"}
+							number={keymetrics?.returning_visitors?.count?.toString() ?? "0"}
 							percentage={
-								keymetrics?.returning_visitors.percentage_change.toString() ??
-								"0"
+								keymetrics?.returning_visitors?.percentage_change?.toString() ===
+								undefined
+									? "0"
+									: Math.floor(
+											keymetrics?.returning_visitors?.percentage_change * 100,
+										).toString()
 							}
 						/>
 					</View>
@@ -217,20 +240,25 @@ const AnalyticsPage: React.FC = () => {
 						<MetricsCard
 							title="Average Session Duration"
 							number={secondsToString(
-								keymetrics?.average_session_duration.duration ?? 0,
+								keymetrics?.average_session_duration?.duration ?? 0,
 							)}
 							percentage={
-								keymetrics?.average_session_duration.percentage_change.toString() ??
-								"0"
+								keymetrics?.average_session_duration?.percentage_change?.toString() ===
+								undefined
+									? "0"
+									: Math.floor(
+											keymetrics?.average_session_duration?.percentage_change *
+												100,
+										).toString()
 							}
 						/>
 					</View>
 					<View style={styles.cardsContainer}>
 						<PieChartCard
-							returningVisitors={keymetrics?.returning_visitors.count ?? 0}
+							returningVisitors={keymetrics?.returning_visitors?.count ?? 0}
 							newVisitors={
-								(keymetrics?.unique_visitors.count ?? 0) -
-								(keymetrics?.returning_visitors.count ?? 0)
+								(keymetrics?.unique_visitors?.count ?? 0) -
+								(keymetrics?.returning_visitors?.count ?? 0)
 							}
 						/>
 					</View>

@@ -8,10 +8,10 @@ import {
 	StyleSheet,
 	TextInput,
 	ActivityIndicator,
+	ToastAndroid,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
-import EditDialog from "../../components/EditDialog";
 import FavoriteSongs from "../../components/FavoriteSong";
 import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
@@ -20,10 +20,10 @@ import { Ionicons } from "@expo/vector-icons";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
-import Selector from "../../components/Selector";
 import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
+import GenreAdder from "../../components/GenreAdder";
 
 type InputRef = TextInput | null;
 
@@ -47,7 +47,31 @@ const EditProfileScreen = () => {
 	const { userData, setUserData } = playerContext;
 
 	const [profileData, setProfileData] = useState(profileInfo);
-	const [genres, setGenres] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([
+		"rock",
+		"pop",
+		"jazz",
+		"classical",
+		"hip hop",
+		"country",
+		"electronica",
+		"reggae",
+		"blues",
+		"folk",
+		"metal",
+		"punk",
+		"soul",
+		"r&b",
+		"funk",
+		"dancehall",
+		"techno",
+		"ambient",
+		"gospel",
+		"latin",
+		"reggaeton",
+		"ska",
+		"opera",
+	]);
 	let [flatLinks, setFlatLinks] = useState<string[]>(
 		Object.values(profileData.links.data).flat() as unknown as string[],
 	);
@@ -55,7 +79,8 @@ const EditProfileScreen = () => {
 	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
 	const [isSongDialogVisible, setIsSongDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
-	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [usrNmErrorMessage, setUsrNmErrorMessage] = useState<string>("");
+	const [nmErrorMessage, setNmErrorMessage] = useState<string>("");
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const [token, setToken] = useState<string | null>(null);
@@ -74,20 +99,37 @@ const EditProfileScreen = () => {
 
 	const handleUpdate = async () => {
 		setLoading(true);
-		await updateProfile();
-		setUserData(null);
+		const response = await updateProfile();
+		console.log("The response: " + JSON.stringify(response));
+		if (JSON.stringify(response) !== "[]") {
+			setUserData(null);
+		} else {
+			setLoading(false);
+		}
 	};
 
 	useEffect(() => {
 		const checkData = async () => {
 			if (JSON.stringify(profileInfo) !== JSON.stringify(profileData)) {
+				let validNames: boolean = true;
 				if (profileInfo.username !== profileData.username) {
 					const validUsername: boolean = await checkUsername();
-					setChanged(validUsername);
-				} else {
-					setChanged(true);
+					validNames = validUsername;
 				}
+
+				if (
+					profileInfo.profile_name !== profileData.profile_name &&
+					profileData.profile_name === ""
+				) {
+					setNmErrorMessage("Name cannot be empty");
+					validNames = false;
+				} else {
+					setNmErrorMessage("");
+				}
+
+				setChanged(validNames);
 			} else {
+				setUsrNmErrorMessage("");
 				setChanged(false);
 			}
 		};
@@ -111,63 +153,64 @@ const EditProfileScreen = () => {
 			// console.log(response.data);
 			return response.data;
 		} catch (error) {
-			console.error("Error updating profile info:", error);
+			console.log("Error updating profile info:", error);
+			ToastAndroid.show("Failed to update profile info", ToastAndroid.SHORT);
 			return [];
 		}
 	};
 
 	const checkUsername = async (): Promise<boolean> => {
 		if (profileData.username === "") {
-			setErrorMessage("Username cannot be empty");
+			setUsrNmErrorMessage("Username cannot be empty");
 			return false;
 		}
 
 		const regex = /^[a-z0-9]+$/;
-
 		if (!regex.test(profileData.username)) {
-			setErrorMessage(
+			setUsrNmErrorMessage(
 				"Usernames must contain only lowercase letters and numbers, with no spaces or special characters",
 			);
 			return false;
 		} else {
-			try {
-				if (timeoutRef.current) {
-					clearTimeout(timeoutRef.current);
-				}
+			setUsrNmErrorMessage("");
+		}
 
-				// Wait for the timeout to complete and handle the response
-				const response = await new Promise<boolean>((resolve) => {
-					timeoutRef.current = setTimeout(async () => {
-						try {
-							const response = await axios.get(
-								`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
-								{
-									headers: {
-										Authorization: `Bearer ${token}`,
-									},
-								},
-							);
-
-							if (response.data) {
-								setErrorMessage("Username already taken");
-								resolve(false);
-							} else {
-								setErrorMessage("");
-								resolve(true);
-							}
-						} catch (error) {
-							console.error("Error checking username:", error);
-							setErrorMessage("Error checking username");
-							resolve(false);
-						}
-					}, 500);
-				});
-
-				return response;
-			} catch (error) {
-				console.error("Error in checkUsername:", error);
-				return false;
+		try {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
 			}
+
+			// Wait for the timeout to complete and handle the response
+			const response = await new Promise<boolean>((resolve) => {
+				timeoutRef.current = setTimeout(async () => {
+					try {
+						const response = await axios.get(
+							`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+
+						if (response.data) {
+							setUsrNmErrorMessage("Username already taken");
+							resolve(false);
+						} else {
+							resolve(true);
+						}
+					} catch (error) {
+						console.log("Error checking username:", error);
+						setUsrNmErrorMessage("Error checking username");
+						resolve(false);
+					}
+				}, 500);
+			});
+
+			return response;
+		} catch (error) {
+			console.log("Error in checkUsername:", error);
+			return false;
 		}
 	};
 
@@ -359,7 +402,7 @@ const EditProfileScreen = () => {
 				setGenres(response.data);
 			}
 		} catch (error) {
-			console.error("Error fetching genres:", error);
+			console.log("Error fetching genres:", error);
 		}
 	};
 
@@ -391,18 +434,19 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const addGenre = (genreToAdd) => {
+	const addGenres = (genresToAdd: string[]) => {
 		if (profileData.fav_genres && Array.isArray(profileData.fav_genres.data)) {
-			// Check if the genre already exists
-			if (!profileData.fav_genres.data.includes(genreToAdd)) {
-				setProfileData((prevProfileData) => ({
-					...prevProfileData,
-					fav_genres: {
-						...prevProfileData.fav_genres,
-						data: [...prevProfileData.fav_genres.data, genreToAdd],
-					},
-				}));
-			}
+			genresToAdd.forEach((genre) => {
+				if (!profileData.fav_genres.data.includes(genre)) {
+					setProfileData((prevProfileData) => ({
+						...prevProfileData,
+						fav_genres: {
+							...prevProfileData.fav_genres,
+							data: [...prevProfileData.fav_genres.data, genre],
+						},
+					}));
+				}
+			});
 		}
 	};
 
@@ -516,33 +560,51 @@ const EditProfileScreen = () => {
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Name</Text>
 					<TextInput
-						style={{ marginLeft: 42 }}
+						style={{
+							marginLeft: 42,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={profileData.profile_name}
+						placeholder="Enter name here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "name");
 						}}
 					/>
 				</View>
+				{nmErrorMessage !== "" && (
+					<Text style={[styles.errorMessage]}>{nmErrorMessage}</Text>
+				)}
 				{/* Username */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Username</Text>
 					<TextInput
-						style={{ marginLeft: 11 }}
+						style={{
+							marginLeft: 11,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={`${profileData.username}`}
+						placeholder="Enter username here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "username");
 						}}
 					/>
 				</View>
-				{errorMessage !== "" && (
-					<Text style={[styles.errorMessage]}>{errorMessage}</Text>
+				{usrNmErrorMessage !== "" && (
+					<Text style={[styles.errorMessage]}>{usrNmErrorMessage}</Text>
 				)}
 				{/* Bio */}
 				<View style={styles.listItem}>
 					<Text style={styles.title}>Bio</Text>
 					<TextInput
-						style={{ marginLeft: 60 }}
+						style={{
+							marginLeft: 60,
+							borderBottomColor: "#000",
+							borderBottomWidth: 1,
+						}}
 						value={profileData.bio}
+						placeholder="Enter bio here"
 						onChangeText={(newName: string) => {
 							handleSave(newName, "bio");
 						}}
@@ -614,11 +676,11 @@ const EditProfileScreen = () => {
 							Add +
 						</Text>
 					</TouchableOpacity>
-					<Selector
+					<GenreAdder
 						options={genres}
 						placeholder={"Search Genres"}
 						visible={isGenreDialogVisible}
-						onSelect={addGenre}
+						onSelect={addGenres}
 						onClose={toggleGenreSelector}
 					/>
 				</View>

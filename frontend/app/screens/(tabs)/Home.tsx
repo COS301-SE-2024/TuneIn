@@ -16,31 +16,26 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	RefreshControl,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import { Room } from "../models/Room";
-import { Friend } from "../models/friend";
-import AppCarousel from "../components/AppCarousel";
-import FriendsGrid from "../components/FriendsGrid";
-import Miniplayer from "../components/home/miniplayer";
-import NavBar from "../components/NavBar";
-import * as StorageService from "./../services/StorageService"; // Import StorageService
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import { Room } from "../../models/Room";
+import { Friend } from "../../models/friend";
+import AppCarousel from "../../components/AppCarousel";
+import FriendsGrid from "../../components/FriendsGrid";
+import Miniplayer from "../../components/home/miniplayer";
+import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "./../services/Live"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
-import { Player } from "../PlayerContext";
-import { colors } from "../styles/colors";
-import TopNavBar from "../components/TopNavBar";
-import { useAPI } from "../APIContext";
-import { UserDto } from "../../api";
-import { RequiredError } from "../../api/base";
-
-interface UserData {
-	username: string;
-	// Add other properties if needed
-}
+import auth from "../../services/AuthManagement"; // Import AuthManagement
+import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
+import * as utils from "../../services/Utils"; // Import Utils
+import { Player } from "../../PlayerContext";
+import { colors } from "../../styles/colors";
+import TopNavBar from "../../components/TopNavBar";
+import { useAPI } from "../../APIContext";
+import { UserDto } from "../../../api";
+import { RequiredError } from "../../../api/base";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -50,8 +45,8 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { currentRoom, userData, setUserData } = playerContext;
-
+	const { userData, setUserData, currentRoom } = playerContext;
+	console.log("current room: ", currentRoom);
 	// An example of a well-typed & well-defined way to interact with the API
 	/* ********************************************************************** */
 	const { users, authenticated } = useAPI();
@@ -60,7 +55,6 @@ const Home: React.FC = () => {
 		users
 			.getProfile()
 			.then((user: AxiosResponse<UserDto>) => {
-				console.log("User: " + user);
 				if (user.status === 401) {
 					//Unauthorized
 					//Auth header is either missing or invalid
@@ -80,7 +74,11 @@ const Home: React.FC = () => {
 	}
 	/* ********************************************************************** */
 
-	console.log("currentRoom: " + currentRoom);
+	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [roomError, setRoomError] = useState<boolean>(false);
+	const [profileError, setProfileError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState<boolean>(false);
+	const [cacheError, setCacheError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -105,9 +103,11 @@ const Home: React.FC = () => {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
+			setRoomError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching rooms:", error);
+			console.log("Error fetching rooms:", error);
+			setRoomError(true);
 			return [];
 		}
 	};
@@ -117,11 +117,11 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-
-			// console.log("Friends: " + JSON.stringify(response.data));
+			setFriendError(false);
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching friends:", error);
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
 			return [];
 		}
 	};
@@ -134,11 +134,12 @@ const Home: React.FC = () => {
 						Authorization: `Bearer ${token}`,
 					},
 				});
-
+				setProfileError(false);
 				return response.data;
 			}
 		} catch (error) {
-			console.error("Error fetching profile info:", error);
+			console.log("Error fetching profile info:", error);
+			setProfileError(true);
 		}
 	};
 
@@ -147,25 +148,36 @@ const Home: React.FC = () => {
 			return [];
 		}
 
-		return rooms.map((room) => ({
-			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
-			name: room.room_name,
-			language: room.language,
-			songName: room.current_song ? room.current_song.title : null,
-			artistName: room.current_song
-				? room.current_song.artists.join(", ")
-				: null,
-			description: room.description,
-			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
-			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: 50,
-			tags: room.tags ? room.tags : [],
-			mine: mine,
-			isNsfw: room.has_nsfw_content,
-			isExplicit: room.has_explicit_content,
-		}));
+		return rooms.map((room, index) => {
+			// Print out the raw room data for the first room only
+			if (index === 0) {
+				console.log("Raw room data before formatting:", room);
+			}
+
+			return {
+				id: room.roomID,
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				name: room.room_name,
+				language: room.language,
+				songName: room.current_song ? room.current_song.title : null,
+				artistName: room.current_song
+					? room.current_song.artists.join(", ")
+					: null,
+				description: room.description,
+				userID: room.creator.userID,
+				userProfile: room.creator
+					? room.creator.profile_picture_url
+					: ProfileIMG,
+				username: room.creator ? room.creator.username : "Unknown",
+				roomSize: 50,
+				tags: room.tags ? room.tags : [],
+				mine: mine,
+				isNsfw: room.has_nsfw_content,
+				isExplicit: room.has_explicit_content,
+				start_date: room.start_date,
+				end_date: room.end_date,
+			};
+		});
 	};
 
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
@@ -183,8 +195,10 @@ const Home: React.FC = () => {
 			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
 			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
 			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
+			setCacheError(false);
 		} catch (error) {
 			console.error("Error loading cached data:", error);
+			setCacheError(true);
 		}
 	};
 
@@ -238,13 +252,12 @@ const Home: React.FC = () => {
 						profile_picture_url: friend.profile_picture_url
 							? friend.profile_picture_url
 							: ProfileIMG,
-						username: friend.username, // Ensure you include the profile_name property
+						username: friend.username,
+						friend_id: friend.friend_id, // Include the friend_id property
 					}))
 				: [];
 
 			setFriends(formattedFriends);
-
-			console.log("Friends after format: " + JSON.stringify(formattedFriends));
 
 			await StorageService.setItem(
 				"cachedFriends",
@@ -253,7 +266,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, []);
+	}, [setUserData, userData, ProfileIMG]);
 
 	const [refreshing] = React.useState(false);
 
@@ -270,12 +283,27 @@ const Home: React.FC = () => {
 	);
 
 	const router = useRouter();
+
 	const navigateToAllFriends = () => {
 		const safeUserData = userData ?? { username: "defaultUser" };
 
 		router.navigate({
 			pathname: "/screens/followers/FollowerStack",
 			params: { username: safeUserData.username },
+		});
+	};
+
+	const navigateToMyRooms = () => {
+		router.navigate({
+			pathname: "/screens/rooms/MyRooms",
+			params: { myRooms: JSON.stringify(myRooms) },
+		});
+	};
+
+	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
+		router.navigate({
+			pathname: "/screens/rooms/MoreRooms",
+			params: { rooms: JSON.stringify(rooms), name: Name },
 		});
 	};
 
@@ -287,6 +315,22 @@ const Home: React.FC = () => {
 		initialize();
 		return;
 	}, [refreshData]);
+
+	useEffect(() => {
+		if (!roomError || !friendError) {
+			if (roomError && !friendError) {
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			} else if (!roomError && friendError) {
+				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+			} else if (profileError) {
+				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+			}
+		}
+
+		if (cacheError) {
+			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
+		}
+	}, [roomError, friendError, profileError, cacheError]);
 
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -317,13 +361,6 @@ const Home: React.FC = () => {
 		},
 		[scrollY],
 	);
-
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
@@ -331,58 +368,78 @@ const Home: React.FC = () => {
 				ref={scrollViewRef}
 				onScroll={handleScroll}
 				scrollEventThrottle={16}
-				contentContainerStyle={styles.scrollViewContent}
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
 				}
 			>
 				{loading ? (
-					<ActivityIndicator
-						size={60}
-						color={colors.backgroundColor}
-						style={{ marginTop: 260 }}
-					/>
-				) : (
+					<ActivityIndicator size={60} style={{ marginTop: 260 }} />
+				) : !roomError || !friendError ? (
 					<View style={styles.contentContainer}>
-						{myRecents.length > 0 && (
+						{!roomError && (
 							<>
-								<Text style={styles.sectionTitle}>Recent Rooms</Text>
-								<AppCarousel data={myRecents} renderItem={renderItem} />
+								{myRecents.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(myRecents, "Recent Rooms")
+											}
+										>
+											<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										</TouchableOpacity>
+
+										<AppCarousel data={myRecents} renderItem={renderItem} />
+									</>
+								)}
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={() =>
+										navigateToMoreRooms(myRecents, "Picks for you")
+									}
+								>
+									<Text style={styles.sectionTitle}>Picks for you</Text>
+								</TouchableOpacity>
+								<AppCarousel data={myPicks} renderItem={renderItem} />
 							</>
 						)}
-						<Text style={styles.sectionTitle}>Picks for you</Text>
-						<AppCarousel data={myPicks} renderItem={renderItem} />
+						{!friendError && userData && userData.username ? (
+							<>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={navigateToAllFriends}
+								>
+									<Text style={styles.sectionTitle}>Friends</Text>
+								</TouchableOpacity>
+								<FriendsGrid
+									friends={friends}
+									user={userData.username}
+									maxVisible={8}
+								/>
+							</>
+						) : null}
 						<TouchableOpacity
 							style={styles.navigateButton}
-							onPress={navigateToAllFriends}
+							onPress={navigateToMyRooms}
 						>
-							<Text style={styles.sectionTitle}>Friends</Text>
+							<Text style={styles.sectionTitle}>My Rooms</Text>
 						</TouchableOpacity>
-						{userData && userData.username ? (
-							<FriendsGrid
-								friends={friends}
-								user={userData.username}
-								maxVisible={8}
-							/>
-						) : null}
-						<Text style={styles.sectionTitle}>My Rooms</Text>
 						<AppCarousel
 							data={myRooms}
 							renderItem={renderItem}
 							showAddRoomCard={true} // Conditionally show the AddRoomCard
 						/>
 					</View>
+				) : (
+					<>
+						<View style={styles.errorMessage}>
+							<Text>Failed to load content</Text>
+							<Text>Try refreshing</Text>
+						</View>
+					</>
 				)}
 			</ScrollView>
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			>
-				<Miniplayer />
-				<NavBar />
-			</Animated.View>
+			<Miniplayer />
 		</View>
 	);
 };
@@ -390,14 +447,17 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-	},
-	scrollViewContent: {
-		paddingTop: 40,
+		backgroundColor: colors.backgroundColor,
 	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: "center",
-		paddingTop: 20,
+	},
+	errorMessage: {
+		flex: 1, // Make the View take up the full screen
+		alignItems: "center",
+		justifyContent: "center",
+		width: "100%",
 	},
 	sectionTitle: {
 		fontSize: 24,
@@ -428,13 +488,6 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 32,
 		fontWeight: "bold",
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 });
 

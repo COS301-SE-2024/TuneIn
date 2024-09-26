@@ -3,30 +3,30 @@ import {
 	View,
 	Text,
 	TextInput,
-	TouchableOpacity,
 	Animated,
 	StyleSheet,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
-	Switch,
-	ScrollView,
 	FlatList,
 } from "react-native";
+import {
+	GestureHandlerRootView,
+	TouchableOpacity,
+} from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import RoomCardWidget from "../components/rooms/RoomCardWidget";
-import UserItem from "../components/UserItem";
-import { colors } from "../styles/colors";
-import { Room } from "../models/Room";
-import { User } from "../models/user";
+import RoomCardWidget from "../../components/rooms/RoomCardWidget";
+import UserItem from "../../components/UserItem";
+import { colors } from "../../styles/colors";
+import { Room } from "../../models/Room";
+import { User } from "../../models/user";
 import axios from "axios";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
-import Dropdown from "../components/Dropdown";
-import { SearchHistoryDto } from "../models/SearchHistoryDto";
-import ToggleButton from "../components/ToggleButton";
-import SkeletonRoomCard from "../components/rooms/SkeletonRoomCard";
-import SkeletonUserItem from "../components/SkeletonUserItem";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
+import { SearchHistoryDto } from "../../models/SearchHistoryDto";
+import SkeletonRoomCard from "../../components/rooms/SkeletonRoomCard";
+import SkeletonUserItem from "../../components/SkeletonUserItem";
+import FilterBottomSheet from "../../components/FilterBottomSheet";
 
 type SearchResult = {
 	id: string;
@@ -35,52 +35,6 @@ type SearchResult = {
 	roomData?: Room;
 	userData?: User;
 };
-
-// Sample genre data with additional genres
-let genres: string[] = [
-	"Rock",
-	"Pop",
-	"Jazz",
-	"Classical",
-	"Hip Hop",
-	"Country",
-	"Electronic",
-	"Reggae",
-	"Blues",
-	"Folk",
-	"Metal",
-	"Punk",
-	"Soul",
-	"R&B",
-	"Funk",
-	"Alternative",
-	"Indie",
-	"Dance",
-	"Techno",
-	"Ambient",
-	"Gospel",
-	"Latin",
-	"Reggaeton",
-	"Ska",
-	"Opera",
-];
-
-// Sample language data
-const languages = [
-	"English",
-	"Spanish",
-	"French",
-	"German",
-	"Chinese",
-	"Japanese",
-	"Korean",
-	"Portuguese",
-	"Russian",
-	"Arabic",
-	"Italian",
-	"Turkish",
-	"Swedish",
-];
 
 const Search: React.FC = () => {
 	const navigation = useNavigation();
@@ -109,6 +63,7 @@ const Search: React.FC = () => {
 	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
 	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+	const [searchError, setSearchError] = useState<boolean>(false);
 
 	const isAdvancedSearch = () => {
 		if (filter === "room") {
@@ -152,49 +107,90 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const getRecommendedRooms = async () => {
+		const getRecommendations = async () => {
 			setLoading(true);
 			try {
 				const token = await auth.getToken();
 				if (token) {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/users/rooms/foryou`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
+					let response;
+					if (filter === "room") {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/rooms/foryou`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						},
-					);
-					const recommendedRooms: SearchResult[] = response.data.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended rooms:", response);
+							return;
+						}
+						const recommendedRooms: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: filter,
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+								},
+							}),
+						);
+						console.log("recommended rooms:", recommendedRooms);
+						console.log("Recommended rooms length: " + recommendedRooms.length);
+						setResults(recommendedRooms);
+					} else {
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						}),
-					);
-					console.log("recommended rooms:", recommendedRooms);
-					console.log("Recommended rooms length: " + recommendedRooms.length);
-					setResults(recommendedRooms);
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended users:", response);
+							return;
+						}
+						console.log(
+							"Recommended users response: " + JSON.stringify(response),
+						);
+						const recommendedUsers: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: filter,
+								name: item.username,
+								userData: {
+									id: item.id,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						console.log("recommended users:", recommendedUsers);
+						console.log("Recommended users length: " + recommendedUsers.length);
+						setResults(recommendedUsers);
+					}
 				}
 			} catch (error) {
-				console.error("Error fetching recommended rooms:", error);
+				console.log("Error fetching recommended rooms:", error);
 			}
 			setLoading(false);
 		};
+
 		if (searchTerm === "") {
+			getRecommendations();
 			if (filter === "room") {
-				setSearchSuggestions(roomSearchHistory.slice(0, 5));
-				getRecommendedRooms();
+				getRoomHistory();
 			} else if (filter === "user") {
-				setSearchSuggestions(userSearchHistory.slice(0, 5));
+				getUserHistory();
 			}
 		} else {
 			if (timeoutRef.current) {
@@ -209,7 +205,7 @@ const Search: React.FC = () => {
 				}
 			}, 300);
 		}
-	}, [searchTerm]);
+	}, [searchTerm, filter]);
 
 	useEffect(() => {
 		if (searchTerm !== "") {
@@ -227,9 +223,15 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
+		searchTerm,
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
+		// console.log("handle search");
+		if (searchTerm.trim() === "") {
+			return;
+		}
+
 		const advanced = isAdvancedSearch();
 		setDropdownVisible(false);
 		setLoading(true);
@@ -237,55 +239,7 @@ const Search: React.FC = () => {
 			const token = await auth.getToken();
 
 			if (token) {
-				if (filter === "all") {
-					const response = await axios.get(
-						`${utils.API_BASE_URL}/search?q=${sh}`,
-						{
-							headers: {
-								Authorization: `Bearer ${token}`,
-							},
-						},
-					);
-					// console.log("Search: " + JSON.stringify(response));
-					const results: SearchResult[] = response.data.rooms.map(
-						(item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
-								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}),
-					);
-
-					const users: SearchResult[] = response.data.users.map(
-						(item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}),
-					);
-
-					const combinedResult = results.concat(users);
-
-					// console.log("Formatted results: " + JSON.stringify(results));
-					setResults(combinedResult);
-				} else if (filter === "room") {
+				if (filter === "room") {
 					if (advanced) {
 						let request = `${utils.API_BASE_URL}/search/rooms/advanced?q=${sh}`;
 						if (nsfw) {
@@ -321,26 +275,28 @@ const Search: React.FC = () => {
 							},
 						});
 
-						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.roomID,
-							type: "room",
-							name: item.room_name,
-							roomData: {
-								roomID: item.roomID,
-								backgroundImage: item.room_image,
+						console.log("Advance Room Search: " + JSON.stringify(response));
+						const roomResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: "room",
 								name: item.room_name,
-								description: item.description,
-								userID: item.creator.userID,
-								tags: item.tags,
-								language: item.language,
-								roomSize: item.participant_count,
-								isExplicit: item.has_explicit_content,
-								isNsfw: item.has_nsfw_content,
-							},
-						}));
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+									language: item.language,
+									roomSize: item.participant_count,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+								},
+							}),
+						);
 
-						setResults(results);
+						setResults(roomResults);
 					} else {
 						const response = await axios.get(
 							`${utils.API_BASE_URL}/search/rooms?q=${sh}`,
@@ -372,7 +328,6 @@ const Search: React.FC = () => {
 						);
 
 						setResults(formatResults);
-						// console.log("Results: " + JSON.stringify(results));
 					}
 				} else if (filter === "user") {
 					if (advanced) {
@@ -391,19 +346,22 @@ const Search: React.FC = () => {
 								Authorization: `Bearer ${token}`,
 							},
 						});
-						// console.log("Search: " + JSON.stringify(response));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.id,
-							type: "user",
-							name: item.username,
-							userData: {
-								id: item.id,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-							},
-						}));
-						setResults(results);
+
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 						// setShowMoreFilters(false);
 					} else {
 						const response = await axios.get(
@@ -415,24 +373,31 @@ const Search: React.FC = () => {
 							},
 						);
 						// console.log("Search: " + JSON.stringify(response.data));
-						const results: SearchResult[] = response.data.map((item: any) => ({
-							id: item.userID,
-							type: "user",
-							name: item.username,
-							userData: {
+						const userResults: SearchResult[] = response.data.map(
+							(item: any) => ({
 								id: item.userID,
-								profile_picture_url: item.profile_picture_url,
-								profile_name: item.profile_name,
-								username: item.username,
-								followers: item.followers.data,
-							},
-						}));
-						setResults(results);
+								type: "user",
+								name: item.username,
+								userData: {
+									id: item.userID,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						setResults(userResults);
 					}
 				}
+
+				setSearchError(false);
 			}
 		} catch (error) {
-			console.error("Error fetching search info:", error);
+			console.log("Error fetching search info:", error);
+			setResults([]);
+			setSearchError(true);
+			setLoading(false);
 			return null;
 		}
 		setLoading(false);
@@ -460,12 +425,6 @@ const Search: React.FC = () => {
 		[scrollY],
 	);
 
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
-
 	const renderResult = ({ item }: { item: SearchResult }) => {
 		if (item.type === "room" && item.roomData) {
 			// console.log("Render Called");
@@ -491,6 +450,7 @@ const Search: React.FC = () => {
 	};
 
 	const getRoomHistory = async () => {
+		// console.log("Get Room History");
 		try {
 			const token = await auth.getToken();
 
@@ -511,12 +471,13 @@ const Search: React.FC = () => {
 				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
 
 	const getUserHistory = async () => {
+		// console.log("Get User History");
 		try {
 			const token = await auth.getToken();
 
@@ -537,12 +498,13 @@ const Search: React.FC = () => {
 				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search history:", error);
 			return null;
 		}
 	};
 
 	const getRoomsSuggestions = async (q: string) => {
+		// console.log("GetRoomsSuggestions");
 		try {
 			const token = await auth.getToken();
 
@@ -562,12 +524,13 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search suggestions:", error);
 			return null;
 		}
 	};
 
 	const getUsersSuggestions = async (q: string) => {
+		// console.log("GetUsersSuggestions");
 		try {
 			const token = await auth.getToken();
 
@@ -587,7 +550,7 @@ const Search: React.FC = () => {
 				setSearchSuggestions(searchTerms.slice(0, 5));
 			}
 		} catch (error) {
-			console.error("Error fetching search history:", error);
+			console.log("Error fetching search suggestions:", error);
 			return null;
 		}
 	};
@@ -608,289 +571,177 @@ const Search: React.FC = () => {
 		prevFilterRef.current = filter;
 	}, [filter]);
 
-	const getGenres = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				// console.log("Genre data" + response.data);
-				genres = response.data;
-			}
-		} catch (error) {
-			console.error("Error fetching genres:", error);
-		}
-	};
-
 	useEffect(() => {
-		getGenres();
 		getRoomHistory();
 	}, []);
 
-	const handleSelectGenre = (genre: string) => {
-		setSelectedGenre(genre);
-	};
-
-	const handleSelectLanguage = (language: string) => {
-		setSelectedLanguage(language);
-	};
-
 	return (
-		<View style={styles.container}>
-			<View style={styles.header}>
-				<TouchableOpacity
-					onPress={() => navigation.goBack()}
-					testID="back-button"
-				>
-					<Ionicons name="chevron-back" size={30} color="black" />
-				</TouchableOpacity>
-				<Text style={styles.title}>Search </Text>
-			</View>
-			<View style={styles.searchBarContainer}>
-				<TextInput
-					testID="search-input"
-					style={styles.searchBar}
-					placeholder="Search..."
-					value={searchTerm}
-					onBlur={() => {
-						setTimeout(() => {
-							setDropdownVisible(false);
-						}, 200);
-					}}
-					onFocus={() => {
-						setDropdownVisible(true);
-					}}
-					onChangeText={setSearchTerm}
-				/>
-				<TouchableOpacity
-					style={styles.searchIcon}
-					onPress={() => {
-						handleSearch();
-					}}
-					testID="search-button"
-				>
-					<Ionicons name="search-sharp" size={30} color={colors.primary} />
-				</TouchableOpacity>
-			</View>
-			{dropdownVisible && searchSuggestions.length !== 0 && (
-				<FlatList
-					data={searchSuggestions}
-					keyExtractor={(item) => item}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							style={styles.dropdownItem}
-							onPress={() => {
-								setSearchTerm(item);
-								handleSearch(item);
-							}}
-						>
-							<Text style={styles.dropdownItemText}>{item}</Text>
-						</TouchableOpacity>
-					)}
-					style={styles.dropdown}
-				/>
-			)}
-			<View style={styles.filterContainer}>
-				<TouchableOpacity
-					style={[
-						styles.filterButton,
-						filter === "room" && styles.activeFilter,
-					]}
-					onPress={() => handleSelection("room")}
-				>
-					<Text style={styles.filterText}>Rooms</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[
-						styles.filterButton,
-						filter === "user" && styles.activeFilter,
-					]}
-					onPress={() => handleSelection("user")}
-					testID="user-btn"
-				>
-					<Text style={styles.filterText}>Users</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.filterButton}
-					onPress={handleToggleMoreFilters}
-					testID="toggle-filters-button"
-				>
-					<Text style={styles.filterText}>
-						{showMoreFilters ? "View Less Filters" : "View More Filters"}
-					</Text>
-				</TouchableOpacity>
-			</View>
+		<GestureHandlerRootView>
+			<View style={styles.container}>
+				<View style={styles.header}>
+					<TouchableOpacity
+						onPress={() => navigation.goBack()}
+						testID="back-button"
+						style={styles.backButton} // Optional to add padding or margin
+					>
+						<Ionicons name="chevron-back" size={30} color="black" />
+					</TouchableOpacity>
+					<Text style={styles.title}>Search</Text>
+				</View>
+				<View style={styles.searchBarContainer}>
+					<TextInput
+						testID="search-input"
+						style={styles.searchBar}
+						placeholder="Search..."
+						value={searchTerm}
+						onBlur={() => {
+							setTimeout(() => {
+								setDropdownVisible(false);
+							}, 200);
+						}}
+						onFocus={() => {
+							setDropdownVisible(true);
+						}}
+						onChangeText={setSearchTerm}
+						onSubmitEditing={() => {
+							handleSearch();
+						}}
+					/>
+					<TouchableOpacity
+						style={styles.searchIcon}
+						onPress={() => {
+							handleSearch();
+						}}
+						testID="search-button"
+					>
+						<Ionicons name="search-sharp" size={30} color={colors.primary} />
+					</TouchableOpacity>
+				</View>
+				{dropdownVisible && searchSuggestions.length !== 0 && (
+					<FlatList
+						data={searchSuggestions}
+						keyExtractor={(item) => item}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.dropdownItem}
+								onPress={() => {
+									setSearchTerm(item);
+									handleSearch(item);
+								}}
+							>
+								<Text style={styles.dropdownItemText}>{item}</Text>
+							</TouchableOpacity>
+						)}
+						style={styles.dropdown}
+					/>
+				)}
+				<View style={styles.filterContainer}>
+					<TouchableOpacity
+						style={[
+							styles.filterButton,
+							filter === "room" && styles.activeFilter,
+						]}
+						onPress={() => handleSelection("room")}
+					>
+						<Text style={styles.filterText}>Rooms</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.filterButton,
+							filter === "user" && styles.activeFilter,
+						]}
+						onPress={() => handleSelection("user")}
+						testID="user-btn"
+					>
+						<Text style={styles.filterText}>Users</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.filterButton}
+						onPress={handleToggleMoreFilters}
+						testID="toggle-filters-button"
+					>
+						<Text style={styles.filterText}>{"View More Filters"}</Text>
+					</TouchableOpacity>
+				</View>
 
-			{(!filter ||
-				(filter === "user" && showMoreFilters) ||
-				(filter === "room" && showMoreFilters)) && (
-				<>
-					{(filter === "user" || !filter) && (
-						<View style={styles.additionalFilters}>
-							{showMoreFilters && (
-								<View style={styles.includeSection}>
-									<Text style={styles.includeHeader}>Search by:</Text>
-									<View style={styles.searchBy}>
-										<ToggleButton
-											label="Minimum Followers"
-											value={minFollowers}
-											onValueChange={setMinFollowers}
-											testID="minFol-btn"
-										/>
-										<ToggleButton
-											label="Minimum Following"
-											value={maxFollowers}
-											onValueChange={setMaxFollowers}
-											testID="maxFl-btn"
-										/>
-									</View>
-								</View>
+				<FilterBottomSheet
+					filter={filter}
+					explicit={explicit}
+					nsfw={nsfw}
+					temporary={temporary}
+					isPrivate={isPrivate}
+					scheduled={scheduled}
+					showMoreFilters={showMoreFilters}
+					host={host}
+					roomCount={roomCount}
+					maxFollowers={maxFollowers}
+					minFollowers={minFollowers}
+					selectedGenre={selectedGenre}
+					selectedLanguage={selectedLanguage}
+					setExplicit={setExplicit}
+					setNsfw={setNsfw}
+					setTemporary={setTemporary}
+					setIsPrivate={setIsPrivate}
+					setScheduled={setScheduled}
+					setHost={setHost}
+					setRoomCount={setRoomCount}
+					setMaxFollowers={setMaxFollowers}
+					setMinFollowers={setMinFollowers}
+					setSelectedGenre={setSelectedGenre}
+					setSelectedLanguage={setSelectedLanguage}
+					setShowMoreFilters={setShowMoreFilters}
+				/>
+
+				{loading ? (
+					!showMoreFilters && (
+						// Render Skeleton if loading
+						<View style={styles.roomCardPadding}>
+							{filter === "room" ? (
+								<>
+									<SkeletonRoomCard />
+									<SkeletonRoomCard />
+									<SkeletonRoomCard />
+								</>
+							) : (
+								<>
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+									<SkeletonUserItem />
+								</>
 							)}
 						</View>
-					)}
-
-					{(filter === "room" || !filter) && (
-						<ScrollView style={styles.additionalFilters}>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Search by:</Text>
-								<View style={styles.searchBy}>
-									<ToggleButton
-										label="Host"
-										testID="host-toggle"
-										value={host}
-										onValueChange={setHost}
-									/>
-									<ToggleButton
-										label="Room Count"
-										testID="room-count-toggle"
-										value={roomCount}
-										onValueChange={setRoomCount}
-									/>
-								</View>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Include:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Explicit</Text>
-									<Switch
-										testID="explicit-switch"
-										value={explicit}
-										onValueChange={setExplicit}
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>NSFW</Text>
-									<Switch
-										testID="nsfw-switch"
-										value={nsfw}
-										onValueChange={setNsfw}
-									/>
-								</View>
-							</View>
-							<View style={styles.dropContainer}>
-								<Dropdown
-									options={genres}
-									placeholder="Select Genre"
-									onSelect={handleSelectGenre}
-									selectedOption={selectedGenre}
-									setSelectedOption={setSelectedGenre}
-								/>
-								<Dropdown
-									options={languages}
-									placeholder="Select Language"
-									onSelect={handleSelectLanguage}
-									selectedOption={selectedLanguage}
-									setSelectedOption={setSelectedLanguage}
-								/>
-							</View>
-							<View style={styles.includeSection}>
-								<Text style={styles.includeHeader}>Other:</Text>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Temporary</Text>
-									<Switch
-										value={temporary}
-										onValueChange={setTemporary}
-										testID="temp-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Private</Text>
-									<Switch
-										value={isPrivate}
-										onValueChange={setIsPrivate}
-										testID="priv-switch"
-									/>
-								</View>
-								<View style={styles.switchContainer}>
-									<Text style={styles.switchLabel}>Scheduled</Text>
-									<Switch
-										value={scheduled}
-										onValueChange={setScheduled}
-										testID="scheduled-switch"
-									/>
-								</View>
-							</View>
-						</ScrollView>
-					)}
-				</>
-			)}
-
-			{loading ? (
-				!showMoreFilters && (
-					// Render Skeleton if loading
-					<View style={styles.roomCardPadding}>
-						{filter === "room" ? (
-							<>
-								<SkeletonRoomCard />
-								<SkeletonRoomCard />
-								<SkeletonRoomCard />
-							</>
-						) : (
-							<>
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-								<SkeletonUserItem />
-							</>
-						)}
+					)
+				) : results.length === 0 ? (
+					// Render No Results Message if no results
+					<View style={styles.noResult}>
+						<Text>
+							{searchError
+								? "Failed to load search results"
+								: "No results found"}
+						</Text>
 					</View>
-				)
-			) : results.length === 0 ? (
-				// Render No Results Message if no results
-				<View style={styles.noResult}>
-					<Text>No results found</Text>
-				</View>
-			) : (
-				// Render FlatList if there are results
-				<FlatList
-					data={results}
-					keyExtractor={(item) => item.id}
-					renderItem={renderResult}
-					contentContainerStyle={styles.resultsContainer}
-					onScroll={handleScroll}
-				/>
-			)}
-
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			></Animated.View>
-		</View>
+				) : (
+					// Render FlatList if there are results
+					<FlatList
+						data={results}
+						keyExtractor={(item) => item.id}
+						renderItem={renderResult}
+						contentContainerStyle={styles.resultsContainer}
+						onScroll={handleScroll}
+					/>
+				)}
+			</View>
+		</GestureHandlerRootView>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingHorizontal: 30,
-		paddingTop: 30,
+		paddingHorizontal: 20,
+		paddingTop: 50,
 	},
 	roomCardPadding: {
 		marginTop: 20,
@@ -900,7 +751,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 20,
+		marginBottom: 40,
+		position: "relative", // Ensures proper alignment for absolute positioning
 	},
 	noResult: {
 		flex: 1, // Make the View take up the full screen
@@ -912,7 +764,13 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "#333",
 		textAlign: "center",
-		flex: 1,
+		position: "absolute", // Ensures the title is centered regardless of the other elements
+		left: 0,
+		right: 0, // Centers the text horizontally
+	},
+	backButton: {
+		position: "absolute", // Keeps the back button aligned to the left
+		left: 10, // Adjust this for your desired padding
 	},
 	searchBarContainer: {
 		flexDirection: "row",
@@ -921,7 +779,7 @@ const styles = StyleSheet.create({
 		borderColor: "#ccc",
 		borderWidth: 1,
 		borderRadius: 56,
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
 	},
 	searchBar: {
 		flex: 1,
@@ -937,8 +795,9 @@ const styles = StyleSheet.create({
 	},
 	filterButton: {
 		paddingVertical: 10,
-		paddingHorizontal: 20,
+		paddingHorizontal: 15,
 		borderRadius: 20,
+		marginRight: 10,
 		borderWidth: 1,
 		borderColor: "#ccc",
 	},
@@ -1122,16 +981,17 @@ const styles = StyleSheet.create({
 		backgroundColor: "#f2f2f2",
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 5,
-		maxHeight: 150, // Optional: limits the height of the dropdown
+		borderRadius: 20,
+		maxHeight: 200, // Optional: limits the height of the dropdown
 		zIndex: 1,
 		shadowColor: "#000", // Adding shadow to match the 'selectedFilter' style
 		shadowOffset: { width: 0, height: 4 }, // Matching shadow settings
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-		paddingHorizontal: 10, // Adding padding to match general spacing
-		marginLeft: 30,
+		paddingHorizontal: 10, // Padding inside the dropdown
+		marginLeft: 20, // Move the dropdown 10px to the left (30 - 10 = 20)
+		marginTop: 7, // Move the dropdown
 	},
 	searchContainer: {
 		flex: 1,
@@ -1139,7 +999,7 @@ const styles = StyleSheet.create({
 		paddingTop: 50,
 	},
 	dropdownItem: {
-		// paddingVertical: 5,
+		paddingVertical: 5,
 		paddingHorizontal: 15,
 		borderBottomWidth: 5,
 		borderBottomColor: "#eee",

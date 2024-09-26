@@ -192,7 +192,7 @@ export class RoomsService {
 		}
 	}
 
-	async joinRoom(_room_id: string, user_id: string): Promise<boolean> {
+	async joinRoom(_room_id: string, user_id: string): Promise<void> {
 		console.log("user", user_id, "joining room", _room_id);
 		try {
 			// Check if the user is already in the room
@@ -203,7 +203,10 @@ export class RoomsService {
 			});
 
 			if (room !== null) {
-				return false;
+				throw new HttpException(
+					"User is already in the room",
+					HttpStatus.CONFLICT,
+				);
 			}
 			// Add the user to the room
 			await this.prisma.participate.create({
@@ -220,14 +223,13 @@ export class RoomsService {
 					room_join_time: new Date(),
 				},
 			});
-			return true;
 		} catch (error) {
 			console.error("Error joining room:", error);
-			return false;
+			throw error;
 		}
 	}
 
-	async leaveRoom(room_id: string, user_id: string): Promise<boolean> {
+	async leaveRoom(room_id: string, user_id: string): Promise<void> {
 		// TODO: Implement logic to leave room
 		console.log("user", user_id, "leaving room", room_id);
 		try {
@@ -241,7 +243,10 @@ export class RoomsService {
 
 			// If the user is already in the room, return false
 			if (room === null) {
-				return false;
+				throw new HttpException(
+					"User is not in the room",
+					HttpStatus.NOT_FOUND,
+				);
 			}
 
 			// Add the user to the room
@@ -258,7 +263,10 @@ export class RoomsService {
 				},
 			});
 			if (user === null) {
-				return false;
+				throw new HttpException(
+					"User is not in the room",
+					HttpStatus.NOT_FOUND,
+				);
 			}
 			// if the user has been successfully remove from the room, then update the room_leave_time to the user_activity table
 			await this.prisma.user_activity.update({
@@ -269,10 +277,9 @@ export class RoomsService {
 					room_leave_time: new Date(),
 				},
 			});
-			return true;
 		} catch (error) {
 			console.error("Error leaving room:", error);
-			return false;
+			throw error;
 		}
 	}
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, fireEvent } from "@testing-library/react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "../app/services/AuthManagement";
@@ -7,6 +7,14 @@ import * as StorageService from "../app/services/StorageService";
 import { useLocalSearchParams } from "expo-router";
 import { Player } from "../app/PlayerContext";
 import EditProfileScreen from "../app/screens/profile/EditProfilePage";
+
+jest.mock("react-native-gesture-handler", () => {
+	const MockView = (props) => <div {...props} />;
+	return {
+		GestureHandlerRootView: MockView,
+		TouchableOpacity: MockView,
+	};
+});
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -297,7 +305,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByDisplayValue, getByText } = render(
+		const { getByDisplayValue } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,
@@ -559,7 +567,7 @@ describe("ProfileScreen", () => {
 			currentRoom: "Room 1",
 		};
 
-		const { getByText, getByTestId } = render(
+		const { getByTestId } = render(
 			<PlayerContextProviderMock value={mockPlayerContextValue}>
 				<EditProfileScreen />
 			</PlayerContextProviderMock>,

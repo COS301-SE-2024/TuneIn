@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	Image,
+	TouchableOpacity,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
 import { router } from "expo-router";
@@ -14,6 +21,7 @@ interface UserItemProps {
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const [isFollowing, setIsFollowing] = useState<boolean>(false);
+	console.log("User Item: " + JSON.stringify(user));
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -36,37 +44,43 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 
 		if (storedToken) {
 			if (isFollowing) {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try {
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					setIsFollowing(false);
-				} else {
-					console.error("Issue unfollowing user");
+					if (response) {
+						setIsFollowing(false);
+					}
+				} catch (error) {
+					console.log("Issue unfollowing user");
+					ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 				}
 			} else {
-				const response = await axios.post(
-					`${utils.API_BASE_URL}/users/${user.username}/follow`,
-					{},
-					{
-						headers: {
-							Authorization: `Bearer ${storedToken}`,
+				try {
+					const response = await axios.post(
+						`${utils.API_BASE_URL}/users/${user.username}/follow`,
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${storedToken}`,
+							},
 						},
-					},
-				);
+					);
 
-				if (response) {
-					console.log("Called Follow");
-					setIsFollowing(true);
-				} else {
-					console.error("Issue unfollowing user");
+					if (response) {
+						console.log("Called Follow");
+						setIsFollowing(true);
+					}
+				} catch (error) {
+					console.log("Issue following user");
+					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
 				}
 			}
 		}
@@ -106,7 +120,12 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				onPress={followHandler}
 				testID="follow-button"
 			>
-				<Text style={styles.followButtonText}>
+				<Text
+					style={[
+						styles.followButtonText,
+						{ color: isFollowing ? "red" : colors.primary },
+					]}
+				>
 					{isFollowing ? "Unfollow" : "Follow"}
 				</Text>
 			</TouchableOpacity>
@@ -121,24 +140,23 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: "#ccc",
 		paddingBottom: 20,
+		paddingLeft: 20,
 		paddingHorizontal: 5,
+		marginTop: 20,
 	},
 	textContainer: {
-		flex: 1,
 		width: 120,
 	},
 	profileImage: {
-		width: 70,
-		height: 70,
+		width: 50,
+		height: 50,
 		borderRadius: 40,
 		marginRight: 20,
-		marginTop: 20,
 	},
 	profileName: {
 		fontSize: 16,
 		fontWeight: "bold",
 		color: "#333",
-		marginTop: 20,
 	},
 	username: {
 		fontSize: 14,
@@ -147,18 +165,17 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 	},
 	followButton: {
-		marginTop: 20,
-		paddingVertical: 5,
-		borderRadius: 15,
-		backgroundColor: colors.primary,
-		alignItems: "center",
-		width: "30%",
+		backgroundColor: colors.backgroundColor,
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 20,
+		borderWidth: 1,
+		borderColor: colors.primary,
 	},
 	unfollowButton: {
-		backgroundColor: colors.secondary,
+		borderColor: "red",
 	},
 	followButtonText: {
-		color: "#fff",
 		fontWeight: "bold",
 	},
 });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
 	View,
 	Text,
@@ -9,14 +9,13 @@ import {
 	NativeSyntheticEvent,
 	FlatList,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import FavoriteSongs from "../../components/FavoriteSong";
 import { colors } from "../../styles/colors";
 
 const MorePage: React.FC = () => {
-	const router = useRouter();
 	const params = useLocalSearchParams();
 	const items = Array.isArray(params.items)
 		? JSON.parse(params.items[0])
@@ -27,7 +26,6 @@ const MorePage: React.FC = () => {
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 	// const [displayedItems, setDisplayedItems] = useState(items.slice(0, 5)); // Initial load of 20 items
-	const [loadingMore, setLoadingMore] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
 	const flatListRef = useRef<FlatList<any>>(null);
 
@@ -61,12 +59,6 @@ const MorePage: React.FC = () => {
 		},
 		[scrollY],
 	);
-
-	const navBarTranslateY = scrollY.interpolate({
-		inputRange: [0, 100],
-		outputRange: [0, 100],
-		extrapolate: "clamp",
-	});
 
 	const renderResult = ({ item }: { item: any }) => {
 		if (params.type === "room") {
@@ -172,13 +164,6 @@ const MorePage: React.FC = () => {
 				ListFooterComponent={renderFooter}
 				testID="flatlist"
 			/>
-
-			<Animated.View
-				style={[
-					styles.navBar,
-					{ transform: [{ translateY: navBarTranslateY }] },
-				]}
-			></Animated.View>
 		</View>
 	);
 };
@@ -332,13 +317,6 @@ const styles = StyleSheet.create({
 	closeButtonText: {
 		color: "white",
 		fontSize: 16,
-	},
-	navBar: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 10,
 	},
 	resultsContainer: {
 		paddingVertical: 10,

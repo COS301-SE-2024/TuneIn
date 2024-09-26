@@ -396,6 +396,27 @@ export const mockPrismaService = {
 		updateMany: jest.fn(),
 		upsert: jest.fn(),
 	},
+	favorite_genres: {
+		create: jest.fn(),
+		createMany: jest.fn(),
+		createManyAndReturn: jest.fn(),
+		delete: jest.fn(),
+		deleteMany: jest.fn(),
+		findUnique: jest.fn(),
+		findUniqueOrThrow: jest.fn(),
+		findFirst: jest.fn(),
+		findFirstOrThrow: jest.fn(),
+		findMany: jest.fn(),
+		update: jest.fn(),
+		updateMany: jest.fn(),
+		upsert: jest.fn(),
+	},
+};
+
+export const mockDtoGenService = {
+	generateMultipleRoomDto: jest.fn(),
+	generateMultipleUserDto: jest.fn(),
+	// mock properties and methods as needed
 };
 
 export const mockAuthService = {
@@ -403,5 +424,32 @@ export const mockAuthService = {
 };
 
 export const mockUsersService = {
+	// mock properties and methods as needed
+	calculateMutualFriends: jest.fn(),
+	calculatePopularity: jest.fn(),
+	calculateActivity: jest.fn(),
+	calculateGenreSimilarity: jest.fn(),
+};
+
+export const mockRecommendationsService = {
+	getPlaylistSimilarityScores: jest.fn(),
+	getTopPlaylists: jest.fn(),
+	setMockSongs: jest.fn(),
+	setPlaylists: jest.fn(),
+	// Add other functions here if needed
+};
+
+export const mockDbUtilsService = {
+	getFriendRequests: jest.fn(),
+	userExists: jest.fn(),
+	isFollowing: jest.fn(),
+	getPotentialFriends: jest.fn(),
+	isFriendsOrPending: jest.fn(),
+	getRoomSongs: jest.fn(),
+	getUserFavoriteSongs: jest.fn(),
+	getUserFollowing: jest.fn(),
+	getUserFriends: jest.fn(),
+	getUserFollowers: jest.fn(),
+	getMutualFriends: jest.fn(),
 	// mock properties and methods as needed
 };
