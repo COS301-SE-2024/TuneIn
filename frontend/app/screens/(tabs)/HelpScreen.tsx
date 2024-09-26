@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
 		flexGrow: 1,
 		padding: 20,
 		paddingTop: 15,
-		backgroundColor: "#f0f0f0",
+		backgroundColor: colors.backgroundColor,
 	},
 	backButton: {
 		position: "absolute",
