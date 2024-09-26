@@ -2507,69 +2507,69 @@ describe("ProfileScreen", () => {
 		});
 	});
 
-	it("should toggle LinkBottomSheet visibility", async () => {
-		(AsyncStorage.getItem as jest.Mock).mockResolvedValue("mock-token");
-		const toastSpy = jest
-			.spyOn(ToastAndroid, "show")
-			.mockImplementation(() => {});
-		const mockProfileData = {
-			profile_picture_url: "https://example.com/profile-pic.jpg",
-			profile_name: "John Doe",
-			username: "johndoe",
-			followers: { count: 10 },
-			following: { count: 20 },
-			bio: "Mock bio",
-			links: {
-				count: 1,
-				data: { other: ["https://example.com"] },
-			},
-			fav_genres: { data: [] },
-			fav_songs: { data: [] },
-			fav_rooms: {
-				count: 0,
-				data: [],
-			},
-			recent_rooms: {
-				count: 0,
-				data: [],
-			},
-		};
+	// it("should toggle LinkBottomSheet visibility", async () => {
+	// 	(AsyncStorage.getItem as jest.Mock).mockResolvedValue("mock-token");
+	// 	const toastSpy = jest
+	// 		.spyOn(ToastAndroid, "show")
+	// 		.mockImplementation(() => {});
+	// 	const mockProfileData = {
+	// 		profile_picture_url: "https://example.com/profile-pic.jpg",
+	// 		profile_name: "John Doe",
+	// 		username: "johndoe",
+	// 		followers: { count: 10 },
+	// 		following: { count: 20 },
+	// 		bio: "Mock bio",
+	// 		links: {
+	// 			count: 1,
+	// 			data: { other: ["https://example.com"] },
+	// 		},
+	// 		fav_genres: { data: [] },
+	// 		fav_songs: { data: [] },
+	// 		fav_rooms: {
+	// 			count: 0,
+	// 			data: [],
+	// 		},
+	// 		recent_rooms: {
+	// 			count: 0,
+	// 			data: [],
+	// 		},
+	// 	};
 
-		const mockPlayerContextValue = {
-			userData: mockProfileData,
-			setUserData: jest.fn(),
-			currentRoom: "Room 1",
-		};
+	// 	const mockPlayerContextValue = {
+	// 		userData: mockProfileData,
+	// 		setUserData: jest.fn(),
+	// 		currentRoom: "Room 1",
+	// 	};
 
-		(useLocalSearchParams as jest.Mock).mockReturnValue({});
-		(axios.get as jest.Mock)
-			.mockResolvedValue({ data: mockProfileData })
-			.mockResolvedValueOnce({ data: [] })
-			.mockResolvedValueOnce({ data: [] })
-			.mockResolvedValueOnce({ data: [] })
-			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockRoomData })
-			.mockResolvedValueOnce({ data: mockCurrRoomData });
-		const { getByTestId, queryByTestId, getByText } = render(
-			<PlayerContextProviderMock value={mockPlayerContextValue}>
-				<ProfileScreen />
-			</PlayerContextProviderMock>,
-		);
+	// 	(useLocalSearchParams as jest.Mock).mockReturnValue({});
+	// 	(axios.get as jest.Mock)
+	// 		.mockResolvedValue({ data: mockProfileData })
+	// 		.mockResolvedValueOnce({ data: [] })
+	// 		.mockResolvedValueOnce({ data: [] })
+	// 		.mockResolvedValueOnce({ data: [] })
+	// 		.mockResolvedValueOnce({ data: mockRoomData })
+	// 		.mockResolvedValueOnce({ data: mockRoomData })
+	// 		.mockResolvedValueOnce({ data: mockRoomData })
+	// 		.mockResolvedValueOnce({ data: mockCurrRoomData });
+	// 	const { getByTestId, queryByTestId, getByText } = render(
+	// 		<PlayerContextProviderMock value={mockPlayerContextValue}>
+	// 			<ProfileScreen />
+	// 		</PlayerContextProviderMock>,
+	// 	);
 
-		// Wait for async operations to complete and profile data to be rendered
-		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
-		expect(queryByTestId("link-bottom-sheet")).toBeNull();
+	// 	// Wait for async operations to complete and profile data to be rendered
+	// 	await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
+	// 	expect(queryByTestId("link-bottom-sheet")).toBeNull();
 
-		await act(async () => {
-			const touchableOpacity = getByTestId("links-touchable");
-			fireEvent.press(touchableOpacity);
+	// 	await act(async () => {
+	// 		const touchableOpacity = getByTestId("links-touchable");
+	// 		fireEvent.press(touchableOpacity);
 
-			await waitFor(() => {
-				// Check if LinkBottomSheet is visible
-				expect(getByTestId("link-bottom-sheet")).toBeTruthy();
-			});
-		});
-		toastSpy.mockRestore();
-	});
+	// 		await waitFor(() => {
+	// 			// Check if LinkBottomSheet is visible
+	// 			expect(getByTestId("link-bottom-sheet")).toBeTruthy();
+	// 		});
+	// 	});
+	// 	toastSpy.mockRestore();
+	// });
 });

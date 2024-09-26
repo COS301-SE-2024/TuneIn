@@ -26,8 +26,8 @@ interface LinkBottomSheetProps {
 
 // Define the functional component with default values set in the parameters
 const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
-	setIsVisible: setShowMoreFilters = () => {},
-	isVisible: showMoreFilters = true,
+	setIsVisible: setIsVisible = () => {},
+	isVisible: isVisible = true,
 	links,
 }) => {
 	const slideAnim = useRef(new Animated.Value(300)).current;
@@ -36,7 +36,7 @@ const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
 	console.log("");
 
 	useEffect(() => {
-		if (showMoreFilters) {
+		if (isVisible) {
 			// Set modal visible state
 			setIsModalVisible(true);
 			// Animate the modal opening
@@ -60,11 +60,11 @@ const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
 				easing: Easing.in(Easing.ease),
 				useNativeDriver: true,
 			}).start(() => {
-				setShowMoreFilters(false); // Close modal after animation
+				setIsVisible(false); // Close modal after animation
 				setIsModalVisible(false); // Update visibility state
 			});
 		}
-	}, [showMoreFilters]);
+	}, [isVisible]);
 
 	const handleClose = () => {
 		if (isModalVisible) {
@@ -74,12 +74,12 @@ const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
 				duration: 300,
 				easing: Easing.in(Easing.ease),
 				useNativeDriver: true,
-			}).start(() => setShowMoreFilters(false)); // Close modal after animation
+			}).start(() => setIsVisible(false)); // Close modal after animation
 		}
 	};
 
 	return (
-		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
+		<Modal transparent={true} animationType="slide" visible={isVisible}>
 			<GestureHandlerRootView>
 				<TouchableWithoutFeedback onPress={handleClose}>
 					<View style={styles.modalContainer} testID="link-bottom-sheet">
