@@ -155,4 +155,70 @@ describe("RoomAnalyticsService", () => {
 			});
 		});
 	});
+	describe("getHourlyParticipantAnalytics", () => {
+		it("should return hourly participant analytics with correct array size", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserActivityPerHour = [
+				{ hour: new Date("2023-01-01T01:00:00Z"), count: 5 },
+				{ hour: new Date("2023-01-01T02:00:00Z"), count: 10 },
+			];
+			const mockRoom = {
+				room_id: mockRoomID,
+				date_created: new Date("2023-01-01T00:00:00Z"),
+			} as PrismaTypes.room;
+
+			jest.spyOn(prismaService, "$queryRaw").mockImplementation(() => {
+				return Promise.resolve(
+					mockUserActivityPerHour,
+				) as unknown as PrismaTypes.PrismaPromise<any>;
+			});
+
+			jest.spyOn(prismaService.room, "findUnique").mockResolvedValue(mockRoom);
+
+			const result = await service.getHourlyParticipantAnalytics(mockRoomID);
+
+			// Check that the array size is correct
+			expect(result.length).toBeGreaterThan(0);
+			expect(result.length).toBeLessThanOrEqual(27);
+		});
+
+		it("should return empty array if no user activity is found", async () => {
+			const mockRoomID = "roomID1";
+
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValue([] as unknown as PrismaTypes.PrismaPromise<any>);
+			jest.spyOn(prismaService.room, "findUnique").mockResolvedValue(null);
+
+			const result = await service.getHourlyParticipantAnalytics(mockRoomID);
+
+			expect(result).toEqual([]);
+		});
+
+		it("should handle room creation date correctly and return correct array size", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserActivityPerHour = [
+				{ hour: new Date("2023-01-01T01:00:00Z"), count: 5 },
+				{ hour: new Date("2023-01-01T02:00:00Z"), count: 10 },
+			];
+			const mockRoom = {
+				room_id: mockRoomID,
+				date_created: new Date("2023-01-01T00:00:00Z"),
+			} as PrismaTypes.room;
+
+			jest.spyOn(prismaService, "$queryRaw").mockImplementation(() => {
+				return Promise.resolve(
+					mockUserActivityPerHour,
+				) as unknown as PrismaTypes.PrismaPromise<any>;
+			});
+
+			jest.spyOn(prismaService.room, "findUnique").mockResolvedValue(mockRoom);
+
+			const result = await service.getHourlyParticipantAnalytics(mockRoomID);
+
+			// Check that the array size is correct
+			expect(result.length).toBeGreaterThan(0);
+			expect(result.length).toBeLessThanOrEqual(27);
+		});
+	});
 });
