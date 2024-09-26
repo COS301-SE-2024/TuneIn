@@ -2,14 +2,15 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 // import { Chat } from "../models/chat";
-import { DirectMessageDto, UserDto } from "../../api";
+import { DirectMessageDto, UserDto, RoomDto } from "../../api";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;
 	otherUser: UserDto;
+	room?: RoomDto;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
+const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser, room }) => {
 	const router = useRouter();
 
 	return (
@@ -29,7 +30,11 @@ const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
 			/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.name}>{otherUser.profile_name}</Text>
-				<Text style={styles.lastMessage}>{message.messageBody}</Text>
+				<Text style={styles.lastMessage}>
+					{message.bodyIsRoomID && room
+						? `Shared Room: ${room.room_name}`
+						: message.messageBody}
+				</Text>
 			</View>
 		</TouchableOpacity>
 	);

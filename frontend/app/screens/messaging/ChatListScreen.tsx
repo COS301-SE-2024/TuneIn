@@ -17,7 +17,7 @@ import { useRouter } from "expo-router";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
-import { DirectMessageDto, UserDto } from "../../../api";
+import { DirectMessageDto, UserDto, RoomDto } from "../../../api";
 import { useLive } from "../../LiveContext";
 
 // const initialChats: Chat[] = [
@@ -57,6 +57,7 @@ const ChatListScreen = () => {
 	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
+	const [messageRooms, setMessageRooms] = useState<RoomDto | undefined[]>([]);
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
 	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
@@ -91,6 +92,13 @@ const ChatListScreen = () => {
 				console.log(chats);
 				setFriends(responses[1].data as UserDto[]);
 				console.log(responses[1].data);
+
+				const roomIDs: string | undefined[] = [];
+				for (const message of chats) {
+					if (message.bodyIsRoomID) {
+						roomIDs.push(message.messageBody);
+					}
+				}
 
 				setFilteredChats(createChats(chats, currentUser.userID));
 				setUserMessages(chats);

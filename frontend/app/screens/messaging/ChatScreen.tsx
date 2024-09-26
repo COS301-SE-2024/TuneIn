@@ -14,7 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { DirectMessage, useLive } from "../../LiveContext";
+import { useLive } from "../../LiveContext";
+import { DirectMessage } from "../../hooks/useDMControls";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
@@ -27,10 +28,9 @@ const ChatScreen = () => {
 		enterDM,
 		leaveDM,
 		dmControls,
-		dmsConnected,
-		dmsReceived,
 		dmParticipants,
 		directMessages,
+		socketHandshakes,
 	} = useLive();
 	const [message, setMessage] = useState<string>("");
 	const [dmError, setError] = useState<boolean>(false);
@@ -41,16 +41,16 @@ const ChatScreen = () => {
 
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
-		if (dmsConnected) {
+		if (socketHandshakes.dmJoined) {
 			console.log("Leaving DM");
 			leaveDM();
 		}
 	};
 
 	useEffect(() => {
-		if (dmsConnected) {
+		if (socketHandshakes.dmJoined) {
 			if (!directMessages || directMessages.length === 0) {
-				if (!dmsReceived) {
+				if (!socketHandshakes.dmsReceived) {
 					dmControls.requestDirectMessageHistory();
 				}
 			}
@@ -66,7 +66,7 @@ const ChatScreen = () => {
 		const initialize = async () => {
 			try {
 				await enterDM([u]);
-				if (!dmsReceived) {
+				if (!socketHandshakes.dmsReceived) {
 					dmControls.requestDirectMessageHistory();
 				}
 			} catch (error) {
@@ -97,6 +97,7 @@ const ChatScreen = () => {
 				dateRead: new Date(0).toISOString(),
 				isRead: false,
 				pID: "",
+				bodyIsRoomID: false,
 			},
 			me: true,
 			messageSent: false,

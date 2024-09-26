@@ -23,7 +23,7 @@ import { User } from "../../models/user";
 import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { SearchHistoryDto } from "../../models/SearchHistoryDto";
+import { SearchHistoryDto } from "../../../api";
 import SkeletonRoomCard from "../../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../../components/SkeletonUserItem";
 import FilterBottomSheet from "../../components/FilterBottomSheet";

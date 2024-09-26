@@ -325,6 +325,48 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/friends/pending:
+    get:
+      operationId: getPendingRequests
+      summary: Get a user's sent friend requests
+      parameters: []
+      responses:
+        '200':
+          description: The user's sent friend requests as an array of UserDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Error getting pending friend requests.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/friends/potential:
+    get:
+      operationId: UsersController_getPotentialFriends
+      summary: Get potential friends for the user
+      parameters: []
+      responses:
+        '200':
+          description: The user's potential friends as an array of UserDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Error getting potential friends.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
   /users/followers:
     get:
       operationId: getFollowers
@@ -443,10 +485,6 @@ paths:
       responses:
         '200':
           description: True if taken, false if not.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
   /users/{username}:
@@ -564,16 +602,8 @@ paths:
       responses:
         '200':
           description: Successfully ended friendship.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error ending friendship.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -625,6 +655,49 @@ paths:
         '400':
           description: Error rejecting friend request.
       tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/cancel:
+    post:
+      operationId: cancelFriendRequest
+      summary: Cancel a friend request to the given user
+      parameters:
+        - name: username
+          required: true
+          in: path
+          description: The username of the user to cancel the friend request to.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully cancelled friend request.
+        '400':
+          description: Error cancelling friend request.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/recommended/users:
+    get:
+      operationId: UsersController_getRecommendedUsers
+      summary: Get recommended users
+      parameters: []
+      responses:
+        '200':
+          description: Recommended users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - users
         - users
       security:
         - bearer: []
@@ -721,16 +794,8 @@ paths:
       responses:
         '200':
           description: Successfully reported the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error reporting the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -1297,64 +1362,6 @@ paths:
         - bearer: []
       tags:
         - rooms
-  /rooms/{roomID}/analytics:
-    get:
-      operationId: getRoomAnalytics
-      summary: Get room analytics
-      description: Returns the analytics of the room as a RoomAnalyticsDto.
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to get analytics for.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: The analytics of the room as a RoomAnalyticsDto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomAnalyticsDto'
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - room analytics
-  /rooms/{roomID}/analytics/queue:
-    get:
-      operationId: getRoomQueueAnalytics
-      summary: Get room queue analytics
-      description: Returns the queue analytics of the room as a RoomAnalyticsQueueDto.
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to get queue analytics for.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: The queue analytics of the room as a RoomAnalyticsQueueDto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomAnalyticsQueueDto'
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - room analytics
   /rooms/{roomID}/analytics/participation:
     get:
       operationId: getRoomParticipationAnalytics
@@ -1421,105 +1428,19 @@ paths:
         - bearer: []
       tags:
         - room analytics
-  /rooms/{roomID}/analytics/votes:
-    get:
-      operationId: getRoomVotesAnalytics
-      summary: Get room voting analytics
-      description: Returns the voting analytics of the room as a RoomAnalyticsVotesDto.
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to get voting analytics for.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: The voting analytics of the room as a RoomAnalyticsVotesDto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomAnalyticsVotesDto'
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - room analytics
-  /rooms/{roomID}/analytics/songs:
-    get:
-      operationId: getRoomSongsAnalytics
-      summary: Get room song analytics
-      description: Returns the song analytics of the room as a RoomAnalyticsSongsDto.
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to get song analytics for.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: The song analytics of the room as a RoomAnalyticsSongsDto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomAnalyticsSongsDto'
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - room analytics
-  /rooms/{roomID}/analytics/contributors:
-    get:
-      operationId: getRoomContributorsAnalytics
-      summary: Get room contributor analytics
-      description: >-
-        Returns the contributor analytics of the room as a
-        RoomAnalyticsContributorsDto.
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to get contributor analytics for.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: >-
-            The contributor analytics of the room as a
-            RoomAnalyticsContributorsDto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoomAnalyticsContributorsDto'
-        '401':
-          description: Unauthorized
-      security:
-        - bearer: []
-        - bearer: []
-      tags:
-        - room analytics
-  /rooms/analytics:
+  /rooms/analytics/{period}/keymetrics:
     get:
       operationId: getKeyMetrics
       summary: Get key metrics for user's rooms
       description: >-
         Returns the key metrics for the user's rooms as a
         RoomAnalyticsKeyMetricsDto.
-      parameters: []
+      parameters:
+        - name: period
+          required: true
+          in: path
+          schema:
+            type: string
       responses:
         '200':
           description: >-
@@ -2445,6 +2366,11 @@ components:
             - $ref: '#/components/schemas/UserFriendship'
         hasSpotifyAccount:
           type: boolean
+        relationship:
+          type: string
+          description: >-
+            The relationship status between the current user and the user in
+            question
       required:
         - profile_name
         - userID
@@ -2528,6 +2454,11 @@ components:
             - $ref: '#/components/schemas/UserFriendship'
         hasSpotifyAccount:
           type: boolean
+        relationship:
+          type: string
+          description: >-
+            The relationship status between the current user and the user in
+            question
     DirectMessageDto:
       type: object
       properties:
@@ -2553,6 +2484,8 @@ components:
           type: boolean
         pID:
           type: string
+        bodyIsRoomID:
+          type: boolean
       required:
         - index
         - messageBody
@@ -2562,6 +2495,7 @@ components:
         - dateRead
         - isRead
         - pID
+        - bodyIsRoomID
     UserListeningStatsDto:
       type: object
       properties:
@@ -2798,18 +2732,6 @@ components:
         - messageBody
         - sender
         - roomID
-    RoomAnalyticsQueueDto:
-      type: object
-      properties:
-        total_songs_queued:
-          type: number
-          description: Total number of songs ever queued in the room
-        total_queue_exports:
-          type: number
-          description: Number of times the room's queue was exported as a playlist
-      required:
-        - total_songs_queued
-        - total_queue_exports
     ParticipantsPerHourDto:
       type: object
       properties:
@@ -2907,140 +2829,6 @@ components:
         - messages
         - reactions_sent
         - bookmarked_count
-    SongAnalyticsDto:
-      type: object
-      properties:
-        spotify_id:
-          type: string
-          description: Spotify ID of the song
-        song_id:
-          type: string
-          description: Internal song ID
-        plays:
-          type: number
-          description: Number of times the song was played
-        upvotes:
-          type: number
-          description: Number of upvotes the song received
-        downvotes:
-          type: number
-          description: Number of downvotes the song received
-        rank:
-          type: number
-          description: Rank of the song based on some criteria
-        global_rank:
-          type: number
-          description: Global rank of the song across all rooms
-      required:
-        - spotify_id
-        - song_id
-        - plays
-        - upvotes
-        - downvotes
-        - rank
-        - global_rank
-    RoomAnalyticsVotesDto:
-      type: object
-      properties:
-        total_upvotes:
-          type: number
-          description: Total number of upvotes for songs in the room
-        total_downvotes:
-          type: number
-          description: Total number of downvotes for songs in the room
-        daily_percentage_change_in_upvotes:
-          type: number
-          description: >-
-            Daily percentage change in upvotes for songs in the room. (last 24
-            hours)
-        daily_percentage_change_in_downvotes:
-          type: number
-          description: >-
-            Daily percentage change in downvotes for songs in the room. (last 24
-            hours)
-        songs:
-          description: >-
-            Details of songs including Spotify ID, song ID, upvotes, and
-            downvotes
-          type: array
-          items:
-            $ref: '#/components/schemas/SongAnalyticsDto'
-      required:
-        - total_upvotes
-        - total_downvotes
-        - daily_percentage_change_in_upvotes
-        - daily_percentage_change_in_downvotes
-        - songs
-    RoomAnalyticsSongsDto:
-      type: object
-      properties:
-        most_played:
-          title: MostPlayed
-          description: Most played songs in the room
-          type: array
-          items:
-            $ref: '#/components/schemas/SongAnalyticsDto'
-        top_voted:
-          description: Top voted songs in the room
-          type: array
-          items:
-            $ref: '#/components/schemas/SongAnalyticsDto'
-      required:
-        - most_played
-        - top_voted
-    RoomAnalyticsContributorsDto:
-      type: object
-      properties:
-        top_contributors:
-          type: object
-          title: TopContributors
-          description: Top contributors to the room's queue
-          properties:
-            user:
-              title: UserDto
-              type: object
-            rank:
-              type: number
-            num_songs:
-              type: number
-            num_upvotes:
-              type: number
-      required:
-        - top_contributors
-    RoomAnalyticsDto:
-      type: object
-      properties:
-        queue:
-          description: Queue analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsQueueDto'
-        participation:
-          description: Participation analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsParticipationDto'
-        interactions:
-          description: Interactions analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsInteractionsDto'
-        votes:
-          description: Votes analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsVotesDto'
-        songs:
-          description: Songs analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsSongsDto'
-        contributors:
-          description: Contributors analytics
-          allOf:
-            - $ref: '#/components/schemas/RoomAnalyticsContributorsDto'
-      required:
-        - queue
-        - participation
-        - interactions
-        - votes
-        - songs
-        - contributors
     RoomAnalyticsKeyMetricsDto:
       type: object
       properties:
