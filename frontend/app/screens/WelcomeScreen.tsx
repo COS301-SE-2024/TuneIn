@@ -29,14 +29,6 @@ const WelcomeScreen: React.FC = () => {
 	const router = useRouter();
 	const { width, height } = Dimensions.get("window");
 
-	const navigateToLogin = () => {
-		router.navigate("/screens/Auth/LoginOther");
-	};
-
-	const navigateToRegister = () => {
-		router.navigate("/screens/Auth/RegisterOther");
-	};
-
 	const navigateToHelp = () => {
 		router.navigate("/screens/(tabs)/HelpScreen");
 	};
@@ -123,9 +115,6 @@ const WelcomeScreen: React.FC = () => {
 				doExchange();
 			} else {
 				ToastAndroid.show("Failed to authenticate. Please try again.", ToastAndroid.SHORT);
-				// throw new Error(
-				// 	"Received unsuccessful response from Spotify. Please try again.",
-				// );
 			}
 		}
 	}, [response, redirectURI, router]);
@@ -147,7 +136,7 @@ const WelcomeScreen: React.FC = () => {
 						<MaterialCommunityIcons
 							name="help-circle-outline"
 							size={24}
-							color="#ccc"
+							color="#FFF"
 							style={styles.helpIcon}
 						/>
 					</TouchableOpacity>
