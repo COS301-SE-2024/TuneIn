@@ -32,6 +32,11 @@ import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
+import * as path from "path";
+
+const { width, height } = Dimensions.get("window");
+const isSmallScreen = height < 800;
+
 interface RoomPageProps {
 	joined: boolean;
 	handleJoinLeave: () => Promise<void>;
@@ -406,7 +411,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					</Text>
 				</View>
 				{roomData.mine ? (
-					<View style={styles.controls}>
+					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
@@ -471,7 +476,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
-				<View style={styles.userInfoContainer}>
+				<TouchableOpacity
+					// onPress={handleUserPress}
+					style={styles.userInfoContainer}
+				>
 					<Image
 						source={{ uri: roomData.userProfile }}
 						style={styles.userImage}
@@ -479,7 +487,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					<Text style={styles.username}>
 						{truncateUsername(roomData.username)}
 					</Text>
-				</View>
+				</TouchableOpacity>
+
 				{/* Right side */}
 				<View style={styles.joinLeaveButtonContainer}>
 					<View style={styles.sideBySideClose}>
@@ -672,8 +681,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		marginTop: 50,
 	},
+	smallControls: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 10,
+	},
 	controlButton: {
 		marginHorizontal: 40,
+		// marginTop: -20,
 	},
 	queueButton: {
 		marginTop: 20,
@@ -724,7 +740,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	songRoomWidget: {
-		marginTop: -50,
+		marginTop: -80,
 	},
 });
 

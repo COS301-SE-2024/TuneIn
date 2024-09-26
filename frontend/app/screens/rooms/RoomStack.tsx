@@ -26,6 +26,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import auth from "../../services/AuthManagement";
 import CurrentRoom from "./functions/CurrentRoom";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
+import ContextMenu from "../../components/ContextMenu";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -42,6 +43,8 @@ function MyRoomTabs() {
 	const [secondsPlayed, setSecondsPlayed] = useState(0);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [isMenuVisible, setMenuVisible] = useState(false);
+	// const roomData = { mine: true }; // Assuming this comes from your state or props
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -142,19 +145,49 @@ function MyRoomTabs() {
 		}
 	};
 
+	// const navigateBasedOnOwnership = () => {
+	// 	console.log("Room is mine? ", roomData.mine);
+	// 	if (roomData.mine) {
+	// 		router.navigate({
+	// 			pathname: "/screens/rooms/AdvancedSettings",
+	// 			params: { room: room },
+	// 		});
+	// 	} else {
+	// 		router.navigate({
+	// 			pathname: "/screens/rooms/RoomInfo",
+	// 			params: { room: room },
+	// 		});
+	// 	}
+	// };
+
 	const navigateBasedOnOwnership = () => {
-		console.log("Room is mine? ", roomData.mine);
-		if (roomData.mine) {
-			router.navigate({
-				pathname: "/screens/rooms/AdvancedSettings",
-				params: { room: room },
-			});
-		} else {
-			router.navigate({
-				pathname: "/screens/rooms/RoomInfo",
-				params: { room: room },
-			});
-		}
+		setMenuVisible(true);
+	};
+
+	const handleAdvancedSettings = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/AdvancedSettings",
+			params: { room: room },
+		});
+	};
+
+	const handleRoomInfo = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/RoomInfo",
+			params: { room: room },
+		});
+	};
+
+	const handleShareRoom = () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
+	};
+
+	const handleSavePlaylist = () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
 	};
 
 	return (
@@ -181,6 +214,24 @@ function MyRoomTabs() {
 				>
 					<Entypo name="dots-three-vertical" size={20} color="black" />
 				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.menuButton}
+					onPress={navigateBasedOnOwnership}
+					testID="menu-button"
+				>
+					<Entypo name="dots-three-vertical" size={20} color="black" />
+				</TouchableOpacity>
+
+				{/* ContextMenu */}
+				<ContextMenu
+					isVisible={isMenuVisible}
+					onClose={() => setMenuVisible(false)}
+					onAdvancedSettings={handleAdvancedSettings}
+					onRoomInfo={handleRoomInfo}
+					onShareRoom={handleShareRoom}
+					onSavePlaylist={handleSavePlaylist}
+					isHost={roomData.mine} // Pass whether the user is the host
+				/>
 			</View>
 
 			<Tab.Navigator
