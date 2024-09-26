@@ -372,7 +372,16 @@ export class ActiveRoom {
 		await this.setQueue(this.queue.toArray(), murLockService);
 	}
 
-	async reloadQueue(prisma: PrismaService) {
+	/**
+	 * Reloads the queue from the database
+	 * @param prisma
+	 * @param murLockService
+	 */
+	async reloadQueue(
+		spotify: SpotifyService,
+		prisma: PrismaService,
+		murLockService: MurLockService,
+	) {
 		//load historic queue from db
 		const roomID = this.room.roomID;
 		const queueItems = await prisma.queue.findMany({
@@ -390,6 +399,9 @@ export class ActiveRoom {
 		if (!queueItems || queueItems === null) {
 			throw new Error("There was an issue fetching the queue");
 		}
+
+		const ids: string[] = queueItems.map((q) => q.song.spotify_id);
+		const tracks: Spotify.Track[] = await spotify.getManyTracks(ids);
 
 		// assume first person who voted for the song is the enqueuer
 		const songEnqueuers: string[] = [];
@@ -414,7 +426,7 @@ export class ActiveRoom {
 					const song = new RoomSong(
 						queueItem.song.spotify_id,
 						songEnqueuer,
-						queueItem.song_id,
+						tracks[i],
 						queueItem.insert_time,
 						queueItem.start_time,
 					);
@@ -423,14 +435,57 @@ export class ActiveRoom {
 				}
 			}
 		}
-		await this.reflushRoomSongs(rs);
+		await this.createQueues(murLockService);
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				try {
+					for (let i = 0; i < rs.length; i++) {
+						const song = rs[i];
+						if (song) {
+							if (song.spotifyID === null) {
+								// throw new Error("Song does not have a spotify id");
+								continue;
+							}
+
+							const startTime = song.getPlaybackStartTime();
+							if (
+								startTime !== null &&
+								startTime.valueOf() < Date.now().valueOf()
+							) {
+								this.historicQueue.enqueue(song);
+							} else {
+								this.queue.enqueue(song);
+							}
+						}
+					}
+				} catch (e) {
+					console.error("Error in reloadQueue");
+					console.error(e);
+				}
+			},
+		);
 	}
 
-	updateQueue() {
-		//update queue
-		this.queue = PriorityQueue.fromArray(
-			sortRoomSongs(this.queue.toArray()),
-			this.compareRoomSongs,
+	async clearQueue(murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'clearQueue'`,
+				);
+				try {
+					this.queue.clear();
+				} catch (e) {
+					console.error("Error in clearQueue");
+					console.error(e);
+				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'clearQueue'`,
+				);
+			},
 		);
 	}
 
@@ -438,175 +493,23 @@ export class ActiveRoom {
 		return `EDIT_QUEUE_LOCK_${this.room.roomID}`;
 	}
 
-	async flushtoDB(
-		spotify: SpotifyService,
-		api: SpotifyApi,
-		prisma: PrismaService,
-		murLockService: MurLockService,
-	) {
-		//flush queue to db
-		/*
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			QUEUE_LOCK_TIMEOUT,
-			async () => {
-				console.log(`Acquire lock: ${this.getQueueLockName()}`);
-				//ensure individual songs are in db
-
-				//get all songs in queue
-				const historicQueue: RoomSong[] = this.historicQueue.toArray();
-				const upcomingQueue: RoomSong[] = this.queue.toArray();
-				const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
-
-				//ensure enqueued songs are in db (songs table)
-				const tracks: Spotify.Track[] = await spotify.getManyTracks(
-					queue.map((s) => s.spotifyID),
-					api,
-				);
-				const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
-
-				//ensure enqueued songs are queueitems associated with room
-				const newQueueItems: Prisma.queueCreateManyInput[] = [];
-				for (let i = 0, n = historicQueue.length; i < n; i++) {
-					const dbSong = songs.find(
-						(s) => s.spotify_id === historicQueue[i].spotifyID,
-					);
-					if (!dbSong || dbSong === null) {
-						throw new Error("Song is not in the database somehow?");
-					}
-
-					historicQueue[i].songID = dbSong.song_id;
-					const song = historicQueue[i];
-					newQueueItems.push({
-						room_id: this.room.roomID,
-						song_id: song.songID,
-						is_done_playing: true,
-						start_time: song.getPlaybackStartTime(),
-						insert_time: song.insertTime,
-					});
-				}
-				for (let i = 0, n = upcomingQueue.length; i < n; i++) {
-					const dbSong = songs.find(
-						(s) => s.spotify_id === upcomingQueue[i].spotifyID,
-					);
-					if (!dbSong || dbSong === null) {
-						throw new Error("Song is not in the database somehow?");
-					}
-
-					historicQueue[i].songID = dbSong.song_id;
-					const song = upcomingQueue[i];
-					newQueueItems.push({
-						room_id: this.room.roomID,
-						song_id: dbSong.song_id,
-						is_done_playing: false,
-						start_time: song.getPlaybackStartTime(),
-						insert_time: song.insertTime,
-					});
-				}
-				await prisma.queue.createMany({
-					data: newQueueItems,
-				});
-
-				//link queue items to songs
-				const queueItems = await prisma.queue.findMany({
-					where: {
-						room_id: this.room.roomID,
-					},
-					include: {
-						vote: true,
-						song: true,
-					},
-					orderBy: {
-						start_time: "asc",
-					},
-				});
-
-				//link queue item ids & song ids to songs
-				for (let i = 0, n = queue.length; i < n; i++) {
-					if (!queue[i].songID || queue[i].songID === null) {
-						const dbSong = queueItems.find(
-							(q) =>
-								q.song.spotify_id === queue[i].spotifyID &&
-								q.insert_time === queue[i].insertTime &&
-								q.start_time === queue[i].getPlaybackStartTime(),
-						);
-						if (!dbSong || dbSong === null) {
-							throw new Error("Song is not in the queue somehow?");
-						}
-						queue[i].songID = dbSong.song_id;
-						queue[i].queueItemID = dbSong.queue_id;
-					}
-
-					if (!queue[i].spotifyInfo && queue[i].spotifyID !== null) {
-						const song = queue[i];
-						const track = tracks.find((t) => t.id === song.spotifyID);
-						if (!track || track === null) {
-							throw new Error("Song is not in the queue somehow?");
-						}
-						song.spotifyInfo = track;
-					}
-				}
-
-				await this.reflushRoomSongs(queue);
-
-				//ensure votes are in db
-				const existingVotes: PrismaTypes.vote[] = await prisma.vote.findMany({
-					where: {
-						queue_id: {
-							in: queue.map((s) => s.queueItemID),
-						},
-					},
-					include: {
-						queue: true,
-						users: true,
-					},
-				});
-				const newVotes: Prisma.voteCreateManyInput[] = [];
-				for (const song of queue) {
-					const v = song.exportNewVotes();
-					if (v.length > 0) {
-						for (const vote of v) {
-							const existingVote = existingVotes.find(
-								(ev) =>
-									ev.queue_id === song.queueItemID &&
-									ev.user_id === vote.user_id &&
-									ev.is_upvote === vote.is_upvote &&
-									ev.vote_time === vote.vote_time,
-							);
-							if (existingVote) {
-								continue;
-							}
-							newVotes.push(vote);
-						}
-					}
-				}
-				await prisma.vote.createMany({
-					data: newVotes,
-				});
-				console.log(`Release lock: ${this.getQueueLockName()}`);
-			},
-		);
-		*/
-	}
-
-	async getNextSong(murLockService: MurLockService): Promise<RoomSong | null> {
-		console.log("historicQueue");
-		console.log(this.historicQueue.toArray());
-		console.log("currentQueue");
-		console.log(this.queue.toArray());
-
-		let result: RoomSong | null = null;
+	/**
+	 * Updates the queue by removing played songs and adding them to the historic queue
+	 * @param murLockService
+	 */
+	async updateQueue(murLockService: MurLockService) {
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
 			async () => {
 				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'getNextSong'`,
+					`Acquire lock: ${this.getQueueLockName()} in function 'updateQueue'`,
 				);
-				this.updateQueue();
-				if (this.queue.isEmpty()) {
-					return;
-				} else {
+				try {
+					// handle played songs
+					if (this.queue.isEmpty()) {
+						return;
+					}
 					let song = this.queue.front();
 					if (song === null) {
 						return;
@@ -614,6 +517,13 @@ export class ActiveRoom {
 					let t = song.getPlaybackStartTime();
 					// while there are songs in the queue that have played already
 					while (t && t < new Date()) {
+						const expectedEnd = new Date(
+							t.valueOf() + song.spotifyInfo.duration_ms,
+						);
+						const now = new Date();
+						if (now < expectedEnd) {
+							break;
+						}
 						// add them to the historic queue, if not there yet
 						const s = this.historicQueue
 							.toArray()
@@ -630,30 +540,22 @@ export class ActiveRoom {
 						console.log("Removing song from queue, since it's already played");
 						console.log(song);
 						this.queue.dequeue();
-						song = this.queue.front();
-						if (song === null) {
+						if (this.queue.isEmpty()) {
 							return;
 						}
-
+						song = this.queue.front();
 						t = song.getPlaybackStartTime();
 					}
-					result = song;
-					// keep song in queue and replace
-					if (this.queue.size() > 1) {
-						this.queue.front().setPlaybackStartTime(new Date());
-						this.queue = PriorityQueue.fromArray(
-							sortRoomSongs(this.queue.toArray()),
-							this.compareRoomSongs,
-						);
-						result = this.queue.front();
-					}
+				} catch (e) {
+					console.error("Error in updateQueue");
+					console.error(e);
 				}
 				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'getNextSong'`,
+					`Release lock: ${this.getQueueLockName()} in function 'updateQueue'`,
 				);
 			},
 		);
-		return result;
+	}
 	}
 
 	async addVote(
