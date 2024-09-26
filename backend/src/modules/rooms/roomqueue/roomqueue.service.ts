@@ -1320,22 +1320,14 @@ export class RoomQueueService {
 		userID: string,
 		createdAt: Date,
 	): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
 		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
 			createdAt: createdAt,
 		};
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.upvoteSong",
-			);
-		}
 		console.log("upvoteSong for spotifyID: ", spotifyID);
+		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
@@ -1345,22 +1337,14 @@ export class RoomQueueService {
 		userID: string,
 		createdAt: Date,
 	): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
 		const vote: VoteDto = {
 			isUpvote: false,
 			userID: userID,
 			spotifyID: spotifyID,
 			createdAt: createdAt,
 		};
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.downvoteSong",
-			);
-		}
 		console.log("upvoteSong for spotifyID: ", spotifyID);
+		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.addVote(vote, this.murLockService);
 	}
 
@@ -1369,21 +1353,13 @@ export class RoomQueueService {
 		spotifyID: string,
 		userID: string,
 	): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
 		const vote: VoteDto = {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
 			createdAt: new Date(),
 		};
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.undoSongVote",
-			);
-		}
+		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.removeVote(vote, this.murLockService);
 	}
 
@@ -1393,15 +1369,7 @@ export class RoomQueueService {
 		userID: string,
 		insertTime: Date,
 	): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.swapSongVote",
-			);
-		}
+		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.swapVote(
 			spotifyID,
 			userID,
@@ -1415,15 +1383,8 @@ export class RoomQueueService {
 		songs: RoomSongDto[];
 		votes: VoteDto[];
 	}> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.getQueueState",
-			);
-		}
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.updateQueue(this.murLockService);
 		return {
 			room: activeRoom.room,
 			songs: activeRoom.queueAsRoomSongDto(),
@@ -1435,60 +1396,13 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 	): Promise<RoomSongDto | null> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.getSongAsRoomSongDto",
-			);
-		}
+		const activeRoom = await this.getRoom(roomID);
 		return activeRoom.songAsRoomSongDto(spotifyID);
 	}
 
-	async initiatePlayback(roomID: string): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.initiatePlayback",
-			);
-		}
-		if (!(await activeRoom.isPlaying(this.murLockService))) {
-			if (activeRoom.isEmpty()) {
-				return false;
-			} else {
-				const s = await activeRoom.getNextSong(this.murLockService);
-				if (!s || s === null) {
-					return false;
-				}
-			}
-		}
-		/*
-		activeRoom.flushtoDB(
-			this.spotify,
-			this.spotifyAuth.getUserlessAPI(),
-			this.prisma,
-			this.murLockService,
-		);
-		*/
-		return true;
-	}
-
-	async getNextSong(roomID: string): Promise<RoomSongDto | null> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.getNextSong",
-			);
-		}
-		const song = await activeRoom.getNextSong(this.murLockService);
+	async getCurrentSong(roomID: string): Promise<RoomSongDto | null> {
+		const activeRoom = await this.getRoom(roomID);
+		const song = await activeRoom.getCurrentSong(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1497,25 +1411,17 @@ export class RoomQueueService {
 
 	async isPlaying(roomID: string): Promise<boolean> {
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.isPlaying(this.murLockService);
+		return await activeRoom.isPlaying();
 	}
 
 	async isPaused(roomID: string): Promise<boolean> {
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.isPaused(this.murLockService);
+		return await activeRoom.isPaused();
 	}
 
-	async playSongNow(roomID: string): Promise<RoomSongDto | null> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.playSongNow",
-			);
-		}
-		const song = await activeRoom.playNext(this.murLockService);
+	async play(roomID: string): Promise<RoomSongDto | null> {
+		const activeRoom = await this.getRoom(roomID);
+		const song = await activeRoom.play(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1524,25 +1430,16 @@ export class RoomQueueService {
 
 	async pauseSong(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.pauseSong(this.murLockService);
+		await activeRoom.pauseSong();
 	}
 
-	async skipSong(roomID: string): Promise<void> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.skipSong",
-			);
-		}
+	async playNext(roomID: string): Promise<void> {
+		const activeRoom = await this.getRoom(roomID);
 		await activeRoom.playNext(this.murLockService);
 	}
 
-	/*
-	async resumeSong(roomID: string): Promise<Date> {
-		
+	async playPrev(roomID: string): Promise<void> {
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.playPrev(this.murLockService);
 	}
-	*/
 }
