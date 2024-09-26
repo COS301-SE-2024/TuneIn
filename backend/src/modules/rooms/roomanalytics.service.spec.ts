@@ -639,4 +639,63 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+	describe("getUniqueVisitors", () => {
+		it("should return correct unique visitors count and percentage change", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockUniqueVisitorsYesterday = [{ count: 5 }];
+			const mockUniqueVisitorsToday = [{ count: 10 }];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockUniqueVisitorsYesterday)
+				.mockResolvedValueOnce(mockUniqueVisitorsToday);
+
+			const result = await service.getUniqueVisitors(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				count: 2,
+				percentage_change: 0,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no visitors", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockUniqueVisitorsYesterday: { count: number }[] = [];
+			const mockUniqueVisitorsToday: { count: number }[] = [];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockUniqueVisitorsYesterday)
+				.mockResolvedValueOnce(mockUniqueVisitorsToday);
+
+			const result = await service.getUniqueVisitors(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				count: 0,
+				percentage_change: 0,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
