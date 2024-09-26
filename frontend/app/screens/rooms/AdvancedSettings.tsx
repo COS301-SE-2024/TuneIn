@@ -122,7 +122,7 @@ const AdvancedSettings = () => {
 				}
 				const token = await auth.getToken();
 				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomData.roomID}/split`,
+					`${utils.API_BASE_URL}/rooms/${roomData.id}/split`,
 					{
 						method: "GET",
 						headers: {
@@ -131,7 +131,8 @@ const AdvancedSettings = () => {
 					},
 				);
 				if (!response.ok) {
-					ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+					console.log(await response.text());
 					return;
 				}
 				const data = await response.json();
