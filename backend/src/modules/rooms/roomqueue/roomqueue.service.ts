@@ -1180,14 +1180,15 @@ export class ActiveRoom {
 		return this.queue.front();
 	}
 
+	async isPlaying(): Promise<boolean> {
+		if (this.queue.isEmpty()) {
 			return false;
 		}
-		const song = await this.getNextSong(murLockService);
-		return song !== null && song.isPlaying();
+		const song = this.queue.front();
+		return song.isPlaying();
 	}
 
-	async isPaused(murLockService: MurLockService): Promise<boolean> {
-		await this.updateQueue(murLockService);
+	async isPaused(): Promise<boolean> {
 		if (this.queue.isEmpty()) {
 			return false;
 		}
@@ -1207,6 +1208,10 @@ export class ActiveRoom {
 					song.insertTime,
 			);
 		}
+	}
+
+	get songs(): RoomSong[] {
+		return this.queue.toArray();
 	}
 }
 
