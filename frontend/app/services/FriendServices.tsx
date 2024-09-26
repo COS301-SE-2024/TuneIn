@@ -255,7 +255,6 @@ class FriendServices {
 
 	// Unfollow a user
 	static async handleUnfollow(friend: Friend): Promise<void> {
-		console.log("handleUnfollow", friend);
 		const token = await auth.getToken();
 		console.log(`User ${utils.API_BASE_URL}/users/${friend.username}/unfollow`);
 		if (!token) {
@@ -264,6 +263,29 @@ class FriendServices {
 		try {
 			const response = await axios.post(
 				`${utils.API_BASE_URL}/users/${friend.username}/unfollow`,
+				{},
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response) throw new Error("Error unfollowing user.");
+		} catch (error) {
+			console.error("Error unfollowing user:", error);
+			throw error;
+		}
+	}
+
+	// Follow a user
+	static async handleFollow(friend: Friend): Promise<void> {
+		const token = await auth.getToken();
+		if (!token) {
+			throw new Error("No token found.");
+		}
+		try {
+			const response = await axios.post(
+				`${utils.API_BASE_URL}/users/${friend.username}/follow`,
 				{},
 				{
 					headers: {

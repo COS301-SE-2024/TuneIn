@@ -46,7 +46,7 @@ const Home: React.FC = () => {
 	}
 
 	const isFocused = useIsFocused();
-	const { userData, setUserData, currentRoom } = playerContext;
+	const { userData, setUserData } = playerContext;
 
 	const { users, authenticated } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();

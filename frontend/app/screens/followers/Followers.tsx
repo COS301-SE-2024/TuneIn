@@ -13,6 +13,7 @@ import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
 import FriendServices from "../../services/FriendServices";
 import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -21,23 +22,31 @@ const Followers: React.FC = () => {
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const user = useLocalSearchParams();
 
-	useEffect(() => {
-		const getFollowers = async () => {
-			try {
-				const mappedFollowers = await FriendServices.fetchFollowers();
-				setFollowers(mappedFollowers);
-				setFilteredFollowers(mappedFollowers);
-				setFriendError(false);
-			} catch (error) {
-				console.log("Error fetching data:", error);
-				setFollowers([]);
-				setFilteredFollowers([]);
-				setFriendError(true);
-			}
-		};
+	const getFollowers = async () => {
+		try {
+			const mappedFollowers = await FriendServices.fetchFollowers();
+			setFollowers(mappedFollowers);
+			setFilteredFollowers(mappedFollowers);
+			setFriendError(false);
+		} catch (error) {
+			console.log("Error fetching data:", error);
+			setFollowers([]);
+			setFilteredFollowers([]);
+			setFriendError(true);
+		}
+	};
 
+	// Initial fetch on component mount
+	useEffect(() => {
 		getFollowers();
 	}, []);
+
+	// Reload data immediately when the page is focused
+	useFocusEffect(
+		React.useCallback(() => {
+			getFollowers();
+		}, []),
+	);
 
 	useEffect(() => {
 		if (search === "") {

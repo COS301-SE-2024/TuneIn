@@ -11,10 +11,9 @@ import {
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
-import { API_BASE_URL } from "../../services/Utils";
-import auth from "../../services/AuthManagement";
 import { useLocalSearchParams } from "expo-router";
 import FriendServices from "../../services/FriendServices";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -30,37 +29,45 @@ const Following: React.FC = () => {
 	const user = useLocalSearchParams();
 	const myUsername = user.username;
 
+	const loadFollowing = async () => {
+		try {
+			const mappedFollowing = await FriendServices.fetchFollowing();
+			setFollowing(mappedFollowing);
+			setFilteredFollowing(mappedFollowing);
+			setFetchFollowingError(false);
+		} catch {
+			setFollowing([]);
+			setFilteredFollowing([]);
+			setFetchFollowingError(true);
+		}
+	};
+
+	const loadPendingRequests = async () => {
+		try {
+			const mappedPendingRequests = await FriendServices.fetchPendingRequests();
+			setPendingRequests(mappedPendingRequests);
+			setFilteredPendingRequests(mappedPendingRequests);
+			setFetchPendingError(false);
+		} catch {
+			setPendingRequests([]);
+			setFilteredPendingRequests([]);
+			setFetchPendingError(true);
+		}
+	};
+
+	// Initial load on component mount
 	useEffect(() => {
-		const loadFollowing = async () => {
-			try {
-				const mappedFollowing = await FriendServices.fetchFollowing();
-				setFollowing(mappedFollowing);
-				setFilteredFollowing(mappedFollowing);
-				setFetchFollowingError(false);
-			} catch {
-				setFollowing([]);
-				setFilteredFollowing([]);
-				setFetchFollowingError(true);
-			}
-		};
-
-		const loadPendingRequests = async () => {
-			try {
-				const mappedPendingRequests =
-					await FriendServices.fetchPendingRequests();
-				setPendingRequests(mappedPendingRequests);
-				setFilteredPendingRequests(mappedPendingRequests);
-				setFetchPendingError(false);
-			} catch {
-				setPendingRequests([]);
-				setFilteredPendingRequests([]);
-				setFetchPendingError(true);
-			}
-		};
-
 		loadFollowing();
 		loadPendingRequests();
 	}, []);
+
+	// Reload data when the page is focused
+	useFocusEffect(
+		React.useCallback(() => {
+			loadFollowing();
+			loadPendingRequests();
+		}, []),
+	);
 
 	useEffect(() => {
 		const filterData = () => {
