@@ -16,6 +16,8 @@ import TableCard from "../../components/TableCard";
 import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
+import { Line } from "react-native-svg";
+import MetricsCard from "../../components/MetricsCard";
 
 const GeneralAnalytics: React.FC = () => {
 	const router = useRouter();
@@ -25,7 +27,28 @@ const GeneralAnalytics: React.FC = () => {
 		room_name: string;
 		roomID: string;
 	} | null>(null);
-
+	const fetchGeneralAnalytics = async () => {
+		try {
+			const accessToken: string | null = await AuthManagement.getToken();
+			const currentRoom = await StorageService.getItem("currentRoom");
+			console.log("current roooooom", currentRoom);
+			console.log(selectedRoom);
+			const response = await fetch(
+				`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				},
+			);
+			const data = await response.json();
+			console.log("general analytics", data);
+			setGeneralAnalytics(data);
+		} catch (error) {
+			console.log("Error fetching general analytics:", error);
+			ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
+		}
+	};
 	useEffect(() => {
 		const fetchRooms = async () => {
 			try {
@@ -42,7 +65,7 @@ const GeneralAnalytics: React.FC = () => {
 				setRooms(data);
 				const currentRoom = await StorageService.getItem("currentRoom");
 				console.log("user rooms", userRooms, "and current room", currentRoom);
-				const room = userRooms.find((room) => room.room_name === currentRoom);
+				const room = data.find((room: any) => room.room_name === currentRoom);
 				console.log("selected room", room);
 				setSelectedRoom(room);
 			} catch (error) {
@@ -51,61 +74,65 @@ const GeneralAnalytics: React.FC = () => {
 			}
 		};
 		fetchRooms();
-	}, [userRooms, selectedRoom]);
+		fetchGeneralAnalytics();
+		console.log("general analytics initial", generalAnalytics);
+	}, []);
 
 	useEffect(() => {
-		const fetchGeneralAnalytics = async () => {
-			try {
-				const accessToken: string | null = await AuthManagement.getToken();
-				const currentRoom = await StorageService.getItem("currentRoom");
-				console.log("current roooooom", currentRoom);
-				console.log(selectedRoom);
-				const response = await fetch(
-					`${API_BASE_URL}/rooms/${selectedRoom?.roomID}/analytics/participation`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					},
-				);
-				const data = await response.json();
-				setGeneralAnalytics(data);
-			} catch (error) {
-				console.log("Error fetching general analytics:", error);
-				ToastAndroid.show("Failed to load analytics", ToastAndroid.SHORT);
-			}
-		};
 		fetchGeneralAnalytics();
 		console.log("general analytics", generalAnalytics);
-	}, [selectedRoom, generalAnalytics]);
+	}, [selectedRoom]);
 
 	// fetch data from the analytics/participation endpoint for the selected room and store it in generalAnalytics
 	const rooms = userRooms.map((room) => room.room_name);
-	console.log("mapped rooms", rooms);
-
-	// Sample data for the horizontal bar graph
-	console.log("rooms fr this time", userRooms);
-	const datah = [
-		{ label: "Room A fr", value: 562 },
-		{ label: "Room B", value: 747 },
-		{ label: "Room C", value: 191 },
-		{ label: "Room D", value: 435 },
-		{ label: "Room E", value: 85 },
-		{ label: "Room F", value: 241 },
-	];
-	const data =
+	const uniqueJoinsPerDay =
 		generalAnalytics?.joins?.per_day?.unique_joins?.map((join: any) => {
 			return {
-				label: join.day,
+				label: join.day.substring(5, 10),
 				value: join.count,
 			};
 		}) ?? [];
+	const totalJoinsPerDay =
+		generalAnalytics?.joins?.per_day?.total_joins?.map((join: any) => {
+			return {
+				label: join.day.substring(5, 10),
+				value: join.count,
+			};
+		}) ?? [];
+	const sessionDurationAverages =
+		generalAnalytics?.session_data?.per_day?.map((session: any) => {
+			return {
+				label: session.day.substring(5, 10),
+				value: session.avg_duration,
+			};
+		}) ?? [];
 
-	const headers = ["Room", "Longest", "Shortest"];
+	const headers = ["Statistic", "Value"];
+	const toTime = (time: number) => {
+		// time is in seconds
+		const days = Math.floor(time / 86400);
+		const hours = Math.floor(time / 3600);
+		const minutes = Math.floor((time % 3600) / 60);
+		const seconds = Math.floor(time % 60);
+		let result = "";
+		if (days > 0) {
+			result += `${days}d `;
+		}
+		if (hours > 0) {
+			result += `${hours}h `;
+		}
+		if (minutes > 0) {
+			result += `${minutes}m `;
+		}
+		if (seconds > 0) {
+			result += `${seconds}s`;
+		}
+		return result === "" ? "0s" : result;
+	};
 	const dataTable = [
-		["Room A", "3 hrs", "5 min"],
-		["Room B", "2 hrs 30min", "7 min"],
-		["Room C", "2hrs", "4 min"],
+		["Average", toTime(generalAnalytics?.session_data?.all_time?.avg_duration)],
+		["Minimum", toTime(generalAnalytics?.session_data?.all_time?.min_duration)],
+		["Maximum", toTime(generalAnalytics?.session_data?.all_time?.max_duration)],
 	];
 
 	const onRoomPick = async (room: string) => {
@@ -150,25 +177,45 @@ const GeneralAnalytics: React.FC = () => {
 					<View style={styles.headerSpacer} />
 				</View>
 				<RoomDropdown initialRooms={rooms} onRoomPick={onRoomPick} />
-				<LineGraphCard data={data} title="Weekly Participants" />
-				<HorizontalBarGraphCard
-					data={datah}
-					title="Room Popularity by Clicks"
+				<LineGraphCard data={uniqueJoinsPerDay} title="Unique Joins" />
+				<LineGraphCard data={totalJoinsPerDay} title="Total Joins" />
+				<View style={styles.cardsContainer}>
+					<MetricsCard
+						title="Unique Joins"
+						number={
+							generalAnalytics?.joins?.all_time?.unique_joins.toString() ?? "0"
+						}
+					/>
+					<MetricsCard
+						title="Returning Visitors"
+						number={
+							generalAnalytics?.joins?.all_time?.total_joins.toString() ?? "0"
+						}
+					/>
+				</View>
+				<LineGraphCard
+					data={sessionDurationAverages}
+					title="Average Session Durations"
 				/>
-				<HorizontalBarGraphCard
-					data={[
-						{ label: "Task 1", value: 253 },
-						{ label: "Task 2", value: 343 },
-						{ label: "Task 3", value: 55 },
-						{ label: "Task 4", value: 221 },
-						{ label: "Task 5", value: 15 },
-						{ label: "Task 6", value: 41 },
-					]}
-					title="Average Session Duration"
-					unit="minutes" // Pass "minutes" to format the total as hours and minutes
-				/>
+				<View style={styles.cardsContainer}>
+					<MetricsCard
+						title="Expected Return Count"
+						number={
+							generalAnalytics?.return_visits?.expected_return_count?.toString() ??
+							"0"
+						}
+					/>
+					<MetricsCard
+						title="Probability of Return"
+						number={
+							Math.floor(
+								generalAnalytics?.return_visits?.probability_of_return * 100,
+							)?.toString() + "%"
+						}
+					/>
+				</View>
 				<TableCard
-					title="Session Duration Extremes"
+					title="Session Data Statistics"
 					headers={headers}
 					data={dataTable}
 				/>
@@ -183,6 +230,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "space-between", // To space out the items evenly
 		marginBottom: 20,
+	},
+	cardsContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginTop: 20,
 	},
 	backButton: {
 		flex: 1,
