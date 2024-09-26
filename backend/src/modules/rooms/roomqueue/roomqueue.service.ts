@@ -831,13 +831,14 @@ export class ActiveRoom {
 		return result;
 	}
 
-	async addSong(
-		spotifyID: string,
+	async addSongs(
+		songs: RoomSongDto[],
 		userID: string,
-		insertTime: Date,
 		murLockService: MurLockService,
 	): Promise<boolean> {
+		console.log(`Attempting to add ${songs.length} songs to the queue`);
 		let result = false;
+		const roomSongs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -845,28 +846,42 @@ export class ActiveRoom {
 				console.log(
 					`Acquire lock: ${this.getQueueLockName()} in function 'addSong'`,
 				);
-				this.updateQueue();
-				const songs: RoomSong[] = this.queue.toArray();
-				if (!songs.find((s) => s.spotifyID === spotifyID)) {
-					this.queue.enqueue(
-						new RoomSong(spotifyID, userID, undefined, insertTime),
-					);
-					result = true;
+				try {
+					for (const song of songs) {
+						if (!roomSongs.find((s) => s.spotifyID === song.spotifyID)) {
+							this.queue.enqueue(
+								new RoomSong(
+									song.spotifyID,
+									userID,
+									song.track,
+									song.insertTime,
+								),
+							);
+							result = true;
+						}
+					}
+				} catch (e) {
+					console.error("Error in addSongs");
+					console.error(e);
 				}
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'addSong'`,
 				);
 			},
 		);
+		await this.updateQueue(murLockService);
 		return result;
 	}
 
-	async removeSong(
-		spotifyID: string,
+	async removeSongs(
+		songs: RoomSongDto[],
 		userID: string,
 		murLockService: MurLockService,
 	): Promise<boolean> {
+		console.log(`Attempting to remove ${songs.length} songs`);
 		let result = false;
+		await this.refreshQueue(murLockService);
+		const roomSongs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -874,30 +889,54 @@ export class ActiveRoom {
 				console.log(
 					`Acquire lock: ${this.getQueueLockName()} in function 'removeSong'`,
 				);
-				this.updateQueue();
-				const songs: RoomSong[] = this.queue.toArray();
-				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-				if (index === -1 || songs[index] === null || !songs[index]) {
-					result = false;
-					return;
+				try {
+					for (const song of songs) {
+						const index = roomSongs.findIndex(
+							(s) => s.spotifyID === song.spotifyID,
+						);
+						console.log(
+							`Found song with id: ${song.spotifyID} at index: ${index}`,
+						);
+						if (
+							index === -1 ||
+							roomSongs[index] === null ||
+							!roomSongs[index]
+						) {
+							console.log(
+								`Not removing because one of these is true: 'index === -1': ${
+									index === -1
+								}, 'roomSongs[index] === null': ${
+									roomSongs[index] === null
+								}, '!roomSongs[index]': ${!roomSongs[index]}`,
+							);
+							continue;
+						}
+						if (roomSongs[index].userID !== userID) {
+							if (this.room.creator.userID !== userID) {
+								console.log(
+									`Not removing because the user ${userID} is not the enqueuer or room owner`,
+								);
+								continue;
+							}
+						}
+						roomSongs.splice(index, 1);
+						result = true;
+					}
+				} catch (e) {
+					console.error("Error in removeSongs");
+					console.error(e);
 				}
-				if (songs[index].userID !== userID) {
-					result = false;
-					return;
-				}
-				songs.splice(index, 1);
-				this.queue = PriorityQueue.fromArray(songs, this.compareRoomSongs);
-				result = true;
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'removeSong'`,
 				);
 			},
 		);
+		if (result) await this.setQueue(roomSongs, murLockService);
+		await this.updateQueue(murLockService);
 		return result;
 	}
 
 	queueAsRoomSongDto(): RoomSongDto[] {
-		this.updateQueue();
 		const tempQueue: RoomSong[] = this.queue.toArray();
 		const result: RoomSongDto[] = tempQueue.map((rs) => {
 			const i = tempQueue.indexOf(rs);
@@ -921,7 +960,6 @@ export class ActiveRoom {
 	}
 
 	allVotes(): VoteDto[] {
-		this.updateQueue();
 		const songs: RoomSong[] = this.queue.toArray();
 		const votes: VoteDto[] = [];
 		for (const song of songs) {
