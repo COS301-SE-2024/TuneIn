@@ -7,7 +7,7 @@ describe("MetricsCard Component", () => {
 	const defaultProps = {
 		title: "Metric Title",
 		number: "1234",
-		percentage: "+5%",
+		percentage: "+5",
 	};
 
 	it("renders correctly with positive percentage", () => {
@@ -28,9 +28,8 @@ describe("MetricsCard Component", () => {
 	});
 
 	it("renders correctly with negative percentage", () => {
-		const props = { ...defaultProps, percentage: "-5%" };
+		const props = { ...defaultProps, percentage: "-5" };
 		const { getByText } = render(<MetricsCard {...props} />);
-
 		// Check if the negative percentage is displayed correctly
 		const percentageText = getByText("-5%");
 		expect(percentageText).toBeTruthy();
