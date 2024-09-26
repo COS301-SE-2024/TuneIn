@@ -32,7 +32,6 @@ import { RoomDto } from "../../models/RoomDto";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
-import AuthManagement from "../../services/AuthManagement";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -43,7 +42,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToLogout = () => {
-		AuthManagement.logout();
+		auth.logout();
 	};
 
 	const navigateToHelp = () => {
