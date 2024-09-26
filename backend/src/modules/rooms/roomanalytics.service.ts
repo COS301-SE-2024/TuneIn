@@ -218,7 +218,7 @@ export class RoomAnalyticsService {
 		}[] = await this.prisma.$queryRaw`
 			SELECT DATE_TRUNC('day', room_join_time) AS day,
 				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS avg_duration,
-				MIN(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS min_duration,
+				MIN(NULLIF(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)), 0))::FLOAT AS min_duration,
 				MAX(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS max_duration
 			FROM "user_activity"
 			WHERE room_id = ${roomID}::UUID
@@ -271,7 +271,6 @@ export class RoomAnalyticsService {
 		}
 		// sort the array
 		sessionDurations.sort((a, b) => a.day.getTime() - b.day.getTime());
-		// find the all time min, max, and avg
 		for (let i = 0; i < sessionDurations.length; i++) {
 			const session = sessionDurations[i];
 			if (session === undefined) {
@@ -464,7 +463,7 @@ export class RoomAnalyticsService {
 		const returnCount: number = result.length;
 		const averageVisits: number =
 			result
-				.map((r: any) => Number(r.user_count))
+				.map((r) => Number(r.user_count))
 				.reduce((a: number, b: number) => a + b, 0) / result.length;
 		returnVisits.probability_of_return = Number(returnCount / totalVisits);
 		returnVisits.expected_return_count = Number(averageVisits);
@@ -481,7 +480,6 @@ export class RoomAnalyticsService {
 		};
 		const today: Date = new Date();
 		const yesterday: Date = subHours(today, 24);
-		console.log("Today", today, "Yesterday", yesterday);
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: {
 				room_id: roomID,
@@ -502,22 +500,14 @@ export class RoomAnalyticsService {
 			GROUP BY hour, room_id
 			ORDER BY hour ASC;
 		`;
-		console.log(
-			"Getting room message interactions analytics for room",
-			roomID,
-			"and message activity",
-			messageActivityPerHour,
-		);
 
 		// fill in the missing hours
 		let allHours: Date[] = [];
 		// from from the date the room was created, get all the hours until now if the room is not older than a day
 		let hour: Date = roomCreationDate ?? new Date();
-		console.log("Room creation date", roomCreationDate);
 		if (isBefore(hour, yesterday)) {
 			hour = yesterday;
 		}
-		console.log("Starting hour", hour);
 		//floor the hour to the nearest hour
 		hour = startOfHour(hour);
 
@@ -526,7 +516,6 @@ export class RoomAnalyticsService {
 			allHours.push(hour);
 			hour = addHours(hour, 1);
 		}
-		console.log("All hours", allHours.length);
 		// remove the last element of the array
 		allHours = allHours.slice(0, allHours.length - 1);
 		// add the missing hours
@@ -539,7 +528,6 @@ export class RoomAnalyticsService {
 		}
 		// sort the array
 		messageActivityPerHour.sort((a, b) => a.hour.getTime() - b.hour.getTime());
-		console.log("Message activity per hour", messageActivityPerHour);
 		for (const hour of messageActivityPerHour) {
 			const m = {
 				count: 0,
@@ -547,7 +535,6 @@ export class RoomAnalyticsService {
 			};
 			m.count = Number(hour.count);
 			m.hour = hour.hour;
-			console.log("Adding", m);
 			messages.per_hour.push(m);
 		}
 		messages.total = messages.per_hour
