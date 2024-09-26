@@ -20,7 +20,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
-import { Room } from "../../models/Room";
+import { Room, formatRoomData } from "../../models/Room";
 import { Friend } from "../../models/friend";
 import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
 	}
 
 	const isFocused = useIsFocused();
-	const { userData, setUserData } = playerContext;
+	const { userData, setUserData, currentRoom } = playerContext;
 
 	const { users, authenticated } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
@@ -68,6 +68,7 @@ const Home: React.FC = () => {
 			});
 	}
 
+	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
@@ -293,81 +294,81 @@ const Home: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
-			{loading ? ( // Show loader until data is fetched
-				<ActivityIndicator size={60} style={{ marginTop: 260 }} />
-			) : (
-				<ScrollView
-					ref={scrollViewRef}
-					onScroll={handleScroll}
-					scrollEventThrottle={16}
-					refreshControl={
-						<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-					}
-				>
-					{!roomError || !friendError ? (
-						<View style={styles.contentContainer}>
-							{!roomError && (
-								<>
-									{myRecents.length > 0 && (
-										<>
-											<TouchableOpacity
-												style={styles.navigateButton}
-												onPress={() =>
-													navigateToMoreRooms(myRecents, "Recent Rooms")
-												}
-											>
-												<Text style={styles.sectionTitle}>Recent Rooms</Text>
-											</TouchableOpacity>
+			<ScrollView
+				ref={scrollViewRef}
+				onScroll={handleScroll}
+				scrollEventThrottle={16}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
+			>
+				{loading ? (
+					<ActivityIndicator size={60} style={{ marginTop: 260 }} />
+				) : !roomError || !friendError ? (
+					<View style={styles.contentContainer}>
+						{!roomError && (
+							<>
+								{myRecents.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(myRecents, "Recent Rooms")
+											}
+										>
+											<Text style={styles.sectionTitle}>Recent Rooms</Text>
+										</TouchableOpacity>
 
-											<AppCarousel data={myRecents} renderItem={renderItem} />
-										</>
-									)}
-									<TouchableOpacity
-										style={styles.navigateButton}
-										onPress={() =>
-											navigateToMoreRooms(myRecents, "Picks for you")
-										}
-									>
-										<Text style={styles.sectionTitle}>Picks for you</Text>
-									</TouchableOpacity>
-									<AppCarousel data={myPicks} renderItem={renderItem} />
-								</>
-							)}
-							{!friendError && userData && userData.username ? (
-								<>
-									<TouchableOpacity
-										style={styles.navigateButton}
-										onPress={navigateToAllFriends}
-									>
-										<Text style={styles.sectionTitle}>Friends</Text>
-									</TouchableOpacity>
-									<FriendsGrid
-										friends={friends}
-										user={userData.username}
-										maxVisible={8}
-									/>
-								</>
-							) : null}
-							<TouchableOpacity
-								style={styles.navigateButton}
-								onPress={navigateToMyRooms}
-							>
-								<Text style={styles.sectionTitle}>My Rooms</Text>
-							</TouchableOpacity>
-							<AppCarousel
-								data={myRooms}
-								renderItem={renderItem}
-								showAddRoomCard={true} // Conditionally show the AddRoomCard
-							/>
-						</View>
-					) : (
+										<AppCarousel data={myRecents} renderItem={renderItem} />
+									</>
+								)}
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={() =>
+										navigateToMoreRooms(myRecents, "Picks for you")
+									}
+								>
+									<Text style={styles.sectionTitle}>Picks for you</Text>
+								</TouchableOpacity>
+								<AppCarousel data={myPicks} renderItem={renderItem} />
+							</>
+						)}
+						{!friendError && userData && userData.username ? (
+							<>
+								<TouchableOpacity
+									style={styles.navigateButton}
+									onPress={navigateToAllFriends}
+								>
+									<Text style={styles.sectionTitle}>Friends</Text>
+								</TouchableOpacity>
+								<FriendsGrid
+									friends={friends}
+									user={userData.username}
+									maxVisible={8}
+								/>
+							</>
+						) : null}
+						<TouchableOpacity
+							style={styles.navigateButton}
+							onPress={navigateToMyRooms}
+						>
+							<Text style={styles.sectionTitle}>My Rooms</Text>
+						</TouchableOpacity>
+						<AppCarousel
+							data={myRooms}
+							renderItem={renderItem}
+							showAddRoomCard={true} // Conditionally show the AddRoomCard
+						/>
+					</View>
+				) : (
+					<>
 						<View style={styles.errorMessage}>
 							<Text>Failed to load content</Text>
 							<Text>Try refreshing</Text>
 						</View>
-					)}
-				</ScrollView>
-			)}
+					</>
+				)}
+			</ScrollView>
 			<Miniplayer />
 		</View>
 	);

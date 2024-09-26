@@ -86,13 +86,6 @@ export default function HelpMenu() {
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
 			<Text style={styles.title} testID="title">
 				Help Center
 			</Text>
@@ -127,6 +120,7 @@ const styles = StyleSheet.create({
 	container: {
 		flexGrow: 1,
 		padding: 20,
+		paddingTop: 15,
 		backgroundColor: "#f0f0f0",
 	},
 	backButton: {
@@ -136,8 +130,9 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
+		color: colors.primaryText,
 		marginBottom: 20,
 		textAlign: "center",
 	},

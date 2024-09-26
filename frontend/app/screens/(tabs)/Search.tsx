@@ -569,7 +569,7 @@ const Search: React.FC = () => {
 
 		// Update the previous filter ref to the current filter
 		prevFilterRef.current = filter;
-	}, [filter]);
+	}, [filter, handleSearch, searchTerm]);
 
 	useEffect(() => {
 		getRoomHistory();
@@ -579,13 +579,6 @@ const Search: React.FC = () => {
 		<GestureHandlerRootView>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => navigation.goBack()}
-						testID="back-button"
-						style={styles.backButton} // Optional to add padding or margin
-					>
-						<Ionicons name="chevron-back" size={30} color="black" />
-					</TouchableOpacity>
 					<Text style={styles.title}>Search</Text>
 				</View>
 				<View style={styles.searchBarContainer}>
@@ -741,7 +734,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 20,
-		paddingTop: 50,
+		paddingTop: 30,
 	},
 	roomCardPadding: {
 		marginTop: 20,
@@ -760,13 +753,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
-		color: "#333",
+		color: colors.primaryText,
 		textAlign: "center",
-		position: "absolute", // Ensures the title is centered regardless of the other elements
-		left: 0,
-		right: 0, // Centers the text horizontally
+		position: "absolute",
 	},
 	backButton: {
 		position: "absolute", // Keeps the back button aligned to the left
