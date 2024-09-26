@@ -1,8 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { RoomAnalyticsService } from "./roomanalytics.service";
+import { RoomAnalyticsService } from "../../modules/rooms/roomanalytics.service";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { addHours, startOfDay, subHours, isBefore } from "date-fns";
+import { RoomAnalyticsParticipationDto } from "./dto/roomanalytics.dto";
 
 describe("RoomAnalyticsService", () => {
 	let service: RoomAnalyticsService;
@@ -219,6 +220,122 @@ describe("RoomAnalyticsService", () => {
 			// Check that the array size is correct
 			expect(result.length).toBeGreaterThan(0);
 			expect(result.length).toBeLessThanOrEqual(27);
+		});
+	});
+	describe("getRoomParticipationAnalytics", () => {
+		it("should return room participation analytics", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserID = "userID1";
+
+			const mockJoins = {
+				all_time: { total_joins: 15, unique_joins: 10 },
+				per_day: [],
+			};
+			const mockSessionData = {
+				all_time: { avg_duration: 300, min_duration: 100, max_duration: 500 },
+				per_day: [],
+			};
+			const mockParticipantsPerHour = [
+				{ instance: new Date("2023-01-01T01:00:00Z"), count: 5 },
+				{ instance: new Date("2023-01-01T02:00:00Z"), count: 10 },
+			];
+			const mockRoomPreviews = 0;
+			const mockReturnVisits: {
+				expected_return_count: number;
+				probability_of_return: number;
+			} = {
+				expected_return_count: 0,
+				probability_of_return: 0,
+			};
+
+			jest
+				.spyOn(service, "getRoomJoinAnalytics")
+				.mockResolvedValue(
+					mockJoins as unknown as RoomAnalyticsParticipationDto["joins"],
+				);
+			jest
+				.spyOn(service, "getRoomSessionAnalytics")
+				.mockResolvedValue(mockSessionData);
+			jest
+				.spyOn(service, "getHourlyParticipantAnalytics")
+				.mockResolvedValue(mockParticipantsPerHour);
+			jest
+				.spyOn(service, "getRoomPreviews")
+				.mockResolvedValue(mockRoomPreviews);
+			jest
+				.spyOn(service, "getReturnVisitsAnalytics")
+				.mockResolvedValue(mockReturnVisits);
+
+			const result = await service.getRoomParticipationAnalytics(
+				mockRoomID,
+				mockUserID,
+			);
+
+			const expectedResult = {
+				joins: mockJoins,
+				session_data: mockSessionData,
+				participants_per_hour: mockParticipantsPerHour,
+				room_previews: mockRoomPreviews,
+				return_visits: mockReturnVisits,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no data available", async () => {
+			const mockRoomID = "roomID1";
+			const mockUserID = "userID1";
+
+			const mockJoins = {
+				all_time: { total_joins: 0, unique_joins: 0 },
+				per_day: [],
+			};
+			const mockSessionData = {
+				all_time: { avg_duration: 0, min_duration: 0, max_duration: 0 },
+				per_day: [],
+			};
+			const mockParticipantsPerHour: any[] = [];
+			const mockRoomPreviews = 0;
+			const mockReturnVisits: {
+				expected_return_count: number;
+				probability_of_return: number;
+			} = {
+				expected_return_count: 0,
+				probability_of_return: 0,
+			};
+
+			jest
+				.spyOn(service, "getRoomJoinAnalytics")
+				.mockResolvedValue(
+					mockJoins as unknown as RoomAnalyticsParticipationDto["joins"],
+				);
+			jest
+				.spyOn(service, "getRoomSessionAnalytics")
+				.mockResolvedValue(mockSessionData);
+			jest
+				.spyOn(service, "getHourlyParticipantAnalytics")
+				.mockResolvedValue(mockParticipantsPerHour);
+			jest
+				.spyOn(service, "getRoomPreviews")
+				.mockResolvedValue(mockRoomPreviews);
+			jest
+				.spyOn(service, "getReturnVisitsAnalytics")
+				.mockResolvedValue(mockReturnVisits);
+
+			const result = await service.getRoomParticipationAnalytics(
+				mockRoomID,
+				mockUserID,
+			);
+
+			const expectedResult = {
+				joins: mockJoins,
+				session_data: mockSessionData,
+				participants_per_hour: mockParticipantsPerHour,
+				room_previews: mockRoomPreviews,
+				return_visits: mockReturnVisits,
+			};
+
+			expect(result).toEqual(expectedResult);
 		});
 	});
 });
