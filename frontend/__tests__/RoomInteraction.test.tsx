@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import InteractiveSessions from "../app/screens/help/RoomInteraction";
+import InteractiveSessions from "../app/screens/messaging/help/RoomInteraction";
 import { useRouter } from "expo-router";
 
 jest.mock("expo-router", () => ({

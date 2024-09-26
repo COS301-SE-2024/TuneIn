@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import ProfileManagement from "../app/screens/help/ProfileManagement";
+import ProfileManagement from "../app/screens/messaging/help/ProfileManagement";
 import { useRouter } from "expo-router";
 
 jest.mock("expo-router", () => ({
