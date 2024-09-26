@@ -707,6 +707,20 @@ export class ActiveRoom {
 		);
 	}
 
+	async getCurrentSong(
+		murLockService: MurLockService,
+	): Promise<RoomSong | null> {
+		await this.refreshQueue(murLockService);
+		console.log("historicQueue");
+		console.log(this.historicQueue.toArray());
+		console.log("currentQueue");
+		console.log(this.queue.toArray());
+		if (this.queue.isEmpty()) {
+			return null;
+		} else {
+			await this.updateQueue(murLockService);
+			return this.queue.front();
+		}
 	}
 
 	async addVote(
@@ -714,6 +728,8 @@ export class ActiveRoom {
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
+		this.printQueueBrief();
+		const songs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -721,25 +737,24 @@ export class ActiveRoom {
 				console.log(
 					`Acquire lock: ${this.getQueueLockName()} in function 'addVote'`,
 				);
-				this.updateQueue();
-				this.printQueueBrief();
-				const songs: RoomSong[] = this.queue.toArray();
-				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-				if (index === -1 || !songs[index]) {
-					result = false;
-					return;
+				try {
+					const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+					if (index === -1 || !songs[index]) {
+						result = false;
+						return;
+					}
+					result = songs[index].addVote(vote);
+				} catch (e) {
+					console.error("Error in addVote");
+					console.error(e);
 				}
-				result = songs[index].addVote(vote);
-				this.queue = PriorityQueue.fromArray(
-					sortRoomSongs(songs),
-					this.compareRoomSongs,
-				);
-				this.printQueueBrief();
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'addVote'`,
 				);
 			},
 		);
+		if (result) await this.setQueue(songs, murLockService);
+		this.printQueueBrief();
 		return result;
 	}
 
@@ -748,6 +763,8 @@ export class ActiveRoom {
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
+		this.printQueueBrief();
+		const songs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -755,26 +772,24 @@ export class ActiveRoom {
 				console.log(
 					`Acquire lock: ${this.getQueueLockName()} in function 'removeVote'`,
 				);
-				this.updateQueue();
-				this.printQueueBrief();
-				const songs: RoomSong[] = this.queue.toArray();
-				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-				if (index === -1 || songs[index] === null || !songs[index]) {
-					result = false;
-					return;
+				try {
+					const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+					if (index === -1 || songs[index] === null || !songs[index]) {
+						result = false;
+						return;
+					}
+					result = songs[index].removeVote(vote);
+				} catch (e) {
+					console.error("Error in removeVote");
+					console.error(e);
 				}
-				result = songs[index].removeVote(vote);
-				this.queue = PriorityQueue.fromArray(
-					sortRoomSongs(songs),
-					this.compareRoomSongs,
-				);
-				this.printQueueBrief();
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'removeVote'`,
 				);
-				this.updateQueue();
 			},
 		);
+		if (result) await this.setQueue(songs, murLockService);
+		this.printQueueBrief();
 		return result;
 	}
 
@@ -785,6 +800,9 @@ export class ActiveRoom {
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
+		await this.refreshQueue(murLockService);
+		this.printQueueBrief();
+		const songs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -792,25 +810,24 @@ export class ActiveRoom {
 				console.log(
 					`Acquire lock: ${this.getQueueLockName()} in function 'swapVote'`,
 				);
-				this.updateQueue();
-				this.printQueueBrief();
-				const songs: RoomSong[] = this.queue.toArray();
-				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-				if (index === -1 || songs[index] === null || !songs[index]) {
-					result = false;
-					return;
+				try {
+					const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+					if (index === -1 || songs[index] === null || !songs[index]) {
+						result = false;
+						return;
+					}
+					result = songs[index].swapVote(userID, swapTime);
+				} catch (e) {
+					console.error("Error in swapVote");
+					console.error(e);
 				}
-				result = songs[index].swapVote(userID, swapTime);
-				this.queue = PriorityQueue.fromArray(
-					sortRoomSongs(songs),
-					this.compareRoomSongs,
-				);
-				this.printQueueBrief();
 				console.log(
 					`Release lock: ${this.getQueueLockName()} in function 'swapVote'`,
 				);
 			},
 		);
+		if (result) await this.setQueue(songs, murLockService);
+		this.printQueueBrief();
 		return result;
 	}
 
