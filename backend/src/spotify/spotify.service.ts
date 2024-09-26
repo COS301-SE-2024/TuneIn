@@ -52,10 +52,22 @@ export class SpotifyService {
 		// 	"base64",
 		// );
 
-		this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
-			this.clientId,
-			this.clientSecret,
-		);
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
+					this.clientId,
+					this.clientSecret,
+				);
+				break;
+			} catch (e) {
+				error = e as Error;
+				console.error(e);
+			}
+		}
+		if (error) {
+			throw error;
+		}
 	}
 
 	async wait(ms: number) {
@@ -67,122 +79,218 @@ export class SpotifyService {
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
-		const api = SpotifyApi.withAccessToken(this.clientId, token);
-		const user = await api.currentUser.profile();
-		return user;
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const api = SpotifyApi.withAccessToken(this.clientId, token);
+				const user = await api.currentUser.profile();
+				return user;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get user profile");
 	}
 
 	async getAudioFeatures(spotifyID: string): Promise<Spotify.AudioFeatures> {
-		const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
-			spotifyID,
-		);
-		return audioFeatures;
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
+					spotifyID,
+				);
+				return audioFeatures;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get audio features");
 	}
 
 	async getManyAudioFeatures(
 		spotifyIDs: string[],
 	): Promise<Spotify.AudioFeatures[]> {
-		const promises: Promise<Spotify.AudioFeatures[]>[] = [];
-		for (let i = 0; i < spotifyIDs.length; i += 100) {
-			const ids = spotifyIDs.slice(i, i + 100);
-			promises.push(this.userlessAPI.tracks.audioFeatures(ids));
-			await this.wait(500); // for rate limiting
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const promises: Promise<Spotify.AudioFeatures[]>[] = [];
+				for (let i = 0; i < spotifyIDs.length; i += 100) {
+					const ids = spotifyIDs.slice(i, i + 100);
+					promises.push(this.userlessAPI.tracks.audioFeatures(ids));
+					await this.wait(500); // for rate limiting
+				}
+				const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
+				const features: Spotify.AudioFeatures[] = [];
+				for (const result of results) {
+					features.push(...result);
+				}
+				return features;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
 		}
-		const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
-		const features: Spotify.AudioFeatures[] = [];
-		for (const result of results) {
-			features.push(...result);
+		if (error) {
+			throw error;
 		}
-		return features;
+		throw new Error("Failed to get audio features");
 	}
 
 	async getUserPlaylists(
 		tk: SpotifyTokenPair,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				if (new Date().getTime() > tk.epoch_expiry) {
+					throw new Error("Token has expired");
+				}
 
-		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
-			await api.currentUser.playlists.playlists();
-		const total = initialPlaylistsFetch.total;
-		const promises = [];
-		let i = 0;
-		while (i < total) {
-			const p = api.currentUser.playlists.playlists(50, i);
-			promises.push(p);
-			i += 50;
-			await this.wait(500); // for rate limiting
+				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+				const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
+					await api.currentUser.playlists.playlists();
+				const total = initialPlaylistsFetch.total;
+				const promises = [];
+				let i = 0;
+				while (i < total) {
+					const p = api.currentUser.playlists.playlists(50, i);
+					promises.push(p);
+					i += 50;
+					await this.wait(500); // for rate limiting
+				}
+				const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
+					await Promise.all(promises);
+				const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
+				for (const p of playlists) {
+					userPlaylists.push(...p.items);
+				}
+				return userPlaylists;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
 		}
-		const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
-			await Promise.all(promises);
-		const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
-		for (const p of playlists) {
-			userPlaylists.push(...p.items);
+		if (error) {
+			throw error;
 		}
-		return userPlaylists;
+		throw new Error("Failed to get user playlists");
 	}
 
 	async getPlaylistTracks(
 		tk: SpotifyTokenPair,
 		playlistID: string,
 	): Promise<Spotify.Track[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				if (new Date().getTime() > tk.epoch_expiry) {
+					throw new Error("Token has expired");
+				}
 
-		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		const playlistInfo: Spotify.Playlist<Spotify.Track> =
-			await api.playlists.getPlaylist(playlistID);
+				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+				const playlistInfo: Spotify.Playlist<Spotify.Track> =
+					await api.playlists.getPlaylist(playlistID);
 
-		let i = 0;
-		const promises: Promise<
-			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
-		>[] = [];
-		while (i < playlistInfo.tracks.total) {
-			promises.push(
-				api.playlists.getPlaylistItems(playlistID, undefined, undefined, 50, i),
-			);
-			i += 50;
-		}
+				let i = 0;
+				const promises: Promise<
+					Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+				>[] = [];
+				while (i < playlistInfo.tracks.total) {
+					promises.push(
+						api.playlists.getPlaylistItems(
+							playlistID,
+							undefined,
+							undefined,
+							50,
+							i,
+						),
+					);
+					i += 50;
+				}
 
-		const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
-			await Promise.all(promises);
-		const result: Spotify.Track[] = [];
-		for (const s of songs) {
-			const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
-			const tracks = items.map((item) => item.track);
-			result.push(...tracks);
+				const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+					await Promise.all(promises);
+				const result: Spotify.Track[] = [];
+				for (const s of songs) {
+					const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+					const tracks = items.map((item) => item.track);
+					result.push(...tracks);
+				}
+				return result;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
 		}
-		return result;
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get playlist tracks");
 	}
 
 	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
-		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
-			await api.currentUser.tracks.savedTracks();
-		const total = initialSongsFetch.total;
-		let i = 0;
-		const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
-		while (i < total) {
-			const p = api.currentUser.tracks.savedTracks(50, i);
-			promises.push(p);
-			i += 50;
-			await this.wait(500); // for rate limiting
-		}
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				if (new Date().getTime() > tk.epoch_expiry) {
+					throw new Error("Token has expired");
+				}
+				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+				const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
+					await api.currentUser.tracks.savedTracks();
+				const total = initialSongsFetch.total;
+				let i = 0;
+				const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
+				while (i < total) {
+					const p = api.currentUser.tracks.savedTracks(50, i);
+					promises.push(p);
+					i += 50;
+					await this.wait(500); // for rate limiting
+				}
 
-		const songs: Spotify.Page<Spotify.SavedTrack>[] = await Promise.all(
-			promises,
-		);
-		const likedSongs: Spotify.SavedTrack[] = [];
-		for (const s of songs) {
-			likedSongs.push(...s.items);
+				const songs: Spotify.Page<Spotify.SavedTrack>[] = await Promise.all(
+					promises,
+				);
+				const likedSongs: Spotify.SavedTrack[] = [];
+				for (const s of songs) {
+					likedSongs.push(...s.items);
+				}
+				return likedSongs;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
 		}
-		return likedSongs;
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get liked songs");
 	}
 
 	getLargestImage(images: Spotify.Image[]): Spotify.Image {
@@ -456,16 +564,31 @@ export class SpotifyService {
 	}
 
 	async getManyTracks(trackIDs: string[]): Promise<Spotify.Track[]> {
-		const promises: Promise<Spotify.Track[]>[] = [];
-		for (let i = 0; i < trackIDs.length; i += 50) {
-			const ids = trackIDs.slice(i, i + 50);
-			promises.push(this.userlessAPI.tracks.get(ids));
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const promises: Promise<Spotify.Track[]>[] = [];
+				for (let i = 0; i < trackIDs.length; i += 50) {
+					const ids = trackIDs.slice(i, i + 50);
+					promises.push(this.userlessAPI.tracks.get(ids));
+				}
+				const results: Spotify.Track[][] = await Promise.all(promises);
+				const tracks: Spotify.Track[] = [];
+				for (const result of results) {
+					tracks.push(...result);
+				}
+				return tracks;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
 		}
-		const results: Spotify.Track[][] = await Promise.all(promises);
-		const tracks: Spotify.Track[] = [];
-		for (const result of results) {
-			tracks.push(...result);
+		if (error) {
+			throw error;
 		}
-		return tracks;
+		throw new Error("Failed to get tracks");
 	}
 }
