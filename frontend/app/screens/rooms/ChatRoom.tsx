@@ -153,16 +153,6 @@ const ChatRoom = () => {
 		<View style={styles.container}>
 			<View style={styles.contentContainer}>
 				<View style={styles.sideBySide}>
-					<View style={styles.joinLeaveButtonContainer}>
-						<TouchableOpacity
-							style={styles.joinLeaveButton}
-							onPress={handleJoinLeave}
-						>
-							<Text style={styles.joinLeaveButtonText}>
-								{joined ? "Leave" : "Join"}
-							</Text>
-						</TouchableOpacity>
-					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
 			</View>
