@@ -30,6 +30,7 @@ const AdvancedSettings = () => {
 	const [toggle2, setToggle2] = useState(true);
 	const [toggle3, setToggle3] = useState(true);
 	const [toggle4, setToggle4] = useState(true);
+	const [genres, setGenres] = useState<string[]>([]);
 
 	const { room } = useLocalSearchParams();
 
@@ -137,7 +138,8 @@ const AdvancedSettings = () => {
 				}
 				const data = await response.json();
 				console.log("Room split data: ", data);
-				if (data.length > 0) {
+				if (data.length > 1) {
+					setGenres(data);
 					setPopupVisible(true);
 				} else {
 					ToastAndroid.show(
@@ -145,7 +147,6 @@ const AdvancedSettings = () => {
 						ToastAndroid.SHORT,
 					);
 				}
-				// return data;
 			} else {
 				console.log("No room data found");
 			}
@@ -346,6 +347,7 @@ const AdvancedSettings = () => {
 				isVisible={isPopupVisible}
 				onClose={handleClosePopup}
 				onConfirm={handleConfirmPopup}
+				genres={genres}
 			/>
 		</View>
 	);
