@@ -202,6 +202,13 @@ export class UsersService {
 			const genresToAdd = newGenreNames.filter(
 				(name) => !currentGenreNames.includes(name) && genreMap.has(name),
 			);
+			const genresToAddIDs: string[] = [];
+			for (const name of genresToAdd) {
+				const id = genreMap.get(name);
+				if (id) {
+					genresToAddIDs.push(id);
+				}
+			}
 
 			const genresToRemove = currentGenreNames
 				.filter((name): name is string => name !== null)
@@ -221,9 +228,9 @@ export class UsersService {
 
 			// Step 5: Insert new genres
 			await prisma.favorite_genres.createMany({
-				data: genresToAdd.map((name) => ({
+				data: genresToAddIDs.map((id) => ({
 					user_id: userId,
-					genre_id: genreMap.get(name)!,
+					genre_id: id,
 				})),
 			});
 		});
@@ -297,6 +304,13 @@ export class UsersService {
 			const songsToAdd = newSongIds.filter(
 				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
 			);
+			const songsToAddIDs: string[] = [];
+			for (const id of songsToAdd) {
+				const songId = songMap.get(id);
+				if (songId) {
+					songsToAddIDs.push(songId);
+				}
+			}
 			console.log("Songs to add: " + songsToAdd);
 
 			const songsToRemove = currentSongSpotifyId
@@ -317,9 +331,9 @@ export class UsersService {
 
 			// Step 5: Insert new songs
 			await prisma.favorite_songs.createMany({
-				data: songsToAdd.map((id) => ({
+				data: songsToAddIDs.map((id) => ({
 					user_id: userId,
-					song_id: songMap.get(id)!,
+					song_id: id,
 				})),
 			});
 		});
