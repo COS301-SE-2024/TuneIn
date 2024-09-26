@@ -42,7 +42,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToLogout = () => {
-		router.navigate("/screens/WelcomScreen");
+		auth.logout();
 	};
 
 	const navigateToHelp = () => {
