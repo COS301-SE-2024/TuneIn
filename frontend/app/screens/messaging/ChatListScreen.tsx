@@ -160,7 +160,7 @@ const ChatListScreen = () => {
 				swipeDirection="down"
 				style={styles.modal}
 			>
-				<CreateChatScreen closeModal={toggleModal} friends={friends} />
+				<CreateChatScreen closeModal={toggleModal} />
 			</Modal>
 		</View>
 	);
