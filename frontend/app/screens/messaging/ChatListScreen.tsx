@@ -19,24 +19,7 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
 import { UserDto } from "../../models/UserDto";
-
-// const initialChats: Chat[] = [
-// 	{
-// 		id: "1",
-// 		name: "John Doe",
-// 		lastMessage: "Hey there!",
-// 		avatar:
-// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-// 	},
-// 	{
-// 		id: "2",
-// 		name: "Jane Smith",
-// 		lastMessage: "What's up?",
-// 		avatar:
-// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-// 	},
-// 	// Add more dummy chats
-// ];
+import { useIsFocused } from "@react-navigation/native"; // Import useIsFocused
 
 const createChats = (
 	messages: DirectMessageDto[],
@@ -61,59 +44,52 @@ const ChatListScreen = () => {
 	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const router = useRouter();
+	const isFocused = useIsFocused(); // Check if the screen is focused
 
-	useEffect(() => {
-		// Fetch chats from backend
-		(async () => {
-			try {
-				const token = await auth.getToken();
+	// Fetch chats from backend
+	const fetchChats = async () => {
+		try {
+			const token = await auth.getToken();
 
-				const promises = [];
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users/dms`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users/friends`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-
-				const responses = await Promise.all(promises);
-				const chats = responses[0].data as DirectMessageDto[];
-				console.log(chats);
-				selfRef.current = responses[1].data as UserDto;
-				console.log(selfRef.current);
-				setFriends(responses[2].data as UserDto[]);
-				console.log(responses[2].data);
-
-				setFilteredChats(createChats(chats, selfRef.current.userID));
-				setUserMessages(chats);
-			} catch (error) {
-				console.log(error);
-				ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
-				throw error;
-			}
-		})();
-	}, []);
-
-	useEffect(() => {
-		/*
-		if (searchQuery === "") {
-			setFilteredChats(initialChats);
-		} else {
-			const filtered = initialChats.filter((chat) =>
-				chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+			const promises = [];
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/dms`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
 			);
-			setFilteredChats(filtered);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/friends`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+
+			const responses = await Promise.all(promises);
+			const chats = responses[0].data as DirectMessageDto[];
+			selfRef.current = responses[1].data as UserDto;
+			setFriends(responses[2].data as UserDto[]);
+
+			setFilteredChats(createChats(chats, selfRef.current.userID));
+			setUserMessages(chats);
+		} catch (error) {
+			console.log(error);
+			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
+			throw error;
 		}
-			*/
+	};
+
+	useEffect(() => {
+		if (isFocused) {
+			// Fetch chats when the screen is focused
+			fetchChats();
+		}
+	}, [isFocused]);
+
+	useEffect(() => {
 		if (searchQuery === "") {
 			if (selfRef.current !== undefined) {
 				setFilteredChats(createChats(userMessages, selfRef.current.userID));
