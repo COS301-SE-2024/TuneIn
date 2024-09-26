@@ -83,7 +83,7 @@ const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
 			<GestureHandlerRootView>
 				<TouchableWithoutFeedback onPress={handleClose}>
 					<View style={styles.modalContainer} testID="link-bottom-sheet">
-						<View style={styles.modalOverlay}>
+						<View>
 							<KeyboardAvoidingView
 								behavior={Platform.OS === "ios" ? "padding" : "height"}
 							>

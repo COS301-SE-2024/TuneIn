@@ -1125,9 +1125,8 @@ const ProfileScreen: React.FC = () => {
 						</TouchableOpacity>
 						<LinkBottomSheet
 							isVisible={isLinkDialogVisible}
-							onClose={() => {
-								setLinkDialogVisible(false);
-							}}
+							setIsVisible={
+								setLinkDialogVisible}
 							links={primaryProfileData.links.data}
 						/>
 						{renderFollowOrEdit()}

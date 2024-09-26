@@ -116,7 +116,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 			<GestureHandlerRootView>
 				<TouchableWithoutFeedback onPress={handleClose}>
 					<View style={styles.modalContainer} testID="follow-bottom-sheet">
-						<View style={styles.modalOverlay}>
+						<View>
 							<KeyboardAvoidingView
 								behavior={Platform.OS === "ios" ? "padding" : "height"}
 							>
