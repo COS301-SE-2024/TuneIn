@@ -1217,8 +1217,7 @@ export class ActiveRoom {
 
 @Injectable()
 export class RoomQueueService {
-	roomQueues: Map<string, ActiveRoom>; //map roomID to room data structure
-	activeQueueSongs: Map<string, Spotify.Track>; //map spotifyID to spotify track
+	public roomQueues: Map<string, ActiveRoom>; //map roomID to room data structure
 
 	constructor(
 		private readonly dbUtils: DbUtilsService,
@@ -1227,9 +1226,9 @@ export class RoomQueueService {
 		private readonly spotify: SpotifyService,
 		private readonly spotifyAuth: SpotifyAuthService,
 		private readonly murLockService: MurLockService,
+		private readonly tasksService: TasksService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
-		this.activeQueueSongs = new Map<string, Spotify.Track>();
 	}
 
 	async createRoomQueue(roomID: string): Promise<void> {
@@ -1237,19 +1236,14 @@ export class RoomQueueService {
 		if (!room || room === null) {
 			throw new Error("Room does not exist");
 		}
-		console.log("1");
-		console.log(room);
-		const activeRoom = new ActiveRoom(room);
-		console.log("2");
-		await activeRoom.reloadQueue(this.prisma);
-		console.log("3");
-		await activeRoom.getSpotifyInfo(
-			this.spotifyAuth.getUserlessAPI(),
+		const activeRoom = new ActiveRoom(room, this.murLockService);
+		await activeRoom.reloadQueue(
+			this.spotify,
+			this.prisma,
 			this.murLockService,
 		);
-		console.log("4");
+		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 		this.roomQueues.set(roomID, activeRoom);
-		console.log("5");
 		console.log(
 			`Created room queue for room ${roomID} with active room: ${activeRoom}`,
 		);
@@ -1261,17 +1255,21 @@ export class RoomQueueService {
 		userID: string,
 		insertTime: Date,
 	): Promise<boolean> {
+	async clearRoomQueue(roomID: string): Promise<void> {
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.clearQueue(this.murLockService);
+	}
 		if (!this.roomQueues.has(roomID)) {
 			await this.createRoomQueue(roomID);
 		}
-		const activeRoom = this.roomQueues.get(roomID);
+		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
 		if (!activeRoom || activeRoom === undefined) {
 			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.addSong",
+				"Weird error. HashMap is broken: RoomQueueService.getQueueState",
 			);
 		}
-		const result: boolean = await activeRoom.addSong(
-			spotifyID,
+		return activeRoom;
+	}
 			userID,
 			insertTime,
 			this.murLockService,
