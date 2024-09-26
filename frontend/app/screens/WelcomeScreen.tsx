@@ -38,7 +38,7 @@ const WelcomeScreen: React.FC = () => {
 	};
 
 	const navigateToHelp = () => {
-		router.navigate("/screens/(tabs)/HelpScreenelpScreen");
+		router.navigate("/screens/(tabs)/HelpScreen");
 	};
 
 	const redirectURI = makeRedirectUri({
@@ -147,7 +147,7 @@ const WelcomeScreen: React.FC = () => {
 						<MaterialCommunityIcons
 							name="help-circle-outline"
 							size={24}
-							color="#FFF"
+							color="#ccc"
 							style={styles.helpIcon}
 						/>
 					</TouchableOpacity>
