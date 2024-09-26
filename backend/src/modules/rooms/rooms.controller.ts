@@ -32,13 +32,8 @@ import { JwtAuthGuard } from "./../../auth/jwt-auth.guard";
 import { AuthService, JWTPayload } from "../../auth/auth.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import {
-	// RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
 	RoomAnalyticsInteractionsDto,
-	RoomAnalyticsVotesDto,
-	RoomAnalyticsSongsDto,
-	RoomAnalyticsContributorsDto,
-	// RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 import { RoomAnalyticsService } from "./roomanalytics.service";
