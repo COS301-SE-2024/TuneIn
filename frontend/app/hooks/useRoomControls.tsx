@@ -676,7 +676,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: enqueueSongs");
-			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, socket],
@@ -705,7 +705,7 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: dequeueSongs");
-			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 			console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
@@ -968,7 +968,7 @@ export function useRoomControls({
 			const input = {
 				roomID: currentRoom.roomID,
 			};
-			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
 		},
 		[currentRoom, currentUser, socket],
 	);
