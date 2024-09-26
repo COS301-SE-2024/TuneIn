@@ -116,15 +116,14 @@ describe("Search Component", () => {
 		(auth.getToken as jest.Mock).mockReturnValue("token");
 	});
 
-	it("should render the header with a title and back button", () => {
+	it("should render the header with a title", () => {
 		(axios.get as jest.Mock)
 			.mockResolvedValueOnce({ data: roomMock })
 			.mockResolvedValueOnce({ data: uHistDtoMock })
 			.mockResolvedValueOnce({ data: ["jazz", "rock"] })
 			.mockResolvedValueOnce({ data: uHistDtoMock });
-		const { getByText, getByTestId } = render(<Search />);
+		const { getByText } = render(<Search />);
 		expect(getByText("Search")).toBeTruthy();
-		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
 	it("should handle search input changes", () => {
