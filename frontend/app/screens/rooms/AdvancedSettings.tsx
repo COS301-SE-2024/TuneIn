@@ -19,6 +19,8 @@ import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
 import RoomShareSheet from "../../components/messaging/RoomShareSheet";
 import { formatRoomData } from "../../models/Room";
+import * as utils from "../../services/Utils";
+import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
@@ -78,6 +80,25 @@ const AdvancedSettings = () => {
 			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
 		}
 	};
+	const navigateToSplittingRoom = () => {
+		router.navigate({
+			pathname: "/screens/rooms/SplittingRoom",
+			params: {
+				rooms: JSON.stringify({}),
+				queues: JSON.stringify({}),
+			},
+		});
+	};
+	const handleConfirmPopup = async (choice: boolean) => {
+		console.log("User choice:", choice ? "Yes" : "No");
+		if (choice) {
+			// Navigate to splitting room or handle "Yes" action
+			navigateToSplittingRoom();
+		} else {
+			// Handle "No" action (cancel)
+			handleClosePopup();
+		}
+	};
 	const handleDelete = () => {
 		setShowDeleteModal(false);
 		if (room) {
@@ -89,6 +110,47 @@ const AdvancedSettings = () => {
 			navigateToHome();
 		} else {
 			console.log("No room data found");
+		}
+	};
+
+	const checkRoomSplit = async () => {
+		try {
+			if (room) {
+				let roomData = typeof room === "string" ? JSON.parse(room) : room;
+				if (Array.isArray(roomData)) {
+					roomData = JSON.parse(roomData[0]);
+				}
+				const token = await auth.getToken();
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomData.roomID}/split`,
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (!response.ok) {
+					ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
+					return;
+				}
+				const data = await response.json();
+				console.log("Room split data: ", data);
+				if (data.length > 0) {
+					setPopupVisible(true);
+				} else {
+					ToastAndroid.show(
+						"Room has no queue to split. Maybe get some bitches?",
+						ToastAndroid.SHORT,
+					);
+				}
+				// return data;
+			} else {
+				console.log("No room data found");
+			}
+		} catch (error) {
+			console.log("Error splitting room: ", error);
+			ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
 		}
 	};
 
@@ -212,10 +274,10 @@ const AdvancedSettings = () => {
 					<Text style={styles.editButtonText}>Edit Room Details</Text>
 					<Icon name="edit" size={20} color="black" />
 				</TouchableOpacity>
-
-				{/* <TouchableOpacity style={styles.saveButton} onPress={() => router.back()}>
-				<Text style={styles.saveButtonText}>Save Changes</Text>
-			</TouchableOpacity> */}
+				<TouchableOpacity style={styles.editButton} onPress={checkRoomSplit}>
+					<Text style={styles.editButtonText}>Split Room</Text>
+					<Icon name="split" size={20} color="black" />
+				</TouchableOpacity>
 				<View style={styles.saveButton}>
 					<CreateButton title="Save Changes" onPress={handleSave} />
 					{/* <CreateButton title="Save Changes" onPress={() => router.back()} /> */}
@@ -279,6 +341,11 @@ const AdvancedSettings = () => {
 					</View>
 				</Modal>
 			</ScrollView>
+			<SplittingPopUp
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+				onConfirm={handleConfirmPopup}
+			/>
 		</View>
 	);
 };
