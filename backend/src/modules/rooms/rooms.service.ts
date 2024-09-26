@@ -1264,9 +1264,12 @@ export class RoomsService {
 					song: true,
 				},
 			});
+		console.log("Songs", songs);
 		return songs.map((song) => {
 			return {
-				...(song.song.audio_features as unknown as AudioFeatures),
+				...(JSON.parse(
+					song.song.audio_features as unknown as string,
+				) as unknown as AudioFeatures),
 				genre: song.song.genre ?? "Unknown",
 				songID: song.song.song_id,
 			};
