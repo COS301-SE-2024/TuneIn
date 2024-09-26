@@ -6,19 +6,13 @@ import {
 	Modal,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
-	Alert,
 	ActivityIndicator,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
-import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import { colors } from "../styles/colors";
 import { useLive } from "../LiveContext";
 import { Device } from "@spotify/web-api-ts-sdk";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { Devices } from "../models/Devices";
-import * as spotifyAuth from "../services/SpotifyAuth";
-import { colors } from "../styles/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const DevicePicker = () => {
@@ -99,14 +93,17 @@ const DevicePicker = () => {
 						<View style={styles.modalBackground}>
 							<TouchableWithoutFeedback>
 								<View style={styles.popupContainer}>
-									{error ? (
+									{roomControls.playbackHandler.deviceError ? (
 										<>
 											<Text style={styles.popupTitle}>
 												Error Fetching Devices
 											</Text>
-											<Text style={styles.popupMessage}>{error}</Text>
+											<Text style={styles.popupMessage}>
+												{roomControls.playbackHandler.deviceError}
+											</Text>
 										</>
-									) : !devices || devices.length === 0 ? (
+									) : roomControls.playbackHandler.spotifyDevices.devices
+											.length === 0 ? (
 										<>
 											<Text style={styles.popupTitle}>
 												No Devices Available
@@ -124,24 +121,35 @@ const DevicePicker = () => {
 													color={colors.primary}
 												/>
 											) : (
-												devices.map((device: Devices, index: number) => (
-													<TouchableOpacity
-														key={index}
-														style={styles.deviceOption}
-														onPress={() => handleDeviceSelect(device.id)}
-													>
-														<RadioButton
-															value={device.id}
-															testID={`radio-button-${device.id}`}
-															status={
-																selectedDevice === device.id
-																	? "checked"
-																	: "unchecked"
+												roomControls.playbackHandler.spotifyDevices.devices.map(
+													(device: Device, index: number) => (
+														<TouchableOpacity
+															key={index}
+															style={styles.deviceOption}
+															onPress={() =>
+																roomControls.playbackHandler.setActiveDevice({
+																	deviceID: device.id,
+																	userSelected: true,
+																})
 															}
-														/>
-														{renderDeviceName(device)}
-													</TouchableOpacity>
-												))
+														>
+															{device.id !== null && (
+																<RadioButton
+																	value={device.id}
+																	testID={`radio-button-${device.id}`}
+																	status={
+																		roomControls.playbackHandler.activeDevice &&
+																		roomControls.playbackHandler.activeDevice
+																			.id === device.id
+																			? "checked"
+																			: "unchecked"
+																	}
+																/>
+															)}
+															{renderDeviceName(device)}
+														</TouchableOpacity>
+													),
+												)
 											)}
 										</>
 									)}
