@@ -22,7 +22,6 @@ import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import AddFavSong from "../../components/AddFavSong";
 import { useLive } from "../../LiveContext";
-import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import GenreAdder from "../../components/GenreAdder";
 
@@ -95,7 +94,9 @@ const EditProfileScreen = () => {
 		const response = await updateProfile();
 		console.log("The response: " + JSON.stringify(response));
 		if (JSON.stringify(response) !== "[]") {
-			setUserData(null);
+			if (!refreshUser) {
+				setRefreshUser(true);
+			}
 		} else {
 			setLoading(false);
 		}
@@ -208,10 +209,10 @@ const EditProfileScreen = () => {
 	};
 
 	useEffect(() => {
-		if (userData === null) {
+		if (!currentUser) {
 			router.navigate("screens/profile/ProfilePage");
 		}
-	}, [userData]);
+	}, [currentUser]);
 
 	const handleImageUpload = async (uri: string) => {
 		try {

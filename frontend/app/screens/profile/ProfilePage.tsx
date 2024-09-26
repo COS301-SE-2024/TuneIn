@@ -28,7 +28,8 @@ import { Room, formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
-import { RoomDto } from "../../models/RoomDto";
+import { RoomDto } from "../../../api";
+import { useLive } from "../../LiveContext";
 
 const ProfileScreen: React.FC = () => {
 	const { currentUser, refreshUser, setRefreshUser } = useLive();
@@ -159,7 +160,7 @@ const ProfileScreen: React.FC = () => {
 							fetchFavRoomInfo(data.username);
 						}
 
-						if (currentUser !== null && data.followers.count > 0) {
+						if (currentUser && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
 								(item: any) => item.username === currentUser.username,
 							);
@@ -182,21 +183,13 @@ const ProfileScreen: React.FC = () => {
 					setPrimProfileData(currentUser);
 				}
 
-				if (
-					recentRoomData === null &&
-					userData !== null &&
-					userData !== undefined
-				) {
+				if (recentRoomData === null && currentUser) {
 					// console.log("User Data for rec room: " + JSON.stringify(userData));
-					fetchRecentRoomInfo(userData.username);
+					fetchRecentRoomInfo(currentUser.username);
 				}
-				if (
-					favoriteRoomData === null &&
-					userData !== null &&
-					userData !== undefined
-				) {
+				if (favoriteRoomData === null && currentUser) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
-					fetchFavRoomInfo(userData.username);
+					fetchFavRoomInfo(currentUser.username);
 				}
 
 				if (currentRoomData === null) {
@@ -210,7 +203,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		initializeProfile();
-	}, [currentUser]);
+	}, [currentUser, currentRoom]);
 
 	useEffect(() => {
 		if (ownsProfile && primaryProfileData) {
@@ -559,7 +552,7 @@ const ProfileScreen: React.FC = () => {
 	}, [
 		loading,
 		ownsProfile,
-		userData,
+		currentUser,
 		primaryProfileData,
 		roomCheck,
 		recentRoomData,
