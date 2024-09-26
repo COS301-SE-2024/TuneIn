@@ -767,4 +767,65 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+	describe("getReturningVisitors", () => {
+		it("should return correct returning visitors count and percentage change", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockReturningVisitorsYesterday = [
+				{ count: 2, user_id: "user1" },
+				{ count: 2, user_id: "user2" },
+			];
+			const mockReturningVisitorsToday = [
+				{ count: 3, user_id: "user3" },
+				{ count: 3, user_id: "user4" },
+			];
+
+			jest.spyOn(prismaService.room, "findMany").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockReturningVisitorsYesterday)
+				.mockResolvedValueOnce(mockReturningVisitorsToday);
+
+			const result = await service.getReturningVisitors(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				count: 4,
+				percentage_change: 1,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no returning visitors", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockReturningVisitorsYesterday = [];
+			const mockReturningVisitorsToday = [];
+
+			jest.spyOn(prismaService.room, "findMany").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockReturningVisitorsYesterday)
+				.mockResolvedValueOnce(mockReturningVisitorsToday);
+
+			const result = await service.getReturningVisitors(mockUserID, mockPeriod);
+
+			const expectedResult = {
+				count: 0,
+				percentage_change: 0,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
