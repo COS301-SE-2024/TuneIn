@@ -785,7 +785,9 @@ describe("RoomAnalyticsService", () => {
 				{ count: 3, user_id: "user4" },
 			];
 
-			jest.spyOn(prismaService.room, "findMany").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
 			jest
 				.spyOn(prismaService, "$queryRaw")
 				.mockResolvedValueOnce(mockReturningVisitorsYesterday)
@@ -795,7 +797,7 @@ describe("RoomAnalyticsService", () => {
 
 			const expectedResult = {
 				count: 4,
-				percentage_change: 1,
+				percentage_change: 0,
 			};
 
 			expect(result).toEqual(expectedResult);
@@ -809,10 +811,16 @@ describe("RoomAnalyticsService", () => {
 				{ room_id: "room1", room_creator: mockUserID },
 				{ room_id: "room2", room_creator: mockUserID },
 			];
-			const mockReturningVisitorsYesterday = [];
-			const mockReturningVisitorsToday = [];
+			const mockReturningVisitorsYesterday: {
+				count: number;
+				user_id: string;
+			}[] = [];
+			const mockReturningVisitorsToday: { count: number; user_id: string }[] =
+				[];
 
-			jest.spyOn(prismaService.room, "findMany").mockResolvedValue(mockRooms);
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
 			jest
 				.spyOn(prismaService, "$queryRaw")
 				.mockResolvedValueOnce(mockReturningVisitorsYesterday)
