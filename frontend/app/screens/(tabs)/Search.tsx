@@ -70,8 +70,6 @@ const Search: React.FC = () => {
 	const [userRecommendations, setUserRecommendations] = useState<
 		SearchResult[]
 	>([]);
-	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
-	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 	const [searchError, setSearchError] = useState<boolean>(false);
 
@@ -495,7 +493,6 @@ const Search: React.FC = () => {
 				const roomHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
-				setRoomSearchHistory(roomHistTerms);
 				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
@@ -522,7 +519,6 @@ const Search: React.FC = () => {
 				const userHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
-				setUserSearchHistory(userHistTerms);
 				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
