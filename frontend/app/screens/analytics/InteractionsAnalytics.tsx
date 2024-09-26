@@ -86,7 +86,11 @@ const InteractionsAnalytics: React.FC = () => {
 				const currentRoom = await StorageService.getItem("currentRoom");
 				console.log("current roooooom", currentRoom);
 				if (!accessToken || !selectedRoom) {
-					console.error("Cannot fetch interaction analytics without a room");
+					console.log("Cannot fetch interaction analytics without a room");
+					ToastAndroid.show(
+						"Cannot fetch interaction analytics without a room",
+						ToastAndroid.SHORT,
+					);
 					return;
 				}
 				const response = await fetch(
