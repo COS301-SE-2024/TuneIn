@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import SongVote from "./rooms/SongVote";
-import { Track } from "../models/Track";
 import {
 	RoomSongDto,
 	getAlbumArtUrl,
@@ -19,22 +18,24 @@ const SongList: React.FC<SongListProps> = ({ track, showVoting = true }) => {
 	const { currentSong, roomQueue } = useLive();
 	const albumCoverUrl = getAlbumArtUrl(track);
 	const [isCurrentSong, setIsCurrentSong] = useState(false);
-	const [queueIndex, setQueueIndex] = React.useState<number>(0);
 
 	useEffect(() => {
-		const i = roomQueue.indexOf(track);
-		if (i !== -1) {
+		const song: RoomSongDto | undefined = roomQueue.find(
+			(s) => s.spotifyID === track.spotifyID,
+		);
+		if (song) {
 			setIsCurrentSong(currentSong?.spotifyID === track.spotifyID);
-			setQueueIndex(i);
+		} else {
+			setIsCurrentSong(false);
 		}
-	}, [currentSong, roomQueue]);
+	}, [currentSong, roomQueue, track]);
 
 	return (
 		<View
 			style={[styles.container, isCurrentSong ? styles.currentSong : null]}
 			testID="song-container"
 		>
-			<Text style={styles.songNumber}>{queueIndex + 1}</Text>
+			<Text style={styles.songNumber}>{track.index}</Text>
 			<Image
 				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
