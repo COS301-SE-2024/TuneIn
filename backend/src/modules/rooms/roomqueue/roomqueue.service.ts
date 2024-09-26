@@ -968,111 +968,218 @@ export class ActiveRoom {
 		return votes;
 	}
 
-	async getSpotifyInfo(api: SpotifyApi, murLockService: MurLockService) {
+	// async getSpotifyInfo(
+	// 	api: SpotifyApi,
+	// 	prisma: PrismaService,
+	// 	murLockService: MurLockService,
+	// ) {
+	// 	await this.refreshQueue(murLockService);
+	// 	const songs = this.queue.toArray();
+	// 	//get spotify info for all songs
+	// 	console.log(
+	// 		`Getting spotify info for all songs in room ${this.room.roomID}`,
+	// 	);
+
+	// 	const songsWithoutInfo: string[] = songs
+	// 		.filter((s) => s && s.spotifyInfo === null)
+	// 		.map((s) => s.spotifyID);
+	// 	console.log(`There are ${songsWithoutInfo.length} songs without info`);
+
+	// 	if (songsWithoutInfo.length > 0) {
+	// 		// check if info is in database
+	// 		const dbSongs: PrismaTypes.song[] = await prisma.song.findMany({
+	// 			where: {
+	// 				spotify_id: {
+	// 					in: songsWithoutInfo,
+	// 				},
+	// 				NOT: {
+	// 					track_info: {
+	// 						not: {},
+	// 					},
+	// 				},
+	// 			},
+	// 		});
+	// 		const dbIDs: string[] = dbSongs.map((s) => s.spotify_id);
+
+	// 		// fetch info from spotify
+	// 		const promises: Promise<Spotify.Track[]>[] = [];
+	// 		for (let i = 0, n = songsWithoutInfo.length; i < n; i += 50) {
+	// 			console.log(`Iteration ${i} of getting 50 songs out of ${n}`);
+	// 			const ids = songsWithoutInfo.slice(i, i + 50);
+	// 			const info = api.tracks.get(ids);
+	// 			promises.push(info);
+	// 		}
+	// 		console.log(
+	// 			`There are ${
+	// 				promises.length
+	// 			} promises to resolve. Starting at ${new Date()}`,
+	// 		);
+	// 		const results: Spotify.Track[][] = await Promise.all(promises);
+	// 		console.log(`All promises resolved at ${new Date()}`);
+	// 		const songInfo: Spotify.Track[] = [];
+	// 		for (const r of results) {
+	// 			songInfo.push(...r);
+	// 		}
+
+	// 		// match the song info, first with the database, then with Spotify
+	// 		let songsEdited = false;
+	// 		for (let i = 0, n = songs.length; i < n; i++) {
+	// 			let song = songs[i];
+	// 			if (song.spotifyInfo === null) {
+	// 				if (dbIDs.includes(song.spotifyID)) {
+	// 					const dbSong = dbSongs.find((s) => s.spotify_id === song.spotifyID);
+	// 					if (dbSong) {
+	// 						// track info is 'string | number | boolean | JsonObject | JsonArray | null'
+	// 						const j = JSON.parse(dbSong.track_info as string);
+	// 						try {
+	// 							song.spotifyInfo = j as Spotify.Track;
+	// 							songsEdited = true;
+	// 						} catch (e) {
+	// 							console.log(
+	// 								`Could not parse track info for song with id ${song.spotifyID}`,
+	// 							);
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 			song = songs[i];
+	// 			if (song.spotifyInfo === null) {
+	// 				if (songInfo.find((s) => s.id === song.spotifyID)) {
+	// 					const info = songInfo.find((s) => song && s.id === song.spotifyID);
+	// 					if (info && songs[i]) {
+	// 						songs[i].spotifyInfo = info;
+	// 						songsEdited = true;
+	// 					}
+	// 				} else {
+	// 					console.log(
+	// 						`Song with id ${song.spotifyID} does not have spotify info`,
+	// 					);
+	// 				}
+	// 			}
+	// 		}
+	// 		if (songsEdited) await this.setQueue(songs, murLockService);
+	// 		console.log("Queue updated with spotify info");
+	// 	}
+	// }
+
+	async play(murLockService: MurLockService): Promise<RoomSong | null> {
+		if (this.queue.isEmpty()) {
+			return null;
+		}
+		let result: RoomSong | null = null;
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
 			async () => {
-				// The lock has been acquired.
 				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'getSpotifyInfo'`,
+					`Acquire lock: ${this.getQueueLockName()} in function 'ActiveRoom.play'`,
 				);
-				//get spotify info for all songs
-				console.log(
-					`Getting spotify info for all songs in room ${this.room.roomID}`,
-				);
-				this.updateQueue();
-				const songs = this.queue.toArray();
-				const songsWithoutInfo: RoomSong[] = [];
-				for (let i = 0, n = songs.length; i < n; i++) {
-					const s = songs[i];
-					if (s && s.spotifyInfo === null) {
-						songsWithoutInfo.push(s);
+				try {
+					const song = this.queue.front();
+					const st = song.getPlaybackStartTime();
+					if (song.isPaused() && song.pauseTime !== null && st !== null) {
+						const offset = song.pauseTime.valueOf() - st.valueOf();
+						const adjustedStart = new Date(Date.now() + offset);
+						this.queue.front().setPlaybackStartTime(adjustedStart);
+						this.queue.front().pauseTime = null;
+					} else if (st === null) {
+						this.queue.front().setPlaybackStartTime(new Date());
 					}
+					result = this.queue.front();
+				} catch (e) {
+					console.error("Error in removeSongs");
+					console.error(e);
 				}
-				console.log(`There are ${songsWithoutInfo.length} songs without info`);
-				if (songsWithoutInfo.length > 0) {
-					const songIDs: string[] = [];
-					for (const song of songsWithoutInfo) {
-						if (song && song.spotifyID !== null) {
-							songIDs.push(song.spotifyID);
-						}
-					}
-					const songInfo: Spotify.Track[] = [];
-					const promises: Promise<Spotify.Track[]>[] = [];
-					for (let i = 0, n = songIDs.length; i < n; i += 50) {
-						console.log(`Iteration ${i} of getting 50 songs out of ${n}`);
-						const ids = songIDs.slice(i, i + 50);
-						const info = api.tracks.get(ids);
-						promises.push(info);
-					}
-					console.log(
-						`There are ${
-							promises.length
-						} promises to resolve. Starting at ${new Date()}`,
-					);
-					const results = await Promise.all(promises);
-					console.log(`All promises resolved at ${new Date()}`);
-					for (const r of results) {
-						songInfo.push(...r);
-					}
-					for (let i = 0, n = songs.length; i < n; i++) {
-						const song = songs[i];
-						const info = songInfo.find((s) => song && s.id === song.spotifyID);
-						if (info && songs[i]) {
-							songs[i].spotifyInfo = info;
-						}
-					}
-					//update queue
-					this.queue = PriorityQueue.fromArray(
-						sortRoomSongs(songs),
-						this.compareRoomSongs,
-					);
-					console.log("Queue updated with spotify info");
-				}
-
-				// Now the lock will be released.
 				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'getSpotifyInfo'`,
+					`Release lock: ${this.getQueueLockName()} in function 'ActiveRoom.play'`,
 				);
 			},
 		);
-	}
-
-	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
-		const result: RoomSong | null = await this.getNextSong(murLockService);
-		if (result !== null) {
-			result.setPlaybackStartTime(new Date());
-		}
+		if (result !== null) await this.updateQueue(murLockService);
 		return result;
 	}
 
-	// async skipSong(murLockService: MurLockService): Promise<RoomSong | null> {
-	// 	let result: RoomSong | null = null;
-	// 	await murLockService.runWithLock(
-	// 		this.getQueueLockName(),
-	// 		QUEUE_LOCK_TIMEOUT,
-	// 		async () => {
-	// 			console.log(`Acquire lock: ${this.getQueueLockName()}`);
-	// 			this.updateQueue();
-	// 			if (this.queue.isEmpty()) {
-	// 				return;
-	// 			}
-	// 			const song = this.queue.dequeue();
-	// 			if (!song || song === null) {
-	// 				return;
-	// 			}
-	// 			this.historicQueue.enqueue(song);
-	// 			result = song;
-	// 			console.log(`Release lock: ${this.getQueueLockName()}`);
-	// 		},
-	// 	);
-	// 	return result;
-	// }
+	async pauseSong() {
+		if (this.queue.isEmpty()) {
+			return;
+		}
+		this.queue.front().pauseTime = new Date();
+	}
 
-	async isPlaying(murLockService: MurLockService): Promise<boolean> {
-		this.updateQueue();
+	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
+		if (this.queue.isEmpty()) {
+			return null;
+		}
+		let result: RoomSong | null = null;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'ActiveRoom.playNext'`,
+				);
+				try {
+					this.queue.dequeue();
+					if (this.queue.isEmpty()) {
+						return;
+					}
+					this.queue.front().setPlaybackStartTime(new Date());
+					result = this.queue.front();
+				} catch (e) {
+					console.error("Error in playNext");
+					console.error(e);
+				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'ActiveRoom.playNext'`,
+				);
+			},
+		);
+		await this.updateQueue(murLockService);
+		return result;
+	}
+
+	async playPrev(murLockService: MurLockService): Promise<RoomSong | null> {
+		// if paused, remove pause time
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'playPrev'`,
+				);
+				try {
+					if (!this.queue.isEmpty()) {
+						const song = this.queue.front();
+						if (song.isPaused()) {
+							this.queue.front().pauseTime = null;
+						}
+					}
+				} catch (e) {
+					console.error("Error in playPrev");
+					console.error(e);
+				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'playPrev'`,
+				);
+			},
+		);
+
+		//find newest song in historic queue
 		if (this.historicQueue.isEmpty()) {
+			return null;
+		}
+		const lastSong = this.historicQueue.dequeue();
+		lastSong.setPlaybackStartTime(new Date());
+		const oldQueue = this.queue.toArray();
+		oldQueue.unshift(lastSong);
+		for (let i = 1, n = oldQueue.length; i < n; i++) {
+			oldQueue[i].setPlaybackStartTime(new Date(Number.MAX_SAFE_INTEGER));
+		}
+		await this.setQueue(oldQueue, murLockService);
+		await this.updateQueue(murLockService);
+		return this.queue.front();
+	}
+
 			return false;
 		}
 		const song = await this.getNextSong(murLockService);
