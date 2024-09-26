@@ -698,4 +698,73 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+	describe("getAverageSessionDuration", () => {
+		it("should return correct average session duration and percentage change", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockAverageSessionDurationYesterday = [{ avg_duration: 300 }];
+			const mockAverageSessionDurationToday = [{ avg_duration: 600 }];
+			const mockAverageSessionDurationAllTime = [{ avg_duration: 450 }];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockAverageSessionDurationYesterday)
+				.mockResolvedValueOnce(mockAverageSessionDurationToday)
+				.mockResolvedValueOnce(mockAverageSessionDurationAllTime);
+
+			const result = await service.getAverageSessionDuration(
+				mockUserID,
+				mockPeriod,
+			);
+
+			const expectedResult = {
+				duration: 450,
+				percentage_change: 1,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no sessions", async () => {
+			const mockUserID = "userID1";
+			const mockPeriod = "day";
+
+			const mockRooms = [
+				{ room_id: "room1", room_creator: mockUserID },
+				{ room_id: "room2", room_creator: mockUserID },
+			];
+			const mockAverageSessionDurationYesterday = [{ avg_duration: 0 }];
+			const mockAverageSessionDurationToday = [{ avg_duration: 0 }];
+			const mockAverageSessionDurationAllTime = [{ avg_duration: 0 }];
+
+			jest
+				.spyOn(prismaService.room, "findMany")
+				.mockResolvedValue(mockRooms as unknown as PrismaTypes.room[]);
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValueOnce(mockAverageSessionDurationYesterday)
+				.mockResolvedValueOnce(mockAverageSessionDurationToday)
+				.mockResolvedValueOnce(mockAverageSessionDurationAllTime);
+
+			const result = await service.getAverageSessionDuration(
+				mockUserID,
+				mockPeriod,
+			);
+
+			const expectedResult = {
+				duration: 0,
+				percentage_change: 0,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
