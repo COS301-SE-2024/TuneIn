@@ -49,6 +49,7 @@ const Followers: React.FC = () => {
 		}
 	}, [search, followers]);
 
+	// Handle follow function
 	const handleFollow = async (friend: Friend) => {
 		try {
 			await FriendServices.handleFollow(friend);
@@ -72,6 +73,16 @@ const Followers: React.FC = () => {
 		}
 	};
 
+	// Handle unfollow function for mutual relationships
+	const handleUnfollow = async (friend: Friend) => {
+		try {
+			// console.log("handleUnfollow", friend);
+			await FriendServices.handleUnfollow(friend);
+		} catch (error) {
+			ToastAndroid.show("Failed to unfollow user.", ToastAndroid.SHORT);
+		}
+	};
+
 	const renderFollower = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
@@ -83,7 +94,8 @@ const Followers: React.FC = () => {
 					? "following"
 					: "follower"
 			}
-			handle={handleFollow}
+			relationship={item.relationship} // Display the relationship status
+			handle={item.relationship === "mutual" ? handleUnfollow : handleFollow} // Use handleUnfollow if mutual
 		/>
 	);
 
@@ -113,6 +125,7 @@ const Followers: React.FC = () => {
 		</View>
 	);
 };
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

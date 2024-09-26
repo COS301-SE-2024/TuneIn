@@ -9,6 +9,8 @@ import {
 	Pressable,
 	ToastAndroid,
 	ScrollView,
+	Platform,
+	Alert,
 } from "react-native";
 import auth from "../../services/AuthManagement";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -19,6 +21,7 @@ import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
 import RoomShareSheet from "../../components/messaging/RoomShareSheet";
 import { formatRoomData } from "../../models/Room";
+import * as utils from "../../services/Utils";
 
 const AdvancedSettings = () => {
 	const router = useRouter();
@@ -63,21 +66,33 @@ const AdvancedSettings = () => {
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
 	const deleteRoom = async (roomID: string) => {
-		// Delete room
 		const token = await auth.getToken();
 		try {
-			await fetch(`http://localhost:3000/rooms/${roomID}`, {
+			await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
 				method: "DELETE",
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+
+			// Show toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Success", "Room deleted successfully.");
+			}
 		} catch (error) {
 			console.log("Error deleting room: ", error);
-			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+
+			// Handle toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to delete room.");
+			}
 		}
 	};
+
 	const handleDelete = () => {
 		setShowDeleteModal(false);
 		if (room) {

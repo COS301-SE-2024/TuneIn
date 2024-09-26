@@ -125,10 +125,24 @@ const Following: React.FC = () => {
 		/>
 	);
 
+	const handleCancelRequest = async (friend: Friend): Promise<void> => {
+		try {
+			await FriendServices.handleCancelRequest(friend);
+			const updatedRequests = pendingRequests.filter(
+				(request) => request.friend_id !== friend.friend_id,
+			);
+			setPendingRequests(updatedRequests);
+			friend.relationship = "mutual";
+		} catch (error) {
+			ToastAndroid.show("Failed to cancel friend request.", ToastAndroid.SHORT);
+		}
+	};
+
 	const renderPendingRequest = ({ item }: { item: Friend }) => {
 		const getHandler = (item: Friend) => {
 			const handlers: { [key: string]: (friend: Friend) => Promise<void> } = {
 				friend: handleFriend,
+				pending: handleCancelRequest,
 			};
 
 			return handlers[item.relationship as string] || (() => {});
