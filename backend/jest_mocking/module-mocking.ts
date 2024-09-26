@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 
 import { MulterModule } from "@nestjs/platform-express";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { memoryStorage } from "multer";
 
@@ -276,8 +276,31 @@ export async function createSearchTestingModule(): Promise<TestingModule> {
 //UsersModule
 export async function createUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
-		imports: [RecommendationsModule, MockConfigModule, MockPrismaModule],
-		providers: [UsersService, DtoGenService, DbUtilsService, AuthService],
+		imports: [PrismaModule, RecommendationsModule],
+		providers: [
+			UsersService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+			DtoGenService,
+			DbUtilsService,
+			RecommendationsService,
+			AuthService,
+			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
+		],
+	}).compile();
+}
+
+export async function createUsersUpdateTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [PrismaModule],
+		providers: [
+			UsersService,
+			PrismaService,
+			DtoGenService,
+			DbUtilsService,
+			AuthService,
+			RecommendationsService,
+			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
+		],
 	}).compile();
 }
 

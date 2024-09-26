@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
 	View,
 	Text,
@@ -7,6 +7,7 @@ import {
 	TouchableOpacity,
 	Image,
 	StyleSheet,
+	ToastAndroid,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,219 +20,6 @@ import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
 import { UserDto } from "../../../api";
 
-/*
-const dummyMessages: Message[] = [
-	{ id: "1", text: "Hey there!", sender: "John Doe", me: false },
-	{ id: "2", text: "Hi! How are you?", sender: "Me", me: true },
-	{ id: "3", text: "I'm good, thanks!", sender: "John Doe", me: false },
-	{ id: "4", text: "What are you up to?", sender: "John Doe", me: false },
-	{ id: "5", text: "Just working on a new project", sender: "Me", me: true },
-	{
-		id: "6",
-		text: "That's great! I'd love to hear more about it",
-		sender: "John Doe",
-		me: false,
-	},
-	{
-		id: "7",
-		text: "Sure! I'll tell you more about it later",
-		sender: "Me",
-		me: true,
-	},
-	{ id: "8", text: "Sounds good!", sender: "John Doe", me: false },
-	{ id: "9", text: "Bye!", sender: "John Doe", me: false },
-	{ id: "10", text: "Bye!", sender: "Me", me: true },
-	// Add more messages here
-];
-*/
-
-const defaultUser: UserDto = {
-	profile_name: "John Doe",
-	userID: "1",
-	username: "johndoe",
-	profile_picture_url:
-		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-	followers: { count: 0, data: [] },
-	following: { count: 0, data: [] },
-	links: { count: 0, data: [] },
-	bio: "Hello, I'm John Doe",
-	fav_genres: { count: 0, data: [] },
-	fav_songs: { count: 0, data: [] },
-	fav_rooms: { count: 0, data: [] },
-	recent_rooms: { count: 0, data: [] },
-};
-
-const defaultMe: UserDto = {
-	profile_name: "Me",
-	userID: "0",
-	username: "me",
-	profile_picture_url:
-		"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg",
-	followers: { count: 0, data: [] },
-	following: { count: 0, data: [] },
-	links: { count: 0, data: [] },
-	bio: "Hello, I'm Me",
-	fav_genres: { count: 0, data: [] },
-	fav_songs: { count: 0, data: [] },
-	fav_rooms: { count: 0, data: [] },
-	recent_rooms: { count: 0, data: [] },
-};
-
-const dummyMessages: DirectMessage[] = [
-	{
-		message: {
-			index: 1,
-			messageBody: "Hey there!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p1",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 2,
-			messageBody: "Hi! How are you?",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p2",
-		},
-		me: true,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 3,
-			messageBody: "I'm good, thanks!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p3",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 4,
-			messageBody: "What are you up to?",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p4",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 5,
-			messageBody: "Just working on a new project",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p5",
-		},
-		me: true,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 6,
-			messageBody: "That's great! I'd love to hear more about it",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p6",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 7,
-			messageBody: "Sure! I'll tell you more about it later",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p7",
-		},
-		me: true,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 8,
-			messageBody: "Sounds good!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p8",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 9,
-			messageBody: "Bye!",
-			sender: defaultUser,
-			recipient: defaultMe,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p9",
-		},
-		me: false,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	{
-		message: {
-			index: 10,
-			messageBody: "Bye!",
-			sender: defaultMe,
-			recipient: defaultUser,
-			dateSent: new Date().toISOString(),
-			dateRead: new Date().toISOString(),
-			isRead: false,
-			pID: "p10",
-		},
-		me: true,
-		messageSent: true,
-		isOptimistic: false,
-	},
-	// Add more messages here if needed
-];
-
-//path: http://localhost:8081/screens/messaging/ChatScreen?friend=8xbbie
 const ChatScreen = () => {
 	const {
 		roomControls,
@@ -245,10 +33,11 @@ const ChatScreen = () => {
 		directMessages,
 	} = useLive();
 	const [message, setMessage] = useState<string>("");
+	const [dmError, setError] = useState<boolean>(false);
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
-	console.log("Username:", u);
+	const flatListRef = useRef<FlatList>(null); // FlatList reference
 
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
@@ -266,9 +55,13 @@ const ChatScreen = () => {
 				}
 			}
 		}
+		// Scroll to the bottom whenever messages change
+		if (directMessages.length > 0) {
+			flatListRef.current?.scrollToEnd({ animated: true });
+		}
 	}, [directMessages]);
 
-	//on component mount
+	// on component mount
 	useEffect(() => {
 		const initialize = async () => {
 			try {
@@ -341,36 +134,41 @@ const ChatScreen = () => {
 					/>
 				)}
 				<Text style={styles.headerTitle}>
-					{dmParticipants[0]?.profile_name || "Loading..."}
+					{dmError ? "Failed" : dmParticipants[0]?.profile_name || "Loading..."}
 				</Text>
 			</View>
 			<FlatList
+				ref={flatListRef} // Reference to control scrolling
 				data={directMessages}
 				keyExtractor={(item) => item.message.index.toString()}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}
+				onContentSizeChange={() =>
+					flatListRef.current?.scrollToEnd({ animated: true })
+				} // Scroll on content size change
 			/>
-			<View style={styles.inputContainer}>
-				<TextInput
-					placeholder="Message..."
-					style={styles.input}
-					value={message}
-					onChangeText={setMessage}
-					onSubmitEditing={handleSend}
-					testID="messageInput"
-				/>
-				<TouchableOpacity
-					style={styles.sendButton}
-					testID="sendButton"
-					onPress={handleSend}
-				>
-					<Feather name="send" size={24} color="black" />
-				</TouchableOpacity>
-			</View>
+			{!dmError && (
+				<View style={styles.inputContainer}>
+					<TextInput
+						placeholder="Message..."
+						style={styles.input}
+						value={message}
+						onChangeText={setMessage}
+						onSubmitEditing={handleSend}
+						testID="messageInput"
+					/>
+					<TouchableOpacity
+						style={styles.sendButton}
+						testID="sendButton"
+						onPress={handleSend}
+					>
+						<Feather name="send" size={24} color="black" />
+					</TouchableOpacity>
+				</View>
+			)}
 		</View>
 	);
 };
-
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

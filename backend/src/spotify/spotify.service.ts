@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
-import { HttpService } from "@nestjs/axios";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import {
@@ -18,15 +17,14 @@ const TABLE_LOCK_TIMEOUT = 30000;
 
 @Injectable()
 export class SpotifyService {
-	private clientId;
-	private clientSecret;
-	private redirectUri;
-	private authHeader;
+	private clientId: string;
+	private clientSecret: string;
+	private redirectUri: string;
+	private authHeader: string;
 	private userlessAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
-		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
 	) {

@@ -20,7 +20,7 @@ jobs:
     - name: Create backend env file
       run: |
         touch backend/.env
-        echo "${{ secrets.BACKEND_ENV_FILE }}" > backend/.env
+        echo "${{ secrets.BACKEND_B64_ENV_FILE }}" | base64 -d > backend/.env
       shell: bash
 
     - name: Install dependencies
@@ -64,11 +64,12 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=2048"
 
           cd TuneIn/
+          git reset --hard
           git checkout develop
           git fetch
           git pull
           cd backend
-          echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
+          echo "${{ secrets.BACKEND_B64_ENV_FILE }}" | base64 -d > .env
           chmod +x start_backend.sh
           nvm use default
           npm i

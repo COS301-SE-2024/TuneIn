@@ -55,7 +55,7 @@ const LoginScreen: React.FC = () => {
 					);
 				}
 				auth.exchangeCognitoToken(result.getAccessToken().getJwtToken());
-				router.navigate("/screens/Home");
+				router.replace("/screens/(tabs)/Home");
 				setIsLoading(false);
 			},
 			onFailure: function (err) {
@@ -76,7 +76,11 @@ const LoginScreen: React.FC = () => {
 
 	return (
 		<ScrollView style={styles.container}>
-			<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+			<TouchableOpacity
+				style={styles.backButton}
+				onPress={() => router.back()}
+				testID="back-button"
+			>
 				<Ionicons name="chevron-back" size={30} color="black" />
 			</TouchableOpacity>
 			<View style={styles.logoContainer}>

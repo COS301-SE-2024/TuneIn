@@ -1,39 +1,47 @@
-import React, { useEffect, useState, useRef, useCallback, memo } from "react";
+import React, {
+	useEffect,
+	useState,
+	useRef,
+	useCallback,
+	useContext,
+} from "react";
 import {
 	View,
 	Text,
 	Image,
 	TouchableOpacity,
-	ScrollView,
 	StyleSheet,
 	Animated,
-	TextInput,
-	KeyboardAvoidingView,
-	Platform,
 	Dimensions,
 	Easing,
 	Alert,
+	ToastAndroid,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
-import CommentWidget from "../../components/CommentWidget";
-import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import auth from "../../services/AuthManagement";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DevicePicker from "../../components/DevicePicker";
 import { useLive } from "../../LiveContext";
 import * as rs from "../../models/RoomSongDto";
-import { FlyingView } from "react-native-flying-objects";
+import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import bookmarks from "../../services/BookmarkService";
 import { useAPI } from "../../APIContext";
+import SongRoomWidget from "../../components/SongRoomWidget";
+import * as path from "path";
 
 const MemoizedCommentWidget = memo(CommentWidget);
+interface RoomPageProps {
+	joined: boolean;
+	handleJoinLeave: () => Promise<void>;
+}
 
-const RoomPage = () => {
+// const RoomPage = () => {
+const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const { rooms } = useAPI();
 	const {
 		roomControls,
@@ -69,6 +77,7 @@ const RoomPage = () => {
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [isSending, setIsSending] = useState(false);
+	const [participants, setParticipants] = useState<any[]>([]);
 	const truncateUsername = (username: string) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
@@ -117,6 +126,114 @@ const RoomPage = () => {
 	const screenHeight = Dimensions.get("window").height;
 	const expandedHeight = screenHeight - 350;
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
+
+	useEffect(() => {
+		const fetchQueue = async () => {
+			const storedToken = await auth.getToken();
+
+			if (!storedToken) {
+				console.error("No stored token found");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error(
+						`Failed to fetch queue: ${response.status} ${response.statusText}`,
+						errorText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					const tracks: Track[] = data.map((item: any) => ({
+						id: item.id,
+						name: item.name,
+						//artists: [item.artistNames],
+						artists: [{ name: item.artistNames }],
+						album: { images: [{ url: item.albumArtUrl }] },
+						explicit: item.explicit,
+						preview_url: item.preview_url,
+						uri: item.uri,
+						duration_ms: item.duration_ms,
+					}));
+					setQueue(tracks);
+				} else {
+					console.error("Unexpected response data format:", data);
+				}
+			} catch (error) {
+				console.log("Failed to fetch queue:", error);
+				ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
+			}
+		};
+
+		fetchQueue();
+	}, [roomData.roomID, roomID]);
+
+	useEffect(() => {
+		return () => {
+			if (trackPositionIntervalRef.current) {
+				clearInterval(trackPositionIntervalRef.current);
+			}
+		};
+	}, [isPlaying]);
+
+	useEffect(() => {
+		const fetchParticipants = async () => {
+			const storedToken = await auth.getToken();
+
+			if (!storedToken) {
+				console.error("No stored token found");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomID}/users`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error(
+						`Failed to fetch participants: ${response.status} ${response.statusText}`,
+						errorText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					setParticipants(data);
+					console.log("Participants:", data);
+				} else {
+					console.error("Unexpected response data format:", data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch participants:", error);
+			}
+		};
+		fetchParticipants();
+	}, [joined]);
 
 	useEffect(() => {
 		if (roomPlaying) {
@@ -198,6 +315,15 @@ const RoomPage = () => {
 		});
 	};
 
+	const handleViewParticipants = () => {
+		router.navigate({
+			pathname: "/screens/rooms/ParticipantsPage",
+			params: {
+				participants: JSON.stringify(participants),
+			},
+		}); // Change this to the correct page for participants
+	};
+
 	const handleJoinLeave = async () => {
 		const token = await auth.getToken();
 		if (!token) {
@@ -243,27 +369,31 @@ const RoomPage = () => {
 		setMessage("");
 	};
 
+	const exampleTrack: SongRoomWidget = {
+		name: "Song Title",
+		artists: [{ name: "Artist Name" }],
+		album: {
+			images: [
+				{
+					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
+				},
+			],
+		},
+	};
+
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-
-			<Image
+			{/* <Image
 				source={{ uri: roomData.backgroundImage }}
 				style={styles.backgroundImage}
-			/>
-			<LinearGradient
+			/> */}
+			{/* <LinearGradient
 				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
 				style={styles.gradientOverlay}
-			/>
+			/> */}
 
 			<View style={styles.contentContainer}>
-				<View style={styles.roomDetails}>
+				{/* <View style={styles.roomDetails}>
 					<Text style={styles.roomName}>{roomData.name}</Text>
 					<Text style={styles.description}>{roomData.description}</Text>
 					<View style={styles.tagsContainer}>
@@ -273,19 +403,20 @@ const RoomPage = () => {
 							</Text>
 						))}
 					</View>
-				</View>
+				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						<Image
-							source={{ uri: roomData.userProfile }}
-							style={styles.userImage}
-						/>
-						<Text style={styles.username}>
-							{truncateUsername(roomData.username)}
-						</Text>
+						{/* <Ionicons name="people" size={30} color="black" />
+						<Text>134 Particpants</Text> */}
+						<TouchableOpacity
+							style={styles.userInfoContainer}
+							onPress={handleViewParticipants}
+						>
+							<Ionicons name="people" size={30} color="black" />
+							<Text>{participants.length + " Participants"}</Text>
+						</TouchableOpacity>
 					</View>
-
 					{/* Right side */}
 					<View style={styles.joinLeaveButtonContainer}>
 						<TouchableOpacity
@@ -299,19 +430,6 @@ const RoomPage = () => {
 					</View>
 					<View style={styles.joinLeaveButtonContainer}></View>
 				</View>
-				<View style={styles.sideBySideClose}>
-					<TouchableOpacity
-						onPress={handleBookmark}
-						style={styles.bookmarkButton}
-					>
-						<Icon
-							name={isBookmarked ? "bookmark" : "bookmark-border"}
-							size={34}
-							color={isBookmarked ? "gold" : "black"}
-						/>
-					</TouchableOpacity>
-					<DevicePicker />
-				</View>
 				<View style={styles.trackDetails}>
 					<Image
 						source={{
@@ -320,12 +438,23 @@ const RoomPage = () => {
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
+				<View style={styles.songRoomWidget}>
+					<SongRoomWidget track={exampleTrack} />
+				</View>
 				<View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
 						{rs.getTitle(currentSong)}
 					</Text>
 					<Text>{rs.constructArtistString(currentSong)}</Text>
 				</View>
+				{/* <SongRoomWidget
+					songName="Eternal Sunshine"
+					artist="Ariana Grande"
+					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
+					progress={0.5}
+					time1="1:30"
+					time2="3:00"
+				/> */}
 
 				{roomData.mine ? (
 					<View style={styles.controls}>
@@ -333,7 +462,7 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
 						>
-							<FontAwesome5 name="step-backward" size={24} color="black" />
+							<FontAwesome5 name="step-backward" size={30} color="black" />
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
@@ -341,7 +470,7 @@ const RoomPage = () => {
 						>
 							<FontAwesome5
 								name={roomPlaying ? "pause" : "play"}
-								size={24}
+								size={30}
 								color="black"
 							/>
 						</TouchableOpacity>
@@ -349,20 +478,20 @@ const RoomPage = () => {
 							style={styles.controlButton}
 							onPress={playNextTrack}
 						>
-							<FontAwesome5 name="step-forward" size={24} color="black" />
+							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
 					</View>
 				) : (
 					<View></View>
 				)}
 
-				<TouchableOpacity
+				{/* <TouchableOpacity
 					style={styles.queueButton}
 					onPress={navigateToPlaylist}
 				>
 					<MaterialIcons name="queue-music" size={55} color="Black" />
 					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -393,7 +522,36 @@ const RoomPage = () => {
 				))}
 			</Animated.ScrollView>
 
-			<Animated.View
+			<View style={styles.sideBySideTwo}>
+				{/* Left side */}
+				<View style={styles.userInfoContainer}>
+					<Image
+						source={{ uri: roomData.userProfile }}
+						style={styles.userImage}
+					/>
+					<Text style={styles.username}>
+						{truncateUsername(roomData.username)}
+					</Text>
+				</View>
+				{/* Right side */}
+				<View style={styles.joinLeaveButtonContainer}>
+					<View style={styles.sideBySideClose}>
+						<TouchableOpacity
+							onPress={handleBookmark}
+							style={styles.bookmarkButton}
+						>
+							<Icon
+								name={isBookmarked ? "bookmark" : "bookmark-border"}
+								size={34}
+								color={isBookmarked ? colors.primary : "black"}
+							/>
+						</TouchableOpacity>
+						<DevicePicker />
+					</View>
+				</View>
+			</View>
+
+			{/* <Animated.View
 				style={{
 					position: "absolute",
 					bottom: 0,
@@ -487,7 +645,7 @@ const RoomPage = () => {
 						</KeyboardAvoidingView>
 					</>
 				)}
-			</Animated.View>
+			</Animated.View> */}
 		</View>
 	);
 };
@@ -496,6 +654,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		position: "relative",
+		// marginHorizontal: 10,
+		backgroundColor: "white",
 	},
 	scrollView: {
 		flex: 1,
@@ -507,12 +667,6 @@ const styles = StyleSheet.create({
 		right: 10, // Adjust this value as needed
 		width: 150,
 		height: 200,
-	},
-	backButton: {
-		position: "absolute",
-		top: 40,
-		left: 20,
-		zIndex: 1,
 	},
 	bookmarkButton: {
 		marginLeft: 10,
@@ -539,7 +693,8 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 		right: 0,
-		paddingTop: 40,
+		paddingTop: 10,
+		marginHorizontal: 20,
 	},
 	joinLeaveButtonContainer: {
 		position: "absolute",
@@ -548,7 +703,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "flex-end",
 	},
-
 	userInfoContainer: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -556,16 +710,16 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	userImage: {
-		width: 30,
-		height: 30,
+		width: 50,
+		height: 50,
 		borderRadius: 25,
 		marginRight: 10,
 		borderWidth: 2,
 		borderColor: "blue",
 	},
 	username: {
-		fontSize: 18,
-		color: "white",
+		fontSize: 20,
+		color: "black",
 		fontWeight: "bold",
 	},
 	roomDetails: {
@@ -636,6 +790,17 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 	},
+	sideBySideTwo: {
+		position: "absolute",
+		bottom: 10,
+		left: 0,
+		right: 0,
+		marginHorizontal: 20,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginBottom: 20,
+	},
 	sideBySideClose: {
 		marginTop: 15,
 		flexDirection: "row",
@@ -654,10 +819,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
-		marginTop: 10,
+		marginTop: 50,
 	},
 	controlButton: {
-		marginHorizontal: 20,
+		marginHorizontal: 40,
 	},
 	queueButton: {
 		marginTop: 20,
@@ -698,13 +863,17 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		marginVertical: 10,
 		paddingVertical: 8,
-		paddingHorizontal: 16,
+		paddingHorizontal: 30,
 		backgroundColor: colors.primary,
 		borderRadius: 20,
 	},
 	joinLeaveButtonText: {
 		color: "white",
 		fontSize: 16,
+		fontWeight: "bold",
+	},
+	songRoomWidget: {
+		marginTop: -50,
 	},
 });
 

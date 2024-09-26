@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ChatListScreen from "../app/screens/messaging/ChatListScreen";
 import { useRouter } from "expo-router";
 import axios from "axios";
@@ -163,13 +163,14 @@ describe("ChatListScreen", () => {
 		expect(toJSON()).toMatchSnapshot();
 	});
 
-	it("handles search input correctly", () => {
+	it("handles search input correctly", async () => {
 		const { getByPlaceholderText } = render(<ChatListScreen />);
 		const searchInput = getByPlaceholderText("Search for a user...");
-
 		fireEvent.changeText(searchInput, "John");
 
-		expect(searchInput.props.value).toBe("John");
+		await waitFor(() => {
+			expect(searchInput.props.value).toBe("John");
+		});
 	});
 
 	it("navigates back when back button is pressed", () => {

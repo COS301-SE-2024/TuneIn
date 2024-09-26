@@ -1,50 +1,150 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
-import axios from "axios";
-import FriendCard from "../../components/FriendCard"; // Import the FriendCard component
-import { Friend } from "../../models/friend"; // Assume you have a Friend model
-
-const API_BASE_URL = "https://your-api-url.com"; // Replace with your API base URL
+import {
+	View,
+	Text,
+	TextInput,
+	FlatList,
+	StyleSheet,
+	ToastAndroid,
+} from "react-native";
+import FriendCard from "../../components/FriendCard";
+import { Friend } from "../../models/friend";
+import { API_BASE_URL } from "../../services/Utils";
+import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
+import FriendServices from "../../services/FriendServices";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
 	const [following, setFollowing] = useState<Friend[]>([]);
 	const [filteredFollowing, setFilteredFollowing] = useState<Friend[]>([]);
+	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
+	const [filteredPendingRequests, setFilteredPendingRequests] = useState<
+		Friend[]
+	>([]);
+	const [fetchFollowingError, setFetchFollowingError] =
+		useState<boolean>(false);
+	const [fetchPendingError, setFetchPendingError] = useState<boolean>(false);
+	const user = useLocalSearchParams();
+	const myUsername = user.username;
 
 	useEffect(() => {
-		const fetchFollowing = async () => {
+		const loadFollowing = async () => {
 			try {
-				const response = await axios.get(`${API_BASE_URL}/users/following`);
-				setFollowing(response.data);
-				setFilteredFollowing(response.data);
-			} catch (error) {
-				console.error("Error fetching following:", error);
+				const mappedFollowing = await FriendServices.fetchFollowing();
+				setFollowing(mappedFollowing);
+				setFilteredFollowing(mappedFollowing);
+				setFetchFollowingError(false);
+			} catch {
+				setFollowing([]);
+				setFilteredFollowing([]);
+				setFetchFollowingError(true);
 			}
 		};
 
-		fetchFollowing();
+		const loadPendingRequests = async () => {
+			try {
+				const mappedPendingRequests =
+					await FriendServices.fetchPendingRequests();
+				setPendingRequests(mappedPendingRequests);
+				setFilteredPendingRequests(mappedPendingRequests);
+				setFetchPendingError(false);
+			} catch {
+				setPendingRequests([]);
+				setFilteredPendingRequests([]);
+				setFetchPendingError(true);
+			}
+		};
+
+		loadFollowing();
+		loadPendingRequests();
 	}, []);
 
 	useEffect(() => {
-		if (search === "") {
-			setFilteredFollowing(following);
-		} else {
-			setFilteredFollowing(
-				following.filter((user) =>
-					user.username.toLowerCase().includes(search.toLowerCase()),
-				),
+		const filterData = () => {
+			if (search === "") {
+				setFilteredFollowing(following);
+				setFilteredPendingRequests(pendingRequests);
+			} else {
+				const lowerCaseSearch = search.toLowerCase();
+				setFilteredFollowing(
+					following.filter((user) =>
+						user.username.toLowerCase().includes(lowerCaseSearch),
+					),
+				);
+				setFilteredPendingRequests(
+					pendingRequests.filter((user) =>
+						user.username.toLowerCase().includes(lowerCaseSearch),
+					),
+				);
+			}
+		};
+		filterData();
+	}, [search, following, pendingRequests]);
+
+	const unfollowUser = async (friend: Friend) => {
+		try {
+			await FriendServices.handleUnfollow(friend);
+			const updatedFollowing = following.filter(
+				(user) => user.username !== friend.username,
 			);
+			setFollowing(updatedFollowing);
+			setFilteredFollowing(updatedFollowing);
+		} catch {
+			ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
 		}
-	}, [search, following]);
+	};
+
+	const handleFriend = async (friend: Friend) => {
+		try {
+			await FriendServices.handleFriend(friend);
+			const updatedPendingRequests = pendingRequests.filter(
+				(item) => item.friend_id !== friend.friend_id,
+			);
+			setPendingRequests(updatedPendingRequests);
+			setFilteredPendingRequests(updatedPendingRequests);
+			friend.relationship = "mutual";
+			setFollowing((prev) => [...prev, friend]);
+		} catch (error) {
+			ToastAndroid.show("Failed to handle friend request.", ToastAndroid.SHORT);
+		}
+	};
 
 	const renderFollowing = ({ item }: { item: Friend }) => (
 		<FriendCard
 			profilePicture={item.profile_picture_url}
 			username={item.username}
 			friend={item}
-			user="current_user" // Replace with actual current user info
+			user={user.username}
+			cardType={
+				item.relationship === "mutual" || item.relationship === "following"
+					? "following"
+					: "friend-follow"
+			}
+			handle={unfollowUser}
 		/>
 	);
+
+	const renderPendingRequest = ({ item }: { item: Friend }) => {
+		const getHandler = (item: Friend) => {
+			const handlers: { [key: string]: (friend: Friend) => Promise<void> } = {
+				friend: handleFriend,
+			};
+
+			return handlers[item.relationship as string] || (() => {});
+		};
+
+		return (
+			<FriendCard
+				profilePicture={item.profile_picture_url}
+				username={item.username}
+				friend={item}
+				user={myUsername}
+				cardType={item.relationship as "friend" | "pending" | "mutual"}
+				handle={getHandler(item)}
+			/>
+		);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -54,6 +154,25 @@ const Following: React.FC = () => {
 				value={search}
 				onChangeText={setSearch}
 			/>
+
+			{/* Pending Requests Section */}
+			<Text style={styles.sectionTitle}>Pending Friend Requests</Text>
+			{filteredPendingRequests.length > 0 ? (
+				<FlatList
+					data={filteredPendingRequests}
+					renderItem={renderPendingRequest}
+					keyExtractor={(item) => item.username}
+				/>
+			) : (
+				<Text style={styles.noDataText}>
+					{fetchPendingError
+						? "Failed to load pending requests"
+						: "No pending requests found."}
+				</Text>
+			)}
+
+			{/* Following Section */}
+			<Text style={styles.sectionTitle}>People You Follow</Text>
 			{filteredFollowing.length > 0 ? (
 				<FlatList
 					data={filteredFollowing}
@@ -61,7 +180,11 @@ const Following: React.FC = () => {
 					keyExtractor={(item) => item.username}
 				/>
 			) : (
-				<Text style={styles.noFollowingText}>No users found.</Text>
+				<Text style={styles.noDataText}>
+					{fetchFollowingError
+						? "Failed to load following users"
+						: "No users found."}
+				</Text>
 			)}
 		</View>
 	);
@@ -78,11 +201,17 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderColor: "#ccc",
 		borderWidth: 1,
-		borderRadius: 4,
+		borderRadius: 20,
 		paddingHorizontal: 8,
 		marginBottom: 16,
 	},
-	noFollowingText: {
+	sectionTitle: {
+		paddingTop: 20,
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 8,
+	},
+	noDataText: {
 		fontSize: 16,
 		color: "#888",
 	},

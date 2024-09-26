@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
-	TouchableOpacity,
 	Modal,
 	FlatList,
 	TextInput,
 	StyleSheet,
-	ScrollView,
+	Keyboard,
 } from "react-native";
+
+import {
+	GestureHandlerRootView,
+	TouchableOpacity,
+} from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 import Fuse from "fuse.js";
 
@@ -47,38 +51,49 @@ const Selector: React.FC<SelectorProps> = ({
 			transparent={true}
 			animationType="slide"
 			onRequestClose={onClose}
+			testID="genre-selector"
 		>
-			<View style={styles.modalContainer}>
+			<GestureHandlerRootView style={styles.modalContainer}>
 				<View style={styles.modalContent}>
 					<TextInput
 						style={styles.searchInput}
 						placeholder={`Search ${placeholder.toLowerCase()}...`}
 						value={searchQuery}
 						onChangeText={setSearchQuery}
+						testID="genre-search-query"
 					/>
-					<ScrollView style={styles.scrollView}>
-						<FlatList
-							testID="flat-list"
-							data={filteredOptions}
-							keyExtractor={(item) => item}
-							renderItem={({ item }) => (
-								<TouchableOpacity
-									style={styles.filterOption}
-									onPress={() => {
-										onSelect(item);
-										onClose();
-									}}
-								>
-									<Text style={styles.filterText}>{item}</Text>
-								</TouchableOpacity>
-							)}
-						/>
-					</ScrollView>
-					<TouchableOpacity style={styles.closeButton} onPress={onClose}>
+					<FlatList
+						testID="flat-list"
+						data={filteredOptions}
+						keyExtractor={(item) => item}
+						style={styles.scrollView}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.filterOption}
+								onPress={() => {
+									onSelect(item);
+									setSearchQuery("");
+									onClose();
+								}}
+								testID={`${item}-genre-option`}
+							>
+								<Text style={styles.filterText}>{item}</Text>
+							</TouchableOpacity>
+						)}
+						keyboardShouldPersistTaps="always"
+					/>
+					<TouchableOpacity
+						style={styles.closeButton}
+						onPress={() => {
+							setSearchQuery("");
+							Keyboard.dismiss(); // Dismiss the keyboard manually when close button is tapped
+							onClose();
+						}}
+					>
 						<Text style={styles.filterText}>Close</Text>
 					</TouchableOpacity>
 				</View>
-			</View>
+			</GestureHandlerRootView>
 		</Modal>
 	);
 };

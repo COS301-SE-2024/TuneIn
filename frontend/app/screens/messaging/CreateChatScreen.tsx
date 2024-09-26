@@ -10,10 +10,6 @@ import {
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
-import axios from "axios";
-import { set } from "react-datepicker/dist/date_utils";
 import { UserDto } from "../../../api";
 
 interface CreateChatScreenProps {
@@ -199,7 +195,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 	friends,
 }) => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [users, setUsers] = useState<UserDto[]>(friends);
+	const [users] = useState<UserDto[]>(friends);
 	const [filteredUsers, setFilteredUsers] = useState<UserDto[]>([]);
 	const router = useRouter();
 
@@ -224,7 +220,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 		const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
 		setFilteredUsers(sortedUsers);
 		*/
-	}, []);
+	}, [friends]);
 
 	const handleUserSelect = (user: UserDto) => {
 		router.push(`/screens/messaging/ChatScreen?username=${user.username}`);

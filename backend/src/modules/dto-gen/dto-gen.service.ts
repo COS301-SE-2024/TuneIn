@@ -42,55 +42,85 @@ export class DtoGenService {
 		}
 
 		//get user info
-		const result: UserDto = await this.generateBriefUserDto(user);
-		//result.links = await this.dbUtils.getLinks(user);
-		const preferences = await this.dbUtils.getPreferences(user);
-		result.fav_genres = preferences.fav_genres;
-		result.fav_songs = preferences.fav_songs;
+		const result: UserDto = this.generateBriefUserDto(user);
+		result.links = await this.dbUtils.getLinks(user);
+		// const preferences = await this.dbUtils.getPreferences(user);
+		const fav_genres = await this.prisma.favorite_genres.findMany({
+			where: { user_id: userID },
+			include: { genre: true },
+		});
+
+		const fav_songs = await this.prisma.favorite_songs.findMany({
+			where: { user_id: userID },
+			include: { song: true },
+		});
+
+		result.fav_genres = {
+			count: fav_genres.length,
+			data: fav_genres
+				.map((genre) => genre.genre?.genre)
+				.filter((name): name is string => name !== null),
+		};
+
+		result.fav_songs = {
+			count: fav_songs.length,
+			data: fav_songs.map((song) => ({
+				songID: song.song.song_id,
+				title: song.song.name,
+				artists: song.song.artists,
+				cover: song.song.artwork_url as string,
+				spotify_id: song.song.spotify_id,
+				duration: song.song.duration as number,
+			})),
+		};
+
+		// result.fav_songs = preferences.fav_songs;
 
 		if (fully_qualify) {
 			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
 				count: recent_rooms.count,
-				data: recent_rooms.data || [],
+				data: recent_rooms.data || [], // I'm assuming that recent_rooms.data is an array of room IDs
 			};
 
 			const favRooms = await this.prisma.bookmark.findMany({
 				where: { user_id: userID },
 			});
 			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-			result.fav_rooms = {
-				count: favRoomIDs.length,
-				data: favRoomIDs,
-			};
+
+			const roomDtoArray: RoomDto[] = await this.generateMultipleRoomDto(
+				favRoomIDs,
+			);
+			if (roomDtoArray && roomDtoArray !== null) {
+				result.fav_rooms = {
+					count: roomDtoArray.length,
+					data: roomDtoArray.map((r) => r.roomID),
+				};
+			}
 		}
 
-		const following: PrismaTypes.users[] | null =
+		const following: PrismaTypes.users[] =
 			await this.dbUtils.getUserFollowing(userID);
-		if (following && following !== null) {
-			result.following.count = following.length;
-			if (fully_qualify) {
-				for (let i = 0; i < following.length; i++) {
-					const f = following[i];
-					if (f && f !== null) {
-						const u: UserDto = await this.generateBriefUserDto(f);
-						result.following.data.push(u);
-					}
+		result.following.count = following.length;
+		if (fully_qualify) {
+			for (let i = 0; i < following.length; i++) {
+				const f = following[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.following.data.push(u);
 				}
 			}
 		}
 
-		const followers: PrismaTypes.users[] | null =
+		const followers: PrismaTypes.users[] =
 			await this.dbUtils.getUserFollowers(userID);
-		if (followers && followers !== null) {
-			result.followers.count = followers.length;
-			if (fully_qualify) {
-				for (let i = 0; i < followers.length; i++) {
-					const f = followers[i];
-					if (f && f !== null) {
-						const u: UserDto = await this.generateBriefUserDto(f);
-						result.followers.data.push(u);
-					}
+		result.followers.count = followers.length;
+		if (fully_qualify) {
+			for (let i = 0; i < followers.length; i++) {
+				const f = followers[i];
+				if (f && f !== null) {
+					const u: UserDto = this.generateBriefUserDto(f);
+					result.followers.data.push(u);
 				}
 			}
 		}
@@ -189,7 +219,7 @@ export class DtoGenService {
 			},
 			links: {
 				count: 0,
-				data: [],
+				data: {},
 			},
 			bio: user.bio || "",
 			current_song: {
@@ -197,8 +227,9 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
-				start_time: new Date(),
+				spotify_id: "",
 				duration: 0,
+				start_time: new Date(),
 			},
 			fav_genres: {
 				count: 0,
@@ -347,8 +378,9 @@ export class DtoGenService {
 				title: "",
 				artists: [],
 				cover: "",
-				start_time: new Date(),
+				spotify_id: "",
 				duration: 0,
+				start_time: new Date(),
 			},
 			tags: room.tags || [],
 			childrenRoomIDs: [],
@@ -356,7 +388,10 @@ export class DtoGenService {
 
 		const creator = await this.generateUserDto(room.room_creator, false);
 		if (creator && creator !== null) {
-			result.creator = creator;
+			const creator = await this.generateUserDto(room.room_creator, false);
+			if (creator && creator !== null) {
+				result.creator = creator;
+			}
 		}
 
 		if (scheduledRoom && scheduledRoom !== null) {
@@ -376,6 +411,9 @@ export class DtoGenService {
 	}
 
 	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
+		if (room_ids.length === 0) {
+			return [];
+		}
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: { room_id: { in: room_ids } },
 		});

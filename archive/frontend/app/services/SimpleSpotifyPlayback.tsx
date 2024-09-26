@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import * as spotifyAuth from "../services/SpotifyAuth";
 import {
 	SpotifyApi,
@@ -139,7 +139,8 @@ export class SimpleSpotifyPlayback {
 				//this.selectedTrackUri = "";
 			}
 		} catch (err) {
-			console.error("An error occurred while controlling playback", err);
+			console.log("An error occurred while controlling playback", err);
+			ToastAndroid.show("Playback failed", ToastAndroid.SHORT);
 		}
 	}
 

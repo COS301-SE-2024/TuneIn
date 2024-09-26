@@ -5,6 +5,7 @@ import {
 	StyleSheet,
 	Modal,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 	Alert,
 	ActivityIndicator,
 } from "react-native";
@@ -14,6 +15,11 @@ import SpeakerIcon from "./Spotify/SpeakerIcon"; // Import SVG components
 import { colors } from "../styles/colors";
 import { useLive } from "../LiveContext";
 import { Device } from "@spotify/web-api-ts-sdk";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { Devices } from "../models/Devices";
+import * as spotifyAuth from "../services/SpotifyAuth";
+import { colors } from "../styles/colors";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const DevicePicker = () => {
 	const { roomControls } = useLive();
@@ -34,20 +40,15 @@ const DevicePicker = () => {
 				}
 			};
 
-			// Initial fetchDevices call
 			fetchDevices();
-
-			// Set interval to call fetchDevices every 4 seconds
 			intervalIdRef.current = setInterval(fetchDevices, 4000);
 
-			// Clean up interval on component unmount or dependency change
 			return () => {
 				if (intervalIdRef.current) {
 					clearInterval(intervalIdRef.current);
 				}
 			};
 		} else {
-			// Clear interval when isVisible becomes false
 			if (intervalIdRef.current) {
 				clearInterval(intervalIdRef.current);
 			}
@@ -71,7 +72,6 @@ const DevicePicker = () => {
 			case "Computer":
 				icon = <Icon name="desktop" size={30} color="#555" />;
 				break;
-			// Add more cases for other types as needed
 			default:
 				break;
 		}
@@ -89,71 +89,69 @@ const DevicePicker = () => {
 			<TouchableOpacity
 				onPress={handleOpenPopup}
 				testID="Speaker-button"
-				style={{ marginLeft: 10 }}
+				style={{ marginLeft: 0 }}
 			>
-				<SpeakerIcon />
+				<MaterialIcons name="speaker" size={34} color="black" />
 			</TouchableOpacity>
 			<View style={styles.container}>
-				<Modal visible={isVisible} transparent={true} animationType="fade">
-					<View style={styles.modalBackground}>
-						<View style={styles.popupContainer}>
-							{roomControls.playbackHandler.deviceError ? (
-								<>
-									<Text style={styles.popupTitle}>Error Fetching Devices</Text>
-									<Text style={styles.popupMessage}>
-										{roomControls.playbackHandler.deviceError}
-									</Text>
-								</>
-							) : !roomControls.playbackHandler.spotifyDevices.devices ||
-							  roomControls.playbackHandler.spotifyDevices.devices.length ===
-									0 ? (
-								<>
-									<Text style={styles.popupTitle}>No Devices Available</Text>
-									<Text style={styles.popupMessage}>
-										Please activate Spotify on at least one of your devices.
-									</Text>
-								</>
-							) : (
-								<>
-									<Text style={styles.popupTitle}>Select a Device</Text>
-									{isLoading ? (
-										<ActivityIndicator size="large" color={colors.primary} />
+				<Modal visible={isVisible} transparent={true} animationType="slide">
+					<TouchableWithoutFeedback onPress={handleClosePopup}>
+						<View style={styles.modalBackground}>
+							<TouchableWithoutFeedback>
+								<View style={styles.popupContainer}>
+									{error ? (
+										<>
+											<Text style={styles.popupTitle}>
+												Error Fetching Devices
+											</Text>
+											<Text style={styles.popupMessage}>{error}</Text>
+										</>
+									) : !devices || devices.length === 0 ? (
+										<>
+											<Text style={styles.popupTitle}>
+												No Devices Available
+											</Text>
+											<Text style={styles.popupMessage}>
+												Please activate Spotify on at least one of your devices.
+											</Text>
+										</>
 									) : (
-										roomControls.playbackHandler.spotifyDevices.devices.map(
-											(device: Device, index: number) =>
-												device.id !== null && (
+										<>
+											<Text style={styles.popupTitle}>Select a Device</Text>
+											{isLoading ? (
+												<ActivityIndicator
+													size="large"
+													color={colors.primary}
+												/>
+											) : (
+												devices.map((device: Devices, index: number) => (
 													<TouchableOpacity
 														key={index}
 														style={styles.deviceOption}
-														onPress={() =>
-															roomControls.playbackHandler.setActiveDevice({
-																deviceID: device.id,
-																userSelected: true,
-															})
-														}
+														onPress={() => handleDeviceSelect(device.id)}
 													>
 														<RadioButton
 															value={device.id}
-															testID={`radio-button-${device.id}`} // Ensure each radio button has a unique testID
+															testID={`radio-button-${device.id}`}
 															status={
-																roomControls.playbackHandler.activeDevice ===
-																device
+																selectedDevice === device.id
 																	? "checked"
 																	: "unchecked"
 															}
 														/>
 														{renderDeviceName(device)}
 													</TouchableOpacity>
-												),
-										)
+												))
+											)}
+										</>
 									)}
-								</>
-							)}
-							<TouchableOpacity onPress={handleClosePopup}>
-								<Text style={styles.closeButtonText}>Close</Text>
-							</TouchableOpacity>
+									<TouchableOpacity onPress={handleClosePopup}>
+										<Text style={styles.closeButtonText}>Close</Text>
+									</TouchableOpacity>
+								</View>
+							</TouchableWithoutFeedback>
 						</View>
-					</View>
+					</TouchableWithoutFeedback>
 				</Modal>
 			</View>
 		</>
@@ -167,14 +165,14 @@ const styles = StyleSheet.create({
 	modalBackground: {
 		flex: 1,
 		backgroundColor: "rgba(0, 0, 0, 0.8)",
-		justifyContent: "center",
-		alignItems: "center",
+		justifyContent: "flex-end",
 	},
 	popupContainer: {
 		backgroundColor: "white",
 		padding: 20,
-		borderRadius: 15,
-		width: 315,
+		borderTopLeftRadius: 15,
+		borderTopRightRadius: 15,
+		width: "100%",
 	},
 	popupTitle: {
 		alignSelf: "center",

@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import * as utils from "./Utils";
 import { JWT_SECRET_KEY } from "react-native-dotenv";
 import { router } from "expo-router";
+import { ToastAndroid } from "react-native";
 
 const jwtSecretKey = JWT_SECRET_KEY;
 if (!jwtSecretKey) {
@@ -135,7 +136,8 @@ export class AuthManagement {
 					this.setToken(newToken);
 				}
 			} catch (error) {
-				console.error("Failed to refresh access token:", error);
+				console.log("Failed to refresh access token:", error);
+				ToastAndroid.show("Failed to refresh access token", ToastAndroid.SHORT);
 			}
 		}
 	}

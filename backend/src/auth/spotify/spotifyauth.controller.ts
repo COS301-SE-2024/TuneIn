@@ -1,11 +1,4 @@
-import {
-	Controller,
-	Get,
-	Query,
-	Redirect,
-	Request,
-	UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
 import {
 	SpotifyAuthService,
 	SpotifyCallbackResponse,
@@ -14,7 +7,6 @@ import {
 } from "./spotifyauth.service";
 import {
 	ApiBearerAuth,
-	ApiHeader,
 	ApiOperation,
 	ApiQuery,
 	ApiResponse,
@@ -22,18 +14,17 @@ import {
 	ApiTags,
 } from "@nestjs/swagger";
 import * as PrismaTypes from "@prisma/client";
-import { SpotifyService } from "../../spotify/spotify.service";
-import { JwtAuthGuard } from "../jwt-auth.guard";
 import { AuthService, JWTPayload } from "../auth.service";
+import { JwtAuthGuard } from "../jwt-auth.guard";
 
 @Controller("auth/spotify")
 export class SpotifyAuthController {
 	constructor(
 		private readonly spotifyAuth: SpotifyAuthService,
-		private readonly spotify: SpotifyService,
 		private readonly auth: AuthService,
 	) {}
 
+	/*
 	@Get("redirect")
 	@Redirect()
 	@ApiTags("auth")
@@ -80,6 +71,7 @@ export class SpotifyAuthController {
 			url: redirectURI,
 		};
 	}
+	*/
 
 	@Get("callback")
 	@ApiTags("auth")

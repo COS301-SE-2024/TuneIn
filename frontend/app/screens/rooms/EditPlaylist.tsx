@@ -7,6 +7,7 @@ import {
 	Text,
 	Image,
 	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
 import SongCard from "../../components/Spotify/SongCard";
 import { useSpotifySearch } from "../../hooks/useSpotifySearch";
@@ -207,13 +208,7 @@ const EditPlaylist: React.FC = () => {
 				console.error("Error saving playlist:", error);
 			}
 		}
-		router.navigate({
-			pathname: "/screens/rooms/Playlist",
-			params: {
-				Room_id: Room_id,
-				mine: mine,
-			},
-		});
+		router.navigate("/screens/(tabs)/Home");
 	};
 
 	const clearQueue = () => {
@@ -232,6 +227,7 @@ const EditPlaylist: React.FC = () => {
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>

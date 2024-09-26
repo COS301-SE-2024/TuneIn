@@ -17,6 +17,8 @@ export interface Room {
 	roomSize?: number;
 	isExplicit?: boolean;
 	isNsfw?: boolean;
+	start_date: Date;
+	end_date: Date;
 }
 
 export const formatRoomData = (room: any): Room => {
@@ -26,7 +28,7 @@ export const formatRoomData = (room: any): Room => {
 		name: room.name,
 		language: room.language,
 		songName: room.current_song ? room.current_song.title : null,
-		artistName: room.artistName ? room.current_song.artists.join(", ") : null,
+		artistName: room.artistName ? room.artistName : null,
 		description: room.description,
 		userID: room.userID,
 		userProfile: room.userProfile
@@ -38,5 +40,7 @@ export const formatRoomData = (room: any): Room => {
 		mine: room.mine,
 		isNsfw: room.isNsfw,
 		isExplicit: room.isExplicit,
+		start_date: room.start_date,
+		end_date: room.end_date,
 	};
 };

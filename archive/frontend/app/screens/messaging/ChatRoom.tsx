@@ -11,6 +11,7 @@ import {
 	Animated,
 	Easing,
 	Dimensions,
+	ToastAndroid,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -66,8 +67,9 @@ const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ roomObj }) => {
 						console.log("User's own info:", response.data);
 						return response.data as UserDto;
 					} catch (error) {
-						console.error("Error fetching user's own info:", error);
-						//user is not authenticated
+						console.log("Error fetching user's own info:", error);
+						ToastAndroid.show("Failed to load user data", ToastAndroid.SHORT);
+						return null;
 					}
 				};
 				setUser(await whoami(token));

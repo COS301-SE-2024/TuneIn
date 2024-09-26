@@ -10,9 +10,7 @@ import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { SpotifyService } from "../../spotify/spotify.service";
-import { TasksService } from "../../tasks/tasks.service";
 import { AxiosError } from "axios";
 import { Type } from "class-transformer";
 
@@ -92,9 +90,8 @@ export class SpotifyAuthService {
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
-		private readonly dbUtils: DbUtilsService,
-		private readonly spotify: SpotifyService,
-		private readonly tasksService: TasksService,
+		// private readonly dbUtils: DbUtilsService,
+		private readonly spotify: SpotifyService, // private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -110,15 +107,15 @@ export class SpotifyAuthService {
 		}
 		this.clientSecret = clientSecret;
 
-		const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
-		if (!redirectUri) {
-			throw new Error("Missing SPOTIFY_REDIRECT_URI");
-		}
-		this.redirectUri = redirectUri;
+		// const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
+		// if (!redirectUri) {
+		// 	throw new Error("Missing SPOTIFY_REDIRECT_URI");
+		// }
+		// this.redirectUri = redirectUri;
 
-		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
-			"base64",
-		);
+		this.authHeader = Buffer.from(
+			`${this.clientId}:${this.clientSecret}`,
+		).toString("base64");
 
 		this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
 			this.clientId,
@@ -133,7 +130,7 @@ export class SpotifyAuthService {
 			"unique-pre-padding": generateRandom(10),
 			"expo-redirect": redirectURI,
 			"ip-address": utils.API_BASE_NO_PORT,
-			"redirect-used": SPOTIFY_REDIRECT_TARGET,
+			"redirect-used": SPOTIFY_REDIRECT_URI,
 			"unique-post-padding": generateRandom(10),
 		};
 		const bytes = new TextEncoder().encode(JSON.stringify(state));
@@ -318,7 +315,7 @@ export class SpotifyAuthService {
 			username: spotifyUser.id,
 			full_name: spotifyUser.display_name,
 			external_links: {
-				spotify: spotifyUser.external_urls.spotify,
+				spotify: [spotifyUser.external_urls.spotify],
 			},
 			email: spotifyUser.email,
 		};

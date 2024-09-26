@@ -9,4 +9,5 @@ export type DirectMessageDto = {
 	dateRead: Date;
 	isRead: boolean;
 	pID: string;
+	room?: Room;
 };

@@ -14,12 +14,6 @@ import {
 	Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import {
-	Poppins_400Regular,
-	Poppins_500Medium,
-	Poppins_700Bold,
-	useFonts,
-} from "@expo-google-fonts/poppins";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
@@ -134,7 +128,7 @@ const RegisterOtherScreen: React.FC = () => {
 					const tokens: SpotifyCallbackResponse =
 						await spotifyAuth.exchangeCodeWithBackend(code, state, redirectURI);
 					await auth.setToken(tokens.token);
-					router.navigate("screens/Home");
+					router.navigate("screens/(tabs)/Home");
 				};
 				doExchange();
 			} else {
@@ -144,16 +138,6 @@ const RegisterOtherScreen: React.FC = () => {
 			}
 		}
 	}, [response, redirectURI, router]);
-
-	let [fontsLoaded] = useFonts({
-		Poppins_400Regular,
-		Poppins_500Medium,
-		Poppins_700Bold,
-	});
-
-	if (!fontsLoaded) {
-		return null;
-	}
 
 	return (
 		<View style={styles.container}>
@@ -192,7 +176,7 @@ const RegisterOtherScreen: React.FC = () => {
 			</View>
 			<TouchableOpacity
 				style={styles.registerContainer}
-				onPress={() => router.navigate("screens/Auth/LoginScreen")}
+				onPress={() => router.navigate("screens/Auth/LoginOther")}
 			>
 				<Text style={styles.registerText}>
 					Already have an account?{" "}
@@ -223,7 +207,7 @@ const styles = StyleSheet.create({
 	welcomeText: {
 		fontSize: 32,
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		// fontFamily: "Poppins_700Bold",
 		textAlign: "center",
 		marginTop: 30,
 		marginBottom: 50,
@@ -259,7 +243,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "bold",
 		color: "#000",
-		fontFamily: "Poppins_700Bold",
+		// fontFamily: "Poppins_700Bold",
 	},
 	dividerContainer: {
 		flexDirection: "row",
@@ -276,7 +260,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 10,
 		fontSize: 14,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		// fontFamily: "Poppins_500Medium",
 	},
 	registerContainer: {
 		position: "absolute",
@@ -289,11 +273,11 @@ const styles = StyleSheet.create({
 	registerText: {
 		fontSize: 16,
 		color: "#000",
-		fontFamily: "Poppins_500Medium",
+		// fontFamily: "Poppins_500Medium",
 	},
 	registerBoldText: {
 		fontWeight: "bold",
-		fontFamily: "Poppins_700Bold",
+		// fontFamily: "Poppins_700Bold",
 		color: colors.primary,
 	},
 });

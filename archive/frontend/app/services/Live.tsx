@@ -17,6 +17,8 @@ import { VoteDto } from "../models/VoteDto";
 import { QueueEventDto } from "../models/QueueEventDto";
 import { ObjectConfig } from "react-native-flying-objects";
 import { Text } from "react-native";
+import { ToastAndroid } from "react-native";
+import { Room } from "../models/Room";
 
 const TIMEOUT = 5000000;
 
@@ -29,6 +31,7 @@ export type DirectMessage = {
 	message: DirectMessageDto;
 	me?: boolean;
 	messageSent: boolean;
+	room?: Room;
 };
 
 // How to integrate Emoji Reactions
@@ -194,6 +197,25 @@ class LiveSocketService {
 			this.isConnecting = true;
 			if (!playback) {
 				playback = SimpleSpotifyPlayback.getInstance();
+			}
+
+			const token = await auth.getToken();
+			try {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				this.currentUser = response.data as UserDto;
+			} catch (error) {
+				console.log("Error fetching user's own info:", error);
+				ToastAndroid.show("Failed to fetch user info", ToastAndroid.SHORT);
+			}
+
+			console.log("Current user:", this.currentUser);
+
+			if (!this.currentUser) {
+				throw new Error("Something went wrong while getting user's info");
 			}
 
 			this.socket.on("userJoinedRoom", (response: ChatEventDto) => {
@@ -633,6 +655,19 @@ class LiveSocketService {
 		this.pollLatency();
 		this.setJoined = setJoined;
 		this.setLiveChatMessages = setLiveChatMessages;
+
+		try {
+			const token = await auth.getToken();
+			const roomDto = await axios.get(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			this.currentRoom = roomDto.data;
+		} catch (error) {
+			console.log("Error fetching room:", error);
+			ToastAndroid.show("Failed to fetch room data", ToastAndroid.SHORT);
+		}
 
 		const u = this.currentUser;
 		const input: ChatEventDto = {

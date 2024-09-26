@@ -1,49 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+// import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
 import { Track } from "../../models/Track";
 import { RoomSongDto } from "../../models/RoomSongDto";
 import { useLive } from "../../LiveContext";
 import { VoteDto } from "../../models/VoteDto";
-
-// Add mock songs here for testing
-const mockSongs: Track[] = [
-	{
-		id: "1",
-		name: "Song One",
-		artists: [{ name: "Artist One" }],
-		album: { images: [{ url: "https://example.com/album1.jpg" }] },
-		explicit: false,
-		preview_url: "https://example.com/preview1.mp3",
-		uri: "spotify:track:1",
-		duration_ms: 210000, // 3 minutes and 30 seconds
-		albumArtUrl: "https://example.com/album1.jpg",
-	},
-	{
-		id: "2",
-		name: "Song Two",
-		artists: [{ name: "Artist Two" }],
-		album: { images: [{ url: "https://example.com/album2.jpg" }] },
-		explicit: true,
-		preview_url: "https://example.com/preview2.mp3",
-		uri: "spotify:track:2",
-		duration_ms: 180000, // 3 minutes
-		albumArtUrl: "https://example.com/album2.jpg",
-	},
-	{
-		id: "3",
-		name: "Song Three",
-		artists: [{ name: "Artist Three" }],
-		album: { images: [{ url: "https://example.com/album3.jpg" }] },
-		explicit: false,
-		preview_url: "https://example.com/preview3.mp3",
-		uri: "spotify:track:3",
-		duration_ms: 240000, // 4 minutes
-		albumArtUrl: "https://example.com/album3.jpg",
-	},
-];
+import CreateButton from "../../components/CreateButton";
 
 const Playlist = () => {
 	const {
@@ -98,14 +62,18 @@ const Playlist = () => {
 
 	return (
 		<View style={styles.container}>
+			{/* RoomTab component */}
+			{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
+			{/* Set activeTab to "Queue" */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
+					testID="back-button"
 				>
-					<Ionicons name="chevron-back" size={24} color="black" />
+					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
 				</TouchableOpacity>
-				<Text style={styles.pageName}>Queue</Text>
+				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
 				{roomQueue.length > 0 ? (
@@ -123,13 +91,17 @@ const Playlist = () => {
 					</View>
 				)}
 			</View>
-			<TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
+			{/* <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
 				{isMine ? (
 					<Text style={styles.addButtonText}>Manage queue</Text>
 				) : (
 					<Text style={styles.addButtonText}>Add Song</Text>
 				)}
-			</TouchableOpacity>
+			</TouchableOpacity> */}
+			<CreateButton
+				title={isMine ? "Manage queue" : "Add Song"}
+				onPress={navigateToAddSong}
+			/>
 		</View>
 	);
 };
@@ -138,6 +110,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 16,
+		backgroundColor: "white",
 	},
 	header: {
 		flexDirection: "row",

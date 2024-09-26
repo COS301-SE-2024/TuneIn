@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../../prisma/prisma.service";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
@@ -17,7 +16,6 @@ export class DmUsersService {
 	constructor(
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
-		private readonly prisma: PrismaService,
 		private readonly usersService: UsersService,
 	) {}
 
@@ -240,5 +238,6 @@ export class DmUsersService {
 			chatID: null,
 			socketIDs: u.socketIDs,
 		});
+		console.log(socketId);
 	}
 }

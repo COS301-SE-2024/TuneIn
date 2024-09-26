@@ -1,29 +1,27 @@
 import { Stack } from "expo-router";
 import { PlayerContextProvider } from "./PlayerContext";
-import { StatusBar, View, StyleSheet } from "react-native";
-import TopNavBar from "../app/components/TopNavBar";
+import { StatusBar, SafeAreaView, StyleSheet } from "react-native";
 import { colors } from "../app/styles/colors";
 import { APIProvider } from "./APIContext";
 import { LiveProvider } from "./LiveContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const Layout = () => {
 	return (
 		<APIProvider>
 			<LiveProvider>
 				<PlayerContextProvider>
-					<StatusBar
-						barStyle="light-content"
-						backgroundColor={colors.backgroundColor}
-					/>
-					<View style={styles.container}>
-						<Stack screenOptions={{ title: "Room", headerShown: false }}>
-							<Stack.Screen name="screens/Home" />
-							<Stack.Screen
-								name="screens/rooms/RoomPage"
-								options={{ title: "Room", headerShown: false }}
-							/>
-						</Stack>
-					</View>
+					<SafeAreaProvider>
+						<StatusBar
+							barStyle="dark-content"
+							backgroundColor={colors.backgroundColor}
+						/>
+						<SafeAreaView style={styles.container}>
+							<Stack screenOptions={{ title: "Room", headerShown: false }}>
+								<Stack.Screen name="screens/(tabs)" />
+							</Stack>
+						</SafeAreaView>
+					</SafeAreaProvider>
 				</PlayerContextProvider>
 			</LiveProvider>
 		</APIProvider>
@@ -32,9 +30,8 @@ const Layout = () => {
 
 const styles = StyleSheet.create({
 	container: {
+		paddingTop: 25,
 		flex: 1,
-		paddingTop: 45,
-		backgroundColor: colors.backgroundColor,
 	},
 });
 
