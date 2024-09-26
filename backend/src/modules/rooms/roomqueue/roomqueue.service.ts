@@ -1249,16 +1249,27 @@ export class RoomQueueService {
 		);
 	}
 
-	async addSong(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-		insertTime: Date,
-	): Promise<boolean> {
+	async refreshQueue(roomID: string): Promise<void> {
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.refreshQueue(this.murLockService);
+		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
+	}
+
+	// async getRoomSpotifyInfo(roomID: string): Promise<void> {
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	await activeRoom.getSpotifyInfo(
+	// 		this.spotifyAuth.getUserlessAPI(),
+	// 		this.prisma,
+	// 		this.murLockService,
+	// 	);
+	// }
+
 	async clearRoomQueue(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
 		await activeRoom.clearQueue(this.murLockService);
 	}
+
+	async getRoom(roomID: string): Promise<ActiveRoom> {
 		if (!this.roomQueues.has(roomID)) {
 			await this.createRoomQueue(roomID);
 		}
