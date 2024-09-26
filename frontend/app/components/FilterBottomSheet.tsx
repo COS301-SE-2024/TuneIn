@@ -183,7 +183,7 @@ const FilterBottomSheet: React.FC<BottomSheetProps> = ({
 		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
 			<TouchableWithoutFeedback onPress={handleClose}>
 				<View style={styles.modalContainer}>
-					<View style={styles.modalOverlay}>
+					<View>
 						<KeyboardAvoidingView
 							behavior={Platform.OS === "ios" ? "padding" : "height"}
 						>

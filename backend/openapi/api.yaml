@@ -325,6 +325,48 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/friends/pending:
+    get:
+      operationId: getPendingRequests
+      summary: Get a user's sent friend requests
+      parameters: []
+      responses:
+        '200':
+          description: The user's sent friend requests as an array of UserDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Error getting pending friend requests.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/friends/potential:
+    get:
+      operationId: UsersController_getPotentialFriends
+      summary: Get potential friends for the user
+      parameters: []
+      responses:
+        '200':
+          description: The user's potential friends as an array of UserDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Error getting potential friends.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
   /users/followers:
     get:
       operationId: getFollowers
@@ -443,10 +485,6 @@ paths:
       responses:
         '200':
           description: True if taken, false if not.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
   /users/{username}:
@@ -564,16 +602,8 @@ paths:
       responses:
         '200':
           description: Successfully ended friendship.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error ending friendship.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -625,6 +655,49 @@ paths:
         '400':
           description: Error rejecting friend request.
       tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/cancel:
+    post:
+      operationId: cancelFriendRequest
+      summary: Cancel a friend request to the given user
+      parameters:
+        - name: username
+          required: true
+          in: path
+          description: The username of the user to cancel the friend request to.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully cancelled friend request.
+        '400':
+          description: Error cancelling friend request.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/recommended/users:
+    get:
+      operationId: UsersController_getRecommendedUsers
+      summary: Get recommended users
+      parameters: []
+      responses:
+        '200':
+          description: Recommended users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - users
         - users
       security:
         - bearer: []
@@ -721,16 +794,8 @@ paths:
       responses:
         '200':
           description: Successfully reported the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
         '400':
           description: Error reporting the user.
-          content:
-            application/json:
-              schema:
-                type: boolean
       tags:
         - users
       security:
@@ -2443,6 +2508,11 @@ components:
             user is not friends with the current user
           allOf:
             - $ref: '#/components/schemas/UserFriendship'
+        relationship:
+          type: string
+          description: >-
+            The relationship status between the current user and the user in
+            question
       required:
         - profile_name
         - userID
@@ -2523,6 +2593,11 @@ components:
             user is not friends with the current user
           allOf:
             - $ref: '#/components/schemas/UserFriendship'
+        relationship:
+          type: string
+          description: >-
+            The relationship status between the current user and the user in
+            question
     DirectMessageDto:
       type: object
       properties:
