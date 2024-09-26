@@ -99,4 +99,60 @@ describe("RoomAnalyticsService", () => {
 			});
 		});
 	});
+	describe("getRoomSessionAnalytics", () => {
+		it("should return room session analytics with per_day array containing 7 or fewer objects", async () => {
+			const mockRoomID = "roomID1";
+			const mockSessionDurations = [
+				{
+					day: new Date("2023-01-01"),
+					avg_duration: 300,
+					min_duration: 100,
+					max_duration: 500,
+				},
+				{
+					day: new Date("2023-01-02"),
+					avg_duration: 400,
+					min_duration: 200,
+					max_duration: 600,
+				},
+			];
+			const mockRoom = {
+				room_id: mockRoomID,
+				date_created: new Date("2023-01-01"),
+			} as PrismaTypes.room;
+
+			jest.spyOn(prismaService, "$queryRaw").mockImplementation(() => {
+				return Promise.resolve(
+					mockSessionDurations,
+				) as unknown as PrismaTypes.PrismaPromise<any>;
+			});
+
+			jest.spyOn(prismaService.room, "findUnique").mockResolvedValue(mockRoom);
+
+			const result = await service.getRoomSessionAnalytics(mockRoomID);
+
+			// Check that the per_day array contains 7 or fewer objects
+			expect(result.per_day.length).toBeLessThanOrEqual(7);
+		});
+
+		it("should return empty session data if no session durations are found", async () => {
+			const mockRoomID = "roomID1";
+
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValue([] as unknown as PrismaTypes.PrismaPromise<any>);
+			jest.spyOn(prismaService.room, "findUnique").mockResolvedValue(null);
+
+			const result = await service.getRoomSessionAnalytics(mockRoomID);
+
+			expect(result).toEqual({
+				all_time: {
+					avg_duration: 0,
+					min_duration: 0,
+					max_duration: 0,
+				},
+				per_day: [],
+			});
+		});
+	});
 });
