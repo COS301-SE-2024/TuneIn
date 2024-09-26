@@ -66,6 +66,14 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 		if (!currentRoom) {
 			setInterfaceCurrentRoom(null);
 		} else {
+			let start: Date = new Date(0);
+			if (currentRoom.start_date) {
+				start = new Date(currentRoom.start_date);
+			}
+			let end: Date = new Date(0);
+			if (currentRoom.end_date) {
+				end = new Date(currentRoom.end_date);
+			}
 			setInterfaceCurrentRoom({
 				roomID: currentRoom.roomID,
 				backgroundImage: currentRoom.room_image,
@@ -73,17 +81,19 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 				songName: getTitle(currentSong),
 				artistName: constructArtistString(currentSong),
 				description: currentRoom.room_image,
-				// userProfile?: currentRoom.room_image,
+				// userProfile?:
 				userID: currentRoom.creator.userID,
 				username: currentRoom.creator.username,
 				mine: currentRoom.creator.userID === currentUser?.userID,
 				tags: currentRoom.tags,
-				// playlist?: currentRoom.room_image,
-				// genre?: currentRoom,
+				// playlist?:
+				//genre
 				language: currentRoom.language,
-				// roomSize?: 0,
+				roomSize: currentRoom.participant_count,
 				isExplicit: currentRoom.has_explicit_content,
 				isNsfw: currentRoom.has_nsfw_content,
+				start_date: start,
+				end_date: end,
 			});
 		}
 	}, [currentRoom, currentSong, currentUser?.userID]);
