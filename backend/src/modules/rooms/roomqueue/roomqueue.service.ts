@@ -284,7 +284,6 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 
 export class ActiveRoom {
 	public readonly room: RoomDto;
-	//private queue: MaxPriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
 	private queue: PriorityQueue<RoomSong>; //priority queue of songs (automatically ordered by score)
 	private historicQueue: MinPriorityQueue<RoomSong>; //priority queue of songs that have already been played
 	private compareRoomSongs: ICompare<RoomSong> = (a: RoomSong, b: RoomSong) => {
@@ -294,23 +293,44 @@ export class ActiveRoom {
 		return b.score - a.score;
 	};
 
-	constructor(room: RoomDto) {
+	constructor(room: RoomDto, murLockService: MurLockService) {
 		this.room = room;
-		this.initQueues();
+		this.createQueues(murLockService);
 	}
 
-	initQueues() {
-		//const getSongScore: IGetCompareValue<RoomSong> = (song) => song.score;
-		//this.queue = new MaxPriorityQueue<RoomSong>(getSongScore);
-		this.queue = new PriorityQueue<RoomSong>(this.compareRoomSongs);
-		const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
-			const playbackTime: Date | null = song.getPlaybackStartTime();
-			if (!playbackTime || playbackTime === null) {
-				throw new Error("Song has no playback start time");
-			}
-			return playbackTime.valueOf();
-		};
-		this.historicQueue = new MinPriorityQueue<RoomSong>(playbackStartTime);
+	/**
+	 * Creates the queue objects for the room
+	 * @param murLockService
+	 */
+	async createQueues(murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () => {
+				console.log(
+					`Acquire lock: ${this.getQueueLockName()} in function 'createQueues'`,
+				);
+				try {
+					this.queue = new PriorityQueue<RoomSong>(this.compareRoomSongs);
+					const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
+						const playbackTime: Date | null = song.getPlaybackStartTime();
+						if (!playbackTime || playbackTime === null) {
+							throw new Error("Song has no playback start time");
+						}
+						return playbackTime.valueOf();
+					};
+					this.historicQueue = new MinPriorityQueue<RoomSong>(
+						playbackStartTime,
+					);
+				} catch (e) {
+					console.error("Error in createQueues");
+					console.error(e);
+				}
+				console.log(
+					`Release lock: ${this.getQueueLockName()} in function 'createQueues'`,
+				);
+			},
+		);
 	}
 
 	reflushRoomSongs(songs: RoomSong[]) {
