@@ -113,9 +113,6 @@ export class RoomAnalyticsService {
 		}
 
 		for (let i = 0; i < userActivityPerDay.length; i++) {
-			if (!userActivityPerDay || userActivityPerDay[i]?.count === undefined) {
-				continue;
-			}
 			total_joins += Number(userActivityPerDay[i]?.count ?? 0);
 		}
 		for (let i = 0; i < uniqueUserActivityPerDay.length; i++) {
@@ -125,27 +122,35 @@ export class RoomAnalyticsService {
 		// get all the days from the first day the room was created until today if the room is not older than 7 days
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
-		const today: Date = new Date();
+		const today: Date = startOfDay(new Date());
 		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
 		if (!firstDay) {
 			return joins;
 		}
 		let day: Date = roomCreationDate ?? firstDay;
+		day = startOfDay(day);
 		if (isBefore(day, subHours(today, 24 * 7))) {
 			day = subHours(today, 24 * 7);
 		}
 		//floor the day to the nearest day
-		day = startOfDay(day);
 		// add the first day
 		while (isBefore(day, today)) {
-			console.log("adding day", day);
+			console.log("adding day", startOfDay(day));
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean =
-				userActivityPerDay.find((u) => u.day === d) === undefined;
+				userActivityPerDay.find((u) => {
+					console.log(
+						"Checking dayss",
+						startOfDay(u.day),
+						d,
+						startOfDay(u.day).getTime() === d.getTime(),
+					);
+					return startOfDay(u.day).getTime() === d.getTime();
+				}) === undefined;
 			if (!dayExists) {
 				userActivityPerDay.push({ day: d, count: 0 });
 			}
@@ -153,7 +158,9 @@ export class RoomAnalyticsService {
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean =
-				uniqueUserActivityPerDay.find((u) => u.day === d) === undefined;
+				uniqueUserActivityPerDay.find(
+					(u) => u.day.getTime() === d.getTime(),
+				) === undefined;
 			if (!dayExists) {
 				uniqueUserActivityPerDay.push({ day: d, count: 0 });
 			}
@@ -225,20 +232,17 @@ export class RoomAnalyticsService {
 			day = subHours(today, 24 * 7);
 		}
 		//floor the day to the nearest day
-		day = startOfDay(day);
+		day = subHours(startOfDay(day), 22);
 		while (isBefore(day, today)) {
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
-		console.log(
-			"All days",
-			allDays.sort((a, b) => a.getTime() - b.getTime()),
-		);
-		day = startOfDay(day);
-		// add the missing days
+
+		day = subHours(startOfDay(day), 22);
 		for (const d of allDays) {
 			const dayExists: boolean =
-				sessionDurations.find((u) => u.day === d) !== undefined;
+				sessionDurations.find((u) => u.day.getTime() === d.getTime()) !==
+				undefined;
 			if (!dayExists) {
 				sessionDurations.push({
 					day: d,
@@ -273,6 +277,13 @@ export class RoomAnalyticsService {
 				duration: Number(session.avg_duration),
 			}))
 			.sort((a, b) => a.day.getTime() - b.day.getTime());
+		sessionData.per_day =
+			sessionData.per_day.length > 7
+				? sessionData.per_day.slice(
+						sessionData.per_day.length - 7,
+						sessionData.per_day.length,
+				  )
+				: sessionData.per_day;
 		return sessionData;
 	}
 	async getHourlyParticipantAnalytics(
@@ -333,13 +344,14 @@ export class RoomAnalyticsService {
 		// add the missing hours
 		for (const h of allHours) {
 			const hourExists: boolean =
-				userActivityPerHour.find((u: any) => u.hour === h) !== undefined;
+				userActivityPerHour.find((u) => u.hour.getTime() === h.getTime()) !==
+				undefined;
 			if (!hourExists) {
 				userActivityPerHour.push({ hour: h, count: 0 });
 			}
 		}
 		// sort the array
-		userActivityPerHour.sort((a: any, b: any) => a.hour - b.hour);
+		userActivityPerHour.sort((a, b) => a.hour.getTime() - b.hour.getTime());
 		console.log("User activity per hour", userActivityPerHour);
 		for (const hour of userActivityPerHour) {
 			const pph = {
