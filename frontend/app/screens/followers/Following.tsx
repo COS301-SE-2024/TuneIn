@@ -6,6 +6,8 @@ import {
 	FlatList,
 	StyleSheet,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
@@ -82,6 +84,14 @@ const Following: React.FC = () => {
 		filterData();
 	}, [search, following, pendingRequests]);
 
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
 	const unfollowUser = async (friend: Friend) => {
 		try {
 			await FriendServices.handleUnfollow(friend);
@@ -91,7 +101,7 @@ const Following: React.FC = () => {
 			setFollowing(updatedFollowing);
 			setFilteredFollowing(updatedFollowing);
 		} catch {
-			ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
+			showError("Failed to unfollow user");
 		}
 	};
 
@@ -106,7 +116,7 @@ const Following: React.FC = () => {
 			friend.relationship = "mutual";
 			setFollowing((prev) => [...prev, friend]);
 		} catch (error) {
-			ToastAndroid.show("Failed to handle friend request.", ToastAndroid.SHORT);
+			showError("Failed to handle friend request.");
 		}
 	};
 

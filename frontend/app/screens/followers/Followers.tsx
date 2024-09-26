@@ -6,6 +6,8 @@ import {
 	FlatList,
 	StyleSheet,
 	ToastAndroid,
+	Alert, // For iOS/web
+	Platform,
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
@@ -66,20 +68,27 @@ const Followers: React.FC = () => {
 			setFollowers(updatedFollowers);
 			setFilteredFollowers(updatedFollowers);
 		} catch (error) {
-			ToastAndroid.show(
-				`Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`,
-				ToastAndroid.SHORT,
-			);
+			const message = `Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`;
+			// Use ToastAndroid for Android, otherwise use Alert
+			if (Platform.OS === "android") {
+				ToastAndroid.show(message, ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", message);
+			}
 		}
 	};
 
 	// Handle unfollow function for mutual relationships
 	const handleUnfollow = async (friend: Friend) => {
 		try {
-			// console.log("handleUnfollow", friend);
 			await FriendServices.handleUnfollow(friend);
 		} catch (error) {
-			ToastAndroid.show("Failed to unfollow user.", ToastAndroid.SHORT);
+			const message = "Failed to unfollow user.";
+			if (Platform.OS === "android") {
+				ToastAndroid.show(message, ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", message);
+			}
 		}
 	};
 
@@ -94,7 +103,6 @@ const Followers: React.FC = () => {
 					? "following"
 					: "follower"
 			}
-			relationship={item.relationship} // Display the relationship status
 			handle={item.relationship === "mutual" ? handleUnfollow : handleFollow} // Use handleUnfollow if mutual
 		/>
 	);

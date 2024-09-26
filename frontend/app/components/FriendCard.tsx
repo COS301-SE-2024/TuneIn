@@ -19,7 +19,6 @@ interface FriendCardProps {
 		| "pending"
 		| "friend-follow";
 	handle: (friend: Friend) => void;
-	relationship: string; // Add this prop to show the relationship status
 }
 
 const FriendCard: React.FC<FriendCardProps> = ({
@@ -29,7 +28,6 @@ const FriendCard: React.FC<FriendCardProps> = ({
 	user,
 	cardType,
 	handle,
-	relationship,
 }) => {
 	// Check if the profile picture is null, undefined, or the default URL
 	const profileImageSource =
@@ -63,7 +61,6 @@ const FriendCard: React.FC<FriendCardProps> = ({
 			>
 				{username}
 			</Text>
-			<Text style={styles.username}>{relationship}</Text>
 			{(cardType === "friend" && (
 				<TouchableOpacity
 					style={styles.unfriendButton}

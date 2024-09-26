@@ -43,6 +43,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 		const storedToken = await auth.getToken();
 
 		if (storedToken) {
+			console.log(`User ${utils.API_BASE_URL}/users/${user.username}/unfollow`);
 			if (isFollowing) {
 				try {
 					const response = await axios.post(
