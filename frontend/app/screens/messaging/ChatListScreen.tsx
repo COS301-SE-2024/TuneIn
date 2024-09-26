@@ -16,9 +16,10 @@ import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { DirectMessageDto, UserDto, RoomDto } from "../../../api";
 import { useLive } from "../../LiveContext";
+import { useAPI } from "../../APIContext";
 
 // const initialChats: Chat[] = [
 // 	{
@@ -55,9 +56,10 @@ const createChats = (
 
 const ChatListScreen = () => {
 	const { currentUser, refreshUser, setRefreshUser } = useLive();
+	const { rooms } = useAPI();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
-	const [messageRooms, setMessageRooms] = useState<RoomDto | undefined[]>([]);
+	const [messageRooms, setMessageRooms] = useState<(RoomDto | undefined)[]>([]);
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
 	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
@@ -75,7 +77,7 @@ const ChatListScreen = () => {
 			try {
 				const token = await auth.getToken();
 
-				const promises = [];
+				let promises = [];
 				promises.push(
 					axios.get(`${utils.API_BASE_URL}/users/dms`, {
 						headers: { Authorization: `Bearer ${token}` },
@@ -93,13 +95,28 @@ const ChatListScreen = () => {
 				setFriends(responses[1].data as UserDto[]);
 				console.log(responses[1].data);
 
-				const roomIDs: string | undefined[] = [];
+				const roomPromises: (
+					| Promise<AxiosResponse<RoomDto, any>>
+					| Promise<undefined>
+				)[] = [];
 				for (const message of chats) {
 					if (message.bodyIsRoomID) {
-						roomIDs.push(message.messageBody);
+						//roomIDs.push(message.messageBody);
+						roomPromises.push(rooms.getRoomInfo(message.messageBody));
+					} else {
+						roomPromises.push(Promise.resolve(undefined));
 					}
 				}
-
+				const roomResponses = await Promise.all(roomPromises);
+				const tmpRooms: (RoomDto | undefined)[] = [];
+				for (const roomResponse of roomResponses) {
+					if (roomResponse !== undefined) {
+						tmpRooms.push(roomResponse.data as RoomDto);
+					} else {
+						tmpRooms.push(undefined);
+					}
+				}
+				setMessageRooms(tmpRooms);
 				setFilteredChats(createChats(chats, currentUser.userID));
 				setUserMessages(chats);
 			} catch (error) {
@@ -108,7 +125,7 @@ const ChatListScreen = () => {
 				throw error;
 			}
 		})();
-	}, [currentUser]);
+	}, [currentUser, rooms, refreshUser, setRefreshUser]);
 
 	useEffect(() => {
 		/*
@@ -136,7 +153,7 @@ const ChatListScreen = () => {
 				setFilteredChats(createChats(filtered, currentUser.userID));
 			}
 		}
-	}, [searchQuery, userMessages]);
+	}, [currentUser, searchQuery, userMessages]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);
