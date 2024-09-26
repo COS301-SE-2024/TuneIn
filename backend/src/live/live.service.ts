@@ -2,7 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { Cron, SchedulerRegistry } from "@nestjs/schedule";
 import { CronJob } from "cron";
 import { Server } from "socket.io";
+import { PlaybackEventDto } from "./dto/playbackevent.dto";
+import { SOCKET_EVENTS } from "../common/constants";
+import {
+	RoomQueueService,
+	ActiveRoom,
+	RoomSong,
+} from "../modules/rooms/roomqueue/roomqueue.service";
+import { RoomSongDto } from "../modules/rooms/dto/roomsong.dto";
 
+const MAX_ANNOUNCEMENTS_PER_ROOM = 5;
 @Injectable()
 export class LiveService {
 	private server: Server;
@@ -26,21 +35,114 @@ export class LiveService {
 		this.server = server;
 	}
 
-	//@Cron("*/5 * * * * *") // Run this every 5 seconds
-	/*
-	synchronizePlayback(): void {
-		const currentTime = Date.now(); // Get current Epoch time
+	@Cron("0 * * * * *") // Run this every 1 minutes
+	async checkRoomQueues() {
+		// const jobs = this.schedulerRegistry.getCronJobs();
+		const now = new Date();
+		console.log(`${now.valueOf()} Checking room queues (${now.toISOString()})`);
+		const rooms: Map<string, ActiveRoom> = this.roomQueue.roomQueues;
+		const roomsToRemove: string[] = [];
+		for (const room of rooms.values()) {
+			console.log(`Checking room ${room.room.roomID}`);
+			if (room.inactive) {
+				room.minutesInactive++;
+				console.log(
+					`Room ${room.room.roomID} has been inactive for ${room.minutesInactive} minutes`,
+				);
+				if (room.minutesInactive >= 10) {
+					console.log(
+						`Will remove room ${room.room.roomID} from queue due to inactivity`,
+					);
+					roomsToRemove.push(room.room.roomID);
+					continue;
+				}
+			}
+			if (room.songs.length === 0) {
+				room.inactive = true;
+				console.log(
+					`Room ${room.room.roomID} has no songs in the queue. Marking as inactive.`,
+				);
+				continue;
+			}
 
-		for (const sessionId in this.queues) {
-			const queue = this.queues[sessionId];
-			const currentMedia = queue.find((item) => currentTime >= item.startTime);
+			if (room.songs.length > 0) {
+				const head = room.songs[0];
+				const st = head.getPlaybackStartTime();
+				if (st !== null) {
+					const expectedEndTime = new Date(
+						st.getTime() + head.spotifyInfo.duration_ms,
+					);
+					if (now > expectedEndTime) {
+						console.log(
+							`Room ${room.room.roomID}: Removing played songs from queue`,
+						);
+						await this.roomQueue.getQueueState(room.room.roomID); // this will trigger played songs to be removed (via ActiveRoom.updateQueue)
+					}
+				}
+				this.cancelSongAnnouncements(room.room.roomID);
+				if (room.songs[0].getPlaybackStartTime() === null) {
+					room.songs[0].setPlaybackStartTime(new Date());
+					await this.roomQueue.refreshQueue(room.room.roomID);
+				}
+				const songsAsRoomSongDto: RoomSongDto[] = room
+					.queueAsRoomSongDto()
+					.slice(0, MAX_ANNOUNCEMENTS_PER_ROOM);
+				const currentSong: RoomSongDto = songsAsRoomSongDto[0];
+				if (!currentSong.startTime) {
+					console.warn(
+						`The current song in the queue for room ${room.room.roomID} has no start time. Skipping room entirely.`,
+					);
+					continue;
+				}
+				const currentSongEvent: PlaybackEventDto = {
+					date_created: new Date(),
+					userID: null,
+					roomID: room.room.roomID,
+					spotifyID: currentSong.spotifyID,
+					song: currentSong,
+					UTC_time: currentSong.startTime.getTime(),
+				};
+				if (currentSong.startTime.getTime() < now.getTime()) {
+					if (!currentSong.pauseTime) {
+						this.server
+							.to(room.room.roomID)
+							.emit(SOCKET_EVENTS.CURRENT_MEDIA, currentSongEvent);
+					} else {
+						console.warn(
+							`The current song in the queue for room ${room.room.roomID} is paused. Skipping room entirely.`,
+						);
+					}
+				}
+				for (const song of songsAsRoomSongDto) {
+					if (!song.startTime) {
+						console.warn(
+							`A song in the queue for room ${room.room.roomID} has no start time. Skipping queue.`,
+						);
+						break;
+					}
+					if (song.startTime < now) {
+						console.warn(
+							`A song in the queue for room ${room.room.roomID} has a start time in the past. Skipping song.`,
+						);
+						continue;
+					}
+					const event: PlaybackEventDto = {
+						date_created: new Date(),
+						userID: null,
+						roomID: room.room.roomID,
+						spotifyID: song.spotifyID,
+						song: song,
+						UTC_time: song.startTime.getTime(),
+					};
+					this.createSongAnnouncement(room.room.roomID, song.startTime, event);
+				}
+			}
+		}
+		for (const roomID of roomsToRemove) {
+			this.roomQueue.roomQueues.delete(roomID);
+		}
+	}
 
-			if (currentMedia) {
-				// Broadcast current playback state to all clients in the session
-				this.server.to(sessionId).emit("syncPlayback", {
-					mediaId: currentMedia.mediaId,
-					position: currentTime - currentMedia.startTime,
-				});
 	createSongAnnouncement(
 		roomID: string,
 		startTime: Date,
