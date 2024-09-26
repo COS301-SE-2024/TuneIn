@@ -122,20 +122,23 @@ export class RoomAnalyticsService {
 		// get all the days from the first day the room was created until today if the room is not older than 7 days
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
-		const today: Date = startOfDay(new Date());
+		const today: Date = addHours(startOfDay(new Date()), 2);
+		console.log("Today", today);
 		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
 		if (!firstDay) {
 			return joins;
 		}
 		let day: Date = roomCreationDate ?? firstDay;
-		day = startOfDay(day);
+		console.log("day", day);
+		day = subHours(startOfDay(day), 22);
+		console.log("day fr this time", day);
 		if (isBefore(day, subHours(today, 24 * 7))) {
 			day = subHours(today, 24 * 7);
 		}
 		//floor the day to the nearest day
 		// add the first day
 		while (isBefore(day, today)) {
-			console.log("adding day", startOfDay(day));
+			console.log("adding day", day);
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
@@ -145,22 +148,24 @@ export class RoomAnalyticsService {
 				userActivityPerDay.find((u) => {
 					console.log(
 						"Checking dayss",
-						startOfDay(u.day),
+						u.day,
 						d,
-						startOfDay(u.day).getTime() === d.getTime(),
+						u.day.getTime() === d.getTime(),
 					);
-					return startOfDay(u.day).getTime() === d.getTime();
-				}) === undefined;
+					return u.day.getTime() === d.getTime();
+				}) !== undefined;
+			console.log("Day exists", dayExists);
 			if (!dayExists) {
 				userActivityPerDay.push({ day: d, count: 0 });
 			}
 		}
+		console.log("User activity per day", userActivityPerDay);
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean =
 				uniqueUserActivityPerDay.find(
 					(u) => u.day.getTime() === d.getTime(),
-				) === undefined;
+				) !== undefined;
 			if (!dayExists) {
 				uniqueUserActivityPerDay.push({ day: d, count: 0 });
 			}
@@ -169,8 +174,20 @@ export class RoomAnalyticsService {
 		userActivityPerDay.sort((a, b) => a.day.getTime() - b.day.getTime());
 		uniqueUserActivityPerDay.sort((a, b) => a.day.getTime() - b.day.getTime());
 		joins.per_day = {
-			total_joins: userActivityPerDay,
-			unique_joins: uniqueUserActivityPerDay,
+			total_joins:
+				userActivityPerDay.length > 7
+					? userActivityPerDay.slice(
+							userActivityPerDay.length - 7,
+							userActivityPerDay.length,
+					  )
+					: userActivityPerDay,
+			unique_joins:
+				uniqueUserActivityPerDay.length > 7
+					? uniqueUserActivityPerDay.slice(
+							uniqueUserActivityPerDay.length - 7,
+							uniqueUserActivityPerDay.length,
+					  )
+					: uniqueUserActivityPerDay,
 		};
 		joins.all_time = {
 			total_joins: total_joins,
