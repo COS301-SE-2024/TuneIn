@@ -254,8 +254,9 @@ const Search: React.FC = () => {
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
-		// console.log("handle search");
-		if (searchTerm.trim() === "") {
+		// console.log("handle search: " + sh);
+		if (sh.trim() === "") {
+			// console.log("whitespace caller")
 			return;
 		}
 
