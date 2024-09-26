@@ -13,7 +13,7 @@ export class RoomSongDto {
 
 	@ApiProperty()
 	@IsNumber()
-	score?: number;
+	score: number;
 
 	@ApiProperty()
 	@IsNumber()
@@ -25,7 +25,7 @@ export class RoomSongDto {
 
 	@ApiProperty()
 	@IsDate()
-	insertTime?: Date;
+	insertTime: Date;
 
 	@ApiProperty()
 	@IsDate()
@@ -33,5 +33,5 @@ export class RoomSongDto {
 
 	@ApiProperty()
 	@IsObject()
-	track?: Track;
+	track: Track;
 }

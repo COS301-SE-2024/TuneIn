@@ -19,6 +19,7 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { SpotifyService } from "../../../spotify/spotify.service";
 import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
 import { MurLockService } from "murlock";
+import { TasksService } from "../../../tasks/tasks.service";
 
 const QUEUE_LOCK_TIMEOUT = 20000;
 
@@ -29,15 +30,14 @@ export class RoomSong {
 	private votes: VoteDto[];
 	public readonly insertTime: Date;
 	private playbackStartTime: Date | null;
-	private spotifyDetails: Spotify.Track | null = null;
-	private internalSongID: string;
+	private spotifyDetails: Spotify.Track;
 	private internalQueueItemID: string;
 	public pauseTime: Date | null = null;
 
 	constructor(
 		spotifyID: string,
 		userID: string,
-		internalSongID?: string,
+		spotifyDetails: Spotify.Track,
 		insertTime: Date = new Date(),
 		playbackStartTime: Date | null = null,
 	) {
@@ -47,9 +47,7 @@ export class RoomSong {
 		this.votes = [];
 		this.insertTime = insertTime;
 		this.playbackStartTime = playbackStartTime;
-		if (internalSongID) {
-			this.internalSongID = internalSongID;
-		}
+		this.spotifyDetails = spotifyDetails;
 	}
 
 	private calculateScore(): number {
@@ -138,12 +136,11 @@ export class RoomSong {
 			userID: this.userID,
 			score: this._score,
 			index: -1,
+			insertTime: this.insertTime,
+			track: this.spotifyDetails,
 		};
 		if (this.playbackStartTime) {
 			result.startTime = this.playbackStartTime;
-		}
-		if (this.spotifyDetails) {
-			result.track = this.spotifyDetails;
 		}
 		if (this.pauseTime !== null) {
 			result.pauseTime = this.pauseTime;
@@ -176,20 +173,12 @@ export class RoomSong {
 		this.playbackStartTime = startTime;
 	}
 
-	get spotifyInfo(): Spotify.Track | null {
+	get spotifyInfo(): Spotify.Track {
 		return this.spotifyDetails;
 	}
 
 	set spotifyInfo(info: Spotify.Track) {
 		this.spotifyDetails = info;
-	}
-
-	get songID(): string {
-		return this.internalSongID;
-	}
-
-	set songID(id: string) {
-		this.internalSongID = id;
 	}
 
 	get queueItemID(): string {
@@ -204,10 +193,6 @@ export class RoomSong {
 		if (!this.playbackStartTime || this.playbackStartTime === null) {
 			return false;
 		}
-		if (!this.spotifyDetails || this.spotifyDetails === null) {
-			console.log("this.spotifyDetails: ", this.spotifyDetails);
-			throw new Error("Song does not have spotify info");
-		}
 		if (this.pauseTime !== null) {
 			return false;
 		}
@@ -220,10 +205,6 @@ export class RoomSong {
 	isPaused(): boolean {
 		if (!this.playbackStartTime || this.playbackStartTime === null) {
 			return false;
-		}
-		if (!this.spotifyDetails || this.spotifyDetails === null) {
-			console.log("this.spotifyDetails: ", this.spotifyDetails);
-			throw new Error("Song does not have spotify info");
 		}
 		if (this.pauseTime !== null) {
 			return true;
@@ -246,7 +227,9 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 				" - score: " +
 				song.score +
 				" - insertTime: " +
-				song.insertTime,
+				song.insertTime +
+				" - startTime: " +
+				song.getPlaybackStartTime(),
 		);
 	}
 	const head: RoomSong = queue[0];
@@ -274,12 +257,6 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 			let pos = currentStartTime.getTime();
 			for (let i = 0; i < tempQueue.length; i++) {
 				const song: RoomSong = tempQueue[i];
-				if (song.spotifyInfo === null) {
-					console.log(
-						"Song does not have spotify info. Will try again next time",
-					);
-					break;
-				}
 				const t: Date = new Date(pos);
 				song.setPlaybackStartTime(t);
 				tempQueue[i] = song;
@@ -295,7 +272,9 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 				" - score: " +
 				song.score +
 				" - insertTime: " +
-				song.insertTime,
+				song.insertTime +
+				" - startTime: " +
+				song.getPlaybackStartTime(),
 		);
 	}
 	console.log("===================================");
