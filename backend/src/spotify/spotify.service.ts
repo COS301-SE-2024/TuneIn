@@ -64,6 +64,10 @@ export class SpotifyService {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
+	getUserlessAPI(): Spotify.SpotifyApi {
+		return this.userlessAPI;
+	}
+
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
 		const api = SpotifyApi.withAccessToken(this.clientId, token);
 		const user = await api.currentUser.profile();
@@ -468,14 +472,11 @@ export class SpotifyService {
 		);
 	}
 
-	async getManyTracks(
-		trackIDs: string[],
-		api: SpotifyApi,
-	): Promise<Spotify.Track[]> {
+	async getManyTracks(trackIDs: string[]): Promise<Spotify.Track[]> {
 		const promises: Promise<Spotify.Track[]>[] = [];
 		for (let i = 0; i < trackIDs.length; i += 50) {
 			const ids = trackIDs.slice(i, i + 50);
-			promises.push(api.tracks.get(ids));
+			promises.push(this.userlessAPI.tracks.get(ids));
 		}
 		const results: Spotify.Track[][] = await Promise.all(promises);
 		const tracks: Spotify.Track[] = [];
