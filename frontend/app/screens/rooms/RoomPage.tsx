@@ -630,32 +630,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	return (
 		<View style={styles.container}>
-			{/* <Image
-				source={{ uri: roomData.backgroundImage }}
-				style={styles.backgroundImage}
-			/> */}
-			{/* <LinearGradient
-				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
-				style={styles.gradientOverlay}
-			/> */}
-
 			<View style={styles.contentContainer}>
-				{/* <View style={styles.roomDetails}>
-					<Text style={styles.roomName}>{roomData.name}</Text>
-					<Text style={styles.description}>{roomData.description}</Text>
-					<View style={styles.tagsContainer}>
-						{roomData.tags.map((tag: string, index: number) => (
-							<Text key={index} style={styles.tag}>
-								{tag}
-							</Text>
-						))}
-					</View>
-				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						{/* <Ionicons name="people" size={30} color="black" />
-						<Text>134 Particpants</Text> */}
 						<TouchableOpacity
 							style={styles.userInfoContainer}
 							onPress={handleViewParticipants}
@@ -729,13 +707,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					<View></View>
 				)}
 
-				{/* <TouchableOpacity
-					style={styles.queueButton}
-					onPress={navigateToPlaylist}
-				>
-					<MaterialIcons name="queue-music" size={55} color="Black" />
-					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -1083,6 +1054,7 @@ const styles = StyleSheet.create({
 	},
 	controlButton: {
 		marginHorizontal: 40,
+		// marginTop: -20,
 	},
 	queueButton: {
 		marginTop: 20,
