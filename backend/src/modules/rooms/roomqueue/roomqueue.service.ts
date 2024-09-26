@@ -1281,32 +1281,37 @@ export class RoomQueueService {
 		}
 		return activeRoom;
 	}
+
+	async addSongs(
+		roomID: string,
+		userID: string,
+		songs: RoomSongDto[],
+	): Promise<boolean> {
+		const activeRoom = await this.getRoom(roomID);
+		const ids: string[] = songs.map((s) => s.spotifyID);
+		const tracks: Spotify.Track[] = await this.spotify.getManyTracks(ids);
+		for (let i = 0; i < songs.length; i++) {
+			songs[i].track = tracks[i];
+		}
+		const result: boolean = await activeRoom.addSongs(
+			songs,
 			userID,
-			insertTime,
 			this.murLockService,
 		);
-		await activeRoom.getSpotifyInfo(
-			this.spotifyAuth.getUserlessAPI(),
-			this.murLockService,
-		);
+		// activeRoom.getSpotifyInfo(
+		// 	this.spotifyAuth.getUserlessAPI(),
+		// 	this.murLockService,
+		// );
 		return result;
 	}
 
-	async removeSong(
+	async removeSongs(
 		roomID: string,
-		spotifyID: string,
 		userID: string,
+		songs: RoomSongDto[],
 	): Promise<boolean> {
-		if (!this.roomQueues.has(roomID)) {
-			await this.createRoomQueue(roomID);
-		}
-		const activeRoom: ActiveRoom | undefined = this.roomQueues.get(roomID);
-		if (!activeRoom || activeRoom === undefined) {
-			throw new Error(
-				"Weird error. HashMap is broken: RoomQueueService.removeSong",
-			);
-		}
-		return await activeRoom.removeSong(spotifyID, userID, this.murLockService);
+		const activeRoom = await this.getRoom(roomID);
+		return await activeRoom.removeSongs(songs, userID, this.murLockService);
 	}
 
 	async upvoteSong(
