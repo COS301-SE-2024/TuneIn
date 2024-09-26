@@ -23,6 +23,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
 import { MyLogger } from "./logger/logger.service";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
+import { MailerModule } from "@nestjs-modules/mailer";
 
 @Module({
 	imports: [
@@ -49,6 +50,16 @@ import { RecommendationsModule } from "./recommendations/recommendations.module"
 		ScheduleModule.forRoot(),
 		SongsModule,
 		RecommendationsModule,
+		MailerModule.forRoot({
+			transport: {
+				host: process.env.EMAIL_HOST,
+				port: process.env.EMAIL_PORT,
+				auth: {
+					user: process.env.EMAIL_USERNAME,
+					pass: process.env.EMAIL_PASSWORD,
+				},
+			},
+		}),
 	],
 	controllers: [AppController],
 	providers: [AppService, MyLogger],
