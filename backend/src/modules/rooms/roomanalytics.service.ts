@@ -82,7 +82,7 @@ export class RoomAnalyticsService {
 		// get all the days from the first day the room was created until today if the room is not older than 7 days
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
-		const today: Date = addHours(startOfDay(new Date()), 2);
+		const today: Date = addHours(startOfDay(new Date()), 3);
 		console.log("Today", today);
 		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
 		if (!firstDay) {
