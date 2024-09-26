@@ -430,4 +430,35 @@ describe("RoomAnalyticsService", () => {
 			expect(result.total).toBe(0);
 		});
 	});
+	describe("getNumberOfReactions", () => {
+		it("should return the correct number of reactions", async () => {
+			const mockRoomID = "roomID1";
+			const mockReactions = [
+				{ reaction_id: "reaction1", room_id: mockRoomID },
+				{ reaction_id: "reaction2", room_id: mockRoomID },
+			];
+
+			jest
+				.spyOn(prismaService.chat_reactions, "findMany")
+				.mockResolvedValue(
+					mockReactions as unknown as PrismaTypes.chat_reactions[],
+				);
+
+			const result = await service.getNumberOfReactions(mockRoomID);
+
+			expect(result).toBe(mockReactions.length);
+		});
+
+		it("should return 0 if no reactions are found", async () => {
+			const mockRoomID = "roomID1";
+
+			jest
+				.spyOn(prismaService.chat_reactions, "findMany")
+				.mockResolvedValue([]);
+
+			const result = await service.getNumberOfReactions(mockRoomID);
+
+			expect(result).toBe(0);
+		});
+	});
 });
