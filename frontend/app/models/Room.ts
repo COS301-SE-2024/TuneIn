@@ -1,4 +1,6 @@
 // src/types/RoomCard.ts
+const defaultProfileIcon = require("../../assets/profile-icon.png");
+
 export interface Room {
 	roomID?: string;
 	backgroundImage: string;
@@ -31,9 +33,7 @@ export const formatRoomData = (room: any): Room => {
 		artistName: room.artistName ? room.artistName : null,
 		description: room.description,
 		userID: room.userID,
-		userProfile: room.userProfile
-			? room.userProfile
-			: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg",
+		userProfile: room.userProfile ? room.userProfile : defaultProfileIcon,
 		username: room.username ? room.username : "Unknown",
 		roomSize: 55,
 		tags: room.tags ? room.tags : [],
