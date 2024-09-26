@@ -38,6 +38,9 @@ import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import * as path from "path";
 
+const { width, height } = Dimensions.get("window");
+const isSmallScreen = height < 800;
+
 interface RoomPageProps {
 	joined: boolean;
 	handleJoinLeave: () => Promise<void>;
@@ -627,32 +630,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	return (
 		<View style={styles.container}>
-			{/* <Image
-				source={{ uri: roomData.backgroundImage }}
-				style={styles.backgroundImage}
-			/> */}
-			{/* <LinearGradient
-				colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(255,255,255,1)"]}
-				style={styles.gradientOverlay}
-			/> */}
-
 			<View style={styles.contentContainer}>
-				{/* <View style={styles.roomDetails}>
-					<Text style={styles.roomName}>{roomData.name}</Text>
-					<Text style={styles.description}>{roomData.description}</Text>
-					<View style={styles.tagsContainer}>
-						{roomData.tags.map((tag: string, index: number) => (
-							<Text key={index} style={styles.tag}>
-								{tag}
-							</Text>
-						))}
-					</View>
-				</View> */}
 				<View style={styles.sideBySide}>
 					{/* Left side */}
 					<View style={styles.userInfoContainer}>
-						{/* <Ionicons name="people" size={30} color="black" />
-						<Text>134 Particpants</Text> */}
 						<TouchableOpacity
 							style={styles.userInfoContainer}
 							onPress={handleViewParticipants}
@@ -696,17 +677,9 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						))}
 					</Text>
 				</View>
-				{/* <SongRoomWidget
-					songName="Eternal Sunshine"
-					artist="Ariana Grande"
-					albumCoverUrl="https://t2.genius.com/unsafe/300x300/https%3A%2F%2Fimages.genius.com%2F08e2633706582e13bc20f44637441996.1000x1000x1.png"
-					progress={0.5}
-					time1="1:30"
-					time2="3:00"
-				/> */}
 
 				{roomData.mine ? (
-					<View style={styles.controls}>
+					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
@@ -733,14 +706,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				) : (
 					<View></View>
 				)}
-
-				{/* <TouchableOpacity
-					style={styles.queueButton}
-					onPress={navigateToPlaylist}
-				>
-					<MaterialIcons name="queue-music" size={55} color="Black" />
-					<Text style={styles.queueButtonText}> Queue</Text>
-				</TouchableOpacity> */}
 			</View>
 			<Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
@@ -779,7 +744,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
-				<View style={styles.userInfoContainer}>
+				<TouchableOpacity
+					// onPress={handleUserPress}
+					style={styles.userInfoContainer}
+				>
 					<Image
 						source={{ uri: roomData.userProfile }}
 						style={styles.userImage}
@@ -787,7 +755,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					<Text style={styles.username}>
 						{truncateUsername(roomData.username)}
 					</Text>
-				</View>
+				</TouchableOpacity>
+
 				{/* Right side */}
 				<View style={styles.joinLeaveButtonContainer}>
 					<View style={styles.sideBySideClose}>
@@ -1076,8 +1045,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		marginTop: 50,
 	},
+	smallControls: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 10,
+	},
 	controlButton: {
 		marginHorizontal: 40,
+		// marginTop: -20,
 	},
 	queueButton: {
 		marginTop: 20,
@@ -1128,7 +1104,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	songRoomWidget: {
-		marginTop: -50,
+		marginTop: -80,
 	},
 });
 

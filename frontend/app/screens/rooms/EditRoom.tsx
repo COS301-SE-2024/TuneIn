@@ -19,6 +19,9 @@ import {
 	Alert,
 	ToastAndroid,
 } from "react-native";
+import CreateButton from "../../components/CreateButton";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../styles/colors";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -70,7 +73,7 @@ const EditRoom: React.FC = () => {
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {
-		router.navigate("/screens/EditPlaylist");
+		router.navigate("/screens/rooms/EditPlaylist");
 	};
 	const pickImage = async () => {
 		let result = await ImagePicker.launchImageLibraryAsync({
@@ -167,11 +170,13 @@ const EditRoom: React.FC = () => {
 		<ScrollView contentContainerStyle={styles.scrollView}>
 			<View style={styles.container}>
 				<View style={styles.header}>
-					{/* <TouchableOpacity onPress={() => router.back()}>
-						<Text style={styles.closeButton}>×</Text>
-					</TouchableOpacity> */}
+					<TouchableOpacity onPress={() => router.back()}>
+						{/* <Text style={styles.closeButton}>×</Text>
+						 */}
+						<Ionicons name="chevron-back" size={24} color="#000" />
+					</TouchableOpacity>
 					<Text style={styles.headerTitle}>Edit Room Details</Text>
-					<View style={styles.headerPlaceholder} />
+					<View style={styles.headerSpacer} />
 				</View>
 				<View style={styles.form}>
 					{buildInputField("Room Name", roomDetails.name, (value) =>
@@ -216,16 +221,11 @@ const EditRoom: React.FC = () => {
 							/>
 						)}
 					</View>
-
-					<TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-						<Text style={styles.saveButtonText}>Save Changes</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={styles.saveButton}
+					<CreateButton title="Save Changes" onPress={saveChanges} />
+					<CreateButton
+						title="Edit Playlist"
 						onPress={navigateToEditPlaylist}
-					>
-						<Text style={styles.saveButtonText}>Edit Playlist</Text>
-					</TouchableOpacity>
+					/>
 				</View>
 			</View>
 		</ScrollView>
@@ -292,6 +292,9 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		fontWeight: "bold",
 	},
+	headerSpacer: {
+		width: 20,
+	},
 	headerPlaceholder: {
 		width: 20,
 	},
@@ -309,7 +312,7 @@ const styles = StyleSheet.create({
 	},
 	inputField: {
 		borderWidth: 1,
-		borderColor: "#D1D5DB",
+		borderColor: colors.primary,
 		borderRadius: 10,
 		padding: 10,
 		backgroundColor: "#F9FAFB",
