@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
-// import { SongInfoDto } from "./dto/songinfo.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
-// import { DtoGenService } from "../dto-gen/dto-gen.service";
-// import { DbUtilsService } from "../db-utils/db-utils.service";
 import {
 	subHours,
 	addHours,
@@ -13,53 +10,16 @@ import {
 	startOfDay,
 } from "date-fns";
 import {
-	// RoomAnalyticsQueueDto,
 	RoomAnalyticsParticipationDto,
 	RoomAnalyticsInteractionsDto,
-	// RoomAnalyticsVotesDto,
-	// RoomAnalyticsSongsDto,
-	// RoomAnalyticsContributorsDto,
-	// RoomAnalyticsDto,
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
-// import { RoomsService } from "./rooms.service";
 
 @Injectable()
 export class RoomAnalyticsService {
 	constructor(
 		private readonly prisma: PrismaService, // private readonly dtogen: DtoGenService, // private readonly dbUtils: DbUtilsService, // private readonly rooms: RoomsService,
 	) {}
-
-	// async getRoomAnalytics(
-	// 	roomID: string,
-	// 	userID: string,
-	// ): Promise<RoomAnalyticsDto> {
-	// 	console.log(
-	// 		"Getting room analytics for room",
-	// 		roomID,
-	// 		" and given userID: ",
-	// 		userID,
-	// 	);
-	// 	return new RoomAnalyticsDto();
-	// }
-
-	// async getRoomQueueAnalytics(
-	// 	roomID: string,
-	// 	userID: string,
-	// ): Promise<RoomAnalyticsQueueDto> {
-	// 	console.log(
-	// 		"Getting room analytics for room",
-	// 		roomID,
-	// 		" and given userID: ",
-	// 		userID,
-	// 	);
-	// 	const roomQueueAnalytics: RoomAnalyticsQueueDto =
-	// 		new RoomAnalyticsQueueDto();
-	// 	const roomQueue: SongInfoDto[] = await this.rooms.getRoomQueue(roomID);
-	// 	roomQueueAnalytics.total_songs_queued = roomQueue.length;
-	// 	roomQueueAnalytics.total_queue_exports = 0; // TODO: Implement logic to get total queue exports
-	// 	return roomQueueAnalytics;
-	// }
 
 	async getRoomJoinAnalytics(
 		roomID: string,
@@ -592,171 +552,6 @@ export class RoomAnalyticsService {
 		);
 		return roomInteractionAnalytics;
 	}
-
-	// async getTotalVotes(roomID: string): Promise<{
-	// 	upvotes: number;
-	// 	downvotes: number;
-	// }> {
-	// 	const votes: {
-	// 		count: number;
-	// 		room_id: string;
-	// 		is_upvote: boolean;
-	// 	}[] = await this.prisma.$queryRaw`
-	// 		select
-	// 			count(*) as count,
-	// 			room_id,
-	// 			is_upvote,
-	// 			queue.room_id
-	// 		from
-	// 			vote
-	// 		inner join queue on queue.queue_id = vote.queue_id
-	// 		group by
-	// 			is_upvote,
-	// 			room_id
-	// 		having
-	// 			room_id = ${roomID}::UUID;
-
-	// 	`;
-	// 	if (votes.length === 0 || votes === undefined) {
-	// 		return {
-	// 			upvotes: 0,
-	// 			downvotes: 0,
-	// 		};
-	// 	}
-	// 	const upvoteResult = votes.filter((v) => v.is_upvote)[0];
-	// 	const numOfUpvotes = upvoteResult ? Number(upvoteResult.count) : 0;
-	// 	const downvoteResult = votes.filter((v) => !v.is_upvote)[0];
-	// 	const numOfDownvotes = downvoteResult ? Number(downvoteResult.count) : 0;
-	// 	return {
-	// 		upvotes: numOfUpvotes,
-	// 		downvotes: numOfDownvotes,
-	// 	};
-	// }
-
-	// async getPercentageChangeInVotes(roomID: string): Promise<any> {
-	// 	// get total votes from today and yesterday
-	// 	const today: Date = new Date();
-	// 	const yesterday: Date = subHours(today, 24);
-	// 	const votesToday: any = await this.prisma.$queryRaw`
-	// 		select
-	// 			count(*) as count,
-	// 			room_id,
-	// 			is_upvote,
-	// 			queue.room_id
-	// 		from
-	// 			vote
-	// 		inner join queue on queue.queue_id = vote.queue_id
-	// 		where
-	// 			vote_time > ${yesterday}
-	// 		group by
-	// 			is_upvote,
-	// 			room_id
-	// 		having
-	// 			room_id = ${roomID}::UUID;
-	// 	`;
-	// 	const votesYesterday: any = await this.prisma.$queryRaw`
-	// 		select
-	// 			count(*) as count,
-	// 			room_id,
-	// 			is_upvote,
-	// 			queue.room_id
-	// 		from
-	// 			vote
-	// 		inner join queue on queue.queue_id = vote.queue_id
-	// 		where
-	// 			vote_time < ${yesterday}
-	// 		group by
-	// 			is_upvote,
-	// 			room_id
-	// 		having
-	// 			room_id = ${roomID}::UUID;
-	// 	`;
-	// 	if (votesToday.length === 0 || votesYesterday.length === 0) {
-	// 		return {
-	// 			daily_percentage_change_in_upvotes: 0,
-	// 			daily_percentage_change_in_downvotes: 0,
-	// 		};
-	// 	}
-	// 	console.log(
-	// 		"Getting percentage change in votes for room",
-	// 		roomID,
-	// 		"and votes",
-	// 		votesToday,
-	// 		votesYesterday,
-	// 	);
-	// 	const numOfUpvotesToday = Number(
-	// 		votesToday.filter((v: any) => v.is_upvote)[0].count,
-	// 	);
-	// 	const numOfDownvotesToday = Number(
-	// 		votesToday.filter((v: any) => !v.is_upvote)[0].count,
-	// 	);
-	// 	const numOfUpvotesYesterday = Number(
-	// 		votesYesterday.filter((v: any) => v.is_upvote)[0].count,
-	// 	);
-	// 	const numOfDownvotesYesterday = Number(
-	// 		votesYesterday.filter((v: any) => !v.is_upvote)[0].count,
-	// 	);
-	// 	const upvoteChange: number = numOfUpvotesToday - numOfUpvotesYesterday;
-	// 	const downvoteChange: number =
-	// 		numOfDownvotesToday - numOfDownvotesYesterday;
-	// 	const upvotePercentageChange: number =
-	// 		(upvoteChange / numOfUpvotesYesterday) * 100;
-	// 	const downvotePercentageChange: number =
-	// 		(downvoteChange / numOfDownvotesYesterday) * 100;
-	// 	return {
-	// 		daily_percentage_change_in_upvotes: upvotePercentageChange,
-	// 		daily_percentage_change_in_downvotes: downvotePercentageChange,
-	// 	};
-	// }
-
-	// async getRoomVotesAnalytics(
-	// 	roomID: string,
-	// 	userID: string,
-	// ): Promise<RoomAnalyticsVotesDto> {
-	// 	console.log(
-	// 		"Getting room analytics for room",
-	// 		roomID,
-	// 		" and given userID: ",
-	// 		userID,
-	// 	);
-	// 	const roomVotesAnalytics: RoomAnalyticsVotesDto =
-	// 		new RoomAnalyticsVotesDto();
-	// 	const votes: any = await this.getTotalVotes(roomID);
-	// 	roomVotesAnalytics.total_upvotes = votes.upvotes;
-	// 	roomVotesAnalytics.total_downvotes = votes.downvotes;
-	// 	const percentageChange: any = await this.getPercentageChangeInVotes(roomID);
-	// 	roomVotesAnalytics.daily_percentage_change_in_upvotes =
-	// 		percentageChange.daily_percentage_change_in_upvotes;
-	// 	roomVotesAnalytics.daily_percentage_change_in_downvotes =
-	// 		percentageChange.daily_percentage_change_in_downvotes;
-	// 	return roomVotesAnalytics;
-	// }
-
-	// async getRoomSongsAnalytics(
-	// 	roomID: string,
-	// 	userID: string,
-	// ): Promise<RoomAnalyticsSongsDto> {
-	// 	console.log(
-	// 		"Getting room analytics for room",
-	// 		roomID,
-	// 		" and given userID: ",
-	// 		userID,
-	// 	);
-	// 	return new RoomAnalyticsSongsDto();
-	// }
-
-	// async getRoomContributorsAnalytics(
-	// 	roomID: string,
-	// 	userID: string,
-	// ): Promise<RoomAnalyticsContributorsDto> {
-	// 	console.log(
-	// 		"Getting room analytics for room",
-	// 		roomID,
-	// 		" and given userID: ",
-	// 		userID,
-	// 	);
-	// 	return new RoomAnalyticsContributorsDto();
-	// }
 
 	async getKeyMetrics(
 		userID: string,
