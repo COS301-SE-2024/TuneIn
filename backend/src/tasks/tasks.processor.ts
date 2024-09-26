@@ -7,15 +7,13 @@ import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { PrismaService } from "../../prisma/prisma.service";
-import { ActiveRoom } from "../modules/rooms/roomqueue/roomqueue.service";
-import { MurLockService } from "murlock";
+// import { MurLockService } from "murlock";
 
 @Processor("task-queue")
 export class TasksProcessor {
 	constructor(
 		private readonly spotifyService: SpotifyService,
-		private readonly prisma: PrismaService,
-		private readonly murLockService: MurLockService,
+		private readonly prisma: PrismaService, // private readonly murLockService: MurLockService,
 	) {}
 
 	@Process("process-task")
@@ -174,7 +172,6 @@ export class TasksProcessor {
 	// 	await room.getSpotifyInfo(api, this.prisma, this.murLockService);
 	// 	await room.flushtoDB(
 	// 		this.spotifyService,
-	// 		api,
 	// 		this.prisma,
 	// 		this.murLockService,
 	// 	);

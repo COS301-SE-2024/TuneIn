@@ -9,7 +9,7 @@ import {
 	SpotifyTokenResponse,
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
-import { sleep } from "../common/utils";
+// import { sleep } from "../common/utils";
 import { MurLockService } from "murlock";
 
 const NUMBER_OF_RETRIES = 3;
@@ -19,8 +19,8 @@ const TABLE_LOCK_TIMEOUT = 30000;
 export class SpotifyService {
 	private clientId: string;
 	private clientSecret: string;
-	private redirectUri: string;
-	private authHeader: string;
+	// private redirectUri: string;
+	// private authHeader: string;
 	private userlessAPI: Spotify.SpotifyApi;
 
 	constructor(
@@ -42,15 +42,15 @@ export class SpotifyService {
 		}
 		this.clientSecret = clientSecret;
 
-		const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
-		if (!redirectUri) {
-			throw new Error("Missing SPOTIFY_REDIRECT_URI");
-		}
-		this.redirectUri = redirectUri;
+		// const redirectUri = this.configService.get<string>("SPOTIFY_REDIRECT_URI");
+		// if (!redirectUri) {
+		// 	throw new Error("Missing SPOTIFY_REDIRECT_URI");
+		// }
+		// this.redirectUri = redirectUri;
 
-		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
-			"base64",
-		);
+		// this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
+		// 	"base64",
+		// );
 
 		this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
 			this.clientId,

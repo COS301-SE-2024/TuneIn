@@ -3,8 +3,8 @@ import { Injectable } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bull";
 import { Queue } from "bull";
 import { SpotifyTokenPair } from "../auth/spotify/spotifyauth.service";
-import { ActiveRoom } from "../modules/rooms/roomqueue/roomqueue.service";
-import * as Spotify from "@spotify/web-api-ts-sdk";
+// import { ActiveRoom } from "../modules/rooms/roomqueue/roomqueue.service";
+// import * as Spotify from "@spotify/web-api-ts-sdk";
 import { Cron } from "@nestjs/schedule";
 
 @Injectable()

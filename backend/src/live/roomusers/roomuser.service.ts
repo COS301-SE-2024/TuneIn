@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
-import { PrismaService } from "../../../prisma/prisma.service";
-import * as PrismaTypes from "@prisma/client";
+// import { PrismaService } from "../../../prisma/prisma.service";
+// import * as PrismaTypes from "@prisma/client";
 
 interface liveChatUser {
 	user: UserDto;
@@ -15,8 +15,7 @@ interface liveChatUser {
 export class RoomUsersService {
 	constructor(
 		private readonly dbUtils: DbUtilsService,
-		private readonly dtogen: DtoGenService,
-		private readonly prisma: PrismaService,
+		private readonly dtogen: DtoGenService, // private readonly prisma: PrismaService,
 	) {}
 
 	private connectedUsers = new Map<string, liveChatUser>();
@@ -82,7 +81,7 @@ export class RoomUsersService {
 		// 	return null;
 		// }
 		// return u;
-		for (const [key, value] of this.connectedUsers) {
+		for (const [, value] of this.connectedUsers) {
 			if (value.socketIDs.includes(socketID)) {
 				return value;
 			}
@@ -152,7 +151,7 @@ export class RoomUsersService {
 		// 	throw new Error("Connected user does not have a roomID");
 		// }
 		// return u.roomID;
-		for (const [key, value] of this.connectedUsers) {
+		for (const [, value] of this.connectedUsers) {
 			if (value.socketIDs.includes(socketID)) {
 				if (value.roomID) {
 					return value.roomID;

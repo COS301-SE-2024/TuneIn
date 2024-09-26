@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../../prisma/prisma.service";
 import { DtoGenService } from "../../dto-gen/dto-gen.service";
-import { DbUtilsService } from "../../db-utils/db-utils.service";
+// import { DbUtilsService } from "../../db-utils/db-utils.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import {
 	MinPriorityQueue,
-	MaxPriorityQueue,
+	// MaxPriorityQueue,
 	IGetCompareValue,
 	PriorityQueue,
 	ICompare,
@@ -14,12 +14,12 @@ import {
 import { RoomDto } from "../dto/room.dto";
 import { VoteDto } from "../dto/vote.dto";
 import { RoomSongDto } from "../dto/roomsong.dto";
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+// import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { SpotifyService } from "../../../spotify/spotify.service";
-import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
+// import { SpotifyAuthService } from "src/auth/spotify/spotifyauth.service";
 import { MurLockService } from "murlock";
-import { TasksService } from "../../../tasks/tasks.service";
+// import { TasksService } from "../../../tasks/tasks.service";
 
 const QUEUE_LOCK_TIMEOUT = 20000;
 
@@ -559,9 +559,8 @@ export class ActiveRoom {
 		);
 	}
 
-	async flushtoDB(
+	async flushToDB(
 		spotify: SpotifyService,
-		api: SpotifyApi,
 		prisma: PrismaService,
 		murLockService: MurLockService,
 	) {
@@ -700,7 +699,7 @@ export class ActiveRoom {
 					});
 					console.log(`Release lock: ${this.getQueueLockName()}`);
 				} catch (e) {
-					console.error("Error in flushtoDB");
+					console.error("Error in flushToDB");
 					console.error(e);
 				}
 			},
@@ -1220,13 +1219,12 @@ export class RoomQueueService {
 	public roomQueues: Map<string, ActiveRoom>; //map roomID to room data structure
 
 	constructor(
-		private readonly dbUtils: DbUtilsService,
+		// private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private readonly prisma: PrismaService,
 		private readonly spotify: SpotifyService,
-		private readonly spotifyAuth: SpotifyAuthService,
-		private readonly murLockService: MurLockService,
-		private readonly tasksService: TasksService,
+		// private readonly spotifyAuth: SpotifyAuthService,
+		private readonly murLockService: MurLockService, // private readonly tasksService: TasksService,
 	) {
 		this.roomQueues = new Map<string, ActiveRoom>();
 	}
@@ -1253,6 +1251,11 @@ export class RoomQueueService {
 		const activeRoom = await this.getRoom(roomID);
 		await activeRoom.refreshQueue(this.murLockService);
 		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
+	}
+
+	async flushToDB(roomID: string): Promise<void> {
+		const activeRoom = await this.getRoom(roomID);
+		await activeRoom.flushToDB(this.spotify, this.prisma, this.murLockService);
 	}
 
 	// async getRoomSpotifyInfo(roomID: string): Promise<void> {

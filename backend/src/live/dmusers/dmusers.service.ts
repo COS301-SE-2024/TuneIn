@@ -77,7 +77,7 @@ export class DmUsersService {
 		// 	throw new Error("Connected user does not exist");
 		// }
 		// return u;
-		for (const [key, value] of this.connectedUsers) {
+		for (const [_, value] of this.connectedUsers) {
 			if (value.socketIDs.includes(socketID)) {
 				return value;
 			}
@@ -238,6 +238,6 @@ export class DmUsersService {
 			chatID: null,
 			socketIDs: u.socketIDs,
 		});
-		console.log(socketId);
+		console.log(socketID);
 	}
 }

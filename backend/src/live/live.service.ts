@@ -7,7 +7,6 @@ import { SOCKET_EVENTS } from "../common/constants";
 import {
 	RoomQueueService,
 	ActiveRoom,
-	RoomSong,
 } from "../modules/rooms/roomqueue/roomqueue.service";
 import { RoomSongDto } from "../modules/rooms/dto/roomsong.dto";
 
@@ -64,6 +63,15 @@ export class LiveService {
 				);
 				continue;
 			}
+
+			console.log(`Flushing room ${room.room.roomID} to DB`);
+			const start: Date = new Date();
+			await this.roomQueue.flushToDB(room.room.roomID);
+			console.log(
+				`Finished flushing room ${room.room.roomID} to DB in ${
+					new Date().valueOf() - start.valueOf()
+				}ms`,
+			);
 
 			if (room.songs.length > 0) {
 				const head = room.songs[0];

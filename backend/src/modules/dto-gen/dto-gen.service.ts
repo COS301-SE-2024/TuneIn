@@ -42,7 +42,7 @@ export class DtoGenService {
 		}
 
 		//get user info
-		const result: UserDto = this.generateBriefUserDto(user);
+		const result: UserDto = await this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
 		// const preferences = await this.dbUtils.getPreferences(user);
 		const fav_genres = await this.prisma.favorite_genres.findMany({
@@ -99,27 +99,29 @@ export class DtoGenService {
 			}
 		}
 
-		const following: PrismaTypes.users[] =
-			await this.dbUtils.getUserFollowing(userID);
+		const following: PrismaTypes.users[] = await this.dbUtils.getUserFollowing(
+			userID,
+		);
 		result.following.count = following.length;
 		if (fully_qualify) {
 			for (let i = 0; i < following.length; i++) {
 				const f = following[i];
 				if (f && f !== null) {
-					const u: UserDto = this.generateBriefUserDto(f);
+					const u: UserDto = await this.generateBriefUserDto(f);
 					result.following.data.push(u);
 				}
 			}
 		}
 
-		const followers: PrismaTypes.users[] =
-			await this.dbUtils.getUserFollowers(userID);
+		const followers: PrismaTypes.users[] = await this.dbUtils.getUserFollowers(
+			userID,
+		);
 		result.followers.count = followers.length;
 		if (fully_qualify) {
 			for (let i = 0; i < followers.length; i++) {
 				const f = followers[i];
 				if (f && f !== null) {
-					const u: UserDto = this.generateBriefUserDto(f);
+					const u: UserDto = await this.generateBriefUserDto(f);
 					result.followers.data.push(u);
 				}
 			}

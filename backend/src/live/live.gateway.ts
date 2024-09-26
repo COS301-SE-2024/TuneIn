@@ -137,7 +137,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.CONNECTED);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -152,7 +152,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(error as Error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 	*/
@@ -167,7 +167,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			//this.server.emit();
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(error as Error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 	*/
@@ -175,7 +175,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/* **************************************************************************************** */
 
 	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
-	async handleLiveMessage(@MessageBody() p: string): Promise<void> {
+	async handleLiveMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
@@ -225,13 +228,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_MESSAGE);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
-	async handleGetLiveChatHistory(@MessageBody() p: string): Promise<void> {
+	async handleGetLiveChatHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
@@ -272,7 +278,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -335,7 +341,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				await this.sendQueueState(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -378,7 +384,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -409,7 +415,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -451,7 +457,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -493,7 +499,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -535,7 +541,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -579,7 +585,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -624,7 +630,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -660,7 +666,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				client.leave(chatID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -740,7 +746,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -813,7 +819,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -870,7 +876,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
 		} catch (error) {
 			console.error(error);
-			this.handleThrownError(error as Error);
+			this.handleThrownError(client, error as Error);
 		}
 	}
 
@@ -1013,13 +1019,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
-	async handleSeekMedia(@MessageBody() p: string): Promise<void> {
+	async handleSeekMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
@@ -1028,13 +1037,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)
-	async handleCurrentMedia(@MessageBody() p: string): Promise<void> {
+	async handleCurrentMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.CURRENT_MEDIA);
@@ -1049,13 +1061,16 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				await this.sendMediaState(roomID);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
-	async handleMediaSync(@MessageBody() p: string): Promise<void> {
+	async handleMediaSync(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise<void> {
 		this.eventQueueService.addToQueue(async () => {
 			this.handOverSocketServer(this.server);
 			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
@@ -1064,7 +1079,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(p);
 			} catch (error) {
 				console.error(error);
-				this.handleThrownError(error as Error);
+				this.handleThrownError(client, error as Error);
 			}
 		});
 	}
@@ -1455,7 +1470,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			date_created: new Date(),
 			errorMessage: error.message,
 		};
-		this.server.emit(SOCKET_EVENTS.ERROR, errorResponse);
+		client.emit(SOCKET_EVENTS.ERROR, errorResponse);
 		console.log("Error emitted: " + SOCKET_EVENTS.ERROR);
 	}
 

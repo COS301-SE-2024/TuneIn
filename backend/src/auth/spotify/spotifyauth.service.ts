@@ -13,6 +13,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { AxiosError } from "axios";
 import { Type } from "class-transformer";
+import { TasksService } from "../../tasks/tasks.service";
 
 export class SpotifyTokenResponse {
 	@ApiProperty()
@@ -82,7 +83,7 @@ export class SpotifyCallbackResponse {
 export class SpotifyAuthService {
 	private clientId: string;
 	private clientSecret: string;
-	private redirectUri: string;
+	// private redirectUri: string;
 	private authHeader: string;
 	private selfAuthorisedAPI: Spotify.SpotifyApi;
 
@@ -91,7 +92,8 @@ export class SpotifyAuthService {
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
 		// private readonly dbUtils: DbUtilsService,
-		private readonly spotify: SpotifyService, // private readonly tasksService: TasksService,
+		private readonly spotify: SpotifyService,
+		private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
