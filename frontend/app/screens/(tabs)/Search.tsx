@@ -8,8 +8,8 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
-	TouchableWithoutFeedback,
 	Keyboard,
+	TouchableWithoutFeedback,
 } from "react-native";
 import {
 	GestureHandlerRootView,
@@ -50,6 +50,8 @@ const Search: React.FC = () => {
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [userLoading, setUserLoading] = useState(false);
+	const [roomLoading, setRoomLoading] = useState(false);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
@@ -115,16 +117,110 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		
+		const getRecommendations = async () => {
+			try {
+				const token = await auth.getToken();
+				if (token) {
+					let response;
+					if (filter === "room") {
+						if (roomRecommendations.length !== 0) {
+							setResults(roomRecommendations);
+							return;
+						}
 
-		if (searchTerm.trim() === "") {
-			
+						setRoomLoading(true);
+
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/rooms/foryou`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended rooms:", response);
+							return;
+						}
+						const recommendedRooms: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.roomID,
+								type: filter,
+								name: item.room_name,
+								roomData: {
+									roomID: item.roomID,
+									backgroundImage: item.room_image,
+									name: item.room_name,
+									description: item.description,
+									userID: item.creator.userID,
+									tags: item.tags,
+								},
+							}),
+						);
+						console.log("recommended rooms:", recommendedRooms);
+						console.log("Recommended rooms length: " + recommendedRooms.length);
+						setResults(recommendedRooms);
+						setRoomRecommendations(recommendedRooms);
+						setRoomLoading(false);
+					} else {
+						if (userRecommendations.length !== 0) {
+							setResults(userRecommendations);
+							return;
+						}
+
+						setUserLoading(true);
+
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							},
+						);
+						if (response.status !== 200) {
+							console.error("Error fetching recommended users:", response);
+							return;
+						}
+						console.log(
+							"Recommended users response: " + JSON.stringify(response),
+						);
+						const recommendedUsers: SearchResult[] = response.data.map(
+							(item: any) => ({
+								id: item.userID,
+								type: filter,
+								name: item.username,
+								userData: {
+									id: item.id,
+									profile_picture_url: item.profile_picture_url,
+									profile_name: item.profile_name,
+									username: item.username,
+									followers: item.followers.data,
+								},
+							}),
+						);
+						console.log("recommended users:", recommendedUsers);
+						console.log("Recommended users length: " + recommendedUsers.length);
+
+						if (searchTerm.trim() === "" && filter === "user" && loading) {
+							setResults(recommendedUsers);
+						}
+						setUserRecommendations(recommendedUsers);
+						setUserLoading(false);
+					}
+				}
+			} catch (error) {
+				console.log("Error fetching recommended rooms:", error);
+			}
+			setLoading(false);
+		};
+
+		if (searchTerm === "") {
+			getRecommendations();
 			if (filter === "room") {
 				getRoomHistory();
-				setResults(roomRecommendations);
 			} else if (filter === "user") {
 				getUserHistory();
-				setResults(userRecommendations);
 			}
 		} else {
 			if (timeoutRef.current) {
@@ -158,7 +254,6 @@ const Search: React.FC = () => {
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
-		console.log("Handle Search: " + sh);
 		// console.log("handle search");
 		if (searchTerm.trim() === "") {
 			return;
@@ -504,84 +599,18 @@ const Search: React.FC = () => {
 	}, [filter]);
 
 	useEffect(() => {
-		getRoomHistory();
-		const getRecommendations = async () => {
-			setLoading(true);
-			try {
-				const token = await auth.getToken();
-				if (token) {
-					let response;
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/rooms/foryou`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							},
-						);
-						if (response.status !== 200) {
-							console.log("Error fetching recommended rooms:", response);
-							return;
-						}
-						const recommendedRooms: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: filter,
-								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
-									backgroundImage: item.room_image,
-									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									tags: item.tags,
-								},
-							}),
-						);
-						// console.log("recommended rooms:", recommendedRooms);
-						// console.log("Recommended rooms length: " + recommendedRooms.length);
-						setRoomRecommendations(recommendedRooms);
-						setResults(recommendedRooms);
+		if (filter === "room") {
+			setLoading(roomLoading);
+		} else {
+			setLoading(userLoading);
+		}
 
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/recommended/users`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							},
-						);
-						if (response.status !== 200) {
-							console.log("Error fetching recommended users:", response);
-							return;
-						}
-						console.log(
-							"Recommended users response: " + JSON.stringify(response),
-						);
-						const recommendedUsers: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.userID,
-								type: filter,
-								name: item.username,
-								userData: {
-									id: item.id,
-									profile_picture_url: item.profile_picture_url,
-									profile_name: item.profile_name,
-									username: item.username,
-									followers: item.followers.data,
-								},
-							}),
-						);
-						// console.log("recommended users:", recommendedUsers);
-						// console.log("Recommended users length: " + recommendedUsers.length);
-						setUserRecommendations(recommendedUsers);
-				}
-			} catch (error) {
-				console.log("Error fetching recommended rooms:", error);
-			}
-			setLoading(false);
-		};
-		getRecommendations();
+		// Update the previous filter ref to the current filter
+		prevFilterRef.current = filter;
+	}, [filter, userLoading, roomLoading]);
+
+	useEffect(() => {
+		getRoomHistory();
 	}, []);
 
 	return (
