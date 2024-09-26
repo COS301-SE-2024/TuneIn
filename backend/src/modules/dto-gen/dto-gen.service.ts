@@ -7,6 +7,7 @@ import * as PrismaTypes from "@prisma/client";
 import { DbUtilsService } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { DirectMessageDto } from "../users/dto/dm.dto";
+import validator from "validator";
 
 // A service that will generate DTOs
 @Injectable()
@@ -609,6 +610,7 @@ export class DtoGenService {
 			recipient.userID,
 			pmID,
 		);
+
 		const result: DirectMessageDto = {
 			index: index,
 			messageBody: dm.message.contents,
@@ -618,6 +620,7 @@ export class DtoGenService {
 			dateRead: new Date(0),
 			isRead: false,
 			pID: dm.p_message_id,
+			bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
 		};
 		console.log("result: " + JSON.stringify(result));
 		return result;
@@ -722,6 +725,8 @@ export class DtoGenService {
 				const recipient: UserDto =
 					dm.recipient === user1.userID ? user1 : user2;
 
+				//body is room id, if it is: ##uuidv4##
+				// uuid v4 regex: /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 				const message: DirectMessageDto = {
 					index: i,
 					messageBody: dm.message.contents,
@@ -731,6 +736,7 @@ export class DtoGenService {
 					dateRead: new Date(0),
 					isRead: false,
 					pID: dm.p_message_id,
+					bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
 				};
 				result.push(message);
 			}
@@ -778,10 +784,23 @@ export class DtoGenService {
 					dateRead: new Date(0),
 					isRead: false,
 					pID: dm.p_message_id,
+					bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
 				};
 				result.push(message);
 			}
 		}
 		return result;
+	}
+
+	messageBodyIsRoomID(messageBody: string): boolean {
+		// format: ##uuidv4##
+		const regexPattern = /^##(.+?)##$/;
+		const match = messageBody.match(regexPattern);
+
+		// if there's a match and the captured group (the content between ##) is a valid UUID, return true
+		if (match && validator.isUUID(match[1])) {
+			return true;
+		}
+		return false;
 	}
 }

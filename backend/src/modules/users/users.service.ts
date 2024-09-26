@@ -1434,6 +1434,7 @@ export class UsersService {
 					dateRead: new Date(0),
 					isRead: false,
 					pID: dm.p_message_id,
+					bodyIsRoomID: this.dtogen.messageBodyIsRoomID(dm.message.contents),
 				};
 				result.push(message);
 			}
