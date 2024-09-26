@@ -82,7 +82,7 @@ export class RoomAnalyticsService {
 		// get all the days from the first day the room was created until today if the room is not older than 7 days
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
-		const today: Date = addHours(startOfDay(new Date()), 3);
+		const today: Date = addHours(startOfDay(new Date()), 2);
 		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
 		if (!firstDay) {
 			return joins;
@@ -98,12 +98,14 @@ export class RoomAnalyticsService {
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
+		// allDays.push(addHours(day, 24 * 2));
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean =
 				userActivityPerDay.find((u) => {
 					return u.day.getTime() === d.getTime();
 				}) !== undefined;
+			console.log("Day exists", d, dayExists);
 			if (!dayExists) {
 				userActivityPerDay.push({ day: d, count: 0 });
 			}
