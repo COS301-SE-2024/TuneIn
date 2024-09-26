@@ -36,6 +36,29 @@ export class UsersController {
 		private readonly usersService: UsersService,
 		private readonly auth: AuthService,
 	) {}
+	// create endpoint that will send an email to dev team
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Post("feedback")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Send feedback to the development team" })
+	@ApiOkResponse({
+		description: "Feedback sent successfully.",
+	})
+	@ApiBadRequestResponse({
+		description: "Error sending feedback.",
+	})
+	async sendFeedback(
+		@Request() req: Request,
+		@Body()
+		feedback: {
+			feedback: string;
+		},
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		console.log("Feedback from user", userInfo.id, ":", feedback.feedback);
+		await this.usersService.sendEmail(userInfo.id, feedback.feedback);
+	}
 
 	//basic CRUD operations on the users table
 	/*
