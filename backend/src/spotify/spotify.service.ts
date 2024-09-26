@@ -389,24 +389,18 @@ export class SpotifyService {
 							return false;
 						}
 						try {
-							const audioFeatures =
-								typeof song.audio_features === "string"
-									? JSON.parse(song.audio_features)
-									: song.audio_features;
-							const trackInfo =
-								typeof song.track_info === "string"
-									? JSON.parse(song.track_info)
-									: song.track_info;
-
-							return (
-								audioFeatures === "" ||
-								trackInfo === "" ||
-								audioFeatures === empty || // Ensure `empty` is defined and comparable
-								trackInfo === empty
-							);
+							const audioFeatures = JSON.parse(
+								song.audio_features as string,
+							) as Spotify.AudioFeatures;
+							const trackInfo = JSON.parse(
+								song.track_info as string,
+							) as Spotify.Track;
+							console.dir(`${audioFeatures}`);
+							console.dir(`${trackInfo}`);
+							return false;
 						} catch (error) {
 							console.error("Error parsing JSON:", error);
-							return false; // Exclude songs if there's an error parsing
+							return true;
 						}
 					});
 					console.log(
@@ -424,44 +418,35 @@ export class SpotifyService {
 						if (needTrackInfo.length > 0) {
 							const tracks: Spotify.Track[] = await this.getManyTracks(
 								spotifyIDs,
-								this.userlessAPI,
 							);
-							const updateList: Prisma.songUpdateInput[] = [];
-							for (const track of tracks) {
-								const song: Prisma.songUpdateInput = {
-									spotify_id: track.id,
-									track_info: JSON.stringify(track),
-								};
-								updateList.push(song);
-							}
-							await this.prisma.song.updateMany({
-								where: {
-									spotify_id: {
-										in: spotifyIDs,
-									},
-								},
-								data: updateList,
-							});
+							await this.prisma.$transaction(
+								tracks.map((track) => {
+									return this.prisma.song.update({
+										where: {
+											spotify_id: track.id,
+										},
+										data: {
+											track_info: JSON.stringify(track),
+										},
+									});
+								}),
+							);
 						}
 
-						const updateList = [];
 						const features: Spotify.AudioFeatures[] =
 							await this.getManyAudioFeatures(spotifyIDs);
-						for (const feature of features) {
-							const song: Prisma.songUpdateInput = {
-								spotify_id: feature.id,
-								audio_features: JSON.stringify(feature),
-							};
-							updateList.push(song);
-						}
-						await this.prisma.song.updateMany({
-							where: {
-								spotify_id: {
-									in: spotifyIDs,
-								},
-							},
-							data: updateList,
-						});
+						await this.prisma.$transaction(
+							features.map((feature) => {
+								return this.prisma.song.update({
+									where: {
+										spotify_id: feature.id,
+									},
+									data: {
+										audio_features: JSON.stringify(feature),
+									},
+								});
+							}),
+						);
 					}
 				} catch (e) {
 					console.error("Error in fixSpotifyInfo");
