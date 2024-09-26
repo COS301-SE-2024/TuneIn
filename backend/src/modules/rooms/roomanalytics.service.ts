@@ -83,22 +83,18 @@ export class RoomAnalyticsService {
 		// if the room is older than 7 days, get all the days from 7 days ago until today
 		const allDays: Date[] = [];
 		const today: Date = addHours(startOfDay(new Date()), 3);
-		console.log("Today", today);
 		const firstDay: Date | undefined = userActivityPerDay[0]?.day;
 		if (!firstDay) {
 			return joins;
 		}
 		let day: Date = roomCreationDate ?? firstDay;
-		console.log("day", day);
 		day = subHours(startOfDay(day), 22);
-		console.log("day fr this time", day);
 		if (isBefore(day, subHours(today, 24 * 7))) {
 			day = subHours(today, 24 * 7);
 		}
 		//floor the day to the nearest day
 		// add the first day
 		while (isBefore(day, today)) {
-			console.log("adding day", day);
 			allDays.push(day);
 			day = addHours(day, 24);
 		}
@@ -106,20 +102,12 @@ export class RoomAnalyticsService {
 		for (const d of allDays) {
 			const dayExists: boolean =
 				userActivityPerDay.find((u) => {
-					console.log(
-						"Checking dayss",
-						u.day,
-						d,
-						u.day.getTime() === d.getTime(),
-					);
 					return u.day.getTime() === d.getTime();
 				}) !== undefined;
-			console.log("Day exists", dayExists);
 			if (!dayExists) {
 				userActivityPerDay.push({ day: d, count: 0 });
 			}
 		}
-		console.log("User activity per day", userActivityPerDay);
 		// add the missing days
 		for (const d of allDays) {
 			const dayExists: boolean =
@@ -283,12 +271,6 @@ export class RoomAnalyticsService {
 			GROUP BY hour, room_id
 			ORDER BY hour ASC;
 		`;
-		console.log(
-			"Getting room hourly participant analytics for room",
-			roomID,
-			"and user activity",
-			userActivityPerHour,
-		);
 		if (userActivityPerHour.length === 0) {
 			return participantsPerHour;
 		}
@@ -328,7 +310,6 @@ export class RoomAnalyticsService {
 		}
 		// sort the array
 		userActivityPerHour.sort((a, b) => a.hour.getTime() - b.hour.getTime());
-		console.log("User activity per hour", userActivityPerHour);
 		for (const hour of userActivityPerHour) {
 			const pph = {
 				count: 0,
@@ -336,7 +317,6 @@ export class RoomAnalyticsService {
 			};
 			pph.count = Number(hour.count);
 			pph.instance = hour.hour;
-			console.log("Adding", pph);
 			participantsPerHour.push(pph);
 		}
 		return participantsPerHour;
@@ -370,26 +350,14 @@ export class RoomAnalyticsService {
 			await this.getRoomSessionAnalytics(roomID);
 		roomAnalyticsParticipation.participants_per_hour =
 			await this.getHourlyParticipantAnalytics(roomID);
-		console.log(
-			"Room analytics participation, participant per hour",
-			roomAnalyticsParticipation.participants_per_hour,
-		);
 		roomAnalyticsParticipation.room_previews = await this.getRoomPreviews(
 			roomID,
-		);
-		console.log(
-			"Room analytics participation, room previews",
-			roomAnalyticsParticipation.room_previews,
 		);
 		roomAnalyticsParticipation.return_visits =
 			await this.getReturnVisitsAnalytics(
 				roomID,
 				roomAnalyticsParticipation.joins.all_time.total_joins,
 			);
-		console.log(
-			"Room analytics participation, return visits",
-			roomAnalyticsParticipation.return_visits,
-		);
 		return roomAnalyticsParticipation;
 	}
 
@@ -695,12 +663,6 @@ export class RoomAnalyticsService {
 			WHERE
 				room_id IN (${Prisma.join(roomIDs)});
 		`);
-		console.log(
-			"Average session duration yesterday",
-			averageSessionDurationYesterday,
-			"Average session duration today",
-			averageSessionDurationToday,
-		);
 		averageSessionDuration.duration = Number(
 			averageSessionDurationAllTime[0]?.avg_duration,
 		);
@@ -769,8 +731,6 @@ export class RoomAnalyticsService {
 			HAVING
 				COUNT(user_id) > 1;
 		`);
-
-		console.log(returningVisitorsYesterday, returningVisitorsToday);
 		const countYesterday = Number(returningVisitorsYesterday.length);
 		const countToday = Number(returningVisitorsToday.length);
 		returningVisitors.count = countToday + countYesterday;
