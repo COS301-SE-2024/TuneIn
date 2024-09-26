@@ -80,9 +80,10 @@ export const getExplicit = (song: RoomSongDto | undefined) => {
 export type RoomSongDto = {
 	spotifyID: string;
 	userID: string;
-	score?: number;
+	score: number;
 	index: number;
 	startTime?: Date;
-	track?: Track;
+	insertTime: Date;
 	pauseTime?: Date;
+	track: Track;
 };

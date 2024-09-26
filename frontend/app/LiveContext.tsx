@@ -6,9 +6,9 @@ import React, {
 	useRef,
 	useMemo,
 	useCallback,
+	useReducer,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import auth from "./services/AuthManagement";
 import * as utils from "./services/Utils";
 import bookmarks from "./services/BookmarkService";
 import {
@@ -20,27 +20,34 @@ import {
 	UserDto,
 } from "../api";
 import { EmojiReactionDto } from "./models/EmojiReactionDto";
-import { Emoji } from "rn-emoji-picker/dist/interfaces";
 import { RoomSongDto } from "./models/RoomSongDto";
 import { VoteDto } from "./models/VoteDto";
 import { QueueEventDto } from "./models/QueueEventDto";
 import { ObjectConfig } from "react-native-flying-objects";
-import { Text, Alert } from "react-native";
+import { Text } from "react-native";
 import { ChatEventDto } from "./models/ChatEventDto";
 import { PlaybackEventDto } from "./models/PlaybackEventDto";
-import { set } from "react-datepicker/dist/date_utils";
-import {
-	SpotifyApi,
-	Devices,
-	Device,
-	PlaybackState,
-} from "@spotify/web-api-ts-sdk";
-import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
 import { useAPI } from "./APIContext";
 import { AxiosResponse } from "axios";
 import { RequiredError } from "../api/base";
-import { SOCKET_EVENTS } from "../../common/constants";
-import { useLiveState, actionTypes } from "./hooks/useSocketState";
+import { SOCKET_EVENTS } from "../constants";
+import {
+	useLiveState,
+	actionTypes,
+	RESET_EVENTS,
+} from "./hooks/useSocketState";
+import {
+	LiveMessage,
+	RoomControls,
+	useRoomControls,
+} from "./hooks/useRoomControls";
+import {
+	DirectMessage,
+	DirectMessageControls,
+	useDirectMessageControls,
+} from "./hooks/useDMControls";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -50,7 +57,7 @@ if (!clientId) {
 }
 
 const TIMEOUT = 300000;
-interface SpotifyAuth {
+export interface SpotifyAuth {
 	exchangeCodeWithBackend: (
 		code: string,
 		state: string,
@@ -83,6 +90,7 @@ interface LiveContextType {
 	setRefreshUser: React.Dispatch<React.SetStateAction<boolean>>;
 	userBookmarks: RoomDto[];
 
+	getSocket: () => Socket | null;
 	sendPing: (timeout?: number) => Promise<void>;
 	getTimeOffset: () => void;
 	pollLatency: () => void;
@@ -136,497 +144,105 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
 	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
 	const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
-	const [mounted, setMounted] = useState<boolean>(false);
 	const [roomEmojiObjects, setRoomEmojiObjects] = useState<ObjectConfig[]>([]);
 	const [timeOffset, setTimeOffset] = useState<number>(0);
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
 	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>();
-	const [spotifyDevices, setSpotifyDevices] = useState<Devices>({
-		devices: [],
-	});
-	const [roomPlaying, setRoomPlaying] = useState<boolean>(false);
-	const { socketState, updateState } = useLiveState();
-
-	const sendIdentity = useCallback((socket: Socket) => {
-		if (
-			currentUser &&
-			!socketState.sentIdentity &&
-			!socketState.identityConfirmed
-		) {
-			const input: ChatEventDto = {
-				userID: currentUser.userID,
-			};
-			socket.emit(SOCKET_EVENTS.CONNECT, JSON.stringify(input));
-			updateState({ type: actionTypes.SENT_IDENTITY });
-		}
-	}, []);
-
-	const createSocketConnection = useCallback((): Socket | null => {
-		if (socketState.socketConnected) {
-			if (socketState.socketInitialized) {
-				console.error(
-					"Cannot create new socket connection: Socket already initialized",
-				);
-			} else {
-				console.error(
-					"Cannot create new socket connection: Socket connection already established",
-				);
-			}
-			return null;
-		}
-		if (!currentUser) {
-			console.error("Cannot create new socket connection: User not logged in");
-			return null;
-		}
-		updateState({ type: actionTypes.SOCKET_INITIALIZED });
-		console.log("==================== CREATING SOCKET ====================");
-		if (socketRef.current === null && currentUser) {
-			const s = io(utils.API_BASE_URL + "/live", {
-				transports: ["websocket"],
-				timeout: TIMEOUT,
-			});
-			s.on("connect", () => {
-				console.log("Connected to the server!");
-				updateState({ type: actionTypes.SOCKET_CONNECTED });
-				console.log(s.connected);
-				if (!socketState.sentIdentity) {
-					sendIdentity(s);
+	const [keepUserSynced, setKeepUserSynced] = useState<boolean>(true);
 	const [refreshUser, setRefreshUser] = useState<boolean>(false);
+	const [roomPlaying, setRoomPlaying] = useReducer(
+		(state: boolean, action: RoomSongDto | undefined) => {
+			if (action) {
+				console.log("action.startTime");
+				console.log(action.startTime);
+				console.log(typeof action.startTime);
+
+				//note action.startTime is TZ time as "2024-09-23T12:29:31.682Z"
+				//convert to Date object
+				let st: Date | undefined;
+				if (typeof action.startTime === "string") {
+					st = new Date(action.startTime);
+				} else {
+					st = action.startTime;
 				}
-				s.on(SOCKET_EVENTS.CONNECTED, (response) => {
-					console.log("Identity confirmed by server");
-					updateState({ type: actionTypes.IDENTITY_CONFIRMED });
-				});
-			});
-			s.on("disconnect", () => {
-				console.log("Disconnected from the server");
-				updateState({ type: actionTypes.RESET });
-			});
-			s.connect();
-			return s;
-		}
-		return null;
-	}, [currentUser, socketState]);
-	const socketRef = useRef<Socket | null>(null);
-	const initializeSocket = useCallback(() => {
-		console.log("Initializing socket");
-		if (!currentUser) {
-			return;
-		}
-		if (socketRef.current === null) {
-			// createSocket();
-		}
-
-		if (socketRef.current !== null) {
-			console.log("socketInitialized:", socketState.socketInitialized);
-			console.log("mounted:", mounted);
-			console.log("currentUser:", currentUser);
-			if (
-				!socketState.socketInitialized &&
-				mounted &&
-				currentUser !== undefined
-			) {
-				socketRef.current.on(
-					SOCKET_EVENTS.USER_JOINED_ROOM,
-					(response: ChatEventDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.USER_JOINED_ROOM}`,
-							response,
-						);
-						const u: UserDto = currentUser;
-						if (
-							response.body &&
-							response.body.sender.userID === currentUser.userID
-						) {
-							updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
-						}
-						roomControls.requestLiveChatHistory();
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.LIVE_CHAT_HISTORY,
-					(history: LiveChatMessageDto[]) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.LIVE_CHAT_HISTORY}`,
-							history,
-						);
-						const chatHistory = history.map((msg) => ({
-							message: msg,
-							me: msg.sender.userID === currentUser.userID,
-						}));
-						setRoomMessages(chatHistory);
-						updateState({ type: actionTypes.ROOM_CHAT_RECEIVED });
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.LIVE_MESSAGE,
-					(newMessage: ChatEventDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.LIVE_MESSAGE}`,
-							newMessage,
-						);
-						if (
-							!socketState.roomChatRequested ||
-							!socketState.roomChatReceived
-						) {
-							dmControls.requestDirectMessageHistory();
-						}
-
-						if (!newMessage.body) {
-							return;
-						}
-						const message = newMessage.body;
-						const me = message.sender.userID === currentUser.userID;
-						if (setRoomMessages) {
-							const messages: LiveMessage[] = [
-								...roomMessages,
-								{ message, me } as LiveMessage,
-							];
-							setRoomMessages(messages);
-						}
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.USER_LEFT_ROOM,
-					(response: ChatEventDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.USER_LEFT_ROOM}`,
-							response,
-						);
-						console.log("User left room:", response);
-					},
-				);
-
-				socketRef.current.on(SOCKET_EVENTS.ERROR, (response: ChatEventDto) => {
-					console.log(`SOCKET EVENT: ${SOCKET_EVENTS.ERROR}`, response);
-					console.error("Error:", response.errorMessage);
-				});
-
-				socketRef.current.on("connect", () => {
-					console.log(`SOCKET EVENT: connect`);
-					if (socketRef.current === null) {
-						console.error("Socket connection not initialized");
-						return Promise.reject(
-							new Error("Socket connection not initialized"),
-						);
+				if (st && st.getTime() < Date.now()) {
+					if (!action.pauseTime) {
+						return true;
 					}
-
-					updateState({ type: actionTypes.SOCKET_CONNECTED });
-					sendIdentity(socketRef.current);
-				});
-
-				socketRef.current.on(
-					SOCKET_EVENTS.CONNECTED,
-					(response: ChatEventDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.CONNECTED}`, response);
-						updateState({ type: actionTypes.IDENTITY_CONFIRMED });
-						if (currentRoom) {
-							joinRoom(currentRoom.roomID);
-						}
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.PLAY_MEDIA,
-					async (response: PlaybackEventDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.PLAY_MEDIA}`, response);
-						if (!response.UTC_time) {
-							console.log("UTC time not found");
-							return;
-						}
-
-						if (!response.spotifyID) {
-							throw new Error("Server did not return song ID");
-						}
-						const deviceID =
-							await roomControls.playbackHandler.getFirstDevice();
-						if (deviceID && deviceID !== null) {
-							await roomControls.playbackHandler.handlePlayback(
-								"play",
-								deviceID,
-								await calculateSeekTime(response.UTC_time, 0),
-							);
-						}
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.PAUSE_MEDIA,
-					async (response: PlaybackEventDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.PAUSE_MEDIA}`, response);
-						const deviceID =
-							await roomControls.playbackHandler.getFirstDevice();
-						if (deviceID && deviceID !== null) {
-							roomControls.playbackHandler.handlePlayback("pause", deviceID);
-						}
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.STOP_MEDIA,
-					async (response: PlaybackEventDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.STOP_MEDIA}`, response);
-						const deviceID =
-							await roomControls.playbackHandler.getFirstDevice();
-						if (deviceID && deviceID !== null) {
-							roomControls.playbackHandler.handlePlayback("pause", deviceID);
-						}
-					},
-				);
-
-				socketRef.current.on("time_sync_response", (data) => {
-					console.log(`SOCKET EVENT: time_sync_response`, data);
-					const t2 = Date.now();
-					const t1 = data.t1;
-					const offset = (t1 - data.t0 + (data.t2 - t2)) / 2;
-					setTimeOffset(offset);
-					console.log(`Time offset: ${offset} ms`);
-				});
-
-				socketRef.current.on(
-					SOCKET_EVENTS.DIRECT_MESSAGE,
-					(data: DirectMessageDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.DIRECT_MESSAGE}`, data);
-						const me = data.sender.userID === currentUser.userID;
-						const dm = {
-							message: data,
-							me: data.sender.userID === currentUser.userID,
-							messageSent: true,
-						} as DirectMessage;
-						if (me) {
-							//if (setDMTextBox) setDMTextBox("");
-						}
-						setDirectMessages((prevMessages) => {
-							const newMessages = [...prevMessages, dm];
-							newMessages.sort((a, b) => a.message.index - b.message.index);
-							return newMessages;
-						});
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.USER_ONLINE,
-					(data: { userID: string }) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_ONLINE}`, data);
-						if (data.userID === currentUser.userID) {
-							updateState({ type: actionTypes.DM_JOIN_CONFIRMED });
-						}
-						//we can use this to update the user's status
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.USER_OFFLINE,
-					(data: { userID: string }) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.USER_OFFLINE}`, data);
-						if (data.userID === currentUser.userID) {
-							updateState({ type: actionTypes.DM_LEAVE_CONFIRMED });
-						}
-						//we can use this to update the user's status
-					},
-				);
-
-				// (unused) for edits and deletes of direct messages
-				socketRef.current.on(SOCKET_EVENTS.CHAT_MODIFIED, (data) => {});
-
-				socketRef.current.on(
-					SOCKET_EVENTS.DM_HISTORY,
-					(data: DirectMessageDto[]) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.DM_HISTORY}`, data);
-						console.log("b");
-						console.log("c");
-						console.log("Setting DMs");
-						const dmHistory = data.map(
-							(msg: DirectMessageDto) =>
-								({
-									message: msg,
-									me: msg.sender.userID === currentUser.userID,
-									messageSent: true,
-								}) as DirectMessage,
-						);
-						dmHistory.sort((a, b) => a.message.index - b.message.index);
-						setDirectMessages(dmHistory);
-						updateState({ type: actionTypes.DMS_RECEIVED });
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.EMOJI_REACTION,
-					(reaction: EmojiReactionDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.EMOJI_REACTION}`,
-							reaction,
-						);
-						//add the new reaction to components
-						if (reaction.userID === currentUser.userID) {
-							return;
-						}
-						setRoomEmojiObjects((prev) => [
-							...prev,
-							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
-						]);
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.QUEUE_STATE,
-					(response: {
-						room: RoomDto;
-						songs: RoomSongDto[];
-						votes: VoteDto[];
-					}) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.QUEUE_STATE}`, response);
-						setCurrentRoom(response.room);
-						updateRoomQueue(response.songs);
-						setCurrentRoomVotes(response.votes);
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.SONG_ADDED,
-					(newSong: QueueEventDto) => {
-						console.log(`SOCKET EVENT: ${SOCKET_EVENTS.SONG_ADDED}`, newSong);
-						const newQueue = [...roomQueue, newSong.song];
-						updateRoomQueue(newQueue);
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.SONG_REMOVED,
-					(removedSong: QueueEventDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.SONG_REMOVED}`,
-							removedSong,
-						);
-						let newQueue = [...roomQueue];
-						newQueue = newQueue.filter(
-							(song) => song.spotifyID !== removedSong.song.spotifyID,
-						);
-						updateRoomQueue(newQueue);
-					},
-				);
-
-				socketRef.current.on(
-					SOCKET_EVENTS.VOTE_UPDATED,
-					(updatedSong: QueueEventDto) => {
-						console.log(
-							`SOCKET EVENT: ${SOCKET_EVENTS.VOTE_UPDATED}`,
-							updatedSong,
-						);
-						const i = roomQueue.findIndex(
-							(song) => song.spotifyID === updatedSong.song.spotifyID,
-						);
-						if (i === -1) {
-							return;
-						}
-						const newQueue = [...roomQueue];
-						newQueue[i] = updatedSong.song;
-						updateRoomQueue(newQueue);
-					},
-				);
-
-				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
-				socketRef.current.connect();
-				while (!socketRef.current.connected) {
-					console.log("awaiting socket connection");
+					return true;
 				}
-				sendIdentity(socketRef.current);
-				console.log("ajbfskdbfksdksdkjfnsdkjnvjkdnjkdsn");
+			} else {
+				return false;
+			}
+			return state;
+		},
+		false,
+	);
+	const {
+		socketState,
+		updateState,
+		socketEventsReceived,
+		handleReceivedEvent,
+	} = useLiveState();
+	const socketRef = useRef<Socket | null>(null);
+	const [socketCreationTime, setSocketCreationTime] = useState<Date>(
+		new Date(0),
+	);
+	const [idSendTime, setIDSendTime] = useState<Date>(new Date(0));
+	const [roomJoinSendTime, setRoomJoinSendTime] = useState<Date>(new Date(0));
+	const [dmJoinSendTime, setdmJoinSendTime] = useState<Date>(new Date(0));
 
-				updateState({ type: actionTypes.SOCKET_INITIALIZED });
-				pollLatency();
+	const sendIdentity = useCallback(
+		(socket: Socket) => {
+			console.log("Sending identity to server");
+			if (
+				currentUser &&
+				!socketState.sentIdentity &&
+				!socketState.identityConfirmed
+			) {
+				setIDSendTime(new Date());
+				const input: ChatEventDto = {
+					userID: currentUser.userID,
+				};
+				socket.emit(SOCKET_EVENTS.CONNECT_USER, JSON.stringify(input));
+				updateState({ type: actionTypes.SENT_IDENTITY });
 			}
-
-			if (!socketState.roomJoined && currentRoom && currentRoom.roomID) {
-				joinRoom(currentRoom.roomID);
-			}
-		}
-	}, [
-		// createSocket,
-		currentRoom,
-		currentUser,
-		mounted,
-	]);
-	const createSocket = useCallback(() => {
-		if (
-			socketRef.current !== null &&
-			socketRef.current.connected &&
-			!socketRef.current.disconnected
-		) {
-			console.error("Socket connection already created");
-			return;
-		}
-		if (
-			currentUser &&
-			(!socketRef.current ||
-				(socketState.socketConnected && socketRef.current.disconnected))
-		) {
-			socketRef.current = createSocketConnection();
-			if (socketRef.current !== null && !socketState.socketInitialized) {
-				initializeSocket();
-			}
-		}
-	}, []);
-	const getSocket = useCallback((): Socket | null => {
-		if (socketRef.current === null && currentUser) {
-			createSocket();
-		}
-		if (socketRef.current === null) {
-			// throw new Error("Socket connection not initialized");
-			console.error("Socket connection not initialized");
-		}
-		return socketRef.current;
-	}, [currentUser, createSocket]);
+		},
+		[
+			currentUser,
+			socketState.identityConfirmed,
+			socketState.sentIdentity,
+			updateState,
+		],
+	);
 
 	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
-		queue.sort((a, b) => a.index - b.index);
+		if (queue.length === 0) {
+			setRoomQueue([]);
+			setCurrentSong(undefined);
+			return;
+		}
+		console.log(`Room queue updating with input:`);
+		console.log(queue);
+		const head: RoomSongDto = queue[0];
+		let st: Date = new Date(0);
+		if (head.startTime) {
+			if (typeof head.startTime === "string") {
+				st = new Date(head.startTime);
+			} else {
+				st = head.startTime;
+			}
+		}
+		if (st === new Date(0) || st.getTime() > Date.now() || head.pauseTime) {
+			queue = queue.sort((a, b) => a.index - b.index);
+		} else {
+			let partialQueue = queue.slice(1);
+			partialQueue = partialQueue.sort((a, b) => a.index - b.index);
+			queue = [head, ...partialQueue];
+		}
 		setRoomQueue(queue);
-	}, []);
-
-	const setRoomID = useCallback((roomID: string) => {
-		rooms
-			.getRoomInfo(roomID)
-			.then((room: AxiosResponse<RoomDto>) => {
-				console.log("Room: " + room);
-				if (room.status === 401) {
-					//Unauthorized
-					//Auth header is either missing or invalid
-					setCurrentRoom(undefined);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-				} else if (room.status === 500) {
-					//Internal Server Error
-					//Something went wrong in the backend (unlikely lmao)
-					setCurrentRoom(undefined);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-					throw new Error("Internal Server Error");
-				} else {
-					const r: RoomDto = room.data;
-					setCurrentRoom(r);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
-					roomControls.requestRoomQueue();
-				}
-			})
-			.catch((error) => {
-				setCurrentRoom(undefined);
-				setRoomQueue([]);
-				setCurrentRoomVotes([]);
-				if (error instanceof RequiredError) {
-					// a required field is missing
-					throw new Error("Parameter missing from request to get room");
-				} else {
-					// some other error
-					throw new Error("Error getting room");
-				}
-			});
+		setCurrentSong(queue[0]);
 	}, []);
 
 	const spotifyAuth: SpotifyAuth = useMemo(
@@ -637,7 +253,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				redirectURI: string,
 			): Promise<SpotifyCallbackResponse> => {
 				try {
-					authAPI
+					return authAPI
 						.spotifyCallback(code, state)
 						.then((sp: AxiosResponse<SpotifyCallbackResponse>) => {
 							if (sp.status === 401) {
@@ -657,15 +273,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								throw new Error("Parameter missing from request to get user");
 							} else {
 								// some other error
+								console.error(error);
 								throw new Error("Error getting user");
 							}
 						});
 				} catch (error) {
-					console.error("Failed to exchange code with backend:", error);
+					console.error(error);
+					console.error(
+						"Something went wrong while exchanging code with backend",
+					);
+					throw new Error(
+						"Something went wrong while exchanging code with backend",
+					);
 				}
-				throw new Error(
-					"Something went wrong while exchanging code with backend",
-				);
 			},
 			getSpotifyTokens: async (): Promise<SpotifyTokenPair | null> => {
 				if (spotifyTokens && spotifyTokens.epoch_expiry > Date.now()) {
@@ -702,170 +322,69 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				console.error("Cannot get Spotify tokens without being authenticated");
 				return null;
 			},
+			userlessAPI: SpotifyApi.withClientCredentials(
+				SPOTIFY_CLIENT_ID,
+				SPOTIFY_CLIENT_SECRET,
+				[],
+			),
 		}),
 		[authAPI, authenticated, spotifyTokens],
 	);
 
-	const joinRoom = useCallback((roomID: string) => {
-		if (!currentUser) {
-			console.error("User cannot join room without being logged in");
-			return;
-		}
-
-		const socket = getSocket();
-		if (socket !== null) {
-			pollLatency();
-			const input: ChatEventDto = {
-				userID: currentUser.userID,
-				body: {
-					messageBody: "",
-					sender: currentUser,
-					roomID: roomID,
-					dateCreated: new Date().toISOString(),
-				},
-			};
-			socket.emit(SOCKET_EVENTS.JOIN_ROOM, JSON.stringify(input));
-			updateState({ type: actionTypes.SENT_ROOM_JOIN });
-
-			//request chat history
-			roomControls.requestLiveChatHistory();
-			updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
-		}
-	}, []);
-
-	const leaveRoom = useCallback(() => {
-		pollLatency();
-		if (!currentUser) {
-			console.error("User cannot leave room without being logged in");
-			return;
-		}
-
-		if (!currentRoom) {
-			console.error("User cannot leave room without being in a room");
-			return;
-		}
-
-		const socket = getSocket();
-		updateState({ type: actionTypes.START_ROOM_LEAVE });
-		if (socket !== null) {
-			const input: ChatEventDto = {
-				userID: currentUser.userID,
-				body: {
-					messageBody: "",
-					sender: currentUser,
-					roomID: currentRoom.roomID,
-					dateCreated: new Date().toISOString(),
-				},
-			};
-			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
-		}
-		setRoomMessages([]);
-		updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
-		setCurrentRoom(undefined);
-		setRoomQueue([]);
-	}, []);
-
-	const enterDM = useCallback((usernames: string[]) => {
-		pollLatency();
-		if (!currentUser) {
-			console.error("User is not logged in");
-			return;
-		}
-		const promises: Promise<UserDto>[] = usernames.map((username) =>
-			getUser(username),
-		);
-		Promise.all(promises)
-			.then((users) => {
-				const socket = getSocket();
-				setDmParticipants(users);
-				if (socket !== null) {
-					const input = {
-						userID: currentUser.userID,
-						participantID: users[0].userID,
-					};
-					socket.emit(SOCKET_EVENTS.ENTER_DM, JSON.stringify(input));
-					updateState({ type: actionTypes.REQUEST_DM_JOIN });
-					dmControls.requestDirectMessageHistory();
-					updateState({ type: actionTypes.DMS_REQUESTED });
-				}
-			})
-			.catch((error) => {
-				console.error("Failed to get user info:", error);
-			});
-	}, []);
-
-	const leaveDM = useCallback(() => {
-		pollLatency();
-		if (socketState.dmJoined) {
-			if (!currentUser) {
-				console.error("User is not logged in");
-				return;
-			}
-			const socket = getSocket();
-			if (socket !== null) {
-				const input = {
-					userID: currentUser.userID,
-				};
-				socket.emit(SOCKET_EVENTS.EXIT_DM, JSON.stringify(input));
-				console.log("emit exitDirectMessage with body:", input);
-				updateState({ type: actionTypes.REQUEST_DM_LEAVE });
-				setDmParticipants([]);
-				setDirectMessages([]);
-			}
-		}
-	}, []);
-
 	// Method to send a ping and wait for a response or timeout
-	const sendPing = useCallback((timeout: number = TIMEOUT): Promise<void> => {
-		if (pingSent) {
-			console.log("A ping is already waiting for a response. Please wait.");
-			return Promise.resolve();
-		}
-		const socket = getSocket();
-		if (socket !== null) {
-			const startTime = Date.now();
-			setPingSent(true);
-			socket.volatile.emit("ping", null, (hitTime: string) => {
-				console.log("Ping hit time:", hitTime);
-				console.log("Ping sent successfully.");
-				const roundTripTime = Date.now() - startTime;
-				console.log(`Ping round-trip time: ${roundTripTime}ms`);
-				setPingSent(false);
-				setBackendLatency(roundTripTime);
-			});
-
-			return new Promise<void>((resolve, reject) => {
-				// const startTime = Date.now();
+	const sendPing = useCallback(
+		(timeout: number = TIMEOUT): Promise<void> => {
+			if (pingSent) {
+				console.log("A ping is already waiting for a response. Please wait.");
+				return Promise.resolve();
+			}
+			const socket = socketRef.current;
+			if (socket !== null) {
+				const startTime = Date.now();
 				setPingSent(true);
+				socket.volatile.emit("ping", null, (hitTime: string) => {
+					console.log("Ping hit time:", hitTime);
+					console.log("Ping sent successfully.");
+					const roundTripTime = Date.now() - startTime;
+					console.log(`Ping round-trip time: ${roundTripTime}ms`);
+					setPingSent(false);
+					setBackendLatency(roundTripTime);
+				});
 
-				// Set up a timeout
-				// const timeoutId = setTimeout(() => {
-				// 	pingSent = false;
-				// 	console.log("Ping timed out.");
-				// 	reject(new Error("Ping timed out"));
-				// }, timeout);
+				return new Promise<void>((resolve, reject) => {
+					// const startTime = Date.now();
+					setPingSent(true);
 
-				// Send the ping message with a callback
-				// socket.volatile.emit("ping", null, () => {
-				// 	console.log("Ping sent successfully.");
-				// 	clearTimeout(timeoutId);
-				// 	const roundTripTime = Date.now() - startTime;
-				// 	console.log(`Ping round-trip time: ${roundTripTime}ms`);
-				// 	pingSent = false;
-				// 	backendLatency = roundTripTime;
-				// 	resolve();
-				// });
-			}).catch((error) => {
-				console.error("Ping failed:", error.message);
-				// Optionally, retry sending the ping here
-				throw error; // Re-throw the error to maintain the Promise<void> type
-			});
-		}
-		return Promise.resolve();
-	}, []);
+					// Set up a timeout
+					// const timeoutId = setTimeout(() => {
+					// 	pingSent = false;
+					// 	console.log("Ping timed out.");
+					// 	reject(new Error("Ping timed out"));
+					// }, timeout);
+
+					// Send the ping message with a callback
+					// socket.volatile.emit("ping", null, () => {
+					// 	console.log("Ping sent successfully.");
+					// 	clearTimeout(timeoutId);
+					// 	const roundTripTime = Date.now() - startTime;
+					// 	console.log(`Ping round-trip time: ${roundTripTime}ms`);
+					// 	pingSent = false;
+					// 	backendLatency = roundTripTime;
+					// 	resolve();
+					// });
+				}).catch((error) => {
+					console.error("Ping failed:", error.message);
+					// Optionally, retry sending the ping here
+					throw error; // Re-throw the error to maintain the Promise<void> type
+				});
+			}
+			return Promise.resolve();
+		},
+		[pingSent],
+	);
 
 	const getTimeOffset = useCallback(() => {
-		const socket = getSocket();
+		const socket = socketRef.current;
 		if (socket !== null) {
 			let t0 = Date.now();
 			socket.emit("time_sync", { t0: Date.now() });
@@ -878,7 +397,193 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			getTimeOffset();
 			console.log("Awaiting time offset");
 		});
-	}, []);
+	}, [getTimeOffset, sendPing]);
+
+	const roomControls: RoomControls = useRoomControls({
+		currentUser,
+		keepUserSynced,
+		currentRoom,
+		socket: socketRef.current,
+		currentSong,
+		roomQueue,
+		setRoomQueue,
+		spotifyTokens,
+		spotifyAuth,
+		roomPlaying,
+		pollLatency,
+	});
+
+	const setRoomID = useCallback(
+		(roomID: string) => {
+			console.log(`setRoomID`);
+			rooms
+				.getRoomInfo(roomID)
+				.then((room: AxiosResponse<RoomDto>) => {
+					if (room.status === 401) {
+						//Unauthorized
+						//Auth header is either missing or invalid
+						setCurrentRoom(undefined);
+						setRoomQueue([]);
+						setCurrentRoomVotes([]);
+					} else if (room.status === 500) {
+						//Internal Server Error
+						//Something went wrong in the backend (unlikely lmao)
+						setCurrentRoom(undefined);
+						setRoomQueue([]);
+						setCurrentRoomVotes([]);
+						throw new Error("Internal Server Error");
+					} else {
+						const r: RoomDto = room.data;
+						setCurrentRoom(r);
+						setRoomQueue([]);
+						setCurrentRoomVotes([]);
+						roomControls.requestRoomQueue();
+					}
+				})
+				.catch((error) => {
+					setCurrentRoom(undefined);
+					setRoomQueue([]);
+					setCurrentRoomVotes([]);
+					if (error instanceof RequiredError) {
+						// a required field is missing
+						throw new Error("Parameter missing from request to get room");
+					} else {
+						// some other error
+						throw new Error("Error getting room");
+					}
+				});
+		},
+		[roomControls, rooms],
+	);
+
+	const joinRoom = useCallback<(roomID: string) => void>(
+		(roomID: string) => {
+			if (!currentUser) {
+				console.error("User cannot join room without being logged in");
+				return;
+			}
+
+			setRoomID(roomID);
+
+			const socket = socketRef.current;
+			if (socket !== null) {
+				setRoomJoinSendTime(new Date());
+				// pollLatency();
+				const input: ChatEventDto = {
+					userID: currentUser.userID,
+					body: {
+						messageID: "",
+						messageBody: "",
+						sender: currentUser,
+						roomID: roomID,
+						dateCreated: new Date().toISOString(),
+					},
+				};
+				socket.emit(SOCKET_EVENTS.JOIN_ROOM, JSON.stringify(input));
+				updateState({ type: actionTypes.SENT_ROOM_JOIN });
+
+				//request chat history
+				roomControls.requestLiveChatHistory();
+				updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
+			}
+		},
+		[currentUser, roomControls, setRoomID, updateState],
+	);
+
+	const leaveRoom = useCallback(() => {
+		// pollLatency();
+		if (!currentUser) {
+			console.error("User cannot leave room without being logged in");
+			return;
+		}
+
+		if (!currentRoom) {
+			console.error("User cannot leave room without being in a room");
+			return;
+		}
+
+		const socket = socketRef.current;
+		updateState({ type: actionTypes.START_ROOM_LEAVE });
+		if (socket !== null) {
+			const input: ChatEventDto = {
+				userID: currentUser.userID,
+				body: {
+					messageID: "",
+					messageBody: "",
+					sender: currentUser,
+					roomID: currentRoom.roomID,
+					dateCreated: new Date().toISOString(),
+				},
+			};
+			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
+		}
+		setRoomMessages([]);
+		updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
+		setCurrentRoom(undefined);
+		setRoomQueue([]);
+		updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+	}, [currentRoom, currentUser, updateState]);
+
+	const dmControls: DirectMessageControls = useDirectMessageControls({
+		currentUser,
+		dmParticipants,
+		socket: socketRef.current,
+		pollLatency,
+	});
+
+	const enterDM = useCallback(
+		(usernames: string[]) => {
+			// pollLatency();
+			if (!currentUser) {
+				console.error("User is not logged in");
+				return;
+			}
+			const promises: Promise<UserDto>[] = usernames.map((username) =>
+				getUser(username),
+			);
+			Promise.all(promises)
+				.then((users) => {
+					const socket = socketRef.current;
+					setDmParticipants(users);
+					if (socket !== null) {
+						setdmJoinSendTime(new Date());
+						const input = {
+							userID: currentUser.userID,
+							participantID: users[0].userID,
+						};
+						socket.emit(SOCKET_EVENTS.ENTER_DM, JSON.stringify(input));
+						updateState({ type: actionTypes.REQUEST_DM_JOIN });
+						dmControls.requestDirectMessageHistory();
+						updateState({ type: actionTypes.DMS_REQUESTED });
+					}
+				})
+				.catch((error) => {
+					console.error("Failed to get user info:", error);
+				});
+		},
+		[currentUser, dmControls, getUser, updateState],
+	);
+
+	const leaveDM = useCallback(() => {
+		// pollLatency();
+		if (socketState.dmJoined) {
+			if (!currentUser) {
+				console.error("User is not logged in");
+				return;
+			}
+			const socket = socketRef.current;
+			if (socket !== null) {
+				const input = {
+					userID: currentUser.userID,
+				};
+				socket.emit(SOCKET_EVENTS.EXIT_DM, JSON.stringify(input));
+				updateState({ type: actionTypes.REQUEST_DM_LEAVE });
+				setDmParticipants([]);
+				setDirectMessages([]);
+				updateState({ type: actionTypes.CLEAR_DM_STATE });
+			}
+		}
+	}, [currentUser, socketState.dmJoined, updateState]);
 
 	const calculateSeekTime = useCallback(
 		async (startTimeUtc: number, mediaDurationMs: number): Promise<number> => {
@@ -904,712 +609,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			console.log(`Seek position: ${seekPosition} ms`);
 			return seekPosition;
 		},
-		[],
+		[backendLatency, pollLatency, timeOffset],
 	);
-
-	const dmControls: DirectMessageControls = useMemo(() => {
-		return {
-			sendDirectMessage: function (message: DirectMessage): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				pollLatency();
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-
-				if (dmParticipants.length === 0) {
-					console.error("User is not sending a message to anyone");
-					return;
-				}
-
-				if (message.message.messageBody.trim()) {
-					message.message.sender = currentUser;
-					message.message.recipient = dmParticipants[0];
-					socket.emit(
-						SOCKET_EVENTS.DIRECT_MESSAGE,
-						JSON.stringify(message.message),
-					);
-				}
-			},
-
-			editDirectMessage: function (message: DirectMessage): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				pollLatency();
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-
-				if (dmParticipants.length === 0) {
-					console.error("User is not sending a message to anyone");
-					return;
-				}
-
-				if (message.message.messageBody.trim()) {
-					let payload = {
-						userID: currentUser.userID,
-						participantID: dmParticipants[0].userID,
-						action: "edit",
-						message: message.message,
-					};
-					socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
-				}
-			},
-
-			deleteDirectMessage: function (message: DirectMessage): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-
-				if (dmParticipants.length === 0) {
-					console.error("User is not sending a message to anyone");
-					return;
-				}
-
-				let payload = {
-					userID: currentUser.userID,
-					participantID: dmParticipants[0].userID,
-					action: "delete",
-					message: message.message,
-				};
-				socket.emit(SOCKET_EVENTS.MODIFY_DM, JSON.stringify(payload));
-			},
-
-			requestDirectMessageHistory: function (): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				if (socketState.dmsRequested) {
-					console.log("Already requested DM history");
-					return;
-				}
-
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-
-				if (dmParticipants.length === 0) {
-					console.error("User is not sending a message to anyone");
-					return;
-				}
-
-				const input = {
-					userID: currentUser.userID,
-					participantID: dmParticipants[0].userID,
-				};
-				socket.emit(
-					SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-					JSON.stringify(input),
-				);
-				updateState({ type: actionTypes.DMS_REQUESTED });
-			},
-		};
-	}, [currentUser, dmParticipants]);
-
-	const roomControls: RoomControls = useMemo(() => {
-		return {
-			sendLiveChatMessage: function (message: string): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				pollLatency();
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-
-				if (!currentRoom) {
-					console.error("User is not in a room");
-					return;
-				}
-
-				if (message.trim()) {
-					const newMessage = {
-						messageBody: message,
-						sender: currentUser,
-						roomID: currentRoom.roomID,
-						dateCreated: new Date().toISOString(),
-					};
-					const input: ChatEventDto = {
-						userID: currentUser.userID,
-						body: newMessage,
-					};
-					socket.emit(SOCKET_EVENTS.LIVE_MESSAGE, JSON.stringify(input));
-				}
-			},
-
-			sendReaction: function (emoji: string): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				if (!currentUser) {
-					return;
-				}
-
-				const newReaction: EmojiReactionDto = {
-					date_created: new Date(),
-					body: emoji,
-					userID: currentUser.userID,
-				};
-				//make it volatile so that it doesn't get queued up
-				//nothing will be lost if it doesn't get sent
-				socket.volatile.emit(
-					SOCKET_EVENTS.EMOJI_REACTION,
-					JSON.stringify(newReaction),
-				);
-			},
-
-			requestLiveChatHistory: function (): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				// if (this.requestingLiveChatHistory) {
-				if (socketState.roomChatRequested) {
-					console.log("Already requested live chat history");
-					return;
-				}
-				if (!currentRoom) {
-					console.error("User is not in a room");
-					return;
-				}
-
-				if (!currentUser) {
-					console.error("User is not logged in");
-					return;
-				}
-				const input: ChatEventDto = {
-					userID: currentUser.userID,
-					body: {
-						messageBody: "",
-						sender: currentUser,
-						roomID: currentRoom.roomID,
-						dateCreated: new Date().toISOString(),
-					},
-				};
-				socket.emit(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY, JSON.stringify(input));
-				updateState({ type: actionTypes.ROOM_CHAT_REQUESTED });
-			},
-
-			canControlRoom: function (): boolean {
-				if (!currentRoom) {
-					return false;
-				}
-				if (!currentUser) {
-					return false;
-				}
-				if (!currentRoom.creator) {
-					return false;
-				}
-				if (currentRoom.creator.userID === currentUser.userID) {
-					return true;
-				}
-				return false;
-			},
-
-			requestRoomQueue: function (): void {
-				const socket = getSocket();
-				if (!socket) {
-					console.error("Socket connection not initialized");
-					return;
-				}
-
-				console.log("Requesting room queue");
-				if (!currentRoom) {
-					return;
-				}
-				if (!currentUser) {
-					return;
-				}
-				const input: QueueEventDto = {
-					song: {
-						spotifyID: "123",
-						userID: currentUser.userID,
-						index: -1,
-					},
-					roomID: currentRoom.roomID,
-					createdAt: new Date(),
-				};
-				socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			},
-
-			playbackHandler: {
-				spotifyDevices,
-				handlePlayback: async function (
-					action: string,
-					deviceID: string,
-					offset?: number,
-				): Promise<void> {
-					try {
-						if (!spotifyTokens) {
-							throw new Error("Spotify tokens not found");
-						}
-						if (!currentSong) {
-							throw new Error("No song is currently playing");
-						}
-
-						const uri: string = `spotify:track:${currentSong.spotifyID}`;
-						if (!validTrackUri(uri)) {
-							throw new Error("Invalid track URI");
-						}
-
-						const activeDevice =
-							await roomControls.playbackHandler.getFirstDevice();
-						if (!activeDevice) {
-							Alert.alert("Please connect a device to Spotify");
-							return;
-						}
-						console.log("active device:", activeDevice);
-						console.log("(action, uri, offset):", action, uri, offset);
-
-						let url = "";
-						let method = "";
-						let body: any = null;
-
-						switch (action) {
-							case "play":
-								if (uri) {
-									body = {
-										uris: [uri],
-										position_ms: offset || 0,
-									};
-								}
-								url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceID}`;
-								method = "PUT";
-								break;
-							case "pause":
-								url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceID}`;
-								method = "PUT";
-								break;
-							case "next":
-								url = `https://api.spotify.com/v1/me/player/next?device_id=${deviceID}`;
-								method = "POST";
-								break;
-							case "previous":
-								url = `https://api.spotify.com/v1/me/player/previous?device_id=${deviceID}`;
-								method = "POST";
-								break;
-							default:
-								throw new Error("Unknown action");
-						}
-
-						const response = await fetch(url, {
-							method,
-							headers: {
-								Authorization: `Bearer ${spotifyTokens.tokens.access_token}`,
-								"Content-Type": "application/json",
-							},
-							body: body ? JSON.stringify(body) : undefined,
-						});
-
-						console.log("Request URL:", url);
-						console.log("Request Method:", method);
-						if (body) {
-							console.log("Request Body:", JSON.stringify(body, null, 2));
-						}
-
-						if (response.ok) {
-							console.log("Playback action successful");
-							// if (action === "play") {
-							// 	this._isPlaying = true;
-							// } else if (action === "pause") {
-							// 	this._isPlaying = false;
-							// }
-						} else {
-							throw new Error(`HTTP error! Status: ${response.status}`);
-						}
-					} catch (err) {
-						console.error("An error occurred while controlling playback", err);
-					}
-				},
-				getFirstDevice: async function (): Promise<string> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					try {
-						let d = spotifyDevices;
-						if (!d.devices || d.devices.length === 0) {
-							d = {
-								devices: await roomControls.playbackHandler.getDevices(),
-							};
-						}
-
-						if (d.devices.length > 0) {
-							const first: Device = d.devices[0];
-							if (!first.id) {
-								throw new Error("Device ID not found");
-							}
-							return first.id;
-						} else {
-							Alert.alert(
-								"No Devices Found",
-								"No devices are currently active.",
-							);
-							throw new Error("No devices found");
-						}
-					} catch (err) {
-						console.error("An error occurred while getting the device ID", err);
-						throw err;
-					}
-				},
-				getDevices: async function (): Promise<Device[]> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					try {
-						const api = SpotifyApi.withAccessToken(
-							clientId,
-							spotifyTokens.tokens,
-						);
-						const data: Devices = await api.player.getAvailableDevices();
-						setSpotifyDevices(data);
-						return data.devices;
-					} catch (err) {
-						console.error("An error occurred while fetching devices", err);
-						throw err;
-					}
-				},
-				getDeviceIDs: async function (): Promise<string[]> {
-					let devices: Device[];
-					if (spotifyDevices.devices.length === 0) {
-						devices = await roomControls.playbackHandler.getDevices();
-					} else {
-						devices = spotifyDevices.devices;
-					}
-					const result: string[] = [];
-					for (const device of devices) {
-						if (device.id) {
-							result.push(device.id);
-						}
-					}
-					return result;
-				},
-				setActiveDevice: async function (
-					deviceID: string | null,
-				): Promise<void> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					if (!deviceID) {
-						throw new Error("Cannot set active device to null");
-					}
-					try {
-						const api = SpotifyApi.withAccessToken(
-							clientId,
-							spotifyTokens.tokens,
-						);
-
-						//fetch devices again to get the latest list
-						const devices = await api.player.getAvailableDevices();
-						for (const device of devices.devices) {
-							if (device.id === deviceID) {
-								await api.player.transferPlayback([deviceID]);
-								console.log("Playback transferred to device:", deviceID);
-								return;
-							}
-						}
-						throw new Error("Device not found");
-					} catch (err) {
-						console.error("An error occurred while transferring playback", err);
-						throw err;
-					}
-				},
-				userListeningToRoom: async function (
-					currentTrackUri: string,
-				): Promise<boolean> {
-					if (!spotifyTokens) {
-						throw new Error("Spotify tokens not found");
-					}
-					if (!validTrackUri(currentTrackUri)) {
-						throw new Error("Invalid track URI");
-					}
-					if (roomPlaying) {
-						const api = SpotifyApi.withAccessToken(
-							clientId,
-							spotifyTokens.tokens,
-						);
-						const playbackState: PlaybackState =
-							await api.player.getPlaybackState();
-						if (!playbackState) {
-							return false;
-						}
-						if (playbackState.item.uri === currentTrackUri) {
-							return true;
-						}
-					}
-					return false;
-				},
-				startPlayback: function (): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					pollLatency();
-					if (!currentUser) {
-						console.error("User is not logged in");
-						return;
-					}
-					if (!currentRoom) {
-						console.error("User is not in a room");
-						return;
-					}
-					const input: PlaybackEventDto = {
-						userID: currentUser.userID,
-						roomID: currentRoom.roomID,
-						spotifyID: null,
-						UTC_time: null,
-					};
-					socket.emit(SOCKET_EVENTS.INIT_PLAY, JSON.stringify(input));
-				},
-
-				pausePlayback: function (): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					pollLatency();
-					if (!currentUser) {
-						console.error("User is not logged in");
-						return;
-					}
-					if (!currentRoom) {
-						console.error("User is not in a room");
-						return;
-					}
-					const input: PlaybackEventDto = {
-						userID: currentUser.userID,
-						roomID: currentRoom.roomID,
-						spotifyID: null,
-						UTC_time: null,
-					};
-					socket.emit(SOCKET_EVENTS.INIT_PAUSE, JSON.stringify(input));
-				},
-
-				stopPlayback: function (): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					pollLatency();
-					if (!currentUser) {
-						console.error("User is not logged in");
-						return;
-					}
-					if (!currentRoom) {
-						console.error("User is not in a room");
-						return;
-					}
-					const input: PlaybackEventDto = {
-						userID: currentUser.userID,
-						roomID: currentRoom.roomID,
-						spotifyID: null,
-						UTC_time: null,
-					};
-					socket.emit(SOCKET_EVENTS.INIT_STOP, JSON.stringify(input));
-				},
-
-				nextTrack: function (): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					pollLatency();
-					if (!currentUser) {
-						console.error("User is not logged in");
-						return;
-					}
-					if (!currentRoom) {
-						console.error("User is not in a room");
-						return;
-					}
-					const input: PlaybackEventDto = {
-						userID: currentUser.userID,
-						roomID: currentRoom.roomID,
-						spotifyID: null,
-						UTC_time: null,
-					};
-					socket.emit(SOCKET_EVENTS.INIT_SKIP, JSON.stringify(input));
-				},
-			},
-			queue: {
-				enqueueSong: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					console.log("Enqueueing song", song);
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
-					console.log("emitted: enqueueSong");
-					socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-					console.log("emitted: requestQueue");
-				},
-				dequeueSong: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					console.log("Dequeueing song", song);
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
-					console.log("emitted: dequeueSong");
-					socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-					console.log("emitted: requestQueue");
-				},
-				upvoteSong: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.UPVOTE_SONG, JSON.stringify(input));
-				},
-				downvoteSong: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.DOWNVOTE_SONG, JSON.stringify(input));
-				},
-				swapSongVote: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.SWAP_SONG_VOTE, JSON.stringify(input));
-				},
-				undoSongVote: function (song: RoomSongDto): void {
-					const socket = getSocket();
-					if (!socket) {
-						console.error("Socket connection not initialized");
-						return;
-					}
-
-					if (!currentRoom) {
-						return;
-					}
-					if (!currentUser) {
-						return;
-					}
-					const input: QueueEventDto = {
-						song: song,
-						roomID: currentRoom.roomID,
-						createdAt: new Date(),
-					};
-					socket.emit(SOCKET_EVENTS.UNDO_SONG_VOTE, JSON.stringify(input));
-				},
-			},
-		};
-	}, [
-		getSocket,
-		// pollLatency,
-		currentUser,
-		currentRoom,
-		spotifyTokens,
-		spotifyDevices,
-		currentSong,
-		roomPlaying,
-		// socketState,
-	]);
 
 	// let t: string | null = tokenState.token;
 	// if (t === null) {
@@ -1631,23 +632,610 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	// 		});
 	// }
 
-	// on mount, initialize the socket
-	useEffect(() => {
-		socketRef.current = createSocketConnection();
-		setMounted(true);
-		initializeSocket();
-		const s = socketRef.current;
-		return () => {
-			if (s !== null) {
-				leaveRoom();
-				s.disconnect();
+	const getUserDetails = useCallback(
+		async (spotifyAuth: SpotifyAuth) => {
+			if (tokenState.token !== null) {
+				console.log(`getUserDetails`);
+				if (!currentUser || refreshUser) {
+					console.log(`getUserDetails: getting user`);
+					users
+						.getProfile()
+						.then((u: AxiosResponse<UserDto>): void => {
+							if (u.status === 401) {
+								//Unauthorized
+								//Auth header is either missing or invalid
+								setCurrentUser(undefined);
+							} else if (u.status === 500) {
+								//Internal Server Error
+								//Something went wrong in the backend (unlikely lmao)
+								throw new Error("Internal Server Error");
+							} else {
+								setCurrentUser(u.data);
+								setRefreshUser(false);
+							}
+						})
+						.catch((error: Error): void => {
+							if (error instanceof RequiredError) {
+								// a required field is missing
+								throw new Error("Parameter missing from request to get user");
+							} else {
+								// some other error
+								throw new Error("Error getting user");
+							}
+						});
+				}
+
+				if (userBookmarks.length === 0) {
+					console.log(`getUserDetails: getting bookmarks`);
+					bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
+						setUserBookmarks(fetchedBookmarks);
+					});
+				}
+
+				// get spotify tokens
+				if (!spotifyTokens) {
+					console.log(`getUserDetails: getting spotify tokens`);
+					spotifyAuth
+						.getSpotifyTokens()
+						.then((t) => {
+							if (t !== null) {
+								setSpotifyTokens(t);
+								roomControls.playbackHandler.getDevices();
+							}
+						})
+						.catch((error) => {
+							console.error("Failed to get Spotify tokens:", error);
+						});
+				}
 			}
-			setMounted(false);
-		};
-	}, []);
+		},
+		[
+			currentUser,
+			refreshUser,
+			roomControls.playbackHandler,
+			spotifyTokens,
+			tokenState.token,
+			userBookmarks.length,
+			users,
+		],
+	);
+
+	const attachListeners = useCallback(
+		(socket: Socket | null) => {
+			if (socket !== null) {
+				socket.removeAllListeners();
+
+				if (!currentUser) {
+					console.error(
+						"Cannot listen for socket events without being logged in",
+					);
+					return;
+				}
+
+				socket.on(SOCKET_EVENTS.USER_JOINED_ROOM, (response: ChatEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.USER_JOINED_ROOM);
+					const u: UserDto = currentUser;
+					// if (
+					// 	response.body &&
+					// 	response.body.sender.userID === currentUser.userID
+					// ) {
+					// 	updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
+					// }
+					updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
+					roomControls.requestLiveChatHistory();
+				});
+
+				socket.on(
+					SOCKET_EVENTS.LIVE_CHAT_HISTORY,
+					(history: LiveChatMessageDto[]) => {
+						handleReceivedEvent(SOCKET_EVENTS.LIVE_CHAT_HISTORY);
+						const chatHistory = history.map((msg) => ({
+							message: msg,
+							me: msg.sender.userID === currentUser.userID,
+						}));
+						setRoomMessages(chatHistory);
+					},
+				);
+
+				socket.on(SOCKET_EVENTS.LIVE_MESSAGE, (newMessage: ChatEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.LIVE_MESSAGE);
+					if (!socketState.roomChatRequested || !socketState.roomChatReceived) {
+						dmControls.requestDirectMessageHistory();
+					}
+
+					if (!newMessage.body) {
+						return;
+					}
+					const message = newMessage.body;
+					const me = message.sender.userID === currentUser.userID;
+					if (setRoomMessages) {
+						const messages: LiveMessage[] = [
+							...roomMessages,
+							{ message, me } as LiveMessage,
+						];
+						setRoomMessages(messages);
+					}
+				});
+
+				socket.on(SOCKET_EVENTS.USER_LEFT_ROOM, (response: ChatEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.USER_LEFT_ROOM);
+				});
+
+				socket.on(SOCKET_EVENTS.ERROR, (response: ChatEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.ERROR);
+					console.error("Socket Error from Server:", response.errorMessage);
+				});
+
+				socket.on("connect", () => {
+					handleReceivedEvent("connect");
+					console.log("Connected to the server!");
+					if (socket === null) {
+						console.error("Socket connection not initialized");
+						throw new Error("Socket connection not initialized");
+					}
+					sendIdentity(socket);
+				});
+
+				socket.on(SOCKET_EVENTS.CONNECTED, (response: ChatEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.CONNECTED);
+					console.log("Identity confirmed by server");
+					if (currentRoom) {
+						joinRoom(currentRoom.roomID);
+					}
+				});
+
+				socket.on("connect_error", (error) => {
+					handleReceivedEvent("connect_error");
+					if (socket.active) {
+						// temporary failure, the socket will automatically try to reconnect
+						console.error(
+							"Socket had an error while connecting. Socket.io will reconnect accordingly",
+						);
+					} else {
+						console.error("Failed connecting to the socket server");
+						console.error("Socket.io reason for connection failure: " + error);
+						socket.connect();
+					}
+				});
+
+				socket.on("disconnect", (reason) => {
+					handleReceivedEvent("disconnect");
+					if (socket.active) {
+						// temporary disconnection, the socket will automatically try to reconnect
+						console.error(
+							"Socket temporarily disconnected. Socket.io will reconnect accordingly",
+						);
+					} else {
+						console.error("Disconnected from the server");
+						console.error("Socket.io reason for disconnection: " + reason);
+					}
+				});
+
+				socket.on(
+					SOCKET_EVENTS.CURRENT_MEDIA,
+					async (response: PlaybackEventDto) => {
+						handleReceivedEvent(SOCKET_EVENTS.CURRENT_MEDIA);
+						if (!response.UTC_time) {
+							console.log("UTC time not found");
+							return;
+						}
+
+						if (!response.spotifyID) {
+							throw new Error("Server did not return song ID");
+						}
+
+						if (response.song && response.song !== null) {
+							setCurrentSong(response.song);
+						}
+
+						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
+							if (!currentSong) {
+								return;
+							}
+							if (!keepUserSynced) {
+								return;
+							}
+							if (
+								roomControls.state &&
+								!roomControls.state.is_playing &&
+								roomControls.state.item.id !== currentSong.spotifyID
+							) {
+								await roomControls.playbackHandler.handlePlayback("play");
+							}
+						}
+					},
+				);
+
+				socket.on(
+					SOCKET_EVENTS.PLAY_MEDIA,
+					async (response: PlaybackEventDto) => {
+						handleReceivedEvent(SOCKET_EVENTS.PLAY_MEDIA);
+						if (!response.UTC_time) {
+							console.log("UTC time not found");
+							return;
+						}
+
+						if (!response.spotifyID) {
+							throw new Error("Server did not return song ID");
+						}
+
+						if (response.song && response.song !== null) {
+							setCurrentSong(response.song);
+						}
+
+						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
+							if (!currentSong) {
+								return;
+							}
+							if (!keepUserSynced) {
+								return;
+							}
+							if (
+								roomControls.state &&
+								!roomControls.state.is_playing &&
+								roomControls.state.item.id !== currentSong.spotifyID
+							) {
+								await roomControls.playbackHandler.handlePlayback("play");
+							}
+						}
+					},
+				);
+
+				socket.on(
+					SOCKET_EVENTS.PAUSE_MEDIA,
+					async (response: PlaybackEventDto) => {
+						handleReceivedEvent(SOCKET_EVENTS.PAUSE_MEDIA);
+						if (await roomControls.playbackHandler.userListeningToRoom()) {
+							await roomControls.playbackHandler.handlePlayback("pause");
+						}
+					},
+				);
+
+				socket.on(
+					SOCKET_EVENTS.STOP_MEDIA,
+					async (response: PlaybackEventDto) => {
+						handleReceivedEvent(SOCKET_EVENTS.STOP_MEDIA);
+						if (await roomControls.playbackHandler.userListeningToRoom()) {
+							await roomControls.playbackHandler.handlePlayback("pause");
+						}
+					},
+				);
+
+				socket.on("time_sync_response", (data) => {
+					handleReceivedEvent("time_sync_response");
+					const t2 = Date.now();
+					const t1 = data.t1;
+					const offset = (t1 - data.t0 + (data.t2 - t2)) / 2;
+					setTimeOffset(offset);
+					console.log(`Time offset: ${offset} ms`);
+				});
+
+				socket.on(SOCKET_EVENTS.DIRECT_MESSAGE, (data: DirectMessageDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.DIRECT_MESSAGE);
+					const me = data.sender.userID === currentUser.userID;
+					const dm = {
+						message: data,
+						me: data.sender.userID === currentUser.userID,
+						messageSent: true,
+					} as DirectMessage;
+					if (me) {
+						//if (setDMTextBox) setDMTextBox("");
+					}
+					setDirectMessages((prevMessages) => {
+						const newMessages = [...prevMessages, dm];
+						newMessages.sort((a, b) => a.message.index - b.message.index);
+						return newMessages;
+					});
+				});
+
+				socket.on(SOCKET_EVENTS.USER_ONLINE, (data: { userID: string }) => {
+					handleReceivedEvent(SOCKET_EVENTS.USER_ONLINE);
+					if (data.userID === currentUser.userID) {
+						updateState({ type: actionTypes.DM_JOIN_CONFIRMED });
+					}
+					//we can use this to update the user's status
+				});
+
+				socket.on(SOCKET_EVENTS.USER_OFFLINE, (data: { userID: string }) => {
+					handleReceivedEvent(SOCKET_EVENTS.USER_OFFLINE);
+					if (data.userID === currentUser.userID) {
+						updateState({ type: actionTypes.DM_LEAVE_CONFIRMED });
+					}
+					//we can use this to update the user's status
+				});
+
+				// (unused) for edits and deletes of direct messages
+				socket.on(SOCKET_EVENTS.CHAT_MODIFIED, (data) => {
+					handleReceivedEvent(SOCKET_EVENTS.CHAT_MODIFIED);
+				});
+
+				socket.on(SOCKET_EVENTS.DM_HISTORY, (data: DirectMessageDto[]) => {
+					handleReceivedEvent(SOCKET_EVENTS.DM_HISTORY);
+					const dmHistory = data.map(
+						(msg: DirectMessageDto) =>
+							({
+								message: msg,
+								me: msg.sender.userID === currentUser.userID,
+								messageSent: true,
+							}) as DirectMessage,
+					);
+					dmHistory.sort((a, b) => a.message.index - b.message.index);
+					setDirectMessages(dmHistory);
+				});
+
+				socket.on(
+					SOCKET_EVENTS.EMOJI_REACTION,
+					(reaction: EmojiReactionDto) => {
+						handleReceivedEvent(SOCKET_EVENTS.EMOJI_REACTION);
+						//add the new reaction to components
+						if (reaction.userID === currentUser.userID) {
+							return;
+						}
+						setRoomEmojiObjects((prev) => [
+							...prev,
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+							{ object: <Text style={{ fontSize: 30 }}>{reaction.body}</Text> },
+						]);
+					},
+				);
+
+				socket.on(
+					SOCKET_EVENTS.QUEUE_STATE,
+					(response: {
+						room: RoomDto;
+						songs: RoomSongDto[];
+						votes: VoteDto[];
+					}) => {
+						handleReceivedEvent(SOCKET_EVENTS.QUEUE_STATE);
+						setCurrentRoom(response.room);
+						updateRoomQueue(response.songs);
+						setCurrentRoomVotes(response.votes);
+					},
+				);
+
+				socket.on(SOCKET_EVENTS.SONG_ADDED, (newSongs: QueueEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.SONG_ADDED);
+					const newQueue = [...roomQueue];
+					for (let i = 0; i < newSongs.songs.length; i++) {
+						if (
+							newQueue.find(
+								(song) => song.spotifyID === newSongs.songs[i].spotifyID,
+							)
+						) {
+							continue;
+						}
+						newQueue.push(newSongs.songs[i]);
+					}
+					updateRoomQueue(newQueue);
+				});
+
+				socket.on(SOCKET_EVENTS.SONG_REMOVED, (removedSong: QueueEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.SONG_REMOVED);
+					let newQueue = [...roomQueue];
+					for (let i = 0; i < removedSong.songs.length; i++) {
+						newQueue = newQueue.filter(
+							(song) => song.spotifyID !== removedSong.songs[i].spotifyID,
+						);
+					}
+					updateRoomQueue(newQueue);
+				});
+
+				socket.on(SOCKET_EVENTS.VOTE_UPDATED, (updatedSong: QueueEventDto) => {
+					handleReceivedEvent(SOCKET_EVENTS.VOTE_UPDATED);
+					const i = roomQueue.findIndex(
+						(song) => song.spotifyID === updatedSong.songs[0].spotifyID,
+					);
+					if (i === -1) {
+						return;
+					}
+					const newQueue = [...roomQueue];
+					newQueue[i] = updatedSong.songs[0];
+					updateRoomQueue(newQueue);
+				});
+			}
+		},
+		[
+			currentRoom,
+			currentSong,
+			currentUser,
+			dmControls,
+			handleReceivedEvent,
+			joinRoom,
+			roomControls,
+			roomMessages,
+			roomQueue,
+			sendIdentity,
+			socketState.roomChatReceived,
+			socketState.roomChatRequested,
+			updateRoomQueue,
+			updateState,
+		],
+	);
+
+	const createSocketConnection = useCallback((): Socket | null => {
+		if (socketState.socketConnected) {
+			if (socketState.socketInitialized) {
+				console.error(
+					"Cannot create new socket connection: Socket already initialized",
+				);
+			} else {
+				console.error(
+					"Cannot create new socket connection: Socket connection already established",
+				);
+			}
+			return null;
+		}
+		if (!currentUser) {
+			console.error("Cannot create new socket connection: User not logged in");
+			return null;
+		}
+		// updateState({ type: actionTypes.SOCKET_INITIALIZED });
+		console.log("==================== CREATING SOCKET ====================");
+		if (socketRef.current !== null) {
+			return socketRef.current;
+		} else if (socketRef.current === null && currentUser) {
+			const s = io(utils.API_BASE_URL + "/live", {
+				transports: ["websocket"],
+				timeout: TIMEOUT,
+			});
+			setSocketCreationTime(new Date());
+			attachListeners(s);
+			return s;
+		}
+		return null;
+	}, [
+		attachListeners,
+		currentUser,
+		socketState.socketConnected,
+		socketState.socketInitialized,
+	]);
+	const createSocket = useCallback(
+		(authenticated: boolean) => {
+			if (socketRef.current !== null) {
+				if (socketRef.current.connected || !socketRef.current.disconnected) {
+					if (!socketRef.current.active) {
+						socketRef.current.connect();
+					}
+				}
+				console.error("Socket connection already created");
+				return;
+			}
+			if (
+				authenticated &&
+				(socketRef.current === null || !socketState.socketConnected)
+			) {
+				if (socketRef.current === null) {
+					socketRef.current = createSocketConnection();
+					setIDSendTime(new Date(0));
+					setRoomJoinSendTime(new Date(0));
+					setdmJoinSendTime(new Date(0));
+					handleReceivedEvent(RESET_EVENTS);
+				} else {
+					if (
+						socketCreationTime !== new Date(0) &&
+						socketCreationTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+					) {
+						console.log("Reconnecting socket");
+						handleReceivedEvent(RESET_EVENTS);
+						updateState({ type: actionTypes.RESET });
+						return;
+					}
+				}
+				// if (socketRef.current !== null && !socketState.socketInitialized) {
+				// 	initializeSocket();
+				// }
+			}
+		},
+		[
+			createSocketConnection,
+			handleReceivedEvent,
+			socketCreationTime,
+			socketState.socketConnected,
+		],
+	);
+	const getSocket = useCallback<() => Socket | null>(() => {
+		if (socketRef.current === null && currentUser) {
+			createSocket(currentUser && authenticated);
+		}
+		if (socketRef.current === null) {
+			// throw new Error("Socket connection not initialized");
+			console.error("Socket connection not initialized");
+		}
+		return socketRef.current;
+	}, [currentUser, createSocket, authenticated]);
+
+	const initializeSocket = useCallback<() => void>(() => {
+		console.log("Initializing socket");
+		if (!currentUser) {
+			return;
+		}
+		if (socketRef.current === null) {
+			// createSocket();
+		}
+
+		if (socketRef.current !== null) {
+			if (!socketState.socketInitialized && currentUser !== undefined) {
+				attachListeners(socketRef.current);
+				if (!socketState.sentIdentity) {
+					sendIdentity(socketRef.current);
+				}
+				updateState({ type: actionTypes.SOCKET_INITIALIZED });
+				pollLatency();
+			}
+
+			if (
+				!socketState.roomJoined &&
+				currentRoom &&
+				currentRoom.roomID &&
+				roomJoinSendTime !== new Date(0) &&
+				roomJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+			) {
+				joinRoom(currentRoom.roomID);
+			}
+		}
+	}, [
+		attachListeners,
+		currentRoom,
+		currentUser,
+		joinRoom,
+		pollLatency,
+		roomJoinSendTime,
+		sendIdentity,
+		socketState.roomJoined,
+		socketState.sentIdentity,
+		socketState.socketInitialized,
+		updateState,
+	]);
+
+	const disconnectSocket = useCallback(() => {
+		if (socketRef.current !== null) {
+			if (socketState.roomJoined) {
+				leaveRoom();
+			}
+			if (socketState.dmJoined) {
+				leaveDM();
+			}
+			socketRef.current.removeAllListeners();
+			socketRef.current.disconnect();
+			updateState({ type: actionTypes.RESET });
+			socketRef.current = null;
+			setSocketCreationTime(new Date(0));
+			setIDSendTime(new Date(0));
+			setRoomJoinSendTime(new Date(0));
+			setdmJoinSendTime(new Date(0));
+			handleReceivedEvent(RESET_EVENTS);
+		}
+	}, [
+		handleReceivedEvent,
+		leaveDM,
+		leaveRoom,
+		socketState.dmJoined,
+		socketState.roomJoined,
+		updateState,
+	]);
+
+	// on mount, initialize the socket
+	// useEffect(() => {
+	// 	socketRef.current = createSocketConnection();
+	// 	handleReceivedEvent(RESET_EVENTS);
+	// 	initializeSocket();
+	// 	const s = socketRef.current;
+	// 	return () => {
+	// 		disconnectSocket();
+	// 		if (s !== null) {
+	// 			leaveRoom();
+	// 			s.disconnect();
+	// 		}
+	// 	};
+	// }, []);
 
 	//if auth info changes, get user info & spotify tokens
 	useEffect(() => {
+		console.log("Running main effect");
+		console.table(socketState);
+		console.table(socketEventsReceived);
+
 		// if user is not authenticated, disconnect from socket
 		if (!currentUser || !authenticated) {
 			if (socketRef.current !== null) {
@@ -1655,77 +1243,30 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					socketRef.current.disconnect();
 					console.error("Socket disconnected. User is not authenticated");
 				}
+				disconnectSocket();
+				socketRef.current.removeAllListeners();
+				socketRef.current.disconnect();
+				updateState({ type: actionTypes.RESET });
 				socketRef.current = null;
+				handleReceivedEvent(RESET_EVENTS);
 			} else {
 				// user is not authenticated & socket doesn't exist anyway
 				// ignore
+				console.error("User is not authenticated & socket doesn't exist");
+				getUserDetails(spotifyAuth);
 			}
 			updateState({ type: actionTypes.RESET });
 			return;
 		}
 
-		const getUserDetails = async () => {
-			if (tokenState.token !== null) {
-				console.log("Getting user");
-				users
-					.getProfile()
-					.then((u: AxiosResponse<UserDto>) => {
-						console.log("User: " + u);
-						if (u.status === 401) {
-							//Unauthorized
-							//Auth header is either missing or invalid
-							setCurrentUser(undefined);
-						} else if (u.status === 500) {
-							//Internal Server Error
-							//Something went wrong in the backend (unlikely lmao)
-							throw new Error("Internal Server Error");
-						}
-						setCurrentUser(u.data);
-					})
-					.catch((error) => {
-						if (error instanceof RequiredError) {
-							// a required field is missing
-							throw new Error("Parameter missing from request to get user");
-						} else {
-							// some other error
-							throw new Error("Error getting user");
-						}
-					});
-
-				bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
-					setUserBookmarks(fetchedBookmarks);
-				});
-
-				// get spotify tokens
-				let tokens: SpotifyTokenPair | null = null;
-				spotifyAuth
-					.getSpotifyTokens()
-					.then((t) => {
-						if (t !== null) {
-							tokens = t;
-							setSpotifyTokens(tokens);
-							roomControls.playbackHandler.getDevices();
-						}
-					})
-					.catch((error) => {
-						console.error("Failed to get Spotify tokens:", error);
-					});
-			}
-		};
-		getUserDetails();
-
 		//// from here on, we know that the user is authenticated
 		if (socketRef.current === null) {
 			if (authenticated) {
 				if (currentUser) {
-					console.log(
-						"User authenticated & we have their info, but socket is null. Creating socket",
-					);
-					updateState({ type: actionTypes.RESET });
-					createSocket();
+					createSocket(currentUser && authenticated);
 				} else {
 					console.error("User is authenticated but we don't have their info");
-					getUserDetails();
+					getUserDetails(spotifyAuth);
 				}
 			}
 			return;
@@ -1733,25 +1274,28 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		// reconnect if socket is disconnected
 		if (
-			!socketRef.current.connected ||
-			socketRef.current.disconnected ||
-			!socketState.socketConnected
+			!socketState.socketConnected &&
+			(!socketRef.current.connected || socketRef.current.disconnected) &&
+			socketCreationTime !== new Date(0) &&
+			socketCreationTime.getSeconds() - new Date().getSeconds() > TIMEOUT
 		) {
 			console.log("Reconnecting socket");
+			handleReceivedEvent(RESET_EVENTS);
 			updateState({ type: actionTypes.RESET });
-			socketRef.current.connect();
+			if (!socketRef.current.active) {
+				socketRef.current.connect();
+			}
 			return;
 		}
 
 		//// from here on, we know that the socket exists and is connected
 
 		// fix inconsistencies in handshake 'connected'
-		if (!socketState.socketConnected) {
-			if (socketRef.current.connected) {
-				console.log("Socket is connected");
-				updateState({ type: actionTypes.SOCKET_CONNECTED });
-			}
-		}
+		// if (!socketState.socketConnected) {
+		// 	if (socketRef.current.connected) {
+		// 		updateState({ type: actionTypes.SOCKET_CONNECTED });
+		// 	}
+		// }
 
 		if (!socketState.socketInitialized) {
 			console.log("Socket is connected but not initialized. Initializing...");
@@ -1771,7 +1315,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
-		if (!socketState.identityConfirmed) {
+		if (
+			!socketState.identityConfirmed &&
+			idSendTime !== new Date(0) &&
+			idSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+		) {
 			console.log("Identity not confirmed. Retry sending identity...");
 			sendIdentity(socketRef.current);
 			updateState({ type: actionTypes.SENT_IDENTITY });
@@ -1789,7 +1337,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
-			if (!socketState.dmJoined) {
+			if (
+				!socketState.dmJoined &&
+				dmJoinSendTime !== new Date(0) &&
+				dmJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+			) {
 				console.log("User tried to join dms but failed. Retrying...");
 				enterDM(dmParticipants.map((u) => u.username));
 				updateState({ type: actionTypes.REQUEST_DM_JOIN });
@@ -1836,7 +1388,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
-			if (!socketState.roomJoined) {
+			if (
+				!socketState.roomJoined &&
+				roomJoinSendTime !== new Date(0) &&
+				roomJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+			) {
 				console.log("User tried to join room but failed. Retrying...");
 				joinRoom(currentRoom.roomID);
 				updateState({ type: actionTypes.SENT_ROOM_JOIN });
@@ -1876,8 +1432,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		} else {
 			// user is not in a room
-			updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+			// updateState({ type: actionTypes.CLEAR_ROOM_STATE });
 		}
+		// }, [
+		// 	authenticated,
+		// 	currentRoom,
+		// 	currentSong,
+		// 	currentUser,
+		// 	directMessages,
+		// 	dmParticipants,
+		// 	roomQueue,
+		// 	roomMessages,
+		// 	currentRoomVotes,
+		// ]);
 	}, [
 		authenticated,
 		currentRoom,
@@ -1888,10 +1455,47 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		roomQueue,
 		roomMessages,
 		currentRoomVotes,
-		socketState,
+		socketRef.current?.connected,
+		socketRef.current?.disconnected,
+		tokenState.token,
+		users,
+		spotifyAuth,
+		dmControls,
+		roomControls,
+		// socketState,
+		socketEventsReceived,
+		socketCreationTime,
+		idSendTime,
+		// updateState,
+		// disconnectSocket,
+		// handleReceivedEvent,
+		// getUserDetails,
+		// createSocket,
+		// initializeSocket,
+		// sendIdentity,
+		dmJoinSendTime,
+		// enterDM,
+		// leaveDM,
+		roomJoinSendTime,
+		// joinRoom,
 	]);
 
 	useEffect(() => {
+		if (socketRef.current !== null) {
+			attachListeners(socketRef.current);
+		}
+	}, [attachListeners]);
+
+	useEffect(() => {
+		setRoomPlaying(currentSong);
+	}, [currentSong]);
+
+	useEffect(() => {
+		setCurrentSong(roomQueue[0]);
+	}, [roomQueue]);
+
+	useEffect(() => {
+		console.log(`refreshUser: ${refreshUser}`);
 		getUserDetails(spotifyAuth);
 	}, [refreshUser]);
 
@@ -1903,8 +1507,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socketHandshakes: socketState,
 
 				currentUser,
+				refreshUser,
+				setRefreshUser,
 				userBookmarks,
 
+				getSocket,
 				sendPing,
 				getTimeOffset,
 				pollLatency,

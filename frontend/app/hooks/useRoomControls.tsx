@@ -76,6 +76,7 @@ export interface RoomControls {
 	requestRoomQueue: () => void;
 	playbackHandler: Playback;
 	queue: QueueControls;
+	state: PlaybackState | undefined;
 }
 
 export interface Playback {
@@ -982,6 +983,7 @@ export function useRoomControls({
 			requestRoomQueue: requestRoomQueue,
 			playbackHandler: playbackHandler,
 			queue: queueControls,
+			state: playbackState,
 		};
 	}, [
 		canControlRoom,
