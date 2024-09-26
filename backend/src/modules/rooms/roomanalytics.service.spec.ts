@@ -338,4 +338,53 @@ describe("RoomAnalyticsService", () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+	describe("getReturnVisitsAnalytics", () => {
+		it("should return correct return visits analytics", async () => {
+			const mockRoomID = "roomID1";
+			const mockTotalVisits = 20;
+			const mockResult = [
+				{ user_count: 3, user_id: "user1" },
+				{ user_count: 2, user_id: "user2" },
+			];
+
+			jest.spyOn(prismaService, "$queryRaw").mockImplementation(() => {
+				return Promise.resolve(
+					mockResult,
+				) as unknown as PrismaTypes.PrismaPromise<any>;
+			});
+
+			const result = await service.getReturnVisitsAnalytics(
+				mockRoomID,
+				mockTotalVisits,
+			);
+
+			const expectedResult = {
+				expected_return_count: (3 + 2) / 2,
+				probability_of_return: 2 / mockTotalVisits,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+
+		it("should handle no return visits", async () => {
+			const mockRoomID = "roomID1";
+			const mockTotalVisits = 20;
+
+			jest
+				.spyOn(prismaService, "$queryRaw")
+				.mockResolvedValue([] as unknown as PrismaTypes.PrismaPromise<any>);
+
+			const result = await service.getReturnVisitsAnalytics(
+				mockRoomID,
+				mockTotalVisits,
+			);
+
+			const expectedResult = {
+				expected_return_count: 0,
+				probability_of_return: 0,
+			};
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
 });
