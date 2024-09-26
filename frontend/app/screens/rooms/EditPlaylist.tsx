@@ -24,29 +24,6 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { RoomDto } from "../../../api";
 import { set } from "react-datepicker/dist/date_utils";
 
-/*
-interface Track {
-	id: string;
-	name: string;
-	artists: { name: string }[];
-	album: { images: { url: string }[] };
-	explicit: boolean;
-	preview_url: string;
-	uri: string;
-	duration_ms: number;
-}
-
-interface SimplifiedTrack {
-	id: string;
-	name: string;
-	artistNames: string;
-	albumArtUrl: string;
-	explicit: boolean;
-	preview_url: string;
-	uri: string;
-	duration_ms: number;
-}
-*/
 // Type guard for Spotify.Track
 function isSpotifyTrack(track: any): track is Spotify.Track {
 	return (
@@ -97,6 +74,8 @@ const EditPlaylist: React.FC = () => {
 						userID: currentUser.userID,
 						track: track,
 						index: tempQueue.length,
+						insertTime: new Date(),
+						score: 0,
 					};
 					tempQueue.push(newSong);
 				}
@@ -122,6 +101,8 @@ const EditPlaylist: React.FC = () => {
 				userID: currentUser.userID,
 				track: track,
 				index: newQueue.length,
+				insertTime: new Date(),
+				score: 0,
 			};
 			setNewQueue((prevQueue) => [...prevQueue, song]);
 			setAddedSongs((prevAddedSongs) => [...prevAddedSongs, track]);
@@ -198,7 +179,9 @@ const EditPlaylist: React.FC = () => {
 						userID: currentUser?.userID || "",
 						track: track,
 						index: -1,
-					});
+						insertTime: new Date(0),
+						score: 0,
+					} as RoomSongDto);
 				}
 				console.log("dequeue:", dequeue);
 				if (dequeue.length > 0) roomControls.queue.dequeueSongs(dequeue);

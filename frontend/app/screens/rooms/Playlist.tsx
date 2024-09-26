@@ -10,44 +10,10 @@ import { VoteDto } from "../../models/VoteDto";
 import CreateButton from "../../components/CreateButton";
 
 const Playlist = () => {
-	const {
-		roomControls,
-		currentUser,
-		enterDM,
-		leaveDM,
-		dmControls,
-		dmsConnected,
-		dmsReceived,
-		dmParticipants,
-		directMessages,
-		roomQueue,
-	} = useLive();
+	const { roomQueue } = useLive();
 	const router = useRouter();
 	const { Room_id, mine } = useLocalSearchParams();
 	const isMine = mine === "true";
-
-	// Function to handle voting
-	// const handleVoteChange = (index: number, newVoteCount: number) => {
-	// 	const songs = [...playlist];
-	// 	songs[index].score = newVoteCount;
-
-	// 	const sortedPlaylist = [...playlist]
-	// 		.map((track, i) => ({ track, index: i }))
-	// 		.sort((a, b) => {
-	// 			const aScore: number = a.track.score || 0;
-	// 			const bScore: number = b.track.score || 0;
-	// 			if (aScore === bScore) return a.index - b.index; // Keep original order for same votes
-	// 			return bScore - aScore; // Sort descending by votes
-	// 		})
-	// 		.map((item) => item.track);
-
-	// 	// Ensure songs don't move above the current track index
-	// 	const finalPlaylist = [
-	// 		...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
-	// 		...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
-	// 	];
-	// 	setPlaylist(finalPlaylist);
-	// };
 
 	const navigateToAddSong = () => {
 		console.log("curr room_id:", Room_id);
