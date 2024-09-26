@@ -5,6 +5,8 @@ import auth from "../app/services/AuthManagement";
 import * as StorageService from "../app/services/StorageService";
 import { useLocalSearchParams } from "expo-router";
 import MorePage from "../app/screens/profile/MorePage";
+import { useState } from "react";
+import { Player } from "../app/PlayerContext";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -265,6 +267,14 @@ const mockRooms = [
 	},
 ];
 
+const mockUsers = [{
+	id: "id",
+	profile_picture_url: "picture",
+	profile_name: "John",
+	username: "johndoe",
+	followers: [],
+}];
+
 const mockSongs = [
 	{
 		songID: "8b20cb14-82af-4730-bad4-028ddb163333",
@@ -295,6 +305,18 @@ const mockSongs = [
 	},
 ];
 
+const PlayerContextProviderMock = ({ children, value }) => {
+	const [userData, setUserData] = useState(value.userData);
+
+	const mockValue = {
+		...value,
+		userData,
+		setUserData,
+	};
+
+	return <Player.Provider value={mockValue}>{children}</Player.Provider>;
+};
+
 jest.useFakeTimers();
 
 describe("ProfileScreen", () => {
@@ -307,19 +329,55 @@ describe("ProfileScreen", () => {
 		(StorageService.getItem as jest.Mock).mockResolvedValue([]);
 	});
 
-	it("it renders rooms", () => {
+	it("it renders users", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({
-			type: "room",
-			items: JSON.stringify(mockRooms),
-			title: "Recent Rooms",
+			type: "user",
+			items: JSON.stringify(mockUsers),
+			title: "Followers",
 		});
+		
+		const mockProfileData = {
+			profile_name: "John Doe",
+			username: "johndoe",
+			profile_picture_url:
+				"https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg",
+			followers: { count: 10 },
+			following: { count: 20 },
+			bio: "Mock bio",
+			links: {
+				count: 1,
+				data: { other: ["https://example.com"] },
+			},
+			fav_genres: { count: 1, data: [] },
+			fav_songs: {
+				count: 5,
+				data: [
+					{
+						title: "Scherzo No. 3 in C-Sharp Minor, Op. 39",
+						artists: ["Frédéric Chopin", "Arthur Rubinstein"],
+						cover: null,
+						duration: 200,
+						spotify_id: "5AnNbtnz54r94cd2alxg5I",
+						start_time: null,
+					},
+				],
+			},
+			fav_rooms: { count: 0, data: [] },
+			recent_rooms: { count: 0, data: [] },
+		};
 
-		const { getByText, getByTestId } = render(<MorePage />);
+		const mockPlayerContextValue = {
+			userData: mockProfileData,
+			setUserData: jest.fn(),
+			currentRoom: "Room 1",
+		};
 
-		expect(getByText("Recent Rooms")).toBeTruthy();
-		expect(getByText("Testing ROOM")).toBeTruthy();
-		expect(getByTestId("prev-button")).toBeTruthy();
-		expect(getByTestId("next-button")).toBeTruthy();
+		const { getByText, getByTestId } = render(
+			<PlayerContextProviderMock value={mockPlayerContextValue}><MorePage />
+			</PlayerContextProviderMock>,);
+
+		expect(getByText("Followers")).toBeTruthy();
+		expect(getByText("johndoe")).toBeTruthy();
 	});
 
 	it("it renders songs", () => {
@@ -345,23 +403,5 @@ describe("ProfileScreen", () => {
 		const { queryByText } = render(<MorePage />);
 
 		expect(queryByText("Dramaturgy")).toBeNull();
-	});
-
-	it("it paginates", () => {
-		(useLocalSearchParams as jest.Mock).mockReturnValue({
-			type: "room",
-			items: JSON.stringify(mockRooms),
-			title: "Recent Rooms",
-		});
-
-		const { getByTestId, getByText } = render(<MorePage />);
-
-		const nextBtn = getByTestId("next-button");
-		fireEvent.press(nextBtn);
-		expect(getByText("eleventh")).toBeTruthy();
-
-		const prevBtn = getByTestId("prev-button");
-		fireEvent.press(prevBtn);
-		expect(getByText("Testing ROOM")).toBeTruthy();
 	});
 });

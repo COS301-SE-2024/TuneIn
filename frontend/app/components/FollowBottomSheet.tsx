@@ -116,7 +116,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 		<Modal transparent={true} animationType="slide" visible={showMoreFilters}>
 			<GestureHandlerRootView>
 				<TouchableWithoutFeedback onPress={handleClose}>
-					<View style={styles.modalContainer}>
+					<View style={styles.modalContainer} testID="follow-bottom-sheet">
 						<View style={styles.modalOverlay}>
 							<KeyboardAvoidingView
 								behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -159,6 +159,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																handleUnfollow(friend);
 																handleClose();
 															}}
+															testID="unfollow"
 														>
 															<Text style={{ fontSize: 18 }}>Unfollow</Text>
 														</TouchableOpacity>
@@ -175,6 +176,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																	handleCancel(friend);
 																	handleClose();
 																}}
+																testID="cancel-friend-req"
 															>
 																<Text style={{ fontSize: 18 }}>
 																	Cancel Friend Request
@@ -194,6 +196,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																		handleRequest(friend, true);
 																		handleClose();
 																	}}
+																	testID="accept-friend"
 																>
 																	<Text style={{ fontSize: 18 }}>
 																		Accept Friend Request
@@ -231,6 +234,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																		sendRequest(friend);
 																		handleClose();
 																	}}
+																	testID="send-request"
 																>
 																	<Text style={{ fontSize: 18 }}>
 																		Send Friend Request
@@ -247,6 +251,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 															handleUnfriend(friend);
 															handleClose();
 														}}
+														testID="unfriend"
 													>
 														<Text style={{ fontSize: 18 }}>Unfriend</Text>
 													</TouchableOpacity>

@@ -59,14 +59,6 @@ const MorePage: React.FC = () => {
 	);
 
 	const renderResult = ({ item }: { item: any }) => {
-		if (params.type === "room") {
-			return (
-				<View style={styles.roomCardPadding}>
-					<RoomCardWidget roomCard={item} />
-				</View>
-			);
-		}
-
 		if(params.type === "user") {
 			return <UserItem user={item}></UserItem>
 		}
