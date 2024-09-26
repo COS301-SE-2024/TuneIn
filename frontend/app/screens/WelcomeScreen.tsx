@@ -13,7 +13,12 @@ import * as utils from "../services/Utils";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import CyanButton from "../components/CyanButton";
 import WhiteButton from "../components//WhiteButton";
-import { DiscoveryDocument, makeRedirectUri, ResponseType, useAuthRequest } from "expo-auth-session";
+import {
+	DiscoveryDocument,
+	makeRedirectUri,
+	ResponseType,
+	useAuthRequest,
+} from "expo-auth-session";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
 import { generateRandom } from "expo-auth-session/build/PKCE";
 import {
@@ -23,7 +28,6 @@ import {
 import { live } from "../services/Live";
 import auth from "../services/AuthManagement";
 import { colors } from "../styles/colors";
-
 
 const WelcomeScreen: React.FC = () => {
 	const router = useRouter();
@@ -75,8 +79,6 @@ const WelcomeScreen: React.FC = () => {
 		[redirectURI],
 	);
 
-	
-
 	const [request, response, promptAsync] = useAuthRequest(
 		{
 			clientId: SPOTIFY_CLIENT_ID,
@@ -114,11 +116,13 @@ const WelcomeScreen: React.FC = () => {
 				};
 				doExchange();
 			} else {
-				ToastAndroid.show("Failed to authenticate. Please try again.", ToastAndroid.SHORT);
+				ToastAndroid.show(
+					"Failed to authenticate. Please try again.",
+					ToastAndroid.SHORT,
+				);
 			}
 		}
 	}, [response, redirectURI, router]);
-
 
 	return (
 		<View style={styles.container}>
