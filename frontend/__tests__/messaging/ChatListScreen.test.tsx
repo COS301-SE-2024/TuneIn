@@ -1,27 +1,15 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { NavigationContainer } from "@react-navigation/native"; // Import NavigationContainer
 import ChatListScreen from "../../app/screens/messaging/ChatListScreen";
-import { useRouter } from "expo-router";
+import auth from "../../app/services/AuthManagement";
 import axios from "axios";
 import { DirectMessageDto } from "../../app/models/DmDto";
 import { UserDto } from "../../app/models/UserDto";
 
-jest.mock("expo-font", () => ({
-	...jest.requireActual("expo-font"),
-	loadAsync: jest.fn(),
-}));
-
-jest.mock("expo-asset", () => ({
-	...jest.requireActual("expo-asset"),
-	fromModule: jest.fn(() => ({
-		downloadAsync: jest.fn(),
-		uri: "mock-uri",
-	})),
-}));
-
-jest.mock("expo-router", () => ({
-	useRouter: jest.fn(),
-}));
+// Mocking dependencies
+jest.mock("axios");
+jest.mock("../../app/services/AuthManagement");
 
 const mockSelf: UserDto = {
 	userID: "1",
@@ -130,56 +118,94 @@ const initialMessages: DirectMessageDto[] = [
 		isRead: false,
 		pID: "1",
 	},
-	// Add more dummy messages
+	// Add a message from Jane Smith
+	{
+		index: 2,
+		messageBody: "Hello!",
+		sender: {
+			...mockOtherUser,
+			username: "jane_smith", // Ensure this matches your expectations
+			profile_name: "Jane Smith",
+		},
+		recipient: mockSelf,
+		dateSent: new Date(),
+		dateRead: new Date(0),
+		isRead: false,
+		pID: "2",
+	},
 ];
 
-jest.mock("axios");
-(axios.get as jest.Mock).mockImplementation((url: string) => {
-	if (url.endsWith("users/dms")) {
-		return Promise.resolve({ data: initialMessages });
-	} else if (url.endsWith("users/friends")) {
-		return Promise.resolve({ data: [mockOtherUser] });
-	} else if (url.endsWith("users")) {
-		return Promise.resolve({ data: mockSelf });
-	}
-	return Promise.reject(new Error("Invalid URL"));
+const mockUserData = {
+	userID: "selfID",
+	username: "selfUser",
+};
+
+beforeEach(() => {
+	jest.clearAllMocks();
+
+	// Mocking the token retrieval
+	(auth.getToken as jest.Mock).mockResolvedValue("mockedToken");
+
+	// Mocking the axios calls
+	(axios.get as jest.Mock).mockImplementation((url) => {
+		if (url.includes("/users/dms")) {
+			return Promise.resolve({ data: initialMessages });
+		} else if (url.includes("/users")) {
+			return Promise.resolve({ data: mockUserData });
+		} else if (url.includes("/users/friends")) {
+			return Promise.resolve({ data: [] }); // No friends for simplicity
+		}
+		return Promise.reject(new Error("Not found"));
+	});
 });
 
+// Wrap your ChatListScreen component with NavigationContainer
+const renderWithNavigation = (component: React.ReactNode) => (
+	<NavigationContainer>{component}</NavigationContainer>
+);
+
 describe("ChatListScreen", () => {
-	const mockRouter = {
-		push: jest.fn(),
-		back: jest.fn(),
-	};
+	test("renders correctly and fetches chats on focus", async () => {
+		const { getByText } = render(renderWithNavigation(<ChatListScreen />));
 
-	beforeEach(() => {
-		(useRouter as jest.Mock).mockReturnValue(mockRouter);
+		// Check if the header is present
+		expect(getByText("Chats")).toBeTruthy();
+
+		// Wait for chat items to be rendered
+		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
+		expect(getByText("Jane Smith")).toBeTruthy();
 	});
 
-	afterEach(() => {
-		jest.clearAllMocks();
-	});
+	test("filters chats based on search input", async () => {
+		const { getByPlaceholderText, getByText } = render(
+			renderWithNavigation(<ChatListScreen />),
+		);
 
-	it("renders the chat list screen correctly", () => {
-		const { toJSON } = render(<ChatListScreen />);
-		expect(toJSON()).toMatchSnapshot();
-	});
+		// Wait for chat items to be rendered
+		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
 
-	it("handles search input correctly", async () => {
-		const { getByPlaceholderText } = render(<ChatListScreen />);
+		// Input search query
 		const searchInput = getByPlaceholderText("Search for a user...");
-		fireEvent.changeText(searchInput, "John");
+		fireEvent.changeText(searchInput, "Jane");
 
-		await waitFor(() => {
-			expect(searchInput.props.value).toBe("John");
-		});
+		// Check if only relevant chat appears
+		await waitFor(() => expect(getByText("Jane Smith")).toBeTruthy());
+		expect(() => getByText("John Doe")).toThrow();
 	});
 
-	it("navigates back when back button is pressed", () => {
-		const { getByTestId } = render(<ChatListScreen />);
-		const backButton = getByTestId("back-button");
+	test("shows 'No results found' when no chats match the search", async () => {
+		const { getByPlaceholderText, getByText } = render(
+			renderWithNavigation(<ChatListScreen />),
+		);
 
-		fireEvent.press(backButton);
+		// Wait for chat items to be rendered
+		await waitFor(() => expect(getByText("John Doe")).toBeTruthy());
 
-		expect(mockRouter.back).toHaveBeenCalled();
+		// Input a search query that matches no results
+		const searchInput = getByPlaceholderText("Search for a user...");
+		fireEvent.changeText(searchInput, "Nonexistent User");
+
+		// Check for no results message
+		expect(getByText("No results found.")).toBeTruthy();
 	});
 });
