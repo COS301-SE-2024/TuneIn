@@ -161,13 +161,18 @@ const AdvancedSettings = () => {
 			// }, this is the format of the room data to be returned
 
 			return {
-				roomID: data.roomID,
+				id: data.roomID,
 				name: data.room_name,
 				description: data.description,
-				userID: data.userID,
-				username: data.username,
+				userID: data.creator.userID,
+				username: data.creator.username,
 				tags: data.tags,
-				genre: data.genre,
+				genre: data.room_name.split(" - ")[1],
+				backgroundImage: data.room_image,
+				isExplicit: data.has_explicit_content,
+				isNsfw: data.has_nsfw_content,
+				language: data.language,
+				roomSize: "50",
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
@@ -277,8 +282,8 @@ const AdvancedSettings = () => {
 					const childRoom1 = await getRoom(data.childrenRoomIDs[0]);
 					const childRoom2 = await getRoom(data.childrenRoomIDs[1]);
 					if (childRoom1 && childRoom2) {
-						const childRoom1Queue = await getRoomQueue(childRoom1.roomID);
-						const childRoom2Queue = await getRoomQueue(childRoom2.roomID);
+						const childRoom1Queue = await getRoomQueue(childRoom1.id);
+						const childRoom2Queue = await getRoomQueue(childRoom2.id);
 						console.log("Child room 1: ", childRoom1);
 						console.log("Child room 2: ", childRoom2);
 						if (childRoom1Queue && childRoom2Queue) {
