@@ -6,13 +6,14 @@ import {
 	FlatList,
 	StyleSheet,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
-import { API_BASE_URL } from "../../services/Utils";
-import auth from "../../services/AuthManagement";
 import { useLocalSearchParams } from "expo-router";
 import FriendServices from "../../services/FriendServices";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Following: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -28,37 +29,45 @@ const Following: React.FC = () => {
 	const user = useLocalSearchParams();
 	const myUsername = user.username;
 
+	const loadFollowing = async () => {
+		try {
+			const mappedFollowing = await FriendServices.fetchFollowing();
+			setFollowing(mappedFollowing);
+			setFilteredFollowing(mappedFollowing);
+			setFetchFollowingError(false);
+		} catch {
+			setFollowing([]);
+			setFilteredFollowing([]);
+			setFetchFollowingError(true);
+		}
+	};
+
+	const loadPendingRequests = async () => {
+		try {
+			const mappedPendingRequests = await FriendServices.fetchPendingRequests();
+			setPendingRequests(mappedPendingRequests);
+			setFilteredPendingRequests(mappedPendingRequests);
+			setFetchPendingError(false);
+		} catch {
+			setPendingRequests([]);
+			setFilteredPendingRequests([]);
+			setFetchPendingError(true);
+		}
+	};
+
+	// Initial load on component mount
 	useEffect(() => {
-		const loadFollowing = async () => {
-			try {
-				const mappedFollowing = await FriendServices.fetchFollowing();
-				setFollowing(mappedFollowing);
-				setFilteredFollowing(mappedFollowing);
-				setFetchFollowingError(false);
-			} catch {
-				setFollowing([]);
-				setFilteredFollowing([]);
-				setFetchFollowingError(true);
-			}
-		};
-
-		const loadPendingRequests = async () => {
-			try {
-				const mappedPendingRequests =
-					await FriendServices.fetchPendingRequests();
-				setPendingRequests(mappedPendingRequests);
-				setFilteredPendingRequests(mappedPendingRequests);
-				setFetchPendingError(false);
-			} catch {
-				setPendingRequests([]);
-				setFilteredPendingRequests([]);
-				setFetchPendingError(true);
-			}
-		};
-
 		loadFollowing();
 		loadPendingRequests();
 	}, []);
+
+	// Reload data when the page is focused
+	useFocusEffect(
+		React.useCallback(() => {
+			loadFollowing();
+			loadPendingRequests();
+		}, []),
+	);
 
 	useEffect(() => {
 		const filterData = () => {
@@ -82,6 +91,14 @@ const Following: React.FC = () => {
 		filterData();
 	}, [search, following, pendingRequests]);
 
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
 	const unfollowUser = async (friend: Friend) => {
 		try {
 			await FriendServices.handleUnfollow(friend);
@@ -91,7 +108,7 @@ const Following: React.FC = () => {
 			setFollowing(updatedFollowing);
 			setFilteredFollowing(updatedFollowing);
 		} catch {
-			ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
+			showError("Failed to unfollow user");
 		}
 	};
 
@@ -106,7 +123,7 @@ const Following: React.FC = () => {
 			friend.relationship = "mutual";
 			setFollowing((prev) => [...prev, friend]);
 		} catch (error) {
-			ToastAndroid.show("Failed to handle friend request.", ToastAndroid.SHORT);
+			showError("Failed to handle friend request.");
 		}
 	};
 
@@ -125,10 +142,24 @@ const Following: React.FC = () => {
 		/>
 	);
 
+	const handleCancelRequest = async (friend: Friend): Promise<void> => {
+		try {
+			await FriendServices.handleCancelRequest(friend);
+			const updatedRequests = pendingRequests.filter(
+				(request) => request.friend_id !== friend.friend_id,
+			);
+			setPendingRequests(updatedRequests);
+			friend.relationship = "mutual";
+		} catch (error) {
+			ToastAndroid.show("Failed to cancel friend request.", ToastAndroid.SHORT);
+		}
+	};
+
 	const renderPendingRequest = ({ item }: { item: Friend }) => {
 		const getHandler = (item: Friend) => {
 			const handlers: { [key: string]: (friend: Friend) => Promise<void> } = {
 				friend: handleFriend,
+				pending: handleCancelRequest,
 			};
 
 			return handlers[item.relationship as string] || (() => {});

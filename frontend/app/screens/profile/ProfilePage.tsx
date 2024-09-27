@@ -11,6 +11,8 @@ import {
 	TouchableWithoutFeedback,
 	RefreshControl,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
@@ -32,6 +34,7 @@ import { RoomDto } from "../../models/RoomDto";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
+import ContextMenu from "../../components/profile/DrawerContextMenu";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -42,7 +45,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToLogout = () => {
-		router.navigate("/screens/WelcomScreen");
+		auth.logout();
 	};
 
 	const navigateToHelp = () => {
@@ -888,21 +891,30 @@ const ProfileScreen: React.FC = () => {
 		}, 2000);
 	}, []);
 
+	// Function to show error messages
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
+	// Function to handle different error cases
 	const handleErrors = () => {
 		console.log("Called");
 		if (favRoomError || recentRoomError) {
-			ToastAndroid.show(
+			showError(
 				favRoomError && recentRoomError
 					? "Failed to load rooms"
 					: favRoomError
 						? "Failed to load favorite rooms"
 						: "Failed to load recent rooms",
-				ToastAndroid.SHORT,
 			);
 		}
 
 		if (currentRoom) {
-			ToastAndroid.show("Failed to load current room", ToastAndroid.SHORT);
+			showError("Failed to load current room");
 		}
 	};
 
@@ -995,43 +1007,7 @@ const ProfileScreen: React.FC = () => {
 						{ownsProfile && (
 							<View style={styles.container}>
 								{/* Drawer Modal */}
-								<Modal
-									transparent={true}
-									visible={drawerVisible}
-									animationType="slide"
-									onRequestClose={() => setDrawerVisible(false)}
-								>
-									{/* Overlay */}
-									<TouchableWithoutFeedback
-										onPress={() => setDrawerVisible(false)}
-									>
-										<View style={styles.overlay} />
-									</TouchableWithoutFeedback>
-
-									{/* Drawer Content */}
-									<View style={styles.drawer}>
-										{/* Close Drawer Button */}
-										<View style={styles.closeButtonContainer}>
-											<TouchableOpacity onPress={toggleDrawer}>
-												<Ionicons name="close" size={24} color="black" />
-											</TouchableOpacity>
-										</View>
-
-										{/* Drawer Items */}
-										<Text
-											style={styles.drawerItem}
-											onPress={navigateToAnayltics}
-										>
-											Analytics
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToHelp}>
-											Help Menu
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToLogout}>
-											Logout
-										</Text>
-									</View>
-								</Modal>
+								<ContextMenu isVisible={drawerVisible} onClose={toggleDrawer} />
 							</View>
 						)}
 						<Text

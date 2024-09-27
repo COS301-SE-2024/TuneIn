@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import FriendsFollowing from "../../app/screens/help/FriendsFollowing";
+import FriendsFollowing from "../../app/screens/messaging/help/FriendsFollowing";
 import { useRouter } from "expo-router";
 
 // Mock the useRouter hook

@@ -8,6 +8,8 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
+	Keyboard,
+	TouchableWithoutFeedback,
 } from "react-native";
 import {
 	GestureHandlerRootView,
@@ -48,6 +50,8 @@ const Search: React.FC = () => {
 	const [explicit, setExplicit] = useState(false);
 	const [nsfw, setNsfw] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [userLoading, setUserLoading] = useState(false);
+	const [roomLoading, setRoomLoading] = useState(false);
 	const [temporary, setTemporary] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [scheduled, setScheduled] = useState(false);
@@ -60,8 +64,12 @@ const Search: React.FC = () => {
 	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 	const [dropdownVisible, setDropdownVisible] = useState(false);
-	const [userSearchHistory, setUserSearchHistory] = useState<string[]>([]);
-	const [roomSearchHistory, setRoomSearchHistory] = useState<string[]>([]);
+	const [roomRecommendations, setRoomRecommendations] = useState<
+		SearchResult[]
+	>([]);
+	const [userRecommendations, setUserRecommendations] = useState<
+		SearchResult[]
+	>([]);
 	const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 	const [searchError, setSearchError] = useState<boolean>(false);
 
@@ -108,12 +116,18 @@ const Search: React.FC = () => {
 
 	useEffect(() => {
 		const getRecommendations = async () => {
-			setLoading(true);
 			try {
 				const token = await auth.getToken();
 				if (token) {
 					let response;
 					if (filter === "room") {
+						if (roomRecommendations.length !== 0) {
+							setResults(roomRecommendations);
+							return;
+						}
+
+						setRoomLoading(true);
+
 						response = await axios.get(
 							`${utils.API_BASE_URL}/users/rooms/foryou`,
 							{
@@ -144,7 +158,16 @@ const Search: React.FC = () => {
 						console.log("recommended rooms:", recommendedRooms);
 						console.log("Recommended rooms length: " + recommendedRooms.length);
 						setResults(recommendedRooms);
+						setRoomRecommendations(recommendedRooms);
+						setRoomLoading(false);
 					} else {
+						if (userRecommendations.length !== 0) {
+							setResults(userRecommendations);
+							return;
+						}
+
+						setUserLoading(true);
+
 						response = await axios.get(
 							`${utils.API_BASE_URL}/users/recommended/users`,
 							{
@@ -176,7 +199,12 @@ const Search: React.FC = () => {
 						);
 						console.log("recommended users:", recommendedUsers);
 						console.log("Recommended users length: " + recommendedUsers.length);
-						setResults(recommendedUsers);
+
+						if (searchTerm.trim() === "" && filter === "user" && loading) {
+							setResults(recommendedUsers);
+						}
+						setUserRecommendations(recommendedUsers);
+						setUserLoading(false);
 					}
 				}
 			} catch (error) {
@@ -208,9 +236,7 @@ const Search: React.FC = () => {
 	}, [searchTerm, filter]);
 
 	useEffect(() => {
-		if (searchTerm !== "") {
-			handleSearch();
-		}
+		handleSearch();
 	}, [
 		nsfw,
 		explicit,
@@ -223,12 +249,12 @@ const Search: React.FC = () => {
 		roomCount,
 		minFollowers,
 		maxFollowers,
-		searchTerm,
 	]);
 
 	const handleSearch = async (sh: string = searchTerm) => {
-		// console.log("handle search");
-		if (searchTerm.trim() === "") {
+		// console.log("handle search: " + sh);
+		if (sh.trim() === "") {
+			// console.log("whitespace caller")
 			return;
 		}
 
@@ -467,7 +493,6 @@ const Search: React.FC = () => {
 				const roomHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
-				setRoomSearchHistory(roomHistTerms);
 				setSearchSuggestions(roomHistTerms.slice(0, 5));
 			}
 		} catch (error) {
@@ -494,7 +519,6 @@ const Search: React.FC = () => {
 				const userHistTerms = response.data.map(
 					(search: SearchHistoryDto) => search.search_term,
 				);
-				setUserSearchHistory(userHistTerms);
 				setSearchSuggestions(userHistTerms.slice(0, 5));
 			}
 		} catch (error) {
@@ -572,167 +596,180 @@ const Search: React.FC = () => {
 	}, [filter]);
 
 	useEffect(() => {
+		if (filter === "room") {
+			setLoading(roomLoading);
+		} else {
+			setLoading(userLoading);
+		}
+
+		// Update the previous filter ref to the current filter
+		prevFilterRef.current = filter;
+	}, [filter, userLoading, roomLoading]);
+
+	useEffect(() => {
 		getRoomHistory();
 	}, []);
 
 	return (
 		<GestureHandlerRootView>
-			<View style={styles.container}>
-				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => navigation.goBack()}
-						testID="back-button"
-						style={styles.backButton} // Optional to add padding or margin
-					>
-						<Ionicons name="chevron-back" size={30} color="black" />
-					</TouchableOpacity>
-					<Text style={styles.title}>Search</Text>
-				</View>
-				<View style={styles.searchBarContainer}>
-					<TextInput
-						testID="search-input"
-						style={styles.searchBar}
-						placeholder="Search..."
-						value={searchTerm}
-						onBlur={() => {
-							setTimeout(() => {
-								setDropdownVisible(false);
-							}, 200);
-						}}
-						onFocus={() => {
-							setDropdownVisible(true);
-						}}
-						onChangeText={setSearchTerm}
-						onSubmitEditing={() => {
-							handleSearch();
-						}}
-					/>
-					<TouchableOpacity
-						style={styles.searchIcon}
-						onPress={() => {
-							handleSearch();
-						}}
-						testID="search-button"
-					>
-						<Ionicons name="search-sharp" size={30} color={colors.primary} />
-					</TouchableOpacity>
-				</View>
-				{dropdownVisible && searchSuggestions.length !== 0 && (
-					<FlatList
-						data={searchSuggestions}
-						keyExtractor={(item) => item}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={() => {
-									setSearchTerm(item);
-									handleSearch(item);
-								}}
-							>
-								<Text style={styles.dropdownItemText}>{item}</Text>
-							</TouchableOpacity>
-						)}
-						style={styles.dropdown}
-					/>
-				)}
-				<View style={styles.filterContainer}>
-					<TouchableOpacity
-						style={[
-							styles.filterButton,
-							filter === "room" && styles.activeFilter,
-						]}
-						onPress={() => handleSelection("room")}
-					>
-						<Text style={styles.filterText}>Rooms</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[
-							styles.filterButton,
-							filter === "user" && styles.activeFilter,
-						]}
-						onPress={() => handleSelection("user")}
-						testID="user-btn"
-					>
-						<Text style={styles.filterText}>Users</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={styles.filterButton}
-						onPress={handleToggleMoreFilters}
-						testID="toggle-filters-button"
-					>
-						<Text style={styles.filterText}>{"View More Filters"}</Text>
-					</TouchableOpacity>
-				</View>
-
-				<FilterBottomSheet
-					filter={filter}
-					explicit={explicit}
-					nsfw={nsfw}
-					temporary={temporary}
-					isPrivate={isPrivate}
-					scheduled={scheduled}
-					showMoreFilters={showMoreFilters}
-					host={host}
-					roomCount={roomCount}
-					maxFollowers={maxFollowers}
-					minFollowers={minFollowers}
-					selectedGenre={selectedGenre}
-					selectedLanguage={selectedLanguage}
-					setExplicit={setExplicit}
-					setNsfw={setNsfw}
-					setTemporary={setTemporary}
-					setIsPrivate={setIsPrivate}
-					setScheduled={setScheduled}
-					setHost={setHost}
-					setRoomCount={setRoomCount}
-					setMaxFollowers={setMaxFollowers}
-					setMinFollowers={setMinFollowers}
-					setSelectedGenre={setSelectedGenre}
-					setSelectedLanguage={setSelectedLanguage}
-					setShowMoreFilters={setShowMoreFilters}
-				/>
-
-				{loading ? (
-					!showMoreFilters && (
-						// Render Skeleton if loading
-						<View style={styles.roomCardPadding}>
-							{filter === "room" ? (
-								<>
-									<SkeletonRoomCard />
-									<SkeletonRoomCard />
-									<SkeletonRoomCard />
-								</>
-							) : (
-								<>
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-									<SkeletonUserItem />
-								</>
-							)}
-						</View>
-					)
-				) : results.length === 0 ? (
-					// Render No Results Message if no results
-					<View style={styles.noResult}>
-						<Text>
-							{searchError
-								? "Failed to load search results"
-								: "No results found"}
-						</Text>
+			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+				<View style={styles.container}>
+					<View style={styles.header}>
+						<TouchableOpacity
+							onPress={() => navigation.goBack()}
+							testID="back-button"
+							style={styles.backButton} // Optional to add padding or margin
+						>
+							<Ionicons name="chevron-back" size={30} color="black" />
+						</TouchableOpacity>
+						<Text style={styles.title}>Search</Text>
 					</View>
-				) : (
-					// Render FlatList if there are results
-					<FlatList
-						data={results}
-						keyExtractor={(item) => item.id}
-						renderItem={renderResult}
-						contentContainerStyle={styles.resultsContainer}
-						onScroll={handleScroll}
+					<View style={styles.searchBarContainer}>
+						<TextInput
+							testID="search-input"
+							style={styles.searchBar}
+							placeholder="Search..."
+							value={searchTerm}
+							onBlur={() => {
+								setTimeout(() => {
+									setDropdownVisible(false);
+								}, 200);
+							}}
+							onFocus={() => {
+								setDropdownVisible(true);
+							}}
+							onChangeText={setSearchTerm}
+							onSubmitEditing={() => {
+								handleSearch();
+							}}
+						/>
+						<TouchableOpacity
+							style={styles.searchIcon}
+							onPress={() => {
+								handleSearch();
+							}}
+							testID="search-button"
+						>
+							<Ionicons name="search-sharp" size={30} color={colors.primary} />
+						</TouchableOpacity>
+					</View>
+					{dropdownVisible && searchSuggestions.length !== 0 && (
+						<FlatList
+							data={searchSuggestions}
+							keyExtractor={(item) => item}
+							renderItem={({ item }) => (
+								<TouchableOpacity
+									style={styles.dropdownItem}
+									onPress={() => {
+										setSearchTerm(item);
+										handleSearch(item);
+									}}
+								>
+									<Text style={styles.dropdownItemText}>{item}</Text>
+								</TouchableOpacity>
+							)}
+							style={styles.dropdown}
+						/>
+					)}
+					<View style={styles.filterContainer}>
+						<TouchableOpacity
+							style={[
+								styles.filterButton,
+								filter === "room" && styles.activeFilter,
+							]}
+							onPress={() => handleSelection("room")}
+						>
+							<Text style={styles.filterText}>Rooms</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={[
+								styles.filterButton,
+								filter === "user" && styles.activeFilter,
+							]}
+							onPress={() => handleSelection("user")}
+							testID="user-btn"
+						>
+							<Text style={styles.filterText}>Users</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.filterButton}
+							onPress={handleToggleMoreFilters}
+							testID="toggle-filters-button"
+						>
+							<Text style={styles.filterText}>{"View More Filters"}</Text>
+						</TouchableOpacity>
+					</View>
+
+					<FilterBottomSheet
+						filter={filter}
+						explicit={explicit}
+						nsfw={nsfw}
+						temporary={temporary}
+						isPrivate={isPrivate}
+						scheduled={scheduled}
+						showMoreFilters={showMoreFilters}
+						host={host}
+						roomCount={roomCount}
+						maxFollowers={maxFollowers}
+						minFollowers={minFollowers}
+						selectedGenre={selectedGenre}
+						selectedLanguage={selectedLanguage}
+						setExplicit={setExplicit}
+						setNsfw={setNsfw}
+						setTemporary={setTemporary}
+						setIsPrivate={setIsPrivate}
+						setScheduled={setScheduled}
+						setHost={setHost}
+						setRoomCount={setRoomCount}
+						setMaxFollowers={setMaxFollowers}
+						setMinFollowers={setMinFollowers}
+						setSelectedGenre={setSelectedGenre}
+						setSelectedLanguage={setSelectedLanguage}
+						setShowMoreFilters={setShowMoreFilters}
 					/>
-				)}
-			</View>
+
+					{loading ? (
+						!showMoreFilters && (
+							// Render Skeleton if loading
+							<View style={styles.roomCardPadding}>
+								{filter === "room" ? (
+									<>
+										<SkeletonRoomCard />
+										<SkeletonRoomCard />
+										<SkeletonRoomCard />
+									</>
+								) : (
+									<>
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+										<SkeletonUserItem />
+									</>
+								)}
+							</View>
+						)
+					) : results.length === 0 ? (
+						// Render No Results Message if no results
+						<View style={styles.noResult}>
+							<Text>
+								{searchError
+									? "Failed to load search results"
+									: "No results found"}
+							</Text>
+						</View>
+					) : (
+						// Render FlatList if there are results
+						<FlatList
+							data={results}
+							keyExtractor={(item) => item.id}
+							renderItem={renderResult}
+							contentContainerStyle={styles.resultsContainer}
+							onScroll={handleScroll}
+						/>
+					)}
+				</View>
+			</TouchableWithoutFeedback>
 		</GestureHandlerRootView>
 	);
 };
@@ -741,7 +778,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingHorizontal: 20,
-		paddingTop: 50,
+		paddingTop: 35,
+		backgroundColor: colors.backgroundColor,
 	},
 	roomCardPadding: {
 		marginTop: 20,
@@ -760,9 +798,9 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
-		color: "#333",
+		color: colors.primaryText,
 		textAlign: "center",
 		position: "absolute", // Ensures the title is centered regardless of the other elements
 		left: 0,
