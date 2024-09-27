@@ -94,6 +94,69 @@ const AdvancedSettings = () => {
 			}
 		}
 	};
+	const getRoom = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			console.log("Room data: ", data);
+			return data;
+		} catch (error) {
+			console.log("Error getting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room.");
+			}
+		}
+	};
+
+	const getRoomQueue = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomID}/queue`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			console.log("Room queue data: ", data);
+			return data;
+		} catch (error) {
+			console.log("Error getting room queue: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room queue", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room queue.");
+			}
+		}
+	};
 	const navigateToSplittingRoom = async () => {
 		const token = auth.getToken();
 		try {
@@ -120,8 +183,32 @@ const AdvancedSettings = () => {
 					return;
 				} else {
 					const data = await response.json();
-					
 					console.log("Room split successfully");
+					const childRoom1 = await getRoom(data[0].id);
+					const childRoom2 = await getRoom(data[1].id);
+					if (childRoom1 && childRoom2) {
+						const childRoom1Queue = await getRoomQueue(childRoom1.id);
+						const childRoom2Queue = await getRoomQueue(childRoom2.id);
+						if (childRoom1Queue && childRoom2Queue) {
+							router.navigate({
+								pathname: "/screens/rooms/SplittingRoom",
+								params: {
+									rooms: JSON.stringify({
+										room1: childRoom1,
+										room2: childRoom2,
+									}),
+									queues: JSON.stringify({
+										room1: childRoom1Queue,
+										room2: childRoom2Queue,
+									}),
+								},
+							});
+						} else {
+							console.log("No queue data found");
+						}
+					} else {
+						console.log("No room data found");
+					}
 				}
 			} else {
 				console.log("No room data found");
