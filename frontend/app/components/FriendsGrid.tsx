@@ -51,7 +51,11 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 			}
 		>
 			<Image
-				source={{ uri: item.profile_picture_url }}
+				source={
+					item.profile_picture_url
+						? { uri: item.profile_picture_url }
+						: require("../../assets/profile-icon.png")
+				}
 				style={[
 					styles.profileImage,
 					{ borderColor: friends.includes(item) ? "green" : colors.primary },

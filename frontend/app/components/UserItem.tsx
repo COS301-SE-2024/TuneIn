@@ -103,7 +103,11 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				style={{ flexDirection: "row", alignItems: "center", paddingRight: 20 }}
 			>
 				<Image
-					source={{ uri: user.profile_picture_url }}
+					source={
+						user.profile_picture_url
+							? { uri: user.profile_picture_url }
+							: require("../../assets/profile-icon.png")
+					}
 					style={styles.profileImage}
 					testID="profile-pic"
 				/>
