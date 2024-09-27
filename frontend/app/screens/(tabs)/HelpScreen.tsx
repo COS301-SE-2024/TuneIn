@@ -88,7 +88,7 @@ export default function HelpMenu() {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [modalMessage, setModalMessage] = useState("");
 
-	const navigateToScreen = (screen) => {
+	const navigateToScreen = (screen: string) => {
 		router.navigate(`/${screen}`);
 	};
 
@@ -195,7 +195,8 @@ const styles = StyleSheet.create({
 	container: {
 		flexGrow: 1,
 		padding: 20,
-		backgroundColor: "#f4f4f4",
+		paddingTop: 15,
+		backgroundColor: colors.backgroundColor,
 	},
 	backButton: {
 		position: "absolute",
@@ -204,8 +205,9 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
+		color: colors.primaryText,
 		marginBottom: 20,
 		textAlign: "center",
 	},
