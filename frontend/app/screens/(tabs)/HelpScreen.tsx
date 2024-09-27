@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
 	TouchableOpacity,
 	StyleSheet,
 	ScrollView,
+	TextInput,
+	Modal,
+	KeyboardAvoidingView,
+	Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -80,46 +84,110 @@ const menuItems = [
 export default function HelpMenu() {
 	const router = useRouter();
 
-	const navigateToScreen = (screen) => {
+	const [message, setMessage] = useState("");
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [modalMessage, setModalMessage] = useState("");
+
+	const navigateToScreen = (screen: string) => {
 		router.navigate(`/${screen}`);
 	};
 
+	const handleSendMessage = () => {
+		if (message.trim() === "") {
+			// Show modal with error message if no message is typed
+			setModalMessage("Please enter a message before sending.");
+		} else {
+			// Show modal with success message if message is typed
+			setModalMessage(
+				"Thank you for your feedback! We will get back to you soon.",
+			);
+			setMessage(""); // Clear the input field after sending
+		}
+		setIsModalVisible(true); // Trigger modal to show
+	};
+
+	const closeModal = () => {
+		setIsModalVisible(false);
+	};
+
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				style={styles.backButton}
-				testID="backButton"
-			>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
-			<Text style={styles.title} testID="title">
-				Help Center
-			</Text>
-			{menuItems.map((item, index) => (
-				<View key={index} style={styles.section} testID={`section-${index}`}>
-					<TouchableOpacity
-						style={styles.header}
-						onPress={() => navigateToScreen(item.route)}
-						testID={`menuItem-${index}`}
-					>
-						<Text style={styles.headerText}>
-							{item.icon} {item.title}
-						</Text>
-					</TouchableOpacity>
-					{item.subcategories.map((subcategory, subIndex) => (
+		<KeyboardAvoidingView
+			style={{ flex: 1 }}
+			behavior={Platform.OS === "ios" ? "padding" : undefined}
+		>
+			<ScrollView contentContainerStyle={styles.container}>
+				<TouchableOpacity
+					onPress={() => router.back()}
+					style={styles.backButton}
+					testID="backButton"
+				>
+					<Ionicons name="chevron-back" size={24} color="black" />
+				</TouchableOpacity>
+				<Text style={styles.title} testID="title">
+					Help Center
+				</Text>
+				{menuItems.map((item, index) => (
+					<View key={index} style={styles.section} testID={`section-${index}`}>
 						<TouchableOpacity
-							key={subIndex}
-							style={styles.subcategory}
-							onPress={() => navigateToScreen(subcategory.screen)}
-							// testID={`subcategory-${index}-${subIndex}`}
+							style={styles.header}
+							onPress={() => navigateToScreen(item.route)}
+							testID={`menuItem-${index}`}
 						>
-							<Text style={styles.subcategoryText}>{subcategory.title}</Text>
+							<Text style={styles.headerText}>
+								{item.icon} {item.title}
+							</Text>
 						</TouchableOpacity>
-					))}
+						{item.subcategories.map((subcategory, subIndex) => (
+							<TouchableOpacity
+								key={subIndex}
+								style={styles.subcategory}
+								onPress={() => navigateToScreen(subcategory.screen)}
+							>
+								<Text style={styles.subcategoryText}>{subcategory.title}</Text>
+							</TouchableOpacity>
+						))}
+					</View>
+				))}
+
+				{/* Contact / Feedback Section */}
+				<View style={styles.feedbackSection}>
+					<Text style={styles.feedbackTitle}>Contact Us / Feedback</Text>
+					<TextInput
+						style={styles.feedbackInput}
+						placeholder="Describe your issue or feedback..."
+						value={message}
+						onChangeText={setMessage}
+						multiline={true}
+						numberOfLines={4}
+						placeholderTextColor="#999"
+					/>
+					<TouchableOpacity
+						style={styles.sendButton}
+						onPress={handleSendMessage}
+						testID="sendMessageButton"
+					>
+						<Text style={styles.sendButtonText}>Send Feedback</Text>
+					</TouchableOpacity>
 				</View>
-			))}
-		</ScrollView>
+
+				{/* Modal for Confirmation */}
+				<Modal
+					visible={isModalVisible}
+					transparent={true}
+					animationType="slide"
+					onRequestClose={closeModal}
+				>
+					<View style={styles.modalContainer}>
+						<View style={styles.modalContent}>
+							<Text style={styles.modalText}>{modalMessage}</Text>
+							<TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+								<Text style={styles.modalButtonText}>OK</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</Modal>
+			</ScrollView>
+		</KeyboardAvoidingView>
 	);
 }
 
@@ -127,7 +195,8 @@ const styles = StyleSheet.create({
 	container: {
 		flexGrow: 1,
 		padding: 20,
-		backgroundColor: "#f0f0f0",
+		paddingTop: 15,
+		backgroundColor: colors.backgroundColor,
 	},
 	backButton: {
 		position: "absolute",
@@ -136,8 +205,9 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
+		color: colors.primaryText,
 		marginBottom: 20,
 		textAlign: "center",
 	},
@@ -167,5 +237,78 @@ const styles = StyleSheet.create({
 	subcategoryText: {
 		fontSize: 16,
 		color: colors.primary,
+	},
+	feedbackSection: {
+		backgroundColor: "#fff",
+		padding: 20,
+		borderRadius: 12,
+		shadowColor: "#000",
+		shadowOpacity: 0.08,
+		shadowRadius: 15,
+		elevation: 4,
+		marginBottom: 30,
+	},
+	feedbackTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		color: "#333",
+		marginBottom: 15,
+		textAlign: "center",
+	},
+	feedbackInput: {
+		borderWidth: 1,
+		borderColor: colors.primary,
+		padding: 15,
+		borderRadius: 10,
+		backgroundColor: "#fafafa",
+		fontSize: 16,
+		color: "#333",
+		height: 100,
+		textAlignVertical: "top",
+		marginBottom: 15,
+		shadowColor: "#000",
+		shadowOpacity: 0.05,
+		shadowRadius: 10,
+		elevation: 3,
+	},
+	sendButton: {
+		backgroundColor: colors.primary,
+		paddingVertical: 15,
+		borderRadius: 25,
+		alignItems: "center",
+	},
+	sendButtonText: {
+		color: "#fff",
+		fontWeight: "600",
+		fontSize: 18,
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
+	},
+	modalContent: {
+		backgroundColor: "#fff",
+		padding: 20,
+		borderRadius: 10,
+		width: "80%",
+		alignItems: "center",
+	},
+	modalText: {
+		fontSize: 18,
+		textAlign: "center",
+		marginBottom: 15,
+	},
+	modalButton: {
+		backgroundColor: colors.primary,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 5,
+	},
+	modalButtonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "bold",
 	},
 });

@@ -11,6 +11,8 @@ import {
 	TouchableWithoutFeedback,
 	RefreshControl,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
@@ -29,6 +31,10 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../models/RoomDto";
+import { Friend } from "../../models/friend";
+import FollowBottomSheet from "../../components/FollowBottomSheet";
+import { User } from "../../models/user";
+import ContextMenu from "../../components/profile/DrawerContextMenu";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -39,7 +45,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToLogout = () => {
-		router.navigate("/screens/WelcomScreen");
+		auth.logout();
 	};
 
 	const navigateToHelp = () => {
@@ -59,6 +65,7 @@ const ProfileScreen: React.FC = () => {
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [isFriendDialogVisible, setFriendDialogVisible] = useState(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [following, setFollowing] = useState<boolean>(false);
 	const [roomCheck, setRoomCheck] = useState<boolean>(false);
@@ -69,9 +76,19 @@ const ProfileScreen: React.FC = () => {
 	const [recentRoomData, setRecentRoomData] = useState<any>(null);
 	const [favoriteRoomData, setFavoriteRoomData] = useState<any>(null);
 	const [drawerVisible, setDrawerVisible] = useState(false);
+	const [friends, setFriends] = useState<Friend[]>([]);
+	const [potentialFriends, setPotentialFriends] = useState<Friend[]>([]);
+	const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
+	const [requests, setRequests] = useState<Friend[]>([]);
+	const [areFriends, setAreFriends] = useState<boolean>(false);
+	const [arePotentialFriends, setArePotentialFriends] =
+		useState<boolean>(false);
+	const [isPendingRequest, setIsPendingRequest] = useState<boolean>(false);
+	const [hasRequested, setHasRequested] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [favRoomError, setFavRoomError] = useState<boolean>(false);
 	const [recentRoomError, setRecentRoomError] = useState<boolean>(false);
+	const [friendError, setFriendError] = useState<boolean>(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -93,6 +110,13 @@ const ProfileScreen: React.FC = () => {
 		router.push({
 			pathname: "./MorePage",
 			params: { type: type, items: JSON.stringify(items), title: title },
+		});
+	};
+
+	const navigateToMoreRooms = (rooms: Room[], Name: string) => {
+		router.navigate({
+			pathname: "/screens/rooms/MoreRooms",
+			params: { rooms: JSON.stringify(rooms), name: Name },
 		});
 	};
 
@@ -149,7 +173,18 @@ const ProfileScreen: React.FC = () => {
 							storedToken,
 							parsedFriend.username,
 						);
+
 						setPrimProfileData(data);
+
+						const fData = await getFriends(storedToken);
+						const potFData = await getPotentialFriends(storedToken);
+						const penFData = await getPendingRequests(storedToken);
+						const reqFData = await getFriendRequests(storedToken);
+
+						setFriends(fData);
+						setPotentialFriends(potFData);
+						setPendingRequests(penFData);
+						setRequests(reqFData);
 
 						if (recentRoomData === null) {
 							fetchRecentRoomInfo(data.username);
@@ -164,6 +199,33 @@ const ProfileScreen: React.FC = () => {
 							);
 							setFollowing(isFollowing);
 						}
+
+						const friends = fData.some(
+							(f) => f.username === parsedFriend.username,
+						);
+
+						setAreFriends(friends);
+
+						const potential = potFData.some(
+							(pot) => pot.username === parsedFriend.username,
+						);
+
+						console.log("Potential: " + potential);
+
+						setArePotentialFriends(potential);
+
+						const pending = penFData.some(
+							(pen) => pen.username === parsedFriend.username,
+						);
+
+						setIsPendingRequest(pending);
+
+						const req = reqFData.some(
+							(req) => req.username === parsedFriend.username,
+						);
+
+						setHasRequested(req);
+
 						if (currentRoomData === null) {
 							fetchCurrentRoomInfo(data.userID);
 						}
@@ -258,9 +320,9 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchProfileInfo = async (token: string, username: string) => {
+		console.log("Fetching profile info");
 		try {
 			if (!userData) {
-				// console.log("Fetching profile info");
 				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -294,6 +356,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchCurrentRoomInfo = async (userID: string) => {
+		console.log("fetch current room");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -321,7 +384,257 @@ const ProfileScreen: React.FC = () => {
 		}
 	};
 
+	const getFriends = async (token: string): Promise<Friend[]> => {
+		console.log("Getting friends");
+		const _token = await auth.getToken();
+		try {
+			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
+				headers: { Authorization: `Bearer ${_token}` },
+			});
+			const mappedFriends: Friend[] = response.data.map((friend: any) => ({
+				profile_picture_url: friend.profile_picture_url,
+				friend_id: friend.userID,
+				username: friend.username,
+				relationship: friend.relationship,
+			}));
+			setFriendError(false);
+			// console.log("Friends: " + JSON.stringify(mappedFriends));
+
+			return mappedFriends;
+		} catch (error) {
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getPotentialFriends = async (token: string): Promise<Friend[]> => {
+		console.log("get potential friends");
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/potential`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPotentialFriends: Friend[] = response.data.map(
+				(friend: any) => ({
+					profile_picture_url: friend.profile_picture_url,
+					friend_id: friend.userID,
+					username: friend.username,
+					relationship: "mutual",
+				}),
+			);
+			setFriendError(false);
+			console.log(
+				"Potential friends: " + JSON.stringify(mappedPotentialFriends),
+			);
+
+			return mappedPotentialFriends;
+		} catch (error) {
+			console.log("Error fetching potential friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getPendingRequests = async (token: string): Promise<Friend[]> => {
+		console.log("get pending requests");
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/pending`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedPendingRequests: Friend[] = response.data.map(
+				(request: any) => ({
+					profile_picture_url: request.profile_picture_url,
+					friend_id: request.userID,
+					username: request.username,
+					relationship: "pending",
+				}),
+			);
+			setFriendError(false);
+			console.log("Pending requests:", JSON.stringify(mappedPendingRequests));
+
+			return mappedPendingRequests;
+		} catch (error) {
+			console.log("Error fetching pending requests:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+	const getFriendRequests = async (token: string): Promise<Friend[]> => {
+		console.log("Getting friend requests");
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/friends/requests`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedRequests: Friend[] = response.data.map((request: any) => ({
+				profile_picture_url: request.profile_picture_url,
+				friend_id: request.userID,
+				username: request.username,
+			}));
+			setFriendError(false);
+			console.log("Friend requests: " + JSON.stringify(mappedRequests));
+
+			return mappedRequests;
+		} catch (error) {
+			console.log("Error fetching friend requests:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+
+	const handleSendRequest = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/befriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				console.log("Friend request response: " + JSON.stringify(response));
+				if (response.status === 201) {
+					console.log("Friend request sent successfully.");
+					const updatedPotentialFriends = potentialFriends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setPotentialFriends(updatedPotentialFriends);
+					setIsPendingRequest(true);
+					setPendingRequests([...pendingRequests, friend]);
+				} else if (response.status === 201) {
+					ToastAndroid.show(
+						"Cannot send request to user who does not follow you.",
+						ToastAndroid.SHORT,
+					);
+				}
+			} catch (error) {
+				console.log("Error sending request:", error);
+				ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
+			}
+		}
+	};
+
+	const handleCancelRequest = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/cancel`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedRequests = pendingRequests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setPendingRequests(updatedRequests);
+					setIsPendingRequest(false);
+					setPotentialFriends([...potentialFriends, friend]);
+					console.log("Friend request cancelled successfully.");
+				}
+			} catch (error) {
+				console.log("Error cancelling request:", error);
+				ToastAndroid.show(
+					"Failed to cancel friend request.",
+					ToastAndroid.SHORT,
+				);
+			}
+		}
+	};
+
+	const handleFriendRequest = async (
+		friend: { username: string; friend_id: string },
+		accept: boolean,
+	): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/${accept ? "accept" : "reject"}`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedRequests = requests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setRequests(updatedRequests);
+					if (accept) {
+						setFriends([...friends, friend]);
+						setAreFriends(true);
+					} else {
+						setPotentialFriends([...potentialFriends, friend]);
+					}
+					setArePotentialFriends(false);
+					console.log("Friend request handled successfully.");
+				}
+			} catch (error) {
+				console.log("Error handling request:", error);
+				ToastAndroid.show(
+					"Unable to handle friend request.",
+					ToastAndroid.SHORT,
+				);
+			}
+		}
+	};
+
+	const handleFriend = async (friend: {
+		username: string;
+		friend_id: string;
+	}): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/unfriend`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedFriends = friends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setFriends(updatedFriends);
+					setAreFriends(false);
+					setPotentialFriends([...potentialFriends, friend]);
+					console.log("User unfriended successfully.");
+				}
+			} catch (error) {
+				console.log("Error unfriending:", error);
+				ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
+			}
+		}
+	};
+
 	const fetchRecentRoomInfo = async (username: string) => {
+		console.log("fetching recent room info");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -355,6 +668,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const fetchFavRoomInfo = async (username: string) => {
+		console.log("fetching fav room info");
 		try {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
@@ -494,15 +808,56 @@ const ProfileScreen: React.FC = () => {
 
 		return (
 			<View style={{ alignItems: "center", marginTop: 20, paddingBottom: 20 }}>
-				<TouchableOpacity
-					style={styles.button}
-					onPress={() => followHandler()}
-					testID="follow-button"
-				>
-					<Text style={styles.buttonText}>
-						{following ? "Unfollow" : "Follow"}
-					</Text>
-				</TouchableOpacity>
+				<>
+					<TouchableOpacity
+						style={[
+							styles.button,
+							{
+								flex: 1,
+								flexDirection: "row",
+								paddingVertical: 5,
+								alignItems: "center",
+							},
+						]}
+						onPress={() => {
+							if (following) {
+								setFriendDialogVisible(true);
+							} else {
+								followHandler();
+							}
+						}}
+						testID="follow-button"
+					>
+						<Text style={styles.buttonText}>
+							{following ? "Following  " : "Follow"}
+						</Text>
+						{following && (
+							<Ionicons
+								style={{ paddingTop: 2 }}
+								name="chevron-down"
+								size={15}
+								color="black"
+							/>
+						)}
+					</TouchableOpacity>
+					<FollowBottomSheet
+						friend={{
+							username: primaryProfileData.username,
+							friend_id: primaryProfileData.userID,
+						}}
+						showFollowOptions={isFriendDialogVisible}
+						isFriend={areFriends}
+						isPotential={arePotentialFriends}
+						isRequesting={hasRequested}
+						isPending={isPendingRequest}
+						handleUnfollow={followHandler}
+						handleRequest={handleFriendRequest}
+						handleUnfriend={handleFriend}
+						handleCancel={handleCancelRequest}
+						sendRequest={handleSendRequest}
+						setShowMoreOptions={setFriendDialogVisible}
+					></FollowBottomSheet>
+				</>
 			</View>
 		);
 	};
@@ -536,21 +891,30 @@ const ProfileScreen: React.FC = () => {
 		}, 2000);
 	}, []);
 
+	// Function to show error messages
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
+	// Function to handle different error cases
 	const handleErrors = () => {
 		console.log("Called");
 		if (favRoomError || recentRoomError) {
-			ToastAndroid.show(
+			showError(
 				favRoomError && recentRoomError
 					? "Failed to load rooms"
 					: favRoomError
 						? "Failed to load favorite rooms"
 						: "Failed to load recent rooms",
-				ToastAndroid.SHORT,
 			);
 		}
 
 		if (currentRoom) {
-			ToastAndroid.show("Failed to load current room", ToastAndroid.SHORT);
+			showError("Failed to load current room");
 		}
 	};
 
@@ -618,6 +982,7 @@ const ProfileScreen: React.FC = () => {
 				style={{
 					paddingVertical: 15,
 					paddingRight: 15,
+					paddingLeft: 1,
 					backgroundColor: "white",
 				}}
 				testID="profile-screen"
@@ -642,43 +1007,7 @@ const ProfileScreen: React.FC = () => {
 						{ownsProfile && (
 							<View style={styles.container}>
 								{/* Drawer Modal */}
-								<Modal
-									transparent={true}
-									visible={drawerVisible}
-									animationType="slide"
-									onRequestClose={() => setDrawerVisible(false)}
-								>
-									{/* Overlay */}
-									<TouchableWithoutFeedback
-										onPress={() => setDrawerVisible(false)}
-									>
-										<View style={styles.overlay} />
-									</TouchableWithoutFeedback>
-
-									{/* Drawer Content */}
-									<View style={styles.drawer}>
-										{/* Close Drawer Button */}
-										<View style={styles.closeButtonContainer}>
-											<TouchableOpacity onPress={toggleDrawer}>
-												<Ionicons name="close" size={24} color="black" />
-											</TouchableOpacity>
-										</View>
-
-										{/* Drawer Items */}
-										<Text
-											style={styles.drawerItem}
-											onPress={navigateToAnayltics}
-										>
-											Analytics
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToHelp}>
-											Help Menu
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToLogout}>
-											Logout
-										</Text>
-									</View>
-								</Modal>
+								<ContextMenu isVisible={drawerVisible} onClose={toggleDrawer} />
 							</View>
 						)}
 						<Text
@@ -717,7 +1046,19 @@ const ProfileScreen: React.FC = () => {
 						>
 							<TouchableOpacity
 								style={{ alignItems: "center" }}
-								onPress={navigateToFollowerStack}
+								onPress={() => {
+									const following: User = primaryProfileData.following.data.map(
+										(item: any) => ({
+											id: item.userID,
+											profile_picture_url: item.profile_picture_url,
+											profile_name: item.profile_name,
+											username: item.username,
+											followers: item.followers.data,
+										}),
+									);
+									navigateToMore("user", following, "Following");
+								}}
+								testID="following-count"
 							>
 								<Text style={{ fontSize: 20, fontWeight: "600" }}>
 									{primaryProfileData.following.count}
@@ -728,7 +1069,18 @@ const ProfileScreen: React.FC = () => {
 							</TouchableOpacity>
 							<TouchableOpacity
 								style={{ marginLeft: 60, alignItems: "center" }}
-								onPress={navigateToFollowerStack}
+								onPress={() => {
+									const followers: User = primaryProfileData.followers.data.map(
+										(item: any) => ({
+											id: item.userID,
+											profile_picture_url: item.profile_picture_url,
+											profile_name: item.profile_name,
+											username: item.username,
+											followers: item.followers.data,
+										}),
+									);
+									navigateToMore("user", followers, "Followers");
+								}}
 							>
 								<Text style={{ fontSize: 20, fontWeight: "600" }}>
 									{primaryProfileData.followers.count}
@@ -749,9 +1101,7 @@ const ProfileScreen: React.FC = () => {
 						</TouchableOpacity>
 						<LinkBottomSheet
 							isVisible={isLinkDialogVisible}
-							onClose={() => {
-								setLinkDialogVisible(false);
-							}}
+							setIsVisible={setLinkDialogVisible}
 							links={primaryProfileData.links.data}
 						/>
 						{renderFollowOrEdit()}
@@ -874,7 +1224,7 @@ const ProfileScreen: React.FC = () => {
 									{primaryProfileData.recent_rooms.count > 10 && (
 										<TouchableOpacity
 											onPress={() => {
-												navigateToMore("room", recentRoomData, "Recent Rooms");
+												navigateToMoreRooms(recentRoomData, "Recent Rooms");
 											}}
 										>
 											<Text

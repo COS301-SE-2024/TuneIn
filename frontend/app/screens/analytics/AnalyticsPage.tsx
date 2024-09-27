@@ -16,11 +16,12 @@ import PieChartCard from "../../components/PieChartCard";
 import { API_BASE_URL } from "../../services/Utils";
 // import * as StorageService from "../../services/StorageService";
 import AuthManagement from "../../services/AuthManagement";
+import AnalyticsMenu from "../../components/analytics/AnalyticsMenu";
 
 const AnalyticsPage: React.FC = () => {
 	const router = useRouter();
 	const [activeButton, setActiveButton] = useState("Day");
-	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [drawerVisible, setDrawerVisible] = useState(false);
 	const [keymetrics, setKeyMetrics] = useState<{
 		unique_visitors: {
 			count: number;
@@ -68,7 +69,7 @@ const AnalyticsPage: React.FC = () => {
 	};
 
 	const toggleDrawer = () => {
-		setDrawerOpen(!drawerOpen);
+		setDrawerVisible(!drawerVisible);
 	};
 
 	const secondsToString = (seconds: number) => {
@@ -107,41 +108,8 @@ const AnalyticsPage: React.FC = () => {
 
 	return (
 		<View style={{ flex: 1 }}>
-			{drawerOpen && (
-				<View style={styles.drawer}>
-					<TouchableOpacity onPress={toggleDrawer}>
-						<Ionicons
-							name="close"
-							size={30}
-							color="black"
-							style={styles.drawerCloseIcon}
-						/>
-					</TouchableOpacity>
-					<View style={styles.drawerContent}>
-						<TouchableOpacity
-							onPress={() => router.push("/screens/analytics/GeneralAnalytics")}
-						>
-							<Text style={styles.drawerItem}>General Analytics</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={() =>
-								router.navigate({
-									pathname: "/screens/analytics/InteractionsAnalytics",
-								})
-							}
-						>
-							<Text style={styles.drawerItem}>Interactions Analytics</Text>
-						</TouchableOpacity>
-						{/* <TouchableOpacity
-							onPress={() =>
-								router.push("/screens/analytics/PlaylistAnalytics")
-							}
-						>
-							<Text style={styles.drawerItem}>Playlist Analytics</Text>
-						</TouchableOpacity> */}
-					</View>
-				</View>
-			)}
+			<AnalyticsMenu isVisible={drawerVisible} onClose={toggleDrawer} />
+
 			<ScrollView contentContainerStyle={styles.scrollView}>
 				<View style={styles.container}>
 					<View style={styles.header}>

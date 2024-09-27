@@ -9,6 +9,8 @@ import {
 	Pressable,
 	ToastAndroid,
 	ScrollView,
+	Platform,
+	Alert,
 } from "react-native";
 import auth from "../../services/AuthManagement";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -66,19 +68,30 @@ const AdvancedSettings = () => {
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
 	const deleteRoom = async (roomID: string) => {
-		// Delete room
 		const token = await auth.getToken();
 		try {
-			await fetch(`http://localhost:3000/rooms/${roomID}`, {
+			await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
 				method: "DELETE",
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+
+			// Show toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Success", "Room deleted successfully.");
+			}
 		} catch (error) {
 			console.log("Error deleting room: ", error);
-			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+
+			// Handle toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to delete room.");
+			}
 		}
 	};
 	const navigateToSplittingRoom = () => {
@@ -296,8 +309,12 @@ const AdvancedSettings = () => {
 					visible={showDeleteModal}
 					onRequestClose={() => setShowDeleteModal(false)}
 				>
-					<View style={styles.modalContainer}>
-						<View style={styles.modalView}>
+					<Pressable
+						style={styles.modalContainer}
+						onPress={() => setShowDeleteModal(false)} // Close modal when pressing outside
+					>
+						{/* Prevent the modal content from closing when pressed */}
+						<Pressable style={styles.modalView} onPress={() => {}}>
 							<Text style={styles.modalText}>
 								Are you sure you want to delete this room? The room will be
 								deleted forever.
@@ -316,8 +333,8 @@ const AdvancedSettings = () => {
 									<Text style={styles.textStyle}>No</Text>
 								</Pressable>
 							</View>
-						</View>
-					</View>
+						</Pressable>
+					</Pressable>
 				</Modal>
 				{/* Save Confirmation Modal */}
 				<Modal
@@ -450,15 +467,18 @@ const styles = StyleSheet.create({
 	},
 	modalContainer: {
 		flex: 1,
-		justifyContent: "center",
+		justifyContent: "flex-end", // Align modal to the bottom
 		alignItems: "center",
 		backgroundColor: "rgba(0,0,0,0.5)",
 	},
 	modalView: {
-		width: 300,
+		width: "100%", // Make it take full width of the screen
+		height: "28%", // Increase the height, you can adjust this to your needs
 		backgroundColor: "white",
-		borderRadius: 10,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
 		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
 		shadowColor: "#000",
 		shadowOffset: {
@@ -491,12 +511,13 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalText: {
+		marginTop: 10,
 		fontSize: 16,
 		textAlign: "center",
-		marginBottom: 15,
 		fontWeight: "bold",
 	},
 	modalButtonContainer: {
+		marginTop: 45,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		width: "100%",
@@ -509,10 +530,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	buttonYes: {
-		backgroundColor: colors.primary,
+		backgroundColor: "red",
+		borderRadius: 25,
 	},
 	buttonNo: {
 		backgroundColor: colors.secondary,
+		borderRadius: 25,
 	},
 	textStyle: {
 		color: "white",
