@@ -145,14 +145,11 @@ const Search: React.FC = () => {
 						console.log("Recommended rooms length: " + recommendedRooms.length);
 						setResults(recommendedRooms);
 					} else {
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/foryou`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						response = await axios.get(`${utils.API_BASE_URL}/users/foryou`, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
-						);
+						});
 						if (response.status !== 200) {
 							console.error("Error fetching recommended users:", response);
 							return;

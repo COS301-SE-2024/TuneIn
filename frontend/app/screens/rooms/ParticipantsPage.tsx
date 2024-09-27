@@ -10,105 +10,24 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLive } from "../../LiveContext";
+import { UserDto } from "../../../api";
 
-interface Participant {
-	id: string;
-	username: string;
-	profilePictureUrl: string;
-}
-
-interface ParticipantsPageProps {
-	participants: Participant[];
-}
-
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
-}) => {
+const ParticipantsPage: React.FC = () => {
 	const navigation = useNavigation();
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
+	const { roomParticipants } = useLive();
 
 	const navigateToProfile = (userId: string) => {};
 
-	const renderItem = ({ item }: { item: Participant }) => (
+	const renderItem = ({ item }: { item: UserDto }) => (
 		<TouchableOpacity style={styles.participantContainer}>
 			<Image
-				source={{ uri: item.profilePictureUrl }}
+				source={{ uri: item.profile_picture_url }}
 				style={styles.profilePicture}
 			/>
 			<Text style={styles.username}>{item.username}</Text>
 		</TouchableOpacity>
 	);
-
-	const mockData: Participant[] = [
-		// Added more participants for scrolling
-		{
-			id: "1",
-			username: "JohnDoe",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "2",
-			username: "JaneSmith",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "3",
-			username: "AliceJohnson",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "4",
-			username: "BobBrown",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "5",
-			username: "EmilyDavis",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "6",
-			username: "MichaelWilson",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "7",
-			username: "OliviaGarcia",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "8",
-			username: "DavidMiller",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "9",
-			username: "DavidMiller",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-	];
 
 	return (
 		<View style={styles.container}>
@@ -122,7 +41,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{(participantsInRoom.length === 0 && (
+			{(roomParticipants.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.{" "}
@@ -133,9 +52,9 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</View>
 			)) || (
 				<FlatList
-					data={participantsInRoom}
+					data={roomParticipants}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.userID}
 				/>
 			)}
 		</View>

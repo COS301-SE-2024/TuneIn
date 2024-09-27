@@ -101,6 +101,7 @@ interface LiveContextType {
 	leaveRoom: () => void;
 	roomMessages: LiveMessage[];
 	roomQueue: RoomSongDto[];
+	roomParticipants: UserDto[];
 	roomPlaying: boolean;
 	roomEmojiObjects: ObjectConfig[];
 	roomControls: RoomControls;
@@ -140,6 +141,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
 	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
 	const [roomQueue, setRoomQueue] = useState<RoomSongDto[]>([]);
+	const [roomParticipants, setRoomParticipants] = useState<UserDto[]>([]);
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
 	const [roomMessages, setRoomMessages] = useState<LiveMessage[]>([]);
 	const [dmParticipants, setDmParticipants] = useState<UserDto[]>([]);
@@ -452,6 +454,32 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						throw new Error("Error getting room");
 					}
 				});
+			rooms
+				.getRoomUsers(roomID)
+				.then((users: AxiosResponse<UserDto[]>) => {
+					if (users.status === 401) {
+						//Unauthorized
+						//Auth header is either missing or invalid
+						setRoomParticipants([]);
+					} else if (users.status === 500) {
+						//Internal Server Error
+						//Something went wrong in the backend (unlikely lmao)
+						setRoomParticipants([]);
+						throw new Error("Internal Server Error");
+					} else {
+						setRoomParticipants(users.data);
+					}
+				})
+				.catch((error) => {
+					setRoomParticipants([]);
+					if (error instanceof RequiredError) {
+						// a required field is missing
+						throw new Error("Parameter missing from request to get room users");
+					} else {
+						// some other error
+						throw new Error("Error getting room users");
+					}
+				});
 		},
 		[roomControls, rooms],
 	);
@@ -521,6 +549,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
 		setCurrentRoom(undefined);
 		setRoomQueue([]);
+		setCurrentRoomVotes([]);
+		setRoomParticipants([]);
 		updateState({ type: actionTypes.CLEAR_ROOM_STATE });
 	}, [currentRoom, currentUser, updateState]);
 
@@ -715,14 +745,22 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socket.on(SOCKET_EVENTS.USER_JOINED_ROOM, (response: ChatEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.USER_JOINED_ROOM);
 					const u: UserDto = currentUser;
-					// if (
-					// 	response.body &&
-					// 	response.body.sender.userID === currentUser.userID
-					// ) {
-					// 	updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
-					// }
-					updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
+					if (response.userID !== null) {
+						if (
+							response.body &&
+							response.body.sender.userID === currentUser.userID
+						) {
+							updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
+						}
+						const joinedParticipant = roomParticipants.find(
+							(p) => p.userID === response.userID,
+						);
+						if (!joinedParticipant && currentRoom) {
+							setRoomID(currentRoom.roomID); //will update room info & participants
+						}
+					}
 					roomControls.requestLiveChatHistory();
+					roomControls.requestRoomQueue();
 				});
 
 				socket.on(
@@ -759,6 +797,21 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.on(SOCKET_EVENTS.USER_LEFT_ROOM, (response: ChatEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.USER_LEFT_ROOM);
+					const u: UserDto = currentUser;
+					if (response.userID !== null) {
+						if (
+							response.body &&
+							response.body.sender.userID === currentUser.userID
+						) {
+							updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
+						}
+						const joinedParticipant = roomParticipants.find(
+							(p) => p.userID === response.userID,
+						);
+						if (!joinedParticipant && currentRoom) {
+							setRoomID(currentRoom.roomID); //will update room info & participants
+						}
+					}
 				});
 
 				socket.on(SOCKET_EVENTS.ERROR, (response: ChatEventDto) => {
@@ -1522,6 +1575,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				leaveRoom,
 				roomMessages,
 				roomQueue,
+				roomParticipants,
 				roomPlaying,
 				roomEmojiObjects,
 				roomControls,

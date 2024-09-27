@@ -326,7 +326,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				await this.roomUsers.setRoomId(client.id, roomID);
 				client.join(roomID);
 				const joinAnnouncement: ChatEventDto = {
-					userID: null,
+					userID: payload.userID,
 					date_created: new Date(),
 				};
 				this.server
@@ -375,7 +375,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				const response: ChatEventDto = {
-					userID: null,
+					userID: payload.userID,
 					date_created: new Date(),
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
