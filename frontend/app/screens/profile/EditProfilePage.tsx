@@ -748,6 +748,7 @@ const styles = StyleSheet.create({
 	container2: {
 		marginRight: 12,
 		marginBottom: 10,
+		marginTop: 5,
 		paddingHorizontal: 14,
 		paddingVertical: 8,
 		backgroundColor: "rgba(232, 235, 242, 1)",
@@ -765,6 +766,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	profileHeader: {
 		flexDirection: "row",
