@@ -178,16 +178,18 @@ const EditProfileScreen = () => {
 			const response = await new Promise<boolean>((resolve) => {
 				timeoutRef.current = setTimeout(async () => {
 					try {
-						const response = await axios.get(
-							`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+						const response = await axios.head(
+							`${utils.API_BASE_URL}/users/${profileData.username}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
 								},
 							},
 						);
-
-						if (response.data) {
+						if (response.status === 500) {
+							setUsrNmErrorMessage("Error checking username");
+							resolve(false);
+						} else if (response.status !== 200) {
 							setUsrNmErrorMessage("Username already taken");
 							resolve(false);
 						} else {

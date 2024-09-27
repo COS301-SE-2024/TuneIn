@@ -222,33 +222,6 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/rooms/recent:
-    get:
-      operationId: getRecentRoomsByUsername
-      summary: Get a user's recent rooms
-      description: Get the user's most recently visited rooms.
-      parameters:
-        - name: username
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The user's recent rooms as an array of RoomDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoomDto'
-        '400':
-          description: Username does not exist or is invalid.
-      tags:
-        - users
-      security:
-        - bearer: []
-        - bearer: []
   /users/rooms/foryou:
     get:
       operationId: getRecommendedRooms
@@ -283,6 +256,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoomDto'
       tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/foryou:
+    get:
+      operationId: UsersController_getRecommendedUsers
+      summary: Get recommended users
+      parameters: []
+      responses:
+        '200':
+          description: Recommended users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - users
         - users
       security:
         - bearer: []
@@ -447,47 +442,32 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/bookmarks:
-    get:
-      operationId: getBookmarksByUsername
-      summary: Get the authorized user's bookmarks
-      description: Get all of the rooms that the user has bookmarked.
-      parameters:
-        - name: username
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The user's bookmarks as an array of RoomDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoomDto'
-        '400':
-          description: Username does not exist or is invalid.
-      tags:
-        - users
-  /users/{username}/taken:
-    get:
+  /users/{username}:
+    head:
       operationId: isUsernameTaken
       summary: Check if a username is taken
-      description: Get all of the rooms that the user has bookmarked.
+      description: Check if the given username is already taken.
       parameters:
         - name: username
           required: true
           in: path
+          description: The username of the user to check.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
         '200':
-          description: True if taken, false if not.
+          description: >-
+            The username is taken and a GET request can be made to get the
+            user's profile.
+        '404':
+          description: The username is not taken and can be used.
       tags:
         - users
-  /users/{username}:
+      security:
+        - bearer: []
+        - bearer: []
     get:
       operationId: getProfileByUsername
       summary: Get user profile info by username
@@ -680,29 +660,58 @@ paths:
         - users
       security:
         - bearer: []
-  /users/recommended/users:
+  /users/{username}/bookmarks:
     get:
-      operationId: UsersController_getRecommendedUsers
-      summary: Get recommended users
-      parameters: []
+      operationId: getBookmarksByUsername
+      summary: Get the authorized user's bookmarks
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
       responses:
         '200':
-          description: Recommended users retrieved successfully
+          description: The user's bookmarks as an array of RoomDto.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserDto'
-        '401':
-          description: Unauthorized
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
       tags:
         - users
+  /users/{username}/rooms/recent:
+    get:
+      operationId: getRecentRoomsByUsername
+      summary: Get a user's recent rooms
+      description: Get the user's most recently visited rooms.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's recent rooms as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
         - users
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/room/current:
+  /users/{username}/rooms/current:
     get:
       operationId: UsersController_getCurrentRoomByUserId
       summary: Get a user's current room based on username

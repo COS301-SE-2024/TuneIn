@@ -100,9 +100,9 @@ export class UsersService {
 			where: { username: username },
 		});
 		if (!user || user === null) {
-			return false;
+			throw new HttpException("Username not found", HttpStatus.NOT_FOUND);
 		}
-		return true;
+		throw new HttpException("Username found", HttpStatus.OK);
 	}
 
 	async updateProfile(

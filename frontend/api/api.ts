@@ -3432,7 +3432,7 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
         usersControllerGetCurrentRoomByUserId: async (username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'username' is not null or undefined
             assertParamExists('usersControllerGetCurrentRoomByUserId', 'username', username)
-            const localVarPath = `/users/{username}/room/current`
+            const localVarPath = `/users/{username}/rooms/current`
                 .replace(`{${"username"}}`, encodeURIComponent(String(username)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6162,16 +6162,16 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Get all of the rooms that the user has bookmarked.
+         * Check if the given username is already taken.
          * @summary Check if a username is taken
-         * @param {string} username 
+         * @param {string} username The username of the user to check.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         isUsernameTaken: async (username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'username' is not null or undefined
             assertParamExists('isUsernameTaken', 'username', username)
-            const localVarPath = `/users/{username}/taken`
+            const localVarPath = `/users/{username}`
                 .replace(`{${"username"}}`, encodeURIComponent(String(username)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6180,9 +6180,13 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'HEAD', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -6475,7 +6479,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         usersControllerGetCurrentRoomByUserId: async (username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'username' is not null or undefined
             assertParamExists('usersControllerGetCurrentRoomByUserId', 'username', username)
-            const localVarPath = `/users/{username}/room/current`
+            const localVarPath = `/users/{username}/rooms/current`
                 .replace(`{${"username"}}`, encodeURIComponent(String(username)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6578,7 +6582,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
          * @throws {RequiredError}
          */
         usersControllerGetRecommendedUsers: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/recommended/users`;
+            const localVarPath = `/users/foryou`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6612,7 +6616,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
          * @throws {RequiredError}
          */
         usersControllerGetRecommendedUsers_4: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/recommended/users`;
+            const localVarPath = `/users/foryou`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6960,9 +6964,9 @@ export const UsersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get all of the rooms that the user has bookmarked.
+         * Check if the given username is already taken.
          * @summary Check if a username is taken
-         * @param {string} username 
+         * @param {string} username The username of the user to check.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7370,9 +7374,9 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getUserRooms(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get all of the rooms that the user has bookmarked.
+         * Check if the given username is already taken.
          * @summary Check if a username is taken
-         * @param {string} username 
+         * @param {string} username The username of the user to check.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -7791,9 +7795,9 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * Get all of the rooms that the user has bookmarked.
+     * Check if the given username is already taken.
      * @summary Check if a username is taken
-     * @param {string} username 
+     * @param {string} username The username of the user to check.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi

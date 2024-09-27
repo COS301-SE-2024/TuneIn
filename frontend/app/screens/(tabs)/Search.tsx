@@ -146,7 +146,7 @@ const Search: React.FC = () => {
 						setResults(recommendedRooms);
 					} else {
 						response = await axios.get(
-							`${utils.API_BASE_URL}/users/recommended/users`,
+							`${utils.API_BASE_URL}/users/foryou`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
