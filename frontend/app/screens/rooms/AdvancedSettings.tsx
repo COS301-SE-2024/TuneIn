@@ -117,8 +117,58 @@ const AdvancedSettings = () => {
 				return null;
 			}
 			const data = await response.json();
-			console.log("Room data: ", data);
-			return data;
+			// 		"roomID": "66bb6bf7-25be-45af-bc38-7e7e258797b8",
+			// "participant_count": 0,
+			// "room_name": "chilling at EPI USE",
+			// "description": "A room for relaxing and enjoying soothing music. Join us to unwind and chill with your favorite tunes.",
+			// "is_temporary": false,
+			// "is_private": false,
+			// "is_scheduled": false,
+			// "start_date": "2024-09-27T17:51:30.203Z",
+			// "end_date": "2024-09-27T17:51:30.203Z",
+			// "language": "English",
+			// "has_explicit_content": true,
+			// "has_nsfw_content": true,
+			// "room_image": "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-22T09%3A30%3A10.856Z-chilling-at%20epi%20use.jpeg",
+			// "current_song": {
+			//     "songID": "",
+			//     "title": "",
+			//     "artists": [],
+			//     "cover": "",
+			//     "spotify_id": "",
+			//     "duration": 0,
+			//     "start_time": "2024-09-27T17:51:30.203Z"
+			// },
+			// "tags": [
+			//     "explicit"
+			// ],
+			//  this is the format of the room data from the backend
+
+			// {
+			// 	id: "1",
+			// 	backgroundImage:
+			// 		"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCy16nhIbV3pI1qLYHMJKwbH2458oiC9EmA&s",
+			// 	name: "Test Room One",
+			// 	description: "This is a description for Test Room One.",
+			// 	userID: "user1",
+			// 	username: "User One",
+			// 	tags: ["chill", "jazz"],
+			// 	genre: "Jazz",
+			// 	language: "English",
+			// 	roomSize: 10,
+			// 	isExplicit: false,
+			// 	isNsfw: false,
+			// }, this is the format of the room data to be returned
+
+			return {
+				roomID: data.roomID,
+				name: data.room_name,
+				description: data.description,
+				userID: data.userID,
+				username: data.username,
+				tags: data.tags,
+				genre: data.genre,
+			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
 			if (Platform.OS === "android" && ToastAndroid) {
@@ -150,9 +200,43 @@ const AdvancedSettings = () => {
 				return null;
 			}
 			const data = await response.json();
-			const queue: Queue = data.map((song: any) => song.song);
-			console.log("Room queue data: ", data);
-			return data;
+			// 	{
+			// 	id: 1,
+			// 	name: "Track One",
+			// 	artists: [{ name: "Artist A" }],
+			// 	album: { images: [{ url: "https://example.com/album1.jpg" }] },
+			// 	explicit: false,
+			// 	preview_url: "https://example.com/preview1.mp3",
+			// 	uri: "spotify:track:1",
+			// 	duration_ms: 210000,
+			// },
+			// this is the format of created queue
+
+			// 		 {
+			//     "title": "Reagan's In",
+			//     "cover": "",
+			//     "artists": [
+			//         "Wasted Youth"
+			//     ],
+			//     "duration": 64,
+			//     "spotify_id": "1wUq86A1UaeVHAD3hISz0y"
+			// },
+
+			// this is the format of the queue from the backend
+			const queue = data.map((song: any) => {
+				return {
+					id: song.id,
+					name: song.title,
+					artists: song.artists.map((artist: string) => ({ name: artist })), // Convert artist string to object
+					album: { images: [{ url: song.cover }] },
+					explicit: false,
+					preview_url: "",
+					uri: `spotify:track:${song.spotify_id}`,
+					duration_ms: song.duration * 1000,
+				};
+			});
+			console.log("Room queue data: ", queue);
+			return queue;
 		} catch (error) {
 			console.log("Error getting room queue: ", error);
 			if (Platform.OS === "android" && ToastAndroid) {
@@ -201,14 +285,8 @@ const AdvancedSettings = () => {
 							router.navigate({
 								pathname: "/screens/rooms/SplittingRoom",
 								params: {
-									rooms: JSON.stringify({
-										room1: childRoom1,
-										room2: childRoom2,
-									}),
-									queues: JSON.stringify({
-										room1: childRoom1Queue,
-										room2: childRoom2Queue,
-									}),
+									rooms: JSON.stringify([childRoom1, childRoom2]),
+									queues: JSON.stringify([childRoom1Queue, childRoom2Queue]),
 								},
 							});
 						} else {
