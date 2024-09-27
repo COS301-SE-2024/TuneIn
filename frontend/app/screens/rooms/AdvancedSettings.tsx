@@ -23,7 +23,11 @@ import RoomShareSheet from "../../components/messaging/RoomShareSheet";
 import { formatRoomData } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
+import { Track } from "../../models/Track";
 
+type Queues = {
+	[key: string]: Track[];
+};
 const AdvancedSettings = () => {
 	const router = useRouter();
 	const [isPopupVisible, setPopupVisible] = useState(false);
@@ -146,6 +150,7 @@ const AdvancedSettings = () => {
 				return null;
 			}
 			const data = await response.json();
+			const queue: Queue = data.map((song: any) => song.song);
 			console.log("Room queue data: ", data);
 			return data;
 		} catch (error) {
