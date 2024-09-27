@@ -50,6 +50,7 @@ const AnalyticsMenu: React.FC<AnalyticsMenuProps> = ({
 					<TouchableOpacity
 						onPress={navigateToInteractionsAnalytics}
 						style={styles.menuItem}
+						testID="interaction-analytics"
 					>
 						<Text style={styles.menuText}>
 							<Ionicons name="people" size={20} color="black" />
