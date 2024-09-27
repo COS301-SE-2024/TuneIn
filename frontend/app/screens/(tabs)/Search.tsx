@@ -615,13 +615,6 @@ const Search: React.FC = () => {
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 				<View style={styles.container}>
 					<View style={styles.header}>
-						<TouchableOpacity
-							onPress={() => navigation.goBack()}
-							testID="back-button"
-							style={styles.backButton} // Optional to add padding or margin
-						>
-							<Ionicons name="chevron-back" size={30} color="black" />
-						</TouchableOpacity>
 						<Text style={styles.title}>Search</Text>
 					</View>
 					<View style={styles.searchBarContainer}>

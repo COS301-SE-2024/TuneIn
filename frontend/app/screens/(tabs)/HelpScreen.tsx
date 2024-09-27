@@ -116,13 +116,6 @@ export default function HelpMenu() {
 			behavior={Platform.OS === "ios" ? "padding" : undefined}
 		>
 			<ScrollView contentContainerStyle={styles.container}>
-				<TouchableOpacity
-					onPress={() => router.back()}
-					style={styles.backButton}
-					testID="backButton"
-				>
-					<Ionicons name="chevron-back" size={24} color="black" />
-				</TouchableOpacity>
 				<Text style={styles.title} testID="title">
 					Help Center
 				</Text>

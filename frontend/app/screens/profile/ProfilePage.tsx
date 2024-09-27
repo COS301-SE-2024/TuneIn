@@ -20,7 +20,7 @@ import GenreList from "../../components/GenreList";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -375,11 +375,15 @@ const ProfileScreen: React.FC = () => {
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
-			if (error.response && error.response.status === 404) {
-				setCurrentRoomData(null);
-				setRoomCheck(true);
+			if (axios.isAxiosError(error)) {
+				if (error.response && error.response.status === 404) {
+					setCurrentRoomData(null);
+					setRoomCheck(true);
+				} else {
+					console.log("Error fetching current room info:", error);
+				}
 			} else {
-				console.log("Error fetching current room info:", error);
+				console.log("An unknown error occurred:", error);
 			}
 		}
 	};
