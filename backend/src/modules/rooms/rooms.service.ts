@@ -352,7 +352,7 @@ export class RoomsService {
 
 	async getRoomQueue(roomID: string): Promise<SongInfoDto[]> {
 		// TODO: Implement logic to get room queue
-		const songInfoDto: SongInfoDto = new SongInfoDto();
+
 		// get queue from db
 		const queue = await this.prisma.queue.findMany({
 			where: {
@@ -364,6 +364,7 @@ export class RoomsService {
 		});
 		const songInfoDtos: SongInfoDto[] = [];
 		for (const song of queue) {
+			const songInfoDto = new SongInfoDto();
 			songInfoDto.title = song.song.name;
 			songInfoDto.cover = song.song.artwork_url || "";
 			songInfoDto.artists = song.song.artists;
@@ -1109,6 +1110,7 @@ export class RoomsService {
 					};
 				});
 				if (childRoom0Songs) {
+					console.log("Child room 0 songs", childRoom0Songs);
 					await this.prisma.queue.createMany({
 						data: childRoom0Songs,
 					});
