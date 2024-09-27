@@ -8,12 +8,12 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
+	TouchableWithoutFeedback,
 	Keyboard,
 	Platform,
 } from "react-native";
 import {
 	GestureHandlerRootView,
-	TouchableWithoutFeedback,
 	TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
