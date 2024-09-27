@@ -540,8 +540,16 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={{ uri: profileData.profile_picture_url }}
-						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+						source={
+							profileData.profile_picture_url
+								? { uri: profileData.profile_picture_url }
+								: require("../../../assets/profile-icon.png")
+						}
+						style={{
+							width: 125,
+							height: 125,
+							borderRadius: 125 / 2,
+						}}
 					/>
 					<TouchableOpacity
 						onPress={() => setPhotoDialogVisible(true)}
