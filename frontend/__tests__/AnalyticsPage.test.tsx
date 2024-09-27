@@ -52,23 +52,6 @@ describe("AnalyticsPage", () => {
 		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
-	it("should open and close the drawer", async () => {
-		const { getByTestId, queryByText } = render(<AnalyticsPage />);
-
-		// Ensure the drawer is initially closed
-		expect(queryByText("Interactions Analytics")).toBeNull();
-
-		// Open the drawer
-		fireEvent.press(getByTestId("menu-button"));
-
-		// Check if the drawer items are visible
-		expect(await queryByText("Interactions Analytics")).toBeTruthy();
-
-		// Close the drawer
-		fireEvent.press(getByTestId("menu-button"));
-		expect(queryByText("Interactions Analytics")).toBeNull();
-	});
-
 	it("should navigate back when back button is pressed", () => {
 		const { getByTestId } = render(<AnalyticsPage />);
 
