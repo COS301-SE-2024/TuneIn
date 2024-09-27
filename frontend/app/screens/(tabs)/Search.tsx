@@ -9,11 +9,11 @@ import {
 	NativeSyntheticEvent,
 	FlatList,
 	Keyboard,
-	TouchableWithoutFeedback,
 	Platform,
 } from "react-native";
 import {
 	GestureHandlerRootView,
+	TouchableWithoutFeedback,
 	TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
@@ -116,7 +116,9 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const canSetUserResults = () => {return searchTerm.trim() === "" && filter === "user" && loading;};
+		const canSetUserResults = () => {
+			return searchTerm.trim() === "" && filter === "user" && loading;
+		};
 		const getRecommendations = async () => {
 			try {
 				const token = await auth.getToken();
@@ -614,7 +616,9 @@ const Search: React.FC = () => {
 
 	return (
 		<GestureHandlerRootView>
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<TouchableWithoutFeedback
+				onPress={() => (Platform.OS !== "web" ? Keyboard.dismiss : null)}
+			>
 				<View style={styles.container}>
 					<View style={styles.header}>
 						<TouchableOpacity
