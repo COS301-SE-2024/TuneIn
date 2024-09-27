@@ -53,8 +53,10 @@ const SplittingRoom: React.FC = () => {
 			if (typeof parsedQueues === "object" && parsedQueues !== null) {
 				const formattedQueues: Queues = Object.fromEntries(
 					Object.entries(parsedQueues).map(([key, queue]) => {
+						console.log("key", key);
+						console.log("queue", queue);
 						if (Array.isArray(queue)) {
-							return [key, queue.slice(0, 2)]; // Ensure size 2 for each queue
+							return [key, queue]; // Ensure size 2 for each queue
 						}
 						return [key, []]; // Default to empty array if not an array
 					}),
@@ -128,12 +130,31 @@ const SplittingRoom: React.FC = () => {
 							const newIndex = Math.round(
 								event.nativeEvent.contentOffset.x / (cardWidth + spacing),
 							);
+							console.log(
+								"New index:",
+								newIndex,
+								"Current index:",
+								currentRoomIndex,
+							);
+							if (rooms[newIndex] && rooms[newIndex].roomID) {
+								console.log(
+									"Setting playlist:",
+									queues[rooms[newIndex].roomID],
+								);
+							}
+							console.log("Setting playlist for room:", rooms[newIndex]);
+							console.log("New index:", newIndex);
+							console.log("Current room index:", currentRoomIndex);
+							console.log("queues:", queues[newIndex.toString()]);
 							if (newIndex !== currentRoomIndex) {
 								setCurrentRoomIndex(newIndex);
+								setPlaylist(queues[newIndex.toString()]);
 								if (rooms[newIndex]?.roomID && queues[rooms[newIndex].roomID]) {
+									console.log("setting new playlist");
 									setPlaylist(queues[rooms[newIndex].roomID]);
 								} else {
-									setPlaylist([]); // Default to empty playlist
+									console.log("setting empty playlist");
+									// setPlaylist([]); // Default to empty playlist
 								}
 							}
 						},
