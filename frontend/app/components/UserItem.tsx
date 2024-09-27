@@ -21,7 +21,7 @@ interface UserItemProps {
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const [isFollowing, setIsFollowing] = useState<boolean>(false);
-	console.log("User Item: " + JSON.stringify(user));
+	// console.log("User Item: " + JSON.stringify(user));
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {

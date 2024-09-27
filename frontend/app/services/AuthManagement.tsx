@@ -51,7 +51,7 @@ class AuthManagement {
 	public logout(): void {
 		// literally the safety cord of this service
 		// users will be logged out and redirected to the welcome screen if there is any issue with the token
-		alert("Something went wrong with the authentication. Please log in again.");
+		// alert("Something went wrong with the authentication. Please log in again.");
 		this.token = null;
 		console.log("Clearing from logout");
 		StorageService.clear();
