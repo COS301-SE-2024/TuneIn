@@ -324,9 +324,7 @@ const Home: React.FC = () => {
 								)}
 								<TouchableOpacity
 									style={styles.navigateButton}
-									onPress={() =>
-										navigateToMoreRooms(myRecents, "Picks for you")
-									}
+									onPress={() => navigateToMoreRooms(myPicks, "Picks for you")}
 								>
 									<Text style={styles.sectionTitle}>Picks for you</Text>
 								</TouchableOpacity>
