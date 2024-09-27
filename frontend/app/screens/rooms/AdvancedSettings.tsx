@@ -94,7 +94,46 @@ const AdvancedSettings = () => {
 			}
 		}
 	};
-	const navigateToSplittingRoom = () => {
+	const navigateToSplittingRoom = async () => {
+		const token = auth.getToken();
+		try {
+			if (room) {
+				let roomData = typeof room === "string" ? JSON.parse(room) : room;
+				if (Array.isArray(roomData)) {
+					roomData = JSON.parse(roomData[0]);
+				}
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomData.id}/split`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (!response.ok) {
+					if (Platform.OS === "android" && ToastAndroid) {
+						ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+					} else {
+						Alert.alert("Error", await response.text());
+					}
+					return;
+				} else {
+					const data = await response.json();
+					
+					console.log("Room split successfully");
+				}
+			} else {
+				console.log("No room data found");
+			}
+		} catch (error) {
+			console.log("Error splitting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to split room.");
+			}
+		}
 		router.navigate({
 			pathname: "/screens/rooms/SplittingRoom",
 			params: {

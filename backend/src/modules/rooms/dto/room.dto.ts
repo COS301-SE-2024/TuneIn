@@ -101,5 +101,5 @@ export class RoomDto {
 		type: String,
 		isArray: true,
 	})
-	childrenRoomIDs: string[];
+	childrenRooms: RoomDto[];
 }

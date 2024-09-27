@@ -1125,9 +1125,11 @@ export class RoomsService {
 						HttpStatus.INTERNAL_SERVER_ERROR,
 					);
 				}
-				parentRoomDto.childrenRoomIDs = [
-					childRoom0.room_id,
-					childRoom1.room_id,
+				parentRoomDto.childrenRooms = [
+					(await this.dtogen.generateRoomDto(childRoom0.room_id)) ??
+						new RoomDto(),
+					(await this.dtogen.generateRoomDto(childRoom1.room_id)) ??
+						new RoomDto(),
 				];
 				return parentRoomDto;
 			} catch (error) {
