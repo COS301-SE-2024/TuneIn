@@ -1033,7 +1033,13 @@ const ProfileScreen: React.FC = () => {
 										? { uri: primaryProfileData.profile_picture_url }
 										: require("../../../assets/profile-icon.png")
 								}
-								style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+								style={{
+									width: 125,
+									height: 125,
+									borderRadius: 125 / 2,
+									borderWidth: 1,
+									borderColor: "black",
+								}}
 							/>
 						</View>
 						<Text

@@ -233,7 +233,7 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const updateImage = async (uri) => {
+	const updateImage = async (uri: string) => {
 		try {
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
 			// console.log("image:", image);
