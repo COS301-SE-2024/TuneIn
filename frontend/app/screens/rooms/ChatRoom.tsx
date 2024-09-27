@@ -167,8 +167,6 @@ const ChatRoom = () => {
 							/>
 						)}
 						keyExtractor={(item, index) => index.toString()}
-						inverted // This prop makes the FlatList start from the bottom
-						// Add extra padding to allow scrolling to the bottom
 						contentContainerStyle={{ paddingBottom: 20 }}
 					/>
 
