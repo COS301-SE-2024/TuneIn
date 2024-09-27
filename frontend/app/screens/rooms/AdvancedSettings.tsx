@@ -129,7 +129,7 @@ const AdvancedSettings = () => {
 		const token = await auth.getToken();
 		try {
 			const response = await fetch(
-				`${utils.API_BASE_URL}/rooms/${roomID}/queue`,
+				`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
 				{
 					method: "GET",
 					headers: {
@@ -184,11 +184,14 @@ const AdvancedSettings = () => {
 				} else {
 					const data = await response.json();
 					console.log("Room split successfully");
-					const childRoom1 = await getRoom(data[0].id);
-					const childRoom2 = await getRoom(data[1].id);
+					console.log("Split room data: ", data);
+					const childRoom1 = await getRoom(data.childrenRoomIDs[0]);
+					const childRoom2 = await getRoom(data.childrenRoomIDs[1]);
 					if (childRoom1 && childRoom2) {
-						const childRoom1Queue = await getRoomQueue(childRoom1.id);
-						const childRoom2Queue = await getRoomQueue(childRoom2.id);
+						const childRoom1Queue = await getRoomQueue(childRoom1.roomID);
+						const childRoom2Queue = await getRoomQueue(childRoom2.roomID);
+						console.log("Child room 1: ", childRoom1);
+						console.log("Child room 2: ", childRoom2);
 						if (childRoom1Queue && childRoom2Queue) {
 							router.navigate({
 								pathname: "/screens/rooms/SplittingRoom",
@@ -221,13 +224,6 @@ const AdvancedSettings = () => {
 				Alert.alert("Error", "Failed to split room.");
 			}
 		}
-		router.navigate({
-			pathname: "/screens/rooms/SplittingRoom",
-			params: {
-				rooms: JSON.stringify({}),
-				queues: JSON.stringify({}),
-			},
-		});
 	};
 	const handleConfirmPopup = async (choice: boolean) => {
 		console.log("User choice:", choice ? "Yes" : "No");
