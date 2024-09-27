@@ -45,7 +45,14 @@ export class UsersService {
 			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
 		}
 		const email = user.email;
-		console.log("Email: ", email, "Message: ", message);
+		console.log(
+			"Email: ",
+			email,
+			"Message: ",
+			message,
+			"Port: ",
+			process.env.EMAIL_PORT,
+		);
 		if (!email) {
 			throw new HttpException(
 				"User does not have an email address",
