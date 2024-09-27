@@ -51,6 +51,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 			}
 		>
 			<Image
+				testID="profile-image"
 				source={
 					item.profile_picture_url
 						? { uri: item.profile_picture_url }
@@ -102,9 +103,8 @@ const styles = StyleSheet.create({
 	},
 	friendContainer: {
 		alignItems: "center",
-		padding: 4,
-		marginRight: 12,
-		paddingHorizontal: 10,
+		padding: 6,
+		paddingHorizontal: 8,
 	},
 	profileImage: {
 		width: 54, // Adjust as needed
@@ -119,17 +119,18 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	moreButton: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
+		width: 53,
+		height: 53,
+		borderRadius: 26,
 		backgroundColor: colors.primary,
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	moreButtonText: {
-		fontSize: 24,
+		fontSize: 38,
 		color: "white",
 		fontWeight: "bold",
+		paddingBottom: 8,
 	},
 });
 

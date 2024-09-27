@@ -1,37 +1,108 @@
 import React from "react";
 import FriendsGrid from "../../app/components/FriendsGrid";
 import { Friend } from "../../app/models/friend";
-import { render, screen } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
+import { useRouter } from "expo-router";
 
-const mockFriends: Friend[] = [
-	{
-		profile_picture_url: "https://example.com/profile1.jpg",
-		username: "User1",
-	},
-	{
-		profile_picture_url: "https://example.com/profile2.jpg",
-		username: "User2",
-	},
-];
+// Mock the useRouter hook
+jest.mock("expo-router", () => ({
+	useRouter: jest.fn(),
+}));
 
 describe("FriendsGrid", () => {
-	const user = "testUser";
+	const mockNavigate = jest.fn();
 
-	it("renders the correct profile images and usernames", () => {
-		render(<FriendsGrid friends={mockFriends} user={user} maxVisible={2} />);
+	beforeEach(() => {
+		(useRouter as jest.Mock).mockReturnValue({ navigate: mockNavigate });
+	});
 
-		// Check for User1
-		const image1 = screen.getByTestId("friend-profile-image-User1");
-		expect(image1.props.source.uri).toBe(mockFriends[0].profile_picture_url);
+	const mockFriends: Friend[] = [
+		{
+			friend_id: "1",
+			username: "JohnDoe",
+			profile_picture_url: "https://example.com/johndoe.jpg",
+		},
+		{
+			friend_id: "2",
+			username: "JaneDoe",
+			profile_picture_url: "https://example.com/janedoe.jpg",
+		},
+	];
 
-		const name1 = screen.getByTestId("friend-name-User1");
-		expect(name1.props.children).toBe(mockFriends[0].username);
+	const mockFollowers: Friend[] = [
+		{
+			friend_id: "3",
+			username: "Follower",
+			profile_picture_url: "https://example.com/followerone.jpg",
+		},
+	];
 
-		// Check for User2
-		const image2 = screen.getByTestId("friend-profile-image-User2");
-		expect(image2.props.source.uri).toBe(mockFriends[1].profile_picture_url);
+	it("renders the friends and followers in the grid", () => {
+		const { getByText, getAllByTestId } = render(
+			<FriendsGrid
+				friends={mockFriends}
+				followers={mockFollowers}
+				username="testuser"
+			/>,
+		);
 
-		const name2 = screen.getByTestId("friend-name-User2");
-		expect(name2.props.children).toBe(mockFriends[1].username);
+		// Check that the friends and followers are rendered
+		expect(getByText("JohnDoe")).toBeTruthy();
+		expect(getByText("JaneDoe")).toBeTruthy();
+		expect(getByText("Follower")).toBeTruthy();
+
+		// Check that the profile images are rendered (assume the testId is applied to Image for simplicity)
+		const profileImages = getAllByTestId("profile-image");
+		expect(profileImages).toHaveLength(3); // Two friends and one follower
+	});
+
+	it("navigates to profile page when a friend is clicked", () => {
+		const { getByText } = render(
+			<FriendsGrid
+				friends={mockFriends}
+				followers={mockFollowers}
+				username="testuser"
+			/>,
+		);
+
+		// Simulate clicking on the first friend (JohnDoe)
+		fireEvent.press(getByText("JohnDoe"));
+
+		// Expect navigation to have been called with the correct params
+		expect(mockNavigate).toHaveBeenCalledWith({
+			pathname: "/screens/profile/ProfilePage",
+			params: { friend: JSON.stringify(mockFriends[0]), user: "testuser" },
+		});
+	});
+
+	it("navigates to followers list when the + button is clicked", () => {
+		const { getByText } = render(
+			<FriendsGrid
+				friends={mockFriends}
+				followers={mockFollowers}
+				username="testuser"
+			/>,
+		);
+
+		// Simulate clicking the + button
+		fireEvent.press(getByText("+"));
+
+		// Expect navigation to the followers list
+		expect(mockNavigate).toHaveBeenCalledWith({
+			pathname: "/screens/followers/FollowerStack",
+			params: { username: "testuser" },
+		});
+	});
+
+	it("navigates to search page when there are no friends or followers", () => {
+		const { getByText } = render(
+			<FriendsGrid friends={[]} followers={[]} username="testuser" />,
+		);
+
+		// Simulate clicking the + button
+		fireEvent.press(getByText("+"));
+
+		// Expect navigation to the search page
+		expect(mockNavigate).toHaveBeenCalledWith("/screens/(tabs)/Search");
 	});
 });
