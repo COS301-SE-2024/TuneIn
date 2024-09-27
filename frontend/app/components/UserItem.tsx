@@ -20,7 +20,7 @@ interface UserItemProps {
 }
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
-	const [isFollowing, setIsFollowing] = useState<boolean>(false);
+	// const [isFollowing, setIsFollowing] = useState<boolean>(false);
 	// console.log("User Item: " + JSON.stringify(user));
 
 	const playerContext = useContext(Player);
@@ -32,59 +32,59 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 
 	const { userData } = playerContext;
 
-	useEffect(() => {
-		const checkFollow = user.followers.some(
-			(item: any) => item.username === userData?.username,
-		);
-		setIsFollowing(checkFollow);
-	}, [userData, user.followers]);
+	// useEffect(() => {
+	// 	const checkFollow = user.followers.some(
+	// 		(item: any) => item.username === userData?.username,
+	// 	);
+	// 	setIsFollowing(checkFollow);
+	// }, [userData, user.followers]);
 
-	const followHandler = async () => {
-		const storedToken = await auth.getToken();
+	// const followHandler = async () => {
+	// 	const storedToken = await auth.getToken();
 
-		if (storedToken) {
-			if (isFollowing) {
-				try {
-					const response = await axios.post(
-						`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
-						{},
-						{
-							headers: {
-								Authorization: `Bearer ${storedToken}`,
-							},
-						},
-					);
+	// 	if (storedToken) {
+	// 		if (isFollowing) {
+	// 			try {
+	// 				const response = await axios.post(
+	// 					`${utils.API_BASE_URL}/users/${user.username}/unfollow`,
+	// 					{},
+	// 					{
+	// 						headers: {
+	// 							Authorization: `Bearer ${storedToken}`,
+	// 						},
+	// 					},
+	// 				);
 
-					if (response) {
-						setIsFollowing(false);
-					}
-				} catch (error) {
-					console.log("Issue unfollowing user");
-					ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
-				}
-			} else {
-				try {
-					const response = await axios.post(
-						`${utils.API_BASE_URL}/users/${user.username}/follow`,
-						{},
-						{
-							headers: {
-								Authorization: `Bearer ${storedToken}`,
-							},
-						},
-					);
+	// 				if (response) {
+	// 					setIsFollowing(false);
+	// 				}
+	// 			} catch (error) {
+	// 				console.log("Issue unfollowing user");
+	// 				ToastAndroid.show("Failed to unfollow user", ToastAndroid.SHORT);
+	// 			}
+	// 		} else {
+	// 			try {
+	// 				const response = await axios.post(
+	// 					`${utils.API_BASE_URL}/users/${user.username}/follow`,
+	// 					{},
+	// 					{
+	// 						headers: {
+	// 							Authorization: `Bearer ${storedToken}`,
+	// 						},
+	// 					},
+	// 				);
 
-					if (response) {
-						console.log("Called Follow");
-						setIsFollowing(true);
-					}
-				} catch (error) {
-					console.log("Issue following user");
-					ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
-				}
-			}
-		}
-	};
+	// 				if (response) {
+	// 					console.log("Called Follow");
+	// 					setIsFollowing(true);
+	// 				}
+	// 			} catch (error) {
+	// 				console.log("Issue following user");
+	// 				ToastAndroid.show("Failed to follow user", ToastAndroid.SHORT);
+	// 			}
+	// 		}
+	// 	}
+	// };
 
 	const navigateToHelp = () => {
 		router.navigate(
@@ -115,7 +115,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 					</Text>
 				</View>
 			</TouchableOpacity>
-			<TouchableOpacity
+			{/* <TouchableOpacity
 				style={[styles.followButton, isFollowing && styles.unfollowButton]}
 				onPress={followHandler}
 				testID="follow-button"
@@ -128,7 +128,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				>
 					{isFollowing ? "Unfollow" : "Follow"}
 				</Text>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 		</View>
 	);
 };
