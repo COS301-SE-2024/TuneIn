@@ -5,6 +5,8 @@ import FriendServices from "../../app/services/FriendServices";
 
 jest.mock("axios");
 jest.mock("../../app/services/AuthManagement");
+// Mock the global fetch
+global.fetch = jest.fn();
 
 describe("FriendServices", () => {
 	const mockToken = "mockToken";
@@ -141,5 +143,143 @@ describe("FriendServices", () => {
 		);
 	});
 
-	// Additional tests can be added for other methods similarly
+	// Test for error handling in getFriends
+	test("getFriends should throw an error on failure", async () => {
+		(axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
+
+		await expect(FriendServices.getFriends()).rejects.toThrow("Network Error");
+	});
+
+	// Test for error handling in getFriendRequests
+	test("getFriendRequests should throw an error on failure", async () => {
+		(axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
+
+		await expect(FriendServices.getFriendRequests()).rejects.toThrow(
+			"Network Error",
+		);
+	});
+
+	// Test for error handling in getPotentialFriends
+	test("getPotentialFriends should throw an error on failure", async () => {
+		(axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
+
+		await expect(FriendServices.getPotentialFriends()).rejects.toThrow(
+			"Network Error",
+		);
+	});
+
+	// Test for error handling in fetchFollowers
+	test("fetchFollowers should throw an error on failure", async () => {
+		(axios.get as jest.Mock).mockRejectedValue(new Error("Network Error"));
+
+		await expect(FriendServices.fetchFollowers()).rejects.toThrow(
+			"Network Error",
+		);
+	});
+
+	// Test for handleSendRequest
+	test("handleSendRequest should send a friend request successfully", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 201 });
+
+		await FriendServices.handleSendRequest(mockFriend);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`${utils.API_BASE_URL}/users/Test friend/befriend`,
+			{
+				method: "POST",
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
+		);
+	});
+
+	test("handleSendRequest should throw an error on failure", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 400 });
+
+		await expect(FriendServices.handleSendRequest(mockFriend)).rejects.toThrow(
+			"Failed to send request.",
+		);
+	});
+
+	// Test for handleCancelRequest
+	test("handleCancelRequest should cancel a friend request successfully", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 201 });
+
+		await FriendServices.handleCancelRequest(mockFriend);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`${utils.API_BASE_URL}/users/Test friend/cancel`,
+			{
+				method: "POST",
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
+		);
+	});
+
+	test("handleCancelRequest should throw an error on failure", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 400 });
+
+		await expect(
+			FriendServices.handleCancelRequest(mockFriend),
+		).rejects.toThrow("Failed to cancel request.");
+	});
+
+	// Test for handleFriendRequest
+	test("handleFriendRequest should accept a friend request successfully", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 201 });
+
+		await FriendServices.handleFriendRequest(mockFriend, true);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`${utils.API_BASE_URL}/users/Test friend/accept`,
+			{
+				method: "POST",
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
+		);
+	});
+
+	test("handleFriendRequest should reject a friend request successfully", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 201 });
+
+		await FriendServices.handleFriendRequest(mockFriend, false);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`${utils.API_BASE_URL}/users/Test friend/reject`,
+			{
+				method: "POST",
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
+		);
+	});
+
+	test("handleFriendRequest should throw an error on failure", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 400 });
+
+		await expect(
+			FriendServices.handleFriendRequest(mockFriend, true),
+		).rejects.toThrow("Failed to handle request.");
+	});
+
+	// Test for handleFriend
+	test("handleFriend should unfriend a user successfully", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 201 });
+
+		await FriendServices.handleFriend(mockFriend);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`${utils.API_BASE_URL}/users/Test friend/unfriend`,
+			{
+				method: "POST",
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
+		);
+	});
+
+	test("handleFriend should throw an error on failure", async () => {
+		(global.fetch as jest.Mock).mockResolvedValue({ status: 400 });
+
+		await expect(FriendServices.handleFriend(mockFriend)).rejects.toThrow(
+			"Failed to unfriend.",
+		);
+	});
 });
