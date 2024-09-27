@@ -10,6 +10,7 @@ import {
 	FlatList,
 	Keyboard,
 	TouchableWithoutFeedback,
+	Platform,
 } from "react-native";
 import {
 	GestureHandlerRootView,
@@ -115,6 +116,7 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
+		const canSetUserResults = () => {return searchTerm.trim() === "" && filter === "user" && loading;};
 		const getRecommendations = async () => {
 			try {
 				const token = await auth.getToken();
@@ -200,7 +202,7 @@ const Search: React.FC = () => {
 						console.log("recommended users:", recommendedUsers);
 						console.log("Recommended users length: " + recommendedUsers.length);
 
-						if (searchTerm.trim() === "" && filter === "user" && loading) {
+						if (canSetUserResults()) {
 							setResults(recommendedUsers);
 						}
 						setUserRecommendations(recommendedUsers);
