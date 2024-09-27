@@ -367,6 +367,8 @@ export class RoomsService {
 			songInfoDto.title = song.song.name;
 			songInfoDto.cover = song.song.artwork_url || "";
 			songInfoDto.artists = song.song.artists;
+			songInfoDto.duration = song.song.duration ?? 0;
+			songInfoDto.spotify_id = song.song.spotify_id;
 			if (song.start_time) {
 				songInfoDto.start_time = song.start_time;
 			}
@@ -1125,11 +1127,9 @@ export class RoomsService {
 						HttpStatus.INTERNAL_SERVER_ERROR,
 					);
 				}
-				parentRoomDto.childrenRooms = [
-					(await this.dtogen.generateRoomDto(childRoom0.room_id)) ??
-						new RoomDto(),
-					(await this.dtogen.generateRoomDto(childRoom1.room_id)) ??
-						new RoomDto(),
+				parentRoomDto.childrenRoomIDs = [
+					childRoom0.room_id,
+					childRoom1.room_id,
 				];
 				return parentRoomDto;
 			} catch (error) {
