@@ -1,20 +1,19 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
-import { Track } from "../models/Track";
+import * as rs from "../models/RoomSongDto";
 
 const { width, height } = Dimensions.get("window");
 
 const isSmallScreen = width < 380 || height < 700;
 
 interface SongRoomWidgetProps {
-	track: Track;
+	track: rs.RoomSongDto | undefined;
 }
 
 const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({ track }) => {
-	const { name: songName, artists, album } = track;
-	const artistName = artists.map((artist) => artist.name).join(", ");
-	const albumCoverUrl = album.images[0]?.url;
-
+	const artistName = rs.constructArtistString(track);
+	const albumCoverUrl = rs.getAlbumArtUrl(track);
+	const songName = rs.getTitle(track);
 	return (
 		<View style={styles.container}>
 			<View style={styles.imageContainer}>
