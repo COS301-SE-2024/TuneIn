@@ -162,6 +162,7 @@ model room {
   room_language                              String?          @default("English")
   explicit                                   Boolean?         @default(false)
   tags                                       String[]
+  playlist_id                                String?
   banned                                     banned[]
   bookmark                                   bookmark[]
   chat_reactions                             chat_reactions[]

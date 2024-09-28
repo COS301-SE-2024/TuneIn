@@ -12,6 +12,7 @@ import {
 import { PrismaService } from "./../../prisma/prisma.service";
 // import { sleep } from "../common/utils";
 import { MurLockService } from "murlock";
+import { RoomDto } from "../modules/rooms/dto/room.dto";
 
 const NUMBER_OF_RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
@@ -203,7 +204,47 @@ export class SpotifyService {
 		throw new Error("Failed to get user playlists");
 	}
 
-	async getPlaylistTracks(
+	async getRoomPlaylist(room: RoomDto): Promise<Spotify.Playlist> {
+		const r = await this.prisma.room.findUnique({
+			where: {
+				room_id: room.roomID,
+			},
+		});
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				if (r.playlist_id) {
+					const playlist: Spotify.Playlist =
+						await this.TuneInAPI.playlists.getPlaylist(r.playlist_id);
+					return playlist;
+				} else {
+					const user: Spotify.UserProfile =
+						await this.TuneInAPI.currentUser.profile();
+					const playlist: Spotify.Playlist =
+						await this.TuneInAPI.playlists.createPlaylist(user.id, {
+							name: room.room_name,
+							description: room.description,
+							public: true,
+							collaborative: false,
+						});
+					//upload playlist image here
+					return playlist;
+				}
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to create playlist");
+	}
+
+	async getUserPlaylistTracks(
 		tk: SpotifyTokenPair,
 		playlistID: string,
 	): Promise<Spotify.Track[]> {

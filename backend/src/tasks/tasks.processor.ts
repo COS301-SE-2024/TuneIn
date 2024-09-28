@@ -88,7 +88,7 @@ export class TasksProcessor {
 		});
 		start = new Date().valueOf();
 		const playlistTracksPromises = playlists.map(async (playlist) => {
-			return this.spotifyService.getPlaylistTracks(tk, playlist.id);
+			return this.spotifyService.getUserPlaylistTracks(tk, playlist.id);
 		});
 		const playlistTracks: Spotify.Track[][] = await Promise.all(
 			playlistTracksPromises,
