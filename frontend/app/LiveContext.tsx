@@ -571,20 +571,39 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			const promises: Promise<UserDto>[] = usernames.map((username) =>
 				getUser(username),
 			);
+			promises.push();
 			Promise.all(promises)
-				.then((users) => {
+				.then((dmUsers) => {
 					const socket = socketRef.current;
-					setDmParticipants(users);
+					setDmParticipants(dmUsers);
 					if (socket !== null) {
 						setdmJoinSendTime(new Date());
 						const input = {
 							userID: currentUser.userID,
-							participantID: users[0].userID,
+							participantID: dmUsers[0].userID,
 						};
 						socket.emit(SOCKET_EVENTS.ENTER_DM, JSON.stringify(input));
 						updateState({ type: actionTypes.REQUEST_DM_JOIN });
 						dmControls.requestDirectMessageHistory();
 						updateState({ type: actionTypes.DMS_REQUESTED });
+
+						users
+							.getDMsByUsername(dmUsers[0].username)
+							.then((dmsResponse) => {
+								const dms = dmsResponse.data;
+								const dmHistory = dms.map(
+									(msg: DirectMessageDto) =>
+										({
+											message: msg,
+											me: msg.sender.userID === currentUser.userID,
+											messageSent: true,
+										}) as DirectMessage,
+								);
+								setDirectMessages(dmHistory);
+							})
+							.catch((error) => {
+								console.error("Failed to get direct messages:", error);
+							});
 					}
 				})
 				.catch((error) => {

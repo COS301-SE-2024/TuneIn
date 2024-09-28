@@ -711,6 +711,33 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/{username}/dms:
+    get:
+      operationId: getDMsByUsername
+      summary: Get the authorized user's direct messages with the given user
+      description: Get all of the direct messages between the two users.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's direct messages as an array of DirectMessageDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectMessageDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
   /users/{username}/rooms/current:
     get:
       operationId: UsersController_getCurrentRoomByUserId
