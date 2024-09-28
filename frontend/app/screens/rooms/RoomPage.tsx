@@ -24,15 +24,11 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import DevicePicker from "../../components/DevicePicker";
 import { useLive } from "../../LiveContext";
 import * as rs from "../../models/RoomSongDto";
-import { FlyingView, ObjectConfig } from "react-native-flying-objects";
-import EmojiPicker, {
-	EmojiPickerRef,
-} from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
 import bookmarks from "../../services/BookmarkService";
 import { useAPI } from "../../APIContext";
 import SongRoomWidget from "../../components/SongRoomWidget";
-import * as path from "path";
+import { RoomDto } from "../../../api";
 
 // const MemoizedCommentWidget = memo(CommentWidget);
 const { width, height } = Dimensions.get("window");
@@ -49,8 +45,6 @@ const RoomPage: React.FC = () => {
 		currentRoom,
 		roomQueue,
 		userBookmarks,
-		socketHandshakes,
-		roomParticipants,
 	} = useLive();
 	const { room } = useLocalSearchParams();
 	let roomData: any;
@@ -70,23 +64,36 @@ const RoomPage: React.FC = () => {
 	const router = useRouter();
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-	const [isChatExpanded, setChatExpanded] = useState(false);
-	const [message, setMessage] = useState("");
-	const [isSending, setIsSending] = useState(false);
 	const truncateUsername = (username: string) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
 	};
+	const [thisRoom, setThisRoom] = useState<RoomDto>();
+	const [userInRoom, setUserInRoom] = useState(false);
+	const trackPositionIntervalRef = useRef<number | null>(null);
+	const queueHeight = useRef(new Animated.Value(0)).current;
 
-	//Emoji picker
-	const emojiPickerRef = useRef<EmojiPickerRef>(null);
-	const handleSelectEmoji = (emoji: string) => {
-		roomControls.sendReaction(emoji);
-	};
-	const passEmojiToTextField = (emoji: string) => {
-		emojiPickerRef.current?.passEmojiToTextField(emoji);
-	};
+	const getAndSetRoomInfo = useCallback(async () => {
+		rooms.getRoomInfo(roomID).then((roomResponse) => {
+			const r = roomResponse.data;
+			setThisRoom(r);
+			if (currentRoom) {
+				setUserInRoom(currentRoom.roomID === roomID);
+			} else {
+				setUserInRoom(false);
+			}
+		});
+	}, [rooms, roomID, currentRoom]);
+
+	const checkBookmarked = useCallback(async () => {
+		for (let i = 0; i < userBookmarks.length; i++) {
+			if (userBookmarks[i].roomID === roomID) {
+				setIsBookmarked(true);
+				break;
+			}
+		}
+	}, [roomID, userBookmarks]);
 
 	const handleBookmark = async () => {
 		const previouslyBookmarked = isBookmarked;
@@ -114,13 +121,6 @@ const RoomPage: React.FC = () => {
 			setIsBookmarked(true);
 		}
 	};
-
-	const trackPositionIntervalRef = useRef<number | null>(null);
-	const queueHeight = useRef(new Animated.Value(0)).current;
-	const collapsedHeight = 60;
-	const screenHeight = Dimensions.get("window").height;
-	const expandedHeight = screenHeight - 350;
-	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	useEffect(() => {
 		return () => {
@@ -157,66 +157,52 @@ const RoomPage: React.FC = () => {
 
 	const playPauseTrack = useCallback(
 		async (offset: number = 0) => {
-			console.log("playPauseTrack playPauseTrack playPauseTrack");
-			if (roomControls.canControlRoom()) {
-				if (!roomPlaying) {
-					console.log("starting playback");
-					roomControls.playbackHandler.startPlayback();
-				} else {
-					console.log("stopping playback");
-					roomControls.playbackHandler.pausePlayback();
+			if (userInRoom) {
+				console.log("playPauseTrack playPauseTrack playPauseTrack");
+				if (roomControls.canControlRoom()) {
+					if (!roomPlaying) {
+						console.log("starting playback");
+						roomControls.playbackHandler.startPlayback();
+					} else {
+						console.log("stopping playback");
+						roomControls.playbackHandler.pausePlayback();
+					}
 				}
+				roomControls.requestRoomQueue();
 			}
-			roomControls.requestRoomQueue();
 		},
-		[currentSong?.index, roomControls, roomPlaying],
+		[roomControls, roomPlaying, userInRoom],
 	);
 
 	const playNextTrack = () => {
-		console.log("playNextTrack playNextTrack playNextTrack");
-		if (roomControls.canControlRoom()) {
-			roomControls.playbackHandler.nextTrack();
+		if (userInRoom) {
+			console.log("playNextTrack playNextTrack playNextTrack");
+			if (roomControls.canControlRoom()) {
+				roomControls.playbackHandler.nextTrack();
+			}
+			roomControls.requestRoomQueue();
 		}
-		roomControls.requestRoomQueue();
 	};
 
 	const playPreviousTrack = () => {
-		if (roomControls.canControlRoom()) {
-			roomControls.playbackHandler.prevTrack();
+		if (userInRoom) {
+			if (roomControls.canControlRoom()) {
+				roomControls.playbackHandler.prevTrack();
+			}
+			roomControls.requestRoomQueue();
 		}
-		roomControls.requestRoomQueue();
 	};
-
-	// const toggleChat = () => {
-	// 	Animated.timing(animatedHeight, {
-	// 		toValue: isChatExpanded ? collapsedHeight : expandedHeight,
-	// 		duration: 300,
-	// 		easing: Easing.ease,
-	// 		useNativeDriver: false,
-	// 	}).start();
-	// 	setChatExpanded(!isChatExpanded);
-	// };
-
-	// const navigateToPlaylist = () => {
-	// 	roomControls.requestRoomQueue();
-	// 	router.navigate({
-	// 		pathname: "/screens/rooms/Playlist",
-	// 		params: {
-	// 			Room_id: roomID,
-	// 			mine: roomData.mine,
-	// 		},
-	// 	});
-	// };
 
 	const handleViewParticipants = () => {
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
+			params: { roomID: roomID },
 		});
 	};
 
 	const handleJoinLeave = async () => {
 		// only join if not in room or if in another room
-		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
+		if (!currentRoom || !userInRoom) {
 			await rooms.joinRoom(roomID);
 			joinRoom(roomID);
 			if (currentSong) {
@@ -227,7 +213,7 @@ const RoomPage: React.FC = () => {
 			roomControls.requestRoomQueue();
 
 			// only leave if you're in the room
-		} else if (currentRoom && currentRoom.roomID === roomID) {
+		} else if (currentRoom && userInRoom) {
 			await rooms.leaveRoom(roomID);
 			leaveRoom();
 			if (await roomControls.playbackHandler.userListeningToRoom()) {
@@ -238,13 +224,14 @@ const RoomPage: React.FC = () => {
 
 	// on component mount
 	useEffect(() => {
-		for (let i = 0; i < userBookmarks.length; i++) {
-			if (userBookmarks[i].roomID === roomID) {
-				setIsBookmarked(true);
-				break;
-			}
-		}
-	}, [roomID, userBookmarks]);
+		getAndSetRoomInfo();
+		checkBookmarked();
+	}, [checkBookmarked, getAndSetRoomInfo, roomID, userBookmarks]);
+
+	useEffect(() => {
+		getAndSetRoomInfo();
+		checkBookmarked();
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -257,7 +244,7 @@ const RoomPage: React.FC = () => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>{roomParticipants.length + " Participants"}</Text>
+							<Text>{thisRoom?.participant_count + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}
@@ -267,7 +254,7 @@ const RoomPage: React.FC = () => {
 							onPress={handleJoinLeave}
 						>
 							<Text style={styles.joinLeaveButtonText}>
-								{currentRoom?.roomID === roomID ? "Leave" : "Join"}
+								{userInRoom ? "Leave" : "Join"}
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -276,13 +263,13 @@ const RoomPage: React.FC = () => {
 				<View style={styles.trackDetails}>
 					<Image
 						source={{
-							uri: rs.getAlbumArtUrl(currentSong),
+							uri: rs.getAlbumArtUrl(userInRoom ? currentSong : undefined),
 						}}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
 				<View style={styles.songRoomWidget}>
-					<SongRoomWidget track={currentSong} />
+					<SongRoomWidget track={userInRoom ? currentSong : undefined} />
 				</View>
 				{/* <View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
@@ -304,7 +291,7 @@ const RoomPage: React.FC = () => {
 							onPress={() => playPauseTrack()}
 						>
 							<FontAwesome5
-								name={roomPlaying ? "pause" : "play"}
+								name={userInRoom && roomPlaying ? "pause" : "play"}
 								size={30}
 								color="black"
 							/>
@@ -324,29 +311,30 @@ const RoomPage: React.FC = () => {
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
 				contentContainerStyle={{ flexGrow: 1 }}
 			>
-				{roomQueue.map((track, index) => (
-					<TouchableOpacity
-						key={rs.getID(track)}
-						style={[
-							styles.track,
-							index === currentSong?.index
-								? styles.currentTrack
-								: styles.queueTrack,
-						]}
-						onPress={() => playPauseTrack(0)}
-					>
-						<Image
-							source={{ uri: rs.getAlbumArtUrl(track) }}
-							style={styles.queueAlbumArt}
-						/>
-						<View style={styles.trackInfo}>
-							<Text style={styles.queueTrackName}>{rs.getTitle(track)}</Text>
-							<Text style={styles.queueTrackArtist}>
-								{rs.constructArtistString(track)}
-							</Text>
-						</View>
-					</TouchableOpacity>
-				))}
+				{userInRoom &&
+					roomQueue.map((track, index) => (
+						<TouchableOpacity
+							key={rs.getID(track)}
+							style={[
+								styles.track,
+								index === currentSong?.index
+									? styles.currentTrack
+									: styles.queueTrack,
+							]}
+							onPress={() => playPauseTrack(0)}
+						>
+							<Image
+								source={{ uri: rs.getAlbumArtUrl(track) }}
+								style={styles.queueAlbumArt}
+							/>
+							<View style={styles.trackInfo}>
+								<Text style={styles.queueTrackName}>{rs.getTitle(track)}</Text>
+								<Text style={styles.queueTrackArtist}>
+									{rs.constructArtistString(track)}
+								</Text>
+							</View>
+						</TouchableOpacity>
+					))}
 			</Animated.ScrollView>
 
 			<View style={styles.sideBySideTwo}>
