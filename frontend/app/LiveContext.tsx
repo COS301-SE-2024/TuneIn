@@ -439,9 +439,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						throw new Error("Internal Server Error");
 					} else {
 						const r: RoomDto = room.data;
+						resetRoom();
 						setCurrentRoom(r);
-						setRoomQueue([]);
-						setCurrentRoomVotes([]);
 						roomControls.requestRoomQueue();
 					}
 				})
@@ -518,6 +517,18 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		[currentUser, roomControls, setRoomID, updateState],
 	);
 
+	const resetRoom = () => {
+		setCurrentRoom(undefined);
+		setCurrentSong(undefined);
+		setRoomQueue([]);
+		setRoomParticipants([]);
+		setCurrentRoomVotes([]);
+		setRoomMessages([]);
+		setRoomEmojiObjects([]);
+		setRoomPlaying(undefined);
+		updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+	};
+
 	const leaveRoom = useCallback(() => {
 		// pollLatency();
 		if (!currentUser) {
@@ -545,13 +556,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			};
 			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
 		}
-		setRoomMessages([]);
-		updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
-		setCurrentRoom(undefined);
-		setRoomQueue([]);
-		setCurrentRoomVotes([]);
-		setRoomParticipants([]);
-		updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+		resetRoom();
 	}, [currentRoom, currentUser, updateState]);
 
 	const dmControls: DirectMessageControls = useDirectMessageControls({
