@@ -49,7 +49,12 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				style={styles.profileImage}
 				testID="friend-request-card-image"
 			/>
-			<Text style={styles.username} testID="friend-request-card-username">
+			<Text
+				style={styles.username}
+				numberOfLines={1}
+				ellipsizeMode="tail"
+				testID="friend-request-card-username"
+			>
 				{username}
 			</Text>
 			<TouchableOpacity
@@ -117,6 +122,8 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 16,
 		flex: 1,
+		fontWeight: "bold",
+		color: "black",
 	},
 	button: {
 		paddingVertical: 8,
@@ -130,6 +137,7 @@ const styles = StyleSheet.create({
 	},
 	rejectText: {
 		fontWeight: "bold",
+		paddingHorizontal: 3,
 	},
 });
 
