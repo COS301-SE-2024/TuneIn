@@ -210,6 +210,9 @@ export class SpotifyService {
 				room_id: room.roomID,
 			},
 		});
+		if (r === null) {
+			throw new Error("Room not found somehow");
+		}
 		let attempts = 0;
 		let error: Error | undefined;
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
@@ -242,6 +245,64 @@ export class SpotifyService {
 			throw error;
 		}
 		throw new Error("Failed to create playlist");
+	}
+
+	async updateRoomPlaylist(
+		playlistID: string,
+		trackIDs: string[],
+		start = 0,
+	): Promise<void> {
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				// handle current playlist songs, if not empty
+				if (start > 0) {
+					// get current playlist state
+					const currentPlaylist: Spotify.Page<
+						Spotify.PlaylistedTrack<Spotify.Track>
+					> = await this.TuneInAPI.playlists.getPlaylistItems(playlistID);
+					const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
+					while (currentTracks.length < currentPlaylist.total) {
+						const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
+							await this.TuneInAPI.playlists.getPlaylistItems(
+								playlistID,
+								undefined,
+								undefined,
+								50,
+								currentTracks.length,
+							);
+						currentTracks.push(...tracks.items);
+					}
+					const currentTrackIDs: string[] = currentTracks.map(
+						(track) => track.track.id,
+					);
+
+					//delete all songs from start
+					const deleteIDs: string[] = currentTrackIDs.slice(start);
+					await this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
+						tracks: deleteIDs.map((id) => ({ uri: `spotify:track:${id}` })),
+					});
+				}
+
+				const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
+				await this.TuneInAPI.playlists.addItemsToPlaylist(
+					playlistID,
+					uris.slice(start),
+					start,
+				);
+				return;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to update playlist");
 	}
 
 	async getUserPlaylistTracks(
