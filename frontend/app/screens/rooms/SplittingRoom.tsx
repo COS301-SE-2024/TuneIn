@@ -105,7 +105,7 @@ const SplittingRoom: React.FC = () => {
 	const navigateToRoomPage = (room: Room) => {
 		console.log("Navigating to room page:", room);
 		router.navigate({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(room) },
 		});
 	};
