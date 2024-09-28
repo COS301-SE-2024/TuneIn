@@ -1032,8 +1032,8 @@ const ProfileScreen: React.FC = () => {
 							<Image
 								source={
 									// primaryProfileData.profile_picture_url ?
-										 { uri: primaryProfileData.profile_picture_url }
-										// : require("../../../assets/profile-icon.png")
+									{ uri: primaryProfileData.profile_picture_url }
+									// : require("../../../assets/profile-icon.png")
 								}
 								style={{
 									width: 125,

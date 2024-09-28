@@ -1,11 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	Image,
-	TouchableOpacity,
-	StyleSheet,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
 import { router } from "expo-router";
