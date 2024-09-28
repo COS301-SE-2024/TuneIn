@@ -1,11 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useCallback,
-	memo,
-	useContext,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback, memo } from "react";
 import {
 	View,
 	Text,
@@ -18,12 +11,9 @@ import {
 	Platform,
 	Dimensions,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
-import auth from "../../services/AuthManagement";
-import { Player } from "../../PlayerContext";
-import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
@@ -34,24 +24,19 @@ import { useAPI } from "../../APIContext";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
-type EmojiReaction = {
-	emoji: string;
-	userId: string; // Add more properties if needed
-};
-
 const ChatRoom = () => {
-	const { room } = useLocalSearchParams();
+	const { room } = useGlobalSearchParams();
 	const {
-		currentUser,
 		currentRoom,
 		socketHandshakes,
 		roomMessages,
 		joinRoom,
 		leaveRoom,
 		roomControls,
-		currentSong,
+		roomEmojiObjects,
 	} = useLive();
 	const { rooms } = useAPI();
+	const [userInRoom, setUserInRoom] = useState(false);
 
 	let roomData: any;
 	if (Array.isArray(room)) {
@@ -67,25 +52,22 @@ const ChatRoom = () => {
 		roomID = roomData.roomID;
 	}
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
 	const [message, setMessage] = useState("");
 	const [isSending, setIsSending] = useState(false);
 
 	//Emoji picker
-	const [object, setObject] = useState<ObjectConfig[]>([]);
+	const [localObjects, setLocalObjects] =
+		useState<ObjectConfig[]>(roomEmojiObjects);
 	const emojiPickerRef = useRef<EmojiPickerRef>(null);
 
 	const handleSelectEmoji = (emoji: string) => {
-		setObject((prev) => [
-			...prev,
-			{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
-		]);
+		if (userInRoom) {
+			setLocalObjects((prev) => [
+				...prev,
+				{ object: <Text style={{ fontSize: 30 }}>{emoji}</Text> },
+			]);
+			roomControls.sendReaction(emoji);
+		}
 	};
 
 	const passEmojiToTextField = (emoji: string) => {
@@ -96,13 +78,13 @@ const ChatRoom = () => {
 
 	const handleJoinLeave = async () => {
 		// only join if not in room or if in another room
-		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
+		if (!currentRoom || !userInRoom) {
 			await rooms.joinRoom(roomID);
 			joinRoom(roomID);
 			roomControls.requestRoomQueue();
 
 			// only leave if you're in the room
-		} else if (currentRoom && currentRoom.roomID === roomID) {
+		} else if (currentRoom && userInRoom) {
 			await rooms.leaveRoom(roomID);
 			leaveRoom();
 			if (await roomControls.playbackHandler.userListeningToRoom()) {
@@ -111,12 +93,37 @@ const ChatRoom = () => {
 		}
 	};
 
+	const updateRoomStatus = useCallback(async () => {
+		if (currentRoom && currentRoom.roomID === roomID) {
+			setUserInRoom(true);
+		} else {
+			setUserInRoom(false);
+		}
+	}, [roomID, currentRoom]);
+
 	const sendMessage = () => {
-		if (isSending) return;
-		setIsSending(true);
-		roomControls.sendLiveChatMessage(message);
-		setMessage("");
+		if (userInRoom) {
+			if (isSending) return;
+			setIsSending(true);
+			roomControls.sendLiveChatMessage(message);
+			setMessage("");
+		}
 	};
+
+	useEffect(() => {
+		if (userInRoom) {
+			setLocalObjects(roomEmojiObjects);
+		}
+	}, [roomEmojiObjects, userInRoom]);
+
+	useEffect(() => {
+		updateRoomStatus();
+	}, [roomID, currentRoom]);
+
+	// on component mount
+	useEffect(() => {
+		updateRoomStatus();
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -128,9 +135,7 @@ const ChatRoom = () => {
 							onPress={handleJoinLeave}
 						>
 							<Text style={styles.joinLeaveButtonText}>
-								{socketHandshakes.roomJoined && currentRoom?.roomID === roomID
-									? "Leave"
-									: "Join"}
+								{socketHandshakes.roomJoined && userInRoom ? "Leave" : "Join"}
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -157,18 +162,19 @@ const ChatRoom = () => {
 				<>
 					<View style={styles.container}>
 						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{roomMessages.map((msg, index) => (
-								<MemoizedCommentWidget
-									key={index}
-									username={msg.message.sender.username}
-									message={msg.message.messageBody}
-									profilePictureUrl={msg.message.sender.profile_picture_url}
-									me={msg.me}
-								/>
-							))}
+							{userInRoom &&
+								roomMessages.map((msg, index) => (
+									<MemoizedCommentWidget
+										key={index}
+										username={msg.message.sender.username}
+										message={msg.message.messageBody}
+										profilePictureUrl={msg.message.sender.profile_picture_url}
+										me={msg.me}
+									/>
+								))}
 						</ScrollView>
 						<FlyingView
-							object={object}
+							object={localObjects}
 							containerProps={{
 								style: styles.flyingView,
 							}}

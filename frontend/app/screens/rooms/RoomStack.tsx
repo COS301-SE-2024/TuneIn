@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
-import Chat from "./ChatRoom";
+import RoomChat from "./ChatRoom";
 import { colors } from "../../styles/colors";
 import {
 	View,
@@ -157,7 +157,7 @@ function MyRoomTabs() {
 					<>
 						<Tab.Screen
 							name="Chat"
-							component={Chat}
+							component={RoomChat}
 							options={{ tabBarLabel: "Chat" }}
 						/>
 						<Tab.Screen
