@@ -21,6 +21,7 @@ export interface Room {
 	isNsfw?: boolean;
 	start_date: Date;
 	end_date: Date;
+	childrenRoomIDs?: string[];
 }
 
 export const formatRoomData = (room: any): Room => {
@@ -42,5 +43,6 @@ export const formatRoomData = (room: any): Room => {
 		isExplicit: room.isExplicit,
 		start_date: room.start_date,
 		end_date: room.end_date,
+		childrenRoomIDs: room.childrenRoomIDs,
 	};
 };
