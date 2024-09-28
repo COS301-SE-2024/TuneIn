@@ -76,6 +76,9 @@ function MyRoomTabs() {
 	}
 
 	useEffect(() => {
+		console.log("Room ID: ", roomID);
+		console.log("Room Data: ", roomData);
+		console.log("Current Room: ", currentRoom);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -231,6 +234,7 @@ function MyRoomTabs() {
 					onShareRoom={handleShareRoom}
 					onSavePlaylist={handleSavePlaylist}
 					isHost={roomData.mine} // Pass whether the user is the host
+					onSeeChildRooms={undefined}
 				/>
 			</View>
 
