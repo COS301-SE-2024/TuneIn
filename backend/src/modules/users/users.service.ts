@@ -1185,7 +1185,7 @@ export class UsersService {
 	async getPendingRequests(userID: string): Promise<UserDto[]> {
 		//get all pending friend requests for the user
 		console.log("Getting pending friend requests for user " + userID);
-		const pendingRequests: PrismaTypes.friends[] | null =
+		const pendingRequests: PrismaTypes.friends[] =
 			await this.dbUtils.getPendingRequests(userID);
 		const ids: string[] = pendingRequests.map(
 			(friend: PrismaTypes.friends) => friend.friend2,
@@ -1683,16 +1683,14 @@ export class UsersService {
 			throw new Error("User does not exist");
 		}
 
-		const userFriends: PrismaTypes.users[] | null =
+		const userFriends: PrismaTypes.users[] =
 			await this.dbUtils.getUserFollowing(userID);
-		if (userFriends !== null) {
-			const friendIDs: string[] = userFriends.map(
-				(user: PrismaTypes.users) => user.user_id,
-			);
-			users = users.filter(
-				(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
-			);
-		}
+		const friendIDs: string[] = userFriends.map(
+			(user: PrismaTypes.users) => user.user_id,
+		);
+		users = users.filter(
+			(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
+		);
 
 		const userScores: { [key: string]: number } = {};
 
@@ -1753,11 +1751,8 @@ export class UsersService {
 		userID1: string,
 		userID2: string,
 	): Promise<number> {
-		const mutualFriends: PrismaTypes.users[] | null =
+		const mutualFriends: PrismaTypes.users[] =
 			await this.dbUtils.getMutualFriends(userID1, userID2);
-		if (!mutualFriends) {
-			throw new Error("Failed to calculate mutual friends");
-		}
 		console.log(
 			"Mutual friends between " + userID1 + " and " + userID2 + ": ",
 			mutualFriends.length,
@@ -1786,8 +1781,9 @@ export class UsersService {
 	async calculateActivity(userID: string): Promise<number> {
 		const rooms: RoomDto[] = await this.getUserRooms(userID);
 
-		const friends: PrismaTypes.users[] | null =
-			await this.dbUtils.getUserFriends(userID);
+		const friends: PrismaTypes.users[] = await this.dbUtils.getUserFriends(
+			userID,
+		);
 
 		if (!friends) {
 			throw new Error("Failed to calculate activity (no friends)");

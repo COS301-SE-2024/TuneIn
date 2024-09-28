@@ -27,16 +27,11 @@ export class DbUtilsService {
 		followee (leader): the person being followed
 	*/
 	async getUserFollowing(userID: string): Promise<PrismaTypes.users[]> {
-		const following: PrismaTypes.follows[] | null =
-			await this.prisma.follows.findMany({
+		const following: PrismaTypes.follows[] = await this.prisma.follows.findMany(
+			{
 				where: { follower: userID },
-			});
-
-		if (!following || following === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. getUserFollowing():ERROR01",
-			);
-		}
+			},
+		);
 		if (following.length === 0) {
 			return [];
 		}
@@ -51,14 +46,9 @@ export class DbUtilsService {
 			}
 		}
 
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: ids } },
 		});
-		if (!users || users === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. getUserFollowing():ERROR02",
-			);
-		}
 
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
@@ -75,15 +65,14 @@ export class DbUtilsService {
 		followee (leader): the person being followed
 	*/
 	async getUserFollowers(userID: string): Promise<PrismaTypes.users[]> {
-		const followers: PrismaTypes.follows[] | null =
-			await this.prisma.follows.findMany({
+		const followers: PrismaTypes.follows[] = await this.prisma.follows.findMany(
+			{
 				where: { followee: userID },
-			});
+			},
+		);
 
-		if (!followers || followers === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. getUserFollowers():ERROR01",
-			);
+		if (followers.length === 0) {
+			return [];
 		}
 
 		const result: PrismaTypes.users[] = [];
@@ -215,12 +204,7 @@ export class DbUtilsService {
 	}
 
 	async getRandomRooms(count: number): Promise<PrismaTypes.room[]> {
-		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany();
-		if (!rooms || rooms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch rooms.",
-			);
-		}
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany();
 
 		if (rooms.length <= count) {
 			return rooms;
@@ -325,48 +309,32 @@ export class DbUtilsService {
 	}
 
 	async getFriendRequests(userID: string): Promise<PrismaTypes.friends[]> {
-		const friendRequests: PrismaTypes.friends[] | null =
+		const friendRequests: PrismaTypes.friends[] =
 			await this.prisma.friends.findMany({
 				where: {
 					friend2: userID,
 					is_pending: true,
 				},
 			});
-
-		if (!friendRequests || friendRequests === null) {
-			throw new Error("An unexpected error occurred in the database.");
-		}
 		return friendRequests;
 	}
 
 	async getPendingRequests(userID: string): Promise<PrismaTypes.friends[]> {
-		const pendingRequests: PrismaTypes.friends[] | null =
+		const pendingRequests: PrismaTypes.friends[] =
 			await this.prisma.friends.findMany({
 				where: {
 					friend1: userID,
 					is_pending: true,
 				},
 			});
-		if (!pendingRequests || pendingRequests === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch pending requests.",
-			);
-		}
 		return pendingRequests;
 	}
 
 	// get users who aren't friends with the user, but are mutual followers
 	async getPotentialFriends(userID: string): Promise<PrismaTypes.users[]> {
-		const follows: PrismaTypes.follows[] | null =
-			await this.prisma.follows.findMany({
-				where: { OR: [{ follower: userID }, { followee: userID }] },
-			});
-
-		if (!follows || follows === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch follows.",
-			);
-		}
+		const follows: PrismaTypes.follows[] = await this.prisma.follows.findMany({
+			where: { OR: [{ follower: userID }, { followee: userID }] },
+		});
 
 		const following = follows.filter((f) => f.follower === userID);
 		const followers = follows.filter((f) => f.followee === userID);
@@ -627,48 +595,40 @@ export class DbUtilsService {
 	}
 	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[]> {
 		// console.log("getting room songs:", roomID);
-		const queue: (PrismaTypes.queue & { song: PrismaTypes.song })[] | null =
+		const queue: (PrismaTypes.queue & { song: PrismaTypes.song })[] =
 			await this.prisma.queue.findMany({
 				where: { room_id: roomID },
 				include: { song: true },
 			});
-		// console.log("queue:", queue);
-		if (!queue || queue === null) {
-			throw new Error("Room not found. Probably doesn't exist fr.");
-		}
 
 		return queue.map((q) => q.song);
 	}
 	async getUserFavoriteSongs(userID: string): Promise<PrismaTypes.song[]> {
 		const favorites:
-			| (PrismaTypes.favorite_songs & { song: PrismaTypes.song })[]
-			| null = await this.prisma.favorite_songs.findMany({
-			where: { user_id: userID },
-			include: { song: true },
-		});
-
-		if (!favorites || favorites === null) {
-			throw new Error("User not found. Probably doesn't exist.");
-		}
+			| (PrismaTypes.favorite_songs & { song: PrismaTypes.song })[] =
+			await this.prisma.favorite_songs.findMany({
+				where: { user_id: userID },
+				include: { song: true },
+			});
 
 		return favorites.map((f) => f.song);
 	}
 
-	async getUserFriends(userID: string): Promise<PrismaTypes.users[] | null> {
-		const friends: PrismaTypes.friends[] | null =
-			await this.prisma.friends.findMany({
-				where: {
-					OR: [
-						{ friend1: userID, is_pending: false },
-						{ friend2: userID, is_pending: false },
-					],
-					is_pending: false,
-				},
-			});
+	async getUserFriends(userID: string): Promise<PrismaTypes.users[]> {
+		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{ friend1: userID, is_pending: false },
+					{ friend2: userID, is_pending: false },
+				],
+				is_pending: false,
+			},
+		});
 
-		if (!friends || friends === null) {
-			throw new Error("No friends found.");
+		if (friends.length === 0) {
+			return [];
 		}
+
 		const friendsIDs: string[] = [];
 		friends.forEach((f) => {
 			if (f.friend1 === userID) {
@@ -690,25 +650,23 @@ export class DbUtilsService {
 	async getMutualFriends(
 		userID1: string,
 		userID2: string,
-	): Promise<PrismaTypes.users[] | null> {
-		const friends1: PrismaTypes.friends[] | null =
-			await this.prisma.friends.findMany({
-				where: {
-					OR: [
-						{ friend1: userID1, is_pending: false },
-						{ friend2: userID1, is_pending: false },
-					],
-				},
-			});
-		const friends2: PrismaTypes.friends[] | null =
-			await this.prisma.friends.findMany({
-				where: {
-					OR: [
-						{ friend1: userID2, is_pending: false },
-						{ friend2: userID2, is_pending: false },
-					],
-				},
-			});
+	): Promise<PrismaTypes.users[]> {
+		const friends1: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{ friend1: userID1, is_pending: false },
+					{ friend2: userID1, is_pending: false },
+				],
+			},
+		});
+		const friends2: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{ friend1: userID2, is_pending: false },
+					{ friend2: userID2, is_pending: false },
+				],
+			},
+		});
 
 		if (!friends1 || friends1 === null || !friends2 || friends2 === null) {
 			throw new Error("No friends found.");

@@ -35,17 +35,17 @@ export class RoomsService {
 	) {}
 
 	async getNewRooms(limit = -1): Promise<RoomDto[]> {
-		const r: PrismaTypes.room[] | null = await this.prisma.room.findMany({
+		const r: PrismaTypes.room[] = await this.prisma.room.findMany({
 			orderBy: {
 				date_created: "desc",
 			},
 		});
-		if (!r || r === null) {
+		if (r.length === 0) {
 			return [];
 		}
 		const allRooms: PrismaTypes.room[] = r;
 
-		const pr: PrismaTypes.public_room[] | null =
+		const pr: PrismaTypes.public_room[] =
 			await this.prisma.public_room.findMany();
 		if (!pr || pr === null) {
 			return [];
@@ -63,34 +63,26 @@ export class RoomsService {
 			publicRooms.splice(limit);
 		}
 
-		const result: RoomDto[] = [];
+		const promises: Promise<RoomDto>[] = [];
 		for (const room of rooms) {
-			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-			if (roomDto) {
-				result.push(roomDto);
-			}
+			promises.push(this.dtogen.generateRoomDtoFromRoom(room));
 		}
+		const result: RoomDto[] = await Promise.all(promises);
 		return result;
 	}
 
 	async getRoomInfo(roomID: string): Promise<RoomDto> {
 		console.log("Getting room info for room", roomID);
-		try {
-			const room = await this.prisma.room.findFirst({
-				where: {
-					room_id: roomID,
-				},
-			});
-			if (!room) {
-				return new RoomDto();
-			}
-			// filter out null values
-			const roomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-			return roomDto ? roomDto : new RoomDto();
-		} catch (error) {
-			console.error("Error getting room info:", error);
-			return new RoomDto();
+		const room = await this.prisma.room.findFirst({
+			where: {
+				room_id: roomID,
+			},
+		});
+		if (!room) {
+			throw new Error("Room does not exist");
 		}
+		// filter out null values
+		return await this.dtogen.generateRoomDtoFromRoom(room);
 	}
 
 	async updateRoomInfo(
@@ -159,12 +151,7 @@ export class RoomsService {
 				throw new Error("Failed to update room");
 			}
 
-			const updatedRoomDto: RoomDto | null =
-				await this.dtogen.generateRoomDtoFromRoom(room);
-			if (!updatedRoomDto) {
-				throw new Error("Failed to generate updated room DTO");
-			}
-			return updatedRoomDto;
+			return await this.dtogen.generateRoomDtoFromRoom(room);
 		} catch (error) {
 			console.error("Error updating room info:", error);
 			throw error;
@@ -317,19 +304,11 @@ export class RoomsService {
 
 			// map all the users to the userdto
 			console.log("Users in room", users);
-			const userDtos: (UserDto | null)[] = await Promise.all(
-				users.map(async (user) => {
-					const u = await this.dtogen.generateUserDto(user.users.user_id);
-					return u;
-				}),
+			const ids: string[] = users.map((user) => user.user_id);
+			const userDtos: UserDto[] = await this.dtogen.generateMultipleUserDto(
+				ids,
 			);
-
-			// filter out null values
-			const filteredUsers: UserDto[] = userDtos.filter(
-				(u) => u !== null,
-			) as UserDto[];
-			console.log("Filtered users", filteredUsers);
-			return filteredUsers;
+			return userDtos;
 		} catch (error) {
 			console.error("Error getting room users:", error);
 			return [];
@@ -429,20 +408,12 @@ export class RoomsService {
 			);
 		}
 
-		const roomMessages: PrismaTypes.room_message[] | null =
+		const roomMessages: PrismaTypes.room_message[] =
 			await this.prisma.room_message.findMany({
 				where: {
 					room_id: roomID,
 				},
 			});
-
-		if (!roomMessages || roomMessages === null) {
-			throw new Error(
-				"Failed to get chat history (query returned null) for room with id '" +
-					roomID +
-					"'",
-			);
-		}
 
 		if (roomMessages.length === 0) {
 			return [];
@@ -453,22 +424,13 @@ export class RoomsService {
 			ids.push(message.message_id);
 		}
 
-		const messages: PrismaTypes.message[] | null =
-			await this.prisma.message.findMany({
-				where: {
-					message_id: {
-						in: ids,
-					},
+		const messages: PrismaTypes.message[] = await this.prisma.message.findMany({
+			where: {
+				message_id: {
+					in: ids,
 				},
-			});
-
-		if (!messages || messages === null) {
-			throw new Error(
-				"Failed to get chat history (query returned null) for room with id '" +
-					roomID +
-					"'",
-			);
-		}
+			},
+		});
 
 		if (messages.length === 0) {
 			throw new Error(

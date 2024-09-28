@@ -271,25 +271,14 @@ export class DtoGenService {
 		user_ids: string[],
 		fully_qualify = false,
 	): Promise<UserDto[]> {
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: user_ids } },
 		});
 
-		if (!users || users === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserDto():ERROR01",
-			);
-		}
-
-		//const result: UserDto[] = [];
 		const promises: Promise<UserDto>[] = [];
 		for (let i = 0; i < users.length; i++) {
 			const u = users[i];
 			if (u && u !== null) {
-				/*
-				const user: UserDto = await this.generateUserDto(u.user_id, false);
-				result.push(user);
-				*/
 				promises.push(this.generateUserDto(u.user_id, fully_qualify));
 			}
 		}
@@ -297,13 +286,13 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateRoomDto(roomID: string): Promise<RoomDto | null> {
+	async generateRoomDto(roomID: string): Promise<RoomDto> {
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
 
 		if (!room || room === null) {
-			return null;
+			throw new Error("Room with id " + roomID + " does not exist");
 		}
 
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
@@ -351,13 +340,7 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateRoomDtoFromRoom(
-		room: PrismaTypes.room,
-	): Promise<RoomDto | null> {
-		if (!room || room === null) {
-			return null;
-		}
-
+	async generateRoomDtoFromRoom(room: PrismaTypes.room): Promise<RoomDto> {
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
 			where: { room_id: room.room_id },
 		});
