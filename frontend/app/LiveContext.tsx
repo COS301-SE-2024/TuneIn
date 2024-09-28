@@ -219,33 +219,42 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		],
 	);
 
-	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
-		if (queue.length === 0) {
-			setRoomQueue([]);
-			setCurrentSong(undefined);
-			return;
-		}
-		console.log(`Room queue updating with input:`);
-		console.log(queue);
-		const head: RoomSongDto = queue[0];
-		let st: Date = new Date(0);
-		if (head.startTime) {
-			if (typeof head.startTime === "string") {
-				st = new Date(head.startTime);
-			} else {
-				st = head.startTime;
+	const updateRoomQueue = useCallback(
+		(queue: RoomSongDto[]) => {
+			if (queue.length === 0) {
+				setRoomQueue([]);
+				setCurrentSong(undefined);
+				setRoomPlaying(undefined);
+				return;
 			}
-		}
-		if (st === new Date(0) || st.getTime() > Date.now() || head.pauseTime) {
-			queue = queue.sort((a, b) => a.index - b.index);
-		} else {
-			let partialQueue = queue.slice(1);
-			partialQueue = partialQueue.sort((a, b) => a.index - b.index);
-			queue = [head, ...partialQueue];
-		}
-		setRoomQueue(queue);
-		setCurrentSong(queue[0]);
-	}, []);
+			console.log(`Room queue updating with input:`);
+			console.log(queue);
+			const head: RoomSongDto = queue[0];
+			let st: Date = new Date(0);
+			if (head.startTime) {
+				if (typeof head.startTime === "string") {
+					st = new Date(head.startTime);
+				} else {
+					st = head.startTime;
+				}
+			}
+			if (st === new Date(0) || st.getTime() > Date.now() || head.pauseTime) {
+				queue = queue.sort((a, b) => a.index - b.index);
+			} else {
+				let partialQueue = queue.slice(1);
+				partialQueue = partialQueue.sort((a, b) => a.index - b.index);
+				queue = [head, ...partialQueue];
+			}
+			console.log(`Room queue post-sort:`);
+			console.log(queue);
+			setRoomQueue(queue);
+			if (!currentSong || queue[0].spotifyID !== currentSong.spotifyID) {
+				setCurrentSong(queue[0]);
+				setRoomPlaying(queue[0]);
+			}
+		},
+		[currentSong],
+	);
 
 	const spotifyAuth: SpotifyAuth = useMemo(
 		() => ({
@@ -424,15 +433,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					if (room.status === 401) {
 						//Unauthorized
 						//Auth header is either missing or invalid
-						setCurrentRoom(undefined);
-						setRoomQueue([]);
-						setCurrentRoomVotes([]);
 					} else if (room.status === 500) {
 						//Internal Server Error
 						//Something went wrong in the backend (unlikely lmao)
-						setCurrentRoom(undefined);
-						setRoomQueue([]);
-						setCurrentRoomVotes([]);
 						throw new Error("Internal Server Error");
 					} else {
 						const r: RoomDto = room.data;
@@ -443,9 +446,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				})
 				.catch((error) => {
-					setCurrentRoom(undefined);
-					setRoomQueue([]);
-					setCurrentRoomVotes([]);
 					if (error instanceof RequiredError) {
 						// a required field is missing
 						throw new Error("Parameter missing from request to get room");
@@ -744,12 +744,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.on(SOCKET_EVENTS.USER_JOINED_ROOM, (response: ChatEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.USER_JOINED_ROOM);
-					const u: UserDto = currentUser;
 					if (response.userID !== null) {
-						if (
-							response.body &&
-							response.body.sender.userID === currentUser.userID
-						) {
+						if (response.userID === currentUser.userID) {
 							updateState({ type: actionTypes.ROOM_JOIN_CONFIRMED });
 						}
 						const joinedParticipant = roomParticipants.find(
@@ -797,12 +793,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.on(SOCKET_EVENTS.USER_LEFT_ROOM, (response: ChatEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.USER_LEFT_ROOM);
-					const u: UserDto = currentUser;
 					if (response.userID !== null) {
-						if (
-							response.body &&
-							response.body.sender.userID === currentUser.userID
-						) {
+						if (response.userID === currentUser.userID) {
 							updateState({ type: actionTypes.ROOM_LEAVE_CONFIRMED });
 						}
 						const joinedParticipant = roomParticipants.find(
@@ -878,7 +870,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						}
 
 						if (response.song && response.song !== null) {
-							setCurrentSong(response.song);
+							if (
+								!currentSong ||
+								response.song.spotifyID !== currentSong.spotifyID
+							) {
+								setCurrentSong(response.song);
+								setRoomPlaying(response.song);
+							}
 						}
 
 						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
@@ -913,7 +911,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						}
 
 						if (response.song && response.song !== null) {
-							setCurrentSong(response.song);
+							if (
+								!currentSong ||
+								response.song.spotifyID !== currentSong.spotifyID
+							) {
+								setCurrentSong(response.song);
+								setRoomPlaying(response.song);
+							}
 						}
 
 						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
@@ -1095,10 +1099,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			dmControls,
 			handleReceivedEvent,
 			joinRoom,
+			keepUserSynced,
 			roomControls,
 			roomMessages,
+			roomParticipants,
 			roomQueue,
 			sendIdentity,
+			setRoomID,
 			socketState.roomChatReceived,
 			socketState.roomChatRequested,
 			updateRoomQueue,
@@ -1486,6 +1493,18 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		} else {
 			// user is not in a room
 			// updateState({ type: actionTypes.CLEAR_ROOM_STATE });
+			users
+				.getCurrentRoom()
+				.then((r) => {
+					if (r.status >= 200 && r.status < 300) {
+						console.log(`User was already in room`);
+						console.log(r.data);
+						setRoomID(r.data.roomID);
+					}
+				})
+				.catch(() => {
+					console.error(`Something bad happened`);
+				});
 		}
 		// }, [
 		// 	authenticated,
@@ -1540,11 +1559,17 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	}, [attachListeners]);
 
 	useEffect(() => {
-		setRoomPlaying(currentSong);
-	}, [currentSong]);
-
-	useEffect(() => {
-		setCurrentSong(roomQueue[0]);
+		if (roomQueue.length > 0) {
+			if (!currentSong || roomQueue[0].spotifyID !== currentSong.spotifyID) {
+				setCurrentSong(roomQueue[0]);
+				setRoomPlaying(currentSong);
+			}
+		} else {
+			if (currentSong) {
+				setCurrentSong(undefined);
+				setRoomPlaying(undefined);
+			}
+		}
 	}, [roomQueue]);
 
 	useEffect(() => {

@@ -879,7 +879,6 @@ export class ActiveRoom {
 	async addSongs(
 		songs: RoomSongDto[],
 		userID: string,
-		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		console.log(`Attempting to add ${songs.length} songs to the queue`);
@@ -1014,100 +1013,6 @@ export class ActiveRoom {
 		}
 		return votes;
 	}
-
-	// async getSpotifyInfo(
-	// 	api: SpotifyApi,
-	// 	prisma: PrismaService,
-	// 	murLockService: MurLockService,
-	// ) {
-	// 	await this.refreshQueue(murLockService);
-	// 	const songs = this.queue.toArray();
-	// 	//get spotify info for all songs
-	// 	console.log(
-	// 		`Getting spotify info for all songs in room ${this.room.roomID}`,
-	// 	);
-
-	// 	const songsWithoutInfo: string[] = songs
-	// 		.filter((s) => s && s.spotifyInfo === null)
-	// 		.map((s) => s.spotifyID);
-	// 	console.log(`There are ${songsWithoutInfo.length} songs without info`);
-
-	// 	if (songsWithoutInfo.length > 0) {
-	// 		// check if info is in database
-	// 		const dbSongs: PrismaTypes.song[] = await prisma.song.findMany({
-	// 			where: {
-	// 				spotify_id: {
-	// 					in: songsWithoutInfo,
-	// 				},
-	// 				NOT: {
-	// 					track_info: {
-	// 						not: {},
-	// 					},
-	// 				},
-	// 			},
-	// 		});
-	// 		const dbIDs: string[] = dbSongs.map((s) => s.spotify_id);
-
-	// 		// fetch info from spotify
-	// 		const promises: Promise<Spotify.Track[]>[] = [];
-	// 		for (let i = 0, n = songsWithoutInfo.length; i < n; i += 50) {
-	// 			console.log(`Iteration ${i} of getting 50 songs out of ${n}`);
-	// 			const ids = songsWithoutInfo.slice(i, i + 50);
-	// 			const info = api.tracks.get(ids);
-	// 			promises.push(info);
-	// 		}
-	// 		console.log(
-	// 			`There are ${
-	// 				promises.length
-	// 			} promises to resolve. Starting at ${new Date()}`,
-	// 		);
-	// 		const results: Spotify.Track[][] = await Promise.all(promises);
-	// 		console.log(`All promises resolved at ${new Date()}`);
-	// 		const songInfo: Spotify.Track[] = [];
-	// 		for (const r of results) {
-	// 			songInfo.push(...r);
-	// 		}
-
-	// 		// match the song info, first with the database, then with Spotify
-	// 		let songsEdited = false;
-	// 		for (let i = 0, n = songs.length; i < n; i++) {
-	// 			let song = songs[i];
-	// 			if (song.spotifyInfo === null) {
-	// 				if (dbIDs.includes(song.spotifyID)) {
-	// 					const dbSong = dbSongs.find((s) => s.spotify_id === song.spotifyID);
-	// 					if (dbSong) {
-	// 						// track info is 'string | number | boolean | JsonObject | JsonArray | null'
-	// 						const j = JSON.parse(dbSong.track_info as string);
-	// 						try {
-	// 							song.spotifyInfo = j as Spotify.Track;
-	// 							songsEdited = true;
-	// 						} catch (e) {
-	// 							console.log(
-	// 								`Could not parse track info for song with id ${song.spotifyID}`,
-	// 							);
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 			song = songs[i];
-	// 			if (song.spotifyInfo === null) {
-	// 				if (songInfo.find((s) => s.id === song.spotifyID)) {
-	// 					const info = songInfo.find((s) => song && s.id === song.spotifyID);
-	// 					if (info && songs[i]) {
-	// 						songs[i].spotifyInfo = info;
-	// 						songsEdited = true;
-	// 					}
-	// 				} else {
-	// 					console.log(
-	// 						`Song with id ${song.spotifyID} does not have spotify info`,
-	// 					);
-	// 				}
-	// 			}
-	// 		}
-	// 		if (songsEdited) await this.setQueue(songs, murLockService);
-	// 		console.log("Queue updated with spotify info");
-	// 	}
-	// }
 
 	async play(murLockService: MurLockService): Promise<RoomSong | null> {
 		if (this.queue.isEmpty()) {
@@ -1298,7 +1203,6 @@ export class RoomQueueService {
 			this.spotify,
 			this.murLockService,
 		);
-		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 		this.roomQueues.set(roomID, activeRoom);
 		console.log(
 			`Created room queue for room ${roomID} with active room: ${activeRoom}`,
@@ -1308,22 +1212,12 @@ export class RoomQueueService {
 	async refreshQueue(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
 		await activeRoom.refreshQueue(this.spotify, this.murLockService);
-		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 	}
 
 	async flushToDB(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
 		await activeRoom.flushToDB(this.spotify, this.prisma, this.murLockService);
 	}
-
-	// async getRoomSpotifyInfo(roomID: string): Promise<void> {
-	// 	const activeRoom = await this.getRoom(roomID);
-	// 	await activeRoom.getSpotifyInfo(
-	// 		this.spotifyAuth.getUserlessAPI(),
-	// 		this.prisma,
-	// 		this.murLockService,
-	// 	);
-	// }
 
 	async clearRoomQueue(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
@@ -1357,13 +1251,8 @@ export class RoomQueueService {
 		const result: boolean = await activeRoom.addSongs(
 			songs,
 			userID,
-			this.spotify,
 			this.murLockService,
 		);
-		// activeRoom.getSpotifyInfo(
-		// 	this.spotifyAuth.getUserlessAPI(),
-		// 	this.murLockService,
-		// );
 		return result;
 	}
 
