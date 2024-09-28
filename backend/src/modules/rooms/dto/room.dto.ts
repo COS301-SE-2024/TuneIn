@@ -13,7 +13,6 @@ import { Type } from "class-transformer";
 
 export class RoomDto {
 	@ApiProperty({
-		description: "The date the room was created",
 		type: UserDto,
 	})
 	@IsObject()
@@ -24,6 +23,10 @@ export class RoomDto {
 	@ApiProperty()
 	@IsString()
 	roomID: string;
+
+	@ApiProperty()
+	@IsString()
+	spotifyPlaylistID: string;
 
 	@ApiProperty()
 	@IsNumber()

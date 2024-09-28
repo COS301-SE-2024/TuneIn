@@ -313,6 +313,7 @@ export class DtoGenService {
 		const result: RoomDto = {
 			creator: new UserDto(),
 			roomID: room.room_id,
+			spotifyPlaylistID: room.playlist_id || "",
 			participant_count: 0,
 			room_name: room.name,
 			description: room.description || "",
@@ -364,6 +365,7 @@ export class DtoGenService {
 		const result: RoomDto = {
 			creator: new UserDto(),
 			roomID: room.room_id,
+			spotifyPlaylistID: room.playlist_id || "",
 			participant_count: 0,
 			room_name: room.name,
 			description: room.description || "",
@@ -456,6 +458,7 @@ export class DtoGenService {
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
+					spotifyPlaylistID: r.playlist_id || "",
 					participant_count: 0, //to fix soon
 					room_name: r.name,
 					description: r.description || "",
