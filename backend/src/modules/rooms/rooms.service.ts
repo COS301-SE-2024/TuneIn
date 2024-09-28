@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
-import { SongInfoDto } from "./dto/songinfo.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
@@ -12,6 +11,10 @@ import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
+import { SpotifyService } from "../../spotify/spotify.service";
+import { RoomQueueService, ActiveRoom } from "./roomqueue/roomqueue.service";
+import { RoomSongDto } from "./dto/roomsong.dto";
+import { SpotifyTokenPair } from "../../../src/auth/spotify/spotifyauth.service";
 
 export class UserActionDto {
 	@ApiProperty({
@@ -26,12 +29,14 @@ export class UserActionDto {
 
 @Injectable()
 export class RoomsService {
-	DUMBroomQueues: Map<string, string> = new Map<string, string>();
+	// DUMBroomQueues: Map<string, string> = new Map<string, string>();
 
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly dtogen: DtoGenService,
 		private readonly dbUtils: DbUtilsService,
+		private readonly spotifyService: SpotifyService,
+		private readonly roomQueueService: RoomQueueService,
 	) {}
 
 	async getNewRooms(limit = -1): Promise<RoomDto[]> {
@@ -328,64 +333,33 @@ export class RoomsService {
 		}
 	}
 
-	async getRoomQueue(roomID: string): Promise<SongInfoDto[]> {
-		// TODO: Implement logic to get room queue
-		const songInfoDto: SongInfoDto = new SongInfoDto();
-		// get queue from db
-		const queue = await this.prisma.queue.findMany({
-			where: {
-				room_id: roomID,
-			},
-			include: {
-				song: true,
-			},
-		});
-		const songInfoDtos: SongInfoDto[] = [];
-		for (const song of queue) {
-			songInfoDto.title = song.song.name;
-			songInfoDto.cover = song.song.artwork_url || "";
-			songInfoDto.artists = song.song.artists;
-			if (song.start_time) {
-				songInfoDto.start_time = song.start_time;
-			}
-			songInfoDtos.push(songInfoDto);
+	async getRoomQueue(roomID: string): Promise<RoomSongDto[]> {
+		const room: ActiveRoom | undefined =
+			this.roomQueueService.roomQueues.get(roomID);
+		if (!room) {
+			//room is inactive
+			return [];
+		} else {
+			return room.queueAsRoomSongDto();
 		}
-		return songInfoDtos;
 	}
 
-	getRoomQueueDUMBVERSION(roomID: string): string {
-		// TODO: Implement logic to get room queue
-		return this.DUMBroomQueues.get(roomID) || "";
-	}
-
-	// clearRoomQueue(userID: string, roomID: string): boolean {
-	// 	// TODO: Implement logic to clear room queue
-	// 	console.log(roomID);
-	// 	return false;
-	// }
-
-	addSongToQueue(roomID: string, songInfoDto: SongInfoDto): SongInfoDto[] {
-		// TODO: Implement logic to add song to queue
-		console.log(roomID);
-		console.log(songInfoDto);
-		return [];
-	}
-
-	addSongToQueueDUMBVERSION(roomID: string, songID: string): string {
-		// Replace the old queue with a new queue containing only the new song
-		/*
-		console.log("input", songID);
-		const songObjects: { songID: string }[] = JSON.parse(songID);
-		const queue: string[] = songObjects.map((obj) => JSON.stringify(obj));
-		*/
-		this.DUMBroomQueues.set(roomID, songID);
-		return songID;
-	}
-
-	getCurrentSong(roomID: string): SongInfoDto {
-		// TODO: Implement logic to get current playing song
-		console.log(roomID);
-		return new SongInfoDto();
+	async getCurrentSong(roomID: string): Promise<RoomSongDto> {
+		const queue: RoomSongDto[] = await this.getRoomQueue(roomID);
+		if (queue.length === 0) {
+			throw new HttpException(
+				"Either room is inactive or queue is empty",
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		const result: RoomSongDto = queue[0];
+		if (result.pauseTime) {
+			throw new HttpException("Song is paused", HttpStatus.BAD_REQUEST);
+		}
+		if (!result.startTime) {
+			throw new HttpException("Song has not started", HttpStatus.BAD_REQUEST);
+		}
+		return result;
 	}
 
 	async roomExists(roomID: string): Promise<boolean> {
@@ -640,112 +614,6 @@ export class RoomsService {
 				"Failed to save reaction. Database returned null after insert.",
 			);
 		}
-	}
-
-	// define a function that will archive all the songs in a room
-	async archiveRoomSongs(
-		roomID: string,
-		userID: string,
-		archiveInfo: any,
-	): Promise<void> {
-		// get all the songs in the room from the queue table
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-
-		if (!(await this.dbUtils.roomExists(roomID))) {
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		}
-
-		const songs: any = await this.prisma.queue.findMany({
-			where: {
-				room_id: roomID,
-			},
-		});
-		// if there are no songs in the room, return false
-		if (!songs || songs === null) {
-			throw new HttpException("No songs in the room", HttpStatus.NOT_FOUND);
-		}
-		// create a playlist as an array of song ids
-		const playlist: string[] = [];
-		for (const song of songs) {
-			playlist.push(song.song_id);
-		}
-
-		// add the songs to the playlist table
-		const result = await this.prisma.playlist.create({
-			data: {
-				name: archiveInfo.name,
-				description: archiveInfo.description,
-				user_id: userID,
-				playlist: playlist,
-			},
-		});
-
-		// if the playlist is created, return true
-		if (result) {
-			throw new HttpException("Playlist created", HttpStatus.OK);
-		}
-		throw new HttpException(
-			"Failed to create playlist",
-			HttpStatus.INTERNAL_SERVER_ERROR,
-		);
-	}
-
-	async getArchivedSongs(userID: string): Promise<any> {
-		// get all the playlists created by the user
-		console.log("User ID: ", userID, " is getting archived songs");
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-
-		const playlists: any = await this.prisma.playlist.findMany({
-			where: {
-				user_id: userID,
-			},
-		});
-		// if there are no playlists, return false
-		console.log("Playlists: ", playlists);
-		if (!playlists || playlists === null) {
-			throw new HttpException("No playlists found", HttpStatus.NOT_FOUND);
-		}
-		return playlists;
-	}
-
-	async deleteArchivedSongs(userID: string, playlistID: string): Promise<void> {
-		// delete the playlist created by the user
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-		console.log("User ID: ", userID, " is deleting archived songs");
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-
-		const playlist: any = await this.prisma.playlist.findFirst({
-			where: {
-				user_id: userID,
-				playlist_id: playlistID,
-			},
-		});
-		// if the playlist does not exist, return false
-		if (!playlist || playlist === null) {
-			throw new HttpException("Playlist not found", HttpStatus.NOT_FOUND);
-		}
-		// delete the playlist
-		const result = await this.prisma.playlist.delete({
-			where: {
-				playlist_id: playlistID,
-			},
-		});
-		// if the playlist is deleted, return true
-		if (result) {
-			throw new HttpException("Playlist deleted", HttpStatus.OK);
-		}
-		throw new HttpException(
-			"Failed to delete playlist",
-			HttpStatus.INTERNAL_SERVER_ERROR,
-		);
 	}
 
 	async getKickedUsers(roomID: string): Promise<UserDto[]> {

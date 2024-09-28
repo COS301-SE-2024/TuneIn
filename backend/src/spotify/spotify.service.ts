@@ -75,7 +75,6 @@ export class SpotifyService {
 				const tp: SpotifyTokenPair = JSON.parse(
 					tokens.token,
 				) as SpotifyTokenPair;
-				console.log(tp);
 				if (tp.epoch_expiry < new Date().getTime()) {
 					firstValueFrom(
 						this.httpService.post(
