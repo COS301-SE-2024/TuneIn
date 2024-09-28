@@ -222,7 +222,7 @@ describe("DbUtilsService", () => {
 				room_language: null,
 				explicit: null,
 				tags: [],
-				playlist_id: null
+				playlist_id: null,
 			};
 			jest.spyOn(mockPrismaService.room, "findUnique").mockResolvedValue(room);
 			jest
