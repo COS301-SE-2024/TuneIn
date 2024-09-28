@@ -14,12 +14,14 @@ interface SplittingPopUpProps {
 	isVisible: boolean;
 	onClose: () => void;
 	onConfirm: (choice: true | false) => Promise<void>; // Updated to take a choice
+	genres: string[];
 }
 
 const SplittingPopUp: React.FC<SplittingPopUpProps> = ({
 	isVisible,
 	onClose,
 	onConfirm,
+	genres,
 }) => {
 	const [slideAnim] = useState(new Animated.Value(300)); // Initial position of the popup
 	const [isYesPressed, setIsYesPressed] = useState(false); // State to track "Yes" button press
@@ -72,8 +74,9 @@ const SplittingPopUp: React.FC<SplittingPopUpProps> = ({
 				>
 					<Text style={styles.title}>Two Distinct Queues Detected</Text>
 					<Text style={styles.message}>
-						We have noticed that there are two distinct queues. Do you want to
-						create 2 branching rooms from the different queues?
+						We noticed {genres[0]} and {genres[1]} as the two most prevalent
+						themes in this room. Do you want to create two branching rooms from
+						the different queues?
 					</Text>
 
 					<View style={styles.buttonContainer}>

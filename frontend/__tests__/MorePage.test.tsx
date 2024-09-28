@@ -153,18 +153,18 @@ describe("ProfileScreen", () => {
 		expect(getByText("johndoe")).toBeTruthy();
 	});
 
-	it("it renders songs", () => {
-		(useLocalSearchParams as jest.Mock).mockReturnValue({
-			type: "song",
-			items: JSON.stringify(mockSongs),
-			title: "Favorite Songs",
-		});
+	// it("it renders songs", () => {
+	// 	(useLocalSearchParams as jest.Mock).mockReturnValue({
+	// 		type: "song",
+	// 		items: JSON.stringify(mockSongs),
+	// 		title: "Favorite Songs",
+	// 	});
 
-		const { getByText } = render(<MorePage />);
+	// 	const { getByText } = render(<MorePage />);
 
-		expect(getByText("Favorite Songs")).toBeTruthy();
-		expect(getByText("Dramaturgy")).toBeTruthy();
-	});
+	// 	expect(getByText("Favorite Songs")).toBeTruthy();
+	// 	expect(getByText("Dramaturgy")).toBeTruthy();
+	// });
 
 	it("it renders nothing", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({

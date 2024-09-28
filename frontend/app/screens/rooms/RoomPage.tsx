@@ -13,7 +13,6 @@ import {
 	StyleSheet,
 	Animated,
 	Dimensions,
-	Easing,
 	Alert,
 	ToastAndroid,
 	Platform,
@@ -32,7 +31,6 @@ import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import { formatRoomData } from "../../models/Room";
 import { colors } from "../../styles/colors";
 import SongRoomWidget from "../../components/SongRoomWidget";
-import * as path from "path";
 
 const { width, height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
@@ -71,7 +69,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [joineds, setJoined] = useState(false);
 
 	useEffect(() => {
-		console.log("Room ID: " + currentRoom?.roomID);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -86,6 +83,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [message, setMessage] = useState("");
 	const [isSending, setIsSending] = useState(false);
+	const [participantCount, setParticipantCount] = useState(0);
 	const [participants, setParticipants] = useState<any[]>([]);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
 
@@ -105,7 +103,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			);
 			setIsBookmarked(isBookmarked ?? false); // Use false as the default value if isBookmarked is undefined
 		} catch (error) {
-			console.error("Error checking bookmark:", error);
+			console.log("Error checking bookmark:", error);
 		}
 	}, [roomID, bookmarker]);
 
@@ -259,7 +257,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				const data = await response.json();
 				if (Array.isArray(data)) {
 					setParticipants(data);
-					console.log("Participants:", data);
+					setParticipantCount(data.length);
 				} else {
 					console.error("Unexpected response data format:", data);
 				}
@@ -374,7 +372,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>{participants.length + " Participants"}</Text>
+							<Text>{participantCount + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}
@@ -392,7 +390,11 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				</View>
 				<View style={styles.trackDetails}>
 					<Image
-						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
+						source={
+							queue[currentTrackIndex]?.albumArtUrl
+								? { uri: queue[currentTrackIndex].albumArtUrl }
+								: require("../../../assets/profile-icon.png")
+						}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>

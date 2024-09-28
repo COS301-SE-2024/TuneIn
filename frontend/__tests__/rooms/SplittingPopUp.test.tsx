@@ -16,6 +16,7 @@ describe("SplittingPopUp Component", () => {
 				isVisible={true}
 				onClose={mockOnClose}
 				onConfirm={mockOnConfirm}
+				genres={["Rock", "Pop"]}
 			/>,
 		);
 
@@ -31,6 +32,7 @@ describe("SplittingPopUp Component", () => {
 				isVisible={true}
 				onClose={mockOnClose}
 				onConfirm={mockOnConfirm}
+				genres={["Rock", "Pop"]}
 			/>,
 		);
 
@@ -48,6 +50,7 @@ describe("SplittingPopUp Component", () => {
 				isVisible={true}
 				onClose={mockOnClose}
 				onConfirm={mockOnConfirm}
+				genres={["Rock", "Pop"]}
 			/>,
 		);
 
@@ -65,6 +68,7 @@ describe("SplittingPopUp Component", () => {
 				isVisible={false}
 				onClose={mockOnClose}
 				onConfirm={mockOnConfirm}
+				genres={["Rock", "Pop"]}
 			/>,
 		);
 

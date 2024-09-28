@@ -372,8 +372,8 @@ export class RoomsController {
 	async getRoomQueue(
 		@Param("roomID") roomID: string,
 		//): SongInfoDto[] {
-	): Promise<string> {
-		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
+	): Promise<SongInfoDto[]> {
+		return this.roomsService.getRoomQueue(roomID);
 	}
 
 	@ApiBearerAuth()
