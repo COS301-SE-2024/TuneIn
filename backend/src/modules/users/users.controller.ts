@@ -925,6 +925,37 @@ export class UsersController {
 	}
 
 	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/dms")
+	@ApiOperation({
+		summary: "Get the authorized user's direct messages with the given user",
+		description: "Get all of the direct messages between the two users.",
+		operationId: "getDMsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's direct messages as an array of DirectMessageDto.",
+		type: DirectMessageDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getDMsByUsername(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<DirectMessageDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getMessagesByUsername(userInfo.id, username);
+	}
+
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Get(":username/rooms/current")
 	@ApiOperation({ summary: "Get a user's current room based on username" })

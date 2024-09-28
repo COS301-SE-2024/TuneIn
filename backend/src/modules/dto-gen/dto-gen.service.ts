@@ -686,10 +686,8 @@ export class DtoGenService {
 		);
 		console.log(dms);
 
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
+		if (dms.length === 0) {
+			return [];
 		}
 
 		//filter unread messages

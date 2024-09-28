@@ -1331,7 +1331,20 @@ export class UsersService {
 		recipientID: string,
 	): Promise<DirectMessageDto[]> {
 		//get messages between two users
-		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
+		return await this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
+	}
+
+	async getMessagesByUsername(
+		userID: string,
+		recipientUsername: string,
+	): Promise<DirectMessageDto[]> {
+		//get messages between two users
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const recipientID = (await this.getProfileByUsername(recipientUsername))
+			.userID;
+		return await this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
 	}
 
 	async getUnreadMessages(
