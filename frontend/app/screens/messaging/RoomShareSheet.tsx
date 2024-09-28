@@ -152,7 +152,7 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 		<Modal
 			testID="modal"
 			transparent={true}
-			animationType="none"
+			animationType="slide"
 			visible={isVisible}
 			onRequestClose={handleClose}
 		>
