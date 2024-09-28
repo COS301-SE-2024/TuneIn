@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import {
 	SpotifyTokenPair,
 	SpotifyTokenResponse,
+	SpotifyAuthService,
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
 // import { sleep } from "../common/utils";
@@ -21,12 +22,12 @@ export class SpotifyService {
 	private clientSecret: string;
 	// private redirectUri: string;
 	// private authHeader: string;
-	private userlessAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
+		private readonly spotifyAuthService: SpotifyAuthService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -53,21 +54,6 @@ export class SpotifyService {
 		// );
 
 		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
-					this.clientId,
-					this.clientSecret,
-				);
-				break;
-			} catch (e) {
-				error = e as Error;
-				console.error(e);
-			}
-		}
-		if (error) {
-			throw error;
-		}
 	}
 
 	async wait(ms: number) {
@@ -75,7 +61,7 @@ export class SpotifyService {
 	}
 
 	getUserlessAPI(): Spotify.SpotifyApi {
-		return this.userlessAPI;
+		return this.spotifyAuthService.getUserlessAPI();
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
@@ -104,9 +90,9 @@ export class SpotifyService {
 		let error: Error | undefined;
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 			try {
-				const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
-					spotifyID,
-				);
+				const audioFeatures = await this.spotifyAuthService
+					.getUserlessAPI()
+					.tracks.audioFeatures(spotifyID);
 				return audioFeatures;
 			} catch (e) {
 				error = e as Error;
@@ -131,7 +117,9 @@ export class SpotifyService {
 				const promises: Promise<Spotify.AudioFeatures[]>[] = [];
 				for (let i = 0; i < spotifyIDs.length; i += 100) {
 					const ids = spotifyIDs.slice(i, i + 100);
-					promises.push(this.userlessAPI.tracks.audioFeatures(ids));
+					promises.push(
+						this.spotifyAuthService.getUserlessAPI().tracks.audioFeatures(ids),
+					);
 					await this.wait(500); // for rate limiting
 				}
 				const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
@@ -610,7 +598,9 @@ export class SpotifyService {
 				const promises: Promise<Spotify.Track[]>[] = [];
 				for (let i = 0; i < trackIDs.length; i += 50) {
 					const ids = trackIDs.slice(i, i + 50);
-					promises.push(this.userlessAPI.tracks.get(ids));
+					promises.push(
+						this.spotifyAuthService.getUserlessAPI().tracks.get(ids),
+					);
 				}
 				const results: Spotify.Track[][] = await Promise.all(promises);
 				const tracks: Spotify.Track[] = [];

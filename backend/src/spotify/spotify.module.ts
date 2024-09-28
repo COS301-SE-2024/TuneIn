@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { PrismaModule } from "./../../prisma/prisma.module";
 import { MurLockModule } from "murlock";
+import { SpotifyAuthModule } from "../auth/spotify/spotifyauth.module";
 
 @Module({
 	imports: [
@@ -11,6 +12,7 @@ import { MurLockModule } from "murlock";
 		PrismaModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 		MurLockModule,
+		SpotifyAuthModule,
 	],
 	controllers: [],
 	providers: [SpotifyService, ConfigService],

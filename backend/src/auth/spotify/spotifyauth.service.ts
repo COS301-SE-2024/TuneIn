@@ -10,7 +10,6 @@ import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { SpotifyService } from "../../spotify/spotify.service";
 import { AxiosError } from "axios";
 import { Type } from "class-transformer";
 import { TasksService } from "../../tasks/tasks.service";
@@ -92,7 +91,6 @@ export class SpotifyAuthService {
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
 		// private readonly dbUtils: DbUtilsService,
-		private readonly spotify: SpotifyService,
 		private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
@@ -285,15 +283,34 @@ export class SpotifyAuthService {
 		return token;
 	}
 
+	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < 3; i++) {
+			try {
+				const api = Spotify.SpotifyApi.withAccessToken(this.clientId, token);
+				const user = await api.currentUser.profile();
+				return user;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await new Promise((resolve) => setTimeout(resolve, 5000 * attempts));
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get user profile");
+	}
+
 	async createUser(tk: SpotifyTokenPair): Promise<PrismaTypes.users> {
 		//get user
 		if (tk.epoch_expiry < Date.now()) {
 			throw new Error("Token has expired");
 		}
 
-		const spotifyUser: Spotify.UserProfile = await this.spotify.getSelf(
-			tk.tokens,
-		);
+		const spotifyUser: Spotify.UserProfile = await this.getSelf(tk.tokens);
 
 		const existingUser: PrismaTypes.users[] | null =
 			await this.prisma.users.findMany({
