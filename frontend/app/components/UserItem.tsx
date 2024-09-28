@@ -61,6 +61,15 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 						onLoad={() => setImageLoaded(true)}
 					/>
 				)}
+				<Image
+					source={
+						user.profile_picture_url
+							? { uri: user.profile_picture_url }
+							: require("../../assets/profile-icon.png")
+					}
+					style={styles.profileImage}
+					testID="profile-pic"
+				/>
 				<View style={styles.textContainer}>
 					<Text style={styles.profileName} numberOfLines={1}>
 						{user.profile_name}

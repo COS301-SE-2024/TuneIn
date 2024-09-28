@@ -20,7 +20,7 @@ import GenreList from "../../components/GenreList";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -57,11 +57,6 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	let ownsProfile: boolean = true;
-
-	const BackgroundIMG: string =
-		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-	const ProfileIMG: string =
-		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -128,7 +123,9 @@ const ProfileScreen: React.FC = () => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
 			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+			backgroundImage: room.room_image
+				? room.room_image
+				: require("../../../assets/imageholder.jpg"),
 			name: room.room_name,
 			language: room.language,
 			songName: room.current_song ? room.current_song.title : null,
@@ -137,7 +134,9 @@ const ProfileScreen: React.FC = () => {
 				: null,
 			description: room.description,
 			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
+			userProfile: room.creator
+				? room.creator.profile_picture_url
+				: require("../../../assets/profile-icon.png"),
 			username: room.creator ? room.creator.username : "Unknown",
 			roomSize: 50,
 			tags: room.tags ? room.tags : [],
@@ -375,11 +374,15 @@ const ProfileScreen: React.FC = () => {
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
-			if (error.response && error.response.status === 404) {
-				setCurrentRoomData(null);
-				setRoomCheck(true);
+			if (axios.isAxiosError(error)) {
+				if (error.response && error.response.status === 404) {
+					setCurrentRoomData(null);
+					setRoomCheck(true);
+				} else {
+					console.log("Error fetching current room info:", error);
+				}
 			} else {
-				console.log("Error fetching current room info:", error);
+				console.log("An unknown error occurred:", error);
 			}
 		}
 	};
@@ -1026,8 +1029,18 @@ const ProfileScreen: React.FC = () => {
 							testID="profile-pic"
 						>
 							<Image
-								source={{ uri: primaryProfileData.profile_picture_url }}
-								style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+								source={
+									primaryProfileData.profile_picture_url
+										? { uri: primaryProfileData.profile_picture_url }
+										: require("../../../assets/profile-icon.png")
+								}
+								style={{
+									width: 125,
+									height: 125,
+									borderRadius: 125 / 2,
+									borderWidth: 1,
+									borderColor: "black",
+								}}
 							/>
 						</View>
 						<Text

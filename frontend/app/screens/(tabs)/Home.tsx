@@ -36,6 +36,7 @@ import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
 import { useIsFocused } from "@react-navigation/native";
+import FriendServices from "../../services/FriendServices";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -74,6 +75,7 @@ const Home: React.FC = () => {
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
+	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
@@ -110,6 +112,23 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
+			setFriendError(false);
+			return response.data;
+		} catch (error) {
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+
+	const getFollowers = async (token: string) => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/following`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
 			setFriendError(false);
 			return response.data;
 		} catch (error) {
@@ -197,15 +216,23 @@ const Home: React.FC = () => {
 			const fetchedFriends = await getFriends(storedToken);
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profile_picture_url: friend.profile_picture_url
-							? friend.profile_picture_url
-							: ProfileIMG,
+						profile_picture_url: friend.profile_picture_url || ProfileIMG,
 						username: friend.username,
 						friend_id: friend.friend_id,
 					}))
 				: [];
-
 			setFriends(formattedFriends);
+
+			// Fetch and format followers
+			const fetchedFollowers = await getFollowers(storedToken);
+			const formattedFollowers: Friend[] = Array.isArray(fetchedFollowers)
+				? fetchedFollowers.map((follower: Friend) => ({
+						profile_picture_url: follower.profile_picture_url || ProfileIMG,
+						username: follower.username,
+						friend_id: follower.friend_id,
+					}))
+				: [];
+			setFollowers(formattedFollowers);
 		}
 		setLoading(false);
 	}, [setUserData, userData, ProfileIMG]);
@@ -324,9 +351,7 @@ const Home: React.FC = () => {
 								)}
 								<TouchableOpacity
 									style={styles.navigateButton}
-									onPress={() =>
-										navigateToMoreRooms(myRecents, "Picks for you")
-									}
+									onPress={() => navigateToMoreRooms(myPicks, "Picks for you")}
 								>
 									<Text style={styles.sectionTitle}>Picks for you</Text>
 								</TouchableOpacity>
@@ -343,8 +368,8 @@ const Home: React.FC = () => {
 								</TouchableOpacity>
 								<FriendsGrid
 									friends={friends}
-									user={userData.username}
-									maxVisible={8}
+									followers={followers} // Passing followers here
+									username={userData.username}
 								/>
 							</>
 						) : null}
@@ -416,7 +441,7 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonText: {
 		color: "white",
-		fontSize: 32,
+		fontSize: 40, // Increased from 32 to 40
 		fontWeight: "bold",
 	},
 });
