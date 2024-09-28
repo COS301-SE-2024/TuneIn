@@ -1,29 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	Image,
-	TouchableOpacity,
-	StyleSheet,
-	ToastAndroid,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { User } from "../models/user";
 import { colors } from "../styles/colors";
 import { router } from "expo-router";
-import { Player } from "../PlayerContext";
-import auth from "../services/AuthManagement";
-import * as utils from "../services/Utils";
-import axios from "axios";
 
 interface UserItemProps {
 	user: User;
 }
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
-	const defaultProfileIcon = require("../../assets/profile-icon.png");
-	const [profileImage, setProfileImage] = useState<string>("");
-	const [imageLoaded, setImageLoaded] = useState<boolean>(false);
-
 	const navigateToHelp = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
@@ -32,19 +17,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 			})}&user=${user}`,
 		);
 	};
-	useEffect(() => {
-		const imageUrl = user.profile_picture_url;
-		// console.log("Image URL: " + imageUrl);
-
-		if (
-			!imageUrl ||
-			imageUrl === "https://example.com/default-profile-picture.png"
-		) {
-			setProfileImage(defaultProfileIcon);
-		} else {
-			setProfileImage(imageUrl);
-		}
-	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -52,15 +24,6 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 				onPress={navigateToHelp}
 				style={{ flexDirection: "row", alignItems: "center", paddingRight: 20 }}
 			>
-				{profileImage === defaultProfileIcon ? (
-					<Image source={defaultProfileIcon} style={styles.profileImage} />
-				) : (
-					<Image
-						source={{ uri: profileImage }}
-						style={[styles.profileImage, !imageLoaded && { display: "none" }]}
-						onLoad={() => setImageLoaded(true)}
-					/>
-				)}
 				<Image
 					source={
 						user.profile_picture_url
