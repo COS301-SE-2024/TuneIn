@@ -175,6 +175,8 @@ const AdvancedSettings = () => {
 				language: data.language,
 				roomSize: "50",
 				userProfile: data.creator.profile_picture_url,
+				mine: true,
+				songName: data.current_song ? data.current_song.title : null,
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
