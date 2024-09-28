@@ -61,18 +61,15 @@ const createAPIGroup = (
 	const usersAPI: UsersApi = new UsersApi(config);
 
 	const getUser = async (username: string): Promise<UserDto> => {
-		let user: UserDto | null = null;
-		usersAPI
+		let user: UserDto = await usersAPI
 			.getProfileByUsername(username)
 			.then((response) => {
-				user = response.data;
+				return response.data;
 			})
 			.catch((error) => {
 				console.error(error);
+				throw error;
 			});
-		if (user === null) {
-			throw new Error("Failed to fetch user @ " + username);
-		}
 		return user;
 	};
 

@@ -1182,9 +1182,7 @@ export class RoomQueueService {
 	async createRoomQueue(roomID: string): Promise<void> {
 		let room: RoomDto = await this.dtogen.generateRoomDto(roomID);
 		if (room.spotifyPlaylistID === "") {
-			const roomPlaylist: Spotify.Playlist = await this.spotify.getRoomPlaylist(
-				room,
-			);
+			await this.spotify.getRoomPlaylist(room);
 			room = await this.dtogen.generateRoomDto(roomID);
 		}
 		const activeRoom = new ActiveRoom(room, this.murLockService);
