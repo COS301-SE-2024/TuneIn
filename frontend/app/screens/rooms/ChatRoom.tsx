@@ -22,8 +22,6 @@ import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
 import auth from "../../services/AuthManagement";
-import CurrentRoom from "./functions/CurrentRoom";
-import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
 import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
@@ -31,6 +29,8 @@ import EmojiPicker, {
 	EmojiPickerRef,
 } from "../../components/rooms/emojiPicker";
 import { colors } from "../../styles/colors";
+import { useLive } from "../../LiveContext";
+import { useAPI } from "../../APIContext";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
@@ -40,9 +40,19 @@ type EmojiReaction = {
 };
 
 const ChatRoom = () => {
-	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
+	const {
+		currentUser,
+		currentRoom,
+		socketHandshakes,
+		roomMessages,
+		joinRoom,
+		leaveRoom,
+		roomControls,
+		currentSong,
+	} = useLive();
+	const { rooms } = useAPI();
+
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -64,20 +74,7 @@ const ChatRoom = () => {
 		);
 	}
 
-	const { currentRoom, setCurrentRoom } = playerContext;
-	const [joined, setJoined] = useState(false);
-
-	useEffect(() => {
-		console.log("Room ID: " + currentRoom?.roomID);
-		if (currentRoom && currentRoom?.roomID === roomID) {
-			setJoined(true);
-			live.joinRoom(roomID, setJoined, setMessages);
-		}
-	}, [currentRoom, roomID]);
-
-	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [message, setMessage] = useState("");
-	const [messages, setMessages] = useState<LiveMessage[]>([]);
 	const [isSending, setIsSending] = useState(false);
 
 	//Emoji picker
@@ -95,57 +92,29 @@ const ChatRoom = () => {
 		emojiPickerRef.current?.passEmojiToTextField(emoji);
 	};
 
-	const joinRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setCurrentRoom(formattedRoom);
-	}, [roomData, setCurrentRoom]);
-
-	const leaveRoom = () => {
-		setCurrentRoom(null);
-	};
-
 	const screenHeight = Dimensions.get("window").height;
 
 	const handleJoinLeave = async () => {
-		console.log("joined", joined);
-		setJoined(!joined);
-		const token = await auth.getToken();
-		console.log("Token fr fr:", token);
-		if (!joined) {
-			if (!token) {
-				throw new Error("No token found");
-			}
-			console.log("Joining room........ from chatroom page?", roomID, token);
-			roomCurrent.leaveJoinRoom(token, roomID, false);
-			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages);
-			setJoined(true);
-		} else {
+		// only join if not in room or if in another room
+		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
+			await rooms.joinRoom(roomID);
+			joinRoom(roomID);
+			roomControls.requestRoomQueue();
+
+			// only leave if you're in the room
+		} else if (currentRoom && currentRoom.roomID === roomID) {
+			await rooms.leaveRoom(roomID);
 			leaveRoom();
-			setJoined(false);
-			roomCurrent.leaveJoinRoom(token as string, roomID, true);
-			live.leaveRoom();
+			if (await roomControls.playbackHandler.userListeningToRoom()) {
+				await roomControls.playbackHandler.handlePlayback("pause");
+			}
 		}
 	};
-
-	if (!readyToJoinRoom) {
-		setReadyToJoinRoom(true);
-		console.log("Ready to join room...");
-	}
-
-	useEffect(() => {
-		if (readyToJoinRoom && !joined) {
-			console.log("Joining room...");
-			console.log(readyToJoinRoom, joined);
-			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
-		}
-	}, [readyToJoinRoom, joined, roomID]);
 
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
-		live.sendLiveChatMessage(message, setIsSending);
+		roomControls.sendLiveChatMessage(message);
 		setMessage("");
 	};
 
@@ -159,7 +128,9 @@ const ChatRoom = () => {
 							onPress={handleJoinLeave}
 						>
 							<Text style={styles.joinLeaveButtonText}>
-								{joined ? "Leave" : "Join"}
+								{socketHandshakes.roomJoined && currentRoom?.roomID === roomID
+									? "Leave"
+									: "Join"}
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -186,7 +157,7 @@ const ChatRoom = () => {
 				<>
 					<View style={styles.container}>
 						<ScrollView style={{ flex: 1, marginTop: 10 }}>
-							{messages.map((msg, index) => (
+							{roomMessages.map((msg, index) => (
 								<MemoizedCommentWidget
 									key={index}
 									username={msg.message.sender.username}
