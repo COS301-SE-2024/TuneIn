@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException } from "@nestjs/common";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import * as Spotify from "@spotify/web-api-ts-sdk";
 import { ConfigService } from "@nestjs/config";
@@ -15,6 +15,7 @@ import { MurLockService } from "murlock";
 import { RoomDto } from "../modules/rooms/dto/room.dto";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
+import { AxiosError } from "axios";
 
 const NUMBER_OF_RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
@@ -806,5 +807,112 @@ export class SpotifyService {
 			throw error;
 		}
 		throw new Error("Failed to get tracks");
+	}
+
+	async refreshAccessToken(
+		tk: SpotifyTokenResponse,
+	): Promise<SpotifyTokenResponse> {
+		try {
+			const response = await firstValueFrom(
+				this.httpService.post(
+					"https://accounts.spotify.com/api/token",
+					{
+						grant_type: "refresh_token",
+						refresh_token: tk.refresh_token,
+					},
+					{
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+							Authorization: `Basic ${this.authHeader}`,
+						},
+					},
+				),
+			);
+
+			if (!response || !response.data) {
+				throw new Error("Failed to refresh token");
+			}
+
+			const refreshToken: SpotifyTokenRefreshResponse =
+				response.data as SpotifyTokenRefreshResponse;
+			const result: SpotifyTokenResponse = {
+				access_token: refreshToken.access_token,
+				token_type: refreshToken.token_type,
+				scope: refreshToken.scope,
+				expires_in: refreshToken.expires_in,
+				refresh_token: tk.refresh_token,
+			};
+			return result;
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err.response?.data);
+			}
+			throw new Error("Failed to refresh token");
+		}
+	}
+
+	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
+		const user = await this.prisma.users.findFirst({
+			where: { user_id: userID },
+		});
+
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		try {
+			const existingTokens: PrismaTypes.authentication[] | null =
+				await this.prisma.authentication.findMany({
+					where: { user_id: user.user_id },
+				});
+
+			if (!existingTokens || existingTokens === null) {
+				throw new Error(
+					"A database error occurred while checking if the user's tokens exist",
+				);
+			}
+
+			if (existingTokens.length > 0) {
+				await this.prisma.authentication.update({
+					where: { user_id: user.user_id },
+					data: {
+						token: JSON.stringify(tk),
+					},
+				});
+			} else {
+				await this.prisma.authentication.create({
+					data: {
+						token: JSON.stringify(tk),
+						user_id: user.user_id,
+					},
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			throw new Error("Failed to save tokens");
+		}
+	}
+
+	async getSpotifyTokens(userID: string): Promise<SpotifyTokenPair> {
+		const tokens = await this.prisma.authentication.findFirst({
+			where: { user_id: userID },
+		});
+
+		if (!tokens) {
+			throw new HttpException("User's Spotify tokens not found", 404);
+		}
+
+		const tk: SpotifyTokenPair = JSON.parse(tokens.token) as SpotifyTokenPair;
+		if (tk.epoch_expiry < Date.now()) {
+			//Token expired
+			const newToken = await this.refreshAccessToken(tk.tokens);
+			const newPair: SpotifyTokenPair = {
+				tokens: newToken,
+				epoch_expiry: Date.now() + newToken.expires_in * 1000,
+			};
+			await this.saveUserSpotifyTokens(newPair, userID);
+			return newPair;
+		}
+		return JSON.parse(tokens.token) as SpotifyTokenPair;
 	}
 }

@@ -28,7 +28,7 @@ export class TasksService {
 	// 	});
 	// }
 
-	@Cron("*/30 * * * * *") // Run this every 30 seconds
+	@Cron("* 10 * * * *") // Run this task every 10 minutes
 	async fixSpotifyInfo() {
 		console.log("Running 'fixSpotifyInfo' based on CRON job");
 		await this.taskQueue.add("fix-spotify-info", {});
