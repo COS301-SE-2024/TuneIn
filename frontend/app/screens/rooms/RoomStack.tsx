@@ -1,15 +1,8 @@
-import React, {
-	useState,
-	useEffect,
-	useContext,
-	useCallback,
-	useRef,
-} from "react";
+import React, { useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
 import Chat from "./ChatRoom";
-import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import {
 	View,
@@ -20,43 +13,23 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
-import { formatRoomData } from "../../models/Room";
-import { live, LiveMessage } from "../../services/Live";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import auth from "../../services/AuthManagement";
-import CurrentRoom from "./functions/CurrentRoom";
-import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import ContextMenu from "../../components/ContextMenu";
+import { useLive } from "../../LiveContext";
+import { useAPI } from "../../APIContext";
 
 const Tab = createMaterialTopTabNavigator();
 
 function MyRoomTabs() {
 	const navigation = useNavigation();
 	const router = useRouter();
-	const [joined, setJoined] = useState(false); // Track if the user has joined the room
-	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-		null,
-	);
+	const { currentUser, currentRoom, socketHandshakes } = useLive();
+	const { rooms } = useAPI();
 	const [secondsPlayed, setSecondsPlayed] = useState(0);
-	const playback = useRef(new SimpleSpotifyPlayback()).current;
-	const [isPlaying, setIsPlaying] = useState(false);
 	const [isMenuVisible, setMenuVisible] = useState(false);
 	// const roomData = { mine: true }; // Assuming this comes from your state or props
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
-	const { currentRoom, setCurrentRoom, userData } = playerContext;
-
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -64,7 +37,7 @@ function MyRoomTabs() {
 		roomData = JSON.parse(room);
 	}
 
-	roomData.mine = roomData.userID === userData?.userID;
+	roomData.mine = currentUser ? roomData.userID === currentUser.userID : false;
 
 	let roomID: string;
 	if (roomData.id !== undefined) {
@@ -74,76 +47,6 @@ function MyRoomTabs() {
 	} else {
 		roomID = currentRoom?.roomID ?? "";
 	}
-
-	useEffect(() => {
-		if (currentRoom && currentRoom?.roomID === roomID) {
-			setJoined(true);
-		}
-	}, [currentRoom, roomID]);
-
-	const joinRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setCurrentRoom(formattedRoom);
-	}, [roomData, setCurrentRoom]);
-
-	const leaveRoom = () => {
-		setCurrentRoom(null);
-		setJoined(false);
-	};
-
-	const handleJoinLeave = async () => {
-		const token = await auth.getToken();
-		if (!token) {
-			throw new Error("No token found");
-		}
-		if (!joined) {
-			const joinedRoom: boolean = await roomCurrent.leaveJoinRoom(
-				token,
-				roomID,
-				false,
-			);
-			if (!joinedRoom) {
-				ToastAndroid.show(
-					"Couldn't join room. Please exit current room.",
-					ToastAndroid.SHORT,
-				);
-				return;
-			}
-			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages);
-			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			const leftRoom: boolean = await roomCurrent.leaveJoinRoom(
-				token as string,
-				roomID,
-				true,
-			);
-			if (!leftRoom) {
-				ToastAndroid.show(
-					"Error leaving room. Please try again.",
-					ToastAndroid.SHORT,
-				);
-				return;
-			}
-			leaveRoom();
-			setJoined(false);
-			live.leaveRoom();
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			// 	//playbackManager.pause();
-			const deviceID = await playback.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				playback.handlePlayback("pause", deviceID);
-			}
-			setIsPlaying(false);
-		}
-	};
 
 	// const navigateBasedOnOwnership = () => {
 	// 	console.log("Room is mine? ", roomData.mine);
@@ -247,12 +150,10 @@ function MyRoomTabs() {
 			>
 				<Tab.Screen
 					name="RoomPage"
-					component={() => (
-						<RoomPage joined={joined} handleJoinLeave={handleJoinLeave} />
-					)}
+					component={() => <RoomPage />}
 					options={{ tabBarLabel: "Room" }}
 				/>
-				{joined && (
+				{socketHandshakes.roomJoined && roomID === currentRoom?.roomID && (
 					<>
 						<Tab.Screen
 							name="Chat"

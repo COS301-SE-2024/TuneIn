@@ -44,7 +44,7 @@ const Playlist = () => {
 			<View style={styles.songListContainer}>
 				{roomQueue.length > 0 ? (
 					roomQueue.map((track, index) => (
-						<SongList key={index} track={track} showVoting={true} />
+						<SongList key={track.index} track={track} showVoting={true} />
 					))
 				) : (
 					<View style={styles.emptyQueueContainer}>
