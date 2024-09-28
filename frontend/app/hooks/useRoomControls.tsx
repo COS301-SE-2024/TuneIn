@@ -15,7 +15,7 @@ import {
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { RoomSongDto } from "../models/RoomSongDto";
 import { QueueEventDto } from "../models/QueueEventDto";
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import { ChatEventDto } from "../models/ChatEventDto";
 import { PlaybackEventDto } from "../models/PlaybackEventDto";
 import {
@@ -50,8 +50,33 @@ const validTrackUri = (uri: string): boolean => {
 		throw new Error("Artist URIs are not supported");
 	}
 
+	if (uri.startsWith("spotify:playlist:")) {
+		throw new Error("Playlist URIs are not supported");
+	}
+
 	//validate with regex
 	const uriRegex = /spotify:track:[a-zA-Z0-9]{22}/;
+	if (!uriRegex.test(uri)) {
+		throw new Error("Invalid URI");
+	}
+	return true;
+};
+
+const validPlaylistUri = (uri: string): boolean => {
+	if (uri.startsWith("spotify:album:")) {
+		throw new Error("Album URIs are not supported");
+	}
+
+	if (uri.startsWith("spotify:artist:")) {
+		throw new Error("Artist URIs are not supported");
+	}
+
+	if (uri.startsWith("spotify:track:")) {
+		throw new Error("Playlist URIs are not supported");
+	}
+
+	//validate with regex
+	const uriRegex = /spotify:playlist:[a-zA-Z0-9]{22}/;
 	if (!uriRegex.test(uri)) {
 		throw new Error("Invalid URI");
 	}
@@ -209,6 +234,14 @@ export function useRoomControls({
 					const devices: Devices = await spotify.player.getAvailableDevices();
 					setSpotifyDevices(devices);
 					setDeviceError(null);
+					for (const device of devices.devices) {
+						if (device.is_active) {
+							setActiveDevice({
+								deviceID: device.id,
+								userSelected: false,
+							});
+						}
+					}
 					const state: PlaybackState = await spotify.player.getPlaybackState();
 					console.log("Playback state:", state);
 					if (state === null) {
@@ -248,26 +281,38 @@ export function useRoomControls({
 					);
 				}
 
-				let uri: string;
+				if (action === "play" && !(currentRoom || song)) {
+					throw new Error("Media to play not specified");
+				}
+
+				let trackURI: string;
 				if (song) {
-					uri = `spotify:track:${song.spotifyID}`;
+					trackURI = `spotify:track:${song.spotifyID}`;
 				} else {
 					if (!currentSong) {
 						if (roomQueue.length === 0) {
 							throw new Error("No song is currently playing");
 						} else {
 							const s = roomQueue[0];
-							uri = `spotify:track:${s.spotifyID}`;
+							trackURI = `spotify:track:${s.spotifyID}`;
 							song = s;
 						}
 					} else {
-						uri = `spotify:track:${currentSong.spotifyID}`;
+						trackURI = `spotify:track:${currentSong.spotifyID}`;
 						song = currentSong;
 					}
 				}
-				console.log(`Track URI: ${uri}`);
-				if (!validTrackUri(uri)) {
+				console.log(`Track URI: ${trackURI}`);
+				if (!validTrackUri(trackURI)) {
 					throw new Error("Invalid track URI");
+				}
+
+				let playlistURI: string | undefined;
+				if (currentRoom) {
+					playlistURI = `spotify:playlist:${currentRoom.spotifyPlaylistID}`;
+					if (!validPlaylistUri(playlistURI)) {
+						throw new Error("Invalid playlist URI");
+					}
 				}
 
 				let device: Device | undefined = activeDevice;
@@ -321,12 +366,19 @@ export function useRoomControls({
 				try {
 					switch (action) {
 						case "play":
+							// await spotify.player.startResumePlayback(
+							// 	device.id,
+							// 	undefined,
+							// 	[uri],
+							// 	undefined,
+							// 	offsetMs,
+							// );
 							await spotify.player.startResumePlayback(
 								device.id,
+								playlistURI,
 								undefined,
-								[uri],
-								undefined,
-								offsetMs,
+								{ offset: { uri: trackURI } },
+								0,
 							);
 							break;
 						case "pause":
@@ -553,39 +605,49 @@ export function useRoomControls({
 
 	useEffect(() => {
 		console.log("useEffect for syncing user with room has been called");
-		const now = Date.now();
-		if (now.valueOf() - lastSync.valueOf() < 1000) return; // Step 2: Check if less than a second has passed
+		try {
+			const now = Date.now();
+			if (now.valueOf() - lastSync.valueOf() < 1000) return; // Step 2: Check if less than a second has passed
 
-		spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
-		if (keepUserSynced && currentRoom && currentSong && spotify) {
-			const syncUserSpotify = async () => {
-				try {
-					let listening = await userListeningToRoom();
-					let attempts = 0;
-					while (!listening) {
-						attempts++;
-						if (attempts === 10) {
-							throw new Error(
-								"Attempts to sync user's spotify 10 times. User is not listening to room",
-							);
+			spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
+			getDevices();
+			if (keepUserSynced && currentRoom && currentSong && spotify) {
+				const syncUserSpotify = async () => {
+					try {
+						let listening = await userListeningToRoom();
+						let attempts = 0;
+						while (!listening) {
+							attempts++;
+							if (attempts === 10) {
+								throw new Error(
+									"Attempts to sync user's spotify 10 times. User is not listening to room",
+								);
+							}
+							console.log("User is not listening to room");
+							await handlePlayback("play");
+							console.log("Playback should've started");
+							const state = await spotify.player.getPlaybackState();
+							listening = state.item.id === currentSong.spotifyID;
+							if (!listening) {
+								await new Promise((resolve) => setTimeout(resolve, 1000));
+							}
 						}
-						console.log("User is not listening to room");
-						await handlePlayback("play", currentSong);
-						console.log("Playback should've started");
-						const state = await spotify.player.getPlaybackState();
-						listening = state.item.id === currentSong.spotifyID;
-						if (!listening) {
-							await new Promise((resolve) => setTimeout(resolve, 1000));
-						}
+					} catch (err) {
+						console.error(
+							"An error occurred while checking if user is listening to room",
+							err,
+						);
 					}
-				} catch (err) {
-					console.error(
-						"An error occurred while checking if user is listening to room",
-						err,
-					);
+				};
+
+				if (!activeDevice) {
+					throw new Error("Active device is not set");
 				}
-			};
-			syncUserSpotify();
+				syncUserSpotify();
+			}
+		} catch (err) {
+			console.error("An error occurred while syncing user with room", err);
+			Alert.alert("An error occurred while syncing user with room: " + err);
 		}
 		setLastSync(new Date());
 	}, [
@@ -597,6 +659,8 @@ export function useRoomControls({
 		spotify,
 		userListeningToRoom,
 		handlePlayback,
+		activeDevice,
+		getDevices,
 	]);
 
 	const playbackHandler: Playback = useMemo(() => {
@@ -988,6 +1052,7 @@ export function useRoomControls({
 	}, [
 		canControlRoom,
 		playbackHandler,
+		playbackState,
 		queueControls,
 		requestLiveChatHistory,
 		requestRoomQueue,
