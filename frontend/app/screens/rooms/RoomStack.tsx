@@ -17,6 +17,8 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
@@ -27,6 +29,7 @@ import auth from "../../services/AuthManagement";
 import CurrentRoom from "./functions/CurrentRoom";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import ContextMenu from "../../components/ContextMenu";
+import * as utils from "../../services/Utils";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -148,20 +151,98 @@ function MyRoomTabs() {
 		}
 	};
 
-	// const navigateBasedOnOwnership = () => {
-	// 	console.log("Room is mine? ", roomData.mine);
-	// 	if (roomData.mine) {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/AdvancedSettings",
-	// 			params: { room: room },
-	// 		});
-	// 	} else {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/RoomInfo",
-	// 			params: { room: room },
-	// 		});
-	// 	}
-	// };
+	const getRoom = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			return {
+				roomID: data.roomID,
+				id: data.roomID,
+				name: data.room_name,
+				description: data.description,
+				userID: data.creator.userID,
+				username: data.creator.username,
+				tags: data.tags,
+				genre: data.room_name.split(" - ")[1],
+				backgroundImage: data.room_image,
+				isExplicit: data.has_explicit_content,
+				isNsfw: data.has_nsfw_content,
+				language: data.language,
+				roomSize: "50",
+				userProfile: data.creator.profile_picture_url,
+				mine: true,
+				songName: data.current_song ? data.current_song.title : null,
+			};
+		} catch (error) {
+			console.log("Error getting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room.");
+			}
+		}
+	};
+
+	const getRoomQueue = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			const queue = data.map((song: any) => {
+				const cover = song.cover;
+				return {
+					id: song.id,
+					name: song.title,
+					artists: song.artists.map((artist: string) => ({ name: artist })), // Convert artist string to object
+					album: { images: [{ url: cover }] },
+					explicit: false,
+					preview_url: "",
+					uri: `spotify:track:${song.spotify_id}`,
+					duration_ms: song.duration * 1000,
+				};
+			});
+			console.log("Room queue data: ", queue);
+			return queue;
+		} catch (error) {
+			console.log("Error getting room queue: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room queue", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room queue.");
+			}
+		}
+	};
 
 	const navigateBasedOnOwnership = () => {
 		setMenuVisible(true);
@@ -193,7 +274,7 @@ function MyRoomTabs() {
 		// Implement room sharing logic here
 	};
 
-	const handleNavigateToChildRooms = () => {
+	const handleNavigateToChildRooms = async () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
 	};
