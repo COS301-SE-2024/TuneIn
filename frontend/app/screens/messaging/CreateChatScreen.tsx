@@ -11,6 +11,7 @@ import {
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { UserDto } from "../../../api";
+import { useLive } from "../../LiveContext";
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
@@ -194,6 +195,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 	closeModal,
 	friends,
 }) => {
+	const { enterDM, leaveDM, socketHandshakes } = useLive();
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [users] = useState<UserDto[]>(friends);
 	const [filteredUsers, setFilteredUsers] = useState<UserDto[]>([]);
@@ -223,6 +225,12 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 	}, [friends]);
 
 	const handleUserSelect = (user: UserDto) => {
+		console.log("pre enterDM");
+		if (socketHandshakes.dmJoined) {
+			leaveDM();
+		}
+		enterDM([user.username]);
+		console.log("post enterDM");
 		router.push(`/screens/messaging/ChatScreen?username=${user.username}`);
 	};
 

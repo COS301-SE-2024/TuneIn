@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 // import { Chat } from "../models/chat";
 import { DirectMessageDto, UserDto, RoomDto } from "../../api";
+import { useLive } from "../LiveContext";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;
@@ -11,17 +12,24 @@ export interface ChatItemProps {
 }
 
 const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser, room }) => {
+	const { enterDM, leaveDM, socketHandshakes } = useLive();
 	const router = useRouter();
 
 	return (
 		<TouchableOpacity
 			testID="chat-item-touchable"
 			style={styles.container}
-			onPress={() =>
+			onPress={() => {
+				console.log("pre enterDM");
+				if (socketHandshakes.dmJoined) {
+					leaveDM();
+				}
+				enterDM([otherUser.username]);
+				console.log("post enterDM");
 				router.push(
 					`/screens/messaging/ChatScreen?username=${otherUser.username}`,
-				)
-			}
+				);
+			}}
 		>
 			<Image
 				source={{ uri: otherUser.profile_picture_url }}

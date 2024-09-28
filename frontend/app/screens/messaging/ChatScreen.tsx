@@ -23,7 +23,6 @@ import { UserDto } from "../../../api";
 
 const ChatScreen = () => {
 	const {
-		roomControls,
 		currentUser,
 		enterDM,
 		leaveDM,
@@ -65,7 +64,13 @@ const ChatScreen = () => {
 	useEffect(() => {
 		const initialize = async () => {
 			try {
-				await enterDM([u]);
+				if (!socketHandshakes.dmJoined) {
+					const user = dmParticipants.find((u) => u.username === username);
+					if (!user) {
+						await enterDM([u]);
+						dmControls.requestDirectMessageHistory();
+					}
+				}
 				if (!socketHandshakes.dmsReceived) {
 					dmControls.requestDirectMessageHistory();
 				}
