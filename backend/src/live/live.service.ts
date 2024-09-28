@@ -11,6 +11,7 @@ import {
 import { RoomSongDto } from "../modules/rooms/dto/roomsong.dto";
 
 const MAX_ANNOUNCEMENTS_PER_ROOM = 5;
+const ROOM_ACTIVITY_TIMEOUT = 10;
 @Injectable()
 export class LiveService {
 	private server: Server;
@@ -48,7 +49,7 @@ export class LiveService {
 				console.log(
 					`Room ${room.room.roomID} has been inactive for ${room.minutesInactive} minutes`,
 				);
-				if (room.minutesInactive >= 10) {
+				if (room.minutesInactive >= ROOM_ACTIVITY_TIMEOUT) {
 					console.log(
 						`Will remove room ${room.room.roomID} from queue due to inactivity`,
 					);

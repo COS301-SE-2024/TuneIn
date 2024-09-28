@@ -501,11 +501,16 @@ export class SpotifyService {
 							const trackInfo = JSON.parse(
 								song.track_info as string,
 							) as Spotify.Track;
-							console.dir(`${audioFeatures}`);
-							console.dir(`${trackInfo}`);
+							if (
+								typeof audioFeatures === "object" &&
+								typeof trackInfo === "object"
+							) {
+							}
 							return false;
 						} catch (error) {
-							console.error("Error parsing JSON:", error);
+							// console.log(song.audio_features);
+							// console.log(song.track_info);
+							// console.error("Error parsing JSON:", error);
 							return true;
 						}
 					});
@@ -514,12 +519,46 @@ export class SpotifyService {
 					);
 					if (songs.length > 0) {
 						const spotifyIDs: string[] = songs.map((song) => song.spotify_id);
-						const needTrackInfo: PrismaTypes.song[] = songs.filter(
-							(song) =>
-								song.track_info === null ||
-								song.track_info === undefined ||
-								song.track_info === empty ||
-								song.track_info === "{}",
+						const needTrackInfo: PrismaTypes.song[] = songs.filter((song) => {
+							console.log(typeof song.track_info);
+							console.log(song.track_info);
+							if (song.track_info === null || song.track_info === undefined) {
+								return true;
+							}
+							if (
+								typeof song.track_info === "number" ||
+								typeof song.track_info === "boolean"
+							) {
+								return true;
+							}
+							try {
+								if (
+									(song.track_info as string) === "" ||
+									(song.track_info as string) === "{}"
+								) {
+									return true;
+								}
+
+								const trackInfo = JSON.parse(
+									song.track_info as string,
+								) as Spotify.Track;
+								if (typeof trackInfo === "object") {
+								}
+								if (trackInfo === null || trackInfo === undefined) {
+									return true;
+								}
+								if (trackInfo === empty) {
+									return true;
+								}
+								return false;
+							} catch (error) {
+								// console.log(song.track_info);
+								// console.error("Error parsing JSON:", error);
+								return true;
+							}
+						});
+						console.log(
+							`Found ${needTrackInfo.length} songs with missing track info`,
 						);
 						if (needTrackInfo.length > 0) {
 							const tracks: Spotify.Track[] = await this.getManyTracks(
