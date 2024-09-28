@@ -100,6 +100,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		marginBottom: -15,
+		paddingHorizontal: 8,
 	},
 	friendContainer: {
 		alignItems: "center",
