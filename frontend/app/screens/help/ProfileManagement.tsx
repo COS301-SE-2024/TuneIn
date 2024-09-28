@@ -1,3 +1,4 @@
+// app/help/ProfileManagement.js
 import React from "react";
 import {
 	View,
@@ -6,16 +7,16 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from "react-native";
-import {
-	FontAwesome,
-	MaterialCommunityIcons,
-	Ionicons,
-	AntDesign,
-} from "@expo/vector-icons";
+import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
 
-export default function GettingStarted() {
+export default function ProfileManagement() {
 	const router = useRouter();
+
+	const navigateToAnaytics = () => {
+		router.navigate("../analytics/AnalyticsPage");
+	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -23,80 +24,87 @@ export default function GettingStarted() {
 				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>Getting Started</Text>
+				<Text style={styles.headerTitle}>Profile Management</Text>
 				<View style={styles.headerSpacer} />
 			</View>
+			<View style={styles.card}>
+				<View style={styles.cardContent}>
+					<FontAwesome
+						name="edit"
+						size={28}
+						color="#08bdbd"
+						style={styles.icon}
+						testID="edit-icon"
+					/>
+					<TouchableOpacity style={styles.textContainer}>
+						<Text style={styles.cardTitle}>
+							Creating and Updating Your Profile
+						</Text>
+						<Text style={styles.cardText}>
+							Showcase your musical preferences, recently visited rooms,
+							bookmarked rooms and unique taste profile by creating or updating
+							your profile for other users to see your music taste.
+						</Text>
+					</TouchableOpacity>
+				</View>
+			</View>
 
-			<TouchableOpacity style={styles.card}>
+			<View style={styles.card}>
 				<View style={styles.cardContent}>
 					<FontAwesome
 						name="music"
-						size={24}
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="music-icon"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Introduction</Text>
+						<Text style={styles.cardTitle}>Music Preferences</Text>
 						<Text style={styles.cardText}>
-							Welcome to TuneIn, where music becomes a shared experience that
-							connects people, transcending distances and creating lasting bonds
-							through the power of music.
+							Import or manually specify your favorite artists, genres, and
+							songs.
 						</Text>
 					</View>
 				</View>
-			</TouchableOpacity>
+			</View>
 
-			<TouchableOpacity style={styles.card}>
+			<View style={styles.card}>
 				<View style={styles.cardContent}>
-					<AntDesign
-						name="infocirlceo"
-						size={24}
+					<Octicons
+						name="heart-fill"
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="heart-icon"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>About</Text>
+						<Text style={styles.cardTitle}>Personalized Recommendations</Text>
 						<Text style={styles.cardText}>
-							Discover and share music with friends and make new ones around the
-							world. With TuneIn you can create rooms, join rooms, and listen to
-							music together with others.
+							Receive personalized room recommendations to enhance discovery and
+							connection through shared tastes.
 						</Text>
 					</View>
 				</View>
-			</TouchableOpacity>
-
-			<TouchableOpacity style={styles.card}>
+			</View>
+			<TouchableOpacity style={styles.card} onPress={navigateToAnaytics}>
 				<View style={styles.cardContent}>
-					<MaterialCommunityIcons
-						name="account"
-						size={24}
+					<Entypo
+						name="bar-graph"
+						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="analytics-icon"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Creating an Account</Text>
+						<Text style={styles.cardTitle}>Analytics</Text>
 						<Text style={styles.cardText}>
-							Sign up using your premium Spotify account or your email but don't
-							forget to link your Spotify account to seamlessly sync your music
-							library into the app.
-						</Text>
-					</View>
-				</View>
-			</TouchableOpacity>
-
-			<TouchableOpacity style={styles.card}>
-				<View style={styles.cardContent}>
-					<Ionicons
-						name="log-in-outline"
-						size={24}
-						color="#08bdbd"
-						style={styles.icon}
-					/>
-					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Logging In</Text>
-						<Text style={styles.cardText}>
-							Log in with your registered credentials to access personalized
-							content.
+							Users can access detailed analytics to track engagement and
+							feedback from your rooms. This includes the number of
+							participants, the most voted songs, and activity levels. To view
+							your analytics, simply navigate to your profile page and click on
+							'Settings'. From there, you can explore all available metrics.
+							These insights help you tailor your content to better meet the
+							preferences of your audience
 						</Text>
 					</View>
 				</View>
@@ -138,7 +146,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.2,
 		shadowRadius: 5,
-		elevation: 3,
+		elevation: 3, // for Android
 	},
 	cardContent: {
 		flexDirection: "row",
