@@ -294,9 +294,15 @@ export class ActiveRoom {
 	};
 	public inactive = false;
 	public minutesInactive = 0;
+	public spotifyPlaylistID: string;
 
-	constructor(room: RoomDto, murLockService: MurLockService) {
+	constructor(
+		room: RoomDto,
+		spotifyPlaylistID: string,
+		murLockService: MurLockService,
+	) {
 		this.room = room;
+		this.spotifyPlaylistID = spotifyPlaylistID;
 		this.createQueues(murLockService);
 	}
 
@@ -340,7 +346,11 @@ export class ActiveRoom {
 	 * @param songs The songs to set the queue to
 	 * @param murLockService
 	 */
-	async setQueue(songs: RoomSong[], murLockService: MurLockService) {
+	async setQueue(
+		songs: RoomSong[],
+		spotify: SpotifyService,
+		murLockService: MurLockService,
+	) {
 		this.inactive = false;
 		this.minutesInactive = 0;
 		await murLockService.runWithLock(
@@ -351,10 +361,37 @@ export class ActiveRoom {
 					`Acquire lock: ${this.getQueueLockName()} in function 'setQueue'`,
 				);
 				try {
+					const prev = this.spotifyIDs();
 					this.queue = PriorityQueue.fromArray(
 						sortRoomSongs(songs),
 						this.compareRoomSongs,
 					);
+					const current = this.spotifyIDs();
+
+					//if prev and current are not the same, then the queue has changed
+					// update the spotify playlist
+					let changed = false;
+					if (prev.length !== current.length) {
+						changed = true;
+					}
+					let i = 0;
+					if (!changed) {
+						for (i = 0; i < prev.length; i++) {
+							if (prev[i] !== current[i]) {
+								changed = true;
+								break;
+							}
+						}
+					}
+					if (changed) {
+						console.log("Queue has changed, updating spotify playlist");
+						const start = this.historicQueue.size() + i;
+						await spotify.updateRoomPlaylist(
+							this.spotifyPlaylistID,
+							current,
+							start,
+						);
+					}
 				} catch (e) {
 					console.error("Error in setQueue");
 					console.error(e);
@@ -370,8 +407,8 @@ export class ActiveRoom {
 	 * Refreshes the song order in the queue
 	 * @param murLockService
 	 */
-	async refreshQueue(murLockService: MurLockService) {
-		await this.setQueue(this.queue.toArray(), murLockService);
+	async refreshQueue(spotify: SpotifyService, murLockService: MurLockService) {
+		await this.setQueue(this.queue.toArray(), spotify, murLockService);
 	}
 
 	/**
@@ -379,7 +416,11 @@ export class ActiveRoom {
 	 * @param prisma
 	 * @param murLockService
 	 */
-	async reloadQueue(prisma: PrismaService, murLockService: MurLockService) {
+	async reloadQueue(
+		prisma: PrismaService,
+		spotify: SpotifyService,
+		murLockService: MurLockService,
+	) {
 		//load historic queue from db
 		const roomID = this.room.roomID;
 		const queueItems = await prisma.queue.findMany({
@@ -463,6 +504,14 @@ export class ActiveRoom {
 				}
 			},
 		);
+		const ids: string[] = rs.map((s) => s.spotifyID);
+		await spotify.updateRoomPlaylist(this.spotifyPlaylistID, ids, 0);
+	}
+
+	spotifyIDs(): string[] {
+		const songs: RoomSong[] = this.queue.toArray();
+		const result: string[] = songs.map((s) => s.spotifyID);
+		return result;
 	}
 
 	async clearQueue(murLockService: MurLockService) {
@@ -700,9 +749,10 @@ export class ActiveRoom {
 	}
 
 	async getCurrentSong(
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<RoomSong | null> {
-		await this.refreshQueue(murLockService);
+		await this.refreshQueue(spotify, murLockService);
 		console.log("historicQueue");
 		console.log(this.historicQueue.toArray());
 		console.log("currentQueue");
@@ -717,6 +767,7 @@ export class ActiveRoom {
 
 	async addVote(
 		vote: VoteDto,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
@@ -745,13 +796,14 @@ export class ActiveRoom {
 				);
 			},
 		);
-		if (result) await this.setQueue(songs, murLockService);
+		if (result) await this.setQueue(songs, spotify, murLockService);
 		this.printQueueBrief();
 		return result;
 	}
 
 	async removeVote(
 		vote: VoteDto,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
@@ -780,7 +832,7 @@ export class ActiveRoom {
 				);
 			},
 		);
-		if (result) await this.setQueue(songs, murLockService);
+		if (result) await this.setQueue(songs, spotify, murLockService);
 		this.printQueueBrief();
 		return result;
 	}
@@ -789,10 +841,11 @@ export class ActiveRoom {
 		spotifyID: string,
 		userID: string,
 		swapTime: Date,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		let result = false;
-		await this.refreshQueue(murLockService);
+		await this.refreshQueue(spotify, murLockService);
 		this.printQueueBrief();
 		const songs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
@@ -818,7 +871,7 @@ export class ActiveRoom {
 				);
 			},
 		);
-		if (result) await this.setQueue(songs, murLockService);
+		if (result) await this.setQueue(songs, spotify, murLockService);
 		this.printQueueBrief();
 		return result;
 	}
@@ -826,6 +879,7 @@ export class ActiveRoom {
 	async addSongs(
 		songs: RoomSongDto[],
 		userID: string,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		console.log(`Attempting to add ${songs.length} songs to the queue`);
@@ -868,11 +922,12 @@ export class ActiveRoom {
 	async removeSongs(
 		songs: RoomSongDto[],
 		userID: string,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
 		console.log(`Attempting to remove ${songs.length} songs`);
 		let result = false;
-		await this.refreshQueue(murLockService);
+		await this.refreshQueue(spotify, murLockService);
 		const roomSongs: RoomSong[] = this.queue.toArray();
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
@@ -923,7 +978,7 @@ export class ActiveRoom {
 				);
 			},
 		);
-		if (result) await this.setQueue(roomSongs, murLockService);
+		if (result) await this.setQueue(roomSongs, spotify, murLockService);
 		await this.updateQueue(murLockService);
 		return result;
 	}
@@ -1130,7 +1185,10 @@ export class ActiveRoom {
 		return result;
 	}
 
-	async playPrev(murLockService: MurLockService): Promise<RoomSong | null> {
+	async playPrev(
+		spotify: SpotifyService,
+		murLockService: MurLockService,
+	): Promise<RoomSong | null> {
 		// if paused, remove pause time
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
@@ -1167,7 +1225,7 @@ export class ActiveRoom {
 		for (let i = 1, n = oldQueue.length; i < n; i++) {
 			oldQueue[i].setPlaybackStartTime(new Date(Number.MAX_SAFE_INTEGER));
 		}
-		await this.setQueue(oldQueue, murLockService);
+		await this.setQueue(oldQueue, spotify, murLockService);
 		await this.updateQueue(murLockService);
 		return this.queue.front();
 	}
@@ -1227,8 +1285,19 @@ export class RoomQueueService {
 		if (!room || room === null) {
 			throw new Error("Room does not exist");
 		}
-		const activeRoom = new ActiveRoom(room, this.murLockService);
-		await activeRoom.reloadQueue(this.prisma, this.murLockService);
+		const roomPlaylist: Spotify.Playlist = await this.spotify.getRoomPlaylist(
+			room,
+		);
+		const activeRoom = new ActiveRoom(
+			room,
+			roomPlaylist.id,
+			this.murLockService,
+		);
+		await activeRoom.reloadQueue(
+			this.prisma,
+			this.spotify,
+			this.murLockService,
+		);
 		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 		this.roomQueues.set(roomID, activeRoom);
 		console.log(
@@ -1238,7 +1307,7 @@ export class RoomQueueService {
 
 	async refreshQueue(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.refreshQueue(this.murLockService);
+		await activeRoom.refreshQueue(this.spotify, this.murLockService);
 		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 	}
 
@@ -1288,6 +1357,7 @@ export class RoomQueueService {
 		const result: boolean = await activeRoom.addSongs(
 			songs,
 			userID,
+			this.spotify,
 			this.murLockService,
 		);
 		// activeRoom.getSpotifyInfo(
@@ -1303,7 +1373,12 @@ export class RoomQueueService {
 		songs: RoomSongDto[],
 	): Promise<boolean> {
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.removeSongs(songs, userID, this.murLockService);
+		return await activeRoom.removeSongs(
+			songs,
+			userID,
+			this.spotify,
+			this.murLockService,
+		);
 	}
 
 	async upvoteSong(
@@ -1320,7 +1395,7 @@ export class RoomQueueService {
 		};
 		console.log("upvoteSong for spotifyID: ", spotifyID);
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.addVote(vote, this.murLockService);
+		return await activeRoom.addVote(vote, this.spotify, this.murLockService);
 	}
 
 	async downvoteSong(
@@ -1337,7 +1412,7 @@ export class RoomQueueService {
 		};
 		console.log("upvoteSong for spotifyID: ", spotifyID);
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.addVote(vote, this.murLockService);
+		return await activeRoom.addVote(vote, this.spotify, this.murLockService);
 	}
 
 	async undoSongVote(
@@ -1352,7 +1427,7 @@ export class RoomQueueService {
 			createdAt: new Date(),
 		};
 		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.removeVote(vote, this.murLockService);
+		return await activeRoom.removeVote(vote, this.spotify, this.murLockService);
 	}
 
 	async swapSongVote(
@@ -1366,6 +1441,7 @@ export class RoomQueueService {
 			spotifyID,
 			userID,
 			insertTime,
+			this.spotify,
 			this.murLockService,
 		);
 	}
@@ -1394,7 +1470,10 @@ export class RoomQueueService {
 
 	async getCurrentSong(roomID: string): Promise<RoomSongDto | null> {
 		const activeRoom = await this.getRoom(roomID);
-		const song = await activeRoom.getCurrentSong(this.murLockService);
+		const song = await activeRoom.getCurrentSong(
+			this.spotify,
+			this.murLockService,
+		);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1432,6 +1511,6 @@ export class RoomQueueService {
 
 	async playPrev(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.playPrev(this.murLockService);
+		await activeRoom.playPrev(this.spotify, this.murLockService);
 	}
 }
