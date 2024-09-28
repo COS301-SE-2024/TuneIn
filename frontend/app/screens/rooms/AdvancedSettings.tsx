@@ -118,50 +118,8 @@ const AdvancedSettings = () => {
 				return null;
 			}
 			const data = await response.json();
-			// 		"roomID": "66bb6bf7-25be-45af-bc38-7e7e258797b8",
-			// "participant_count": 0,
-			// "room_name": "chilling at EPI USE",
-			// "description": "A room for relaxing and enjoying soothing music. Join us to unwind and chill with your favorite tunes.",
-			// "is_temporary": false,
-			// "is_private": false,
-			// "is_scheduled": false,
-			// "start_date": "2024-09-27T17:51:30.203Z",
-			// "end_date": "2024-09-27T17:51:30.203Z",
-			// "language": "English",
-			// "has_explicit_content": true,
-			// "has_nsfw_content": true,
-			// "room_image": "https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-22T09%3A30%3A10.856Z-chilling-at%20epi%20use.jpeg",
-			// "current_song": {
-			//     "songID": "",
-			//     "title": "",
-			//     "artists": [],
-			//     "cover": "",
-			//     "spotify_id": "",
-			//     "duration": 0,
-			//     "start_time": "2024-09-27T17:51:30.203Z"
-			// },
-			// "tags": [
-			//     "explicit"
-			// ],
-			//  this is the format of the room data from the backend
-
-			// {
-			// 	id: "1",
-			// 	backgroundImage:
-			// 		"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCy16nhIbV3pI1qLYHMJKwbH2458oiC9EmA&s",
-			// 	name: "Test Room One",
-			// 	description: "This is a description for Test Room One.",
-			// 	userID: "user1",
-			// 	username: "User One",
-			// 	tags: ["chill", "jazz"],
-			// 	genre: "Jazz",
-			// 	language: "English",
-			// 	roomSize: 10,
-			// 	isExplicit: false,
-			// 	isNsfw: false,
-			// }, this is the format of the room data to be returned
-
 			return {
+				roomID: data.roomID,
 				id: data.roomID,
 				name: data.room_name,
 				description: data.description,
@@ -209,32 +167,7 @@ const AdvancedSettings = () => {
 				return null;
 			}
 			const data = await response.json();
-			// 	{
-			// 	id: 1,
-			// 	name: "Track One",
-			// 	artists: [{ name: "Artist A" }],
-			// 	album: { images: [{ url: "https://example.com/album1.jpg" }] },
-			// 	explicit: false,
-			// 	preview_url: "https://example.com/preview1.mp3",
-			// 	uri: "spotify:track:1",
-			// 	duration_ms: 210000,
-			// },
-			// this is the format of created queue
-
-			// 		 {
-			//     "title": "Reagan's In",
-			//     "cover": "",
-			//     "artists": [
-			//         "Wasted Youth"
-			//     ],
-			//     "duration": 64,
-			//     "spotify_id": "1wUq86A1UaeVHAD3hISz0y"
-			// },
-
-			// this is the format of the queue from the backend
-			console.log("Placeholder image: ", placeholderImage);
 			const queue = data.map((song: any) => {
-				console.log("--------------------Song cover: ", placeholderImage);
 				const cover = song.cover;
 				return {
 					id: song.id,
