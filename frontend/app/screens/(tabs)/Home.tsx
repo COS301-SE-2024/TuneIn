@@ -25,17 +25,18 @@ import { Friend } from "../../models/friend";
 import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
 import Miniplayer from "../../components/home/miniplayer";
-import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "../../services/AuthManagement"; // Import AuthManagement
-import { live, instanceExists } from "../../services/Live"; // Import AuthManagement
-import * as utils from "../../services/Utils"; // Import Utils
+import auth from "../../services/AuthManagement";
+import { live, instanceExists } from "../../services/Live";
+import * as utils from "../../services/Utils";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import TopNavBar from "../../components/TopNavBar";
 import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
+import { useIsFocused } from "@react-navigation/native";
+import FriendServices from "../../services/FriendServices";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -45,47 +46,41 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData, currentRoom } = playerContext;
-	console.log("current room: ", currentRoom);
-	// An example of a well-typed & well-defined way to interact with the API
-	/* ********************************************************************** */
+	const isFocused = useIsFocused();
+	const { userData, setUserData } = playerContext;
+
 	const { users, authenticated } = useAPI();
 	const [currentUser, setCurrentUser] = useState<UserDto>();
 	if (authenticated && !currentUser) {
 		users
 			.getProfile()
 			.then((user: AxiosResponse<UserDto>) => {
-				if (user.status === 401) {
-					//Unauthorized
-					//Auth header is either missing or invalid
-				} else if (user.status === 500) {
-					//Internal Server Error
-					//Something went wrong in the backend (unlikely lmao)
+				if (user.status === 401 || user.status === 500) {
+					// Handle errors
 				}
 				setCurrentUser(user.data);
 			})
 			.catch((error) => {
 				if (error instanceof RequiredError) {
-					// a required field is missing
+					// Handle required field error
 				} else {
-					// some other error
+					// Handle other errors
 				}
 			});
 	}
-	/* ********************************************************************** */
 
 	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
-	const [cacheError, setCacheError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
+	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	// const [userData, setUserData] = useState<UserData | undefined>(undefined);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
 	if (!instanceExists()) {
 		live.initialiseSocket();
 	}
@@ -126,6 +121,23 @@ const Home: React.FC = () => {
 		}
 	};
 
+	const getFollowers = async (token: string) => {
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/following`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			setFriendError(false);
+			return response.data;
+		} catch (error) {
+			console.log("Error fetching friends:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
+
 	const fetchProfileInfo = async (token: string) => {
 		try {
 			if (token) {
@@ -149,11 +161,6 @@ const Home: React.FC = () => {
 		}
 
 		return rooms.map((room, index) => {
-			// Print out the raw room data for the first room only
-			if (index === 0) {
-				console.log("Raw room data before formatting:", room);
-			}
-
 			return {
 				id: room.roomID,
 				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
@@ -176,6 +183,7 @@ const Home: React.FC = () => {
 				isExplicit: room.has_explicit_content,
 				start_date: room.start_date,
 				end_date: room.end_date,
+				childrenRoomIDs: room.childrenRoomIDs,
 			};
 		});
 	};
@@ -184,41 +192,16 @@ const Home: React.FC = () => {
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
 
-	const loadCachedData = async () => {
-		try {
-			const cachedRecents = await StorageService.getItem("cachedRecents");
-			const cachedPicks = await StorageService.getItem("cachedPicks");
-			const cachedMyRooms = await StorageService.getItem("cachedMyRooms");
-			const cachedFriends = await StorageService.getItem("cachedFriends");
-
-			if (cachedRecents) setMyRecents(JSON.parse(cachedRecents));
-			if (cachedPicks) setMyPicks(JSON.parse(cachedPicks));
-			if (cachedMyRooms) setMyRooms(JSON.parse(cachedMyRooms));
-			if (cachedFriends) setFriends(JSON.parse(cachedFriends));
-			setCacheError(false);
-		} catch (error) {
-			console.error("Error loading cached data:", error);
-			setCacheError(true);
-		}
-	};
-
 	const refreshData = useCallback(async () => {
-		// await StorageService.clear();
-		// console.log("CLEARED STORAGE");
 		setLoading(true);
 		const storedToken = await auth.getToken();
-		console.log("Stored token:", storedToken);
-
 		if (storedToken) {
-			// Fetch recent rooms
 			const recentRooms = await fetchRooms(storedToken, "/recent");
 			const formattedRecentRooms = formatRoomData(recentRooms);
 
-			// Fetch picks for you
 			const picksForYouRooms = await fetchRooms(storedToken, "/foryou");
 			const formattedPicksForYouRooms = formatRoomData(picksForYouRooms);
 
-			// Fetch My Rooms
 			const myRoomsData = await fetchRooms(storedToken);
 			const formattedMyRooms = formatRoomData(myRoomsData, true);
 
@@ -226,51 +209,44 @@ const Home: React.FC = () => {
 			setMyPicks(formattedPicksForYouRooms);
 			setMyRecents(formattedRecentRooms);
 
-			await StorageService.setItem(
-				"cachedRecents",
-				JSON.stringify(formattedRecentRooms),
-			);
-			await StorageService.setItem(
-				"cachedPicks",
-				JSON.stringify(formattedPicksForYouRooms),
-			);
-			await StorageService.setItem(
-				"cachedMyRooms",
-				JSON.stringify(formattedMyRooms),
-			);
-
 			if (!userData) {
 				const userInfo = await fetchProfileInfo(storedToken);
 				setUserData(userInfo);
 			}
 
-			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
-
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profile_picture_url: friend.profile_picture_url
-							? friend.profile_picture_url
-							: ProfileIMG,
+						profile_picture_url: friend.profile_picture_url || ProfileIMG,
 						username: friend.username,
-						friend_id: friend.friend_id, // Include the friend_id property
+						friend_id: friend.friend_id,
 					}))
 				: [];
-
 			setFriends(formattedFriends);
 
-			await StorageService.setItem(
-				"cachedFriends",
-				JSON.stringify(formattedFriends),
-			);
+			// Fetch and format followers
+			const fetchedFollowers = await getFollowers(storedToken);
+			const formattedFollowers: Friend[] = Array.isArray(fetchedFollowers)
+				? fetchedFollowers.map((follower: Friend) => ({
+						profile_picture_url: follower.profile_picture_url || ProfileIMG,
+						username: follower.username,
+						friend_id: follower.friend_id,
+					}))
+				: [];
+			setFollowers(formattedFollowers);
 		}
-
 		setLoading(false);
 	}, [setUserData, userData, ProfileIMG]);
 
-	const [refreshing] = React.useState(false);
+	useEffect(() => {
+		if (isFocused) {
+			refreshData(); // Reload data immediately when the page is focused
+		}
+	}, [isFocused, refreshData]);
 
-	const onRefresh = React.useCallback(() => {
+	const [refreshing] = useState(false);
+
+	const onRefresh = useCallback(() => {
 		setLoading(true);
 		refreshData();
 		setTimeout(() => {
@@ -307,31 +283,6 @@ const Home: React.FC = () => {
 		});
 	};
 
-	useEffect(() => {
-		const initialize = async () => {
-			await loadCachedData();
-			await refreshData();
-		};
-		initialize();
-		return;
-	}, [refreshData]);
-
-	useEffect(() => {
-		if (!roomError || !friendError) {
-			if (roomError && !friendError) {
-				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
-			} else if (!roomError && friendError) {
-				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
-			} else if (profileError) {
-				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
-			}
-		}
-
-		if (cacheError) {
-			ToastAndroid.show("Failed to load cache data", ToastAndroid.SHORT);
-		}
-	}, [roomError, friendError, profileError, cacheError]);
-
 	const handleScroll = useCallback(
 		({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
 			const currentOffset = nativeEvent.contentOffset.y;
@@ -347,20 +298,27 @@ const Home: React.FC = () => {
 				if (currentOffset <= 0 || direction === "up") {
 					Animated.timing(scrollY, {
 						toValue: 0,
-						duration: 150,
-						useNativeDriver: true,
-					}).start();
-				} else {
-					Animated.timing(scrollY, {
-						toValue: 100,
-						duration: 150,
+						duration: 200,
 						useNativeDriver: true,
 					}).start();
 				}
-			}, 50); // Reduced debounce timeout to make it more responsive
+			}, 100);
 		},
 		[scrollY],
 	);
+
+	useEffect(() => {
+		if (!roomError || !friendError) {
+			if (roomError && !friendError) {
+				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+			} else if (!roomError && friendError) {
+				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+			} else if (profileError) {
+				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+			}
+		}
+	}, [roomError, friendError, profileError]);
+
 	return (
 		<View style={styles.container}>
 			<TopNavBar />
@@ -394,9 +352,7 @@ const Home: React.FC = () => {
 								)}
 								<TouchableOpacity
 									style={styles.navigateButton}
-									onPress={() =>
-										navigateToMoreRooms(myRecents, "Picks for you")
-									}
+									onPress={() => navigateToMoreRooms(myPicks, "Picks for you")}
 								>
 									<Text style={styles.sectionTitle}>Picks for you</Text>
 								</TouchableOpacity>
@@ -413,8 +369,8 @@ const Home: React.FC = () => {
 								</TouchableOpacity>
 								<FriendsGrid
 									friends={friends}
-									user={userData.username}
-									maxVisible={8}
+									followers={followers} // Passing followers here
+									username={userData.username}
 								/>
 							</>
 						) : null}
@@ -486,7 +442,7 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonText: {
 		color: "white",
-		fontSize: 32,
+		fontSize: 40, // Increased from 32 to 40
 		fontWeight: "bold",
 	},
 });

@@ -1,4 +1,6 @@
 // src/types/RoomCard.ts
+const defaultProfileIcon = require("../../assets/profile-icon.png");
+
 export interface Room {
 	roomID?: string;
 	backgroundImage: string;
@@ -19,11 +21,12 @@ export interface Room {
 	isNsfw?: boolean;
 	start_date: Date;
 	end_date: Date;
+	childrenRoomIDs?: string[];
 }
 
 export const formatRoomData = (room: any): Room => {
 	return {
-		roomID: room.id,
+		roomID: room.id ?? room.roomID,
 		backgroundImage: room.backgroundImage,
 		name: room.name,
 		language: room.language,
@@ -31,9 +34,7 @@ export const formatRoomData = (room: any): Room => {
 		artistName: room.artistName ? room.artistName : null,
 		description: room.description,
 		userID: room.userID,
-		userProfile: room.userProfile
-			? room.userProfile
-			: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg",
+		userProfile: room.userProfile ? room.userProfile : defaultProfileIcon,
 		username: room.username ? room.username : "Unknown",
 		roomSize: 55,
 		tags: room.tags ? room.tags : [],
@@ -42,5 +43,6 @@ export const formatRoomData = (room: any): Room => {
 		isExplicit: room.isExplicit,
 		start_date: room.start_date,
 		end_date: room.end_date,
+		childrenRoomIDs: room.childrenRoomIDs,
 	};
 };

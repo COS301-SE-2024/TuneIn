@@ -19,24 +19,7 @@ import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import axios from "axios";
 import { UserDto } from "../../models/UserDto";
-
-// const initialChats: Chat[] = [
-// 	{
-// 		id: "1",
-// 		name: "John Doe",
-// 		lastMessage: "Hey there!",
-// 		avatar:
-// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-// 	},
-// 	{
-// 		id: "2",
-// 		name: "Jane Smith",
-// 		lastMessage: "What's up?",
-// 		avatar:
-// 			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-// 	},
-// 	// Add more dummy chats
-// ];
+import { useIsFocused } from "@react-navigation/native";
 
 const createChats = (
 	messages: DirectMessageDto[],
@@ -60,73 +43,75 @@ const ChatListScreen = () => {
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
 	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
+	const [noResults, setNoResults] = useState(false); // State to track no results
 	const router = useRouter();
+	const isFocused = useIsFocused();
 
-	useEffect(() => {
-		// Fetch chats from backend
-		(async () => {
-			try {
-				const token = await auth.getToken();
+	const fetchChats = async () => {
+		try {
+			const token = await auth.getToken();
 
-				const promises = [];
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users/dms`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-				promises.push(
-					axios.get(`${utils.API_BASE_URL}/users/friends`, {
-						headers: { Authorization: `Bearer ${token}` },
-					}),
-				);
-
-				const responses = await Promise.all(promises);
-				const chats = responses[0].data as DirectMessageDto[];
-				console.log(chats);
-				selfRef.current = responses[1].data as UserDto;
-				console.log(selfRef.current);
-				setFriends(responses[2].data as UserDto[]);
-				console.log(responses[2].data);
-
-				setFilteredChats(createChats(chats, selfRef.current.userID));
-				setUserMessages(chats);
-			} catch (error) {
-				console.log(error);
-				ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
-				throw error;
-			}
-		})();
-	}, []);
-
-	useEffect(() => {
-		/*
-		if (searchQuery === "") {
-			setFilteredChats(initialChats);
-		} else {
-			const filtered = initialChats.filter((chat) =>
-				chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+			const promises = [];
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/dms`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
 			);
-			setFilteredChats(filtered);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/friends`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+
+			const responses = await Promise.all(promises);
+			const chats = responses[0].data as DirectMessageDto[];
+			selfRef.current = responses[1].data as UserDto;
+			setFriends(responses[2].data as UserDto[]);
+
+			setFilteredChats(createChats(chats, selfRef.current.userID));
+			setUserMessages(chats);
+		} catch (error) {
+			console.log(error);
+			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
+			throw error;
 		}
-			*/
+	};
+
+	useEffect(() => {
+		if (isFocused) {
+			fetchChats();
+		}
+	}, [isFocused]);
+
+	useEffect(() => {
 		if (searchQuery === "") {
 			if (selfRef.current !== undefined) {
 				setFilteredChats(createChats(userMessages, selfRef.current.userID));
+				setNoResults(false); // Reset no results state
 			}
 		} else {
 			if (selfRef.current !== undefined) {
+				const currentUsername = selfRef.current.username.toLowerCase();
+
 				const filtered = userMessages.filter((chat) => {
-					return chat.sender.profile_name
-						.toLowerCase()
-						.includes(searchQuery.toLowerCase());
+					const senderName = chat.sender.profile_name.toLowerCase();
+					const recipientName = chat.recipient.profile_name.toLowerCase();
+
+					return (
+						(senderName.includes(searchQuery.toLowerCase()) ||
+							recipientName.includes(searchQuery.toLowerCase())) &&
+						!senderName.includes(currentUsername) &&
+						!recipientName.includes(currentUsername)
+					);
 				});
 
 				setFilteredChats(createChats(filtered, selfRef.current.userID));
+				setNoResults(filtered.length === 0); // Set no results state
 			}
 		}
 	}, [searchQuery, userMessages]);
@@ -154,13 +139,17 @@ const ChatListScreen = () => {
 					<Ionicons name="search" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
-			<FlatList
-				data={filteredChats}
-				keyExtractor={(item) => item.message.pID}
-				renderItem={({ item }) => (
-					<ChatItem message={item.message} otherUser={item.otherUser} />
-				)}
-			/>
+			{noResults ? (
+				<Text style={styles.noResultsText}>No results found.</Text> // Message when no results
+			) : (
+				<FlatList
+					data={filteredChats}
+					keyExtractor={(item) => item.message.pID}
+					renderItem={({ item }) => (
+						<ChatItem message={item.message} otherUser={item.otherUser} />
+					)}
+				/>
+			)}
 			<TouchableOpacity style={styles.newChatButton} onPress={toggleModal}>
 				<Entypo name="message" size={24} color="white" />
 			</TouchableOpacity>
@@ -171,7 +160,7 @@ const ChatListScreen = () => {
 				swipeDirection="down"
 				style={styles.modal}
 			>
-				<CreateChatScreen closeModal={toggleModal} friends={friends} />
+				<CreateChatScreen closeModal={toggleModal} />
 			</Modal>
 		</View>
 	);
@@ -228,6 +217,12 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 		margin: 0,
 		height: "90%",
+	},
+	noResultsText: {
+		// Style for no results message
+		textAlign: "center",
+		color: "gray",
+		marginTop: 20,
 	},
 });
 

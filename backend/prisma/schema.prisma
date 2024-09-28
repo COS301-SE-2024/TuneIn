@@ -151,29 +151,32 @@ model queue {
 }
 
 model room {
-  room_id        String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name           String
-  room_creator   String           @db.Uuid
-  playlist_photo String?
-  description    String?          @default("This room has no description")
-  date_created   DateTime         @default(now()) @db.Timestamptz(6)
-  nsfw           Boolean          @default(false)
-  is_temporary   Boolean?         @default(false)
-  room_language  String?          @default("English")
-  explicit       Boolean?         @default(false)
-  tags           String[]
-  banned         banned[]
-  bookmark       bookmark[]
-  chat_reactions chat_reactions[]
-  participate    participate[]
-  private_room   private_room?
-  public_room    public_room?
-  queue          queue[]
-  users          users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
-  room_message   room_message[]
-  scheduled_room scheduled_room?
-  table_state    table_state?
-  user_activity  user_activity[]
+  room_id                                    String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                                       String
+  room_creator                               String           @db.Uuid
+  playlist_photo                             String?
+  description                                String?          @default("This room has no description")
+  date_created                               DateTime         @default(now()) @db.Timestamptz(6)
+  nsfw                                       Boolean          @default(false)
+  is_temporary                               Boolean?         @default(false)
+  room_language                              String?          @default("English")
+  explicit                                   Boolean?         @default(false)
+  tags                                       String[]
+  playlist_id                                String?
+  banned                                     banned[]
+  bookmark                                   bookmark[]
+  chat_reactions                             chat_reactions[]
+  child_room_child_room_parent_room_idToroom child_room[]     @relation("child_room_parent_room_idToroom")
+  child_room_child_room_room_idToroom        child_room?      @relation("child_room_room_idToroom")
+  participate                                participate[]
+  private_room                               private_room?
+  public_room                                public_room?
+  queue                                      queue[]
+  users                                      users            @relation(fields: [room_creator], references: [user_id], onDelete: Cascade, map: "room_creator")
+  room_message                               room_message[]
+  scheduled_room                             scheduled_room?
+  table_state                                table_state?
+  user_activity                              user_activity[]
 }
 
 model room_message {
@@ -212,12 +215,12 @@ model song {
   genre          String?
   lyrics_url     String?
   duration       Int?             @default(0)
-  genres         String[]
-  artwork_url    String?
   spotify_id     String           @unique
   audio_features Json             @db.Json
   artists        String[]
-  track_info     Json?            @db.Json
+  track_info     Json             @default("{}") @db.Json
+  genres         String[]
+  artwork_url    String?
   favorite_songs favorite_songs[]
   queue          queue[]
 }
@@ -305,4 +308,11 @@ model favorite_songs {
   user_id     String @db.Uuid
   song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
   users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model child_room {
+  room_id                              String @id @db.Uuid
+  parent_room_id                       String @db.Uuid
+  room_child_room_parent_room_idToroom room   @relation("child_room_parent_room_idToroom", fields: [parent_room_id], references: [room_id], onDelete: Cascade)
+  room_child_room_room_idToroom        room   @relation("child_room_room_idToroom", fields: [room_id], references: [room_id], onDelete: Cascade)
 }

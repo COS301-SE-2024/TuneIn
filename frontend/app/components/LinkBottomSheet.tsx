@@ -2,92 +2,137 @@ import React, { useState, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
-	TouchableOpacity,
 	StyleSheet,
-	Modal,
-	PanResponder,
 	Animated,
+	Modal,
+	Easing,
+	TouchableOpacity,
+	TouchableWithoutFeedback,
+	KeyboardAvoidingView,
+	Platform,
 	Linking,
 } from "react-native";
+import {
+	GestureHandlerRootView,
+	ScrollView,
+} from "react-native-gesture-handler";
 import { colors } from "../styles/colors";
 
-const LinkBottomSheet = ({ isVisible, onClose, links }) => {
-	const animation = useRef(new Animated.Value(50)).current; // Adjust initial translateY here
-	const [visible, setVisible] = useState(isVisible); // State to manage visibility
+interface LinkBottomSheetProps {
+	links: any;
+	isVisible: boolean;
+	setIsVisible: (value: boolean) => void;
+}
+
+// Define the functional component with default values set in the parameters
+const LinkBottomSheet: React.FC<LinkBottomSheetProps> = ({
+	setIsVisible: setIsVisible = () => {},
+	isVisible: isVisible = true,
+	links,
+}) => {
+	const slideAnim = useRef(new Animated.Value(300)).current;
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	console.log("");
 
 	useEffect(() => {
-		setVisible(isVisible); // Update visibility state when prop changes
+		if (isVisible) {
+			// Set modal visible state
+			setIsModalVisible(true);
+			// Animate the modal opening
+			timeoutRef.current = setTimeout(() => {
+				Animated.timing(slideAnim, {
+					toValue: 0, // Fully visible
+					duration: 300,
+					easing: Easing.out(Easing.ease),
+					useNativeDriver: true,
+				}).start();
+			}, 0);
+
+			return () => {
+				clearTimeout(timeoutRef.current!); // Clean up timeout
+			};
+		} else {
+			// Animate the modal closing
+			Animated.timing(slideAnim, {
+				toValue: 300, // Slide down to hide
+				duration: 300,
+				easing: Easing.in(Easing.ease),
+				useNativeDriver: true,
+			}).start(() => {
+				setIsVisible(false); // Close modal after animation
+				setIsModalVisible(false); // Update visibility state
+			});
+		}
 	}, [isVisible]);
 
-	const handleOnClose = () => {
-		setVisible(false); // Set visibility to false
-		onClose();
+	const handleClose = () => {
+		if (isModalVisible) {
+			// Check if modal is currently visible
+			Animated.timing(slideAnim, {
+				toValue: 300, // Slide down to hide
+				duration: 300,
+				easing: Easing.in(Easing.ease),
+				useNativeDriver: true,
+			}).start(() => setIsVisible(false)); // Close modal after animation
+		}
 	};
 
-	const [panResponder] = useState(
-		PanResponder.create({
-			onStartShouldSetPanResponder: () => true,
-			onMoveShouldSetPanResponder: () => true,
-			onPanResponderMove: Animated.event([null, { dy: animation }], {
-				useNativeDriver: false,
-				listener: (evt, gestureState) => {
-					if (gestureState.dy > 0) {
-						// Allow dragging only downwards
-						if (gestureState.dy < 300) {
-							// limit the maximum peeking height
-							animation.setValue(gestureState.dy);
-						}
-					}
-				},
-			}),
-			onPanResponderRelease: (evt, gestureState) => {
-				if (gestureState.dy > 50) {
-					handleOnClose();
-				} else {
-					Animated.spring(animation, {
-						toValue: 0,
-						useNativeDriver: false,
-					}).start();
-				}
-			},
-		}),
-	);
-
-	// // Function to group links by type
-	// const groupLinksByType = (links) => {
-	// 	const groupedLinks = {};
-	// 	links.forEach((link) => {
-	// 		if (!groupedLinks[link.type]) {
-	// 			groupedLinks[link.type] = [];
-	// 		}
-	// 		groupedLinks[link.type].push(link);
-	// 	});
-	// 	return groupedLinks;
-	// };
-
-	// // Group links by type
-	// const groupedLinks = groupLinksByType(links);
-
 	return (
-		<Modal
-			transparent={true}
-			animationType="slide"
-			visible={visible}
-			onRequestClose={onClose}
-		>
-			<View style={styles.modalContainer} testID="link-bottom-sheet">
-				<Animated.View
-					style={[styles.modal, { transform: [{ translateY: animation }] }]}
-				>
-					<View style={styles.dragHandle} {...panResponder.panHandlers} />
-					<View style={styles.textContainer}>
-						<Text style={styles.modalTitle}>Links</Text>
-						{Object.keys(links).map((type, index) => (
-							<Links key={index} mediaPlatform={type} links={links[type]} />
-						))}
+		<Modal transparent={true} animationType="slide" visible={isVisible}>
+			<GestureHandlerRootView>
+				<TouchableWithoutFeedback onPress={handleClose}>
+					<View style={styles.modalContainer} testID="link-bottom-sheet">
+						<View>
+							<KeyboardAvoidingView
+								behavior={Platform.OS === "ios" ? "padding" : "height"}
+							>
+								<TouchableWithoutFeedback>
+									<ScrollView>
+										<Animated.View
+											style={[
+												styles.modal,
+												{
+													transform: [{ translateY: slideAnim }],
+												},
+												{ minHeight: "20%" },
+											]}
+										>
+											<View
+												style={{
+													padding: 10,
+													alignItems: "center",
+													borderBottomWidth: 1,
+													borderColor: "#ccc",
+												}}
+											>
+												<Text
+													style={{
+														fontSize: 20,
+														fontWeight: "bold",
+														// color: "white",
+													}}
+												>
+													Links
+												</Text>
+											</View>
+											<View style={styles.textContainer}>
+												{Object.keys(links).map((type, index) => (
+													<Links
+														key={index}
+														mediaPlatform={type}
+														links={links[type]}
+													/>
+												))}
+											</View>
+										</Animated.View>
+									</ScrollView>
+								</TouchableWithoutFeedback>
+							</KeyboardAvoidingView>
+						</View>
 					</View>
-				</Animated.View>
-			</View>
+				</TouchableWithoutFeedback>
+			</GestureHandlerRootView>
 		</Modal>
 	);
 };
@@ -96,9 +141,14 @@ const capitalizeFirstLetter = (string) => {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const Links = ({ mediaPlatform, links }) => {
-	console.log("Links: " + links + " Type: " + mediaPlatform);
+const Links = ({
+	mediaPlatform,
+	links,
+	setIsVisible: setShowMoreFilters = (val: boolean) => {},
+}) => {
+	// console.log("Links: " + links + " Type: " + mediaPlatform);
 	const handleLinkPress = (link) => {
+		setShowMoreFilters(false);
 		Linking.openURL("https://www." + link); // Open the link in the device's default browser
 	};
 
@@ -119,51 +169,41 @@ const Links = ({ mediaPlatform, links }) => {
 const styles = StyleSheet.create({
 	modalContainer: {
 		flex: 1,
-		backgroundColor: "rgba(0,0,0,0)",
+		backgroundColor: "rgba(0,0,0,0.5)",
 		justifyContent: "flex-end",
 	},
 	modal: {
-		backgroundColor: colors.primary,
+		backgroundColor: "white",
 		padding: 20,
 		borderTopLeftRadius: 40,
 		borderTopRightRadius: 40,
-		alignItems: "center",
 		width: "100%",
 		minHeight: "30%", // Adjust the minimum height here
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+		justifyContent: "flex-end", // Align at the bottom
 	},
 	textContainer: {
 		alignSelf: "flex-start",
 		marginLeft: 20,
 		marginBottom: 10,
 	},
-	modalTitle: {
-		color: "white",
-		paddingBottom: 5,
-		fontSize: 18,
-		fontWeight: "700",
-		textAlign: "left", // Align text to the left
-	},
 	mediaHeader: {
 		paddingBottom: 3,
 		paddingTop: 10,
-		color: "white",
+		// color: "white",
 		fontSize: 14,
-		fontWeight: "400",
+		fontWeight: "700",
 		textAlign: "left", // Align text to the left
 	},
 	link: {
-		color: "white",
+		// color: "white",
 		paddingBottom: 3,
 		fontSize: 12,
 		fontWeight: "400",
 		textAlign: "left", // Align text to the left
-	},
-	dragHandle: {
-		width: 60,
-		height: 5,
-		backgroundColor: "#ccc",
-		borderRadius: 5,
-		marginBottom: 10,
 	},
 });
 

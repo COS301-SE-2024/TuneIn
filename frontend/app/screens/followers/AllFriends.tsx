@@ -6,6 +6,8 @@ import {
 	FlatList,
 	TextInput,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
@@ -93,6 +95,14 @@ const AllFriends: React.FC = () => {
 		}
 	}, [search, requests, friends, potentialFriends, pendingRequests]);
 
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
 	const handleSendRequest = async (friend: Friend): Promise<void> => {
 		try {
 			await FriendServices.handleSendRequest(friend);
@@ -103,7 +113,7 @@ const AllFriends: React.FC = () => {
 			friend.relationship = "pending";
 			setPendingRequests((prev) => [...prev, friend]);
 		} catch (error) {
-			ToastAndroid.show("Failed to send friend request.", ToastAndroid.SHORT);
+			showError("Failed to send friend request.");
 		}
 	};
 
@@ -117,7 +127,7 @@ const AllFriends: React.FC = () => {
 			friend.relationship = "mutual";
 			setPotentialFriends((prev) => [...prev, friend]);
 		} catch (error) {
-			ToastAndroid.show("Failed to cancel friend request.", ToastAndroid.SHORT);
+			showError("Failed to cancel friend request.");
 		}
 	};
 
@@ -139,7 +149,7 @@ const AllFriends: React.FC = () => {
 				setPotentialFriends((prev) => [...prev, friend]);
 			}
 		} catch (error) {
-			ToastAndroid.show("Unable to handle friend request.", ToastAndroid.SHORT);
+			showError("Unable to handle friend request.");
 		}
 	};
 
@@ -153,7 +163,7 @@ const AllFriends: React.FC = () => {
 			friend.relationship = "mutual";
 			setPotentialFriends((prev) => [...prev, friend]);
 		} catch (error) {
-			ToastAndroid.show("Failed to unfriend.", ToastAndroid.SHORT);
+			showError("Failed to unfriend.");
 		}
 	};
 

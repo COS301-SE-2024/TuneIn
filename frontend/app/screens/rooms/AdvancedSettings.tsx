@@ -9,6 +9,8 @@ import {
 	Pressable,
 	ToastAndroid,
 	ScrollView,
+	Platform,
+	Alert,
 } from "react-native";
 import auth from "../../services/AuthManagement";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -19,7 +21,14 @@ import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
 import RoomShareSheet from "../../components/messaging/RoomShareSheet";
 import { formatRoomData } from "../../models/Room";
+import * as utils from "../../services/Utils";
+import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
+import { Track } from "../../models/Track";
+const placeholderImage = require("../../assets/spotify.png");
 
+type Queues = {
+	[key: string]: Track[];
+};
 const AdvancedSettings = () => {
 	const router = useRouter();
 	const [isPopupVisible, setPopupVisible] = useState(false);
@@ -28,6 +37,7 @@ const AdvancedSettings = () => {
 	const [toggle2, setToggle2] = useState(true);
 	const [toggle3, setToggle3] = useState(true);
 	const [toggle4, setToggle4] = useState(true);
+	const [genres, setGenres] = useState<string[]>([]);
 
 	const { room } = useLocalSearchParams();
 
@@ -45,9 +55,10 @@ const AdvancedSettings = () => {
 	const toggleSwitch4 = () => setToggle4((previousState) => !previousState);
 
 	const goToEditScreen = () => {
+		const formattedRoom = formatRoomData(JSON.parse(room as string));
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: { room: room },
+			params: { room: JSON.stringify(formattedRoom) },
 		});
 	};
 
@@ -63,19 +74,190 @@ const AdvancedSettings = () => {
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
 	const deleteRoom = async (roomID: string) => {
-		// Delete room
 		const token = await auth.getToken();
 		try {
-			await fetch(`http://localhost:3000/rooms/${roomID}`, {
+			await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
 				method: "DELETE",
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+
+			// Show toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Room deleted successfully.", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Success", "Room deleted successfully.");
+			}
 		} catch (error) {
 			console.log("Error deleting room: ", error);
-			ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+
+			// Handle toast on Android, alert on other platforms
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to delete room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to delete room.");
+			}
+		}
+	};
+	const getRoom = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			return {
+				roomID: data.roomID,
+				id: data.roomID,
+				name: data.room_name,
+				description: data.description,
+				userID: data.creator.userID,
+				username: data.creator.username,
+				tags: data.tags,
+				genre: data.room_name.split(" - ")[1],
+				backgroundImage: data.room_image,
+				isExplicit: data.has_explicit_content,
+				isNsfw: data.has_nsfw_content,
+				language: data.language,
+				roomSize: "50",
+				userProfile: data.creator.profile_picture_url,
+				mine: true,
+				songName: data.current_song ? data.current_song.title : null,
+			};
+		} catch (error) {
+			console.log("Error getting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room.");
+			}
+		}
+	};
+
+	const getRoomQueue = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			const queue = data.map((song: any) => {
+				const cover = song.cover;
+				return {
+					id: song.id,
+					name: song.title,
+					artists: song.artists.map((artist: string) => ({ name: artist })), // Convert artist string to object
+					album: { images: [{ url: cover }] },
+					explicit: false,
+					preview_url: "",
+					uri: `spotify:track:${song.spotify_id}`,
+					duration_ms: song.duration * 1000,
+					albumArtUrl: placeholderImage,
+				};
+			});
+			return queue;
+		} catch (error) {
+			console.log("Error getting room queue: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room queue", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room queue.");
+			}
+		}
+	};
+	const navigateToSplittingRoom = async () => {
+		const token = auth.getToken();
+		try {
+			if (room) {
+				let roomData = typeof room === "string" ? JSON.parse(room) : room;
+				if (Array.isArray(roomData)) {
+					roomData = JSON.parse(roomData[0]);
+				}
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomData.id ?? roomData.roomID}/split`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (!response.ok) {
+					if (Platform.OS === "android" && ToastAndroid) {
+						ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+					} else {
+						Alert.alert("Error", await response.text());
+					}
+					return;
+				} else {
+					const data = await response.json();
+					const childRoom1 = await getRoom(data.childrenRoomIDs[0]);
+					const childRoom2 = await getRoom(data.childrenRoomIDs[1]);
+					if (childRoom1 && childRoom2) {
+						const childRoom1Queue = await getRoomQueue(childRoom1.id);
+						const childRoom2Queue = await getRoomQueue(childRoom2.id);
+						if (childRoom1Queue && childRoom2Queue) {
+							router.navigate({
+								pathname: "/screens/rooms/SplittingRoom",
+								params: {
+									rooms: JSON.stringify([childRoom1, childRoom2]),
+									queues: JSON.stringify([childRoom1Queue, childRoom2Queue]),
+								},
+							});
+						} else {
+							console.log("No queue data found");
+						}
+					} else {
+						console.log("No room data found");
+					}
+				}
+			} else {
+				console.log("No room data found");
+			}
+		} catch (error) {
+			console.log("Error splitting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to split room.");
+			}
+		}
+	};
+	const handleConfirmPopup = async (choice: boolean) => {
+		console.log("User choice:", choice ? "Yes" : "No");
+		if (choice) {
+			// Navigate to splitting room or handle "Yes" action
+			navigateToSplittingRoom();
+		} else {
+			// Handle "No" action (cancel)
+			handleClosePopup();
 		}
 	};
 	const handleDelete = () => {
@@ -89,6 +271,49 @@ const AdvancedSettings = () => {
 			navigateToHome();
 		} else {
 			console.log("No room data found");
+		}
+	};
+
+	const checkRoomSplit = async () => {
+		try {
+			if (room) {
+				let roomData = typeof room === "string" ? JSON.parse(room) : room;
+				if (Array.isArray(roomData)) {
+					roomData = JSON.parse(roomData[0]);
+				}
+				console.log("Room data to check splitting: ", roomData);
+				const token = await auth.getToken();
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomData.id ?? roomData.roomID}/split`,
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (!response.ok) {
+					const message = JSON.parse(await response.text()).message;
+					ToastAndroid.show(message, ToastAndroid.SHORT);
+					console.log(message);
+					return;
+				}
+				const data = await response.json();
+				if (data.length > 1) {
+					setGenres(data);
+					setPopupVisible(true);
+				} else {
+					ToastAndroid.show(
+						"Room has no queue to split. Maybe get some bitches?",
+						ToastAndroid.SHORT,
+					);
+				}
+			} else {
+				console.log("No room data found");
+			}
+		} catch (error) {
+			console.log("Error splitting room: ", error);
+			ToastAndroid.show("Failed to split room", ToastAndroid.SHORT);
 		}
 	};
 
@@ -212,10 +437,10 @@ const AdvancedSettings = () => {
 					<Text style={styles.editButtonText}>Edit Room Details</Text>
 					<Icon name="edit" size={20} color="black" />
 				</TouchableOpacity>
-
-				{/* <TouchableOpacity style={styles.saveButton} onPress={() => router.back()}>
-				<Text style={styles.saveButtonText}>Save Changes</Text>
-			</TouchableOpacity> */}
+				<TouchableOpacity style={styles.editButton} onPress={checkRoomSplit}>
+					<Text style={styles.editButtonText}>Split Room</Text>
+					<Icon name="room" size={20} color="black" />
+				</TouchableOpacity>
 				<View style={styles.saveButton}>
 					<CreateButton title="Save Changes" onPress={handleSave} />
 					{/* <CreateButton title="Save Changes" onPress={() => router.back()} /> */}
@@ -232,8 +457,12 @@ const AdvancedSettings = () => {
 					visible={showDeleteModal}
 					onRequestClose={() => setShowDeleteModal(false)}
 				>
-					<View style={styles.modalContainer}>
-						<View style={styles.modalView}>
+					<Pressable
+						style={styles.modalContainer}
+						onPress={() => setShowDeleteModal(false)} // Close modal when pressing outside
+					>
+						{/* Prevent the modal content from closing when pressed */}
+						<Pressable style={styles.modalView} onPress={() => {}}>
 							<Text style={styles.modalText}>
 								Are you sure you want to delete this room? The room will be
 								deleted forever.
@@ -252,8 +481,8 @@ const AdvancedSettings = () => {
 									<Text style={styles.textStyle}>No</Text>
 								</Pressable>
 							</View>
-						</View>
-					</View>
+						</Pressable>
+					</Pressable>
 				</Modal>
 				{/* Save Confirmation Modal */}
 				<Modal
@@ -279,6 +508,12 @@ const AdvancedSettings = () => {
 					</View>
 				</Modal>
 			</ScrollView>
+			<SplittingPopUp
+				isVisible={isPopupVisible}
+				onClose={handleClosePopup}
+				onConfirm={handleConfirmPopup}
+				genres={genres}
+			/>
 		</View>
 	);
 };
@@ -380,15 +615,18 @@ const styles = StyleSheet.create({
 	},
 	modalContainer: {
 		flex: 1,
-		justifyContent: "center",
+		justifyContent: "flex-end", // Align modal to the bottom
 		alignItems: "center",
 		backgroundColor: "rgba(0,0,0,0.5)",
 	},
 	modalView: {
-		width: 300,
+		width: "100%", // Make it take full width of the screen
+		height: "28%", // Increase the height, you can adjust this to your needs
 		backgroundColor: "white",
-		borderRadius: 10,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
 		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
 		shadowColor: "#000",
 		shadowOffset: {
@@ -421,12 +659,13 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalText: {
+		marginTop: 10,
 		fontSize: 16,
 		textAlign: "center",
-		marginBottom: 15,
 		fontWeight: "bold",
 	},
 	modalButtonContainer: {
+		marginTop: 45,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		width: "100%",
@@ -439,10 +678,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	buttonYes: {
-		backgroundColor: colors.primary,
+		backgroundColor: "red",
+		borderRadius: 25,
 	},
 	buttonNo: {
 		backgroundColor: colors.secondary,
+		borderRadius: 25,
 	},
 	textStyle: {
 		color: "white",

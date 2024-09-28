@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.primary,
 		paddingHorizontal: 8,
 		paddingVertical: 4,
-		borderRadius: 8,
+		borderRadius: 15,
 	},
 	unfriendButton: {
 		backgroundColor: "white",

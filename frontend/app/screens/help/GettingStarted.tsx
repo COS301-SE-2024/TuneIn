@@ -34,6 +34,7 @@ export default function GettingStarted() {
 						size={24}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="music-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Introduction</Text>
@@ -53,6 +54,7 @@ export default function GettingStarted() {
 						size={24}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="info-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>About</Text>
@@ -72,6 +74,7 @@ export default function GettingStarted() {
 						size={24}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="account-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Creating an Account</Text>
@@ -91,6 +94,7 @@ export default function GettingStarted() {
 						size={24}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="login-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Logging In</Text>

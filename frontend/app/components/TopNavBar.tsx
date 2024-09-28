@@ -26,15 +26,10 @@ const TopNavBar: React.FC = () => {
 						},
 					});
 					const imageUrl = response.data.profile_picture_url;
-					console.log("Image URL: " + imageUrl);
 
-					if (
-						!imageUrl ||
-						imageUrl === "https://example.com/default-profile-picture.png"
-					) {
+					if (!imageUrl) {
 						setProfileImage(defaultProfileIcon);
 					} else {
-						console.log("I work ");
 						setProfileImage(imageUrl);
 					}
 				}
@@ -59,8 +54,6 @@ const TopNavBar: React.FC = () => {
 		});
 	};
 
-	const appName = "TuneIn"; // Change this to your app's name
-
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity onPress={navigateToProfile}>
@@ -75,7 +68,7 @@ const TopNavBar: React.FC = () => {
 				)}
 			</TouchableOpacity>
 			<View style={styles.appNameContainer}>
-				<Text style={styles.appName}>{appName}</Text>
+				<Text style={styles.appName}>TuneIn</Text>
 			</View>
 			<TouchableOpacity onPress={navigateToDMs}>
 				<Entypo name="direction" size={24} color="black" />
@@ -86,7 +79,7 @@ const TopNavBar: React.FC = () => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginTop: 0,
+		marginTop: 4,
 		flexDirection: "row",
 		height: 56,
 		alignItems: "center",
@@ -96,7 +89,7 @@ const styles = StyleSheet.create({
 	},
 	appName: {
 		color: "black",
-		fontSize: 20,
+		fontSize: 23,
 		fontWeight: "bold",
 	},
 	profileImage: {

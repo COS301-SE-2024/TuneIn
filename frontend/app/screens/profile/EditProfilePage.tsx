@@ -233,7 +233,7 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const updateImage = async (uri) => {
+	const updateImage = async (uri: string) => {
 		try {
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
 			// console.log("image:", image);
@@ -540,8 +540,16 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={{ uri: profileData.profile_picture_url }}
-						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+						source={
+							profileData.profile_picture_url
+								? { uri: profileData.profile_picture_url }
+								: require("../../../assets/profile-icon.png")
+						}
+						style={{
+							width: 125,
+							height: 125,
+							borderRadius: 125 / 2,
+						}}
 					/>
 					<TouchableOpacity
 						onPress={() => setPhotoDialogVisible(true)}
@@ -740,6 +748,7 @@ const styles = StyleSheet.create({
 	container2: {
 		marginRight: 12,
 		marginBottom: 10,
+		marginTop: 5,
 		paddingHorizontal: 14,
 		paddingVertical: 8,
 		backgroundColor: "rgba(232, 235, 242, 1)",
@@ -757,6 +766,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	profileHeader: {
 		flexDirection: "row",

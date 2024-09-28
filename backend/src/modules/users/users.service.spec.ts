@@ -77,7 +77,7 @@ const mockUserDto: UserDto = {
 	},
 };
 
-describe("UsersService follow function", () => {
+describe("UsersService", () => {
 	let usersService: UsersService;
 	let prismaService: PrismaService;
 	let dbUtilsService: DbUtilsService;
@@ -414,6 +414,7 @@ describe("UsersService follow function", () => {
 					date_created: new Date(),
 					nsfw: false,
 					tags: [],
+					playlist_id: null,
 				},
 				{
 					room_id: "roomID2",
@@ -427,6 +428,7 @@ describe("UsersService follow function", () => {
 					date_created: new Date(),
 					nsfw: false,
 					tags: [],
+					playlist_id: null,
 				},
 			]);
 			const mockRoomDtos: RoomDto[] = [
