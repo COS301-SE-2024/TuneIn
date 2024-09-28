@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -7,15 +7,18 @@ import {
 	TouchableOpacity,
 	FlatList,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useLive } from "../../LiveContext";
 import { UserDto } from "../../../api";
+import { useAPI } from "../../APIContext";
 
 const ParticipantsPage: React.FC = () => {
-	const navigation = useNavigation();
-	const { roomParticipants } = useLive();
+	const router = useRouter();
+	const { roomID } = useLocalSearchParams<{ roomID: string }>();
+	const { rooms } = useAPI();
+	const { currentRoom, roomParticipants } = useLive();
+	const [participants, setParticipants] = React.useState<UserDto[]>([]);
 
 	const navigateToProfile = (userId: string) => {};
 
@@ -29,19 +32,46 @@ const ParticipantsPage: React.FC = () => {
 		</TouchableOpacity>
 	);
 
+	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
+		const usersResponse = await rooms.getRoomUsers(roomID);
+		return usersResponse.data;
+	}, [roomID, rooms]);
+
+	// on roomID or currentRoom change
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, [currentRoom, roomParticipants]);
+
+	// on mount
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => navigation.goBack()}
+					onPress={() => router.back()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{(roomParticipants.length === 0 && (
+			{(participants.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.{" "}
@@ -52,7 +82,7 @@ const ParticipantsPage: React.FC = () => {
 				</View>
 			)) || (
 				<FlatList
-					data={roomParticipants}
+					data={participants}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.userID}
 				/>
