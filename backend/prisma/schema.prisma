@@ -162,6 +162,7 @@ model room {
   room_language                              String?          @default("English")
   explicit                                   Boolean?         @default(false)
   tags                                       String[]
+  playlist_id                                String?
   banned                                     banned[]
   bookmark                                   bookmark[]
   chat_reactions                             chat_reactions[]
@@ -214,12 +215,12 @@ model song {
   genre          String?
   lyrics_url     String?
   duration       Int?             @default(0)
-  genres         String[]
-  artwork_url    String?
   spotify_id     String           @unique
   audio_features Json             @db.Json
   artists        String[]
-  track_info     Json?            @db.Json
+  track_info     Json             @default("{}") @db.Json
+  genres         String[]
+  artwork_url    String?
   favorite_songs favorite_songs[]
   queue          queue[]
 }
