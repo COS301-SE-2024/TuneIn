@@ -173,17 +173,19 @@ export function useRoomControls({
 				userSelected: boolean;
 			},
 		) => {
+			if (action.deviceID === null) {
+				return state;
+			}
+
 			let result: Device | undefined = state;
-			if (action.deviceID !== null) {
-				for (const device of spotifyDevices.devices) {
-					if (device.id === action.deviceID) {
-						result = device;
-					}
+			for (const device of spotifyDevices.devices) {
+				if (device.id === action.deviceID) {
+					result = device;
 				}
 			}
 
 			// if updating state to match Spotify API
-			if (!action.userSelected) {
+			if (!action.userSelected && result !== state) {
 				return result;
 			}
 
@@ -195,7 +197,10 @@ export function useRoomControls({
 			}
 
 			if (!result || result.is_active) {
-				return result;
+				if (result !== state) {
+					return result;
+				}
+				return state;
 			}
 
 			if (result.id === null) {
@@ -204,19 +209,22 @@ export function useRoomControls({
 				return result;
 			}
 
-			spotify.player
-				.transferPlayback([result.id])
-				.then(() => {
-					console.log("Playback transferred to device:", action);
-					setDeviceError(null);
-				})
-				.catch((err) => {
-					console.error("An error occurred while transferring playback", err);
-					setDeviceError(
-						"An error occurred while transferring playback: " + err,
-					);
-				});
-			return result;
+			if (result !== state) {
+				spotify.player
+					.transferPlayback([result.id])
+					.then(() => {
+						console.log("Playback transferred to device:", action);
+						setDeviceError(null);
+					})
+					.catch((err) => {
+						console.error("An error occurred while transferring playback", err);
+						setDeviceError(
+							"An error occurred while transferring playback: " + err,
+						);
+					});
+				return result;
+			}
+			return state;
 		},
 		undefined,
 	);
@@ -236,10 +244,13 @@ export function useRoomControls({
 					setDeviceError(null);
 					for (const device of devices.devices) {
 						if (device.is_active) {
-							setActiveDevice({
-								deviceID: device.id,
-								userSelected: false,
-							});
+							if (!activeDevice || activeDevice.id !== device.id) {
+								setActiveDevice({
+									deviceID: device.id,
+									userSelected: false,
+								});
+								break;
+							}
 						}
 					}
 					const state: PlaybackState = await spotify.player.getPlaybackState();
@@ -325,11 +336,14 @@ export function useRoomControls({
 						} else {
 							for (const d of devices) {
 								if (d.is_active) {
-									setActiveDevice({
-										deviceID: d.id,
-										userSelected: false,
-									});
-									device = d;
+									if (!activeDevice || activeDevice.id !== d.id) {
+										setActiveDevice({
+											deviceID: d.id,
+											userSelected: false,
+										});
+										device = d;
+										break;
+									}
 								}
 							}
 						}
@@ -405,6 +419,7 @@ export function useRoomControls({
 		[
 			spotifyTokens,
 			spotify,
+			currentRoom,
 			activeDevice,
 			currentSong,
 			roomQueue,
@@ -449,10 +464,12 @@ export function useRoomControls({
 					return false;
 				}
 				setPlaybackState(state);
-				setActiveDevice({
-					deviceID: state.device.id,
-					userSelected: false,
-				});
+				if (!activeDevice || activeDevice.id !== state.device.id) {
+					setActiveDevice({
+						deviceID: state.device.id,
+						userSelected: false,
+					});
+				}
 				if (state.item.id === currentSong.spotifyID) {
 					return true;
 				}
