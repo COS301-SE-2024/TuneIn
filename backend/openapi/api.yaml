@@ -2518,10 +2518,10 @@ components:
       type: object
       properties:
         creator:
-          description: The date the room was created
-          allOf:
-            - $ref: '#/components/schemas/UserDto'
+          $ref: '#/components/schemas/UserDto'
         roomID:
+          type: string
+        spotifyPlaylistID:
           type: string
         participant_count:
           type: number
@@ -2571,6 +2571,7 @@ components:
       required:
         - creator
         - roomID
+        - spotifyPlaylistID
         - participant_count
         - room_name
         - description

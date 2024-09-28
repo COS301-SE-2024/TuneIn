@@ -878,7 +878,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								setRoomPlaying(response.song);
 							}
 						}
-
 						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
 							if (!currentSong) {
 								return;

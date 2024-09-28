@@ -567,7 +567,7 @@ export interface RoomAnalyticsParticipationDto {
  */
 export interface RoomDto {
     /**
-     * The date the room was created
+     * 
      * @type {UserDto}
      * @memberof RoomDto
      */
@@ -578,6 +578,12 @@ export interface RoomDto {
      * @memberof RoomDto
      */
     'roomID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomDto
+     */
+    'spotifyPlaylistID': string;
     /**
      * 
      * @type {number}
