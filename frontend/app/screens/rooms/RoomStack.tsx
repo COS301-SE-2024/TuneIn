@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
@@ -25,9 +25,9 @@ function MyRoomTabs() {
 	const router = useRouter();
 	const { currentUser, currentRoom, socketHandshakes } = useLive();
 	const { rooms } = useAPI();
+	const [userInRoom, setUserInRoom] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0);
 	const [isMenuVisible, setMenuVisible] = useState(false);
-	// const roomData = { mine: true }; // Assuming this comes from your state or props
 
 	const { room } = useLocalSearchParams();
 	let roomData: any;
@@ -93,6 +93,23 @@ function MyRoomTabs() {
 		// Implement room sharing logic here
 	};
 
+	const updateRoomStatus = useCallback(async () => {
+		if (currentRoom && currentRoom.roomID === roomID) {
+			setUserInRoom(true);
+		} else {
+			setUserInRoom(false);
+		}
+	}, [roomID, currentRoom]);
+
+	useEffect(() => {
+		updateRoomStatus();
+	}, [roomID, currentRoom]);
+
+	// on component mount
+	useEffect(() => {
+		updateRoomStatus();
+	}, []);
+
 	return (
 		<>
 			<View style={styles.header}>
@@ -153,7 +170,7 @@ function MyRoomTabs() {
 					component={() => <RoomPage />}
 					options={{ tabBarLabel: "Room" }}
 				/>
-				{socketHandshakes.roomJoined && roomID === currentRoom?.roomID && (
+				{socketHandshakes.roomJoined && userInRoom && (
 					<>
 						<Tab.Screen
 							name="Chat"
