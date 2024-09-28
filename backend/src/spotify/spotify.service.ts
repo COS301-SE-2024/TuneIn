@@ -7,12 +7,14 @@ import { Prisma } from "@prisma/client";
 import {
 	SpotifyTokenPair,
 	SpotifyTokenResponse,
-	SpotifyAuthService,
+	SpotifyTokenRefreshResponse,
 } from "../auth/spotify/spotifyauth.service";
 import { PrismaService } from "./../../prisma/prisma.service";
 // import { sleep } from "../common/utils";
 import { MurLockService } from "murlock";
 import { RoomDto } from "../modules/rooms/dto/room.dto";
+import { HttpService } from "@nestjs/axios";
+import { firstValueFrom } from "rxjs";
 
 const NUMBER_OF_RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
@@ -22,14 +24,15 @@ export class SpotifyService {
 	private clientId: string;
 	private clientSecret: string;
 	// private redirectUri: string;
-	// private authHeader: string;
+	private authHeader: string;
+	private userlessAPI: Spotify.SpotifyApi;
 	private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
 
 	constructor(
 		private readonly configService: ConfigService,
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
-		private readonly spotifyAuthService: SpotifyAuthService,
+		private readonly httpService: HttpService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -51,29 +54,88 @@ export class SpotifyService {
 		// }
 		// this.redirectUri = redirectUri;
 
-		// this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
-		// 	"base64",
-		// );
+		this.authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString(
+			"base64",
+		);
 
 		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
 		if (!tuneinID) {
 			throw new Error("Missing TUNEIN_USER_ID");
 		}
 		let error: Error | undefined;
-		this.spotifyAuthService.getSpotifyTokens(tuneinID).then((tp) => {
-			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-				try {
-					this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
-					break;
-				} catch (e) {
-					error = e as Error;
-					console.error(e);
+		this.prisma.authentication
+			.findFirst({
+				where: { user_id: tuneinID },
+			})
+			.then((tokens: PrismaTypes.authentication | null) => {
+				if (!tokens) {
+					throw new Error("Missing TuneIn Spotify tokens");
 				}
+				const tp: SpotifyTokenPair = JSON.parse(
+					tokens.token,
+				) as SpotifyTokenPair;
+				console.log(tp);
+				if (tp.epoch_expiry < new Date().getTime()) {
+					firstValueFrom(
+						this.httpService.post(
+							"https://accounts.spotify.com/api/token",
+							{
+								grant_type: "refresh_token",
+								refresh_token: tp.tokens.refresh_token,
+							},
+							{
+								headers: {
+									"Content-Type": "application/x-www-form-urlencoded",
+									Authorization: `Basic ${this.authHeader}`,
+								},
+							},
+						),
+					).then((response) => {
+						if (!response || !response.data) {
+							throw new Error("Failed to refresh token");
+						}
+
+						const refreshToken: SpotifyTokenRefreshResponse =
+							response.data as SpotifyTokenRefreshResponse;
+						const result: SpotifyTokenResponse = {
+							access_token: refreshToken.access_token,
+							token_type: refreshToken.token_type,
+							scope: refreshToken.scope,
+							expires_in: refreshToken.expires_in,
+							refresh_token: tp.tokens.refresh_token,
+						};
+						tp.tokens = result;
+					});
+				}
+				for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+					try {
+						this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
+						break;
+					} catch (e) {
+						error = e as Error;
+						console.error(e);
+					}
+				}
+				if (error) {
+					throw error;
+				}
+			});
+
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
+					this.clientId,
+					this.clientSecret,
+				);
+				break;
+			} catch (e) {
+				error = e as Error;
+				console.error(e);
 			}
-			if (error) {
-				throw error;
-			}
-		});
+		}
+		if (error) {
+			throw error;
+		}
 	}
 
 	async wait(ms: number) {
@@ -81,7 +143,7 @@ export class SpotifyService {
 	}
 
 	getUserlessAPI(): Spotify.SpotifyApi {
-		return this.spotifyAuthService.getUserlessAPI();
+		return this.userlessAPI;
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
@@ -110,9 +172,9 @@ export class SpotifyService {
 		let error: Error | undefined;
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 			try {
-				const audioFeatures = await this.spotifyAuthService
-					.getUserlessAPI()
-					.tracks.audioFeatures(spotifyID);
+				const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
+					spotifyID,
+				);
 				return audioFeatures;
 			} catch (e) {
 				error = e as Error;
@@ -137,9 +199,7 @@ export class SpotifyService {
 				const promises: Promise<Spotify.AudioFeatures[]>[] = [];
 				for (let i = 0; i < spotifyIDs.length; i += 100) {
 					const ids = spotifyIDs.slice(i, i + 100);
-					promises.push(
-						this.spotifyAuthService.getUserlessAPI().tracks.audioFeatures(ids),
-					);
+					promises.push(this.userlessAPI.tracks.audioFeatures(ids));
 					await this.wait(500); // for rate limiting
 				}
 				const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
@@ -719,9 +779,7 @@ export class SpotifyService {
 				const promises: Promise<Spotify.Track[]>[] = [];
 				for (let i = 0; i < trackIDs.length; i += 50) {
 					const ids = trackIDs.slice(i, i + 50);
-					promises.push(
-						this.spotifyAuthService.getUserlessAPI().tracks.get(ids),
-					);
+					promises.push(this.userlessAPI.tracks.get(ids));
 				}
 				const results: Spotify.Track[][] = await Promise.all(promises);
 				const tracks: Spotify.Track[] = [];

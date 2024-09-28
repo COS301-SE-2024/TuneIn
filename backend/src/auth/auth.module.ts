@@ -9,7 +9,6 @@ import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../prisma/prisma.module";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
-import { SpotifyModule } from "../spotify/spotify.module";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
@@ -25,7 +24,6 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 		}),
 		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
-		SpotifyModule,
 		SpotifyAuthModule,
 	],
 	providers: [AuthService, LocalStrategy, JwtStrategy],
