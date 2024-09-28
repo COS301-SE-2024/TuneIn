@@ -23,7 +23,6 @@ import {
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { SongInfoDto } from "./dto/songinfo.dto";
 import { RoomsService, UserActionDto } from "./rooms.service";
 import { UpdateRoomDto } from "./dto/updateroomdto";
 import { RoomDto } from "./dto/room.dto";
@@ -37,6 +36,7 @@ import {
 	RoomAnalyticsKeyMetricsDto,
 } from "./dto/roomanalytics.dto";
 import { RoomAnalyticsService } from "./roomanalytics.service";
+import { RoomSongDto } from "./dto/roomsong.dto";
 
 @Controller("rooms")
 export class RoomsController {
@@ -348,11 +348,13 @@ export class RoomsController {
 	@ApiTags("rooms")
 	@ApiOperation({
 		summary: "Get the queue of a room",
-		description: "Returns the queue of the room as an array of SongInfoDto.",
+		description: "Returns the queue of the room as an array of RoomSongDto.",
 		operationId: "getRoomQueue",
 	})
 	@ApiOkResponse({
-		description: "The queue of the room as an array of SongInfoDto.",
+		description: "The queue of the room as an array of RoomSongDto.",
+		type: RoomSongDto,
+		isArray: true,
 	})
 	@ApiNotFoundResponse({
 		description: "Room not found",
@@ -369,58 +371,17 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
-	async getRoomQueue(
-		@Param("roomID") roomID: string,
-		//): SongInfoDto[] {
-	): Promise<string> {
-		return this.roomsService.getRoomQueueDUMBVERSION(roomID);
-	}
-
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Post(":roomID/songs")
-	@ApiTags("rooms")
-	@ApiOperation({
-		summary: "Add a song to the queue of a room",
-		operationId: "addSongToQueue",
-	})
-	@ApiOkResponse({
-		description: "The queue of the room as an array of SongInfoDto.",
-	})
-	@ApiNotFoundResponse({
-		description: "Room not found",
-	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
-	})
-	@ApiParam({
-		name: "roomID",
-		description: "The ID of the room to add the song to.",
-		required: true,
-		type: String,
-		format: "uuid",
-		example: "123e4567-e89b-12d3-a456-426614174000",
-		allowEmptyValue: false,
-	})
-	addSongToQueue(
-		@Param("roomID") roomID: string,
-		//@Body() songInfoDto: SongInfoDto,
-		@Body() songInfoDto: string,
-		//): SongInfoDto[] {
-	): string {
-		//return this.roomsService.addSongToQueue(roomID, songInfoDto);
-		return this.roomsService.addSongToQueueDUMBVERSION(roomID, songInfoDto);
+	async getRoomQueue(@Param("roomID") roomID: string): Promise<RoomSongDto[]> {
+		return await this.roomsService.getRoomQueue(roomID);
 	}
 
 	@Get(":roomID/songs/current")
 	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Get the current song of a room",
+		description: "Get the song currently playing in the room.",
+		operationId: "getCurrentSong",
+	})
 	@ApiParam({
 		name: "roomID",
 		description: "The ID of the room to get the current song for.",
@@ -430,13 +391,18 @@ export class RoomsController {
 		example: "123e4567-e89b-12d3-a456-426614174000",
 		allowEmptyValue: false,
 	})
-	@ApiOperation({
-		summary: "Get the current song of a room",
-		description: "Get the song currently playing in the room.",
-		operationId: "getCurrentSong",
+	@ApiOkResponse({
+		description: "The current song of the room as a RoomSongDto.",
+		type: RoomSongDto,
 	})
-	getCurrentSong(@Param("roomID") roomID: string): SongInfoDto {
-		return this.roomsService.getCurrentSong(roomID);
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async getCurrentSong(@Param("roomID") roomID: string): Promise<RoomSongDto> {
+		return await this.roomsService.getCurrentSong(roomID);
 	}
 
 	@ApiBearerAuth()
@@ -962,15 +928,67 @@ export class RoomsController {
 		allowEmptyValue: false,
 	})
 	@ApiOkResponse({
-		description: "The playlist ID as a string.",
-		type: String,
+		description: "Playlist saved successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Playlist not found",
 	})
 	@ApiBadRequestResponse({
 		description: "Bad request",
 	})
-	async saveRoomAsPlaylist(@Param("roomID") roomID: string): Promise<string> {
-		console.log("saveRoomAsPlaylist for room: " + roomID);
-		return "";
+	async saveRoomAsPlaylist(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.saveRoomPlaylist(roomID, userInfo.id);
+	}
+
+	/**
+	 * Unave room as a playlist
+	 *
+	 * @param roomID - The ID of the room to remove from the user's playlists.
+	 * @returns The playlist ID as a string.
+	 */
+	@Post(":roomID/unsave")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Unsave room as a playlist",
+		operationId: "unsaveRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to remove from the user's playlists.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiOkResponse({
+		description: "Playlist removed successfully",
+	})
+	@ApiNotFoundResponse({
+		description: "Playlist not found",
+	})
+	@ApiBadRequestResponse({
+		description: "Bad request",
+	})
+	async unsaveRoomAsPlaylist(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		await this.roomsService.unsaveRoomPlaylist(roomID, userInfo.id);
 	}
 
 	/**

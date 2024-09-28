@@ -936,4 +936,32 @@ export class RoomsService {
 		const childGenres: string[] = [];
 		return childGenres;
 	}
+
+	async saveRoomPlaylist(roomID: string, userID: string): Promise<void> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		if (!(await this.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		const room: RoomDto = await this.getRoomInfo(roomID);
+		const tokens: SpotifyTokenPair = await this.spotifyService.getSpotifyTokens(
+			userID,
+		);
+		await this.spotifyService.saveRoomPlaylist(room, tokens);
+	}
+
+	async unsaveRoomPlaylist(roomID: string, userID: string): Promise<void> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		if (!(await this.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		const room: RoomDto = await this.getRoomInfo(roomID);
+		const tokens: SpotifyTokenPair = await this.spotifyService.getSpotifyTokens(
+			userID,
+		);
+		await this.spotifyService.saveRoomPlaylist(room, tokens);
+	}
 }
