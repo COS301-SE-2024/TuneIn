@@ -41,6 +41,16 @@ describe("InteractiveSessions Component", () => {
 		expect(mockRouter.navigate).toHaveBeenCalledWith("../rooms/CreateRoom");
 	});
 
+	it("navigates to Home when the corresponding card is pressed", () => {
+		const { getByText } = render(<InteractiveSessions />);
+
+		// Simulate pressing the CreateRoom card
+		fireEvent.press(getByText("Joining Rooms"));
+
+		// Assert that mockRouter.navigate was called with the correct screen
+		expect(mockRouter.navigate).toHaveBeenCalledWith("../Home");
+	});
+
 	it("renders all the icons correctly", () => {
 		const { getByTestId } = render(<InteractiveSessions />);
 
