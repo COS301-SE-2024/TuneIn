@@ -24,6 +24,7 @@ import { formatRoomData } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
+import { format } from 'winston';
 const placeholderImage = require("../../assets/spotify.png");
 
 type Queues = {
@@ -55,9 +56,11 @@ const AdvancedSettings = () => {
 	const toggleSwitch4 = () => setToggle4((previousState) => !previousState);
 
 	const goToEditScreen = () => {
+		const formattedRoom = formatRoomData(JSON.parse(room as string));
+		console.log("Formatted room data to edit room: ", formattedRoom);
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
-			params: { room: room },
+			params: { room: JSON.stringify(formattedRoom) },
 		});
 	};
 
@@ -201,7 +204,7 @@ const AdvancedSettings = () => {
 					roomData = JSON.parse(roomData[0]);
 				}
 				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomData.id}/split`,
+					`${utils.API_BASE_URL}/rooms/${roomData.id ?? roomData.roomID}/split`,
 					{
 						method: "POST",
 						headers: {
@@ -285,9 +288,10 @@ const AdvancedSettings = () => {
 				if (Array.isArray(roomData)) {
 					roomData = JSON.parse(roomData[0]);
 				}
+				console.log("Room data to check splitting: ", roomData);
 				const token = await auth.getToken();
 				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomData.id}/split`,
+					`${utils.API_BASE_URL}/rooms/${roomData.id ?? roomData.roomID}/split`,
 					{
 						method: "GET",
 						headers: {
@@ -296,8 +300,9 @@ const AdvancedSettings = () => {
 					},
 				);
 				if (!response.ok) {
-					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
-					console.log(await response.text());
+					const message = JSON.parse(await response.text()).message;
+					ToastAndroid.show(message, ToastAndroid.SHORT);
+					console.log(message);
 					return;
 				}
 				const data = await response.json();
