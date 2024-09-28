@@ -99,7 +99,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 
 const styles = StyleSheet.create({
 	container: {
-		marginBottom: 20,
+		marginBottom: 0,
 	},
 	friendContainer: {
 		alignItems: "center",
@@ -127,10 +127,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	moreButtonText: {
-		fontSize: 38,
+		fontSize: 32, // Slightly reduced font size to ensure it fits well
 		color: "white",
 		fontWeight: "bold",
-		paddingBottom: 8,
+		lineHeight: 38, // Adjusting line height for vertical centering
+		textAlign: "center",
 	},
 });
 
