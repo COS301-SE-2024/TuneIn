@@ -14,6 +14,7 @@ const TopNavBar: React.FC = () => {
 	const router = useRouter();
 	const [profileImage, setProfileImage] = useState<string>("");
 	const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+	const [previousProfileImage, setPreviousProfileImage] = useState<string>(""); // Track previous image
 
 	useEffect(() => {
 		const fetchProfilePicture = async () => {
@@ -27,10 +28,10 @@ const TopNavBar: React.FC = () => {
 					});
 					const imageUrl = response.data.profile_picture_url;
 
-					if (!imageUrl) {
-						setProfileImage(defaultProfileIcon);
-					} else {
-						setProfileImage(imageUrl);
+					// Check if the profile picture has changed
+					if (imageUrl !== previousProfileImage) {
+						setPreviousProfileImage(imageUrl); // Update the previous image
+						setProfileImage(imageUrl || defaultProfileIcon); // Fallback if no image
 					}
 				}
 			} catch (error) {
@@ -40,7 +41,7 @@ const TopNavBar: React.FC = () => {
 		};
 
 		fetchProfilePicture();
-	}, []);
+	}, [previousProfileImage]); // Dependency to rerun on image change
 
 	const navigateToProfile = () => {
 		router.push({
