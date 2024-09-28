@@ -33,8 +33,8 @@ const AddRoomCard: React.FC<AddRoomCardProps> = ({ style }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		width: 280, // Set your desired width
-		height: 190, // Set your desired height
+		width: 290, // Set your desired width
+		height: 200, // Set your desired height
 		backgroundColor: "#D3D3D3", // Light grey background
 		borderRadius: 15,
 		justifyContent: "center",

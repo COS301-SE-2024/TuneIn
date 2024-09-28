@@ -58,12 +58,17 @@ const TopNavBar: React.FC = () => {
 		<View style={styles.container}>
 			<TouchableOpacity onPress={navigateToProfile}>
 				{profileImage === defaultProfileIcon ? (
-					<Image source={defaultProfileIcon} style={styles.profileImage} />
+					<Image
+						source={defaultProfileIcon}
+						style={styles.profileImage}
+						testID="profile-image"
+					/>
 				) : (
 					<Image
 						source={{ uri: profileImage }}
 						style={[styles.profileImage, !imageLoaded && { display: "none" }]}
 						onLoad={() => setImageLoaded(true)}
+						testID="profile-image"
 					/>
 				)}
 			</TouchableOpacity>
@@ -71,7 +76,7 @@ const TopNavBar: React.FC = () => {
 				<Text style={styles.appName}>TuneIn</Text>
 			</View>
 			<TouchableOpacity onPress={navigateToDMs}>
-				<Entypo name="direction" size={24} color="black" />
+				<Entypo name="direction" size={24} color="black" testID="dm-icon" />
 			</TouchableOpacity>
 		</View>
 	);

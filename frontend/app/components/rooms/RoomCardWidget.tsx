@@ -19,7 +19,7 @@ interface RoomCardWidgetProps {
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-	const cardWidth = 280;
+	const cardWidth = 290;
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 	container: {
 		borderRadius: 15,
 		overflow: "hidden",
-		height: 190, // Adjust height as needed
+		height: 200, // Adjust height as needed
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.25,

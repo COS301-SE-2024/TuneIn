@@ -829,9 +829,6 @@ describe("ProfileScreen", () => {
 	it("fetches profile data for other page where there is no current room", async () => {
 		// Mock AsyncStorage.getItem to return a token
 		(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mock-token");
-		const toastSpy = jest
-			.spyOn(ToastAndroid, "show")
-			.mockImplementation(() => {});
 		// Mock axios.get to return mock profile data
 		const mockProfileData = {
 			profile_picture_url: "https://example.com/profile-pic.jpg",
@@ -894,13 +891,6 @@ describe("ProfileScreen", () => {
 			friend: JSON.stringify({ profilePicture: "", username: "l" }),
 			user: "Jaden",
 		});
-
-		// Render the ProfileScreen component
-		const { getByText, getByTestId } = render(
-			<PlayerContextProviderMock value={mockPlayerContextValue}>
-				<ProfileScreen />
-			</PlayerContextProviderMock>,
-		);
 	});
 
 	it("fetches profile data for other page where there are cached rooms owned by user", async () => {

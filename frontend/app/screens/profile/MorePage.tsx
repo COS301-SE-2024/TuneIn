@@ -11,9 +11,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import FavoriteSongs from "../../components/FavoriteSong";
-import { colors } from "../../styles/colors";
 import UserItem from "../../components/UserItem";
 
 const MorePage: React.FC = () => {
