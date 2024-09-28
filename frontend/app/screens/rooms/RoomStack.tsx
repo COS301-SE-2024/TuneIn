@@ -193,6 +193,11 @@ function MyRoomTabs() {
 		// Implement room sharing logic here
 	};
 
+	const handleNavigateToChildRooms = () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
+	};
+
 	return (
 		<>
 			<View style={styles.header}>
@@ -234,7 +239,11 @@ function MyRoomTabs() {
 					onShareRoom={handleShareRoom}
 					onSavePlaylist={handleSavePlaylist}
 					isHost={roomData.mine} // Pass whether the user is the host
-					onSeeChildRooms={undefined}
+					onSeeChildRooms={
+						roomData.childrenRoomIDs?.length > 0
+							? handleNavigateToChildRooms
+							: undefined
+					}
 				/>
 			</View>
 
