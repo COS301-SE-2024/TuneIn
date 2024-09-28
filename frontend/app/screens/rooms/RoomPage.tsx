@@ -71,10 +71,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [joineds, setJoined] = useState(false);
 
 	useEffect(() => {
-		console.log("current Room ID: " + currentRoom?.roomID);
-		console.log("room ID: " + roomID);
-		console.log("Room Data", room);
-		console.log("Current Room", currentRoom);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -108,7 +104,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			);
 			setIsBookmarked(isBookmarked ?? false); // Use false as the default value if isBookmarked is undefined
 		} catch (error) {
-			console.error("Error checking bookmark:", error);
+			console.log("Error checking bookmark:", error);
 		}
 	}, [roomID, bookmarker]);
 
