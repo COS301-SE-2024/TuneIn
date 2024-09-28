@@ -125,7 +125,7 @@ const ProfileScreen: React.FC = () => {
 			id: room.roomID,
 			backgroundImage: room.room_image
 				? room.room_image
-				: require("../../../assets/imageholder.jpg"),
+				: "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
 			name: room.room_name,
 			language: room.language,
 			songName: room.current_song ? room.current_song.title : null,
@@ -239,13 +239,15 @@ const ProfileScreen: React.FC = () => {
 						const storedToken = await auth.getToken();
 						if (storedToken) {
 							const data = await fetchProfileInfo(storedToken, "");
-							// setPrimProfileData(data);
+							console.log("Fetched data: " + JSON.stringify(data));
+							setPrimProfileData(data);
 						}
 					} catch (error) {
 						console.log("Failed to retrieve profile data:", error);
 						setProfileError(true);
 					}
 				} else {
+					console.log("User Data : " + JSON.stringify(userData));
 					setPrimProfileData(userData);
 				}
 
@@ -272,7 +274,6 @@ const ProfileScreen: React.FC = () => {
 				}
 			}
 
-			// console.log("Completed effect: " + JSON.stringify(userData));
 			setLoading(false);
 		};
 
@@ -1030,9 +1031,9 @@ const ProfileScreen: React.FC = () => {
 						>
 							<Image
 								source={
-									primaryProfileData.profile_picture_url
-										? { uri: primaryProfileData.profile_picture_url }
-										: require("../../../assets/profile-icon.png")
+									// primaryProfileData.profile_picture_url ?
+									{ uri: primaryProfileData.profile_picture_url }
+									// : require("../../../assets/profile-icon.png")
 								}
 								style={{
 									width: 125,
