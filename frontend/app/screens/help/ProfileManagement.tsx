@@ -14,10 +14,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 export default function ProfileManagement() {
 	const router = useRouter();
 
-	const navigateToProfile = () => {
-		router.navigate("../profile/ProfilePage");
-	};
-
 	const navigateToAnaytics = () => {
 		router.navigate("../analytics/AnalyticsPage");
 	};
@@ -39,10 +35,7 @@ export default function ProfileManagement() {
 						color="#08bdbd"
 						style={styles.icon}
 					/>
-					<TouchableOpacity
-						style={styles.textContainer}
-						onPress={navigateToProfile}
-					>
+					<TouchableOpacity style={styles.textContainer}>
 						<Text style={styles.cardTitle}>
 							Creating and Updating Your Profile
 						</Text>

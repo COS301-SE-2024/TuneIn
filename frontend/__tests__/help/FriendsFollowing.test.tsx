@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import FriendsFollowing from "../../app/screens/help/FriendsFollowing"; // Adjust the path as needed
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 // Mock the useRouter hook from expo-router
 jest.mock("expo-router", () => ({

@@ -2,12 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import GettingStarted from "../../app/screens/help/GettingStarted"; // Adjust path as needed
 import { useRouter } from "expo-router";
-import {
-	FontAwesome,
-	MaterialCommunityIcons,
-	Ionicons,
-	AntDesign,
-} from "@expo/vector-icons";
 
 // Mock the useRouter hook from expo-router
 jest.mock("expo-router", () => ({
