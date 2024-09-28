@@ -26,7 +26,13 @@ export default function RoomCollaboration() {
 
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<Entypo name="chat" size={30} color="#08bdbd" style={styles.icon} />
+					<Entypo
+						name="chat"
+						size={30}
+						color="#08bdbd"
+						style={styles.icon}
+						testID="chat-icon"
+					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Chat</Text>
 						<Text style={styles.cardText}>
@@ -48,6 +54,7 @@ export default function RoomCollaboration() {
 						size={30}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="reactions-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Reactions</Text>
@@ -69,6 +76,7 @@ export default function RoomCollaboration() {
 						size={34}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="playlist-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Add To The Playlist</Text>
@@ -90,6 +98,7 @@ export default function RoomCollaboration() {
 						size={34}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="voting-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Voting</Text>
