@@ -6,16 +6,13 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from "react-native";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export default function InteractiveSessions() {
+export default function RoomCollaboration() {
 	const router = useRouter();
-
-	const navigateToScreen = (screen) => {
-		router.navigate(screen);
-	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -23,86 +20,28 @@ export default function InteractiveSessions() {
 				<TouchableOpacity onPress={() => router.back()} testID="back-button">
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>Interactive Sessions/Rooms</Text>
+				<Text style={styles.headerTitle}>Room Collaboration</Text>
 				<View style={styles.headerSpacer} />
 			</View>
 
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("../rooms/CreateRoom")}
-			>
-				<View style={styles.cardContent}>
-					<FontAwesome5
-						name="door-open"
-						size={28}
-						color="#08bdbd"
-						style={styles.icon}
-					/>
-					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Creating Rooms</Text>
-						<Text style={styles.cardText}>
-							Users can create rooms that are permanent or temporary, public or
-							private, and scheduled.
-						</Text>
-					</View>
-				</View>
-			</TouchableOpacity>
-
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
-					<Ionicons
-						name="settings"
-						size={28}
+					<Entypo
+						name="chat"
+						size={30}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="chat-icon"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Room Settings</Text>
+						<Text style={styles.cardTitle}>Chat</Text>
 						<Text style={styles.cardText}>
-							Configure room settings including room name, description, genre,
-							language, explicitness, NSFW, playlist photo, and
-							visibility/privacy options.
-						</Text>
-					</View>
-				</View>
-			</TouchableOpacity>
-
-			<TouchableOpacity style={styles.card}>
-				<View style={styles.cardContent}>
-					<FontAwesome5
-						name="tools"
-						size={28}
-						color="#08bdbd"
-						style={styles.icon}
-					/>
-					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Managing Rooms</Text>
-						<Text style={styles.cardText}>
-							Room owners can manage participants, edit the playlist, moderate
-							content, delete the room and control what other users are allowed
-							to do in room such as enabling chat, voting and if they may add to
-							the queue.
-						</Text>
-					</View>
-				</View>
-			</TouchableOpacity>
-
-			<TouchableOpacity
-				style={styles.card}
-				onPress={() => navigateToScreen("../Home")}
-			>
-				<View style={styles.cardContent}>
-					<Ionicons
-						name="enter-outline"
-						size={28}
-						color="#08bdbd"
-						style={styles.icon}
-					/>
-					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Joining Rooms</Text>
-						<Text style={styles.cardText}>
-							Users can enter and exit rooms, participate and vote, chat or
-							voice chat, and direct message other users if allowed by settings.
+							As a user, you can interact and collaborate with others in the
+							same room by sending messages in the chat section. Simply click
+							the 'Show Chat' or 'Up Arrow' to reveal the chat section. To hide
+							the chat after opening it, click the 'Hide Chat' or 'Down Arrow'.
+							This interaction is only available if the host has enabled chat
+							functionality in the room.
 						</Text>
 					</View>
 				</View>
@@ -111,16 +50,66 @@ export default function InteractiveSessions() {
 			<TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<MaterialIcons
-						name="bookmarks"
-						size={28}
+						name="emoji-emotions"
+						size={30}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="reactions-icon"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.cardTitle}>Bookmarking Rooms</Text>
+						<Text style={styles.cardTitle}>Reactions</Text>
 						<Text style={styles.cardText}>
-							Users can bookmark rooms they like to easily find them later.
-							Bookmarked rooms are displayed in the user's profile.
+							When in a room, you can react to the currently playing songs by
+							clicking on the emoji icon between the text box and the send
+							button. This will display the available reactions, and you can
+							choose one to send. This interaction is only available if the host
+							has enabled chat functionality in the room.
+						</Text>
+					</View>
+				</View>
+			</TouchableOpacity>
+
+			<TouchableOpacity style={styles.card}>
+				<View style={styles.cardContent}>
+					<MaterialIcons
+						name="playlist-add"
+						size={34}
+						color="#08bdbd"
+						style={styles.icon}
+						testID="playlist-icon"
+					/>
+					<View style={styles.textContainer}>
+						<Text style={styles.cardTitle}>Add To The Playlist</Text>
+						<Text style={styles.cardText}>
+							As a user, you can add your own songs to the playlist by clicking
+							on the queue button. This will open the queue, where you can add
+							songs by clicking the 'Add Song' button and searching for tracks
+							to include. This interaction is only available if the host has
+							enabled users to add tracks in the room.
+						</Text>
+					</View>
+				</View>
+			</TouchableOpacity>
+
+			<TouchableOpacity style={styles.card}>
+				<View style={styles.cardContent}>
+					<MaterialIcons
+						name="how-to-vote"
+						size={34}
+						color="#08bdbd"
+						style={styles.icon}
+						testID="voting-icon"
+					/>
+					<View style={styles.textContainer}>
+						<Text style={styles.cardTitle}>Voting</Text>
+						<Text style={styles.cardText}>
+							As a user, you can vote on the order of the songs in the playlist
+							by clicking on the queue button. This will open the queue, where
+							you can upvote or downvote any song currently in the
+							queue/playlist. The more upvotes a song receives, the higher it
+							will move in the queue, and vice versa for downvotes. This
+							interaction is only available if the host has enabled voting in
+							the room.
 						</Text>
 					</View>
 				</View>
