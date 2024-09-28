@@ -61,9 +61,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 					style={styles.closeButton}
 					testID="close-button"
 				>
-					<Text style={styles.closeButtonText}>
-						<Octicons name="x" size={24} color="black" />
-					</Text>
+					<Octicons name="x" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
 			<View style={styles.searchContainer}>
@@ -89,7 +87,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 							style={styles.avatar}
 						/>
 						<View>
-							<Text style={styles.name}>{item.username}</Text>{" "}
+							<Text style={styles.name}>{item.username}</Text>
 							{/* Assuming username is available */}
 							<Text style={styles.username}>{item.username}</Text>
 						</View>
