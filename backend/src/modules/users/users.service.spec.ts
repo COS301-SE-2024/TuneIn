@@ -414,6 +414,7 @@ describe("UsersService", () => {
 					date_created: new Date(),
 					nsfw: false,
 					tags: [],
+					playlist_id: null,
 				},
 				{
 					room_id: "roomID2",
@@ -427,6 +428,7 @@ describe("UsersService", () => {
 					date_created: new Date(),
 					nsfw: false,
 					tags: [],
+					playlist_id: null,
 				},
 			]);
 			const mockRoomDtos: RoomDto[] = [
