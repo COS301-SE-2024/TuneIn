@@ -34,29 +34,23 @@ import { useAPI } from "../../APIContext";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import * as path from "path";
 
-const MemoizedCommentWidget = memo(CommentWidget);
+// const MemoizedCommentWidget = memo(CommentWidget);
 const { width, height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
 
-interface RoomPageProps {
-	joined: boolean;
-	handleJoinLeave: () => Promise<void>;
-}
-
-// const RoomPage = () => {
-const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
+const RoomPage: React.FC = () => {
 	const { rooms } = useAPI();
 	const {
 		roomControls,
 		roomPlaying,
 		joinRoom,
 		leaveRoom,
-		roomEmojiObjects,
 		currentSong,
 		currentRoom,
 		roomQueue,
-		roomMessages,
 		userBookmarks,
+		socketHandshakes,
+		roomParticipants,
 	} = useLive();
 	const { room } = useLocalSearchParams();
 	let roomData: any;
@@ -75,12 +69,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 	const router = useRouter();
 	const [isBookmarked, setIsBookmarked] = useState(false);
-	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const [isChatExpanded, setChatExpanded] = useState(false);
 	const [message, setMessage] = useState("");
 	const [isSending, setIsSending] = useState(false);
-	const [participants, setParticipants] = useState<any[]>([]);
 	const truncateUsername = (username: string) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
@@ -131,112 +123,12 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
 
 	useEffect(() => {
-		const fetchQueue = async () => {
-			const storedToken = await auth.getToken();
-
-			if (!storedToken) {
-				console.error("No stored token found");
-				return;
-			}
-
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
-					{
-						method: "GET",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${storedToken}`,
-						},
-					},
-				);
-
-				if (!response.ok) {
-					const errorText = await response.text();
-					console.error(
-						`Failed to fetch queue: ${response.status} ${response.statusText}`,
-						errorText,
-					);
-					return;
-				}
-
-				const data = await response.json();
-				if (Array.isArray(data)) {
-					const tracks: Track[] = data.map((item: any) => ({
-						id: item.id,
-						name: item.name,
-						//artists: [item.artistNames],
-						artists: [{ name: item.artistNames }],
-						album: { images: [{ url: item.albumArtUrl }] },
-						explicit: item.explicit,
-						preview_url: item.preview_url,
-						uri: item.uri,
-						duration_ms: item.duration_ms,
-					}));
-					setQueue(tracks);
-				} else {
-					console.error("Unexpected response data format:", data);
-				}
-			} catch (error) {
-				console.log("Failed to fetch queue:", error);
-				ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
-			}
-		};
-
-		fetchQueue();
-	}, [roomData.roomID, roomID]);
-
-	useEffect(() => {
 		return () => {
 			if (trackPositionIntervalRef.current) {
 				clearInterval(trackPositionIntervalRef.current);
 			}
 		};
-	}, [isPlaying]);
-
-	useEffect(() => {
-		const fetchParticipants = async () => {
-			const storedToken = await auth.getToken();
-
-			if (!storedToken) {
-				console.error("No stored token found");
-				return;
-			}
-
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomID}/users`,
-					{
-						method: "GET",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${storedToken}`,
-						},
-					},
-				);
-
-				if (!response.ok) {
-					const errorText = await response.text();
-					console.error(
-						`Failed to fetch participants: ${response.status} ${response.statusText}`,
-						errorText,
-					);
-					return;
-				}
-
-				const data = await response.json();
-				if (Array.isArray(data)) {
-					setParticipants(data);
-					console.log("Participants:", data);
-				} else {
-					console.error("Unexpected response data format:", data);
-				}
-			} catch (error) {
-				console.error("Failed to fetch participants:", error);
-			}
-		};
-		fetchParticipants();
-	}, [joined]);
+	}, [roomPlaying]);
 
 	useEffect(() => {
 		if (roomPlaying) {
@@ -264,7 +156,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	}, [currentSong, roomPlaying]);
 
 	const playPauseTrack = useCallback(
-		async (index: number = currentTrackIndex, offset: number = 0) => {
+		async (offset: number = 0) => {
 			console.log("playPauseTrack playPauseTrack playPauseTrack");
 			if (roomControls.canControlRoom()) {
 				if (!roomPlaying) {
@@ -274,12 +166,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					console.log("stopping playback");
 					roomControls.playbackHandler.pausePlayback();
 				}
-				const i = currentSong?.index;
-				if (i) setCurrentTrackIndex(i);
 			}
 			roomControls.requestRoomQueue();
 		},
-		[currentSong?.index, currentTrackIndex, roomControls, roomPlaying],
+		[currentSong?.index, roomControls, roomPlaying],
 	);
 
 	const playNextTrack = () => {
@@ -297,45 +187,36 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		roomControls.requestRoomQueue();
 	};
 
-	const toggleChat = () => {
-		Animated.timing(animatedHeight, {
-			toValue: isChatExpanded ? collapsedHeight : expandedHeight,
-			duration: 300,
-			easing: Easing.ease,
-			useNativeDriver: false,
-		}).start();
-		setChatExpanded(!isChatExpanded);
-	};
+	// const toggleChat = () => {
+	// 	Animated.timing(animatedHeight, {
+	// 		toValue: isChatExpanded ? collapsedHeight : expandedHeight,
+	// 		duration: 300,
+	// 		easing: Easing.ease,
+	// 		useNativeDriver: false,
+	// 	}).start();
+	// 	setChatExpanded(!isChatExpanded);
+	// };
 
-	const navigateToPlaylist = () => {
-		roomControls.requestRoomQueue();
-		router.navigate({
-			pathname: "/screens/rooms/Playlist",
-			params: {
-				Room_id: roomID,
-				mine: roomData.mine,
-			},
-		});
-	};
+	// const navigateToPlaylist = () => {
+	// 	roomControls.requestRoomQueue();
+	// 	router.navigate({
+	// 		pathname: "/screens/rooms/Playlist",
+	// 		params: {
+	// 			Room_id: roomID,
+	// 			mine: roomData.mine,
+	// 		},
+	// 	});
+	// };
 
 	const handleViewParticipants = () => {
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
-			params: {
-				participants: JSON.stringify(participants),
-			},
-		}); // Change this to the correct page for participants
+		});
 	};
 
 	const handleJoinLeave = async () => {
-		const token = await auth.getToken();
-		if (!token) {
-			throw new Error("No token found");
-		}
-
 		// only join if not in room or if in another room
 		if (!currentRoom || (currentRoom && currentRoom.roomID !== roomID)) {
-			console.log("Joining room........", roomID, token);
 			await rooms.joinRoom(roomID);
 			joinRoom(roomID);
 			if (currentSong) {
@@ -365,25 +246,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		}
 	}, [roomID, userBookmarks]);
 
-	const sendMessage = () => {
-		if (isSending) return;
-		setIsSending(true);
-		roomControls.sendLiveChatMessage(message);
-		setMessage("");
-	};
-
-	const exampleTrack: SongRoomWidget = {
-		name: "Song Title",
-		artists: [{ name: "Artist Name" }],
-		album: {
-			images: [
-				{
-					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
-				},
-			],
-		},
-	};
-
 	return (
 		<View style={styles.container}>
 			<View style={styles.contentContainer}>
@@ -395,7 +257,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>{participants.length + " Participants"}</Text>
+							<Text>{roomParticipants.length + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}
@@ -420,14 +282,14 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					/>
 				</View>
 				<View style={styles.songRoomWidget}>
-					<SongRoomWidget track={exampleTrack} />
+					<SongRoomWidget track={currentSong} />
 				</View>
-				<View style={styles.trackInfo}>
+				{/* <View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
 						{rs.getTitle(currentSong)}
 					</Text>
 					<Text>{rs.constructArtistString(currentSong)}</Text>
-				</View>
+				</View> */}
 
 				{roomData.mine ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
@@ -467,11 +329,11 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						key={rs.getID(track)}
 						style={[
 							styles.track,
-							index === currentTrackIndex
+							index === currentSong?.index
 								? styles.currentTrack
 								: styles.queueTrack,
 						]}
-						onPress={() => playPauseTrack(index, 0)}
+						onPress={() => playPauseTrack(0)}
 					>
 						<Image
 							source={{ uri: rs.getAlbumArtUrl(track) }}
