@@ -277,6 +277,37 @@ function MyRoomTabs() {
 	const handleNavigateToChildRooms = async () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
+		const childRooms = roomData.childrenRoomIDs;
+		try {
+			if (!childRooms) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("No child rooms found", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", "No child rooms found.");
+				}
+			} else {
+				const childRoomData = await Promise.all(
+					childRooms.map((childRoomID: string) => getRoom(childRoomID)),
+				);
+				const childRoomQueueData = await Promise.all(
+					childRooms.map((childRoomID: string) => getRoomQueue(childRoomID)),
+				);
+				router.navigate({
+					pathname: "/screens/rooms/SplittingRoom",
+					params: {
+						rooms: JSON.stringify(childRoomData),
+						queues: JSON.stringify(childRoomQueueData),
+					},
+				});
+			}
+		} catch (error) {
+			console.log("Error getting child rooms: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get child rooms", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get child rooms.");
+			}
+		}
 	};
 
 	return (
