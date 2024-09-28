@@ -79,9 +79,9 @@ const TopNavBar: React.FC = () => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginTop: 4,
+		marginTop: 2,
 		flexDirection: "row",
-		height: 56,
+		height: 50,
 		alignItems: "center",
 		justifyContent: "space-between",
 		paddingHorizontal: 16,

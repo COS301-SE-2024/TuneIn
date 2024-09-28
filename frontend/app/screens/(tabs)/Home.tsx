@@ -4,6 +4,8 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	memo,
+	useMemo,
 } from "react";
 import {
 	View,
@@ -446,4 +448,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default Home;
+export default memo(Home);
