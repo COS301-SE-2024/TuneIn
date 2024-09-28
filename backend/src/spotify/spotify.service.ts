@@ -22,6 +22,7 @@ export class SpotifyService {
 	private clientSecret: string;
 	// private redirectUri: string;
 	// private authHeader: string;
+	private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -53,7 +54,25 @@ export class SpotifyService {
 		// 	"base64",
 		// );
 
+		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
+		if (!tuneinID) {
+			throw new Error("Missing TUNEIN_USER_ID");
+		}
 		let error: Error | undefined;
+		this.spotifyAuthService.getSpotifyTokens(tuneinID).then((tp) => {
+			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+				try {
+					this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
+					break;
+				} catch (e) {
+					error = e as Error;
+					console.error(e);
+				}
+			}
+			if (error) {
+				throw error;
+			}
+		});
 	}
 
 	async wait(ms: number) {
