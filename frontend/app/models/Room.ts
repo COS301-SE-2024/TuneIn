@@ -26,7 +26,7 @@ export interface Room {
 
 export const formatRoomData = (room: any): Room => {
 	return {
-		roomID: room.id,
+		roomID: room.id ?? room.roomID,
 		backgroundImage: room.backgroundImage,
 		name: room.name,
 		language: room.language,
