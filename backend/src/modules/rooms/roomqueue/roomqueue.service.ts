@@ -294,15 +294,9 @@ export class ActiveRoom {
 	};
 	public inactive = false;
 	public minutesInactive = 0;
-	public spotifyPlaylistID: string;
 
-	constructor(
-		room: RoomDto,
-		spotifyPlaylistID: string,
-		murLockService: MurLockService,
-	) {
+	constructor(room: RoomDto, murLockService: MurLockService) {
 		this.room = room;
-		this.spotifyPlaylistID = spotifyPlaylistID;
 		this.createQueues(murLockService);
 	}
 
@@ -387,7 +381,7 @@ export class ActiveRoom {
 						console.log("Queue has changed, updating spotify playlist");
 						const start = this.historicQueue.size() + i;
 						await spotify.updateRoomPlaylist(
-							this.spotifyPlaylistID,
+							this.room.spotifyPlaylistID,
 							current,
 							start,
 						);
@@ -505,7 +499,7 @@ export class ActiveRoom {
 			},
 		);
 		const ids: string[] = rs.map((s) => s.spotifyID);
-		await spotify.updateRoomPlaylist(this.spotifyPlaylistID, ids, 0);
+		await spotify.updateRoomPlaylist(this.room.spotifyPlaylistID, ids, 0);
 	}
 
 	spotifyIDs(): string[] {
@@ -1186,18 +1180,14 @@ export class RoomQueueService {
 	}
 
 	async createRoomQueue(roomID: string): Promise<void> {
-		const room: RoomDto | null = await this.dtogen.generateRoomDto(roomID);
-		if (!room || room === null) {
-			throw new Error("Room does not exist");
+		let room: RoomDto = await this.dtogen.generateRoomDto(roomID);
+		if (room.spotifyPlaylistID === "") {
+			const roomPlaylist: Spotify.Playlist = await this.spotify.getRoomPlaylist(
+				room,
+			);
+			room = await this.dtogen.generateRoomDto(roomID);
 		}
-		const roomPlaylist: Spotify.Playlist = await this.spotify.getRoomPlaylist(
-			room,
-		);
-		const activeRoom = new ActiveRoom(
-			room,
-			roomPlaylist.id,
-			this.murLockService,
-		);
+		const activeRoom = new ActiveRoom(room, this.murLockService);
 		await activeRoom.reloadQueue(
 			this.prisma,
 			this.spotify,

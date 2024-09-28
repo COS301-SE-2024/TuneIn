@@ -292,6 +292,14 @@ export class SpotifyService {
 							collaborative: false,
 						});
 					//upload playlist image here
+					await this.prisma.room.update({
+						where: {
+							room_id: room.roomID,
+						},
+						data: {
+							playlist_id: playlist.id,
+						},
+					});
 					return playlist;
 				}
 			} catch (e) {
