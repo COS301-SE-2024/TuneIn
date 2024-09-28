@@ -209,9 +209,11 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 
 				// Show a toast on Android, and an alert on other platforms
 				if (Platform.OS === "android") {
-					ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
+					// ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
+					console.log("Failed to fetch queue");
 				} else {
-					Alert.alert("Error", "Failed to fetch queue");
+					console.log("Failed to fetch queue");
+					// Alert.alert("Error", "Failed to fetch queue");
 				}
 			}
 		};

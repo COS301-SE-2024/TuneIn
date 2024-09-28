@@ -977,6 +977,7 @@ const ProfileScreen: React.FC = () => {
 					testID="refresh-control"
 				/>
 			}
+			style={{ backgroundColor: colors.backgroundColor }}
 		>
 			<View
 				style={{

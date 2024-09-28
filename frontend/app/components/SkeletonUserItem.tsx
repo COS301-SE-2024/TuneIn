@@ -13,7 +13,6 @@ const SkeletonUserItem = () => {
 					<View style={styles.usernamePlaceholder} />
 				</View>
 			</View>
-			<View style={styles.followButtonPlaceholder} />
 		</View>
 	);
 };

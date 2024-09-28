@@ -53,20 +53,24 @@ describe("AnalyticsPage", () => {
 	});
 
 	it("should open and close the drawer", async () => {
-		const { getByTestId, queryByText } = render(<AnalyticsPage />);
+		const { getByTestId, queryByTestId } = render(<AnalyticsPage />);
 
 		// Ensure the drawer is initially closed
-		expect(queryByText("Interactions Analytics")).toBeNull();
+		expect(queryByTestId("interaction-analytics")).toBeNull();
 
 		// Open the drawer
 		fireEvent.press(getByTestId("menu-button"));
 
-		// Check if the drawer items are visible
-		expect(await queryByText("Interactions Analytics")).toBeTruthy();
+		await waitFor(async () => {
+			const text = await queryByTestId("interaction-analytics");
+
+			// Check if the drawer items are visible
+			expect(text).toBeTruthy();
+		});
 
 		// Close the drawer
 		fireEvent.press(getByTestId("menu-button"));
-		expect(queryByText("Interactions Analytics")).toBeNull();
+		expect(queryByTestId("interaction-analytics")).toBeNull();
 	});
 
 	it("should navigate back when back button is pressed", () => {
