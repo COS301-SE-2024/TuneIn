@@ -21,7 +21,12 @@ export default function InteractiveSessions() {
 		<ScrollView style={styles.container}>
 			<View style={styles.header}>
 				<TouchableOpacity onPress={() => router.back()} testID="back-button">
-					<Ionicons name="chevron-back" size={24} color="black" />
+					<Ionicons
+						name="chevron-back"
+						size={24}
+						color="black"
+						testID="back-icon"
+					/>
 				</TouchableOpacity>
 				<Text style={styles.headerTitle}>Interactive Sessions/Rooms</Text>
 				<View style={styles.headerSpacer} />
@@ -37,6 +42,7 @@ export default function InteractiveSessions() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="door-open-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Creating Rooms</Text>
@@ -55,6 +61,7 @@ export default function InteractiveSessions() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="settings-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Room Settings</Text>
@@ -74,6 +81,7 @@ export default function InteractiveSessions() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="tools-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Managing Rooms</Text>
@@ -97,6 +105,7 @@ export default function InteractiveSessions() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="enter-outline-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Joining Rooms</Text>
@@ -115,6 +124,7 @@ export default function InteractiveSessions() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="bookmarks-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Bookmarking Rooms</Text>
