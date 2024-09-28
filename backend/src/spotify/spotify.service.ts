@@ -374,6 +374,50 @@ export class SpotifyService {
 		throw new Error("Failed to update playlist");
 	}
 
+	async saveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
+				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+				await api.currentUser.playlists.follow(roomPlaylist.id);
+				break;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to save room playlist");
+	}
+
+	async unsaveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
+				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+				await api.currentUser.playlists.unfollow(roomPlaylist.id);
+				break;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to save room playlist");
+	}
+
 	async getUserPlaylistTracks(
 		tk: SpotifyTokenPair,
 		playlistID: string,
