@@ -79,9 +79,6 @@ function MyRoomTabs() {
 	}
 
 	useEffect(() => {
-		console.log("Room ID: ", roomID);
-		console.log("Room Data: ", roomData);
-		console.log("Current Room: ", currentRoom);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -171,8 +168,8 @@ function MyRoomTabs() {
 			}
 			const data = await response.json();
 			return {
-				roomID: data.roomID,
-				id: data.roomID,
+				roomID: roomID,
+				id: roomID,
 				name: data.room_name,
 				description: data.description,
 				userID: data.creator.userID,
@@ -185,7 +182,7 @@ function MyRoomTabs() {
 				language: data.language,
 				roomSize: "50",
 				userProfile: data.creator.profile_picture_url,
-				mine: true,
+				mine: data.creator.userID === userData?.userID,
 				songName: data.current_song ? data.current_song.title : null,
 			};
 		} catch (error) {
