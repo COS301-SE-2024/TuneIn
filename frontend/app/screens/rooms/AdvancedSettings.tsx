@@ -24,6 +24,7 @@ import { formatRoomData } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
+const placeholderImage = require("../../assets/spotify.png");
 
 type Queues = {
 	[key: string]: Track[];
@@ -173,6 +174,7 @@ const AdvancedSettings = () => {
 				isNsfw: data.has_nsfw_content,
 				language: data.language,
 				roomSize: "50",
+				userProfile: data.creator.profile_picture_url,
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
@@ -228,16 +230,20 @@ const AdvancedSettings = () => {
 			// },
 
 			// this is the format of the queue from the backend
+			console.log("Placeholder image: ", placeholderImage);
 			const queue = data.map((song: any) => {
+				console.log("--------------------Song cover: ", placeholderImage);
+				const cover = song.cover;
 				return {
 					id: song.id,
 					name: song.title,
 					artists: song.artists.map((artist: string) => ({ name: artist })), // Convert artist string to object
-					album: { images: [{ url: song.cover }] },
+					album: { images: [{ url: cover }] },
 					explicit: false,
 					preview_url: "",
 					uri: `spotify:track:${song.spotify_id}`,
 					duration_ms: song.duration * 1000,
+					albumArtUrl: placeholderImage,
 				};
 			});
 			console.log("Room queue data: ", queue);
@@ -501,7 +507,7 @@ const AdvancedSettings = () => {
 				</TouchableOpacity>
 				<TouchableOpacity style={styles.editButton} onPress={checkRoomSplit}>
 					<Text style={styles.editButtonText}>Split Room</Text>
-					<Icon name="split" size={20} color="black" />
+					<Icon name="room" size={20} color="black" />
 				</TouchableOpacity>
 				<View style={styles.saveButton}>
 					<CreateButton title="Save Changes" onPress={handleSave} />

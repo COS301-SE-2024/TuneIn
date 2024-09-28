@@ -26,6 +26,7 @@ type Queues = {
 };
 
 const SplittingRoom: React.FC = () => {
+	console.log("--------SplittingRoom", placeholderImage);
 	const router = useRouter(); // Initialize the router
 	const { queues: queuesParam, rooms: roomsParam } = useLocalSearchParams();
 	const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
@@ -102,6 +103,7 @@ const SplittingRoom: React.FC = () => {
 	});
 
 	const navigateToRoomPage = (room: Room) => {
+		console.log("Navigating to room page:", room);
 		router.navigate({
 			pathname: "/screens/rooms/RoomPage",
 			params: { room: JSON.stringify(room) },

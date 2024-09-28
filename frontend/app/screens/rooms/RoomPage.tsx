@@ -71,7 +71,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [joineds, setJoined] = useState(false);
 
 	useEffect(() => {
-		console.log("Room ID: " + currentRoom?.roomID);
+		console.log("current Room ID: " + currentRoom?.roomID);
+		console.log("room ID: " + roomID);
+		console.log("Room Data", room);
+		console.log("Current Room", currentRoom);
 		if (currentRoom && currentRoom?.roomID === roomID) {
 			setJoined(true);
 		}
@@ -390,7 +393,11 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				</View>
 				<View style={styles.trackDetails}>
 					<Image
-						source={{ uri: queue[currentTrackIndex]?.albumArtUrl }}
+						source={
+							queue[currentTrackIndex]?.albumArtUrl
+								? { uri: queue[currentTrackIndex].albumArtUrl }
+								: require("../../../assets/profile-icon.png")
+						}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
