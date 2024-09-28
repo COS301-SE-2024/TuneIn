@@ -27,14 +27,14 @@ import FriendsGrid from "../../components/FriendsGrid";
 import Miniplayer from "../../components/home/miniplayer";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 import axios, { AxiosResponse } from "axios";
-import auth from "./../services/AuthManagement"; // Import AuthManagement
-import * as utils from "./../services/Utils"; // Import Utils
-import { Player } from "../PlayerContext";
-import { colors } from "../styles/colors";
-import TopNavBar from "../components/TopNavBar";
-import { useAPI } from "../APIContext";
-import { UserDto } from "../../api";
-import { RequiredError } from "../../api/base";
+import auth from "./../../services/AuthManagement"; // Import AuthManagement
+import * as utils from "./../../services/Utils"; // Import Utils
+import { Player } from "../../PlayerContext";
+import { colors } from "../../styles/colors";
+import TopNavBar from "../../components/TopNavBar";
+import { useAPI } from "../../APIContext";
+import { UserDto } from "../../../api";
+import { RequiredError } from "../../../api/base";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -53,7 +53,6 @@ const Home: React.FC = () => {
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
-	// const [userData, setUserData] = useState<UserData | undefined>(undefined);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -211,7 +210,7 @@ const Home: React.FC = () => {
 		}
 
 		setLoading(false);
-	}, [setUserData, userData, ProfileIMG]);
+	}, [ProfileIMG]);
 
 	const [refreshing] = React.useState(false);
 

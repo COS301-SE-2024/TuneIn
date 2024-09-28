@@ -341,7 +341,7 @@ const ProfileScreen: React.FC = () => {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${userID}/room/current`,
+					`${utils.API_BASE_URL}/users/${userID}/rooms/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
