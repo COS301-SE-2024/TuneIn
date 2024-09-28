@@ -34,6 +34,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="edit-icon"
 					/>
 					<TouchableOpacity style={styles.textContainer}>
 						<Text style={styles.cardTitle}>
@@ -55,6 +56,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="music-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Music Preferences</Text>
@@ -73,6 +75,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="heart-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Personalized Recommendations</Text>
@@ -90,6 +93,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="analytics-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Analytics</Text>
