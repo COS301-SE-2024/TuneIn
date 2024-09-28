@@ -24,7 +24,6 @@ import { formatRoomData } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
-import { format } from 'winston';
 const placeholderImage = require("../../assets/spotify.png");
 
 type Queues = {
@@ -57,7 +56,6 @@ const AdvancedSettings = () => {
 
 	const goToEditScreen = () => {
 		const formattedRoom = formatRoomData(JSON.parse(room as string));
-		console.log("Formatted room data to edit room: ", formattedRoom);
 		router.navigate({
 			pathname: "/screens/rooms/EditRoom",
 			params: { room: JSON.stringify(formattedRoom) },
@@ -184,7 +182,6 @@ const AdvancedSettings = () => {
 					albumArtUrl: placeholderImage,
 				};
 			});
-			console.log("Room queue data: ", queue);
 			return queue;
 		} catch (error) {
 			console.log("Error getting room queue: ", error);
@@ -221,15 +218,11 @@ const AdvancedSettings = () => {
 					return;
 				} else {
 					const data = await response.json();
-					console.log("Room split successfully");
-					console.log("Split room data: ", data);
 					const childRoom1 = await getRoom(data.childrenRoomIDs[0]);
 					const childRoom2 = await getRoom(data.childrenRoomIDs[1]);
 					if (childRoom1 && childRoom2) {
 						const childRoom1Queue = await getRoomQueue(childRoom1.id);
 						const childRoom2Queue = await getRoomQueue(childRoom2.id);
-						console.log("Child room 1: ", childRoom1);
-						console.log("Child room 2: ", childRoom2);
 						if (childRoom1Queue && childRoom2Queue) {
 							router.navigate({
 								pathname: "/screens/rooms/SplittingRoom",
@@ -306,7 +299,6 @@ const AdvancedSettings = () => {
 					return;
 				}
 				const data = await response.json();
-				console.log("Room split data: ", data);
 				if (data.length > 1) {
 					setGenres(data);
 					setPopupVisible(true);

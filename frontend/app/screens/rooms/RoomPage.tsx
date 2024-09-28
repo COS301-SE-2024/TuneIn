@@ -258,7 +258,6 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				if (Array.isArray(data)) {
 					setParticipants(data);
 					setParticipantCount(data.length);
-					console.log("Participants:", data);
 				} else {
 					console.error("Unexpected response data format:", data);
 				}

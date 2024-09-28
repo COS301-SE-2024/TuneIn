@@ -26,7 +26,6 @@ type Queues = {
 };
 
 const SplittingRoom: React.FC = () => {
-	console.log("--------SplittingRoom", placeholderImage);
 	const router = useRouter(); // Initialize the router
 	const { queues: queuesParam, rooms: roomsParam } = useLocalSearchParams();
 	const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
@@ -46,7 +45,6 @@ const SplittingRoom: React.FC = () => {
 			return [];
 		}
 	}, [roomsParam]);
-
 	// Set queues from searchParams
 	useEffect(() => {
 		try {
@@ -54,8 +52,6 @@ const SplittingRoom: React.FC = () => {
 			if (typeof parsedQueues === "object" && parsedQueues !== null) {
 				const formattedQueues: Queues = Object.fromEntries(
 					Object.entries(parsedQueues).map(([key, queue]) => {
-						console.log("key", key);
-						console.log("queue", queue);
 						if (Array.isArray(queue)) {
 							return [key, queue]; // Ensure size 2 for each queue
 						}
@@ -103,7 +99,6 @@ const SplittingRoom: React.FC = () => {
 	});
 
 	const navigateToRoomPage = (room: Room) => {
-		console.log("Navigating to room page:", room);
 		router.navigate({
 			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(room) },
@@ -132,32 +127,9 @@ const SplittingRoom: React.FC = () => {
 							const newIndex = Math.round(
 								event.nativeEvent.contentOffset.x / (cardWidth + spacing),
 							);
-							console.log(
-								"New index:",
-								newIndex,
-								"Current index:",
-								currentRoomIndex,
-							);
-							if (rooms[newIndex] && rooms[newIndex].roomID) {
-								console.log(
-									"Setting playlist:",
-									queues[rooms[newIndex].roomID],
-								);
-							}
-							console.log("Setting playlist for room:", rooms[newIndex]);
-							console.log("New index:", newIndex);
-							console.log("Current room index:", currentRoomIndex);
-							console.log("queues:", queues[newIndex.toString()]);
 							if (newIndex !== currentRoomIndex) {
 								setCurrentRoomIndex(newIndex);
 								setPlaylist(queues[newIndex.toString()]);
-								if (rooms[newIndex]?.roomID && queues[rooms[newIndex].roomID]) {
-									console.log("setting new playlist");
-									setPlaylist(queues[rooms[newIndex].roomID]);
-								} else {
-									console.log("setting empty playlist");
-									// setPlaylist([]); // Default to empty playlist
-								}
 							}
 						},
 					},
