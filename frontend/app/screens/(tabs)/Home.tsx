@@ -183,6 +183,7 @@ const Home: React.FC = () => {
 				isExplicit: room.has_explicit_content,
 				start_date: room.start_date,
 				end_date: room.end_date,
+				childrenRoomIDs: room.childrenRoomIDs,
 			};
 		});
 	};

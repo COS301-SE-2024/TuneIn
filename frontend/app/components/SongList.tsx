@@ -24,7 +24,7 @@ const SongList: React.FC<SongListProps> = ({
 	swapSongs,
 	setVoteCount,
 }) => {
-	const albumCoverUrl = track.album.images[0]?.url;
+	const albumCoverUrl = track.album.images[0]?.url ?? "";
 
 	return (
 		<View

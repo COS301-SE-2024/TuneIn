@@ -67,6 +67,7 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 					start_date: result.start_date,
 					end_date: result.end_date,
 					tags: result.tags,
+					childrenRoomIDs: result.childrenRoomIDs,
 				};
 				setCurrentRoom(room);
 			} catch (error) {

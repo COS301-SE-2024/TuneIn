@@ -45,7 +45,6 @@ const SplittingRoom: React.FC = () => {
 			return [];
 		}
 	}, [roomsParam]);
-
 	// Set queues from searchParams
 	useEffect(() => {
 		try {
@@ -54,7 +53,7 @@ const SplittingRoom: React.FC = () => {
 				const formattedQueues: Queues = Object.fromEntries(
 					Object.entries(parsedQueues).map(([key, queue]) => {
 						if (Array.isArray(queue)) {
-							return [key, queue.slice(0, 2)]; // Ensure size 2 for each queue
+							return [key, queue]; // Ensure size 2 for each queue
 						}
 						return [key, []]; // Default to empty array if not an array
 					}),
@@ -101,7 +100,7 @@ const SplittingRoom: React.FC = () => {
 
 	const navigateToRoomPage = (room: Room) => {
 		router.navigate({
-			pathname: "/screens/rooms/RoomPage",
+			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(room) },
 		});
 	};
@@ -130,11 +129,7 @@ const SplittingRoom: React.FC = () => {
 							);
 							if (newIndex !== currentRoomIndex) {
 								setCurrentRoomIndex(newIndex);
-								if (rooms[newIndex]?.roomID && queues[rooms[newIndex].roomID]) {
-									setPlaylist(queues[rooms[newIndex].roomID]);
-								} else {
-									setPlaylist([]); // Default to empty playlist
-								}
+								setPlaylist(queues[newIndex.toString()]);
 							}
 						},
 					},

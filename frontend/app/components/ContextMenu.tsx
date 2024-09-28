@@ -12,6 +12,7 @@ interface ContextMenuProps {
 	onShareRoom: () => void;
 	onSavePlaylist: () => void;
 	isHost: boolean;
+	onSeeChildRooms?: () => void;
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({
@@ -22,6 +23,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 	onShareRoom,
 	onSavePlaylist,
 	isHost,
+	onSeeChildRooms,
 }) => {
 	return (
 		<Modal transparent visible={isVisible} animationType="fade">
@@ -63,6 +65,19 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 							Save Playlist
 						</Text>
 					</TouchableOpacity>
+					{onSeeChildRooms && (
+						<TouchableOpacity onPress={onSeeChildRooms} style={styles.menuItem}>
+							<Text style={styles.menuText}>
+								<MaterialCommunityIcons
+									name="link-variant"
+									size={24}
+									color="black"
+								/>
+								{"  "}
+								Sub-Rooms
+							</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 			</TouchableOpacity>
 		</Modal>
