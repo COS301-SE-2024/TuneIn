@@ -379,11 +379,7 @@ export class ActiveRoom {
 	 * @param prisma
 	 * @param murLockService
 	 */
-	async reloadQueue(
-		spotify: SpotifyService,
-		prisma: PrismaService,
-		murLockService: MurLockService,
-	) {
+	async reloadQueue(prisma: PrismaService, murLockService: MurLockService) {
 		//load historic queue from db
 		const roomID = this.room.roomID;
 		const queueItems = await prisma.queue.findMany({
@@ -401,9 +397,6 @@ export class ActiveRoom {
 		if (!queueItems || queueItems === null) {
 			throw new Error("There was an issue fetching the queue");
 		}
-
-		const ids: string[] = queueItems.map((q) => q.song.spotify_id);
-		const tracks: Spotify.Track[] = await spotify.getManyTracks(ids);
 
 		// assume first person who voted for the song is the enqueuer
 		const songEnqueuers: string[] = [];
@@ -425,15 +418,22 @@ export class ActiveRoom {
 			if (queueItem) {
 				const songEnqueuer = songEnqueuers[i];
 				if (queueItem.song.spotify_id && songEnqueuer) {
-					const song = new RoomSong(
-						queueItem.song.spotify_id,
-						songEnqueuer,
-						tracks[i],
-						queueItem.insert_time,
-						queueItem.start_time,
-					);
-					song.addVotes(queueItem.vote);
-					rs.push(song);
+					try {
+						const song = new RoomSong(
+							queueItem.song.spotify_id,
+							songEnqueuer,
+							JSON.parse(queueItem.song.track_info as string),
+							queueItem.insert_time,
+							queueItem.start_time,
+						);
+						song.addVotes(queueItem.vote);
+						rs.push(song);
+					} catch (e) {
+						console.error(
+							"Error in reloadQueue. Song could not be loaded from database queue",
+						);
+						console.error(e);
+					}
 				}
 			}
 		}
@@ -446,11 +446,6 @@ export class ActiveRoom {
 					for (let i = 0; i < rs.length; i++) {
 						const song = rs[i];
 						if (song) {
-							if (song.spotifyID === null) {
-								// throw new Error("Song does not have a spotify id");
-								continue;
-							}
-
 							const startTime = song.getPlaybackStartTime();
 							if (
 								startTime !== null &&
@@ -579,9 +574,7 @@ export class ActiveRoom {
 					const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
 
 					//ensure enqueued songs are in db (songs table)
-					const tracks: Spotify.Track[] = await spotify.getManyTracks(
-						queue.map((s) => s.spotifyID),
-					);
+					const tracks: Spotify.Track[] = queue.map((s) => s.spotifyInfo);
 					const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
 
 					//ensure enqueued songs are queueitems associated with room
@@ -1235,11 +1228,7 @@ export class RoomQueueService {
 			throw new Error("Room does not exist");
 		}
 		const activeRoom = new ActiveRoom(room, this.murLockService);
-		await activeRoom.reloadQueue(
-			this.spotify,
-			this.prisma,
-			this.murLockService,
-		);
+		await activeRoom.reloadQueue(this.prisma, this.murLockService);
 		// await this.tasksService.getRoomSpotifyInfo(activeRoom);
 		this.roomQueues.set(roomID, activeRoom);
 		console.log(
