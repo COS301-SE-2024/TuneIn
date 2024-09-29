@@ -138,6 +138,7 @@ export class RoomSong {
 			index: -1,
 			insertTime: this.insertTime,
 			track: this.spotifyDetails,
+			playlistIndex: -1,
 		};
 		if (this.playbackStartTime) {
 			result.startTime = this.playbackStartTime;
@@ -978,10 +979,12 @@ export class ActiveRoom {
 
 	queueAsRoomSongDto(): RoomSongDto[] {
 		const tempQueue: RoomSong[] = this.queue.toArray();
+		const playedSongs: number = this.historicQueue.size();
 		const result: RoomSongDto[] = tempQueue.map((rs) => {
 			const i = tempQueue.indexOf(rs);
 			const s: RoomSongDto = rs.asRoomSongDto();
 			s.index = i;
+			s.playlistIndex = i + playedSongs;
 			return s;
 		});
 		return result;
@@ -996,6 +999,7 @@ export class ActiveRoom {
 		const result: RoomSongDto = song.asRoomSongDto();
 		const i = tempQueue.indexOf(song);
 		result.index = i;
+		result.playlistIndex = i + this.historicQueue.size();
 		return result;
 	}
 
@@ -1157,6 +1161,10 @@ export class ActiveRoom {
 					song.insertTime,
 			);
 		}
+	}
+
+	get playedSongs(): RoomSong[] {
+		return this.historicQueue.toArray();
 	}
 
 	get songs(): RoomSong[] {
@@ -1354,7 +1362,10 @@ export class RoomQueueService {
 		if (!song || song === null) {
 			return null;
 		}
-		return song.asRoomSongDto();
+		const result = song.asRoomSongDto();
+		result.index = 0;
+		result.playlistIndex = activeRoom.playedSongs.length;
+		return result;
 	}
 
 	async isPlaying(roomID: string): Promise<boolean> {
@@ -1373,7 +1384,10 @@ export class RoomQueueService {
 		if (!song || song === null) {
 			return null;
 		}
-		return song.asRoomSongDto();
+		const result = song.asRoomSongDto();
+		result.index = 0;
+		result.playlistIndex = activeRoom.playedSongs.length;
+		return result;
 	}
 
 	async pauseSong(roomID: string): Promise<void> {
