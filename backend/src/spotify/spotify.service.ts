@@ -34,8 +34,7 @@ export class SpotifyService {
 		private readonly configService: ConfigService,
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
-		private readonly httpService: HttpService,
-		// private readonly imageService: ImageService,
+		private readonly httpService: HttpService, // private readonly imageService: ImageService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
