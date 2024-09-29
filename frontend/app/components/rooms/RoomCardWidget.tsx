@@ -176,7 +176,11 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 							<View style={styles.userInfoContainer}>
 								<View style={styles.userAvatarContainer}>
 									<Image
-										source={{ uri: roomCard.userProfile }}
+										source={
+											roomCard.userProfile
+												? { uri: roomCard.userProfile }
+												: require("../../assets/profile-icon.png")
+										}
 										style={styles.userAvatar}
 									/>
 									<Text style={styles.username}>
@@ -208,14 +212,15 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		width: 290, // Set the width to match the card width
 		borderRadius: 15,
-		overflow: "hidden",
+		overflow: "hidden", // Ensures the shadow respects the rounded corners
 		height: 190, // Adjust height as needed
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
+		shadowRadius: 6, // Adjust shadow radius for a softer shadow effect
+		elevation: 5, // For Android shadow
 	},
 	imageBackground: {
 		flex: 1,
