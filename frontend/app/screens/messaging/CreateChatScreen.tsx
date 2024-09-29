@@ -10,22 +10,17 @@ import {
 } from "react-native";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { UserDto } from "../../../api";
-import { useLive } from "../../LiveContext";
 import FriendServices from "../../services/FriendServices"; // Import FriendServices
 import { Friend } from "../../models/friend"; // Adjust import path as necessary
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
-	friends: UserDto[];
 }
 
-const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
-	closeModal,
-	friends,
-}) => {
-	const { enterDM, leaveDM, socketHandshakes } = useLive();
+const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
+	const [allUsers, setAllUsers] = useState<Friend[]>([]); // Combined list of friends and followers
+	const [filteredUsers, setFilteredUsers] = useState<Friend[]>([]);
 	const router = useRouter();
 
 	// Fetch friends and followers when the component mounts
@@ -52,21 +47,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 		setFilteredUsers(filtered);
 	};
 
-	useEffect(() => {
-		console.log("Friends: ", friends);
-		/*
-		const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
-		setFilteredUsers(sortedUsers);
-		*/
-	}, [friends]);
-
-	const handleUserSelect = (user: UserDto) => {
-		console.log("pre enterDM");
-		if (socketHandshakes.dmJoined) {
-			leaveDM();
-		}
-		enterDM([user.username]);
-		console.log("post enterDM");
+	const handleUserSelect = (user: Friend) => {
 		router.navigate(`/screens/messaging/ChatScreen?username=${user.username}`);
 		closeModal();
 	};
