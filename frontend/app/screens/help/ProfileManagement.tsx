@@ -14,10 +14,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 export default function ProfileManagement() {
 	const router = useRouter();
 
-	const navigateToProfile = () => {
-		router.navigate("../profile/ProfilePage");
-	};
-
 	const navigateToAnaytics = () => {
 		router.navigate("../analytics/AnalyticsPage");
 	};
@@ -38,11 +34,9 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="edit-icon"
 					/>
-					<TouchableOpacity
-						style={styles.textContainer}
-						onPress={navigateToProfile}
-					>
+					<TouchableOpacity style={styles.textContainer}>
 						<Text style={styles.cardTitle}>
 							Creating and Updating Your Profile
 						</Text>
@@ -62,6 +56,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="music-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Music Preferences</Text>
@@ -80,6 +75,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="heart-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Personalized Recommendations</Text>
@@ -97,6 +93,7 @@ export default function ProfileManagement() {
 						size={28}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="analytics-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Analytics</Text>

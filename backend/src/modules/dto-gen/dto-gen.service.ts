@@ -299,6 +299,10 @@ export class DtoGenService {
 			where: { room_id: roomID },
 		});
 
+		const childRooms = await this.prisma.child_room.findMany({
+			where: { parent_room_id: roomID },
+		});
+
 		const result: RoomDto = {
 			creator: new UserDto(),
 			roomID: room.room_id,
@@ -316,7 +320,7 @@ export class DtoGenService {
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
 			tags: room.tags || [],
-			childrenRoomIDs: [],
+			childrenRoomIDs: childRooms.map((r) => r.room_id),
 		};
 
 		if (scheduledRoom && scheduledRoom !== null) {
@@ -343,6 +347,10 @@ export class DtoGenService {
 	async generateRoomDtoFromRoom(room: PrismaTypes.room): Promise<RoomDto> {
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
 			where: { room_id: room.room_id },
+		});
+
+		const childrenRooms = await this.prisma.child_room.findMany({
+			where: { parent_room_id: room.room_id },
 		});
 
 		const result: RoomDto = {
@@ -379,6 +387,10 @@ export class DtoGenService {
 			result.start_date = scheduledRoom.start_date;
 			result.end_date = scheduledRoom.end_date;
 			*/
+		}
+
+		if (childrenRooms && childrenRooms !== null) {
+			result.childrenRoomIDs = childrenRooms.map((r) => r.room_id);
 		}
 
 		//participant count will be added later
@@ -429,6 +441,9 @@ export class DtoGenService {
 							") not found in Users table",
 					);
 				}
+				const childrenRooms = await this.prisma.child_room.findMany({
+					where: { parent_room_id: r.room_id },
+				});
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
@@ -446,7 +461,7 @@ export class DtoGenService {
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
 					tags: r.tags || [],
-					childrenRoomIDs: [],
+					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
 				};
 				result.push(room);
 			}

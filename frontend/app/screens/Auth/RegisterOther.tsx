@@ -98,9 +98,6 @@ const RegisterOtherScreen: React.FC = () => {
 			redirectUri: redirectURI,
 			responseType: ResponseType.Code,
 			scopes: [scopes.join(" ")],
-			extraParams: {
-				show_dialog: "true",
-			},
 			usePKCE: false,
 			state: state,
 		},

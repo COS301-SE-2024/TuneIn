@@ -10,6 +10,8 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
@@ -17,6 +19,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import ContextMenu from "../../components/ContextMenu";
 import { useLive } from "../../LiveContext";
 import { useAPI } from "../../APIContext";
+import { RoomSongDto } from "../../models/RoomSongDto";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -93,6 +96,42 @@ function MyRoomTabs() {
 		// Implement room sharing logic here
 	};
 
+	const handleNavigateToChildRooms = async () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
+		const childRooms = roomData.childrenRoomIDs;
+		try {
+			if (!childRooms) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("No child rooms found", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", "No child rooms found.");
+				}
+			} else {
+				const childRoomData: RoomDto[] = await Promise.all(
+					childRooms.map((childRoomID: string) => getRoom(childRoomID)),
+				);
+				const childRoomQueueData: RoomSongDto[] = await Promise.all(
+					childRooms.map((childRoomID: string) => getRoomQueue(childRoomID)),
+				);
+				router.navigate({
+					pathname: "/screens/rooms/SplittingRoom",
+					params: {
+						rooms: JSON.stringify(childRoomData),
+						queues: JSON.stringify(childRoomQueueData),
+					},
+				});
+			}
+		} catch (error) {
+			console.log("Error getting child rooms: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get child rooms", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get child rooms.");
+			}
+		}
+	};
+
 	const updateRoomStatus = useCallback(async () => {
 		if (currentRoom && currentRoom.roomID === roomID) {
 			setUserInRoom(true);
@@ -151,6 +190,11 @@ function MyRoomTabs() {
 					onShareRoom={handleShareRoom}
 					onSavePlaylist={handleSavePlaylist}
 					isHost={roomData.mine} // Pass whether the user is the host
+					onSeeChildRooms={
+						roomData.childrenRoomIDs?.length > 0
+							? handleNavigateToChildRooms
+							: undefined
+					}
 				/>
 			</View>
 

@@ -162,30 +162,6 @@ class FriendServices {
 			throw error;
 		}
 	}
-
-	static async handleFollow(friend: Friend): Promise<void> {
-		const token = await auth.getToken();
-		if (!token) {
-			throw new Error("No token found.");
-		}
-		const action = friend.relationship === "mutual" ? "unfollow" : "follow";
-		const url = `${utils.API_BASE_URL}/users/${friend.username}/${action}`;
-
-		try {
-			const response = await axios.post(
-				url,
-				{},
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			if (response.status !== 200) throw new Error(`Failed to ${action} user.`);
-		} catch (error) {
-			console.error("Error following user:", error);
-			throw error;
-		}
-	}
-
 	// Fetch followers
 	static async fetchFollowers(): Promise<Friend[]> {
 		const token = await auth.getToken();
@@ -219,20 +195,36 @@ class FriendServices {
 	static async fetchFollowing(): Promise<Friend[]> {
 		const token = await auth.getToken();
 		try {
-			const response = await axios.get<Friend[]>(
+			// Fetch the users the current user is following
+			const followingResponse = await axios.get<Friend[]>(
 				`${utils.API_BASE_URL}/users/following`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
-			return response.data
-				.filter((user: any) => user.relationship === "following") // Filter for 'following' relationship
-				.map((user: any) => ({
-					profile_picture_url: user.profile_picture_url,
-					username: user.username,
-					friend_id: user.userID,
-					relationship: user.relationship,
-				}));
+
+			// Fetch followers and filter for 'mutual' relationship
+			const followers = await this.fetchFollowers(); // Call fetchFollowers method
+			const mutualFollowers = followers.filter(
+				(follower: Friend) => follower.relationship === "mutual",
+			);
+
+			// Combine following and mutual followers
+			const combinedFollowing = [
+				...followingResponse.data
+					.filter((user: any) => user.relationship === "following")
+					.map(
+						(user: any): Friend => ({
+							profile_picture_url: user.profile_picture_url,
+							username: user.username,
+							friend_id: user.userID,
+							relationship: user.relationship,
+						}),
+					),
+				...mutualFollowers, // Add mutual followers to the list
+			];
+
+			return combinedFollowing;
 		} catch (error) {
 			console.error("Error fetching following:", error);
 			throw error;
@@ -264,21 +256,44 @@ class FriendServices {
 	// Unfollow a user
 	static async handleUnfollow(friend: Friend): Promise<void> {
 		const token = await auth.getToken();
+		console.log(`User ${utils.API_BASE_URL}/users/${friend.username}/unfollow`);
 		if (!token) {
 			throw new Error("No token found.");
 		}
 		try {
-			const response = await fetch(
+			const response = await axios.post(
 				`${utils.API_BASE_URL}/users/${friend.username}/unfollow`,
+				{},
 				{
-					method: "POST",
 					headers: {
 						Authorization: `Bearer ${token}`,
-						"Content-Type": "application/json",
 					},
 				},
 			);
-			if (!response.ok) throw new Error("Error unfollowing user.");
+			if (!response) throw new Error("Error unfollowing user.");
+		} catch (error) {
+			console.error("Error unfollowing user:", error);
+			throw error;
+		}
+	}
+
+	// Follow a user
+	static async handleFollow(friend: Friend): Promise<void> {
+		const token = await auth.getToken();
+		if (!token) {
+			throw new Error("No token found.");
+		}
+		try {
+			const response = await axios.post(
+				`${utils.API_BASE_URL}/users/${friend.username}/follow`,
+				{},
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response) throw new Error("Error unfollowing user.");
 		} catch (error) {
 			console.error("Error unfollowing user:", error);
 			throw error;

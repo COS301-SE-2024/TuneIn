@@ -12,184 +12,13 @@ import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { UserDto } from "../../../api";
 import { useLive } from "../../LiveContext";
+import FriendServices from "../../services/FriendServices"; // Import FriendServices
+import { Friend } from "../../models/friend"; // Adjust import path as necessary
 
 interface CreateChatScreenProps {
 	closeModal: () => void;
 	friends: UserDto[];
 }
-
-/*
-const users = [
-	{
-		id: "1",
-		name: "John Doe",
-		username: "@johndoe",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "2",
-		name: "Jane Smith",
-		username: "@janesmith",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "3",
-		name: "Alice Johnson",
-		username: "@alicejohnson",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "4",
-		name: "Bob Brown",
-		username: "@bobbrown",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "5",
-		name: "Charlie Davis",
-		username: "@charliedavis",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "6",
-		name: "David Evans",
-		username: "@davidevans",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "7",
-		name: "Eve Foster",
-		username: "@evefoster",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "8",
-		name: "Frank Green",
-		username: "@frankgreen",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "9",
-		name: "Grace Hill",
-		username: "@gracehill",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "10",
-		name: "Henry King",
-		username: "@henryking",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "11",
-		name: "Ivy Lewis",
-		username: "@ivylewis",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "12",
-		name: "Jack Martin",
-		username: "@jackmartin",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "13",
-		name: "Kathy Nelson",
-		username: "@kathynelson",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "14",
-		name: "Liam Owens",
-		username: "@liamowens",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "15",
-		name: "Mia Parker",
-		username: "@miaparker",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "16",
-		name: "Noah Quinn",
-		username: "@noahquinn",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "17",
-		name: "Olivia Roberts",
-		username: "@oliviaroberts",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "18",
-		name: "Paul Scott",
-		username: "@paulscott",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "19",
-		name: "Quinn Taylor",
-		username: "@quinntaylor",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "20",
-		name: "Rachel Upton",
-		username: "@rachelupton",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "21",
-		name: "Steve Walker",
-		username: "@stevewalker",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "22",
-		name: "Tom Xavier",
-		username: "@tomxavier",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "23",
-		name: "Uma Young",
-		username: "@umayoung",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-	{
-		id: "24",
-		name: "Victor Zane",
-		username: "@victorzane",
-		avatar:
-			"https://images.pexels.com/photos/3792581/pexels-photo-3792581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-	},
-];
-*/
 
 const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 	closeModal,
@@ -197,20 +26,27 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 }) => {
 	const { enterDM, leaveDM, socketHandshakes } = useLive();
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [users] = useState<UserDto[]>(friends);
-	const [filteredUsers, setFilteredUsers] = useState<UserDto[]>([]);
 	const router = useRouter();
 
+	// Fetch friends and followers when the component mounts
+	useEffect(() => {
+		const fetchUsers = async () => {
+			try {
+				const friends = await FriendServices.getFriends();
+				const followers = await FriendServices.fetchFollowers();
+				// Combine friends and followers, ensuring friends come first
+				setAllUsers([...friends, ...followers]);
+			} catch (error) {
+				console.error("Error fetching users:", error);
+			}
+		};
+
+		fetchUsers();
+	}, []);
+
 	const handleSearch = (query: string) => {
-		/*
 		setSearchQuery(query);
-		const filtered = users.filter((user) =>
-			user.name.toLowerCase().includes(query.toLowerCase()),
-		);
-		setFilteredUsers(filtered);
-		*/
-		setSearchQuery(query);
-		const filtered = users.filter((user) =>
+		const filtered = allUsers.filter((user) =>
 			user.username.toLowerCase().includes(query.toLowerCase()),
 		);
 		setFilteredUsers(filtered);
@@ -231,7 +67,8 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 		}
 		enterDM([user.username]);
 		console.log("post enterDM");
-		router.push(`/screens/messaging/ChatScreen?username=${user.username}`);
+		router.navigate(`/screens/messaging/ChatScreen?username=${user.username}`);
+		closeModal();
 	};
 
 	return (
@@ -243,9 +80,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 					style={styles.closeButton}
 					testID="close-button"
 				>
-					<Text style={styles.closeButtonText}>
-						<Octicons name="x" size={24} color="black" />
-					</Text>
+					<Octicons name="x" size={24} color="black" />
 				</TouchableOpacity>
 			</View>
 			<View style={styles.searchContainer}>
@@ -259,8 +94,8 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 				/>
 			</View>
 			<FlatList
-				data={filteredUsers}
-				keyExtractor={(item) => item.userID}
+				data={filteredUsers.length > 0 ? filteredUsers : allUsers} // Use filtered users or all users
+				keyExtractor={(item) => item.friend_id} // Changed to friend_id
 				renderItem={({ item }) => (
 					<TouchableOpacity
 						style={styles.userItem}
@@ -271,7 +106,8 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({
 							style={styles.avatar}
 						/>
 						<View>
-							<Text style={styles.name}>{item.profile_name}</Text>
+							<Text style={styles.name}>{item.username}</Text>
+							{/* Assuming username is available */}
 							<Text style={styles.username}>{item.username}</Text>
 						</View>
 					</TouchableOpacity>
@@ -300,10 +136,6 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		flex: 1,
 	},
-	// closeButton: {
-	// 	position: "absolute",
-	// 	right: 0,
-	// },
 	searchContainer: {
 		flexDirection: "row",
 		alignItems: "center",

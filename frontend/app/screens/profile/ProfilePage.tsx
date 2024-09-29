@@ -11,6 +11,8 @@ import {
 	TouchableWithoutFeedback,
 	RefreshControl,
 	ToastAndroid,
+	Platform,
+	Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import BioSection from "../../components/BioSection";
@@ -18,7 +20,7 @@ import GenreList from "../../components/GenreList";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,6 +35,7 @@ import { useLive } from "../../LiveContext";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
+import ContextMenu from "../../components/profile/DrawerContextMenu";
 
 const ProfileScreen: React.FC = () => {
 	const { currentUser, refreshUser, setRefreshUser } = useLive();
@@ -44,7 +47,7 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	const navigateToLogout = () => {
-		router.navigate("/screens/WelcomScreen");
+		auth.logout();
 	};
 
 	const navigateToHelp = () => {
@@ -56,11 +59,6 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	let ownsProfile: boolean = true;
-
-	const BackgroundIMG: string =
-		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-	const ProfileIMG: string =
-		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -127,7 +125,9 @@ const ProfileScreen: React.FC = () => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
 			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+			backgroundImage: room.room_image
+				? room.room_image
+				: "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
 			name: room.room_name,
 			language: room.language,
 			songName: room.current_song ? room.current_song.title : null,
@@ -136,7 +136,9 @@ const ProfileScreen: React.FC = () => {
 				: null,
 			description: room.description,
 			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
+			userProfile: room.creator
+				? room.creator.profile_picture_url
+				: require("../../../assets/profile-icon.png"),
 			username: room.creator ? room.creator.username : "Unknown",
 			roomSize: 50,
 			tags: room.tags ? room.tags : [],
@@ -256,8 +258,6 @@ const ProfileScreen: React.FC = () => {
 					setRoomCheck(true);
 				}
 			}
-
-			// console.log("Completed effect: " + JSON.stringify(currentUser));
 			setLoading(false);
 		};
 
@@ -355,11 +355,15 @@ const ProfileScreen: React.FC = () => {
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
-			if (error.response && error.response.status === 404) {
-				setCurrentRoomData(null);
-				setRoomCheck(true);
+			if (axios.isAxiosError(error)) {
+				if (error.response && error.response.status === 404) {
+					setCurrentRoomData(null);
+					setRoomCheck(true);
+				} else {
+					console.log("Error fetching current room info:", error);
+				}
 			} else {
-				console.log("Error fetching current room info:", error);
+				console.log("An unknown error occurred:", error);
 			}
 		}
 	};
@@ -868,21 +872,30 @@ const ProfileScreen: React.FC = () => {
 		}, 2000);
 	}, []);
 
+	// Function to show error messages
+	const showError = (message: string) => {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else {
+			Alert.alert("Error", message);
+		}
+	};
+
+	// Function to handle different error cases
 	const handleErrors = () => {
 		console.log("Called");
 		if (favRoomError || recentRoomError) {
-			ToastAndroid.show(
+			showError(
 				favRoomError && recentRoomError
 					? "Failed to load rooms"
 					: favRoomError
 						? "Failed to load favorite rooms"
 						: "Failed to load recent rooms",
-				ToastAndroid.SHORT,
 			);
 		}
 
 		if (currentRoom) {
-			ToastAndroid.show("Failed to load current room", ToastAndroid.SHORT);
+			showError("Failed to load current room");
 		}
 	};
 
@@ -945,6 +958,7 @@ const ProfileScreen: React.FC = () => {
 					testID="refresh-control"
 				/>
 			}
+			style={{ backgroundColor: colors.backgroundColor }}
 		>
 			<View
 				style={{
@@ -975,43 +989,7 @@ const ProfileScreen: React.FC = () => {
 						{ownsProfile && (
 							<View style={styles.container}>
 								{/* Drawer Modal */}
-								<Modal
-									transparent={true}
-									visible={drawerVisible}
-									animationType="slide"
-									onRequestClose={() => setDrawerVisible(false)}
-								>
-									{/* Overlay */}
-									<TouchableWithoutFeedback
-										onPress={() => setDrawerVisible(false)}
-									>
-										<View style={styles.overlay} />
-									</TouchableWithoutFeedback>
-
-									{/* Drawer Content */}
-									<View style={styles.drawer}>
-										{/* Close Drawer Button */}
-										<View style={styles.closeButtonContainer}>
-											<TouchableOpacity onPress={toggleDrawer}>
-												<Ionicons name="close" size={24} color="black" />
-											</TouchableOpacity>
-										</View>
-
-										{/* Drawer Items */}
-										<Text
-											style={styles.drawerItem}
-											onPress={navigateToAnayltics}
-										>
-											Analytics
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToHelp}>
-											Help Menu
-										</Text>
-										<Text style={styles.drawerItem} onPress={navigateToLogout}>
-											Logout
-										</Text>
-									</View>
-								</Modal>
+								<ContextMenu isVisible={drawerVisible} onClose={toggleDrawer} />
 							</View>
 						)}
 						<Text
@@ -1029,8 +1007,18 @@ const ProfileScreen: React.FC = () => {
 							testID="profile-pic"
 						>
 							<Image
-								source={{ uri: primaryProfileData.profile_picture_url }}
-								style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+								source={
+									// primaryProfileData.profile_picture_url ?
+									{ uri: primaryProfileData.profile_picture_url }
+									// : require("../../../assets/profile-icon.png")
+								}
+								style={{
+									width: 125,
+									height: 125,
+									borderRadius: 125 / 2,
+									borderWidth: 1,
+									borderColor: "black",
+								}}
 							/>
 						</View>
 						<Text

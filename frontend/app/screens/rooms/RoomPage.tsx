@@ -13,9 +13,9 @@ import {
 	StyleSheet,
 	Animated,
 	Dimensions,
-	Easing,
 	Alert,
 	ToastAndroid,
+	Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -374,102 +374,6 @@ const RoomPage: React.FC = () => {
 					</View>
 				</View>
 			</View>
-
-			{/* <Animated.View
-				style={{
-					position: "absolute",
-					bottom: 0,
-					left: 0,
-					right: 0,
-					height: animatedHeight,
-					backgroundColor: "#E8EBF2",
-					borderTopLeftRadius: 20,
-					borderTopRightRadius: 20,
-					elevation: 5,
-					paddingHorizontal: 10,
-					paddingTop: 10,
-				}}
-			>
-				<TouchableOpacity
-					onPress={toggleChat}
-					style={{
-						flexDirection: "row",
-						justifyContent: "space-between",
-						alignItems: "center",
-						paddingBottom: 10,
-					}}
-				>
-					<Text style={{ fontSize: 18, fontWeight: "bold" }}>
-						{isChatExpanded ? "Hide Chat" : "Show Chat"}
-					</Text>
-					<MaterialIcons
-						name={isChatExpanded ? "keyboard-arrow-down" : "keyboard-arrow-up"}
-						size={34}
-						style={{ marginLeft: 10 }}
-					/>
-				</TouchableOpacity>
-				{isChatExpanded && (
-					<>
-						<View style={styles.container}>
-							<ScrollView style={{ flex: 1, marginTop: 10 }}>
-								{roomMessages.map((msg, index) => (
-									<MemoizedCommentWidget
-										key={msg.message.messageID}
-										username={msg.message.sender.username}
-										message={msg.message.messageBody}
-										profilePictureUrl={msg.message.sender.profile_picture_url}
-										me={msg.me}
-									/>
-								))}
-							</ScrollView>
-							<FlyingView
-								object={roomEmojiObjects}
-								containerProps={{
-									style: styles.flyingView,
-								}}
-							/>
-						</View>
-						<KeyboardAvoidingView
-							behavior={Platform.OS === "ios" ? "padding" : "height"}
-							keyboardVerticalOffset={90}
-						>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-									marginBottom: 10,
-								}}
-							>
-								<TextInput
-									style={{
-										flex: 1,
-										borderWidth: 1,
-										borderColor: "#ccc",
-										borderRadius: 20,
-										paddingHorizontal: 10,
-										paddingVertical: 5,
-									}}
-									placeholder="Type your message..."
-									value={message}
-									onChangeText={setMessage}
-									onSubmitEditing={sendMessage}
-								/>
-
-								<EmojiPicker
-									ref={emojiPickerRef}
-									onSelectEmoji={handleSelectEmoji}
-								/>
-								<TouchableOpacity
-									onPress={sendMessage}
-									style={{ marginLeft: 10 }}
-								>
-									<MaterialIcons name="send" size={24} color="#007AFF" />
-								</TouchableOpacity>
-							</View>
-						</KeyboardAvoidingView>
-					</>
-				)}
-			</Animated.View> */}
 		</View>
 	);
 };

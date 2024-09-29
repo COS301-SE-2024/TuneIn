@@ -6,11 +6,14 @@ import {
 	FlatList,
 	StyleSheet,
 	ToastAndroid,
+	Alert, // For iOS/web
+	Platform,
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
 import FriendServices from "../../services/FriendServices";
 import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Followers: React.FC = () => {
 	const [search, setSearch] = useState("");
@@ -19,23 +22,31 @@ const Followers: React.FC = () => {
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const user = useLocalSearchParams();
 
-	useEffect(() => {
-		const getFollowers = async () => {
-			try {
-				const mappedFollowers = await FriendServices.fetchFollowers();
-				setFollowers(mappedFollowers);
-				setFilteredFollowers(mappedFollowers);
-				setFriendError(false);
-			} catch (error) {
-				console.log("Error fetching data:", error);
-				setFollowers([]);
-				setFilteredFollowers([]);
-				setFriendError(true);
-			}
-		};
+	const getFollowers = async () => {
+		try {
+			const mappedFollowers = await FriendServices.fetchFollowers();
+			setFollowers(mappedFollowers);
+			setFilteredFollowers(mappedFollowers);
+			setFriendError(false);
+		} catch (error) {
+			console.log("Error fetching data:", error);
+			setFollowers([]);
+			setFilteredFollowers([]);
+			setFriendError(true);
+		}
+	};
 
+	// Initial fetch on component mount
+	useEffect(() => {
 		getFollowers();
 	}, []);
+
+	// Reload data immediately when the page is focused
+	useFocusEffect(
+		React.useCallback(() => {
+			getFollowers();
+		}, []),
+	);
 
 	useEffect(() => {
 		if (search === "") {
@@ -49,6 +60,7 @@ const Followers: React.FC = () => {
 		}
 	}, [search, followers]);
 
+	// Handle follow function
 	const handleFollow = async (friend: Friend) => {
 		try {
 			await FriendServices.handleFollow(friend);
@@ -65,10 +77,27 @@ const Followers: React.FC = () => {
 			setFollowers(updatedFollowers);
 			setFilteredFollowers(updatedFollowers);
 		} catch (error) {
-			ToastAndroid.show(
-				`Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`,
-				ToastAndroid.SHORT,
-			);
+			const message = `Failed to ${friend.relationship === "mutual" ? "unfollow" : "follow"} user.`;
+			// Use ToastAndroid for Android, otherwise use Alert
+			if (Platform.OS === "android") {
+				ToastAndroid.show(message, ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", message);
+			}
+		}
+	};
+
+	// Handle unfollow function for mutual relationships
+	const handleUnfollow = async (friend: Friend) => {
+		try {
+			await FriendServices.handleUnfollow(friend);
+		} catch (error) {
+			const message = "Failed to unfollow user.";
+			if (Platform.OS === "android") {
+				ToastAndroid.show(message, ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", message);
+			}
 		}
 	};
 
@@ -83,7 +112,7 @@ const Followers: React.FC = () => {
 					? "following"
 					: "follower"
 			}
-			handle={handleFollow}
+			handle={item.relationship === "mutual" ? handleUnfollow : handleFollow} // Use handleUnfollow if mutual
 		/>
 	);
 
@@ -113,6 +142,7 @@ const Followers: React.FC = () => {
 		</View>
 	);
 };
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

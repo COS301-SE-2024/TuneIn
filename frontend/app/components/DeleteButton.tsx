@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { colors } from "../styles/colors";
 
 interface DeleteButtonProps {
 	title: string;
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
 	buttonText: {
 		fontSize: 18,
 		fontWeight: "bold",
-		color: "#000",
+		color: colors.primaryText,
 	},
 });
 

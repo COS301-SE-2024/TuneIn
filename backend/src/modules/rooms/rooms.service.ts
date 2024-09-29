@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
+import { AudioFeatures, SongInfoDto } from "./dto/songinfo.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
@@ -15,6 +16,8 @@ import { SpotifyService } from "../../spotify/spotify.service";
 import { RoomQueueService, ActiveRoom } from "./roomqueue/roomqueue.service";
 import { RoomSongDto } from "./dto/roomsong.dto";
 import { SpotifyTokenPair } from "../../../src/auth/spotify/spotifyauth.service";
+import { kmeans } from "ml-kmeans";
+import { KMeansResult } from "ml-kmeans/lib/KMeansResult";
 
 export class UserActionDto {
 	@ApiProperty({
@@ -785,26 +788,344 @@ export class RoomsService {
 	}
 
 	async splitRoom(roomID: string): Promise<RoomDto> {
-		// Implement the logic to split the room
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		try {
+			// Fetch audio features of the songs in the room queue
+			// check if the room already has child rooms
+			const childRooms: PrismaTypes.child_room[] | null =
+				await this.prisma.child_room.findMany({
+					where: {
+						parent_room_id: roomID,
+					},
+				});
+			console.log("Child rooms", childRooms);
+			if (!childRooms || childRooms.length !== 0) {
+				throw new HttpException(
+					"Room already has child rooms",
+					HttpStatus.BAD_REQUEST,
+				);
+			}
+			const audioFeatures: (AudioFeatures & {
+				genre: string;
+				songID: string;
+			})[] = await this.getAudioFeatures(roomID);
+			if (!audioFeatures || audioFeatures.length === 0) {
+				throw new HttpException(
+					"Room does not have any events",
+					HttpStatus.NOT_FOUND,
+				);
+			}
+			console.log("Audio features");
+
+			const features: number[][] = audioFeatures.map((song) => [
+				song.danceability,
+				song.energy,
+				song.key,
+				song.loudness,
+				song.mode,
+				song.speechiness,
+				song.acousticness,
+				song.instrumentalness,
+				song.liveness,
+				song.valence,
+				song.tempo,
+			]);
+
+			// Apply K-means clustering with convergence check
+			const maxIterations = 100;
+			const distinctivenessThreshold = 0.5; // Define your threshold
+			let clusters: KMeansResult = kmeans(features, 2, { maxIterations: 20 });
+			let canSplit = false;
+			for (let i = 0; i < maxIterations; i++) {
+				clusters = kmeans(features, 2, { maxIterations: 20 });
+				if (this.checkConvergence(clusters, distinctivenessThreshold)) {
+					canSplit = true;
+				}
+			}
+			console.log("Clusters", clusters);
+			if (!canSplit) {
+				throw new HttpException("Room cannot be split", HttpStatus.BAD_REQUEST);
+			}
+
+			console.log("Splitting room");
+
+			// Assign songs to sub-rooms based on clusters
+			const subRooms = [0, 1].map((cluster: number) => {
+				return audioFeatures.filter(
+					(_, index) => clusters.clusters[index] === cluster,
+				);
+			});
+			console.log("Sub-rooms", subRooms);
+			const childGenres = subRooms.map((subRoom) =>
+				this.genresFromCluster(subRoom.map((song) => song.genre)),
+			);
+
+			console.log(childGenres);
+			if (childGenres.length < 2) {
+				throw new HttpException("No genres found", HttpStatus.BAD_REQUEST);
+			}
+
+			// Create new rooms for the sub-rooms
+			const parentRoom: PrismaTypes.room | null =
+				await this.prisma.room.findFirst({
+					where: {
+						room_id: roomID,
+					},
+				});
+			if (!parentRoom) {
+				throw new HttpException("Parent room not found", HttpStatus.NOT_FOUND);
+			}
+			try {
+				const childRoom0: PrismaTypes.room | null =
+					await this.prisma.room.create({
+						data: {
+							name: parentRoom.name + " - " + childGenres[0],
+							description: parentRoom.description,
+							room_creator: parentRoom.room_creator,
+							playlist_photo: parentRoom.playlist_photo,
+							explicit: parentRoom.explicit,
+							nsfw: parentRoom.nsfw,
+							room_language: parentRoom.room_language,
+							tags: [childGenres[0] ?? "vibe"],
+						},
+					});
+				const childRoom1: PrismaTypes.room | null =
+					await this.prisma.room.create({
+						data: {
+							name: parentRoom.name + " - " + childGenres[1],
+							description: parentRoom.description,
+							room_creator: parentRoom.room_creator,
+							playlist_photo: parentRoom.playlist_photo,
+							explicit: parentRoom.explicit,
+							nsfw: parentRoom.nsfw,
+							room_language: parentRoom.room_language,
+							tags: [childGenres[1] ?? "vibe"],
+						},
+					});
+
+				if (!childRoom0 || !childRoom1) {
+					throw new HttpException(
+						"Failed to create child rooms",
+						HttpStatus.INTERNAL_SERVER_ERROR,
+					);
+				}
+
+				await this.prisma.child_room.create({
+					data: {
+						parent_room_id: parentRoom.room_id,
+						room_id: childRoom0.room_id,
+					},
+				});
+
+				await this.prisma.child_room.create({
+					data: {
+						parent_room_id: parentRoom.room_id,
+						room_id: childRoom1.room_id,
+					},
+				});
+
+				// Move songs to sub-rooms
+				const childRoom0Songs:
+					| { room_id: string; song_id: string }[]
+					| undefined = subRooms[0]?.map((song) => {
+					return {
+						room_id: childRoom0.room_id,
+						song_id: song.songID,
+					};
+				});
+				const childRoom1Songs:
+					| { room_id: string; song_id: string }[]
+					| undefined = subRooms[1]?.map((song) => {
+					return {
+						room_id: childRoom1.room_id,
+						song_id: song.songID,
+					};
+				});
+				if (childRoom0Songs) {
+					console.log("Child room 0 songs", childRoom0Songs);
+					await this.prisma.queue.createMany({
+						data: childRoom0Songs,
+					});
+				}
+				if (childRoom1Songs) {
+					await this.prisma.queue.createMany({
+						data: childRoom1Songs,
+					});
+				}
+				const parentRoomDto: RoomDto | null = await this.dtogen.generateRoomDto(
+					roomID,
+				);
+				if (!parentRoomDto) {
+					throw new HttpException(
+						"Failed to create child rooms",
+						HttpStatus.INTERNAL_SERVER_ERROR,
+					);
+				}
+				parentRoomDto.childrenRoomIDs = [
+					childRoom0.room_id,
+					childRoom1.room_id,
+				];
+				return parentRoomDto;
+			} catch (error) {
+				throw new HttpException(
+					"Failed to create child rooms",
+					HttpStatus.INTERNAL_SERVER_ERROR,
+				);
+			}
+		} catch (error) {
+			console.error("Error splitting room:", error);
+			throw error;
 		}
-		//split the room
-		//set the children ids to RoomDto.children
-		//return RoomDto
-		console.log(roomID);
+	}
+	async canSplitRoom(roomID: string): Promise<string[]> {
+		try {
+			// Fetch audio features of the songs in the room queue
+			const childrenRoom: PrismaTypes.child_room[] | null =
+				await this.prisma.child_room.findMany({
+					where: {
+						parent_room_id: roomID,
+					},
+				});
+			if (!childrenRoom || childrenRoom.length !== 0) {
+				throw new HttpException(
+					"Room already has child rooms",
+					HttpStatus.BAD_REQUEST,
+				);
+			}
+			const audioFeatures: (AudioFeatures & { genre: string })[] =
+				await this.getAudioFeatures(roomID);
+			if (!audioFeatures || audioFeatures.length === 0) {
+				throw new HttpException(
+					"Room does not have any events",
+					HttpStatus.NOT_FOUND,
+				);
+			}
+
+			const features: number[][] = audioFeatures.map((song) => [
+				song.danceability,
+				song.energy,
+				song.key,
+				song.loudness,
+				song.mode,
+				song.speechiness,
+				song.acousticness,
+				song.instrumentalness,
+				song.liveness,
+				song.valence,
+				song.tempo,
+			]);
+
+			// Apply K-means clustering with convergence check
+			const maxIterations = 100;
+			const distinctivenessThreshold = 0.5; // Define your threshold
+			let clusters: KMeansResult = kmeans(features, 2, { maxIterations: 20 });
+			let canSplit = false;
+			for (let i = 0; i < maxIterations; i++) {
+				clusters = kmeans(features, 2, { maxIterations: 20 });
+				if (this.checkConvergence(clusters, distinctivenessThreshold)) {
+					canSplit = true;
+				}
+			}
+			if (!canSplit) {
+				throw new HttpException("Room cannot be split", HttpStatus.BAD_REQUEST);
+			}
+
+			// Assign songs to sub-rooms based on clusters
+			console.log("Number of subrooms:", clusters.clusters);
+			const subRooms = [0, 1].map((cluster: number) => {
+				return audioFeatures.filter(
+					(_, index) => clusters.clusters[index] === cluster,
+				);
+			});
+
+			const childGenres = subRooms.map((subRoom) =>
+				this.genresFromCluster(subRoom.map((song) => song.genre)),
+			);
+
+			console.log(childGenres);
+			const distinctGenres = [...new Set(childGenres)];
+			if (distinctGenres.length < 2) {
+				throw new HttpException("No genres found", HttpStatus.BAD_REQUEST);
+			}
+			return distinctGenres;
+		} catch (error) {
+			console.error("Error splitting room:", error);
+			throw error;
+		}
 	}
 
-	async canSplitRoom(roomID: string): Promise<string[]> {
-		// Implement the logic to check if the room can be split
-		// if (true) {
-		// 	// room does not exist
-		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		// }
-		console.log(roomID);
-		const childGenres: string[] = [];
-		return childGenres;
+	checkConvergence(clusters: KMeansResult, threshold: number): boolean {
+		const centroids = clusters.centroids;
+		let minDistance = Infinity;
+
+		for (let i = 0; i < centroids.length; i++) {
+			for (let j = i + 1; j < centroids.length; j++) {
+				const distance = this.euclideanDistance(
+					centroids[i] ?? [],
+					centroids[j] ?? [],
+				);
+				if (distance < minDistance) {
+					minDistance = distance;
+				}
+			}
+		}
+
+		return minDistance > threshold;
+	}
+
+	euclideanDistance(point1: number[], point2: number[]): number {
+		let sum = 0;
+		console.log(point1);
+		for (let i = 0; i < point1.length; i++) {
+			const val1: number = point1[i] ?? 0;
+			const val2: number = point2[i] ?? 0;
+			if (val1 === undefined || val2 === undefined) {
+				break;
+			}
+			sum += Math.pow(val1 - val2, 2);
+		}
+		return Math.sqrt(sum);
+	}
+
+	async getAudioFeatures(
+		roomID: string,
+	): Promise<(AudioFeatures & { genre: string; songID: string })[]> {
+		// Implement the logic to get the audio features for a song
+		const songs: (PrismaTypes.queue & { song: PrismaTypes.song })[] =
+			await this.prisma.queue.findMany({
+				where: {
+					room_id: roomID,
+				},
+				include: {
+					song: true,
+				},
+			});
+		console.log("Songs", songs);
+		return songs.map((song) => {
+			return {
+				...(JSON.parse(
+					song.song.audio_features as unknown as string,
+				) as unknown as AudioFeatures),
+				genre: song.song.genre ?? "Unknown",
+				songID: song.song.song_id,
+			};
+		});
+	}
+	genresFromCluster(cluster: string[]): string {
+		const genreCounts: { [genre: string]: number } = {};
+		cluster.forEach((genre) => {
+			if (genre in genreCounts && genreCounts[genre]) {
+				genreCounts[genre]++;
+			} else {
+				genreCounts[genre] = 1;
+			}
+		});
+
+		const sortedGenres = Object.keys(genreCounts).sort(
+			(genre1, genre2) =>
+				(genreCounts[genre2] ?? 0) - (genreCounts[genre1] ?? 0),
+		);
+
+		return sortedGenres[0] ?? "Unknown";
 	}
 
 	async saveRoomPlaylist(roomID: string, userID: string): Promise<void> {

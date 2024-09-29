@@ -16,6 +16,13 @@ const Tab = createMaterialTopTabNavigator();
 function MyTabs({ username }: { username: string | string[] }) {
 	const navigation = useNavigation();
 
+	const truncateText = (text: string, maxLength: number) => {
+		if (text.length > maxLength) {
+			return text.substring(0, maxLength - 3) + "...";
+		}
+		return text;
+	};
+
 	const displayUsername = Array.isArray(username)
 		? username.join(", ")
 		: username;
@@ -29,7 +36,9 @@ function MyTabs({ username }: { username: string | string[] }) {
 				>
 					<Ionicons name="chevron-back" size={24} color="#000" />
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>{displayUsername}</Text>
+				<Text style={styles.headerTitle}>
+					{truncateText(displayUsername, 20)}
+				</Text>
 			</View>
 
 			{/* Tab Navigator */}

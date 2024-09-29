@@ -88,7 +88,7 @@ export default function HelpMenu() {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [modalMessage, setModalMessage] = useState("");
 
-	const navigateToScreen = (screen) => {
+	const navigateToScreen = (screen: string) => {
 		router.navigate(`/${screen}`);
 	};
 
@@ -116,13 +116,6 @@ export default function HelpMenu() {
 			behavior={Platform.OS === "ios" ? "padding" : undefined}
 		>
 			<ScrollView contentContainerStyle={styles.container}>
-				<TouchableOpacity
-					onPress={() => router.back()}
-					style={styles.backButton}
-					testID="backButton"
-				>
-					<Ionicons name="chevron-back" size={24} color="black" />
-				</TouchableOpacity>
 				<Text style={styles.title} testID="title">
 					Help Center
 				</Text>
@@ -195,7 +188,8 @@ const styles = StyleSheet.create({
 	container: {
 		flexGrow: 1,
 		padding: 20,
-		backgroundColor: "#f4f4f4",
+		paddingTop: 15,
+		backgroundColor: colors.backgroundColor,
 	},
 	backButton: {
 		position: "absolute",
@@ -204,8 +198,9 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 23,
 		fontWeight: "bold",
+		color: colors.primaryText,
 		marginBottom: 20,
 		textAlign: "center",
 	},

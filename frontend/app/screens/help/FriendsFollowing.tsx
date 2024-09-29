@@ -31,6 +31,7 @@ export default function FriendsFollowing() {
 						size={30}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="following-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Following</Text>
@@ -49,6 +50,7 @@ export default function FriendsFollowing() {
 						size={30}
 						color="#08bdbd"
 						style={styles.icon}
+						testID="friends-icon"
 					/>
 					<View style={styles.textContainer}>
 						<Text style={styles.cardTitle}>Friends</Text>
