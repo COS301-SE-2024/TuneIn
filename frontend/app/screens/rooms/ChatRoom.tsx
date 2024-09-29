@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback, memo } from "react";
+import React, {
+	useEffect,
+	useState,
+	useRef,
+	useCallback,
+	memo,
+	useContext,
+} from "react";
 import {
 	View,
 	Text,
@@ -20,13 +27,13 @@ import EmojiPicker, {
 import { colors } from "../../styles/colors";
 import { useLive } from "../../LiveContext";
 import { useAPI } from "../../APIContext";
+import { Player } from "../../PlayerContext";
 
 const MemoizedCommentWidget = memo(CommentWidget);
 
 const ChatRoom = () => {
 	const { room } = useGlobalSearchParams();
 	const {
-		currentRoom,
 		socketHandshakes,
 		roomMessages,
 		joinRoom,
@@ -36,13 +43,16 @@ const ChatRoom = () => {
 	} = useLive();
 	const { rooms } = useAPI();
 	const [userInRoom, setUserInRoom] = useState(false);
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+	const { currentRoom } = playerContext;
 
 	let roomData: any;
-	if (Array.isArray(room)) {
-		roomData = JSON.parse(room[0]);
-	} else if (room) {
-		roomData = JSON.parse(room);
-	}
+	roomData = currentRoom;
 
 	let roomID: string;
 	if (roomData.id !== undefined) {

@@ -1,27 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 // import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
-import { Track } from "../../models/Track";
-import { RoomSongDto } from "../../models/RoomSongDto";
 import { useLive } from "../../LiveContext";
-import { VoteDto } from "../../models/VoteDto";
 import CreateButton from "../../components/CreateButton";
+import { Player } from "../../PlayerContext";
 
 const Playlist = () => {
 	const { roomQueue } = useLive();
 	const router = useRouter();
-	const { Room_id, mine } = useLocalSearchParams();
-	const isMine = mine === "true";
+	const playerContext = useContext(Player);
 
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+	const { currentRoom } = playerContext;
+	const isMine = currentRoom?.mine ? "true" : "false";
+
+	console.log("curr room_id:", isMine);
 	const navigateToAddSong = () => {
-		console.log("curr room_id:", Room_id);
+		console.log("curr room_id:", isMine);
 		router.navigate({
 			pathname: "/screens/rooms/EditPlaylist",
 			params: {
-				Room_id: Room_id,
-				isMine: mine,
+				Room_id: currentRoom?.roomID,
+				isMine: isMine,
 			},
 		});
 	};
