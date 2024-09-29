@@ -9,7 +9,7 @@ interface UserItemProps {
 }
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
-	const navigateToHelp = () => {
+	const navigateToProfile = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
 				profile_picture_url: user.profile_picture_url,
@@ -21,7 +21,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
-				onPress={navigateToHelp}
+				onPress={navigateToProfile}
 				style={{ flexDirection: "row", alignItems: "center", paddingRight: 20 }}
 			>
 				<Image

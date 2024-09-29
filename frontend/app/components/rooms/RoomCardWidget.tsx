@@ -175,7 +175,11 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 							<View style={styles.userInfoContainer}>
 								<View style={styles.userAvatarContainer}>
 									<Image
-										source={{ uri: roomCard.userProfile }}
+										source={
+											roomCard.userProfile
+												? { uri: roomCard.userProfile }
+												: require("../../assets/profile-icon.png")
+										}
 										style={styles.userAvatar}
 									/>
 									<Text style={styles.username}>

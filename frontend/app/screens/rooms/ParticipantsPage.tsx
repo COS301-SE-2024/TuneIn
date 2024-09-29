@@ -51,64 +51,28 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 
 	const navigateToProfile = (userId: string) => {};
 
-	const renderItem = ({ item }: { item: Participant }) => (
-		<TouchableOpacity style={styles.participantContainer}>
-			<Image
-				source={{ uri: item.profilePictureUrl }}
-				style={styles.profilePicture}
-			/>
-			<Text style={styles.username}>{item.username}</Text>
-		</TouchableOpacity>
-	);
+	const renderItem = ({ item }: { item: Participant }) => {
+		// Truncate the username if it's longer than 20 characters
+		const truncatedUsername =
+			item.username.length > 20
+				? `${item.username.slice(0, 17)}...`
+				: item.username;
 
-	const mockData: Participant[] = [
-		// Added more participants for scrolling
-		{
-			id: "1",
-			username: "JohnDoe",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "2",
-			username: "JaneSmith",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "3",
-			username: "AliceJohnson",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "4",
-			username: "BobBrown",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "5",
-			username: "EmilyDavis",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "6",
-			username: "MichaelWilson",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "7",
-			username: "OliviaGarcia",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "8",
-			username: "DavidMiller",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-		{
-			id: "9",
-			username: "DavidMiller",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
-		},
-	];
+		return (
+			<TouchableOpacity style={styles.participantContainer}>
+				<Image
+					source={
+						item.profilePictureUrl
+							? { uri: item.profilePictureUrl }
+							: require("../../assets/profile-icon.png")
+					}
+					style={styles.profilePicture}
+				/>
+				<Text style={styles.username}>{truncatedUsername}</Text>
+				{/* Apply truncated username */}
+			</TouchableOpacity>
+		);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -125,10 +89,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			{(participantsInRoom.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
-						This room has no participants.{" "}
-						{/* {isMine = true
-							? "Add some songs to get started!"
-							: "Wait for the host to add some songs."} */}
+						This room has no participants.
 					</Text>
 				</View>
 			)) || (
