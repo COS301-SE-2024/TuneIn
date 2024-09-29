@@ -21,7 +21,6 @@ test("renders profile page", async ({ loggedInPage }) => {
 	await expect(loggedInPage.getByText("Student1")).toBeVisible();
 });
 
-
 test("edits user info", async ({ loggedInPage, cleanupProfile }) => {
 	await loggedInPage.goto("http://localhost:8081/screens/profile/ProfilePage");
 
@@ -63,3 +62,49 @@ test("edits user info", async ({ loggedInPage, cleanupProfile }) => {
 	// Call the cleanup fixture explicitly
 	await cleanupProfile();
 });
+
+test("searching rooms", async ({ loggedInPage }) => {
+	await loggedInPage.goto("http://localhost:8081/screens/Search");
+
+	// Wait for the network to be idle to ensure all requests are finished
+	await loggedInPage.waitForLoadState("networkidle");
+
+	// Assert that the text "Student1" is visible
+	await loggedInPage.getByTestId("search-input").fill("room");
+
+	await loggedInPage.getByTestId("search-button").click();
+
+	await expect(loggedInPage.getByText("Khensie")).toBeVisible();
+});
+
+test("searching users", async ({ loggedInPage }) => {
+	await loggedInPage.goto("http://localhost:8081/screens/Search");
+
+	// Wait for the network to be idle to ensure all requests are finished
+	await loggedInPage.waitForLoadState("networkidle");
+
+	await loggedInPage.getByTestId("user-btn").click();
+
+	await loggedInPage.getByTestId("search-input").fill("farmer");
+
+	await loggedInPage.getByTestId("search-button").click();
+
+	await expect(loggedInPage.getByText("farmer345")).toBeVisible();
+
+	await loggedInPage
+		.locator("div:nth-child(4) > div > div > div > div")
+		.click();
+
+	await loggedInPage.waitForLoadState("networkidle");
+
+	await expect(loggedInPage.getByText("Farmer23")).toBeVisible();
+});
+
+// await loggedInPage.locator('div:nth-child(4) > div > div > div > div').click();
+// await loggedInPage.getByRole('button', { name: 'Close' }).click();
+// await loggedInPage.
+// await loggedInPage.
+// await loggedInPage.
+// await loggedInPage.
+// await loggedInPage.
+// await loggedInPage.
