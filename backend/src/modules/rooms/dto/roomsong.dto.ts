@@ -34,4 +34,8 @@ export class RoomSongDto {
 	@ApiProperty()
 	@IsObject()
 	track: Track;
+
+	@ApiProperty()
+	@IsNumber()
+	playlistIndex: number;
 }

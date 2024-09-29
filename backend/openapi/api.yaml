@@ -1298,6 +1298,43 @@ paths:
           description: Room not found
       tags:
         - rooms
+  /rooms/{roomID}/share:
+    post:
+      operationId: shareRoom
+      summary: Share a room
+      description: Shares the room with the given users.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to share.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user IDs of the user to share the room with.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+                example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: Room shared successfully
+        '400':
+          description: No users to share with
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not found
+      tags:
+        - rooms
   /rooms/{roomID}/chat/history:
     get:
       operationId: getLiveChatHistory
@@ -1658,12 +1695,14 @@ paths:
         '200':
           description: The scheduled room as a .ics file.
           content:
-            text/calendar:
-              schema:
-                $ref: '#/components/schemas/File'
             application/octet-stream:
               schema:
-                $ref: '#/components/schemas/File'
+                type: string
+                format: binary
+            text/calendar:
+              schema:
+                type: string
+                format: binary
         '404':
           description: Room not found
       tags:
@@ -2570,6 +2609,8 @@ components:
           type: string
         track:
           type: object
+        playlistIndex:
+          type: number
       required:
         - spotifyID
         - userID
@@ -2579,6 +2620,7 @@ components:
         - insertTime
         - pauseTime
         - track
+        - playlistIndex
     RoomDto:
       type: object
       properties:
@@ -2948,9 +2990,6 @@ components:
           format: uuid
       required:
         - userID
-    File:
-      type: object
-      properties: {}
     CombinedSearchResults:
       type: object
       properties:

@@ -297,20 +297,24 @@ export function useRoomControls({
 				}
 
 				let trackURI: string;
+				let position = 0;
 				if (song) {
 					trackURI = `spotify:track:${song.spotifyID}`;
+					position = song.playlistIndex;
 				} else {
 					if (!currentSong) {
 						if (roomQueue.length === 0) {
 							throw new Error("No song is currently playing");
 						} else {
-							const s = roomQueue[0];
+							const s: RoomSongDto = roomQueue[0];
 							trackURI = `spotify:track:${s.spotifyID}`;
 							song = s;
+							position = s.playlistIndex;
 						}
 					} else {
 						trackURI = `spotify:track:${currentSong.spotifyID}`;
 						song = currentSong;
+						position = currentSong.playlistIndex;
 					}
 				}
 				console.log(`Track URI: ${trackURI}`);
@@ -391,8 +395,8 @@ export function useRoomControls({
 								device.id,
 								playlistURI,
 								undefined,
-								{ offset: { position: currentSong.playlistIndex }},
-								off
+								{ position: position },
+								offsetMs,
 							);
 							break;
 						case "pause":
