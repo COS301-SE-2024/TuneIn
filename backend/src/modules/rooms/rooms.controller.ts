@@ -405,6 +405,55 @@ export class RoomsController {
 		return await this.roomsService.getCurrentSong(roomID);
 	}
 
+	@Post(":roomID/share")
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Share a room",
+		description: "Shares the room with the given users.",
+		operationId: "shareRoom",
+	})
+	@ApiParam({
+		name: "roomID",
+		description: "The ID of the room to share.",
+		required: true,
+		type: String,
+		format: "uuid",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+		allowEmptyValue: false,
+	})
+	@ApiBody({
+		description: "The user IDs of the user to share the room with.",
+		required: true,
+		schema: {
+			type: "array",
+			items: {
+				type: "string",
+				format: "uuid",
+				example: "123e4567-e89b-12d3-a456-426614174000",
+			},
+		},
+	})
+	@ApiOkResponse({
+		description: "Room shared successfully",
+	})
+	@ApiBadRequestResponse({
+		description: "No users to share with",
+	})
+	@ApiNotFoundResponse({
+		description: "Room not found",
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	async shareRoom(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+		@Body() users: string[],
+	) {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.roomsService.shareRoom(roomID, userInfo.id, users);
+	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
@@ -869,7 +918,6 @@ export class RoomsController {
 	})
 	@ApiOkResponse({
 		description: "The scheduled room as a .ics file.",
-		type: File,
 		content: {
 			"application/octet-stream": {
 				schema: {
