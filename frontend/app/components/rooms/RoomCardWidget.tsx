@@ -196,7 +196,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						<MaterialIcons
 							name="explicit"
 							size={28}
-							color="black"
+							color="white"
 							style={styles.explicitIcon}
 						/>
 					)}
@@ -212,11 +212,11 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		overflow: "hidden",
 		height: 210, // Adjust height as needed
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
+		// shadowColor: "#000",
+		// shadowOffset: { width: 0, height: 4 },
+		// shadowOpacity: 0.25,
+		// shadowRadius: 3.84,
+		// elevation: 5,
 	},
 	imageBackground: {
 		flex: 1,
@@ -325,12 +325,7 @@ const styles = StyleSheet.create({
 		height: 26,
 		position: "absolute", // Use absolute positioning
 		top: 10, // Position from the bottom
-		right: 10, // Position from the right
-		shadowColor: "white",
-		shadowOffset: { width: 0, height: 0 },
-		shadowOpacity: 0.5,
-		shadowRadius: 3,
-		elevation: 5,
+		right: 10,
 	},
 });
 
