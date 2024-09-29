@@ -24,6 +24,7 @@ import { formatRoomData } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
+import { color } from "react-native-elements/dist/helpers";
 const placeholderImage = require("../../assets/spotify.png");
 
 type Queues = {
@@ -690,7 +691,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	buttonYes: {
-		backgroundColor: "red",
+		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
 	buttonNo: {

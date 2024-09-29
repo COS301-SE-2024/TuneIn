@@ -14,7 +14,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
 				profile_picture_url: user.profile_picture_url,
 				username: user.username,
-			})}&user=${user}`,
+			})}`,
 		);
 	};
 
