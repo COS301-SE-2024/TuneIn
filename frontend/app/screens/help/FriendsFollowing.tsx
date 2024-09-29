@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { colors } from "../../styles/colors";
 
 export default function FriendsFollowing() {
 	const router = useRouter();
@@ -68,7 +69,7 @@ export default function FriendsFollowing() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#ecf0f1",
+		backgroundColor: colors.backgroundColor,
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},

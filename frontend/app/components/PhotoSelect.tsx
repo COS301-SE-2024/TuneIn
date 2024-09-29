@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker"; // Import Expo's image picker library
+import { colors } from "../styles/colors";
 
 const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
 	const [visibility, setVisibility] = useState(isVisible);
@@ -54,7 +55,10 @@ const PhotoSelect = ({ isVisible, onClose, onImageUpload }) => {
                             <Image source={{ uri: image }} style={styles.image} />
                         </View>
                     )} */}
-					<Button title="Choose from Library" onPress={pickImage} />
+					{/* <Button title="Choose from Library" onPress={pickImage} /> */}
+					<TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+						<Text style={styles.buttonText}>Choose from Library</Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 		</Modal>
@@ -68,6 +72,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 	},
+	imageButton: {
+		backgroundColor: colors.primary,
+		paddingVertical: 8,
+		paddingHorizontal: 12,
+	},
 	modal: {
 		backgroundColor: "white",
 		paddingHorizontal: 10,
@@ -75,6 +84,11 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		alignItems: "center",
 		height: 110,
+	},
+	buttonText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
 	},
 	headerContainer: {
 		flexDirection: "row",

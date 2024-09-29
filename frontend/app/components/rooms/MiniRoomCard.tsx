@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface MiniRoomCardProps {
 	roomCard: Room;
@@ -101,8 +102,14 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 
 			{/* Conditionally render explicit icon */}
 			{roomCard.isExplicit && (
-				<Image
-					source={require("../../../assets/Explicit.png")}
+				// <Image
+				// 	source={require("../../../assets/Explicit.png")}
+				// 	style={styles.explicitIcon}
+				// />
+				<MaterialIcons
+					name="explicit"
+					size={26}
+					color="black"
 					style={styles.explicitIcon}
 				/>
 			)}

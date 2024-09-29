@@ -14,21 +14,24 @@ const CommentWidget: React.FC<CommentWidgetProps> = ({
 	profilePictureUrl,
 	me = false,
 }) => {
+	// Truncate the username if it's longer than 20 characters
+	const truncatedUsername =
+		username.length > 20 ? `${username.slice(0, 17)}...` : username;
+
 	return (
-		<View
-			testID="comment-widget-container"
-			style={[
-				styles.container,
-				me ? styles.containerMe : styles.containerOther,
-			]}
-		>
+		<View testID="comment-widget-container" style={[styles.container]}>
 			<Image
 				testID="comment-widget-avatar"
-				source={{ uri: profilePictureUrl }}
+				source={
+					profilePictureUrl
+						? { uri: profilePictureUrl }
+						: require("../../assets/imageholder.jpg")
+				}
 				style={styles.avatar}
 			/>
-			<View>
-				<Text style={styles.username}>{username}</Text>
+			<View style={styles.messageContainer}>
+				<Text style={styles.username}>{truncatedUsername}</Text>
+				{/* Apply truncated username */}
 				<View
 					testID="comment-widget-bubble"
 					style={[styles.bubble, me ? styles.bubbleMe : styles.bubbleOther]}
@@ -43,14 +46,9 @@ const CommentWidget: React.FC<CommentWidgetProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		flexDirection: "row",
-		alignItems: "flex-end",
+		alignItems: "flex-start", // Align the avatar and message at the top
 		marginVertical: 4,
-	},
-	containerMe: {
-		justifyContent: "flex-start",
-	},
-	containerOther: {
-		justifyContent: "flex-start",
+		marginRight: 10,
 	},
 	avatar: {
 		width: 30,
@@ -58,12 +56,15 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		marginRight: 10,
 	},
+	messageContainer: {
+		flex: 1, // Make the message container flexible to avoid forcing line breaks
+	},
 	bubble: {
 		paddingVertical: 10,
 		paddingHorizontal: 15,
 		borderRadius: 25,
 		elevation: 2,
-		maxWidth: "100%",
+		flexGrow: 1, // Allow the bubble to grow as needed
 	},
 	bubbleMe: {
 		backgroundColor: "#08bdbd",
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		fontSize: 16,
+		flexShrink: 1, // Allow the text to shrink and only wrap when necessary
 	},
 	username: {
 		fontSize: 12,

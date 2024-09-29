@@ -1031,9 +1031,9 @@ const ProfileScreen: React.FC = () => {
 						>
 							<Image
 								source={
-									// primaryProfileData.profile_picture_url ?
+									primaryProfileData.profile_picture_url ?
 									{ uri: primaryProfileData.profile_picture_url }
-									// : require("../../../assets/profile-icon.png")
+									: require("../../../assets/profile-icon.png")
 								}
 								style={{
 									width: 125,
@@ -1045,7 +1045,12 @@ const ProfileScreen: React.FC = () => {
 							/>
 						</View>
 						<Text
-							style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}
+							style={{
+								fontSize: 20,
+								fontWeight: "600",
+								textAlign: "center",
+								paddingTop: 10,
+							}}
 						>
 							{primaryProfileData.profile_name}
 						</Text>

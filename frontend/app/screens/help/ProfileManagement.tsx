@@ -10,6 +10,7 @@ import {
 import { FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
+import { colors } from "../../styles/colors";
 
 export default function ProfileManagement() {
 	const router = useRouter();
@@ -116,7 +117,7 @@ export default function ProfileManagement() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#ecf0f1",
+		backgroundColor: colors.backgroundColor,
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},

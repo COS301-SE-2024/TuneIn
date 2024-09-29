@@ -398,7 +398,11 @@ const AdvancedSettings = () => {
 					<View style={styles.toggleItem}>
 						<Text style={styles.toggleHeader}>Searchability</Text>
 						<View style={styles.toggleSwitchContainer}>
-							<Switch value={toggle1} onValueChange={toggleSwitch1} />
+							<Switch
+								value={toggle1}
+								onValueChange={toggleSwitch1}
+								trackColor={{ false: "#767577", true: colors.primary }}
+							/>
 						</View>
 						<Text style={styles.toggleDescription}>
 							Make this room searchable
@@ -407,7 +411,11 @@ const AdvancedSettings = () => {
 					<View style={styles.toggleItem}>
 						<Text style={styles.toggleHeader}>Listeners can add</Text>
 						<View style={styles.toggleSwitchContainer}>
-							<Switch value={toggle2} onValueChange={toggleSwitch2} />
+							<Switch
+								value={toggle2}
+								onValueChange={toggleSwitch2}
+								trackColor={{ false: "#767577", true: colors.primary }}
+							/>
 						</View>
 						<Text style={styles.toggleDescription}>
 							Allow everyone to add tracks
@@ -416,7 +424,11 @@ const AdvancedSettings = () => {
 					<View style={styles.toggleItem}>
 						<Text style={styles.toggleHeader}>Enable chat in room</Text>
 						<View style={styles.toggleSwitchContainer}>
-							<Switch value={toggle3} onValueChange={toggleSwitch3} />
+							<Switch
+								value={toggle3}
+								onValueChange={toggleSwitch3}
+								trackColor={{ false: "#767577", true: colors.primary }}
+							/>
 						</View>
 						<Text style={styles.toggleDescription}>
 							Listeners can use chat functionality
@@ -425,7 +437,11 @@ const AdvancedSettings = () => {
 					<View style={styles.toggleItem}>
 						<Text style={styles.toggleHeader}>Can vote</Text>
 						<View style={styles.toggleSwitchContainer}>
-							<Switch value={toggle4} onValueChange={toggleSwitch4} />
+							<Switch
+								value={toggle4}
+								onValueChange={toggleSwitch4}
+								trackColor={{ false: "#767577", true: colors.primary }}
+							/>
 						</View>
 						<Text style={styles.toggleDescription}>
 							Listeners can vote for next song
@@ -561,7 +577,7 @@ const styles = StyleSheet.create({
 		left: 10,
 	},
 	selectedOption: {
-		backgroundColor: "lightblue",
+		backgroundColor: colors.primary,
 		borderRadius: 5,
 		paddingHorizontal: 5,
 	},
@@ -602,10 +618,6 @@ const styles = StyleSheet.create({
 		marginRight: 5,
 	},
 	saveButton: {
-		// backgroundColor: "#08BDBD",
-		// borderRadius: 24,
-		// paddingVertical: 12,
-		// alignItems: "center",
 		marginTop: 32,
 	},
 	saveButtonText: {
