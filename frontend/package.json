@@ -131,11 +131,13 @@
       "**/*.{ts,tsx}",
       "!**/node_modules/**",
       "!**/vendor/**",
-      "!**/api-client/**"
+      "!**/api-client/**",
+      "!**/e2e/**"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/api-client/"
+      "/api-client/",
+      "/e2e/"
     ]
   },
   "engines": {
