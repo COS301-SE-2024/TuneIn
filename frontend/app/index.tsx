@@ -93,7 +93,8 @@ const App: React.FC = () => {
 		<APIProvider>
 			<LiveProvider>
 				<PlayerContextProvider>
-					<HomeScreen /> {/* Display HomeScreen after checking authentication */}
+					<HomeScreen />{" "}
+					{/* Display HomeScreen after checking authentication */}
 				</PlayerContextProvider>
 			</LiveProvider>
 		</APIProvider>

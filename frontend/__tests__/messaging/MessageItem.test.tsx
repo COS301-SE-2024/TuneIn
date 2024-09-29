@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
 import MessageItem from "../../app/components/messaging/MessageItem";
-import { DirectMessage } from "../../app/services/Live";
+import { DirectMessage } from "../../app/hooks/useDMControls";
 
 // Mock the RoomLink component
 jest.mock("../../app/components/messaging/RoomLink", () => "RoomLink");

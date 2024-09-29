@@ -26,6 +26,11 @@ const Playlist = () => {
 		});
 	};
 
+	useEffect(() => {
+		console.log(`Playlist page room queue`);
+		console.log(roomQueue);
+	}, [roomQueue]);
+
 	return (
 		<View style={styles.container}>
 			{/* RoomTab component */}
