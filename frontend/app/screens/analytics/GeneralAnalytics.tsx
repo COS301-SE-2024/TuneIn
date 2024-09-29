@@ -18,6 +18,7 @@ import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
 import { Line } from "react-native-svg";
 import MetricsCard from "../../components/MetricsCard";
+import { colors } from "../../styles/colors";
 
 const GeneralAnalytics: React.FC = () => {
 	const router = useRouter();
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "space-between", // To space out the items evenly
 		marginBottom: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	cardsContainer: {
 		flexDirection: "row",
@@ -256,6 +258,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingHorizontal: 20,
 		paddingTop: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	header: {
 		flexDirection: "row",

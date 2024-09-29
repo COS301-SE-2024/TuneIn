@@ -485,7 +485,11 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					style={styles.userInfoContainer}
 				>
 					<Image
-						source={{ uri: roomData.userProfile }}
+						source={
+							roomData.userProfile
+								? { uri: roomData.userProfile }
+								: require("../../assets/profile-icon.png")
+						}
 						style={styles.userImage}
 					/>
 					<Text style={styles.username}>
@@ -744,7 +748,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	songRoomWidget: {
-		marginTop: -80,
+		marginTop: -90,
 	},
 });
 

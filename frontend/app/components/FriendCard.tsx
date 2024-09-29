@@ -133,21 +133,23 @@ const styles = StyleSheet.create({
 	},
 	acceptButton: {
 		backgroundColor: colors.primary,
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-		borderRadius: 15,
-	},
-	unfriendButton: {
-		backgroundColor: colors.backgroundColor,
-		paddingHorizontal: 8,
-		paddingVertical: 4,
+		paddingVertical: 8,
+		paddingHorizontal: 12,
 		borderRadius: 20,
 		borderWidth: 1,
-		borderColor: "grey",
-		color: "grey",
+		borderColor: colors.primary,
+		marginRight: 10,
+	},
+	unfriendButton: {
+		backgroundColor: "black",
+		paddingVertical: 8,
+		paddingHorizontal: 12,
+		borderRadius: 20,
+		borderWidth: 1,
+		marginRight: 10,
 	},
 	rejectText: {
-		color: "grey",
+		color: "white",
 		fontWeight: "bold",
 	},
 	cardContainer: {
@@ -169,8 +171,9 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	acceptText: {
-		color: colors.primaryText,
+		color: "white",
 		fontWeight: "bold",
+		// paddingHorizontal: 3,
 	},
 	pendingText: {
 		color: "purple",

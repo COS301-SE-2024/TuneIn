@@ -1,11 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useCallback,
-	memo,
-	useContext,
-} from "react";
+import React, { useState, useEffect, useRef, useContext, memo } from "react";
 import {
 	View,
 	Text,
@@ -15,15 +8,13 @@ import {
 	TextInput,
 	Keyboard,
 	Dimensions,
-	FlatList, // Import FlatList
+	FlatList,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import CommentWidget from "../../components/CommentWidget";
-import CurrentRoom from "./functions/CurrentRoom";
 import { live, LiveMessage } from "../../services/Live";
 import { Player } from "../../PlayerContext";
-import { formatRoomData } from "../../models/Room";
 import { FlyingView, ObjectConfig } from "react-native-flying-objects";
 import EmojiPicker, {
 	EmojiPickerRef,
@@ -35,7 +26,6 @@ const MemoizedCommentWidget = memo(CommentWidget);
 const ChatRoom = () => {
 	live.initialiseSocket();
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -57,7 +47,7 @@ const ChatRoom = () => {
 		);
 	}
 
-	const { currentRoom, setCurrentRoom } = playerContext;
+	const { currentRoom } = playerContext;
 	const [joined, setJoined] = useState(false);
 
 	useEffect(() => {
@@ -89,12 +79,6 @@ const ChatRoom = () => {
 		emojiPickerRef.current?.passEmojiToTextField(emoji);
 	};
 
-	const joinRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setCurrentRoom(formattedRoom);
-	}, [roomData, setCurrentRoom]);
-
 	const screenHeight = Dimensions.get("window").height;
 
 	if (!readyToJoinRoom) {
@@ -106,7 +90,6 @@ const ChatRoom = () => {
 		if (readyToJoinRoom && !joined) {
 			console.log("Joining room...");
 			console.log(readyToJoinRoom, joined);
-			// live.joinRoom(roomID, setJoined, setMessages, setMessage);
 		}
 	}, [readyToJoinRoom, joined, roomID]);
 
@@ -137,6 +120,8 @@ const ChatRoom = () => {
 			keyboardDidHideListener.remove();
 		};
 	}, []);
+
+	const [inputHeight, setInputHeight] = useState(40); // Initial height for TextInput
 
 	return (
 		<View style={styles.container}>
@@ -186,17 +171,17 @@ const ChatRoom = () => {
 					}}
 				>
 					<TextInput
-						style={{
-							flex: 1,
-							borderWidth: 1,
-							borderColor: "#ccc",
-							borderRadius: 20,
-							paddingHorizontal: 10,
-							paddingVertical: 10,
-						}}
+						style={[
+							styles.textInput,
+							{ height: Math.max(40, inputHeight) }, // Dynamically set height
+						]}
 						placeholder="Type your message..."
 						value={message}
 						onChangeText={setMessage}
+						multiline
+						onContentSizeChange={(event) =>
+							setInputHeight(event.nativeEvent.contentSize.height)
+						} // Update height based on content size
 						onSubmitEditing={sendMessage}
 					/>
 
@@ -222,25 +207,16 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 200,
 	},
-	contentContainer: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		paddingTop: 40,
-	},
-	sideBySide: {
-		marginTop: 15,
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-	},
-	joinLeaveButtonContainer: {
-		position: "absolute",
-		paddingRight: 8,
-		right: 0,
+	textInput: {
 		flex: 1,
-		alignItems: "flex-end",
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 20,
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		marginRight: 5,
+		minHeight: 40, // Minimum height for TextInput
+		maxHeight: 120, // Optional maximum height for TextInput
 	},
 });
 
