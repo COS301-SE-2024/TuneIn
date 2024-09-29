@@ -12,6 +12,7 @@ import { ImageModule } from "../image/image.module";
 		PrismaModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 		MurLockModule,
+		ImageModule,
 	],
 	controllers: [],
 	providers: [SpotifyService, ConfigService],

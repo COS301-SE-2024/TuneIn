@@ -66,62 +66,20 @@ export class SpotifyService {
 			throw new Error("Missing TUNEIN_USER_ID");
 		}
 		let error: Error | undefined;
-		this.prisma.authentication
-			.findFirst({
-				where: { user_id: tuneinID },
-			})
-			.then((tokens: PrismaTypes.authentication | null) => {
-				if (!tokens) {
-					throw new Error("Missing TuneIn Spotify tokens");
+		this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
+			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+				try {
+					this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
+					break;
+				} catch (e) {
+					error = e as Error;
+					console.error(e);
 				}
-				const tp: SpotifyTokenPair = JSON.parse(
-					tokens.token,
-				) as SpotifyTokenPair;
-				if (tp.epoch_expiry < new Date().getTime()) {
-					firstValueFrom(
-						this.httpService.post(
-							"https://accounts.spotify.com/api/token",
-							{
-								grant_type: "refresh_token",
-								refresh_token: tp.tokens.refresh_token,
-							},
-							{
-								headers: {
-									"Content-Type": "application/x-www-form-urlencoded",
-									Authorization: `Basic ${this.authHeader}`,
-								},
-							},
-						),
-					).then((response) => {
-						if (!response || !response.data) {
-							throw new Error("Failed to refresh token");
-						}
-
-						const refreshToken: SpotifyTokenRefreshResponse =
-							response.data as SpotifyTokenRefreshResponse;
-						const result: SpotifyTokenResponse = {
-							access_token: refreshToken.access_token,
-							token_type: refreshToken.token_type,
-							scope: refreshToken.scope,
-							expires_in: refreshToken.expires_in,
-							refresh_token: tp.tokens.refresh_token,
-						};
-						tp.tokens = result;
-					});
-				}
-				for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-					try {
-						this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
-						break;
-					} catch (e) {
-						error = e as Error;
-						console.error(e);
-					}
-				}
-				if (error) {
-					throw error;
-				}
-			});
+			}
+			if (error) {
+				throw error;
+			}
+		});
 
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 			try {
@@ -303,16 +261,16 @@ export class SpotifyService {
 							public: true,
 							collaborative: false,
 						});
-					const imageBuffer = await this.downloadImage(room.room_image);
-					const processedImageBuffer = await this.imageService.compressImage(
-						imageBuffer,
-						256 * 1024,
-					);
+					// const imageBuffer = await this.downloadImage(room.room_image);
+					// const processedImageBuffer = await this.imageService.compressImage(
+					// 	imageBuffer,
+					// 	256 * 1024,
+					// );
 					// const b64 = this.imageService.imageToB64(processedImageBuffer);
-					await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
-						playlist.id,
-						processedImageBuffer,
-					);
+					// await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
+					// 	playlist.id,
+					// 	processedImageBuffer,
+					// );
 					await this.prisma.room.update({
 						where: {
 							room_id: room.roomID,
@@ -877,6 +835,7 @@ export class SpotifyService {
 		tk: SpotifyTokenResponse,
 	): Promise<SpotifyTokenResponse> {
 		try {
+			console.log("Refreshing expired token");
 			const response = await firstValueFrom(
 				this.httpService.post(
 					"https://accounts.spotify.com/api/token",
@@ -916,6 +875,7 @@ export class SpotifyService {
 	}
 
 	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
+		console.log("Saving user's Spotify tokens");
 		const user = await this.prisma.users.findFirst({
 			where: { user_id: userID },
 		});
