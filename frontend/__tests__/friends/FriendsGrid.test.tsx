@@ -29,40 +29,23 @@ describe("FriendsGrid", () => {
 		},
 	];
 
-	const mockFollowers: Friend[] = [
-		{
-			friend_id: "3",
-			username: "Follower",
-			profile_picture_url: "https://example.com/followerone.jpg",
-		},
-	];
-
 	it("renders the friends and followers in the grid", () => {
 		const { getByText, getAllByTestId } = render(
-			<FriendsGrid
-				friends={mockFriends}
-				followers={mockFollowers}
-				username="testuser"
-			/>,
+			<FriendsGrid friends={mockFriends} username="testuser" />,
 		);
 
 		// Check that the friends and followers are rendered
 		expect(getByText("JohnDoe")).toBeTruthy();
 		expect(getByText("JaneDoe")).toBeTruthy();
-		expect(getByText("Follower")).toBeTruthy();
 
 		// Check that the profile images are rendered (assume the testId is applied to Image for simplicity)
 		const profileImages = getAllByTestId("profile-image");
-		expect(profileImages).toHaveLength(3); // Two friends and one follower
+		expect(profileImages).toHaveLength(2); // Two friends
 	});
 
 	it("navigates to profile page when a friend is clicked", () => {
 		const { getByText } = render(
-			<FriendsGrid
-				friends={mockFriends}
-				followers={mockFollowers}
-				username="testuser"
-			/>,
+			<FriendsGrid friends={mockFriends} username="testuser" />,
 		);
 
 		// Simulate clicking on the first friend (JohnDoe)
@@ -77,11 +60,7 @@ describe("FriendsGrid", () => {
 
 	it("navigates to followers list when the + button is clicked", () => {
 		const { getByText } = render(
-			<FriendsGrid
-				friends={mockFriends}
-				followers={mockFollowers}
-				username="testuser"
-			/>,
+			<FriendsGrid friends={mockFriends} username="testuser" />,
 		);
 
 		// Simulate clicking the + button
@@ -96,7 +75,7 @@ describe("FriendsGrid", () => {
 
 	it("navigates to search page when there are no friends or followers", () => {
 		const { getByText } = render(
-			<FriendsGrid friends={[]} followers={[]} username="testuser" />,
+			<FriendsGrid friends={[]} username="testuser" />,
 		);
 
 		// Simulate clicking the + button

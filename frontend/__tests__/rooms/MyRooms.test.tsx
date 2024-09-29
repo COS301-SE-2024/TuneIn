@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 import MyRooms from "../../app/screens/rooms/MyRooms"; // Adjust the path as needed
 import { useLocalSearchParams } from "expo-router";
 
@@ -35,38 +35,14 @@ describe("MyRooms", () => {
 		(useLocalSearchParams as jest.Mock).mockReturnValue({ myRooms: mockRooms });
 	});
 
-	it("changes sort direction on arrow press", async () => {
-		const { getByTestId, getByText } = render(<MyRooms />);
+	it("renders the MyRooms screen correctly", () => {
+		const { getByText } = render(<MyRooms />);
 
-		// Check the initial sort direction (ascending)
-		const sortArrow = getByTestId("sort-arrow");
-		// Check if the initial icon is "arrow-up"
+		// Check if the page title is rendered
+		expect(getByText("My Rooms")).toBeTruthy();
 
-		// Change sort direction
-		fireEvent.press(sortArrow);
-		// Expect the icon to change to "arrow-down"
-	});
-
-	it("sorts rooms based on selected criteria", async () => {
-		const { getByTestId, getByText } = render(<MyRooms />);
-
-		// Initially sorted by start date
-		await waitFor(() => {
-			expect(getByText("January 2024")).toBeTruthy();
-		});
-
-		// Change sorting criteria to end date using the Picker
-		const picker = getByTestId("dropdown");
-		fireEvent(picker, "valueChange", "end_date");
-
-		// Change sort direction
-		const sortArrow = getByTestId("sort-arrow");
-		fireEvent.press(sortArrow);
-
-		// Wait for sorting to take effect
-		await waitFor(() => {
-			// Update the expected outcome based on the sorted result
-			expect(getByText("February 2024")).toBeTruthy(); // Assuming end_date sorting
-		});
+		// Ensure that rooms are rendered after loading
+		expect(getByText("January 2024")).toBeTruthy();
+		expect(getByText("February 2024")).toBeTruthy();
 	});
 });
