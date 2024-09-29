@@ -391,8 +391,8 @@ export function useRoomControls({
 								device.id,
 								playlistURI,
 								undefined,
-								{ offset: { uri: trackURI } },
-								0,
+								{ offset: { position: currentSong.playlistIndex }},
+								off
 							);
 							break;
 						case "pause":

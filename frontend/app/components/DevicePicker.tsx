@@ -21,6 +21,7 @@ const DevicePicker = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
+	/*
 	useEffect(() => {
 		// Declare intervalId using useRef to ensure it maintains its value across renders
 		if (isVisible) {
@@ -48,6 +49,7 @@ const DevicePicker = () => {
 			}
 		}
 	}, [isVisible, roomControls.playbackHandler]);
+	*/
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
