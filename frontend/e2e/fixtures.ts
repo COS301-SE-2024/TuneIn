@@ -52,11 +52,13 @@ export const test = base.extend<{
 
 		await context.close();
 	},
-	
+
 	cleanupProfile: async ({ loggedInPage }, use) => {
 		await use(async () => {
 			// Perform the profile cleanup
-			await loggedInPage.goto("http://localhost:8081/screens/profile/ProfilePage");
+			await loggedInPage.goto(
+				"http://localhost:8081/screens/profile/ProfilePage",
+			);
 			await loggedInPage.waitForLoadState("networkidle");
 
 			// Edit profile and reset the fields
