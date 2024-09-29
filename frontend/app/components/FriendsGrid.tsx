@@ -95,12 +95,12 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, username }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginBottom: 20,
+		marginBottom: 5,
 	},
 	friendContainer: {
 		alignItems: "center",
 		padding: 6,
-		paddingHorizontal: 8,
+		paddingHorizontal: 10,
 	},
 	profileImage: {
 		width: 54, // Adjust as needed
