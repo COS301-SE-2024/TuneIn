@@ -100,8 +100,6 @@ test("searching users", async ({ loggedInPage }) => {
 	await expect(loggedInPage.getByText("Farmer23")).toBeVisible();
 });
 
-// await loggedInPage.locator('div:nth-child(4) > div > div > div > div').click();
-// await loggedInPage.getByRole('button', { name: 'Close' }).click();
 // await loggedInPage.
 // await loggedInPage.
 // await loggedInPage.
