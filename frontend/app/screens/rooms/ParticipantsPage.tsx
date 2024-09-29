@@ -22,15 +22,28 @@ const ParticipantsPage: React.FC = () => {
 
 	const navigateToProfile = (userId: string) => {};
 
-	const renderItem = ({ item }: { item: UserDto }) => (
-		<TouchableOpacity style={styles.participantContainer}>
-			<Image
-				source={{ uri: item.profile_picture_url }}
-				style={styles.profilePicture}
-			/>
-			<Text style={styles.username}>{item.username}</Text>
-		</TouchableOpacity>
-	);
+	const renderItem = ({ item }: { item: UserDto }) => {
+		// Truncate the username if it's longer than 20 characters
+		const truncatedUsername =
+			item.username.length > 20
+				? `${item.username.slice(0, 17)}...`
+				: item.username;
+
+		return (
+			<TouchableOpacity style={styles.participantContainer}>
+				<Image
+					source={
+						item.profile_picture_url
+							? { uri: item.profile_picture_url }
+							: require("../../assets/profile-icon.png")
+					}
+					style={styles.profilePicture}
+				/>
+				<Text style={styles.username}>{truncatedUsername}</Text>
+				{/* Apply truncated username */}
+			</TouchableOpacity>
+		);
+	};
 
 	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
 		const usersResponse = await rooms.getRoomUsers(roomID);
@@ -74,10 +87,7 @@ const ParticipantsPage: React.FC = () => {
 			{(participants.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
-						This room has no participants.{" "}
-						{/* {isMine = true
-							? "Add some songs to get started!"
-							: "Wait for the host to add some songs."} */}
+						This room has no participants.
 					</Text>
 				</View>
 			)) || (

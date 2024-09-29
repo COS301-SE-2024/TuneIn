@@ -86,7 +86,7 @@ describe("FriendRequestCard Component", () => {
 		// Check if accept button has correct styles after press
 		expect(acceptButton.props.style).toEqual(
 			expect.objectContaining({
-				backgroundColor: colors.primary,
+				backgroundColor: colors.backgroundColor,
 				borderColor: colors.primary,
 			}),
 		);
@@ -97,8 +97,8 @@ describe("FriendRequestCard Component", () => {
 		// Check if reject button has correct styles after press
 		expect(rejectButton.props.style).toEqual(
 			expect.objectContaining({
-				backgroundColor: "red",
-				borderColor: "red",
+				backgroundColor: "black",
+				borderColor: "black",
 			}),
 		);
 	});

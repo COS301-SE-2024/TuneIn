@@ -8,7 +8,7 @@ import {
 	TextInput,
 	Keyboard,
 	Dimensions,
-	FlatList, // Import FlatList
+	FlatList,
 } from "react-native";
 import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -144,6 +144,8 @@ const ChatRoom = () => {
 		};
 	}, []);
 
+	const [inputHeight, setInputHeight] = useState(40); // Initial height for TextInput
+
 	return (
 		<View style={styles.container}>
 			<Animated.View
@@ -192,17 +194,17 @@ const ChatRoom = () => {
 					}}
 				>
 					<TextInput
-						style={{
-							flex: 1,
-							borderWidth: 1,
-							borderColor: "#ccc",
-							borderRadius: 20,
-							paddingHorizontal: 10,
-							paddingVertical: 10,
-						}}
+						style={[
+							styles.textInput,
+							{ height: Math.max(40, inputHeight) }, // Dynamically set height
+						]}
 						placeholder="Type your message..."
 						value={message}
 						onChangeText={setMessage}
+						multiline
+						onContentSizeChange={(event) =>
+							setInputHeight(event.nativeEvent.contentSize.height)
+						} // Update height based on content size
 						onSubmitEditing={sendMessage}
 					/>
 
@@ -228,25 +230,16 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 200,
 	},
-	contentContainer: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		paddingTop: 40,
-	},
-	sideBySide: {
-		marginTop: 15,
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-	},
-	joinLeaveButtonContainer: {
-		position: "absolute",
-		paddingRight: 8,
-		right: 0,
+	textInput: {
 		flex: 1,
-		alignItems: "flex-end",
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 20,
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		marginRight: 5,
+		minHeight: 40, // Minimum height for TextInput
+		maxHeight: 120, // Optional maximum height for TextInput
 	},
 });
 

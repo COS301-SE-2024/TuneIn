@@ -197,7 +197,7 @@ const ChatListScreen = () => {
 					onChangeText={setSearchQuery}
 				/>
 				<TouchableOpacity style={styles.searchIconContainer} onPress={() => {}}>
-					<Ionicons name="search" size={24} color="black" />
+					<Ionicons name="search" size={24} color={colors.primary} />
 				</TouchableOpacity>
 			</View>
 			{noResults ? (
@@ -246,14 +246,14 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	searchContainer: {
+		marginTop: 10,
 		flexDirection: "row",
 		alignItems: "center",
-		borderColor: "#CCCCCC",
-		borderWidth: 1,
-		borderRadius: 20,
-		paddingHorizontal: 16,
 		marginBottom: 20,
-		marginTop: 10,
+		borderColor: "#ccc",
+		borderWidth: 1,
+		borderRadius: 56,
+		paddingHorizontal: 15,
 	},
 	searchInput: {
 		flex: 1,

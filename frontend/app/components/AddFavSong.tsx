@@ -12,6 +12,8 @@ import {
 import SongCard from "./Spotify/SongCard";
 import { useSpotifySearch } from "../hooks/useSpotifySearch";
 import { colors } from "../styles/colors";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface Track {
 	id: string;
@@ -42,7 +44,7 @@ interface FavSongProps {
 
 const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 	const { searchResults, handleSearch } = useSpotifySearch();
-
+	const router = useRouter();
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [playlist, setPlaylist] = useState<SimplifiedTrack[]>([]);
 	const [sResults, setSResults] = useState<SimplifiedTrack[]>(searchResults);
@@ -103,6 +105,17 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			testID="song-dialog"
 		>
 			<View style={styles.container}>
+				<View>
+					<TouchableOpacity
+						style={styles.backButton}
+						onPress={() => router.back()}
+						testID="back"
+					>
+						<Ionicons name="chevron-back" size={24} color="black" />
+					</TouchableOpacity>
+				</View>
+				<br />
+
 				<TextInput
 					style={styles.input}
 					placeholder="Search for songs..."
@@ -176,11 +189,13 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 20,
 		backgroundColor: "#fff",
+		marginTop: 20,
 	},
 	input: {
+		marginTop: 25,
 		borderWidth: 1,
 		borderColor: "#ccc",
-		borderRadius: 15,
+		borderRadius: 20,
 		padding: 10,
 		marginBottom: 15,
 	},
@@ -228,7 +243,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	searchButton: {
-		backgroundColor: "#4c50bf",
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
@@ -247,7 +262,7 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 	removeButton: {
-		backgroundColor: "red",
+		backgroundColor: "black",
 		borderRadius: 30,
 		height: 30,
 		alignItems: "center",
@@ -258,6 +273,12 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		fontSize: 16,
 		fontWeight: "bold",
+	},
+	backButton: {
+		position: "absolute",
+		left: 0,
+		// top: -10,
+		marginBottom: 30,
 	},
 });
 

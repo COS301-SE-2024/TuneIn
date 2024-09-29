@@ -9,6 +9,7 @@ import {
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { colors } from "../../styles/colors";
 
 export default function InteractiveSessions() {
 	const router = useRouter();
@@ -142,7 +143,7 @@ export default function InteractiveSessions() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#ecf0f1",
+		backgroundColor: colors.backgroundColor,
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},

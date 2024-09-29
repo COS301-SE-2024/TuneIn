@@ -1022,7 +1022,12 @@ const ProfileScreen: React.FC = () => {
 							/>
 						</View>
 						<Text
-							style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}
+							style={{
+								fontSize: 20,
+								fontWeight: "600",
+								textAlign: "center",
+								paddingTop: 10,
+							}}
 						>
 							{primaryProfileData.profile_name}
 						</Text>
