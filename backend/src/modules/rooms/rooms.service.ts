@@ -87,7 +87,9 @@ export class RoomsService {
 			throw new Error("Room does not exist");
 		}
 		// filter out null values
-		return await this.dtogen.generateRoomDtoFromRoom(room);
+		const result: RoomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+		result.current_song = await this.getCurrentSong(roomID);
+		return result;
 	}
 
 	async updateRoomInfo(

@@ -361,15 +361,6 @@ export class DtoGenService {
 			has_explicit_content: room.explicit || false,
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
-			current_song: {
-				songID: "",
-				title: "",
-				artists: [],
-				cover: "",
-				spotify_id: "",
-				duration: 0,
-				start_time: new Date(),
-			},
 			tags: room.tags || [],
 			childrenRoomIDs: [],
 		};
