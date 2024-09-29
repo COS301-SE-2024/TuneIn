@@ -91,7 +91,12 @@ export class RoomsService {
 		}
 		// filter out null values
 		const result: RoomDto = await this.dtogen.generateRoomDtoFromRoom(room);
-		result.current_song = await this.getCurrentSong(roomID);
+		const currentSong: RoomSongDto | undefined = await this.getCurrentSong(
+			roomID,
+		);
+		if (currentSong) {
+			result.current_song = currentSong;
+		}
 		return result;
 	}
 
@@ -349,21 +354,12 @@ export class RoomsService {
 		}
 	}
 
-	async getCurrentSong(roomID: string): Promise<RoomSongDto> {
+	async getCurrentSong(roomID: string): Promise<RoomSongDto | undefined> {
 		const queue: RoomSongDto[] = await this.getRoomQueue(roomID);
 		if (queue.length === 0) {
-			throw new HttpException(
-				"Either room is inactive or queue is empty",
-				HttpStatus.NOT_FOUND,
-			);
+			return undefined;
 		}
 		const result: RoomSongDto = queue[0];
-		if (result.pauseTime) {
-			throw new HttpException("Song is paused", HttpStatus.BAD_REQUEST);
-		}
-		if (!result.startTime) {
-			throw new HttpException("Song has not started", HttpStatus.BAD_REQUEST);
-		}
 		return result;
 	}
 
@@ -1154,5 +1150,74 @@ export class RoomsService {
 			userID,
 		);
 		await this.spotifyService.saveRoomPlaylist(room, tokens);
+	}
+
+	// async shareRoom(@Request() req: Request, @Param("roomID") roomID: string, @Body() users: string[]) {
+	// 	const userInfo: JWTPayload = this.auth.getUserInfo(req);
+	// 	return await this.roomsService.shareRoom(roomID, userInfo.id, users);
+	// }
+	/*
+	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
+		//send message to user
+		try {
+			const newMessage = await this.prisma.message.create({
+				data: {
+					contents: message.messageBody,
+					date_sent: message.dateSent,
+					sender: message.sender.userID,
+				},
+			});
+			const m: PrismaTypes.private_message =
+				await this.prisma.private_message.create({
+					data: {
+						users: {
+							connect: {
+								user_id: message.recipient.userID,
+							},
+						},
+						message: {
+							connect: {
+								message_id: newMessage.message_id,
+							},
+						},
+					},
+				});
+			console.log("new DM: ");
+			console.log(m);
+			return await this.dtogen.generateDirectMessageDto(m.p_message_id);
+		} catch (e) {
+			throw new Error("Failed to send message");
+		}
+	}
+	*/
+	async shareRoom(
+		roomID: string,
+		userID: string,
+		users: string[],
+	): Promise<void> {
+		console.log(roomID, userID, users);
+		// if (!(await this.dbUtils.userExists(userID))) {
+		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// }
+		// if (!(await this.roomExists(roomID))) {
+		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		// }
+		// users.forEach(async (user) => {
+		// 	if (!(await this.dbUtils.userExists(user))) {
+		// 		throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		// 	}
+		// });
+		// const room: RoomDto = await this.getRoomInfo(roomID);
+		// const newMessage: PrismaTypes.messageCreateInput = {
+		// 	data: {
+		// 		contents: "Check out this room: " + room.name,
+		// 		date_sent: new Date(),
+		// 		users: {
+		// 			connect: {
+		// 				user_id: userID,
+		// 			},
+		// 		},
+		// 	},
+		// };
 	}
 }

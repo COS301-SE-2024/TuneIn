@@ -172,12 +172,9 @@ const Search: React.FC = () => {
 
 						setUserLoading(true);
 
-						response = await axios.get(
-							`${utils.API_BASE_URL}/users/foryou`,
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
+						response = await axios.get(`${utils.API_BASE_URL}/users/foryou`, {
+							headers: {
+								Authorization: `Bearer ${token}`,
 							},
 						});
 						if (response.status !== 200) {

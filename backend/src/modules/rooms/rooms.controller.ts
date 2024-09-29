@@ -9,6 +9,8 @@ import {
 	Put,
 	UseGuards,
 	Request,
+	HttpStatus,
+	HttpException,
 } from "@nestjs/common";
 import {
 	ApiBadRequestResponse,
@@ -402,7 +404,18 @@ export class RoomsController {
 		description: "Unauthorized",
 	})
 	async getCurrentSong(@Param("roomID") roomID: string): Promise<RoomSongDto> {
-		return await this.roomsService.getCurrentSong(roomID);
+		const result: RoomSongDto | undefined =
+			await this.roomsService.getCurrentSong(roomID);
+		if (!result) {
+			throw new HttpException("Room not found", HttpStatus.NOT_FOUND);
+		}
+		if (result.pauseTime) {
+			throw new HttpException("Song is paused", HttpStatus.BAD_REQUEST);
+		}
+		if (!result.startTime) {
+			throw new HttpException("Song has not started", HttpStatus.BAD_REQUEST);
+		}
+		return result;
 	}
 
 	@Post(":roomID/share")
