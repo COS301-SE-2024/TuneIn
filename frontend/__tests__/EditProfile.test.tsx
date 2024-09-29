@@ -660,5 +660,4 @@ describe("ProfileScreen", () => {
 
 		expect(getByTestId("song-dialog").props.visible).toBe(true);
 	});
-
 });

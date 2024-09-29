@@ -13,20 +13,12 @@ import { colors } from "../styles/colors";
 
 interface FriendsGridProps {
 	friends: Friend[];
-	followers: Friend[];
 	username: string;
 }
 
-const FriendsGrid: React.FC<FriendsGridProps> = ({
-	friends,
-	followers,
-	username,
-}) => {
+const FriendsGrid: React.FC<FriendsGridProps> = ({ friends, username }) => {
 	const router = useRouter();
 	const maxVisible = 8; // Max visible items
-
-	// Combine friends and followers, with friends coming first
-	const combinedList = [...friends, ...followers].slice(0, maxVisible);
 
 	const navigateToAllFriends = () => {
 		const safeUserData = username ?? { username: "defaultUser" };
@@ -42,7 +34,7 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 
 	const renderItem = ({ item, index }: { item: Friend; index: number }) => (
 		<TouchableOpacity
-			style={[styles.friendContainer]}
+			style={styles.friendContainer}
 			onPress={() =>
 				router.navigate({
 					pathname: "/screens/profile/ProfilePage",
@@ -57,12 +49,8 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 						? { uri: item.profile_picture_url }
 						: require("../../assets/profile-icon.png")
 				}
-				style={[
-					styles.profileImage,
-					{ borderColor: friends.includes(item) ? "green" : colors.primary },
-				]}
+				style={[styles.profileImage, { borderColor: colors.primary }]}
 			/>
-
 			<Text style={styles.friendName}>
 				{item.username.length > 10
 					? item.username.slice(0, 8) + "..."
@@ -73,26 +61,34 @@ const FriendsGrid: React.FC<FriendsGridProps> = ({
 
 	return (
 		<View style={styles.container}>
-			<FlatList
-				horizontal
-				data={combinedList}
-				renderItem={renderItem}
-				keyExtractor={(item, index) => `friend-${item.friend_id}-${index}`}
-				ListFooterComponent={() => (
-					<TouchableOpacity
-						style={styles.friendContainer}
-						onPress={
-							combinedList.length > 0 ? navigateToAllFriends : navigateToSearch
-						}
-					>
-						<View style={styles.moreButton}>
-							<Text style={styles.moreButtonText}>+</Text>
-						</View>
-					</TouchableOpacity>
-				)}
-				showsHorizontalScrollIndicator={false}
-				extraData={combinedList}
-			/>
+			{friends.length === 0 ? (
+				<TouchableOpacity
+					style={styles.centeredButton}
+					onPress={navigateToSearch}
+				>
+					<View style={styles.moreButton}>
+						<Text style={styles.moreButtonText}>+</Text>
+					</View>
+				</TouchableOpacity>
+			) : (
+				<FlatList
+					horizontal
+					data={friends.slice(0, maxVisible)}
+					renderItem={renderItem}
+					keyExtractor={(item, index) => `friend-${item.friend_id}-${index}`}
+					ListFooterComponent={() => (
+						<TouchableOpacity
+							style={styles.friendContainer}
+							onPress={navigateToAllFriends}
+						>
+							<View style={styles.moreButton}>
+								<Text style={styles.moreButtonText}>+</Text>
+							</View>
+						</TouchableOpacity>
+					)}
+					showsHorizontalScrollIndicator={false}
+				/>
+			)}
 		</View>
 	);
 };
@@ -131,6 +127,11 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontWeight: "bold",
 		paddingBottom: 8,
+	},
+	centeredButton: {
+		alignItems: "center",
+		justifyContent: "center",
+		flex: 1,
 	},
 });
 
