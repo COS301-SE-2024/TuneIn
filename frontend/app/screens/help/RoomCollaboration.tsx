@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { colors } from "../../styles/colors";
 
 export default function RoomCollaboration() {
 	const router = useRouter();
@@ -121,7 +122,7 @@ export default function RoomCollaboration() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#ecf0f1",
+		backgroundColor: colors.backgroundColor,
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},

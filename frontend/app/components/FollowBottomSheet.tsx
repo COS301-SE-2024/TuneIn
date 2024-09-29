@@ -160,7 +160,9 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 															}}
 															testID="unfollow"
 														>
-															<Text style={{ fontSize: 18 }}>Unfollow</Text>
+															<Text style={{ fontSize: 18, fontWeight: 500 }}>
+																Unfollow
+															</Text>
 														</TouchableOpacity>
 														{isPending ? (
 															<TouchableOpacity
@@ -177,7 +179,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																}}
 																testID="cancel-friend-req"
 															>
-																<Text style={{ fontSize: 18 }}>
+																<Text style={{ fontSize: 18, fontWeight: 500 }}>
 																	Cancel Friend Request
 																</Text>
 															</TouchableOpacity>
@@ -197,7 +199,9 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																	}}
 																	testID="accept-friend"
 																>
-																	<Text style={{ fontSize: 18 }}>
+																	<Text
+																		style={{ fontSize: 18, fontWeight: 500 }}
+																	>
 																		Accept Friend Request
 																	</Text>
 																</TouchableOpacity>
@@ -214,7 +218,9 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																		handleClose();
 																	}}
 																>
-																	<Text style={{ fontSize: 18 }}>
+																	<Text
+																		style={{ fontSize: 18, fontWeight: 500 }}
+																	>
 																		Reject Friend Request
 																	</Text>
 																</TouchableOpacity>
@@ -235,7 +241,9 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 																	}}
 																	testID="send-request"
 																>
-																	<Text style={{ fontSize: 18 }}>
+																	<Text
+																		style={{ fontSize: 18, fontWeight: 500 }}
+																	>
 																		Send Friend Request
 																	</Text>
 																</TouchableOpacity>
