@@ -326,9 +326,17 @@ export class SpotifyService {
 
 					//delete all songs from start
 					const deleteIDs: string[] = currentTrackIDs.slice(start);
-					await this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
-						tracks: deleteIDs.map((id) => ({ uri: `spotify:track:${id}` })),
-					});
+					const promises = [];
+					for (let i = 0; i < deleteIDs.length; i += 50) {
+						const ids = deleteIDs.slice(i, i + 50);
+						await new Promise((resolve) => setTimeout(resolve, 500));
+						promises.push(
+							this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
+								tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
+							}),
+						);
+					}
+					await Promise.all(promises);
 				}
 
 				const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
