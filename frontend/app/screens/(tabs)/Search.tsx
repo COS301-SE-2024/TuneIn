@@ -649,7 +649,7 @@ const Search: React.FC = () => {
 							}}
 							testID="search-button"
 						>
-							<Ionicons name="search-sharp" size={30} color={colors.primary} />
+							<Ionicons name="search" size={24} color={colors.primary} />
 						</TouchableOpacity>
 					</View>
 					{dropdownVisible && searchSuggestions.length !== 0 && (

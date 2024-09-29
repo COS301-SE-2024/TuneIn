@@ -12,6 +12,7 @@ import {
 import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
 import { colors } from "../../styles/colors";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface RoomCardWidgetProps {
 	roomCard: Room;
@@ -192,8 +193,14 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					</View>
 					{/* Conditionally render explicit icon */}
 					{roomCard.isExplicit && (
-						<Image
-							source={require("../../../assets/Explicit.png")}
+						// <Image
+						// 	source={require("../../../assets/Explicit.png")}
+						// 	style={styles.explicitIcon}
+						// />
+						<MaterialIcons
+							name="explicit"
+							size={28}
+							color="white"
 							style={styles.explicitIcon}
 						/>
 					)}
@@ -322,7 +329,7 @@ const styles = StyleSheet.create({
 		height: 26,
 		position: "absolute", // Use absolute positioning
 		top: 10, // Position from the bottom
-		right: 10, // Position from the right
+		right: 10,
 	},
 });
 

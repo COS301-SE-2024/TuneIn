@@ -13,6 +13,7 @@ import {
 	AntDesign,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { colors } from "../../styles/colors";
 
 export default function GettingStarted() {
 	const router = useRouter();
@@ -112,7 +113,7 @@ export default function GettingStarted() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#ecf0f1",
+		backgroundColor: colors.backgroundColor,
 		paddingVertical: 20,
 		paddingHorizontal: 15,
 	},
