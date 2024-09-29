@@ -105,7 +105,6 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			testID="song-dialog"
 		>
 			<View style={styles.container}>
-
 				<View>
 					<TouchableOpacity
 						style={styles.backButton}
