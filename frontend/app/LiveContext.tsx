@@ -427,57 +427,59 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const setRoomID = useCallback(
 		(roomID: string) => {
 			console.log(`setRoomID`);
-			rooms
-				.getRoomInfo(roomID)
-				.then((room: AxiosResponse<RoomDto>) => {
-					if (room.status === 401) {
-						//Unauthorized
-						//Auth header is either missing or invalid
-					} else if (room.status === 500) {
-						//Internal Server Error
-						//Something went wrong in the backend (unlikely lmao)
-						throw new Error("Internal Server Error");
-					} else {
-						const r: RoomDto = room.data;
-						setCurrentRoom(r);
-						roomControls.requestRoomQueue();
-					}
-				})
-				.catch((error) => {
-					if (error instanceof RequiredError) {
-						// a required field is missing
-						throw new Error("Parameter missing from request to get room");
-					} else {
-						// some other error
-						throw new Error("Error getting room");
-					}
-				});
-			rooms
-				.getRoomUsers(roomID)
-				.then((users: AxiosResponse<UserDto[]>) => {
-					if (users.status === 401) {
-						//Unauthorized
-						//Auth header is either missing or invalid
+			if (!currentRoom || currentRoom.roomID !== roomID) {
+				rooms
+					.getRoomInfo(roomID)
+					.then((room: AxiosResponse<RoomDto>) => {
+						if (room.status === 401) {
+							//Unauthorized
+							//Auth header is either missing or invalid
+						} else if (room.status === 500) {
+							//Internal Server Error
+							//Something went wrong in the backend (unlikely lmao)
+							throw new Error("Internal Server Error");
+						} else {
+							const r: RoomDto = room.data;
+							setCurrentRoom(r);
+							roomControls.requestRoomQueue();
+						}
+					})
+					.catch((error) => {
+						if (error instanceof RequiredError) {
+							// a required field is missing
+							throw new Error("Parameter missing from request to get room");
+						} else {
+							// some other error
+							throw new Error("Error getting room");
+						}
+					});
+				rooms
+					.getRoomUsers(roomID)
+					.then((users: AxiosResponse<UserDto[]>) => {
+						if (users.status === 401) {
+							//Unauthorized
+							//Auth header is either missing or invalid
+							setRoomParticipants([]);
+						} else if (users.status === 500) {
+							//Internal Server Error
+							//Something went wrong in the backend (unlikely lmao)
+							setRoomParticipants([]);
+							throw new Error("Internal Server Error");
+						} else {
+							setRoomParticipants(users.data);
+						}
+					})
+					.catch((error) => {
 						setRoomParticipants([]);
-					} else if (users.status === 500) {
-						//Internal Server Error
-						//Something went wrong in the backend (unlikely lmao)
-						setRoomParticipants([]);
-						throw new Error("Internal Server Error");
-					} else {
-						setRoomParticipants(users.data);
-					}
-				})
-				.catch((error) => {
-					setRoomParticipants([]);
-					if (error instanceof RequiredError) {
-						// a required field is missing
-						throw new Error("Parameter missing from request to get room users");
-					} else {
-						// some other error
-						throw new Error("Error getting room users");
-					}
-				});
+						if (error instanceof RequiredError) {
+							// a required field is missing
+							throw new Error("Parameter missing from request to get room users");
+						} else {
+							// some other error
+							throw new Error("Error getting room users");
+						}
+					});
+			}
 		},
 		[roomControls, rooms],
 	);

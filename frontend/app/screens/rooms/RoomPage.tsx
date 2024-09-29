@@ -76,16 +76,18 @@ const RoomPage: React.FC = () => {
 	const [lastRoomFetch, setLastRoomFetch] = useState(new Date(0));
 
 	const getAndSetRoomInfo = useCallback(async () => {
-		rooms.getRoomInfo(roomID).then((roomResponse) => {
-			const r = roomResponse.data;
-			setThisRoom(r);
-			if (currentRoom) {
-				setUserInRoom(currentRoom.roomID === roomID);
-			} else {
-				setUserInRoom(false);
-			}
-		});
-	}, [rooms, roomID, currentRoom]);
+		if (!thisRoom || thisRoom.roomID !== roomID) {
+			rooms.getRoomInfo(roomID).then((roomResponse) => {
+				const r = roomResponse.data;
+				setThisRoom(r);
+				if (currentRoom) {
+					setUserInRoom(currentRoom.roomID === roomID);
+				} else {
+					setUserInRoom(false);
+				}
+			});
+		}
+	}, [thisRoom, roomID, rooms, currentRoom]);
 
 	const checkBookmarked = useCallback(async () => {
 		for (let i = 0; i < userBookmarks.length; i++) {
@@ -223,19 +225,21 @@ const RoomPage: React.FC = () => {
 		}
 	};
 
+	// useEffect(() => {
+	// 	// only fetch room info every 30 seconds
+	// 	if (lastRoomFetch.getTime() + 30 * 1000 < new Date().getTime()) {
+	// 		getAndSetRoomInfo();
+	// 		checkBookmarked();
+	// 		setLastRoomFetch(new Date());
+	// 	}
+	// }, [checkBookmarked, getAndSetRoomInfo, roomID, userBookmarks]);
+
 	// on component mount
 	useEffect(() => {
-		// only fetch room info every 30 seconds
-		if (lastRoomFetch.getTime() + 30 * 1000 < new Date().getTime()) {
+		if (thisRoom === undefined) {
 			getAndSetRoomInfo();
 			checkBookmarked();
-			setLastRoomFetch(new Date());
 		}
-	}, [checkBookmarked, getAndSetRoomInfo, roomID, userBookmarks]);
-
-	useEffect(() => {
-		getAndSetRoomInfo();
-		checkBookmarked();
 	}, []);
 
 	return (
