@@ -171,7 +171,6 @@ const ProfileScreen: React.FC = () => {
 
 	useEffect(() => {
 		// console.log("init effect called");
-		setLoading(true);
 		const initializeProfile = async () => {
 			if (!ownsProfile) {
 				const parsedFriend = JSON.parse(params.friend as string);
@@ -195,12 +194,9 @@ const ProfileScreen: React.FC = () => {
 						setPendingRequests(penFData);
 						setRequests(reqFData);
 
-						if (recentRoomData === null) {
-							fetchRecentRoomInfo(data.username);
-						}
-						if (favoriteRoomData === null) {
-							fetchFavRoomInfo(data.username);
-						}
+						await fetchRecentRoomInfo(data.username);
+
+						await fetchFavRoomInfo(data.username);
 
 						if (userData !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
@@ -235,9 +231,7 @@ const ProfileScreen: React.FC = () => {
 
 						setHasRequested(req);
 
-						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.userID);
-						}
+						await fetchCurrentRoomInfo(data.userID);
 					}
 				} catch (error) {
 					console.log("Failed to retrieve profile data:", error);
@@ -262,20 +256,20 @@ const ProfileScreen: React.FC = () => {
 				}
 
 				if (
-					recentRoomData === null &&
+					// recentRoomData === null &&
 					userData !== null &&
 					userData !== undefined
 				) {
 					// console.log("User Data for rec room: " + JSON.stringify(userData));
-					fetchRecentRoomInfo(userData.username);
+					await fetchRecentRoomInfo(userData.username);
 				}
 				if (
-					favoriteRoomData === null &&
+					// favoriteRoomData === null &&
 					userData !== null &&
 					userData !== undefined
 				) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
-					fetchFavRoomInfo(userData.username);
+					await fetchFavRoomInfo(userData.username);
 				}
 
 				if (currentRoomData === null) {
@@ -283,11 +277,10 @@ const ProfileScreen: React.FC = () => {
 					setRoomCheck(true);
 				}
 			}
-
-			setLoading(false);
 		};
-
+		setLoading(true);
 		initializeProfile();
+		setLoading(false);
 	}, [userData, setUserData, params.friend]);
 
 	useEffect(() => {
