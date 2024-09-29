@@ -73,6 +73,7 @@ const RoomPage: React.FC = () => {
 	const [userInRoom, setUserInRoom] = useState(false);
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
+	const [lastRoomFetch, setLastRoomFetch] = useState(new Date(0));
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		rooms.getRoomInfo(roomID).then((roomResponse) => {
@@ -224,8 +225,12 @@ const RoomPage: React.FC = () => {
 
 	// on component mount
 	useEffect(() => {
-		getAndSetRoomInfo();
-		checkBookmarked();
+		// only fetch room info every 30 seconds
+		if (lastRoomFetch.getTime() + 30 * 1000 < new Date().getTime()) {
+			getAndSetRoomInfo();
+			checkBookmarked();
+			setLastRoomFetch(new Date());
+		}
 	}, [checkBookmarked, getAndSetRoomInfo, roomID, userBookmarks]);
 
 	useEffect(() => {
