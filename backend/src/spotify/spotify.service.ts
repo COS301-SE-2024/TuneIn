@@ -60,15 +60,14 @@ export class SpotifyService {
 			"base64",
 		);
 
-		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
-		if (!tuneinID) {
-			throw new Error("Missing TUNEIN_USER_ID");
-		}
 		let error: Error | undefined;
-		this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
+		this.createTuneInAPI().then(() => {
 			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 				try {
-					this.TuneInAPI = SpotifyApi.withAccessToken(clientId, tp.tokens);
+					this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
+						this.clientId,
+						this.clientSecret,
+					);
 					break;
 				} catch (e) {
 					error = e as Error;
@@ -79,22 +78,28 @@ export class SpotifyService {
 				throw error;
 			}
 		});
+	}
 
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
-					this.clientId,
-					this.clientSecret,
-				);
-				break;
-			} catch (e) {
-				error = e as Error;
-				console.error(e);
+	async createTuneInAPI() {
+		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
+		if (!tuneinID) {
+			throw new Error("Missing TUNEIN_USER_ID");
+		}
+		let error: Error | undefined;
+		this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
+			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+				try {
+					this.TuneInAPI = SpotifyApi.withAccessToken(this.clientId, tp.tokens);
+					break;
+				} catch (e) {
+					error = e as Error;
+					console.error(e);
+				}
 			}
-		}
-		if (error) {
-			throw error;
-		}
+			if (error) {
+				throw error;
+			}
+		});
 	}
 
 	async downloadImage(url: string): Promise<Buffer> {
@@ -234,6 +239,7 @@ export class SpotifyService {
 	}
 
 	async getRoomPlaylist(room: RoomDto): Promise<Spotify.Playlist> {
+		await this.createTuneInAPI();
 		const r = await this.prisma.room.findUnique({
 			where: {
 				room_id: room.roomID,
@@ -298,6 +304,7 @@ export class SpotifyService {
 		trackIDs: string[],
 		start = 0,
 	): Promise<void> {
+		await this.createTuneInAPI();
 		let attempts = 0;
 		let error: Error | undefined;
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
@@ -536,7 +543,9 @@ export class SpotifyService {
 						return;
 					}
 					const genre =
-						track.album.genres.length > 0 ? track.album.genres[0] : undefined;
+						track.album && track.album.genres && track.album.genres.length > 0
+							? track.album.genres[0]
+							: undefined;
 					const audioFeatures: Spotify.AudioFeatures =
 						await this.getAudioFeatures(track.id);
 					const s: Prisma.songCreateInput = {
@@ -596,6 +605,8 @@ export class SpotifyService {
 								trackFeatures = await this.getAudioFeatures(track.id);
 							}
 							const genre =
+								track.album &&
+								track.album.genres &&
 								track.album.genres.length > 0
 									? track.album.genres[0]
 									: undefined;
