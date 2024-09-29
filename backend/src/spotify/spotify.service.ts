@@ -535,7 +535,8 @@ export class SpotifyService {
 						result = song;
 						return;
 					}
-					const genre = track.album.genres[0];
+					const genre =
+						track.album.genres.length > 0 ? track.album.genres[0] : undefined;
 					const audioFeatures: Spotify.AudioFeatures =
 						await this.getAudioFeatures(track.id);
 					const s: Prisma.songCreateInput = {
@@ -594,7 +595,10 @@ export class SpotifyService {
 							if (trackFeatures === undefined) {
 								trackFeatures = await this.getAudioFeatures(track.id);
 							}
-							const genre = track.album.genres[0];
+							const genre =
+								track.album.genres.length > 0
+									? track.album.genres[0]
+									: undefined;
 							if (!foundIDs.includes(track.id)) {
 								const song: Prisma.songCreateInput = {
 									name: track.name,
