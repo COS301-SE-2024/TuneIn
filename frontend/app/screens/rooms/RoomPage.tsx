@@ -268,7 +268,7 @@ const RoomPage: React.FC = () => {
 				<View style={styles.trackDetails}>
 					<Image
 						source={{
-							uri: rs.getAlbumArtUrl(userInRoom ? currentSong : undefined),
+							uri: "rs.getAlbumArtUrl(userInRoom ? currentSong : undefined)",
 						}}
 						style={styles.nowPlayingAlbumArt}
 					/>
