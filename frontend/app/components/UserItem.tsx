@@ -10,11 +10,12 @@ interface UserItemProps {
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
 	const navigateToHelp = () => {
+		console.log("User info: " + JSON.stringify(user));
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
 				profile_picture_url: user.profile_picture_url,
 				username: user.username,
-			})}&user=${user}`,
+			})}`,
 		);
 	};
 

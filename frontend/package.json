@@ -12,7 +12,9 @@
     "lint-fix": "eslint --fix .",
     "lint": "eslint .",
     "test": "jest",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.654.0",
@@ -90,6 +92,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@playwright/test": "^1.47.2",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.10",
     "@types/react": "~18.2.45",
