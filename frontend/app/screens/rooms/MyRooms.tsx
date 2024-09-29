@@ -125,7 +125,7 @@ const MyRooms: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
-			<View style={styles.sortContainer}>
+			{/* <View style={styles.sortContainer}>
 				<Picker
 					testID="dropdown"
 					selectedValue={sortBy}
@@ -151,7 +151,7 @@ const MyRooms: React.FC = () => {
 						color={colors.primaryText}
 					/>
 				</TouchableOpacity>
-			</View>
+			</View> */}
 
 			<ScrollView contentContainerStyle={styles.scrollViewContent}>
 				{loading || sortLoading ? (
@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		paddingHorizontal: 10,
 		position: "relative", // Allows absolute positioning of the button
+		paddingBottom: 20,
 	},
 	addButton: {
 		position: "absolute",
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
 	pageTitle: {
 		fontSize: 24,
 		fontWeight: "bold",
-		color: colors.primary,
+		color: colors.primaryText,
 	},
 	sortContainer: {
 		flexDirection: "row",

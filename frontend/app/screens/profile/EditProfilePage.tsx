@@ -13,7 +13,6 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
 import FavoriteSongs from "../../components/FavoriteSong";
-import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +23,7 @@ import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import GenreAdder from "../../components/GenreAdder";
+import * as ImagePicker from "expo-image-picker";
 
 type InputRef = TextInput | null;
 
@@ -211,6 +211,19 @@ const EditProfileScreen = () => {
 		} catch (error) {
 			console.log("Error in checkUsername:", error);
 			return false;
+		}
+	};
+
+	const pickImage = async (onImageUpload: (uri: string) => Promise<void>) => {
+		let result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ImagePicker.MediaTypeOptions.All,
+			allowsEditing: true,
+			aspect: [4, 3],
+			quality: 1,
+		});
+
+		if (!result.canceled) {
+			await onImageUpload(result.assets[0].uri); // Pass only the URI (string) to onImageUpload
 		}
 	};
 
@@ -552,17 +565,12 @@ const EditProfileScreen = () => {
 						}}
 					/>
 					<TouchableOpacity
-						onPress={() => setPhotoDialogVisible(true)}
+						onPress={() => pickImage(updateImage)}
 						style={styles.changePhotoButton}
 						testID="photo-button"
 					>
 						<Text>Change Photo</Text>
 					</TouchableOpacity>
-					<PhotoSelect
-						isVisible={isPhotoDialogVisible}
-						onClose={() => setPhotoDialogVisible(false)}
-						onImageUpload={updateImage} // Pass the URI of the photo you want to display
-					/>
 				</View>
 				{/* Name */}
 				<View style={styles.listItem}>
