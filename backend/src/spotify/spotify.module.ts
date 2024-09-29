@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { HttpModule } from "@nestjs/axios";
 import { PrismaModule } from "./../../prisma/prisma.module";
 import { MurLockModule } from "murlock";
+import { ImageModule } from "../image/image.module";
 
 @Module({
 	imports: [

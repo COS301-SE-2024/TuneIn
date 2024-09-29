@@ -16,6 +16,7 @@ import { RoomDto } from "../modules/rooms/dto/room.dto";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosError } from "axios";
+import { ImageService } from "../image/image.service";
 
 const NUMBER_OF_RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
@@ -34,6 +35,7 @@ export class SpotifyService {
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
 		private readonly httpService: HttpService,
+		private readonly imageService: ImageService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -136,6 +138,16 @@ export class SpotifyService {
 		if (error) {
 			throw error;
 		}
+	}
+
+	async downloadImage(url: string): Promise<Buffer> {
+		const response = await firstValueFrom(
+			this.httpService.get(url, { responseType: "arraybuffer" }),
+		);
+		if (!response || !response.data) {
+			throw new HttpException("Failed to download image", 500);
+		}
+		return Buffer.from(response.data);
 	}
 
 	async wait(ms: number) {
@@ -291,7 +303,16 @@ export class SpotifyService {
 							public: true,
 							collaborative: false,
 						});
-					//upload playlist image here
+					const imageBuffer = await this.downloadImage(room.room_image);
+					const processedImageBuffer = await this.imageService.compressImage(
+						imageBuffer,
+						256 * 1024,
+					);
+					// const b64 = this.imageService.imageToB64(processedImageBuffer);
+					await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
+						playlist.id,
+						processedImageBuffer,
+					);
 					await this.prisma.room.update({
 						where: {
 							room_id: room.roomID,
