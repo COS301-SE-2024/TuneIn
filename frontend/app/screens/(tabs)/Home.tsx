@@ -36,7 +36,6 @@ import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
 import { useIsFocused } from "@react-navigation/native";
-import FriendServices from "../../services/FriendServices";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -75,7 +74,6 @@ const Home: React.FC = () => {
 	const [friendError, setFriendError] = useState<boolean>(false);
 	const [scrollY] = useState(new Animated.Value(0));
 	const [friends, setFriends] = useState<Friend[]>([]);
-	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [loading, setLoading] = useState(true);
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
@@ -112,23 +110,6 @@ const Home: React.FC = () => {
 			const response = await axios.get(`${utils.API_BASE_URL}/users/friends`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-			setFriendError(false);
-			return response.data;
-		} catch (error) {
-			console.log("Error fetching friends:", error);
-			setFriendError(true);
-			return [];
-		}
-	};
-
-	const getFollowers = async (token: string) => {
-		try {
-			const response = await axios.get<Friend[]>(
-				`${utils.API_BASE_URL}/users/following`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
 			setFriendError(false);
 			return response.data;
 		} catch (error) {
@@ -223,17 +204,6 @@ const Home: React.FC = () => {
 					}))
 				: [];
 			setFriends(formattedFriends);
-
-			// Fetch and format followers
-			const fetchedFollowers = await getFollowers(storedToken);
-			const formattedFollowers: Friend[] = Array.isArray(fetchedFollowers)
-				? fetchedFollowers.map((follower: Friend) => ({
-						profile_picture_url: follower.profile_picture_url || ProfileIMG,
-						username: follower.username,
-						friend_id: follower.friend_id,
-					}))
-				: [];
-			setFollowers(formattedFollowers);
 		}
 		setLoading(false);
 	}, [setUserData, userData, ProfileIMG]);
@@ -367,11 +337,7 @@ const Home: React.FC = () => {
 								>
 									<Text style={styles.sectionTitle}>Friends</Text>
 								</TouchableOpacity>
-								<FriendsGrid
-									friends={friends}
-									followers={followers} // Passing followers here
-									username={userData.username}
-								/>
+								<FriendsGrid friends={friends} username={userData.username} />
 							</>
 						) : null}
 						<TouchableOpacity
