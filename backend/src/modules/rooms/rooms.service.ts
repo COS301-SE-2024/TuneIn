@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { RoomDto } from "./dto/room.dto";
 import { UpdateRoomDto } from "./dto/updateroomdto";
-import { AudioFeatures, SongInfoDto } from "./dto/songinfo.dto";
 import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
@@ -18,6 +17,7 @@ import { RoomSongDto } from "./dto/roomsong.dto";
 import { SpotifyTokenPair } from "../../../src/auth/spotify/spotifyauth.service";
 import { kmeans } from "ml-kmeans";
 import { KMeansResult } from "ml-kmeans/lib/KMeansResult";
+import * as Spotify from "@spotify/web-api-ts-sdk";
 
 export class UserActionDto {
 	@ApiProperty({
@@ -804,7 +804,7 @@ export class RoomsService {
 					HttpStatus.BAD_REQUEST,
 				);
 			}
-			const audioFeatures: (AudioFeatures & {
+			const audioFeatures: (Spotify.AudioFeatures & {
 				genre: string;
 				songID: string;
 			})[] = await this.getAudioFeatures(roomID);
@@ -991,7 +991,7 @@ export class RoomsService {
 					HttpStatus.BAD_REQUEST,
 				);
 			}
-			const audioFeatures: (AudioFeatures & { genre: string })[] =
+			const audioFeatures: (Spotify.AudioFeatures & { genre: string })[] =
 				await this.getAudioFeatures(roomID);
 			if (!audioFeatures || audioFeatures.length === 0) {
 				throw new HttpException(
@@ -1088,7 +1088,7 @@ export class RoomsService {
 
 	async getAudioFeatures(
 		roomID: string,
-	): Promise<(AudioFeatures & { genre: string; songID: string })[]> {
+	): Promise<(Spotify.AudioFeatures & { genre: string; songID: string })[]> {
 		// Implement the logic to get the audio features for a song
 		const songs: (PrismaTypes.queue & { song: PrismaTypes.song })[] =
 			await this.prisma.queue.findMany({
@@ -1104,7 +1104,7 @@ export class RoomsService {
 			return {
 				...(JSON.parse(
 					song.song.audio_features as unknown as string,
-				) as unknown as AudioFeatures),
+				) as unknown as Spotify.AudioFeatures),
 				genre: song.song.genre ?? "Unknown",
 				songID: song.song.song_id,
 			};

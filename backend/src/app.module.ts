@@ -24,7 +24,7 @@ import { SongsModule } from "./modules/songs/songs.module";
 import { MurLockModule } from "murlock";
 import { MyLogger } from "./logger/logger.service";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
-import { ImageModule } from './image/image.module';
+import { ImageModule } from "./image/image.module";
 
 @Module({
 	imports: [
