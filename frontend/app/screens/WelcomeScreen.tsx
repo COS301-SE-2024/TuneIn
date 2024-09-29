@@ -21,15 +21,13 @@ import {
 } from "expo-auth-session";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from "react-native-dotenv";
 import { generateRandom } from "expo-auth-session/build/PKCE";
-import {
-	exchangeCodeWithBackend,
-	SpotifyCallbackResponse,
-} from "../services/SpotifyAuth";
-import { live } from "../services/Live";
 import auth from "../services/AuthManagement";
 import { colors } from "../styles/colors";
+import { useLive } from "../LiveContext";
+import { SpotifyCallbackResponse } from "../../api";
 
 const WelcomeScreen: React.FC = () => {
+	const { spotifyAuth } = useLive();
 	const router = useRouter();
 	const { width, height } = Dimensions.get("window");
 
@@ -105,13 +103,9 @@ const WelcomeScreen: React.FC = () => {
 
 				//make post request to backend server get access token
 				const doExchange = async () => {
-					const tokens: SpotifyCallbackResponse = await exchangeCodeWithBackend(
-						code,
-						state,
-						redirectURI,
-					);
+					const tokens: SpotifyCallbackResponse =
+						await spotifyAuth.exchangeCodeWithBackend(code, state, redirectURI);
 					await auth.setToken(tokens.token);
-					live.initialiseSocket();
 					router.navigate("screens/(tabs)/Home");
 				};
 				doExchange();

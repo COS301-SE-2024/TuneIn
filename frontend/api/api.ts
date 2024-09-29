@@ -658,10 +658,10 @@ export interface RoomDto {
     'room_image': string;
     /**
      * The current song playing in the room
-     * @type {SongInfoDto}
+     * @type {RoomSongDto}
      * @memberof RoomDto
      */
-    'current_song'?: SongInfoDto;
+    'current_song'?: RoomSongDto;
     /**
      * The tags that describe the room
      * @type {Array<string>}
@@ -680,6 +680,61 @@ export interface RoomDto {
      * @memberof RoomDto
      */
     'childrenRoomIDs': Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface RoomSongDto
+ */
+export interface RoomSongDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomSongDto
+     */
+    'spotifyID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomSongDto
+     */
+    'userID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoomSongDto
+     */
+    'score': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoomSongDto
+     */
+    'index': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomSongDto
+     */
+    'startTime': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomSongDto
+     */
+    'insertTime': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoomSongDto
+     */
+    'pauseTime': string;
+    /**
+     * 
+     * @type {object}
+     * @memberof RoomSongDto
+     */
+    'track': object;
 }
 /**
  * 
@@ -2759,50 +2814,6 @@ export class RoomManagementApi extends BaseAPI {
 export const RoomsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @summary Add a song to the queue of a room
-         * @param {string} roomID The ID of the room to add the song to.
-         * @param {string} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        addSongToQueue: async (roomID: string, body: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roomID' is not null or undefined
-            assertParamExists('addSongToQueue', 'roomID', roomID)
-            // verify required parameter 'body' is not null or undefined
-            assertParamExists('addSongToQueue', 'body', body)
-            const localVarPath = `/rooms/{roomID}/songs`
-                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Adds the room to the user\'s bookmarks.
          * @summary Bookmark a room
          * @param {string} roomID The ID of the room to bookmark.
@@ -3087,7 +3098,7 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Returns the queue of the room as an array of SongInfoDto.
+         * Returns the queue of the room as an array of RoomSongDto.
          * @summary Get the queue of a room
          * @param {string} roomID The ID of the room to get the queue for.
          * @param {*} [options] Override http request option.
@@ -3386,6 +3397,44 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Unsave room as a playlist
+         * @param {string} roomID The ID of the room to remove from the user\&#39;s playlists.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        unsaveRoom: async (roomID: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('unsaveRoom', 'roomID', roomID)
+            const localVarPath = `/rooms/{roomID}/unsave`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Update room info
          * @param {string} roomID The ID of the room to update.
          * @param {UpdateRoomDto} updateRoomDto The updated room info
@@ -3477,20 +3526,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RoomsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @summary Add a song to the queue of a room
-         * @param {string} roomID The ID of the room to add the song to.
-         * @param {string} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async addSongToQueue(roomID: string, body: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.addSongToQueue(roomID, body, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['RoomsApi.addSongToQueue']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Adds the room to the user\'s bookmarks.
          * @summary Bookmark a room
          * @param {string} roomID The ID of the room to bookmark.
@@ -3549,7 +3584,7 @@ export const RoomsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCurrentSong(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async getCurrentSong(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoomSongDto>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCurrentSong(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.getCurrentSong']?.[localVarOperationServerIndex]?.url;
@@ -3594,13 +3629,13 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Returns the queue of the room as an array of SongInfoDto.
+         * Returns the queue of the room as an array of RoomSongDto.
          * @summary Get the queue of a room
          * @param {string} roomID The ID of the room to get the queue for.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getRoomQueue(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async getRoomQueue(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomSongDto>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getRoomQueue(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.getRoomQueue']?.[localVarOperationServerIndex]?.url;
@@ -3666,7 +3701,7 @@ export const RoomsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async saveRoom(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+        async saveRoom(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.saveRoom(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.saveRoom']?.[localVarOperationServerIndex]?.url;
@@ -3696,6 +3731,19 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.unbookmarkRoom(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.unbookmarkRoom']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Unsave room as a playlist
+         * @param {string} roomID The ID of the room to remove from the user\&#39;s playlists.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async unsaveRoom(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.unsaveRoom(roomID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.unsaveRoom']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -3735,17 +3783,6 @@ export const RoomsApiFp = function(configuration?: Configuration) {
 export const RoomsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = RoomsApiFp(configuration)
     return {
-        /**
-         * 
-         * @summary Add a song to the queue of a room
-         * @param {string} roomID The ID of the room to add the song to.
-         * @param {string} body 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        addSongToQueue(roomID: string, body: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.addSongToQueue(roomID, body, options).then((request) => request(axios, basePath));
-        },
         /**
          * Adds the room to the user\'s bookmarks.
          * @summary Bookmark a room
@@ -3793,7 +3830,7 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCurrentSong(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        getCurrentSong(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<RoomSongDto> {
             return localVarFp.getCurrentSong(roomID, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3826,13 +3863,13 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getRoomInfo(roomID, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns the queue of the room as an array of SongInfoDto.
+         * Returns the queue of the room as an array of RoomSongDto.
          * @summary Get the queue of a room
          * @param {string} roomID The ID of the room to get the queue for.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getRoomQueue(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        getRoomQueue(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomSongDto>> {
             return localVarFp.getRoomQueue(roomID, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3883,7 +3920,7 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        saveRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+        saveRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.saveRoom(roomID, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3905,6 +3942,16 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          */
         unbookmarkRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.unbookmarkRoom(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Unsave room as a playlist
+         * @param {string} roomID The ID of the room to remove from the user\&#39;s playlists.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        unsaveRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.unsaveRoom(roomID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3937,19 +3984,6 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
  * @extends {BaseAPI}
  */
 export class RoomsApi extends BaseAPI {
-    /**
-     * 
-     * @summary Add a song to the queue of a room
-     * @param {string} roomID The ID of the room to add the song to.
-     * @param {string} body 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof RoomsApi
-     */
-    public addSongToQueue(roomID: string, body: string, options?: RawAxiosRequestConfig) {
-        return RoomsApiFp(this.configuration).addSongToQueue(roomID, body, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Adds the room to the user\'s bookmarks.
      * @summary Bookmark a room
@@ -4046,7 +4080,7 @@ export class RoomsApi extends BaseAPI {
     }
 
     /**
-     * Returns the queue of the room as an array of SongInfoDto.
+     * Returns the queue of the room as an array of RoomSongDto.
      * @summary Get the queue of a room
      * @param {string} roomID The ID of the room to get the queue for.
      * @param {*} [options] Override http request option.
@@ -4140,6 +4174,18 @@ export class RoomsApi extends BaseAPI {
      */
     public unbookmarkRoom(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).unbookmarkRoom(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Unsave room as a playlist
+     * @param {string} roomID The ID of the room to remove from the user\&#39;s playlists.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public unsaveRoom(roomID: string, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).unsaveRoom(roomID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
