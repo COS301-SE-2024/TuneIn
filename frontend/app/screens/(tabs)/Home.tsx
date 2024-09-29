@@ -36,7 +36,6 @@ import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
 import { useIsFocused } from "@react-navigation/native";
-import FriendServices from "../../services/FriendServices";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
