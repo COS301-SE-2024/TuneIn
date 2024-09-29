@@ -35,6 +35,7 @@ import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
 import ContextMenu from "../../components/profile/DrawerContextMenu";
+import { CognitoUserPool } from "amazon-cognito-identity-js";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();
@@ -115,10 +116,18 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
+	console.log("Params: ", params);
+	console.log("User Data: ", userData);
 	if (params && JSON.stringify(params) !== "{}") {
 		ownsProfile = false;
 	}
-
+	if (
+		userData &&
+		params.friend &&
+		userData.username === JSON.parse(params.friend as string).username
+	) {
+		ownsProfile = true;
+	}
 	const preFormatRoomData = (room: any, mine: boolean) => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
@@ -162,6 +171,7 @@ const ProfileScreen: React.FC = () => {
 
 	useEffect(() => {
 		// console.log("init effect called");
+		setLoading(true);
 		const initializeProfile = async () => {
 			if (!ownsProfile) {
 				const parsedFriend = JSON.parse(params.friend as string);
@@ -278,7 +288,7 @@ const ProfileScreen: React.FC = () => {
 		};
 
 		initializeProfile();
-	}, [userData, setUserData]);
+	}, [userData, setUserData, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile && primaryProfileData) {
@@ -303,7 +313,7 @@ const ProfileScreen: React.FC = () => {
 
 			return () => clearInterval(intervalId);
 		}
-	}, [primaryProfileData, ownsProfile]);
+	}, [primaryProfileData, ownsProfile, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile) {
@@ -313,7 +323,7 @@ const ProfileScreen: React.FC = () => {
 				setCurrentRoomData(null);
 			}
 		}
-	}, [currentRoom, ownsProfile]);
+	}, [currentRoom, ownsProfile, params.friend]);
 
 	const toggleDrawer = () => {
 		setDrawerVisible(!drawerVisible);
