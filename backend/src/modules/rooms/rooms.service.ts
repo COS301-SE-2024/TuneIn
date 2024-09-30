@@ -363,20 +363,8 @@ export class RoomsService {
 		return result;
 	}
 
-	async roomExists(roomID: string): Promise<boolean> {
-		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
-			where: {
-				room_id: roomID,
-			},
-		});
-		if (!room || room === null) {
-			return false;
-		}
-		return true;
-	}
-
 	async getLiveChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
-		if (!(await this.roomExists(roomID))) {
+		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new HttpException(
 				"Room with id '" + roomID + "' does not exist",
 				HttpStatus.NOT_FOUND,
@@ -447,7 +435,7 @@ export class RoomsService {
 		message: LiveChatMessageDto,
 		userID?: string,
 	): Promise<string> {
-		if (!(await this.roomExists(message.roomID))) {
+		if (!(await this.dbUtils.roomExists(message.roomID))) {
 			throw new Error("Room with id '" + message.roomID + "' does not exist");
 		}
 
@@ -593,7 +581,7 @@ export class RoomsService {
 		roomID: string,
 		emojiReactionDto: EmojiReactionDto,
 	): Promise<void> {
-		if (!(await this.roomExists(roomID))) {
+		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new Error("Room with id '" + roomID + "' does not exist");
 		}
 
@@ -1128,7 +1116,7 @@ export class RoomsService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
-		if (!(await this.roomExists(roomID))) {
+		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		const room: RoomDto = await this.getRoomInfo(roomID);
@@ -1142,7 +1130,7 @@ export class RoomsService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
-		if (!(await this.roomExists(roomID))) {
+		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		const room: RoomDto = await this.getRoomInfo(roomID);
@@ -1199,7 +1187,7 @@ export class RoomsService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
-		if (!(await this.roomExists(roomID))) {
+		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		users.forEach(async (user) => {
