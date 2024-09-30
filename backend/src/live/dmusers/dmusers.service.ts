@@ -3,6 +3,9 @@ import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
 import { UsersService } from "../../modules/users/users.service";
+import { Server } from "socket.io";
+import { SOCKET_EVENTS } from "../../common/constants";
+import { DirectMessageDto } from "../../modules/users/dto/dm.dto";
 
 interface dmUser {
 	user: UserDto;
@@ -239,5 +242,50 @@ export class DmUsersService {
 			socketIDs: u.socketIDs,
 		});
 		console.log(socketID);
+	}
+
+	async shareRoom(
+		socketServer: Server,
+		messages: DirectMessageDto[],
+	): Promise<void> {
+		const chatIDs: string[][] = await Promise.all(
+			messages.map(async (m) => {
+				return await this.usersService.generateChatHash(
+					m.sender.userID,
+					m.recipient.userID,
+				);
+			}),
+		);
+		for (let i = 0; i < messages.length; i++) {
+			if (chatIDs[i].length !== 2) {
+				throw new Error("Invalid chatIDs generated");
+			}
+			if (
+				!this.connectedUsers.has(messages[i].sender.userID) &&
+				!this.connectedUsers.has(messages[i].recipient.userID)
+			) {
+				// neither user is connected
+				continue;
+			}
+			const values: dmUser[] = Array.from(this.connectedUsers.values());
+			let chatID: string | undefined;
+			if (values.some((u) => u.chatID === chatIDs[i][0])) {
+				const id = values.find((u) => u.chatID === chatIDs[i][0]);
+				if (!id) {
+					chatID = undefined;
+				}
+				chatID = chatIDs[i][0];
+			}
+			if (!chatID && values.some((u) => u.chatID === chatIDs[i][1])) {
+				const id = values.find((u) => u.chatID === chatIDs[i][1]);
+				if (!id) {
+					chatID = undefined;
+				}
+				chatID = chatIDs[i][1];
+			}
+
+			if (chatID)
+				socketServer.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, messages[i]);
+		}
 	}
 }
