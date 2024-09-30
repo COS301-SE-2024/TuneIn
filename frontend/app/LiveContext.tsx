@@ -48,6 +48,7 @@ import {
 	DirectMessageControls,
 	useDirectMessageControls,
 } from "./hooks/useDMControls";
+import { set } from "react-datepicker/dist/date_utils";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -89,6 +90,8 @@ interface LiveContextType {
 	refreshUser: boolean;
 	setRefreshUser: React.Dispatch<React.SetStateAction<boolean>>;
 	userBookmarks: RoomDto[];
+	recentDMs: { message: DirectMessageDto; room?: RoomDto }[];
+	setFetchRecentDMs: React.Dispatch<React.SetStateAction<boolean>>;
 
 	getSocket: () => Socket | null;
 	sendPing: (timeout?: number) => Promise<void>;
@@ -194,6 +197,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [idSendTime, setIDSendTime] = useState<Date>(new Date(0));
 	const [roomJoinSendTime, setRoomJoinSendTime] = useState<Date>(new Date(0));
 	const [dmJoinSendTime, setdmJoinSendTime] = useState<Date>(new Date(0));
+	const [recentDMs, setRecentDMs] = useState<
+		{ message: DirectMessageDto; room?: RoomDto }[]
+	>([]);
+	const [fetchRecentDMs, setFetchRecentDMs] = useState<boolean>(true);
 
 	const sendIdentity = useCallback(
 		(socket: Socket) => {
@@ -473,7 +480,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						setRoomParticipants([]);
 						if (error instanceof RequiredError) {
 							// a required field is missing
-							throw new Error("Parameter missing from request to get room users");
+							throw new Error(
+								"Parameter missing from request to get room users",
+							);
 						} else {
 							// some other error
 							throw new Error("Error getting room users");
@@ -754,6 +763,66 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			users,
 		],
 	);
+
+	// Fetch chats from backend
+	const fetchChats = useCallback(async () => {
+		if (!currentUser) {
+			if (!refreshUser) {
+				setRefreshUser(true);
+			}
+			return;
+		}
+		try {
+			const chatResponse = await users.getDMs();
+			if (chatResponse.status !== 200) {
+				//Unauthorized
+				//Auth header is either missing or invalid
+				return;
+			}
+			const chats: DirectMessageDto[] = chatResponse.data;
+			const roomIDs: string[] = [];
+			for (const message of chats) {
+				if (message.bodyIsRoomID) {
+					// shared room is: ##roomID##
+					const roomID = message.messageBody.substring(
+						2,
+						message.messageBody.length - 2,
+					);
+					roomIDs.push(roomID);
+				}
+			}
+			const roomsPromise: AxiosResponse<RoomDto[]> =
+				await rooms.getRooms(roomIDs);
+			if (roomsPromise.status !== 200) {
+				return;
+			}
+			const sharedRooms: RoomDto[] = roomsPromise.data;
+			const fetchedRecentDMs: {
+				message: DirectMessageDto;
+				room?: RoomDto;
+			}[] = [];
+			for (let i = 0, n = chats.length; i < n; i++) {
+				const message = chats[i];
+				if (message.bodyIsRoomID) {
+					// shared room is: ##roomID##
+					const roomID = message.messageBody.substring(
+						2,
+						message.messageBody.length - 2,
+					);
+					const r = sharedRooms.find((room) => room.roomID === roomID);
+					if (r) {
+						const room: RoomDto = r;
+						fetchedRecentDMs.push({ message, room });
+						continue;
+					}
+				}
+				fetchedRecentDMs.push({ message });
+			}
+			setRecentDMs(fetchedRecentDMs);
+		} catch (error) {
+			console.log(error);
+		}
+	}, [currentUser, refreshUser, rooms, users]);
 
 	const attachListeners = useCallback(
 		(socket: Socket | null) => {
@@ -1356,6 +1425,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
+		if (fetchRecentDMs) {
+			fetchChats();
+			setFetchRecentDMs(false);
+		}
+
 		// reconnect if socket is disconnected
 		if (
 			!socketState.socketConnected &&
@@ -1612,6 +1686,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				refreshUser,
 				setRefreshUser,
 				userBookmarks,
+				recentDMs,
+				setFetchRecentDMs,
 
 				getSocket,
 				sendPing,

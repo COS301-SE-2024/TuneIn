@@ -38,128 +38,73 @@ const createChats = (
 };
 
 const ChatListScreen = () => {
-	const { currentUser, refreshUser, setRefreshUser } = useLive();
-	const { rooms } = useAPI();
+	const {
+		currentUser,
+		refreshUser,
+		setRefreshUser,
+		recentDMs,
+		setFetchRecentDMs,
+	} = useLive();
 	const [searchQuery, setSearchQuery] = useState("");
-	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
-	const [messageRooms, setMessageRooms] = useState<(RoomDto | undefined)[]>([]);
+	const [localRecentDMs, setLocalRecentDMs] =
+		useState<{ message: DirectMessageDto; room?: RoomDto }[]>(recentDMs);
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
-	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [noResults, setNoResults] = useState(false); // State to track no results
 	const router = useRouter();
 	const isFocused = useIsFocused();
 
-	// Fetch chats from backend
-	const fetchChats = useCallback(async () => {
-		if (!currentUser) {
-			if (!refreshUser) {
-				setRefreshUser(true);
+	const localStateOutdated = useCallback(() => {
+		if (currentUser !== undefined) {
+			if (recentDMs.length !== localRecentDMs.length) {
+				return true;
 			}
-			return;
-		}
-		try {
-			const token = await auth.getToken();
-
-			let promises = [];
-			promises.push(
-				axios.get(`${utils.API_BASE_URL}/users/dms`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			);
-			promises.push(
-				axios.get(`${utils.API_BASE_URL}/users/friends`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			);
-
-			const responses = await Promise.all(promises);
-			const chats = responses[0].data as DirectMessageDto[];
-			console.log(chats);
-			setFriends(responses[1].data as UserDto[]);
-			console.log(responses[1].data);
-
-			const roomPromises: (
-				| Promise<AxiosResponse<RoomDto, any>>
-				| Promise<undefined>
-			)[] = [];
-			for (const message of chats) {
-				if (message.bodyIsRoomID) {
-					//roomIDs.push(message.messageBody);
-					roomPromises.push(rooms.getRoomInfo(message.messageBody));
-				} else {
-					roomPromises.push(Promise.resolve(undefined));
+			for (let i = 0; i < recentDMs.length; i++) {
+				if (recentDMs[i].message.pID !== localRecentDMs[i].message.pID) {
+					return true;
 				}
 			}
-			const roomResponses = await Promise.all(roomPromises);
-			const tmpRooms: (RoomDto | undefined)[] = [];
-			for (const roomResponse of roomResponses) {
-				if (roomResponse !== undefined) {
-					tmpRooms.push(roomResponse.data as RoomDto);
-				} else {
-					tmpRooms.push(undefined);
-				}
-			}
-			setMessageRooms(tmpRooms);
-			setFilteredChats(createChats(chats, currentUser.userID));
-			setUserMessages(chats);
-		} catch (error) {
-			console.log(error);
-			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
-			throw error;
 		}
-	}, [currentUser, refreshUser, rooms, setRefreshUser]);
+		return false;
+	}, [currentUser, recentDMs, localRecentDMs]);
 
-	// useEffect(() => {
-	// 	if (searchQuery === "") {
-	// 		setFilteredChats(initialChats);
-	// 	} else {
-	// 		const filtered = initialChats.filter((chat) =>
-	// 			chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
-	// 		);
-	// 		promises.push(
-	// 			axios.get(`${utils.API_BASE_URL}/users`, {
-	// 				headers: { Authorization: `Bearer ${token}` },
-	// 			}),
-	// 		);
-	// 		promises.push(
-	// 			axios.get(`${utils.API_BASE_URL}/users/friends`, {
-	// 				headers: { Authorization: `Bearer ${token}` },
-	// 			}),
-	// 		);
-
-	// 		const responses = await Promise.all(promises);
-	// 		const chats = responses[0].data as DirectMessageDto[];
-	// 		selfRef.current = responses[1].data as UserDto;
-	// 		setFriends(responses[2].data as UserDto[]);
-
-	// 		setFilteredChats(createChats(chats, selfRef.current.userID));
-	// 		setUserMessages(chats);
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 		ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
-	// 		throw error;
-	// 	}
-	// };
+	const getMessages = useCallback(
+		(recents: { message: DirectMessageDto }[]) => {
+			const messages: DirectMessageDto[] = [];
+			for (const recent of recents) {
+				messages.push(recent.message);
+			}
+			return messages;
+		},
+		[],
+	);
 
 	useEffect(() => {
 		if (isFocused) {
-			fetchChats();
+			if (localStateOutdated()) {
+				setFetchRecentDMs(true);
+			}
 		}
-	}, [fetchChats, isFocused]);
+	}, [recentDMs, isFocused, localStateOutdated, setFetchRecentDMs]);
 
 	useEffect(() => {
-		fetchChats();
+		if (isFocused) {
+			if (localStateOutdated()) {
+				setFetchRecentDMs(true);
+			}
+		}
 	}, []);
 
 	useEffect(() => {
 		if (searchQuery === "") {
 			if (currentUser !== undefined) {
-				setFilteredChats(createChats(userMessages, currentUser.userID));
+				const messages: DirectMessageDto[] = getMessages(localRecentDMs);
+				setFilteredChats(createChats(messages, currentUser.userID));
 			}
 		} else {
 			if (currentUser !== undefined) {
-				const filtered = userMessages.filter((chat) => {
+				const messages: DirectMessageDto[] = getMessages(localRecentDMs);
+				const filtered = messages.filter((chat) => {
 					const senderName = chat.sender.profile_name.toLowerCase();
 					const recipientName = chat.recipient.profile_name.toLowerCase();
 
@@ -175,7 +120,7 @@ const ChatListScreen = () => {
 				setNoResults(filtered.length === 0); // Set no results state
 			}
 		}
-	}, [currentUser, searchQuery, userMessages]);
+	}, [currentUser, searchQuery, localRecentDMs]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);

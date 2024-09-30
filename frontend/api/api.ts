@@ -735,6 +735,12 @@ export interface RoomSongDto {
      * @memberof RoomSongDto
      */
     'track': object;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoomSongDto
+     */
+    'playlistIndex': number;
 }
 /**
  * 
@@ -3166,6 +3172,47 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Returns the rooms as an array of RoomDto.
+         * @summary Get multiple rooms
+         * @param {Array<string>} q An array of room IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRooms: async (q: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('getRooms', 'q', q)
+            const localVarPath = `/rooms`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (q) {
+                localVarQueryParameter['q'] = q;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Adds the current user as a participant to the room.
          * @summary Join a room
          * @param {string} roomID The ID of the room to join.
@@ -3317,6 +3364,46 @@ export const RoomsApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Shares the room with the given users.
+         * @summary Share a room
+         * @param {string} roomID The ID of the room to share.
+         * @param {Array<string>} requestBody The user IDs of the user to share the room with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        shareRoom: async (roomID: string, requestBody: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roomID' is not null or undefined
+            assertParamExists('shareRoom', 'roomID', roomID)
+            // verify required parameter 'requestBody' is not null or undefined
+            assertParamExists('shareRoom', 'requestBody', requestBody)
+            const localVarPath = `/rooms/{roomID}/share`
+                .replace(`{${"roomID"}}`, encodeURIComponent(String(roomID)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(requestBody, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3571,7 +3658,7 @@ export const RoomsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCalendarFile(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+        async getCalendarFile(roomID: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCalendarFile(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.getCalendarFile']?.[localVarOperationServerIndex]?.url;
@@ -3655,6 +3742,19 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Returns the rooms as an array of RoomDto.
+         * @summary Get multiple rooms
+         * @param {Array<string>} q An array of room IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRooms(q: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoomDto>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRooms(q, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.getRooms']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Adds the current user as a participant to the room.
          * @summary Join a room
          * @param {string} roomID The ID of the room to join.
@@ -3705,6 +3805,20 @@ export const RoomsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.saveRoom(roomID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RoomsApi.saveRoom']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Shares the room with the given users.
+         * @summary Share a room
+         * @param {string} roomID The ID of the room to share.
+         * @param {Array<string>} requestBody The user IDs of the user to share the room with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async shareRoom(roomID: string, requestBody: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.shareRoom(roomID, requestBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RoomsApi.shareRoom']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -3820,7 +3934,7 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCalendarFile(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+        getCalendarFile(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
             return localVarFp.getCalendarFile(roomID, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3883,6 +3997,16 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getRoomUsers(roomID, options).then((request) => request(axios, basePath));
         },
         /**
+         * Returns the rooms as an array of RoomDto.
+         * @summary Get multiple rooms
+         * @param {Array<string>} q An array of room IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRooms(q: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
+            return localVarFp.getRooms(q, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Adds the current user as a participant to the room.
          * @summary Join a room
          * @param {string} roomID The ID of the room to join.
@@ -3922,6 +4046,17 @@ export const RoomsApiFactory = function (configuration?: Configuration, basePath
          */
         saveRoom(roomID: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.saveRoom(roomID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Shares the room with the given users.
+         * @summary Share a room
+         * @param {string} roomID The ID of the room to share.
+         * @param {Array<string>} requestBody The user IDs of the user to share the room with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        shareRoom(roomID: string, requestBody: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.shareRoom(roomID, requestBody, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -4104,6 +4239,18 @@ export class RoomsApi extends BaseAPI {
     }
 
     /**
+     * Returns the rooms as an array of RoomDto.
+     * @summary Get multiple rooms
+     * @param {Array<string>} q An array of room IDs to get info for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public getRooms(q: Array<string>, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).getRooms(q, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Adds the current user as a participant to the room.
      * @summary Join a room
      * @param {string} roomID The ID of the room to join.
@@ -4150,6 +4297,19 @@ export class RoomsApi extends BaseAPI {
      */
     public saveRoom(roomID: string, options?: RawAxiosRequestConfig) {
         return RoomsApiFp(this.configuration).saveRoom(roomID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Shares the room with the given users.
+     * @summary Share a room
+     * @param {string} roomID The ID of the room to share.
+     * @param {Array<string>} requestBody The user IDs of the user to share the room with.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RoomsApi
+     */
+    public shareRoom(roomID: string, requestBody: Array<string>, options?: RawAxiosRequestConfig) {
+        return RoomsApiFp(this.configuration).shareRoom(roomID, requestBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

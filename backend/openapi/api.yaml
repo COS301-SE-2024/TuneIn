@@ -1013,6 +1013,38 @@ paths:
         - bearer: []
       tags:
         - auth
+  /rooms:
+    get:
+      operationId: getRooms
+      summary: Get multiple rooms
+      description: Returns the rooms as an array of RoomDto.
+      parameters:
+        - name: q
+          required: true
+          in: query
+          description: An array of room IDs to get info for.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: An array of RoomDto representing the rooms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: No rooms given
+        '404':
+          description: No rooms found
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
   /rooms/new:
     get:
       operationId: getNewRooms
