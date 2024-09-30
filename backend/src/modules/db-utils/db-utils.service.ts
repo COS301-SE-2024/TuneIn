@@ -271,6 +271,20 @@ export class DbUtilsService {
 		return true;
 	}
 
+	async usersExist(
+		userIDs: string[],
+	): Promise<{ userID: string; exists: boolean }[]> {
+		const user: PrismaTypes.users[] = await this.prisma.users.findMany({
+			where: { user_id: { in: userIDs } },
+		});
+		return userIDs.map((id) => {
+			return {
+				userID: id,
+				exists: user.find((u) => u.user_id === id) !== undefined,
+			};
+		});
+	}
+
 	async roomExists(roomID: string): Promise<boolean> {
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
@@ -462,7 +476,7 @@ export class DbUtilsService {
 
 		if (!dms || dms === null) {
 			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+				"An unexpected error occurred in the database. Could not fetch direct messages. DbUtilsService.getDMIndex():ERROR01",
 			);
 		}
 
@@ -474,7 +488,7 @@ export class DbUtilsService {
 			throw new Error(
 				"Message with id " +
 					messageID +
-					" does not exist. DTOGenService.getDMIndex():ERROR01",
+					" does not exist. DTOGenService.getDMIndex():ERROR02",
 			);
 		}
 		return index;

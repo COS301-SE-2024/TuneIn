@@ -9,6 +9,7 @@ import { RoomQueueModule } from "./roomqueue/roomqueue.module";
 import { RoomAnalyticsService } from "./roomanalytics.service";
 import { RecommendationsModule } from "../../recommendations/recommendations.module";
 import { SpotifyModule } from "../../spotify/spotify.module";
+import { DmUsersModule } from "../../live/dmusers/dmusers.module";
 
 @Module({
 	imports: [
@@ -19,6 +20,7 @@ import { SpotifyModule } from "../../spotify/spotify.module";
 		RoomQueueModule,
 		RecommendationsModule,
 		SpotifyModule,
+		DmUsersModule,
 	],
 	controllers: [RoomsController],
 	providers: [RoomsService, RoomAnalyticsService],

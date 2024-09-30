@@ -18,6 +18,9 @@ import { SpotifyTokenPair } from "../../../src/auth/spotify/spotifyauth.service"
 import { kmeans } from "ml-kmeans";
 import { KMeansResult } from "ml-kmeans/lib/KMeansResult";
 import * as Spotify from "@spotify/web-api-ts-sdk";
+import { Server } from "socket.io";
+import { DirectMessageDto } from "../users/dto/dm.dto";
+import { DmUsersService } from "../../live/dmusers/dmusers.service";
 
 export class UserActionDto {
 	@ApiProperty({
@@ -33,6 +36,7 @@ export class UserActionDto {
 @Injectable()
 export class RoomsService {
 	// DUMBroomQueues: Map<string, string> = new Map<string, string>();
+	public server: Server | undefined;
 
 	constructor(
 		private readonly prisma: PrismaService,
@@ -40,6 +44,7 @@ export class RoomsService {
 		private readonly dbUtils: DbUtilsService,
 		private readonly spotifyService: SpotifyService,
 		private readonly roomQueueService: RoomQueueService,
+		private readonly dmUsersService: DmUsersService,
 	) {}
 
 	async getNewRooms(limit = -1): Promise<RoomDto[]> {
@@ -1183,20 +1188,34 @@ export class RoomsService {
 		userID: string,
 		users: string[],
 	): Promise<void> {
-		console.log(roomID, userID, users);
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		if (users.length === 0) {
+			throw new HttpException("User list is empty", HttpStatus.BAD_REQUEST);
 		}
+		await this.dbUtils.usersExist([userID, ...users]).then((users) => {
+			users.forEach((user) => {
+				if (!user.exists) {
+					throw new HttpException(
+						`User (with id '${user.userID}') does not exist`,
+						HttpStatus.NOT_FOUND,
+					);
+				}
+			});
+		});
 		if (!(await this.dbUtils.roomExists(roomID))) {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
-		users.forEach(async (user) => {
-			if (!(await this.dbUtils.userExists(user))) {
-				throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-			}
-		});
 		const room: RoomDto = await this.getRoomInfo(roomID);
-		await this.prisma.$transaction(
+		const roomShares: ({
+			private_message: {
+				p_message_id: string;
+				recipient: string;
+			} | null;
+		} & {
+			message_id: string;
+			contents: string;
+			date_sent: Date;
+			sender: string;
+		})[] = await this.prisma.$transaction(
 			users.map((user) => {
 				return this.prisma.message.create({
 					data: {
@@ -1217,8 +1236,42 @@ export class RoomsService {
 							},
 						},
 					},
+					include: {
+						private_message: true,
+					},
 				});
 			}),
 		);
+		if (this.server) {
+			const roomShareMessages: ({
+				message: {
+					message_id: string;
+					contents: string;
+					date_sent: Date;
+					sender: string;
+				};
+			} & {
+				p_message_id: string;
+				recipient: string;
+			})[] = [];
+			for (const rs of roomShares) {
+				if (rs.private_message !== null) {
+					roomShareMessages.push({
+						message: {
+							message_id: rs.message_id,
+							contents: rs.contents,
+							date_sent: rs.date_sent,
+							sender: rs.sender,
+						},
+						p_message_id: rs.private_message.p_message_id,
+						recipient: rs.private_message.recipient,
+					});
+				}
+			}
+			const roomShareDMs: DirectMessageDto[] =
+				await this.dtogen.generateMultipleDirectMessageDto(roomShareMessages);
+			this.dmUsersService.shareRoom(this.server, roomShareDMs);
+		}
+		throw new HttpException(`Room shared`, HttpStatus.CREATED);
 	}
 }
