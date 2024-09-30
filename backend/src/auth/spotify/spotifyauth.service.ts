@@ -280,21 +280,18 @@ export class SpotifyAuthService {
 			tk.tokens,
 		);
 
-		let existingUser: PrismaTypes.users | null =
-			await this.prisma.users.findFirst({
-				where: { email: spotifyUser.email },
-			});
-		if (!existingUser || existingUser === null) {
-			//try to find by username
-			existingUser = await this.prisma.users.findFirst({
+		const existingUser: PrismaTypes.users[] | null =
+			await this.prisma.users.findMany({
 				where: { username: spotifyUser.id },
 			});
-			if (!existingUser) {
+		if (existingUser && existingUser.length > 0) {
+			if (existingUser.length > 1) {
+				throw new Error("Multiple users with the same username");
+			}
+			if (!existingUser[0] || existingUser[0] === null) {
 				throw new Error("Failed to find user");
 			}
-		}
-		if (existingUser) {
-			const e = existingUser as PrismaTypes.users;
+			const e = existingUser[0];
 			return e;
 		}
 
