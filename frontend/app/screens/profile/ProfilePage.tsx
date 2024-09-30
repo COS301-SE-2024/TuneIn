@@ -30,7 +30,7 @@ import { Room, formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
-import { RoomDto } from "../../models/RoomDto";
+import { RoomDto } from "../../../api";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
