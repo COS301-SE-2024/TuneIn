@@ -1196,28 +1196,41 @@ export class RoomsService {
 		users: string[],
 	): Promise<void> {
 		console.log(roomID, userID, users);
-		// if (!(await this.dbUtils.userExists(userID))) {
-		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		// }
-		// if (!(await this.roomExists(roomID))) {
-		// 	throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		// }
-		// users.forEach(async (user) => {
-		// 	if (!(await this.dbUtils.userExists(user))) {
-		// 		throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		// 	}
-		// });
-		// const room: RoomDto = await this.getRoomInfo(roomID);
-		// const newMessage: PrismaTypes.messageCreateInput = {
-		// 	data: {
-		// 		contents: "Check out this room: " + room.name,
-		// 		date_sent: new Date(),
-		// 		users: {
-		// 			connect: {
-		// 				user_id: userID,
-		// 			},
-		// 		},
-		// 	},
-		// };
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		if (!(await this.roomExists(roomID))) {
+			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		}
+		users.forEach(async (user) => {
+			if (!(await this.dbUtils.userExists(user))) {
+				throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+			}
+		});
+		const room: RoomDto = await this.getRoomInfo(roomID);
+		await this.prisma.$transaction(
+			users.map((user) => {
+				return this.prisma.message.create({
+					data: {
+						contents: `##${room.roomID}##`,
+						date_sent: new Date(),
+						users: {
+							connect: {
+								user_id: userID, // sender
+							},
+						},
+						private_message: {
+							create: {
+								users: {
+									connect: {
+										user_id: user, // recipient
+									},
+								},
+							},
+						},
+					},
+				});
+			}),
+		);
 	}
 }
