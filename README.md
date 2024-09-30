@@ -2,7 +2,7 @@
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
 <div><a href="https://codecov.io/github/COS301-SE-2024/TuneIn" >
- <img alt="Code Coverage Percentage" src="coverage/badges.svg"/>
+  <img alt="Code Coverage Percentage" src="https://codecov.io/github/COS301-SE-2024/TuneIn/branch/develop/graph/badge.svg?token=RyPUPAO23n"/>
 </a>
 <a href="https://github.com/COS301-SE-2024/TuneIn/commits/develop/" >
  <img alt="Last Commit" src="https://img.shields.io/github/last-commit/COS301-SE-2024/TuneIn"/>
