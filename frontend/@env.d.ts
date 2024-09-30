@@ -4,6 +4,8 @@ declare module "react-native-dotenv" {
 	export const SPOTIFY_CLIENT_ID: string;
 	export const SPOTIFY_REDIRECT_URI: string;
 	export const SPOTIFY_CLIENT_SECRET: string;
+	export const SPOTIFY_USERNAME: string;
+	export const SPOTIFY_PASSWORD: string;
 	export const VITE_PORT: string;
 	export const AWS_ACCESS_KEY_ID: string;
 	export const AWS_SECRET_ACCESS_KEY: string;

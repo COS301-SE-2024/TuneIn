@@ -146,6 +146,7 @@ const WelcomeScreen: React.FC = () => {
 					onPress={() => {
 						promptAsync();
 					}}
+					testID="spotify-login-button"
 				>
 					<FontAwesome
 						name="spotify"

@@ -44,50 +44,43 @@ const Playlist = () => {
 	}, [roomQueue]);
 
 	return (
-		<ScrollView>
-			<View style={styles.container}>
-				{/* RoomTab component */}
-				{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
-				{/* Set activeTab to "Queue" */}
-				<View style={styles.header}>
-					<TouchableOpacity
-						style={styles.backButton}
-						onPress={() => router.back()}
-						testID="back-button"
-					>
-						{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
-					</TouchableOpacity>
-					{/* <Text style={styles.pageName}>Queue</Text> */}
-				</View>
-				<View style={styles.songListContainer}>
-					{roomQueue.length > 0 ? (
-						roomQueue.map((track, index) => (
-							<SongList key={track.index} track={track} showVoting={true} />
-						))
-					) : (
-						<View style={styles.emptyQueueContainer}>
-							<Text style={styles.emptyQueueText}>
-								The queue is empty.{" "}
-								{isMine
-									? "Add some songs to get started!"
-									: "Wait for the host to add some songs."}
-							</Text>
-						</View>
-					)}
-				</View>
-				{/* <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
-				{isMine ? (
-					<Text style={styles.addButtonText}>Manage queue</Text>
-				) : (
-					<Text style={styles.addButtonText}>Add Song</Text>
-				)}
-			</TouchableOpacity> */}
-				<CreateButton
-					title={isMine ? "Manage queue" : "Add Song"}
-					onPress={navigateToAddSong}
-				/>
+		<View style={styles.container}>
+			{/* RoomTab component */}
+			{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
+			{/* Set activeTab to "Queue" */}
+			<View style={styles.header}>
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={() => router.back()}
+					testID="back-button"
+				>
+					{/* <Ionicons name="chevron-back" size={24} color="black" /> */}
+				</TouchableOpacity>
+				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
-		</ScrollView>
+			<View style={styles.songListContainer}>
+				{roomQueue.length > 0 ? (
+					<ScrollView>
+						{roomQueue.map((track, index) => (
+							<SongList key={track.index} track={track} showVoting={true} />
+						))}
+					</ScrollView>
+				) : (
+					<View style={styles.emptyQueueContainer}>
+						<Text style={styles.emptyQueueText}>
+							The queue is empty.{" "}
+							{isMine
+								? "Add some songs to get started!"
+								: "Wait for the host to add some songs."}
+						</Text>
+					</View>
+				)}
+			</View>
+			<CreateButton
+				title={isMine ? "Manage queue" : "Add Song"}
+				onPress={navigateToAddSong}
+			/>
+		</View>
 	);
 };
 
@@ -96,6 +89,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingHorizontal: 16,
 		backgroundColor: "white",
+	},
+	containerButton: {
+		flex: 1,
+		justifyContent: "flex-end", // Aligns the button at the bottom
+		paddingBottom: 20,
 	},
 	header: {
 		flexDirection: "row",

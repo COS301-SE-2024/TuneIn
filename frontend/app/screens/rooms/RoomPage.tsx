@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	songRoomWidget: {
-		marginTop: -80,
+		marginTop: -90,
 	},
 });
 

@@ -17,6 +17,7 @@ import RoomDropdown from "../../components/RoomDropdown";
 import AuthManagement from "../../services/AuthManagement";
 import { API_BASE_URL } from "../../services/Utils";
 import * as StorageService from "../../services/StorageService";
+import { colors } from "../../styles/colors";
 
 // create an interface class for user rooms
 interface UserRoom {
@@ -229,6 +230,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingHorizontal: 20,
 		paddingTop: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	header: {
 		flexDirection: "row",

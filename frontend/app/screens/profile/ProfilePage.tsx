@@ -31,14 +31,13 @@ import * as StorageService from "../../services/StorageService"; // Import Stora
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
 import { RoomDto } from "../../../api";
-import { useLive } from "../../LiveContext";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
 import ContextMenu from "../../components/profile/DrawerContextMenu";
+import { CognitoUserPool } from "amazon-cognito-identity-js";
 
 const ProfileScreen: React.FC = () => {
-	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const navigation = useNavigation();
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -94,7 +93,7 @@ const ProfileScreen: React.FC = () => {
 		);
 	}
 
-	const { currentRoom } = playerContext;
+	const { userData, setUserData, currentRoom } = playerContext;
 
 	const navigateToRoomPage = () => {
 		router.push({
@@ -117,10 +116,18 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
+	console.log("Params: ", params);
+	console.log("User Data: ", userData);
 	if (params && JSON.stringify(params) !== "{}") {
 		ownsProfile = false;
 	}
-
+	if (
+		userData &&
+		params.friend &&
+		userData.username === JSON.parse(params.friend as string).username
+	) {
+		ownsProfile = true;
+	}
 	const preFormatRoomData = (room: any, mine: boolean) => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
@@ -187,16 +194,13 @@ const ProfileScreen: React.FC = () => {
 						setPendingRequests(penFData);
 						setRequests(reqFData);
 
-						if (recentRoomData === null) {
-							fetchRecentRoomInfo(data.username);
-						}
-						if (favoriteRoomData === null) {
-							fetchFavRoomInfo(data.username);
-						}
+						await fetchRecentRoomInfo(data.username);
 
-						if (currentUser && data.followers.count > 0) {
+						await fetchFavRoomInfo(data.username);
+
+						if (userData !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
-								(item: any) => item.username === currentUser.username,
+								(item: any) => item.username === userData.username,
 							);
 							setFollowing(isFollowing);
 						}
@@ -227,30 +231,45 @@ const ProfileScreen: React.FC = () => {
 
 						setHasRequested(req);
 
-						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.userID);
-						}
+						await fetchCurrentRoomInfo(data.userID);
 					}
 				} catch (error) {
 					console.log("Failed to retrieve profile data:", error);
 					setProfileError(true);
 				}
 			} else {
-				if (!currentUser) {
-					if (!refreshUser) {
-						setRefreshUser(true);
+				if (!userData) {
+					try {
+						const storedToken = await auth.getToken();
+						if (storedToken) {
+							const data = await fetchProfileInfo(storedToken, "");
+							console.log("Fetched data: " + JSON.stringify(data));
+							setPrimProfileData(data);
+						}
+					} catch (error) {
+						console.log("Failed to retrieve profile data:", error);
+						setProfileError(true);
 					}
 				} else {
-					setPrimProfileData(currentUser);
+					console.log("User Data : " + JSON.stringify(userData));
+					setPrimProfileData(userData);
 				}
 
-				if (recentRoomData === null && currentUser) {
+				if (
+					// recentRoomData === null &&
+					userData !== null &&
+					userData !== undefined
+				) {
 					// console.log("User Data for rec room: " + JSON.stringify(userData));
-					fetchRecentRoomInfo(currentUser.username);
+					await fetchRecentRoomInfo(userData.username);
 				}
-				if (favoriteRoomData === null && currentUser) {
+				if (
+					// favoriteRoomData === null &&
+					userData !== null &&
+					userData !== undefined
+				) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
-					fetchFavRoomInfo(currentUser.username);
+					await fetchFavRoomInfo(userData.username);
 				}
 
 				if (currentRoomData === null) {
@@ -258,11 +277,11 @@ const ProfileScreen: React.FC = () => {
 					setRoomCheck(true);
 				}
 			}
-			setLoading(false);
 		};
-
+		setLoading(true);
 		initializeProfile();
-	}, [currentUser, currentRoom]);
+		setLoading(false);
+	}, [userData, setUserData, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile && primaryProfileData) {
@@ -287,7 +306,7 @@ const ProfileScreen: React.FC = () => {
 
 			return () => clearInterval(intervalId);
 		}
-	}, [primaryProfileData, ownsProfile]);
+	}, [primaryProfileData, ownsProfile, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile) {
@@ -297,7 +316,7 @@ const ProfileScreen: React.FC = () => {
 				setCurrentRoomData(null);
 			}
 		}
-	}, [currentRoom, ownsProfile]);
+	}, [currentRoom, ownsProfile, params.friend]);
 
 	const toggleDrawer = () => {
 		setDrawerVisible(!drawerVisible);
@@ -306,13 +325,17 @@ const ProfileScreen: React.FC = () => {
 	const fetchProfileInfo = async (token: string, username: string) => {
 		console.log("Fetching profile info");
 		try {
-			if (!currentUser) {
-				// console.log("Fetching profile info");
-				if (!refreshUser) {
-					setRefreshUser(true);
-				}
+			if (!userData) {
+				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				// console.log("Fetching profile info data: " + JSON.stringify(response));
+				setUserData(response.data);
 				if (ownsProfile) {
-					return currentUser;
+					// console.log("Profile return: " + JSON.stringify(response.data.fav_genres));
+					return response.data;
 				}
 			}
 			// console.log("Fetching with data: " + JSON.stringify(friend));
@@ -341,7 +364,7 @@ const ProfileScreen: React.FC = () => {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${userID}/rooms/current`,
+					`${utils.API_BASE_URL}/users/${userID}/room/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,
@@ -863,8 +886,11 @@ const ProfileScreen: React.FC = () => {
 
 	const onRefresh = React.useCallback(async () => {
 		setLoading(true);
-		if (!refreshUser) {
-			setRefreshUser(true);
+		const storedToken = await auth.getToken();
+
+		if (storedToken) {
+			setUserData(null);
+			fetchProfileInfo(storedToken, "");
 		}
 
 		setTimeout(() => {
@@ -903,7 +929,7 @@ const ProfileScreen: React.FC = () => {
 		return (
 			loading ||
 			ownsProfile === null ||
-			!currentUser ||
+			userData === null ||
 			primaryProfileData === null ||
 			!roomCheck ||
 			recentRoomData === null ||
@@ -918,7 +944,7 @@ const ProfileScreen: React.FC = () => {
 	}, [
 		loading,
 		ownsProfile,
-		currentUser,
+		userData,
 		primaryProfileData,
 		roomCheck,
 		recentRoomData,
@@ -929,8 +955,8 @@ const ProfileScreen: React.FC = () => {
 		// console.log(
 		// 	"loading: " +
 		// 		loading +
-		// 		" currentUser: " +
-		// 		currentUser +
+		// 		" userData: " +
+		// 		userData +
 		// 		" primaryProfile: " +
 		// 		primaryProfileData +
 		// 		" roomData: " +
@@ -1008,9 +1034,9 @@ const ProfileScreen: React.FC = () => {
 						>
 							<Image
 								source={
-									// primaryProfileData.profile_picture_url ?
-									{ uri: primaryProfileData.profile_picture_url }
-									// : require("../../../assets/profile-icon.png")
+									primaryProfileData.profile_picture_url
+										? { uri: primaryProfileData.profile_picture_url }
+										: require("../../../assets/profile-icon.png")
 								}
 								style={{
 									width: 125,
