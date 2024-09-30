@@ -29,6 +29,7 @@ import bookmarks from "../../services/BookmarkService";
 import { useAPI } from "../../APIContext";
 import SongRoomWidget from "../../components/SongRoomWidget";
 import { RoomDto } from "../../../api";
+import * as utils from "../../services/Utils";
 
 // const MemoizedCommentWidget = memo(CommentWidget);
 const { width, height } = Dimensions.get("window");
@@ -74,6 +75,8 @@ const RoomPage: React.FC = () => {
 	const trackPositionIntervalRef = useRef<number | null>(null);
 	const queueHeight = useRef(new Animated.Value(0)).current;
 	const [lastRoomFetch, setLastRoomFetch] = useState(new Date(0));
+	const [participantCount, setParticipantCount] = useState(0);
+	const [participants, setParticipants] = useState<any[]>([]);
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		if (!thisRoom || thisRoom.roomID !== roomID) {
@@ -124,6 +127,50 @@ const RoomPage: React.FC = () => {
 			setIsBookmarked(true);
 		}
 	};
+
+	useEffect(() => {
+		const fetchParticipants = async () => {
+			const storedToken = await auth.getToken();
+
+			if (!storedToken) {
+				console.error("No stored token found");
+				return;
+			}
+
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/rooms/${roomID}/users`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${storedToken}`,
+						},
+					},
+				);
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error(
+						`Failed to fetch participants: ${response.status} ${response.statusText}`,
+						errorText,
+					);
+					return;
+				}
+
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					setParticipants(data);
+					setParticipantCount(data.length);
+				} else {
+					console.error("Unexpected response data format:", data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch participants:", error);
+			}
+		};
+		fetchParticipants();
+	}, [userInRoom]);
 
 	useEffect(() => {
 		return () => {
@@ -253,7 +300,7 @@ const RoomPage: React.FC = () => {
 							onPress={handleViewParticipants}
 						>
 							<Ionicons name="people" size={30} color="black" />
-							<Text>{thisRoom?.participant_count + " Participants"}</Text>
+							<Text>{participantCount + " Participants"}</Text>
 						</TouchableOpacity>
 					</View>
 					{/* Right side */}
