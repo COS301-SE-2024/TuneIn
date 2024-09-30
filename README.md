@@ -145,11 +145,17 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 
 
 ## :blue_book: Documentation
+[User Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/User%20Manual.pdf)
+
 [Coding Standards/Quality](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/CodingStandards.pdf)
 
 [Testing Policy Document](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/TestingPolicy.pdf)
 
 [our UI design / wireframe](https://www.figma.com/design/vM3jH8s1Xt2CLlFjRRkzQ8/LoFi?node-id=0-1&t=8Qu3n4sAnXvIIUYE-1)
+
+[SRS](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/SRCv3.md)
+
+[Technical Installation Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/TechnicalInstallationManual.md)
 
 [link to our SRS document](https://github.com/COS301-SE-2024/TuneIn/blob/main/documentation/SRS.md)
 
