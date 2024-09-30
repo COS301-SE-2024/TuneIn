@@ -1,5 +1,6 @@
 import {
 	Body,
+	Query,
 	Controller,
 	Delete,
 	Get,
@@ -22,6 +23,7 @@ import {
 	ApiParam,
 	ApiProduces,
 	ApiSecurity,
+	ApiQuery,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -47,6 +49,47 @@ export class RoomsController {
 		private readonly roomAnalytics: RoomAnalyticsService,
 		private readonly auth: AuthService,
 	) {}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get()
+	@ApiTags("rooms")
+	@ApiOperation({
+		summary: "Get multiple rooms",
+		description: "Returns the rooms as an array of RoomDto.",
+		operationId: "getRooms",
+	})
+	@ApiQuery({
+		name: "q",
+		description: "An array of room IDs to get info for.",
+		required: true,
+		type: "string",
+		isArray: true,
+	})
+	@ApiOkResponse({
+		description: "An array of RoomDto representing the rooms.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "No rooms given",
+	})
+	@ApiNotFoundResponse({
+		description: "No rooms found",
+	})
+	async getRooms(@Query("q") roomIDs: string[]): Promise<RoomDto[]> {
+		if (roomIDs.length === 0) {
+			throw new HttpException("No rooms given", HttpStatus.BAD_REQUEST);
+		}
+		return await this.roomsService.getMultipleRoomInfo(roomIDs);
+	}
 
 	@Get("new")
 	@ApiTags("rooms")

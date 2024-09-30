@@ -105,6 +105,37 @@ export class RoomsService {
 		return result;
 	}
 
+	async getMultipleRoomInfo(roomIDs: string[]): Promise<RoomDto[]> {
+		console.log("Getting room info for rooms", roomIDs);
+		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany({
+			where: {
+				room_id: {
+					in: roomIDs,
+				},
+			},
+		});
+		roomIDs.map((roomID) => {
+			if (!rooms.find((r) => r.room_id === roomID)) {
+				throw new HttpException(
+					"Room with id '" + roomID + "' does not exist",
+					HttpStatus.NOT_FOUND,
+				);
+			}
+		});
+		const result: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+			roomIDs,
+		);
+		const currentSongs: (RoomSongDto | undefined)[] =
+			await this.getCurrentSongs(roomIDs);
+		for (let i = 0; i < result.length; i++) {
+			const c = currentSongs[i];
+			if (c) {
+				result[i].current_song = c;
+			}
+		}
+		return result;
+	}
+
 	async updateRoomInfo(
 		userID: string,
 		roomID: string,
@@ -366,6 +397,22 @@ export class RoomsService {
 		}
 		const result: RoomSongDto = queue[0];
 		return result;
+	}
+
+	async getCurrentSongs(
+		roomIDs: string[],
+	): Promise<(RoomSongDto | undefined)[]> {
+		const queues: RoomSongDto[][] = await Promise.all(
+			roomIDs.map(async (roomID) => {
+				return await this.getRoomQueue(roomID);
+			}),
+		);
+		return queues.map((queue) => {
+			if (queue.length === 0) {
+				return undefined;
+			}
+			return queue[0];
+		});
 	}
 
 	async getLiveChatHistory(roomID: string): Promise<PrismaTypes.message[]> {
