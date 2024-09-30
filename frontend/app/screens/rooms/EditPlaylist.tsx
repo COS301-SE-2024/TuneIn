@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	removeButton: {
-		backgroundColor: "#ff5c5c",
+		backgroundColor: "black",
 		borderRadius: 30,
 		height: 30,
 		alignItems: "center",

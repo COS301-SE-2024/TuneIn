@@ -8,6 +8,7 @@ import {
 	getTitle,
 } from "../models/RoomSongDto";
 import { useLive } from "../LiveContext";
+import { colors } from "../styles/colors";
 
 interface SongListProps {
 	track: RoomSongDto;
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	currentSongText: {
-		color: "blue", // Text color for current song
+		color: colors.primary, // Text color for current song
 	},
 	artist: {
 		fontSize: 14,
