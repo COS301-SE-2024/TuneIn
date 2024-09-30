@@ -21,14 +21,13 @@ const DevicePicker = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
-	/*
 	useEffect(() => {
 		// Declare intervalId using useRef to ensure it maintains its value across renders
 		if (isVisible) {
 			const fetchDevices = async () => {
 				try {
 					const deviceList: Device[] =
-						await roomControls.playbackHandler.getDevices();
+						roomControls.playbackHandler.spotifyDevices.devices;
 					console.log("deviceList: ", deviceList);
 				} catch (err) {
 					console.error("An error occurred while fetching devices", err);
@@ -49,7 +48,6 @@ const DevicePicker = () => {
 			}
 		}
 	}, [isVisible, roomControls.playbackHandler]);
-	*/
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);

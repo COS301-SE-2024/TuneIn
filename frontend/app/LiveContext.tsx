@@ -1317,8 +1317,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	//if auth info changes, get user info & spotify tokens
 	useEffect(() => {
 		console.log("Running main effect");
-		console.table(socketState);
-		console.table(socketEventsReceived);
+		// console.table(socketState);
+		// console.table(socketEventsReceived);
 
 		// if user is not authenticated, disconnect from socket
 		if (!currentUser || !authenticated) {
