@@ -126,7 +126,7 @@ export class RoomsService {
 			roomIDs,
 		);
 		const currentSongs: (RoomSongDto | undefined)[] =
-			await this.getCurrentSongs(roomIDs);
+			this.getCurrentSongs(roomIDs);
 		for (let i = 0; i < result.length; i++) {
 			const c = currentSongs[i];
 			if (c) {
@@ -379,7 +379,7 @@ export class RoomsService {
 		}
 	}
 
-	async getRoomQueue(roomID: string): Promise<RoomSongDto[]> {
+	getRoomQueue(roomID: string): RoomSongDto[] {
 		const room: ActiveRoom | undefined =
 			this.roomQueueService.roomQueues.get(roomID);
 		if (!room) {
@@ -399,14 +399,10 @@ export class RoomsService {
 		return result;
 	}
 
-	async getCurrentSongs(
-		roomIDs: string[],
-	): Promise<(RoomSongDto | undefined)[]> {
-		const queues: RoomSongDto[][] = await Promise.all(
-			roomIDs.map(async (roomID) => {
-				return await this.getRoomQueue(roomID);
-			}),
-		);
+	getCurrentSongs(roomIDs: string[]): (RoomSongDto | undefined)[] {
+		const queues: RoomSongDto[][] = roomIDs.map((roomID) => {
+			return this.getRoomQueue(roomID);
+		});
 		return queues.map((queue) => {
 			if (queue.length === 0) {
 				return undefined;
