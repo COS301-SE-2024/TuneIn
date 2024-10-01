@@ -17,6 +17,7 @@ import {
 	NativeSyntheticEvent,
 	RefreshControl,
 	ToastAndroid,
+	Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
@@ -280,11 +281,14 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		if (!roomError || !friendError) {
 			if (roomError && !friendError) {
-				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
 			} else if (!roomError && friendError) {
-				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
 			} else if (profileError) {
-				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
 			}
 		}
 	}, [roomError, friendError, profileError]);
