@@ -222,11 +222,8 @@ const Home: React.FC = () => {
 	}, [setUserData, userData, ProfileIMG]);
 
 	useEffect(() => {
-		// if (isFocused) {
-		// 	refreshData(); // Reload data immediately when the page is focused
-		// }
 		refreshData();
-	}, [isFocused, refreshData]);
+	}, []);
 
 	const [refreshing] = useState(false);
 
