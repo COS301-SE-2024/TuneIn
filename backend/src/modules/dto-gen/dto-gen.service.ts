@@ -128,70 +128,18 @@ export class DtoGenService {
 			}
 		}
 
-		//exclude links temporarily
-		//exclude current songs
-		//exclude fav genres
-		//exclude fav songs
-
-		// if (fully_qualify) {
-		// 	const favRooms: PrismaTypes.room[] | null =
-		// 		await this.dbUtils.getRandomRooms(5);
-		// 	if (favRooms && favRooms !== null) {
-		// 		result.fav_rooms.count = favRooms.length;
-		// 		const ids: string[] = favRooms.map((r) => r.room_id);
-		// 		const rooms = await this.generateMultipleRoomDto(ids);
-		// 		if (rooms && rooms !== null) {
-		// 			result.fav_rooms.data = rooms;
-		// 		}
-		// 	}
-		// }
-
-		// if (fully_qualify) {
-		// 	const recentRooms: PrismaTypes.room[] | null =
-		// 		await this.dbUtils.getRandomRooms(5);
-		// 	if (recentRooms && recentRooms !== null) {
-		// 		result.recent_rooms.count = recentRooms.length;
-		// 		const ids: string[] = recentRooms.map((r) => r.room_id);
-		// 		const rooms = await this.generateMultipleRoomDto(ids);
-		// 		if (rooms && rooms !== null) {
-		// 			result.recent_rooms.data = rooms;
-		// 		}
-		// 	}
-		// }
-
-		try {
-			const currentRoomID = await this.dbUtils.getCurrentRoomID(userID);
-			result.current_room_id = currentRoomID;
-		} catch {
-			//error will be thrown if not applicable
-		}
-		return result;
-	}
-
-	async generateFriendUserDto(selfID: string, friendUsername: string) {
-		const friend = await this.prisma.users.findFirst({
-			where: { username: friendUsername },
-		});
-
-		if (!friend || friend === null) {
-			throw new Error(
-				"User with username " + friendUsername + " does not exist",
-			);
-		}
-		const friendID = friend.user_id;
-		const friendship = await this.prisma.friends.findFirst({
-			where: {
-				OR: [
-					{ friend1: selfID, friend2: friendID },
-					{ friend1: friendID, friend2: selfID },
-				],
-			},
-		});
-
-		if (!friendship || friendship === null) {
-			throw new Error(
-				"Friendship between " + selfID + " and " + friendID + " does not exist",
-			);
+		const currentRoom: PrismaTypes.room | null =
+			await this.prisma.room.findUnique({
+				where: {
+					participate: {
+						some: {
+							user_id: userID,
+						},
+					},
+				},
+			});
+		if (currentRoom !== null) {
+			result.current_room_id = currentRoom.room_id;
 		}
 		const result: UserDto = await this.generateBriefUserDto(friend);
 		const base = `/users/${result.username}`;
@@ -225,15 +173,6 @@ export class DtoGenService {
 				data: {},
 			},
 			bio: user.bio || "",
-			current_song: {
-				songID: "",
-				title: "",
-				artists: [],
-				cover: "",
-				spotify_id: "",
-				duration: 0,
-				start_time: new Date(),
-			},
 			fav_genres: {
 				count: 0,
 				data: [],
@@ -254,17 +193,6 @@ export class DtoGenService {
 				return users.includes(user.user_id);
 			}),
 		};
-		if (add_friendship) {
-			result = {
-				...result,
-				friendship: {
-					status: false,
-					accept_url: "",
-					reject_url: "",
-				},
-			};
-		}
-		return result;
 	}
 
 	async generateMultipleUserDto(

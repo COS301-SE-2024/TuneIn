@@ -196,21 +196,10 @@ export class UserDto {
 	@Type(() => RoomsData)
 	recent_rooms: RoomsData;
 
-	@ApiPropertyOptional({
-		description:
-			"The user's friendship status with the current user, or null if the user is not friends with the current user",
-		type: UserFriendship,
-	})
-	@IsObject()
-	@ValidateNested()
-	@Type(() => UserFriendship)
-	friendship?: UserFriendship;
-
 	@ApiProperty()
 	@IsBoolean()
 	hasSpotifyAccount: boolean;
 
-	// optional field for relationship status
 	@ApiPropertyOptional({
 		description:
 			"The relationship status between the current user and the user in question",
