@@ -89,14 +89,66 @@ export class DbUtilsService {
 		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: ids } },
 		});
+	async getUserFollowersAndFollowing(userID: string): Promise<{
+		following: UserWithAuth[];
+		followers: UserWithAuth[];
+	}> {
+		const result: UserWithAuth[][] = await this.prisma.$transaction([
+			this.prisma.users.findMany({
+				where: {
+					follows_follows_followeeTousers: {
+						every: {
+							followee: userID,
+						},
+					},
+				},
+				include: { authentication: true },
+			}), // people following userID
+			this.prisma.users.findMany({
+				where: {
+					follows_follows_followerTousers: {
+						every: {
+							follower: userID,
+						},
+					},
+				},
+				include: { authentication: true },
+			}), // people userID is following
+		]);
+		return {
+			following: result[0],
+			followers: result[1],
+		};
+	}
 
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				result.push(u);
-			}
-		}
-		return result;
+	async getUserFollowersAndFollowingCount(userID: string): Promise<{
+		following: number;
+		followers: number;
+	}> {
+		const result: number[] = await this.prisma.$transaction([
+			this.prisma.users.count({
+				where: {
+					follows_follows_followeeTousers: {
+						every: {
+							followee: userID,
+						},
+					},
+				},
+			}), // number of people following userID
+			this.prisma.users.count({
+				where: {
+					follows_follows_followerTousers: {
+						every: {
+							follower: userID,
+						},
+					},
+				},
+			}), // number of people userID is following
+		]);
+		return {
+			following: result[0],
+			followers: result[1],
+		};
 	}
 
 	async getLinks(
@@ -588,25 +640,6 @@ export class DbUtilsService {
 		return true;
 	}
 
-	async getCurrentRoomID(userID: string): Promise<string> {
-		if (!(await this.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
-		}
-		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
-			await this.prisma.participate.findFirst({
-				where: {
-					user_id: userID,
-				},
-				include: {
-					room: true,
-				},
-			});
-
-		if (room === null) {
-			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
-		}
-		return room.room.room_id;
-	}
 	async getRoomSongs(roomID: string): Promise<PrismaTypes.song[]> {
 		// console.log("getting room songs:", roomID);
 		const queue: (PrismaTypes.queue & { song: PrismaTypes.song })[] =
