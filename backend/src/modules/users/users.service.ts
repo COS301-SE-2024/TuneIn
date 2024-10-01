@@ -1632,6 +1632,13 @@ export class UsersService {
 		if (!result) {
 			throw new Error("Failed to block user");
 		}
+		// unfriend and unfollow user
+		try {
+			await this.unfriendUser(userID, usernameToBlock);
+			await this.unfollowUser(userID, usernameToBlock);
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	async unblockUser(userID: string, usernameToUnblock: string): Promise<void> {
