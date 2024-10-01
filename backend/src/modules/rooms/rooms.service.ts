@@ -203,7 +203,7 @@ export class RoomsService {
 			});
 
 			if (room !== null) {
-				await this.leaveRoom(_room_id, user_id);
+				await this.leaveRoom(room.room_id, user_id);
 			}
 			// Add the user to the room
 			await this.prisma.participate.create({
