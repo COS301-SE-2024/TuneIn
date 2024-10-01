@@ -48,13 +48,13 @@ export class AuthManagement {
 		return this.token !== null;
 	}
 
-	public logout(): void {
+	public async logout(): Promise<void> {
 		// literally the safety cord of this service
 		// users will be logged out and redirected to the welcome screen if there is any issue with the token
 		// alert("Something went wrong with the authentication. Please log in again.");
 		this.token = null;
 		console.log("Clearing from logout");
-		StorageService.clear();
+		await StorageService.clear();
 		this.tokenSet = false;
 		router.navigate("/screens/WelcomeScreen");
 	}
@@ -157,6 +157,6 @@ function decodeToken(token: string | null): any {
 
 export default AuthManagement.getInstance();
 
-export function logout() {
-	throw new Error("Function not implemented.");
-}
+// export function logout() {
+// 	throw new Error("Function not implemented.");
+// }
