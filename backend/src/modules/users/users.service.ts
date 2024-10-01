@@ -1616,6 +1616,7 @@ export class UsersService {
 				blockee: user.user_id,
 			},
 		});
+		console.log("isBlocked: ", isBlocked);
 		if (isBlocked) {
 			throw new HttpException(
 				"User is already blocked",
@@ -1678,11 +1679,13 @@ export class UsersService {
 
 	async getBlockedUsers(userID: string): Promise<UserDto[]> {
 		console.log("Getting blocked users for user " + userID);
-		if (true) {
-			//if user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-		return [];
+		const blockedUsers: PrismaTypes.blocked[] =
+			await this.prisma.blocked.findMany({
+				where: { blocker: userID },
+			});
+		const ids: string[] = blockedUsers.map((blocked) => blocked.blockee);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		return result;
 	}
 
 	async reportUser(userID: string, usernameToReport: string): Promise<void> {
