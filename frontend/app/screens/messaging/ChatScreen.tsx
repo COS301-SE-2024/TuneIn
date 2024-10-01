@@ -34,8 +34,7 @@ const ChatScreen = () => {
 	const [message, setMessage] = useState<string>("");
 	const [dmError, setError] = useState<boolean>(false);
 	const router = useRouter();
-	let { username } = useLocalSearchParams();
-	const u: string = Array.isArray(username) ? username[0] : username;
+	let { username } = useLocalSearchParams<{ username: string }>();
 	const flatListRef = useRef<FlatList>(null); // FlatList reference
 
 	const cleanup = async () => {
@@ -67,7 +66,7 @@ const ChatScreen = () => {
 				if (!socketHandshakes.dmJoined) {
 					const user = dmParticipants.find((u) => u.username === username);
 					if (!user) {
-						await enterDM([u]);
+						await enterDM([username]);
 						dmControls.requestDirectMessageHistory();
 					}
 				}
