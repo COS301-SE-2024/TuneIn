@@ -408,29 +408,20 @@ export class DtoGenService {
 	async generateLiveChatMessageDto(
 		messageID: string,
 	): Promise<LiveChatMessageDto> {
-		const roomMessage: PrismaTypes.room_message | null =
-			await this.prisma.room_message.findUnique({
-				where: { message_id: messageID },
-			});
+		const message:
+			| ({
+					room_message: PrismaTypes.room_message | null;
+			  } & PrismaTypes.message)
+			| null = await this.prisma.message.findUnique({
+			where: { message_id: messageID },
+			include: { room_message: true },
+		});
 
-		if (!roomMessage || roomMessage === null) {
+		if (message === null || message.room_message === null) {
 			throw new Error(
 				"Message with id " +
 					messageID +
 					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR01",
-			);
-		}
-
-		const message: PrismaTypes.message | null =
-			await this.prisma.message.findUnique({
-				where: { message_id: messageID },
-			});
-
-		if (!message || message === null) {
-			throw new Error(
-				"Message with id " +
-					messageID +
-					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR02",
 			);
 		}
 
@@ -440,7 +431,7 @@ export class DtoGenService {
 			messageID: messageID,
 			messageBody: message.contents,
 			sender: sender,
-			roomID: roomMessage.room_id,
+			roomID: message.room_message.room_id,
 			dateCreated: message.date_sent,
 		};
 
