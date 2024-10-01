@@ -14,6 +14,10 @@ export type FullyQualifiedRoom = {
 	scheduled_room: PrismaTypes.scheduled_room | null;
 } & PrismaTypes.room;
 
+export type UserWithAuth = {
+	authentication: PrismaTypes.authentication | null;
+} & PrismaTypes.users;
+
 @Injectable()
 export class DbUtilsService {
 	private salt: string;
@@ -30,42 +34,29 @@ export class DbUtilsService {
 		this.salt = salt;
 	}
 
+	async getUsersWithAuth(userIDs: string[]): Promise<UserWithAuth[]> {
+		return await this.prisma.users.findMany({
+			where: { user_id: { in: userIDs } },
+			include: { authentication: true },
+		});
+	}
+
 	//get user following (people the user is following)
 	/*
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowing(userID: string): Promise<PrismaTypes.users[]> {
-		const following: PrismaTypes.follows[] = await this.prisma.follows.findMany(
-			{
-				where: { follower: userID },
+	async getUserFollowing(userID: string): Promise<UserWithAuth[]> {
+		return await this.prisma.users.findMany({
+			where: {
+				follows_follows_followerTousers: {
+					every: {
+						follower: userID,
+					},
+				},
 			},
-		);
-		if (following.length === 0) {
-			return [];
-		}
-		const result: PrismaTypes.users[] = [];
-		const ids: string[] = [];
-		for (let i = 0; i < following.length; i++) {
-			const f = following[i];
-			if (f && f !== null) {
-				if (f.followee && f.followee !== null) {
-					ids.push(f.followee);
-				}
-			}
-		}
-
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
-			where: { user_id: { in: ids } },
-		});
-
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				result.push(u);
-			}
-		}
-		return result;
+			include: { authentication: true },
+		}); // people userID is following
 	}
 
 	//get user followers (people following the user)
@@ -73,31 +64,19 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowers(userID: string): Promise<PrismaTypes.users[]> {
-		const followers: PrismaTypes.follows[] = await this.prisma.follows.findMany(
-			{
-				where: { followee: userID },
+	async getUserFollowers(userID: string): Promise<UserWithAuth[]> {
+		return await this.prisma.users.findMany({
+			where: {
+				follows_follows_followeeTousers: {
+					some: {
+						followee: userID,
+					},
+				},
 			},
-		);
+			include: { authentication: true },
+		}); // people following userID
+	}
 
-		if (followers.length === 0) {
-			return [];
-		}
-
-		const result: PrismaTypes.users[] = [];
-		const ids: string[] = [];
-		for (let i = 0; i < followers.length; i++) {
-			const f = followers[i];
-			if (f && f !== null) {
-				if (f.follower && f.follower !== null) {
-					ids.push(f.follower);
-				}
-			}
-		}
-
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
-			where: { user_id: { in: ids } },
-		});
 	async getUserFollowersAndFollowing(userID: string): Promise<{
 		following: UserWithAuth[];
 		followers: UserWithAuth[];

@@ -22,20 +22,16 @@ export class DtoGenService {
 		fully_qualify = true,
 	): Promise<UserDto> {
 		//check if userID exists
-		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
-			where: { user_id: userID },
-		});
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth([userID]);
 
-		if (!user || user === null) {
-			throw new Error(
-				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserDto():ERROR01",
-			);
+		if (users.length === 0) {
+			throw new Error("User with id " + userID + " does not exist");
 		}
+		const user: UserWithAuth = users[0];
 
 		//get user info
 		const result: UserDto = await this.generateBriefUserDto(user);
 		result.links = await this.dbUtils.getLinks(user);
-		// const preferences = await this.dbUtils.getPreferences(user);
 		const fav_genres = await this.prisma.favorite_genres.findMany({
 			where: { user_id: userID },
 			include: { genre: true },
@@ -139,11 +135,10 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateBriefUserDto(
-		user: PrismaTypes.users,
-		add_friendship = false,
-	): Promise<UserDto> {
-		let result: UserDto = {
+	generateBriefUserDto(
+		user: UserWithAuth
+	): UserDto {
+		return {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
 			username: user.username,
@@ -177,9 +172,7 @@ export class DtoGenService {
 				count: 0,
 				data: [],
 			},
-			hasSpotifyAccount: await this.getUsersWithSpotify().then((users) => {
-				return users.includes(user.user_id);
-			}),
+			hasSpotifyAccount: user.authentication !== null,
 		};
 	}
 
