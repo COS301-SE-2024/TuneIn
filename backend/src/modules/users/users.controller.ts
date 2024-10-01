@@ -372,6 +372,25 @@ export class UsersController {
 		return await this.usersService.getRoomsFromFriends(userInfo.id);
 	}
 
+	// create an endpoint to fetch new rooms from people you follow (following)
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("rooms/following")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get rooms from people you follow" })
+	@ApiOkResponse({
+		description: "Rooms from people you follow retrieved successfully",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting rooms from people you follow.",
+	})
+	async getRoomsFromFollowing(@Request() req: Request): Promise<RoomDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRoomsFromFollowing(userInfo.id);
+	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
