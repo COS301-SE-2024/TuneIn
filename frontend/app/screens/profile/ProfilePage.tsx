@@ -926,7 +926,13 @@ const ProfileScreen: React.FC = () => {
 						testID="follow-button"
 					>
 						<Text style={styles.buttonText}>
-							{isBlocked ? "Unblock" : following ? "Following  " : "Follow  "}
+							{isBlocked
+								? "Unblock"
+								: areFriends
+									? "Friends  "
+									: following
+										? "Following  "
+										: "Follow  "}
 						</Text>
 						{!isBlocked && (
 							<Ionicons
