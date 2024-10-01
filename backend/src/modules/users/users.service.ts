@@ -498,8 +498,6 @@ export class UsersService {
 		}
 		return rooms;
 	}
-
-
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
 		const user = await this.prisma.users.findUnique({
 			where: { user_id: userID },
