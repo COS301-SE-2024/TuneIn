@@ -257,10 +257,22 @@ export class DtoGenService {
 
 	async generateMultipleUserDto(
 		user_ids: string[],
+		userID?: string,
 		fully_qualify = false,
 	): Promise<UserDto[]> {
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { blockee: userID },
+			});
+		}
 		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
-			where: { user_id: { in: user_ids } },
+			where: {
+				AND: [
+					{ user_id: { in: user_ids } },
+					{ user_id: { notIn: blocked.map((b) => b.blocker) } },
+				],
+			},
 		});
 
 		if (!users || users === null) {
