@@ -636,8 +636,13 @@ const ProfileScreen: React.FC = () => {
 					const updatedRequests = requests.filter(
 						(request) => request.friend_id !== friend.friend_id,
 					);
+					const updatedPendingRequests = pendingRequests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setPendingRequests(updatedPendingRequests);
 					setRequests(updatedRequests);
 					setIsBlocked(block);
+					setFollowing(false);
 					console.log("User blocked successfully.");
 				}
 			} catch (error) {
@@ -914,18 +919,16 @@ const ProfileScreen: React.FC = () => {
 									},
 									false,
 								);
-							} else if (following) {
-								setFriendDialogVisible(true);
 							} else {
-								followHandler();
+								setFriendDialogVisible(true);
 							}
 						}}
 						testID="follow-button"
 					>
 						<Text style={styles.buttonText}>
-							{isBlocked ? "Unblock" : following ? "Following  " : "Follow"}
+							{isBlocked ? "Unblock" : following ? "Following  " : "Follow  "}
 						</Text>
-						{following && (
+						{!isBlocked && (
 							<Ionicons
 								style={{ paddingTop: 2 }}
 								name="chevron-down"
@@ -944,12 +947,11 @@ const ProfileScreen: React.FC = () => {
 						isPotential={arePotentialFriends}
 						isRequesting={hasRequested}
 						isPending={isPendingRequest}
-						isBlocked={isBlocked}
 						handleUnfollow={followHandler}
 						handleRequest={handleFriendRequest}
 						handleUnfriend={handleFriend}
 						handleCancel={handleCancelRequest}
-						handleUnblock={handleBlock}
+						handleBlock={handleBlock}
 						sendRequest={handleSendRequest}
 						setShowMoreOptions={setFriendDialogVisible}
 					></FollowBottomSheet>
