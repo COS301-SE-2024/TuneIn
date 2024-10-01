@@ -203,10 +203,7 @@ export class RoomsService {
 			});
 
 			if (room !== null) {
-				throw new HttpException(
-					"User is already in the room",
-					HttpStatus.CONFLICT,
-				);
+				await this.leaveRoom(room.room_id, user_id);
 			}
 			// Add the user to the room
 			await this.prisma.participate.create({

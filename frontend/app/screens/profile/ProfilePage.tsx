@@ -7,8 +7,6 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	ActivityIndicator,
-	Modal,
-	TouchableWithoutFeedback,
 	RefreshControl,
 	ToastAndroid,
 	Platform,
@@ -20,7 +18,7 @@ import GenreList from "../../components/GenreList";
 import FavoriteSongs from "../../components/FavoriteSong";
 import LinkBottomSheet from "../../components/LinkBottomSheet";
 import NowPlaying from "../../components/NowPlaying";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,7 +33,6 @@ import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
 import ContextMenu from "../../components/profile/DrawerContextMenu";
-import { CognitoUserPool } from "amazon-cognito-identity-js";
 
 const ProfileScreen: React.FC = () => {
 	const navigation = useNavigation();

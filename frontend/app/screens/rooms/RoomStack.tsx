@@ -101,18 +101,8 @@ function MyRoomTabs() {
 			throw new Error("No token found");
 		}
 		if (!joined) {
-			const joinedRoom: boolean = await roomCurrent.leaveJoinRoom(
-				token,
-				roomID,
-				false,
-			);
-			if (!joinedRoom) {
-				ToastAndroid.show(
-					"Couldn't join room. Please exit current room.",
-					ToastAndroid.SHORT,
-				);
-				return;
-			}
+			await roomCurrent.leaveJoinRoom(token, roomID, false);
+
 			joinRoom();
 			live.joinRoom(roomID, setJoined, setMessages);
 			setJoined(true);
