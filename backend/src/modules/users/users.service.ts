@@ -1602,9 +1602,35 @@ export class UsersService {
 		console.log(
 			"Blocking user with id: " + userID + " is blocking " + usernameToBlock,
 		);
-		if (true) {
+		const user = await this.prisma.users.findFirst({
+			where: { username: usernameToBlock },
+		});
+		if (!user) {
 			//if user does not exist
-			throw new HttpException("User is already blocked", HttpStatus.NOT_FOUND);
+			throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		// check if users is already blocked
+		const isBlocked = await this.prisma.blocked.findFirst({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		if (isBlocked) {
+			throw new HttpException(
+				"User is already blocked",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		const result = await this.prisma.blocked.create({
+			data: {
+				blocker: userID,
+				blockee: user.user_id,
+				date_blocked: new Date(),
+			},
+		});
+		if (!result) {
+			throw new Error("Failed to block user");
 		}
 	}
 
@@ -1615,9 +1641,31 @@ export class UsersService {
 				" is unblocking " +
 				usernameToUnblock,
 		);
-		if (true) {
+		const user = await this.prisma.users.findFirst({
+			where: { username: usernameToUnblock },
+		});
+		if (!user) {
 			//if user does not exist
-			throw new HttpException("User was not blocked", HttpStatus.NOT_FOUND);
+			throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		// check if users is already blocked
+		const isBlocked = await this.prisma.blocked.findFirst({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		if (!isBlocked) {
+			throw new HttpException("User is not blocked", HttpStatus.BAD_REQUEST);
+		}
+		const result = await this.prisma.blocked.deleteMany({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		if (!result) {
+			throw new Error("Failed to unblock user");
 		}
 	}
 
