@@ -90,9 +90,14 @@ export class UsersService {
 		});
 	}
 
-	async getProfile(uid: string): Promise<UserDto> {
-		const user = await this.dtogen.generateUserDto(uid);
+	async getProfile(userID: string): Promise<UserDto> {
+		const user = await this.dtogen.generateUserDto(userID);
 		return user;
+	}
+
+	async getUsers(userIDs: string[]): Promise<UserDto[]> {
+		const users: UserDto[] = await this.dtogen.generateMultipleUserDto(userIDs);
+		return users;
 	}
 
 	async usernameTaken(username: string): Promise<boolean> {
