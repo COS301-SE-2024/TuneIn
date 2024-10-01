@@ -1188,10 +1188,14 @@ export class RoomQueueService {
 	}
 
 	async createRoomQueue(roomID: string): Promise<void> {
-		let room: RoomDto = await this.dtogen.generateRoomDto(roomID);
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
+			roomID,
+		]);
+		const room: RoomDto = rooms[0];
 		if (room.spotifyPlaylistID === "") {
-			await this.spotify.getRoomPlaylist(room);
-			room = await this.dtogen.generateRoomDto(roomID);
+			const playlist: Spotify.Playlist<Spotify.TrackItem> =
+				await this.spotify.getRoomPlaylist(room);
+			room.spotifyPlaylistID = playlist.id;
 		}
 		const activeRoom = new ActiveRoom(room, this.murLockService);
 		await activeRoom.reloadQueue(

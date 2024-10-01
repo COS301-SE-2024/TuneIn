@@ -526,12 +526,12 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			console.log("Called");
 			console.log("Result " + result);
-			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
+			const userIDs = result.map((row) => row.user_id.toString());
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
 			console.log(userDtos);
 
 			if (userDtos) {
-				const sortedUsers = userIds
+				const sortedUsers = userIDs
 					.map((id) => userDtos.find((user) => user.userID === id))
 					.filter((user): user is UserDto => user !== undefined);
 
@@ -662,12 +662,12 @@ export class SearchService {
 		);
 
 		if (Array.isArray(result)) {
-			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
+			const userIDs = result.map((row) => row.user_id.toString());
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
 			// console.log(userDtos);
 
 			if (userDtos) {
-				const sortedUsers = userIds
+				const sortedUsers = userIDs
 					.map((id) => userDtos.find((user) => user.userID === id))
 					.filter((user): user is UserDto => user !== undefined);
 

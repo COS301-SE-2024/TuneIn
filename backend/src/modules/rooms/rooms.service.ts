@@ -6,7 +6,10 @@ import { PrismaService } from "../../../prisma/prisma.service";
 import * as PrismaTypes from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+import {
+	DbUtilsService,
+	FullyQualifiedRoom,
+} from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { EmojiReactionDto } from "../../live/dto/emojireaction.dto";
 import { ApiProperty } from "@nestjs/swagger";
@@ -107,13 +110,8 @@ export class RoomsService {
 
 	async getMultipleRoomInfo(roomIDs: string[]): Promise<RoomDto[]> {
 		console.log("Getting room info for rooms", roomIDs);
-		const rooms: PrismaTypes.room[] = await this.prisma.room.findMany({
-			where: {
-				room_id: {
-					in: roomIDs,
-				},
-			},
-		});
+		const rooms: FullyQualifiedRoom[] =
+			await this.dbUtils.getFullyQualifiedRooms(roomIDs);
 		roomIDs.map((roomID) => {
 			if (!rooms.find((r) => r.room_id === roomID)) {
 				throw new HttpException(
@@ -122,8 +120,8 @@ export class RoomsService {
 				);
 			}
 		});
-		const result: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
-			roomIDs,
+		const result: RoomDto[] = await this.dtogen.generateMultipleRoomDtoFromRoom(
+			rooms,
 		);
 		const currentSongs: (RoomSongDto | undefined)[] =
 			this.getCurrentSongs(roomIDs);
@@ -983,15 +981,16 @@ export class RoomsService {
 						data: childRoom1Songs,
 					});
 				}
-				const parentRoomDto: RoomDto | null = await this.dtogen.generateRoomDto(
+				const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
 					roomID,
-				);
-				if (!parentRoomDto) {
+				]);
+				if (rooms.length === 0) {
 					throw new HttpException(
 						"Failed to create child rooms",
 						HttpStatus.INTERNAL_SERVER_ERROR,
 					);
 				}
+				const parentRoomDto: RoomDto = rooms[0];
 				parentRoomDto.childrenRoomIDs = [
 					childRoom0.room_id,
 					childRoom1.room_id,

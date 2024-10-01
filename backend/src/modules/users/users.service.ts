@@ -1255,7 +1255,7 @@ export class UsersService {
 		return true;
 	}
 
-	async getCurrentRoomDto(username: string): Promise<RoomDto> {
+	async getCurrentRoomDto(username: string): Promise<RoomDto | undefined> {
 		let userID = "";
 		// regex to check if username is infact, userID
 		// const isUserID = /^[0-9a-fA-F]{36}$/;
@@ -1287,15 +1287,13 @@ export class UsersService {
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const result: RoomDto | null = await this.dtogen.generateRoomDto(
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
 			room.room.room_id,
-		);
-		if (!result) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for current room. Received null.",
-			);
+		]);
+		if (rooms.length === 0) {
+			return undefined;
 		}
-		return result;
+		return rooms[0];
 	}
 
 	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {

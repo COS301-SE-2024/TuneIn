@@ -392,7 +392,12 @@ export class UsersController {
 	})
 	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getCurrentRoomDto(userInfo.id);
+		const result: RoomDto | undefined =
+			await this.usersService.getCurrentRoomDto(userInfo.id);
+		if (result === undefined) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return result;
 	}
 
 	@ApiBearerAuth()
@@ -1022,7 +1027,12 @@ export class UsersController {
 	async getCurrentRoomByUserId(
 		@Param("username") username: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoomDto(username);
+		const result: RoomDto | undefined =
+			await this.usersService.getCurrentRoomDto(username);
+		if (result === undefined) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return result;
 	}
 
 	@Post(":username/block")

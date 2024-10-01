@@ -196,64 +196,6 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateRoomDto(roomID: string): Promise<RoomDto> {
-		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
-			where: { room_id: roomID },
-		});
-
-		if (!room || room === null) {
-			throw new Error("Room with id " + roomID + " does not exist");
-		}
-
-		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
-			where: { room_id: roomID },
-		});
-
-		const childRooms = await this.prisma.child_room.findMany({
-			where: { parent_room_id: roomID },
-		});
-
-		const result: RoomDto = {
-			creator: new UserDto(),
-			roomID: room.room_id,
-			spotifyPlaylistID: room.playlist_id || "",
-			participant_count: 0,
-			room_name: room.name,
-			description: room.description || "",
-			is_temporary: room.is_temporary || false,
-			is_private: await this.dbUtils.isRoomPrivate(roomID),
-			is_scheduled: false,
-			start_date: new Date(0),
-			end_date: new Date(0),
-			language: room.room_language || "",
-			has_explicit_content: room.explicit || false,
-			has_nsfw_content: room.nsfw || false,
-			room_image: room.playlist_photo || "",
-			tags: room.tags || [],
-			childrenRoomIDs: childRooms.map((r) => r.room_id),
-		};
-
-		if (scheduledRoom && scheduledRoom !== null) {
-			result.is_scheduled = true;
-			/*
-			result.start_date = scheduledRoom.start_date;
-			result.end_date = scheduledRoom.end_date;
-			*/
-		}
-
-		const creator = await this.generateUserDto(room.room_creator, false);
-		if (creator && creator !== null) {
-			result.creator = creator;
-		}
-
-		//participant count will be added later
-		//current song will be added later
-		//dates will be added later
-		//current songs will be added later
-
-		return result;
-	}
-
 	async generateRoomDtoFromRoom(room: PrismaTypes.room): Promise<RoomDto> {
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
 			where: { room_id: room.room_id },
