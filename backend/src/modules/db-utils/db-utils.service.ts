@@ -5,6 +5,15 @@ import * as PrismaTypes from "@prisma/client";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
+
+export type FullyQualifiedRoom = {
+	child_room_child_room_parent_room_idToroom: PrismaTypes.child_room[];
+	participate: PrismaTypes.participate[];
+	private_room: PrismaTypes.private_room | null;
+	public_room: PrismaTypes.public_room | null;
+	scheduled_room: PrismaTypes.scheduled_room | null;
+} & PrismaTypes.room;
+
 @Injectable()
 export class DbUtilsService {
 	private salt: string;
@@ -253,6 +262,25 @@ export class DbUtilsService {
 				data: [],
 			};
 		}
+	}
+
+	async getFullyQualifiedRooms(
+		roomIDs: string[],
+	): Promise<FullyQualifiedRoom[]> {
+		return await this.prisma.room.findMany({
+			where: {
+				room_id: {
+					in: roomIDs,
+				},
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
 	}
 
 	async getRandomRooms(count: number): Promise<PrismaTypes.room[]> {

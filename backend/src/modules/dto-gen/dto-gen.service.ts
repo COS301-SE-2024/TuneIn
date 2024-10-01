@@ -356,6 +356,25 @@ export class DtoGenService {
 				userDtos.push(user);
 			}
 		}
+	async generateMultipleRoomDtoFromRoom(
+		rooms: FullyQualifiedRoom[],
+	): Promise<RoomDto[]> {
+		if (rooms.length === 0) {
+			return [];
+		}
+		const userIds: string[] = rooms.map((r) => r.room_creator);
+		//remove duplicate user ids
+		const uniqueUserIds: string[] = [...new Set(userIds)];
+		const users: ({
+			authentication: PrismaTypes.authentication | null;
+		} & PrismaTypes.users)[] = await this.prisma.users.findMany({
+			where: { user_id: { in: uniqueUserIds } },
+			include: {
+				authentication: true,
+			},
+		});
+
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
 
 		const result: RoomDto[] = [];
 		for (let i = 0; i < rooms.length; i++) {
@@ -369,19 +388,17 @@ export class DtoGenService {
 							") not found in Users table",
 					);
 				}
-				const childrenRooms = await this.prisma.child_room.findMany({
-					where: { parent_room_id: r.room_id },
-				});
+				const childrenRooms = r.child_room_child_room_parent_room_idToroom;
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
 					spotifyPlaylistID: r.playlist_id || "",
-					participant_count: 0, //to fix soon
+					participant_count: r.participate.length,
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
-					is_private: false, //db must add column
-					is_scheduled: false, //db must add column
+					is_private: r.private_room !== null,
+					is_scheduled: r.scheduled_room !== null,
 					start_date: new Date(),
 					end_date: new Date(),
 					language: r.room_language || "",
