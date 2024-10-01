@@ -5,7 +5,10 @@ import { Prisma } from "@prisma/client";
 import { UserDto } from "./dto/user.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+import {
+	DbUtilsService,
+	FullyQualifiedRoom,
+} from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
@@ -559,6 +562,14 @@ export class UsersService {
 		}
 
 		//for is_private, we will need to add the roomID to the private_room tbale
+		const r: FullyQualifiedRoom = {
+			...room,
+			child_room_child_room_parent_room_idToroom: [],
+			participate: [],
+			private_room: null,
+			public_room: null,
+			scheduled_room: null,
+		};
 		if (createRoomDto.is_private) {
 			const privRoom: Prisma.private_roomCreateInput = {
 				room: {
@@ -575,6 +586,7 @@ export class UsersService {
 					"An unknown error occurred while creating private room. Received null.",
 				);
 			}
+			r.private_room = privRoomResult;
 		} else {
 			const pubRoom: Prisma.public_roomCreateInput = {
 				room: {
@@ -591,6 +603,7 @@ export class UsersService {
 					"An unknown error occurred while creating public room. Received null.",
 				);
 			}
+			r.public_room = pubRoomResult;
 		}
 
 		//TODO: implement scheduled room creation
@@ -605,14 +618,13 @@ export class UsersService {
 			};
 		}
 		*/
-
-		const result = await this.dtogen.generateRoomDtoFromRoom(room);
-		if (!result) {
+		const rooms = await this.dtogen.generateMultipleRoomDtoFromRoom([r]);
+		if (rooms.length === 0) {
 			throw new Error(
-				"An unknown error occurred while generating RoomDto for created room. Received null.",
+				"An unknown error occurred while generating RoomDto for created room. Received empty array.",
 			);
 		}
-		return result;
+		return rooms[0];
 	}
 
 	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {

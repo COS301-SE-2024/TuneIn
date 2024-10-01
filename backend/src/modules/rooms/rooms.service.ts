@@ -51,54 +51,54 @@ export class RoomsService {
 	) {}
 
 	async getNewRooms(limit = -1): Promise<RoomDto[]> {
-		const r: PrismaTypes.room[] = await this.prisma.room.findMany({
+		const rooms: FullyQualifiedRoom[] = await this.prisma.room.findMany({
+			where: {
+				NOT: {
+					public_room: null,
+				},
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
 			orderBy: {
 				date_created: "desc",
 			},
 		});
-		if (r.length === 0) {
+		if (rooms.length === 0) {
 			return [];
 		}
-		const allRooms: PrismaTypes.room[] = r;
-
-		const pr: PrismaTypes.public_room[] =
-			await this.prisma.public_room.findMany();
-		if (!pr || pr === null) {
-			return [];
-		}
-		const publicRooms: PrismaTypes.public_room[] = pr;
-
-		const rooms: PrismaTypes.room[] = [];
-		for (const room of allRooms) {
-			if (publicRooms.find((pr) => pr.room_id === room.room_id)) {
-				rooms.push(room);
-			}
-		}
-
 		if (limit > 0) {
-			publicRooms.splice(limit);
+			rooms.splice(limit);
 		}
-
-		const promises: Promise<RoomDto>[] = [];
-		for (const room of rooms) {
-			promises.push(this.dtogen.generateRoomDtoFromRoom(room));
-		}
-		const result: RoomDto[] = await Promise.all(promises);
-		return result;
+		return await this.dtogen.generateMultipleRoomDtoFromRoom(rooms);
 	}
 
 	async getRoomInfo(roomID: string): Promise<RoomDto> {
 		console.log("Getting room info for room", roomID);
-		const room = await this.prisma.room.findFirst({
+		const room: FullyQualifiedRoom | null = await this.prisma.room.findFirst({
 			where: {
 				room_id: roomID,
 			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
 		});
-		if (!room) {
+		if (room === null) {
 			throw new Error("Room does not exist");
 		}
 		// filter out null values
-		const result: RoomDto = await this.dtogen.generateRoomDtoFromRoom(room);
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDtoFromRoom([
+			room,
+		]);
+		const result: RoomDto = rooms[0];
 		const currentSong: RoomSongDto | undefined = await this.getCurrentSong(
 			roomID,
 		);
@@ -189,18 +189,22 @@ export class RoomsService {
 		}
 
 		try {
-			const room: PrismaTypes.room | null = await this.prisma.room.update({
+			const room: FullyQualifiedRoom = await this.prisma.room.update({
 				where: {
 					room_id: roomID,
 				},
 				data: updatedRoom,
+				include: {
+					child_room_child_room_parent_room_idToroom: true,
+					participate: true,
+					private_room: true,
+					public_room: true,
+					scheduled_room: true,
+				},
 			});
 
-			if (!room) {
-				throw new Error("Failed to update room");
-			}
-
-			return await this.dtogen.generateRoomDtoFromRoom(room);
+			const rooms = await this.dtogen.generateMultipleRoomDtoFromRoom([room]);
+			return rooms[0];
 		} catch (error) {
 			console.error("Error updating room info:", error);
 			throw error;
