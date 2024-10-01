@@ -17,20 +17,10 @@ export class DtoGenService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async getUsersWithSpotify(): Promise<string[]> {
-		return await this.prisma.authentication.findMany().then((users) => {
-			return users.map((u) => u.user_id);
-		});
-	}
-
 	async generateUserDto(
 		userID: string,
 		fully_qualify = true,
 	): Promise<UserDto> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new Error("User with id " + userID + " does not exist");
-		}
-
 		//check if userID exists
 		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
@@ -74,58 +64,63 @@ export class DtoGenService {
 				duration: song.song.duration as number,
 			})),
 		};
-
-		// result.fav_songs = preferences.fav_songs;
+		result.hasSpotifyAccount = await this.prisma.authentication
+			.findFirst({
+				where: { user_id: userID },
+			})
+			.then((query) => {
+				return query !== null;
+			});
 
 		if (fully_qualify) {
 			const recent_rooms = await this.dbUtils.getActivity(user);
 			result.recent_rooms = {
 				count: recent_rooms.count,
-				data: recent_rooms.data || [], // I'm assuming that recent_rooms.data is an array of room IDs
+				data: recent_rooms.data,
 			};
 
-			const favRooms = await this.prisma.bookmark.findMany({
-				where: { user_id: userID },
+			const bookmarkedRooms = await this.prisma.room.findMany({
+				where: {
+					bookmark: {
+						some: {
+							user_id: userID,
+						},
+					},
+				},
 			});
-			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-
-			const roomDtoArray: RoomDto[] = await this.generateMultipleRoomDto(
-				favRoomIDs,
-			);
-			if (roomDtoArray && roomDtoArray !== null) {
-				result.fav_rooms = {
-					count: roomDtoArray.length,
-					data: roomDtoArray.map((r) => r.roomID),
-				};
-			}
+			result.fav_rooms = {
+				count: bookmarkedRooms.length,
+				data: bookmarkedRooms.map((r) => r.room_id),
+			};
 		}
 
-		const following: PrismaTypes.users[] = await this.dbUtils.getUserFollowing(
-			userID,
-		);
-		result.following.count = following.length;
 		if (fully_qualify) {
-			for (let i = 0; i < following.length; i++) {
-				const f = following[i];
-				if (f && f !== null) {
-					const u: UserDto = await this.generateBriefUserDto(f);
-					result.following.data.push(u);
-				}
-			}
-		}
+			const followData: {
+				following: PrismaTypes.users[];
+				followers: PrismaTypes.users[];
+			} = await this.dbUtils.getUserFollowersAndFollowing(userID);
 
-		const followers: PrismaTypes.users[] = await this.dbUtils.getUserFollowers(
-			userID,
-		);
-		result.followers.count = followers.length;
-		if (fully_qualify) {
-			for (let i = 0; i < followers.length; i++) {
-				const f = followers[i];
-				if (f && f !== null) {
-					const u: UserDto = await this.generateBriefUserDto(f);
-					result.followers.data.push(u);
-				}
+			for (let i = 0; i < followData.following.length; i++) {
+				const f = followData.following[i];
+				const u: UserDto = await this.generateBriefUserDto(f);
+				result.following.data.push(u);
 			}
+			result.following.count = followData.following.length;
+
+			for (let i = 0; i < followData.followers.length; i++) {
+				const f = followData.followers[i];
+				const u: UserDto = await this.generateBriefUserDto(f);
+				result.followers.data.push(u);
+			}
+			result.followers.count = followData.followers.length;
+		} else {
+			const followData: {
+				following: number;
+				followers: number;
+			} = await this.dbUtils.getUserFollowersAndFollowingCount(user.user_id);
+
+			result.following.count = followData.following;
+			result.followers.count = followData.followers;
 		}
 
 		const currentRoom: PrismaTypes.room | null =
@@ -141,13 +136,6 @@ export class DtoGenService {
 		if (currentRoom !== null) {
 			result.current_room_id = currentRoom.room_id;
 		}
-		const result: UserDto = await this.generateBriefUserDto(friend);
-		const base = `/users/${result.username}`;
-		result.friendship = {
-			status: !friendship.is_pending,
-			accept_url: friendship.is_pending ? "" : base + "/accept",
-			reject_url: friendship.is_pending ? "" : base + "/reject",
-		};
 		return result;
 	}
 
