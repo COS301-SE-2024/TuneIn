@@ -167,6 +167,6 @@ function decodeToken(token: string | null): any {
 
 export default AuthManagement.getInstance();
 
-export function logout() {
-	throw new Error("Function not implemented.");
-}
+// export function logout() {
+// 	throw new Error("Function not implemented.");
+// }

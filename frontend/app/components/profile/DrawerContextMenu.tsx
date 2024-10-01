@@ -19,7 +19,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 	};
 
 	const navigateToLogout = () => {
-		auth.logout();
+		auth.default.logout();
 		onClose(); // Close the modal after logout
 	};
 
