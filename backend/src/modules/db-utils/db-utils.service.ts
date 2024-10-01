@@ -669,38 +669,30 @@ export class DbUtilsService {
 	}
 
 	async getUserFriends(userID: string): Promise<PrismaTypes.users[]> {
-		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
+		return await this.prisma.users.findMany({
 			where: {
 				OR: [
-					{ friend1: userID, is_pending: false },
-					{ friend2: userID, is_pending: false },
+					{
+						friends_friends_friend1Tousers: {
+							some: {
+								friend2: userID,
+								is_pending: false,
+							},
+						},
+					},
+					{
+						friends_friends_friend2Tousers: {
+							some: {
+								friend1: userID,
+								is_pending: false,
+							},
+						},
+					},
 				],
-				is_pending: false,
 			},
 		});
-
-		if (friends.length === 0) {
-			return [];
-		}
-
-		const friendsIDs: string[] = [];
-		friends.forEach((f) => {
-			if (f.friend1 === userID) {
-				friendsIDs.push(f.friend2);
-			} else {
-				friendsIDs.push(f.friend1);
-			}
-		});
-
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
-			where: { user_id: { in: friendsIDs } },
-		});
-
-		if (!users || users === null) {
-			throw new Error("No friends found.");
-		}
-		return users;
 	}
+
 	async getMutualFriends(
 		userID1: string,
 		userID2: string,

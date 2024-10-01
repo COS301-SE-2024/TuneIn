@@ -4,7 +4,7 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+import { DbUtilsService, FullyQualifiedRoom, UserWithAuth } from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { DirectMessageDto } from "../users/dto/dm.dto";
 import validator from "validator";
