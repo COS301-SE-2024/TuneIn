@@ -1,9 +1,10 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Modal, Platform, Alert, ToastAndroid } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
 import { router } from "expo-router";
+import CurrentRoom from "../../screens/rooms/functions/CurrentRoom";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
@@ -18,9 +19,27 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 		onClose(); // Close the modal after navigation
 	};
 
-	const navigateToLogout = () => {
-		auth.default.logout();
-		onClose(); // Close the modal after logout
+	const navigateToLogout = async () => {
+		await auth.default
+			.getToken()
+			.then(async (token) => {
+				const current = new CurrentRoom();
+				const currentRoom = await current.getCurrentRoom(token as string);
+				if (currentRoom) {
+					const currentRoomID = currentRoom?.roomID ?? currentRoom.id;
+					await currentRoom.leaveJoinRoom(token as string, currentRoomID, true);
+				}
+				auth.default.logout();
+				onClose(); // Close the modal after logout
+				if (Platform.OS === "android") {
+					ToastAndroid.show("You have been logged out.", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Logout", "You have been logged out.");
+				}
+			})
+			.catch((error) => {
+				console.error("Error getting token: " + error);
+			});
 	};
 
 	const navigateToHelp = () => {
