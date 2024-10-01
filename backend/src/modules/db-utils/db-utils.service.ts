@@ -139,9 +139,10 @@ export class DbUtilsService {
 		};
 	}
 
-	async getLinks(
-		user: PrismaTypes.users,
-	): Promise<{ count: number; data: Record<string, string[]> }> {
+	getLinks(user: PrismaTypes.users): {
+		count: number;
+		data: Record<string, string[]>;
+	} {
 		if (JSON.stringify(user.external_links || {}) === "{}") {
 			return { count: 0, data: {} };
 		}
@@ -211,9 +212,7 @@ export class DbUtilsService {
 		}
 	}
 
-	async getActivity(
-		user: PrismaTypes.users,
-	): Promise<{ count: number; data: string[] }> {
+	getActivity(user: PrismaTypes.users): { count: number; data: string[] } {
 		if (!user.activity) {
 			return {
 				count: 0,

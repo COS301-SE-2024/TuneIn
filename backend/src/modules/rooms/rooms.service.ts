@@ -985,16 +985,9 @@ export class RoomsService {
 						data: childRoom1Songs,
 					});
 				}
-				const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
+				const [parentRoomDto]: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
 					roomID,
 				]);
-				if (rooms.length === 0) {
-					throw new HttpException(
-						"Failed to create child rooms",
-						HttpStatus.INTERNAL_SERVER_ERROR,
-					);
-				}
-				const parentRoomDto: RoomDto = rooms[0];
 				parentRoomDto.childrenRoomIDs = [
 					childRoom0.room_id,
 					childRoom1.room_id,

@@ -94,7 +94,7 @@ export class UsersService {
 	}
 
 	async getProfile(userID: string): Promise<UserDto> {
-		const user = await this.dtogen.generateUserDto(userID);
+		const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([userID]);
 		return user;
 	}
 
@@ -167,10 +167,7 @@ export class UsersService {
 			data: updatedUser,
 		});
 
-		const u = await this.dtogen.generateUserDto(userId);
-		if (!u) {
-			throw new Error("Failed to generate user profile");
-		}
+		const [u]: UserDto = await this.dtogen.generateMultipleUserDto([userId]);
 		return u;
 	}
 
@@ -355,10 +352,8 @@ export class UsersService {
 		if (!userData) {
 			throw new Error("User not found");
 		} else {
-			const user = await this.dtogen.generateUserDto(userData.user_id);
-			if (user) {
-				return user;
-			}
+			const [user]: UserDto = await this.dtogen.generateMultipleUserDto([userData.user_id]);
+			return user;
 		}
 
 		return new UserDto();
@@ -512,11 +507,6 @@ export class UsersService {
 
 		const ids: string[] = rooms.map((room) => room.room_id);
 		const r = await this.dtogen.generateMultipleRoomDto(ids);
-		if (!r || r === null) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for user rooms (getUserRooms). Received null.",
-			);
-		}
 		return r;
 	}
 
@@ -870,12 +860,7 @@ export class UsersService {
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
-		if (!rooms) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
-			);
-		}
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
 		return rooms;
 	}
 
@@ -891,12 +876,7 @@ export class UsersService {
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs);
-		if (!rooms) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
-			);
-		}
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
 		return rooms;
 	}
 
@@ -1165,15 +1145,6 @@ export class UsersService {
 
 	async getFriendRequests(userID: string): Promise<UserDto[]> {
 		//get all friend requests for the user
-		console.log("Getting friend requests for user " + userID);
-
-		/*
-			DONT IGNORE THIS
-
-			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
-			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
-		*/
-
 		const friendRequests: PrismaTypes.friends[] =
 			await this.dbUtils.getFriendRequests(userID);
 		if (friendRequests.length === 0) {
@@ -1412,7 +1383,7 @@ export class UsersService {
 		userID: string,
 		min: Date,
 	): Promise<DirectMessageDto[]> {
-		const self: UserDto = await this.dtogen.generateUserDto(userID);
+		const [self]: UserDto[] = await this.dtogen.generateMultipleUserDto([userID]);
 		const dms: ({
 			message: PrismaTypes.message;
 		} & PrismaTypes.private_message)[] =
@@ -1445,8 +1416,8 @@ export class UsersService {
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
 			if (dm && dm !== null) {
-				const sender: UserDto = await this.dtogen.generateUserDto(
-					dm.message.sender,
+				const [sender]: UserDto[] = await this.dtogen.generateMultipleUserDto(
+					[dm.message.sender],
 				);
 				const index: number = await this.dbUtils.getDMIndex(
 					userID,

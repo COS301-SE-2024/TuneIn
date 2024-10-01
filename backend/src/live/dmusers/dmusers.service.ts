@@ -46,7 +46,7 @@ export class DmUsersService {
 			return;
 		}
 
-		const user: UserDto = await this.dtogen.generateUserDto(userId);
+		const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([userId]);
 
 		this.connectedUsers.set(userId, {
 			user: user,
@@ -192,8 +192,8 @@ export class DmUsersService {
 			this.disconnectChat(socketID);
 		}
 
-		const participant: UserDto = await this.dtogen.generateUserDto(
-			participantId,
+		const [participant]: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			[participantId],
 		);
 
 		const chatIDs: string[] = await this.usersService.generateChatHash(

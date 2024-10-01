@@ -21,123 +21,6 @@ export class DtoGenService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async generateUserDto(
-		userID: string,
-		fully_qualify = true,
-	): Promise<UserDto> {
-		//check if userID exists
-		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth([userID]);
-
-		if (users.length === 0) {
-			throw new Error("User with id " + userID + " does not exist");
-		}
-		const user: UserWithAuth = users[0];
-
-		//get user info
-		const result: UserDto = await this.generateBriefUserDto(user);
-		result.links = await this.dbUtils.getLinks(user);
-		const fav_genres = await this.prisma.favorite_genres.findMany({
-			where: { user_id: userID },
-			include: { genre: true },
-		});
-
-		const fav_songs = await this.prisma.favorite_songs.findMany({
-			where: { user_id: userID },
-			include: { song: true },
-		});
-
-		result.fav_genres = {
-			count: fav_genres.length,
-			data: fav_genres
-				.map((genre) => genre.genre?.genre)
-				.filter((name): name is string => name !== null),
-		};
-
-		result.fav_songs = {
-			count: fav_songs.length,
-			data: fav_songs.map((song) => ({
-				songID: song.song.song_id,
-				title: song.song.name,
-				artists: song.song.artists,
-				cover: song.song.artwork_url as string,
-				spotify_id: song.song.spotify_id,
-				duration: song.song.duration as number,
-			})),
-		};
-		result.hasSpotifyAccount = await this.prisma.authentication
-			.findFirst({
-				where: { user_id: userID },
-			})
-			.then((query) => {
-				return query !== null;
-			});
-
-		if (fully_qualify) {
-			const recent_rooms = await this.dbUtils.getActivity(user);
-			result.recent_rooms = {
-				count: recent_rooms.count,
-				data: recent_rooms.data,
-			};
-
-			const bookmarkedRooms = await this.prisma.room.findMany({
-				where: {
-					bookmark: {
-						some: {
-							user_id: userID,
-						},
-					},
-				},
-			});
-			result.fav_rooms = {
-				count: bookmarkedRooms.length,
-				data: bookmarkedRooms.map((r) => r.room_id),
-			};
-		}
-
-		if (fully_qualify) {
-			const followData: {
-				following: UserWithAuth[];
-				followers: UserWithAuth[];
-			} = await this.dbUtils.getUserFollowersAndFollowing(userID);
-
-			for (let i = 0; i < followData.following.length; i++) {
-				const f = followData.following[i];
-				const u: UserDto = await this.generateBriefUserDto(f);
-				result.following.data.push(u);
-			}
-			result.following.count = followData.following.length;
-
-			for (let i = 0; i < followData.followers.length; i++) {
-				const f = followData.followers[i];
-				const u: UserDto = await this.generateBriefUserDto(f);
-				result.followers.data.push(u);
-			}
-			result.followers.count = followData.followers.length;
-		} else {
-			const followData: {
-				following: number;
-				followers: number;
-			} = await this.dbUtils.getUserFollowersAndFollowingCount(user.user_id);
-
-			result.following.count = followData.following;
-			result.followers.count = followData.followers;
-		}
-
-		const currentRoom: PrismaTypes.room[] = await this.prisma.room.findMany({
-			where: {
-				participate: {
-					some: {
-						user_id: userID,
-					},
-				},
-			},
-		});
-		if (currentRoom.length > 0) {
-			result.current_room_id = currentRoom[0].room_id;
-		}
-		return result;
-	}
-
 	generateBriefUserDto(user: UserWithAuth): UserDto {
 		return {
 			profile_name: user.full_name || "",
@@ -407,7 +290,9 @@ export class DtoGenService {
 			);
 		}
 
-		const sender: UserDto = await this.generateUserDto(message.sender);
+		const [sender]: UserDto[] = await this.generateMultipleUserDto([
+			message.sender,
+		]);
 
 		const result: LiveChatMessageDto = {
 			messageID: messageID,
@@ -426,12 +311,11 @@ export class DtoGenService {
 		const senderIDs: string[] = messages.map((m) => m.sender);
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
 		const senders: Map<string, UserDto> = new Map<string, UserDto>();
+		const sendUsers: UserDto[] = await this.generateMultipleUserDto(
+			uniqueSenderIDs,
+		);
 		for (let i = 0; i < uniqueSenderIDs.length; i++) {
-			const id = uniqueSenderIDs[i];
-			if (id) {
-				const sender: UserDto = await this.generateUserDto(id);
-				senders.set(id, sender);
-			}
+			senders.set(uniqueSenderIDs[i], sendUsers[i]);
 		}
 
 		const roomIDs = await this.prisma.room_message.findMany({
@@ -504,8 +388,7 @@ export class DtoGenService {
 			);
 		}
 
-		const sender: UserDto = await this.generateUserDto(dm.message.sender);
-		const recipient: UserDto = await this.generateUserDto(dm.recipient);
+		const [sender, recipient]: UserDto[] = await this.generateMultipleUserDto([dm.message.sender, dm.recipient]);
 		const index: number = await this.dbUtils.getDMIndex(
 			sender.userID,
 			recipient.userID,

@@ -1188,10 +1188,9 @@ export class RoomQueueService {
 	}
 
 	async createRoomQueue(roomID: string): Promise<void> {
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
+		const [room]: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
 			roomID,
 		]);
-		const room: RoomDto = rooms[0];
 		if (room.spotifyPlaylistID === "") {
 			const playlist: Spotify.Playlist<Spotify.TrackItem> =
 				await this.spotify.getRoomPlaylist(room);
