@@ -173,11 +173,14 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
+	const [friendRooms, setFriendRooms] = useState<Room[]>([]);
+	const [followingRooms, setFollowingRooms] = useState<Room[]>([]);
 
 	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		if (storedToken) {
+			console.log("Loading data...");
 			const recentRooms = await fetchRooms(storedToken, "/recent");
 			const formattedRecentRooms = formatRoomData(recentRooms);
 
@@ -187,9 +190,17 @@ const Home: React.FC = () => {
 			const myRoomsData = await fetchRooms(storedToken);
 			const formattedMyRooms = formatRoomData(myRoomsData, true);
 
+			const friendRoomsData = await fetchRooms(storedToken, "/friends");
+			const formattedFriendRooms = formatRoomData(friendRoomsData);
+
+			const followingRoomsData = await fetchRooms(storedToken, "/following");
+			const formattedFollowingRooms = formatRoomData(followingRoomsData);
+
 			setMyRooms(formattedMyRooms);
 			setMyPicks(formattedPicksForYouRooms);
 			setMyRecents(formattedRecentRooms);
+			setFriendRooms(formattedFriendRooms);
+			setFollowingRooms(formattedFollowingRooms);
 
 			if (!userData) {
 				const userInfo = await fetchProfileInfo(storedToken);
@@ -205,14 +216,16 @@ const Home: React.FC = () => {
 					}))
 				: [];
 			setFriends(formattedFriends);
+			console.log("Data loaded");
 		}
 		setLoading(false);
 	}, [setUserData, userData, ProfileIMG]);
 
 	useEffect(() => {
-		if (isFocused) {
-			refreshData(); // Reload data immediately when the page is focused
-		}
+		// if (isFocused) {
+		// 	refreshData(); // Reload data immediately when the page is focused
+		// }
+		refreshData();
 	}, [isFocused, refreshData]);
 
 	const [refreshing] = useState(false);
@@ -322,6 +335,40 @@ const Home: React.FC = () => {
 										</TouchableOpacity>
 
 										<AppCarousel data={myRecents} renderItem={renderItem} />
+									</>
+								)}
+								{followingRooms.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(
+													followingRooms,
+													"From People You Follow",
+												)
+											}
+										>
+											<Text style={styles.sectionTitle}>
+												From People You Follow
+											</Text>
+										</TouchableOpacity>
+										<AppCarousel
+											data={followingRooms}
+											renderItem={renderItem}
+										/>
+									</>
+								)}
+								{friendRooms.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(friendRooms, "More From Friends")
+											}
+										>
+											<Text style={styles.sectionTitle}>More From Friends</Text>
+										</TouchableOpacity>
+										<AppCarousel data={friendRooms} renderItem={renderItem} />
 									</>
 								)}
 								<TouchableOpacity
