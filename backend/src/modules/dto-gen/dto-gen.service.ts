@@ -114,13 +114,13 @@ export class DtoGenService {
 					data: recent_rooms.data,
 				};
 
-				const [currentRoom, bookmarkedRooms]: Prisma.room[][] =
+				const [currentRoom, bookmarkedRooms]: PrismaTypes.room[][] =
 					await this.prisma.$transaction([
 						this.prisma.room.findMany({
 							where: {
 								participate: {
 									some: {
-										user_id: user.user_id,
+										user_id: u.user_id,
 									},
 								},
 							},
@@ -235,37 +235,35 @@ export class DtoGenService {
 		const result: RoomDto[] = [];
 		for (let i = 0; i < rooms.length; i++) {
 			const r = rooms[i];
-			if (r && r !== null) {
-				const u = userDtos.find((u) => u.userID === r.room_creator);
-				if (!u || u === null) {
-					throw new Error(
-						"Weird error. Got users from Rooms table but user (" +
-							r.room_creator +
-							") not found in Users table",
-					);
-				}
-				const childrenRooms = r.child_room_child_room_parent_room_idToroom;
-				const room: RoomDto = {
-					creator: u || new UserDto(),
-					roomID: r.room_id,
-					spotifyPlaylistID: r.playlist_id || "",
-					participant_count: r.participate.length,
-					room_name: r.name,
-					description: r.description || "",
-					is_temporary: r.is_temporary || false,
-					is_private: r.private_room !== null,
-					is_scheduled: r.scheduled_room !== null,
-					start_date: new Date(),
-					end_date: new Date(),
-					language: r.room_language || "",
-					has_explicit_content: r.explicit || false,
-					has_nsfw_content: r.nsfw || false,
-					room_image: r.playlist_photo || "",
-					tags: r.tags || [],
-					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
-				};
-				result.push(room);
+			const u = userDtos.find((u) => u.userID === r.room_creator);
+			if (!u) {
+				throw new Error(
+					"Weird error. Got users from Rooms table but user (" +
+						r.room_creator +
+						") not found in Users table",
+				);
 			}
+			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const room: RoomDto = {
+				creator: u || new UserDto(),
+				roomID: r.room_id,
+				spotifyPlaylistID: r.playlist_id || "",
+				participant_count: r.participate.length,
+				room_name: r.name,
+				description: r.description || "",
+				is_temporary: r.is_temporary || false,
+				is_private: r.private_room !== null,
+				is_scheduled: r.scheduled_room !== null,
+				start_date: new Date(),
+				end_date: new Date(),
+				language: r.room_language || "",
+				has_explicit_content: r.explicit || false,
+				has_nsfw_content: r.nsfw || false,
+				room_image: r.playlist_photo || "",
+				tags: r.tags || [],
+				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
+			};
+			result.push(room);
 		}
 		return result;
 	}
@@ -326,18 +324,12 @@ export class DtoGenService {
 			},
 		});
 
-		if (!roomIDs || roomIDs === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch room IDs. DTOGenService.generateMultipleLiveChatMessageDto():ERROR01",
-			);
-		}
-
 		const result: LiveChatMessageDto[] = [];
 		for (let i = 0; i < messages.length; i++) {
 			const m = messages[i];
 			if (m && m !== null) {
 				const s: UserDto | undefined = senders.get(m.sender);
-				if (!s || s === null) {
+				if (!s) {
 					throw new Error(
 						"Weird error. Got messages from Messages table but user (" +
 							m.sender +
@@ -346,7 +338,7 @@ export class DtoGenService {
 				}
 
 				const roomMessage = roomIDs.find((r) => r.message_id === m.message_id);
-				if (!roomMessage || roomMessage === null) {
+				if (!roomMessage) {
 					throw new Error(
 						"Weird error. Got messages from Messages table but message (" +
 							m.message_id +
@@ -380,7 +372,7 @@ export class DtoGenService {
 		});
 		console.log("dm: " + JSON.stringify(dm));
 
-		if (!dm || dm === null) {
+		if (dm === null) {
 			throw new Error(
 				"Message with id " +
 					pmID +
@@ -428,16 +420,6 @@ export class DtoGenService {
 					if (users.length !== 2) {
 						throw new Error(
 							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
-						);
-					}
-					if (
-						!users[0] ||
-						users[0] === null ||
-						!users[1] ||
-						users[1] === null
-					) {
-						throw new Error(
-							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
 						);
 					}
 					if (
@@ -547,32 +529,30 @@ export class DtoGenService {
 
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			if (dm && dm !== null) {
-				const sender: UserDto | undefined = users.find(
-					(u) => u.userID === dm.message.sender,
+			const sender: UserDto | undefined = users.find(
+				(u) => u.userID === dm.message.sender,
+			);
+			const recipient: UserDto | undefined = users.find(
+				(u) => u.userID === dm.recipient,
+			);
+			if (!sender || !recipient) {
+				throw new Error(
+					"Weird error. Got messages from DMs table but user not found in Users table",
 				);
-				const recipient: UserDto | undefined = users.find(
-					(u) => u.userID === dm.recipient,
-				);
-				if (!sender || sender === null || !recipient || recipient === null) {
-					throw new Error(
-						"Weird error. Got messages from DMs table but user not found in Users table",
-					);
-				}
-
-				const message: DirectMessageDto = {
-					index: i,
-					messageBody: dm.message.contents,
-					sender: sender,
-					recipient: recipient,
-					dateSent: dm.message.date_sent,
-					dateRead: new Date(0),
-					isRead: false,
-					pID: dm.p_message_id,
-					bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
-				};
-				result.push(message);
 			}
+
+			const message: DirectMessageDto = {
+				index: i,
+				messageBody: dm.message.contents,
+				sender: sender,
+				recipient: recipient,
+				dateSent: dm.message.date_sent,
+				dateRead: new Date(0),
+				isRead: false,
+				pID: dm.p_message_id,
+				bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
+			};
+			result.push(message);
 		}
 		return result;
 	}

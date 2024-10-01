@@ -47,17 +47,31 @@ paths:
         - bearer: []
   /users:
     get:
-      operationId: getProfile
-      summary: Get current user's profile info
-      description: Get the profile info of the currently authenticated user.
-      parameters: []
+      operationId: getUsers
+      summary: Get multiple users' profile info
+      description: Returns the profile info of multiple users as an array of UserDto.
+      parameters:
+        - name: q
+          required: true
+          in: query
+          description: An array of user IDs to get info for.
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
-          description: Successfully returned user profile info.
+          description: An array of UserDto representing the requested users.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserDto'
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Bad request. No users given.
+        '404':
+          description: No users found with the given IDs.
       tags:
         - users
       security:
@@ -2409,19 +2423,6 @@ components:
       required:
         - count
         - data
-    UserFriendship:
-      type: object
-      properties:
-        status:
-          type: boolean
-        accept_url:
-          type: string
-        reject_url:
-          type: string
-      required:
-        - status
-        - accept_url
-        - reject_url
     UserDto:
       type: object
       properties:
@@ -2472,12 +2473,6 @@ components:
           description: The user's recent rooms
           allOf:
             - $ref: '#/components/schemas/RoomsData'
-        friendship:
-          description: >-
-            The user's friendship status with the current user, or null if the
-            user is not friends with the current user
-          allOf:
-            - $ref: '#/components/schemas/UserFriendship'
         hasSpotifyAccount:
           type: boolean
         relationship:
@@ -2560,12 +2555,6 @@ components:
           description: The user's recent rooms
           allOf:
             - $ref: '#/components/schemas/RoomsData'
-        friendship:
-          description: >-
-            The user's friendship status with the current user, or null if the
-            user is not friends with the current user
-          allOf:
-            - $ref: '#/components/schemas/UserFriendship'
         hasSpotifyAccount:
           type: boolean
         relationship:

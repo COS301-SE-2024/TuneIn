@@ -102,7 +102,7 @@ export class UsersService {
 		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
-		if (!user || user === null) {
+		if (user === null) {
 			throw new HttpException("Username not found", HttpStatus.NOT_FOUND);
 		}
 		throw new HttpException("Username found", HttpStatus.OK);
@@ -569,11 +569,6 @@ export class UsersService {
 			const privRoomResult = await this.prisma.private_room.create({
 				data: privRoom,
 			});
-			if (!privRoomResult || privRoomResult === null) {
-				throw new Error(
-					"An unknown error occurred while creating private room. Received null.",
-				);
-			}
 			r.private_room = privRoomResult;
 		} else {
 			const pubRoom: Prisma.public_roomCreateInput = {
@@ -586,11 +581,6 @@ export class UsersService {
 			const pubRoomResult = await this.prisma.public_room.create({
 				data: pubRoom,
 			});
-			if (!pubRoomResult || pubRoomResult === null) {
-				throw new Error(
-					"An unknown error occurred while creating public room. Received null.",
-				);
-			}
 			r.public_room = pubRoomResult;
 		}
 
@@ -817,7 +807,7 @@ export class UsersService {
 		}
 		const bookmarks: PrismaTypes.bookmark[] =
 			await this.prisma.bookmark.findMany({
-				where: { user_id: userID },
+				where: { user_id: u.user_id },
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
@@ -896,20 +886,12 @@ export class UsersService {
 				HttpStatus.BAD_REQUEST,
 			);
 		}
-		const result = await this.prisma.friends.create({
+		await this.prisma.friends.create({
 			data: {
 				friend1: userID,
 				friend2: potentialFriend.user_id,
 			},
 		});
-
-		if (!result || result === null) {
-			throw new Error(
-				"Failed to befriend user (@" +
-					newPotentialFriendUsername +
-					"). Database error.",
-			);
-		}
 		return true;
 	}
 
@@ -958,7 +940,7 @@ export class UsersService {
 		}
 
 		//delete the friendship
-		const result = await this.prisma.friends.deleteMany({
+		await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
 					{ friend1: userID, friend2: friend.user_id },
@@ -966,13 +948,6 @@ export class UsersService {
 				],
 			},
 		});
-
-		if (!result || result === null) {
-			throw new Error(
-				"Failed to unfriend user (" + friendUsername + "). Database error.",
-			);
-		}
-
 		return true;
 	}
 
@@ -1316,12 +1291,6 @@ export class UsersService {
 				},
 			});
 
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
-		}
-
 		//count number of unique senders
 		const senders: string[] = [];
 		for (let i = 0; i < dms.length; i++) {
@@ -1358,12 +1327,6 @@ export class UsersService {
 					message: true,
 				},
 			});
-
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
-		}
 
 		//sort messages by date
 		dms.sort((a, b) => {
@@ -1454,27 +1417,24 @@ export class UsersService {
 		//edit a message
 		try {
 			const updatedMessage:
-				| ({
+				| {
 						message: PrismaTypes.message;
-				  } & PrismaTypes.private_message)
-				| null = await this.prisma.private_message.update({
-				where: {
-					p_message_id: message.pID,
-				},
-				data: {
-					message: {
-						update: {
-							contents: message.messageBody,
+				  } & PrismaTypes.private_message =
+				await this.prisma.private_message.update({
+					where: {
+						p_message_id: message.pID,
+					},
+					data: {
+						message: {
+							update: {
+								contents: message.messageBody,
+							},
 						},
 					},
-				},
-				include: {
-					message: true,
-				},
-			});
-			if (!updatedMessage || updatedMessage === null) {
-				throw new Error("Failed to update message");
-			}
+					include: {
+						message: true,
+					},
+				});
 			return await this.dtogen.generateDirectMessageDto(
 				updatedMessage.p_message_id,
 			);
@@ -1518,12 +1478,6 @@ export class UsersService {
 					message: true,
 				},
 			});
-
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
-		}
 
 		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
 		for (let i = 0; i < dms.length; i++) {

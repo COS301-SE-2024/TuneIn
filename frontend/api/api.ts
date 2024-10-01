@@ -1137,12 +1137,6 @@ export interface UpdateUserDto {
      */
     'recent_rooms'?: RoomsData;
     /**
-     * The user\'s friendship status with the current user, or null if the user is not friends with the current user
-     * @type {UserFriendship}
-     * @memberof UpdateUserDto
-     */
-    'friendship'?: UserFriendship;
-    /**
      * 
      * @type {boolean}
      * @memberof UpdateUserDto
@@ -1259,12 +1253,6 @@ export interface UserDto {
      */
     'recent_rooms': RoomsData;
     /**
-     * The user\'s friendship status with the current user, or null if the user is not friends with the current user
-     * @type {UserFriendship}
-     * @memberof UserDto
-     */
-    'friendship'?: UserFriendship;
-    /**
      * 
      * @type {boolean}
      * @memberof UserDto
@@ -1276,31 +1264,6 @@ export interface UserDto {
      * @memberof UserDto
      */
     'relationship'?: string;
-}
-/**
- * 
- * @export
- * @interface UserFriendship
- */
-export interface UserFriendship {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof UserFriendship
-     */
-    'status': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserFriendship
-     */
-    'accept_url': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserFriendship
-     */
-    'reject_url': string;
 }
 /**
  * 
@@ -6166,40 +6129,6 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Get the profile info of the currently authenticated user.
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getProfile: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Get the profile info of the user with the given username.
          * @summary Get user profile info by username
          * @param {string} username The username of the user to fetch profile info for.
@@ -6399,6 +6328,47 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             // authentication bearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the profile info of multiple users as an array of UserDto.
+         * @summary Get multiple users\' profile info
+         * @param {Array<string>} q An array of user IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUsers: async (q: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('getUsers', 'q', q)
+            const localVarPath = `/users`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (q) {
+                localVarQueryParameter['q'] = q;
+            }
 
 
     
@@ -7141,18 +7111,6 @@ export const UsersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get the profile info of the currently authenticated user.
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getProfile(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getProfile(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UsersApi.getProfile']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Get the profile info of the user with the given username.
          * @summary Get user profile info by username
          * @param {string} username The username of the user to fetch profile info for.
@@ -7224,6 +7182,19 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getUserRooms(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UsersApi.getUserRooms']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Returns the profile info of multiple users as an array of UserDto.
+         * @summary Get multiple users\' profile info
+         * @param {Array<string>} q An array of user IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUsers(q: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserDto>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUsers(q, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.getUsers']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -7582,15 +7553,6 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getPendingRequests_2(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get the profile info of the currently authenticated user.
-         * @summary Get current user\'s profile info
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getProfile(options?: RawAxiosRequestConfig): AxiosPromise<UserDto> {
-            return localVarFp.getProfile(options).then((request) => request(axios, basePath));
-        },
-        /**
          * Get the profile info of the user with the given username.
          * @summary Get user profile info by username
          * @param {string} username The username of the user to fetch profile info for.
@@ -7645,6 +7607,16 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         getUserRooms(options?: RawAxiosRequestConfig): AxiosPromise<Array<RoomDto>> {
             return localVarFp.getUserRooms(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns the profile info of multiple users as an array of UserDto.
+         * @summary Get multiple users\' profile info
+         * @param {Array<string>} q An array of user IDs to get info for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUsers(q: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<UserDto>> {
+            return localVarFp.getUsers(q, options).then((request) => request(axios, basePath));
         },
         /**
          * Check if the given username is already taken.
@@ -8001,17 +7973,6 @@ export class UsersApi extends BaseAPI {
     }
 
     /**
-     * Get the profile info of the currently authenticated user.
-     * @summary Get current user\'s profile info
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UsersApi
-     */
-    public getProfile(options?: RawAxiosRequestConfig) {
-        return UsersApiFp(this.configuration).getProfile(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Get the profile info of the user with the given username.
      * @summary Get user profile info by username
      * @param {string} username The username of the user to fetch profile info for.
@@ -8077,6 +8038,18 @@ export class UsersApi extends BaseAPI {
      */
     public getUserRooms(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).getUserRooms(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns the profile info of multiple users as an array of UserDto.
+     * @summary Get multiple users\' profile info
+     * @param {Array<string>} q An array of user IDs to get info for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public getUsers(q: Array<string>, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).getUsers(q, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

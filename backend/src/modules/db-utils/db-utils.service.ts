@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import Prisma from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
@@ -283,7 +283,7 @@ export class DbUtilsService {
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room === null) {
+		if (room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
 		}
 
@@ -292,7 +292,7 @@ export class DbUtilsService {
 				where: { room_id: roomID },
 			});
 
-		if (!publicRoom || publicRoom === null) {
+		if (publicRoom === null) {
 			return false;
 		}
 
@@ -303,7 +303,7 @@ export class DbUtilsService {
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room === null) {
+		if (room === null) {
 			throw new Error("Room not found. Probably doesn't exist.");
 		}
 
@@ -312,7 +312,7 @@ export class DbUtilsService {
 				where: { room_id: roomID },
 			});
 
-		if (!privateRoom || privateRoom === null) {
+		if (privateRoom === null) {
 			return false;
 		}
 
@@ -323,7 +323,7 @@ export class DbUtilsService {
 		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
-		if (!user || user === null) {
+		if (user === null) {
 			return false;
 		}
 		return true;
@@ -347,7 +347,7 @@ export class DbUtilsService {
 		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room === null) {
+		if (room === null) {
 			return false;
 		}
 		return true;
@@ -367,10 +367,6 @@ export class DbUtilsService {
 				followee: accountFollowedId,
 			},
 		});
-		console.log("Follow: ", follow);
-		if (!follow || follow === null) {
-			return false;
-		}
 		if (follow.length === 0) {
 			return false;
 		}
@@ -532,12 +528,6 @@ export class DbUtilsService {
 				},
 			});
 
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DbUtilsService.getDMIndex():ERROR01",
-			);
-		}
-
 		const index = dms.findIndex(
 			(dm) =>
 				dm.p_message_id === messageID || dm.message.message_id === messageID,
@@ -574,11 +564,6 @@ export class DbUtilsService {
 				],
 			},
 		});
-		console.log("Follow1: ", follow1);
-
-		if (!follow1 || follow1 === null) {
-			return false;
-		}
 		if (follow1.length === 0 || follow1.length === 1) {
 			return false;
 		}
@@ -633,10 +618,6 @@ export class DbUtilsService {
 		const friends: PrismaTypes.friends[] = await this.prisma.friends.findMany({
 			where: getWhere(isPending),
 		});
-		console.log("Friends: ", friends);
-		if (!friends || friends === null) {
-			return false;
-		}
 		if (friends.length === 0) {
 			return false;
 		}
@@ -712,10 +693,6 @@ export class DbUtilsService {
 				],
 			},
 		});
-
-		if (!friends1 || friends1 === null || !friends2 || friends2 === null) {
-			throw new Error("No friends found.");
-		}
 		const friends1IDs: string[] = [];
 		const friends2IDs: string[] = [];
 		friends1.forEach((f) => {
@@ -743,10 +720,6 @@ export class DbUtilsService {
 		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
 			where: { user_id: { in: mutualFriends } },
 		});
-
-		if (!users || users === null) {
-			throw new Error("No mutual friends found.");
-		}
 		return users;
 	}
 }

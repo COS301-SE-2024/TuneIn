@@ -465,19 +465,9 @@ export class RoomsService {
 	}
 
 	async createMessage(message: Prisma.messageCreateInput): Promise<string> {
-		const newMessage: PrismaTypes.message | null =
-			await this.prisma.message.create({
-				data: message,
-			});
-
-		if (!newMessage || newMessage === null) {
-			throw new Error(
-				"Failed to create message with id '" +
-					message.message_id +
-					"'. Unknown database error",
-			);
-		}
-
+		const newMessage: PrismaTypes.message = await this.prisma.message.create({
+			data: message,
+		});
 		return newMessage.message_id;
 	}
 
@@ -501,7 +491,7 @@ export class RoomsService {
 			},
 		);
 
-		if (!sender || sender === null) {
+		if (sender === null) {
 			throw new Error(
 				"Failed to get user with id '" +
 					u +
@@ -530,7 +520,7 @@ export class RoomsService {
 				},
 			});
 
-		if (!roomMessage || roomMessage === null) {
+		if (roomMessage === null) {
 			throw new Error(
 				"Failed to create room message for room with id '" +
 					message.roomID +
@@ -580,7 +570,7 @@ export class RoomsService {
 			await this.prisma.bookmark.create({
 				data: b,
 			});
-		if (!newBookmark || newBookmark === null) {
+		if (newBookmark === null) {
 			throw new Error(
 				"Failed to bookmark room. Database returned null after insert.",
 			);
@@ -619,12 +609,6 @@ export class RoomsService {
 		const delBookmark: Prisma.BatchPayload =
 			await this.prisma.bookmark.deleteMany(b);
 		console.log(delBookmark);
-
-		if (!delBookmark || delBookmark === null) {
-			throw new Error(
-				"Failed to unbookmark room. Database returned null after delete.",
-			);
-		}
 	}
 
 	async saveReaction(
@@ -648,7 +632,7 @@ export class RoomsService {
 					reaction: emojiReactionDto.body,
 				},
 			});
-		if (!newReaction || newReaction === null) {
+		if (newReaction === null) {
 			throw new Error(
 				"Failed to save reaction. Database returned null after insert.",
 			);
