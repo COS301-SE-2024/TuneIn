@@ -233,6 +233,58 @@ describe("UsersService", () => {
 			).rejects.toThrow("Failed to follow user with id: (followeeID)");
 		});
 	});
+	describe("getRoomsFromFriends", () => {
+		it("should return rooms from all friends", async () => {
+			// Arrange
+			const userID = "user123";
+			const friends = [{ user_id: "friend1" }, { user_id: "friend2" }];
+			const friendRooms1 = [{ room_id: "room1" }];
+			const friendRooms2 = [{ room_id: "room2" }];
+
+			jest
+				.spyOn(dbUtilsService, "getUserFriends")
+				.mockResolvedValue(friends as unknown as PrismaTypes.users[]);
+			jest
+				.spyOn(usersService, "getUserRooms")
+				.mockResolvedValueOnce(friendRooms1 as unknown as RoomDto[])
+				.mockResolvedValueOnce(friendRooms2 as unknown as RoomDto[]);
+
+			// Act
+			const result = await usersService.getRoomsFromFriends(userID);
+
+			// Assert
+			expect(result).toEqual([...friendRooms1, ...friendRooms2]);
+		});
+
+		it("should throw an error if user has no friends", async () => {
+			// Arrange
+			const userID = "user123";
+
+			jest.spyOn(dbUtilsService, "getUserFriends").mockResolvedValue(null);
+
+			// Act & Assert
+			await expect(usersService.getRoomsFromFriends(userID)).rejects.toThrow(
+				"User has no friends",
+			);
+		});
+
+		it("should handle friends with no rooms", async () => {
+			// Arrange
+			const userID = "user123";
+			const friends = [{ user_id: "friend1" }];
+
+			jest
+				.spyOn(dbUtilsService, "getUserFriends")
+				.mockResolvedValue(friends as unknown as PrismaTypes.users[]);
+			jest.spyOn(usersService, "getUserRooms").mockResolvedValue([]);
+
+			// Act
+			const result = await usersService.getRoomsFromFriends(userID);
+
+			// Assert
+			expect(result).toEqual([]);
+		});
+	});
 	describe("unfollowUser", () => {
 		it("should be defined", () => {
 			expect(usersService).toBeDefined();
