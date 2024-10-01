@@ -353,6 +353,25 @@ export class UsersController {
 		return await this.usersService.getRecommendedRooms(userInfo.id);
 	}
 
+	// create an endpoint to fetch new rooms from friends
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@Get("rooms/friends")
+	@ApiTags("users")
+	@ApiOperation({ summary: "Get rooms from friends" })
+	@ApiOkResponse({
+		description: "Rooms from friends retrieved successfully",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Error getting rooms from friends.",
+	})
+	async getRoomsFromFriends(@Request() req: Request): Promise<RoomDto[]> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRoomsFromFriends(userInfo.id);
+	}
+
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
 	@UseGuards(JwtAuthGuard)
