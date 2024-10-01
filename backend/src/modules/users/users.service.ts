@@ -162,7 +162,7 @@ export class UsersService {
 			data: updatedUser,
 		});
 
-		const [u]: UserDto = await this.dtogen.generateMultipleUserDto([userId]);
+		const [u]: UserDto[] = await this.dtogen.generateMultipleUserDto([userId]);
 		return u;
 	}
 
@@ -345,9 +345,14 @@ export class UsersService {
 		});
 
 		if (!userData) {
-			throw new Error("User not found");
+			throw new HttpException(
+				"User with username: (" + username + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		} else {
-			const [user]: UserDto = await this.dtogen.generateMultipleUserDto([userData.user_id]);
+			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+				userData.user_id,
+			]);
 			return user;
 		}
 	}
@@ -616,19 +621,17 @@ export class UsersService {
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
 		*/
 		// get the recent rooms from the user's activity field
-		const userID = (await this.getProfile(username)).userID;
-
-		const u = await this.prisma.users.findUnique({
-			where: { user_id: userID },
+		const u: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
 		});
 
-		if (!u || u === null) {
-			throw new Error("User does not exist");
+		if (u === null) {
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
 		}
 
 		const recentRooms = await this.prisma.user_activity.findMany({
 			where: {
-				user_id: userID, // Filter by specific user ID
+				user_id: u.user_id, // Filter by specific user ID
 			},
 			distinct: ["room_id"], // Ensure unique room IDs
 			orderBy: {
@@ -803,10 +806,14 @@ export class UsersService {
 	}
 
 	async getBookmarks(username: string): Promise<RoomDto[]> {
-		const userID = (await this.getProfile(username)).userID;
-
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		const u: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+		if (u === null) {
+			throw new HttpException(
+				"User with username: (" + username + ") does not exist",
+				HttpStatus.NOT_FOUND,
+			);
 		}
 		const bookmarks: PrismaTypes.bookmark[] =
 			await this.prisma.bookmark.findMany({
@@ -1176,45 +1183,40 @@ export class UsersService {
 		return true;
 	}
 
-	async getCurrentRoomDto(username: string): Promise<RoomDto | undefined> {
-		let userID = "";
-		// regex to check if username is infact, userID
-		// const isUserID = /^[0-9a-fA-F]{36}$/;
-		// user id is 36 characters long, is alphanumeric and has no spaces. also contains hyphens
-		// example: 711c5238-3081-7008-9055-510a6bebc7e9
-		const isUserID =
-			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-		console.log("username: ", username, username.length);
-		if (isUserID.test(username)) {
-			userID = username;
-		} else {
-			userID = (await this.getProfile(username)).userID;
+	async getCurrentRoom(username: string): Promise<RoomDto | undefined> {
+		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
+			where: { username: username },
+		});
+		if (user === null) {
+			throw new HttpException(
+				`User with username ${username} does not exist`,
+				HttpStatus.NOT_FOUND,
+			);
 		}
-		// const userID: string = username;
 
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
-		}
-		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
-			await this.prisma.participate.findFirst({
-				where: {
-					user_id: userID,
+		const room: FullyQualifiedRoom | null = await this.prisma.room.findFirst({
+			where: {
+				participate: {
+					some: {
+						user_id: user.user_id,
+					},
 				},
-				include: {
-					room: true,
-				},
-			});
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
 
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
-			room.room.room_id,
-		]);
-		if (rooms.length === 0) {
-			return undefined;
-		}
-		return rooms[0];
+		const [result]: RoomDto[] =
+			await this.dtogen.generateMultipleRoomDtoFromRoom([room]);
+		return result;
 	}
 
 	async sendMessage(message: DirectMessageDto): Promise<DirectMessageDto> {
@@ -1263,12 +1265,28 @@ export class UsersService {
 		recipientUsername: string,
 	): Promise<DirectMessageDto[]> {
 		//get messages between two users
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
+			where: {
+				OR: [{ user_id: userID }, { username: recipientUsername }],
+			},
+		});
+		if (users.find((user) => user.user_id === userID) === undefined) {
+			throw new HttpException(
+				`User with ID: (${userID}) does not exist`,
+				HttpStatus.NOT_FOUND,
+			);
 		}
-		const recipientID = (await this.getProfile(recipientUsername))
-			.userID;
-		return await this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
+		const recipient = users.find((user) => user.username === recipientUsername);
+		if (!recipient) {
+			throw new HttpException(
+				`User with username ${recipientUsername} does not exist`,
+				HttpStatus.NOT_FOUND,
+			);
+		}
+		return await this.dtogen.getChatAsDirectMessageDto(
+			userID,
+			recipient.user_id,
+		);
 	}
 
 	async getUnreadMessages(
@@ -1321,7 +1339,9 @@ export class UsersService {
 		userID: string,
 		min: Date,
 	): Promise<DirectMessageDto[]> {
-		const [self]: UserDto[] = await this.dtogen.generateMultipleUserDto([userID]);
+		const [self]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+			userID,
+		]);
 		const dms: ({
 			message: PrismaTypes.message;
 		} & PrismaTypes.private_message)[] =
@@ -1354,9 +1374,9 @@ export class UsersService {
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
 			if (dm && dm !== null) {
-				const [sender]: UserDto[] = await this.dtogen.generateMultipleUserDto(
-					[dm.message.sender],
-				);
+				const [sender]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+					dm.message.sender,
+				]);
 				const index: number = await this.dbUtils.getDMIndex(
 					userID,
 					dm.message.sender,
@@ -1646,7 +1666,7 @@ export class UsersService {
 			end = new Date().getTime();
 			console.log("Time taken to calculate popularity: " + (end - start));
 			start = new Date().getTime();
-			const activity = await this.calculateActivity(user.user_id);
+			const activity = await this.calculateActivity(user);
 			end = new Date().getTime();
 			console.log("Time taken to calculate activity: " + (end - start));
 			start = new Date().getTime();
@@ -1715,22 +1735,22 @@ export class UsersService {
 		return popularity;
 	}
 
-	async calculateActivity(userID: string): Promise<number> {
-		const rooms: RoomDto[] = await this.getUserRooms(userID);
+	async calculateActivity(user: PrismaTypes.users): Promise<number> {
+		const rooms: RoomDto[] = await this.getUserRooms(user.user_id);
 
 		const friends: PrismaTypes.users[] = await this.dbUtils.getUserFriends(
-			userID,
+			user.user_id,
 		);
 
 		if (!friends) {
 			throw new Error("Failed to calculate activity (no friends)");
 		}
 
-		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
+		const bookmarks: RoomDto[] = await this.getBookmarks(user.username);
 		const date30DaysAgo: Date = new Date();
 		date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
 		const messages: PrismaTypes.message[] = await this.prisma.message.findMany({
-			where: { sender: userID, date_sent: { gte: date30DaysAgo } },
+			where: { sender: user.user_id, date_sent: { gte: date30DaysAgo } },
 		});
 		const roomMessages: PrismaTypes.room_message[] =
 			await this.prisma.room_message.findMany({

@@ -40,7 +40,9 @@ export class RoomUsersService {
 				}
 			}
 		} else {
-			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([userId]);
+			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+				userId,
+			]);
 
 			if (roomID && roomID !== undefined) {
 				if (!(await this.dbUtils.roomExists(roomID))) {

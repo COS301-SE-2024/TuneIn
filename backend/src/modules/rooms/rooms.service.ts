@@ -985,9 +985,8 @@ export class RoomsService {
 						data: childRoom1Songs,
 					});
 				}
-				const [parentRoomDto]: RoomDto[] = await this.dtogen.generateMultipleRoomDto([
-					roomID,
-				]);
+				const [parentRoomDto]: RoomDto[] =
+					await this.dtogen.generateMultipleRoomDto([roomID]);
 				parentRoomDto.childrenRoomIDs = [
 					childRoom0.room_id,
 					childRoom1.room_id,

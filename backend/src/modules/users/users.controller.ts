@@ -392,8 +392,9 @@ export class UsersController {
 	})
 	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		const result: RoomDto | undefined =
-			await this.usersService.getCurrentRoomDto(userInfo.id);
+		const result: RoomDto | undefined = await this.usersService.getCurrentRoom(
+			userInfo.username,
+		);
 		if (result === undefined) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
@@ -1026,8 +1027,9 @@ export class UsersController {
 	async getCurrentRoomByUserId(
 		@Param("username") username: string,
 	): Promise<RoomDto> {
-		const result: RoomDto | undefined =
-			await this.usersService.getCurrentRoomDto(username);
+		const result: RoomDto | undefined = await this.usersService.getCurrentRoom(
+			username,
+		);
 		if (result === undefined) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}

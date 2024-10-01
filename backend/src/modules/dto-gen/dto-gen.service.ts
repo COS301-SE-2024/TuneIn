@@ -388,7 +388,10 @@ export class DtoGenService {
 			);
 		}
 
-		const [sender, recipient]: UserDto[] = await this.generateMultipleUserDto([dm.message.sender, dm.recipient]);
+		const [sender, recipient]: UserDto[] = await this.generateMultipleUserDto([
+			dm.message.sender,
+			dm.recipient,
+		]);
 		const index: number = await this.dbUtils.getDMIndex(
 			sender.userID,
 			recipient.userID,
