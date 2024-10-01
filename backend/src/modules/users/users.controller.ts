@@ -93,7 +93,7 @@ export class UsersController {
 	})
 	getProfile(@Request() req: Request): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.usersService.getProfile(userInfo.id);
+		return this.usersService.getProfile(userInfo.username);
 	}
 
 	@ApiBearerAuth()
@@ -343,7 +343,7 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRoomsById(userInfo.id);
+		return await this.usersService.getRecentRooms(userInfo.username);
 	}
 
 	@ApiBearerAuth()
@@ -607,7 +607,7 @@ export class UsersController {
 	})
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarksById(userInfo.id);
+		return await this.usersService.getBookmarks(userInfo.username);
 	}
 
 	@ApiBearerAuth()
@@ -668,8 +668,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
-		console.log("called /users/:username");
-		return this.usersService.getProfileByUsername(username);
+		return this.usersService.getProfile(username);
 	}
 
 	@ApiBearerAuth()
@@ -942,7 +941,7 @@ export class UsersController {
 	async getBookmarksByUsername(
 		@Param("username") username: string,
 	): Promise<RoomDto[]> {
-		return await this.usersService.getBookmarksByUsername(username);
+		return await this.usersService.getBookmarks(username);
 	}
 
 	@ApiBearerAuth()
@@ -971,7 +970,7 @@ export class UsersController {
 	async getRecentRoomsByUsername(
 		@Param("username") username: string,
 	): Promise<RoomDto[]> {
-		return await this.usersService.getRecentRoomByUsername(username);
+		return await this.usersService.getRecentRooms(username);
 	}
 
 	@ApiBearerAuth()

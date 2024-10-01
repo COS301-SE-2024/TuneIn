@@ -93,11 +93,6 @@ export class UsersService {
 		});
 	}
 
-	async getProfile(userID: string): Promise<UserDto> {
-		const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([userID]);
-		return user;
-	}
-
 	async getUsers(userIDs: string[]): Promise<UserDto[]> {
 		const users: UserDto[] = await this.dtogen.generateMultipleUserDto(userIDs);
 		return users;
@@ -344,7 +339,7 @@ export class UsersService {
 		});
 	}
 
-	async getProfileByUsername(username: string): Promise<UserDto> {
+	async getProfile(username: string): Promise<UserDto> {
 		const userData = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
@@ -355,8 +350,6 @@ export class UsersService {
 			const [user]: UserDto = await this.dtogen.generateMultipleUserDto([userData.user_id]);
 			return user;
 		}
-
-		return new UserDto();
 	}
 
 	/*
@@ -617,54 +610,13 @@ export class UsersService {
 		return rooms[0];
 	}
 
-	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
+	async getRecentRooms(username: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
 		*/
 		// get the recent rooms from the user's activity field
-		const u = await this.prisma.users.findUnique({
-			where: { user_id: userID },
-		});
-
-		if (!u || u === null) {
-			throw new Error("User does not exist");
-		}
-
-		const recentRooms = await this.prisma.user_activity.findMany({
-			where: {
-				user_id: userID, // Filter by specific user ID
-			},
-			distinct: ["room_id"], // Ensure unique room IDs
-			orderBy: {
-				room_join_time: "desc", // Sort by most recent join time
-			},
-			select: {
-				room_id: true, // Only select the room ID
-			},
-		});
-
-		const recent_rooms =
-			(await this.dtogen.generateMultipleRoomDto(
-				recentRooms.map((room) => room.room_id),
-			)) || [];
-
-		return recent_rooms;
-		// } catch (e) {
-		// 	throw new Error(
-		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
-		// 			typeof activity["recent_rooms"],
-		// 	);
-		// }
-	}
-
-	async getRecentRoomByUsername(username: string): Promise<RoomDto[]> {
-		/*
-		activity field in users table is modelled as:
-		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
-		*/
-		// get the recent rooms from the user's activity field
-		const userID = (await this.getProfileByUsername(username)).userID;
+		const userID = (await this.getProfile(username)).userID;
 
 		const u = await this.prisma.users.findUnique({
 			where: { user_id: userID },
@@ -850,22 +802,8 @@ export class UsersService {
 		return result;
 	}
 
-	async getBookmarksById(userID: string): Promise<RoomDto[]> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		}
-		const bookmarks: PrismaTypes.bookmark[] =
-			await this.prisma.bookmark.findMany({
-				where: { user_id: userID },
-			});
-
-		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
-		return rooms;
-	}
-
-	async getBookmarksByUsername(username: string): Promise<RoomDto[]> {
-		const userID = (await this.getProfileByUsername(username)).userID;
+	async getBookmarks(username: string): Promise<RoomDto[]> {
+		const userID = (await this.getProfile(username)).userID;
 
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
@@ -1250,7 +1188,7 @@ export class UsersService {
 		if (isUserID.test(username)) {
 			userID = username;
 		} else {
-			userID = (await this.getProfileByUsername(username)).userID;
+			userID = (await this.getProfile(username)).userID;
 		}
 		// const userID: string = username;
 
@@ -1328,7 +1266,7 @@ export class UsersService {
 		if (!(await this.dbUtils.userExists(userID))) {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
-		const recipientID = (await this.getProfileByUsername(recipientUsername))
+		const recipientID = (await this.getProfile(recipientUsername))
 			.userID;
 		return await this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
 	}
