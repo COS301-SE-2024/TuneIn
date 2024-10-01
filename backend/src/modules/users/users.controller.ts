@@ -539,7 +539,7 @@ export class UsersController {
 	})
 	async getBlocked(@Request() req: Request): Promise<UserDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getFollowing(userInfo.id);
+		return await this.usersService.getBlockedUsers(userInfo.id);
 	}
 
 	@ApiBearerAuth()

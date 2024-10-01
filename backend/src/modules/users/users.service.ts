@@ -1685,6 +1685,9 @@ export class UsersService {
 			});
 		const ids: string[] = blockedUsers.map((blocked) => blocked.blockee);
 		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		for (const user of result) {
+			user.relationship = "blocked";
+		}
 		return result;
 	}
 
