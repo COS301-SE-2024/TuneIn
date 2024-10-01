@@ -4,7 +4,11 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
-import { DbUtilsService, FullyQualifiedRoom, UserWithAuth } from "../db-utils/db-utils.service";
+import {
+	DbUtilsService,
+	FullyQualifiedRoom,
+	UserWithAuth,
+} from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { DirectMessageDto } from "../users/dto/dm.dto";
 import validator from "validator";
@@ -92,8 +96,8 @@ export class DtoGenService {
 
 		if (fully_qualify) {
 			const followData: {
-				following: PrismaTypes.users[];
-				followers: PrismaTypes.users[];
+				following: UserWithAuth[];
+				followers: UserWithAuth[];
 			} = await this.dbUtils.getUserFollowersAndFollowing(userID);
 
 			for (let i = 0; i < followData.following.length; i++) {
@@ -119,25 +123,22 @@ export class DtoGenService {
 			result.followers.count = followData.followers;
 		}
 
-		const currentRoom: PrismaTypes.room | null =
-			await this.prisma.room.findUnique({
-				where: {
-					participate: {
-						some: {
-							user_id: userID,
-						},
+		const currentRoom: PrismaTypes.room[] = await this.prisma.room.findMany({
+			where: {
+				participate: {
+					some: {
+						user_id: userID,
 					},
 				},
-			});
-		if (currentRoom !== null) {
-			result.current_room_id = currentRoom.room_id;
+			},
+		});
+		if (currentRoom.length > 0) {
+			result.current_room_id = currentRoom[0].room_id;
 		}
 		return result;
 	}
 
-	generateBriefUserDto(
-		user: UserWithAuth
-	): UserDto {
+	generateBriefUserDto(user: UserWithAuth): UserDto {
 		return {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
@@ -310,51 +311,60 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
-		if (room_ids.length === 0) {
+	async generateMultipleRoomDto(roomIDs: string[]): Promise<RoomDto[]> {
+		if (roomIDs.length === 0) {
 			return [];
 		}
-		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
-			where: { room_id: { in: room_ids } },
-		});
+		const rooms: FullyQualifiedRoom[] =
+			await this.dbUtils.getFullyQualifiedRooms(roomIDs);
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
 
-		if (!rooms || rooms === null) {
-			throw new Error("Unknown error. DB returned null");
-		}
-
-		const userIds: string[] = rooms.map((r) => r.room_creator);
-		//remove duplicate user ids
-		const uniqueUserIds: string[] = [...new Set(userIds)];
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
-			where: { user_id: { in: uniqueUserIds } },
-		});
-
-		const userDtos: UserDto[] = [];
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				const user = await this.generateBriefUserDto(u);
-				userDtos.push(user);
+		const result: RoomDto[] = [];
+		for (let i = 0; i < rooms.length; i++) {
+			const r = rooms[i];
+			const u = userDtos.find((u) => u.userID === r.room_creator);
+			if (!u) {
+				throw new Error(
+					"Weird error. Got users from Rooms table but user (" +
+						r.room_creator +
+						") not found in Users table",
+				);
 			}
+			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const room: RoomDto = {
+				creator: u || new UserDto(),
+				roomID: r.room_id,
+				spotifyPlaylistID: r.playlist_id || "",
+				participant_count: r.participate.length,
+				room_name: r.name,
+				description: r.description || "",
+				is_temporary: r.is_temporary || false,
+				is_private: r.private_room !== null,
+				is_scheduled: r.scheduled_room !== null,
+				start_date: new Date(),
+				end_date: new Date(),
+				language: r.room_language || "",
+				has_explicit_content: r.explicit || false,
+				has_nsfw_content: r.nsfw || false,
+				room_image: r.playlist_photo || "",
+				tags: r.tags || [],
+				childrenRoomIDs: childrenRooms.map((r) => r.room_id),
+			};
+			result.push(room);
 		}
+		return result;
+	}
+
 	async generateMultipleRoomDtoFromRoom(
 		rooms: FullyQualifiedRoom[],
 	): Promise<RoomDto[]> {
 		if (rooms.length === 0) {
 			return [];
 		}
-		const userIds: string[] = rooms.map((r) => r.room_creator);
-		//remove duplicate user ids
-		const uniqueUserIds: string[] = [...new Set(userIds)];
-		const users: ({
-			authentication: PrismaTypes.authentication | null;
-		} & PrismaTypes.users)[] = await this.prisma.users.findMany({
-			where: { user_id: { in: uniqueUserIds } },
-			include: {
-				authentication: true,
-			},
-		});
-
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
 		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
 
 		const result: RoomDto[] = [];
