@@ -1635,8 +1635,8 @@ export class UsersService {
 		}
 		// unfriend and unfollow user
 		try {
-			await this.unfriendUser(userID, usernameToBlock);
 			await this.unfollowUser(userID, usernameToBlock);
+			await this.unfriendUser(userID, usernameToBlock);
 		} catch (e) {
 			console.log(e);
 		}
