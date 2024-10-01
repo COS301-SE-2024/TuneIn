@@ -178,21 +178,118 @@ export class DtoGenService {
 	}
 
 	async generateMultipleUserDto(
-		user_ids: string[],
+		userIDs: string[],
 		fully_qualify = false,
 	): Promise<UserDto[]> {
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
-			where: { user_id: { in: user_ids } },
+		//check if userID exists
+		const users = await this.prisma.users.findMany({
+			where: { user_id: { in: userIDs } },
+			include: {
+				authentication: true,
+				favorite_genres: {
+					include: { genre: true },
+				},
+				favorite_songs: {
+					include: { song: true },
+				},
+			},
 		});
 
-		const promises: Promise<UserDto>[] = [];
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				promises.push(this.generateUserDto(u.user_id, fully_qualify));
-			}
+		if (users.length === 0) {
+			return [];
 		}
-		const result: UserDto[] = await Promise.all(promises);
+
+		const result: UserDto[] = [];
+		for (let i = 0, n = users.length; i < n; i++) {
+			const u = users[i];
+			const user: UserDto = this.generateBriefUserDto(u);
+			user.links = this.dbUtils.getLinks(u);
+			user.fav_genres = {
+				count: u.favorite_genres.length,
+				data: u.favorite_genres
+					.map((genre) => genre.genre?.genre)
+					.filter((name): name is string => name !== null),
+			};
+
+			user.fav_songs = {
+				count: u.favorite_songs.length,
+				data: u.favorite_songs.map((song) => ({
+					songID: song.song.song_id,
+					title: song.song.name,
+					artists: song.song.artists,
+					cover: song.song.artwork_url as string,
+					spotify_id: song.song.spotify_id,
+					duration: song.song.duration as number,
+				})),
+			};
+			user.hasSpotifyAccount = u.authentication !== null;
+
+			if (fully_qualify) {
+				const recent_rooms = this.dbUtils.getActivity(u);
+				user.recent_rooms = {
+					count: recent_rooms.count,
+					data: recent_rooms.data,
+				};
+
+				const [currentRoom, bookmarkedRooms]: Prisma.room[][] =
+					await this.prisma.$transaction([
+						this.prisma.room.findMany({
+							where: {
+								participate: {
+									some: {
+										user_id: user.user_id,
+									},
+								},
+							},
+						}),
+						this.prisma.room.findMany({
+							where: {
+								bookmark: {
+									some: {
+										user_id: u.user_id,
+									},
+								},
+							},
+						}),
+					]);
+
+				if (currentRoom.length > 0) {
+					user.current_room_id = currentRoom[0].room_id;
+				}
+				user.fav_rooms = {
+					count: bookmarkedRooms.length,
+					data: bookmarkedRooms.map((r) => r.room_id),
+				};
+
+				const followData: {
+					following: UserWithAuth[];
+					followers: UserWithAuth[];
+				} = await this.dbUtils.getUserFollowersAndFollowing(user.userID);
+
+				for (let i = 0; i < followData.following.length; i++) {
+					const f = followData.following[i];
+					const u: UserDto = this.generateBriefUserDto(f);
+					user.following.data.push(u);
+				}
+				user.following.count = followData.following.length;
+
+				for (let i = 0; i < followData.followers.length; i++) {
+					const f = followData.followers[i];
+					const u: UserDto = this.generateBriefUserDto(f);
+					user.followers.data.push(u);
+				}
+				user.followers.count = followData.followers.length;
+			} else {
+				const followData: {
+					following: number;
+					followers: number;
+				} = await this.dbUtils.getUserFollowersAndFollowingCount(user.userID);
+
+				user.following.count = followData.following;
+				user.followers.count = followData.followers;
+			}
+			result.push(user);
+		}
 		return result;
 	}
 
