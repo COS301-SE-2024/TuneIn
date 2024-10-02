@@ -8,6 +8,7 @@ import {
 	ToastAndroid,
 	Platform,
 	Alert,
+	RefreshControl, // Import RefreshControl
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
@@ -26,6 +27,7 @@ const Following: React.FC = () => {
 	const [fetchFollowingError, setFetchFollowingError] =
 		useState<boolean>(false);
 	const [fetchPendingError, setFetchPendingError] = useState<boolean>(false);
+	const [isRefreshing, setIsRefreshing] = useState<boolean>(false); // State for refresh control
 	const user = useLocalSearchParams();
 	const myUsername = user.username;
 

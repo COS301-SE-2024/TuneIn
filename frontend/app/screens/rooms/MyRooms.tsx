@@ -8,11 +8,11 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Utility function to group rooms by the month they were created
 const groupRoomsByMonth = (rooms: Room[]) => {
@@ -112,6 +112,12 @@ const MyRooms: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.titleContainer}>
+				<TouchableOpacity
+					onPress={() => router.back()}
+					style={styles.backButton}
+				>
+					<Ionicons name="chevron-back" size={24} color="#000" />
+				</TouchableOpacity>
 				<Text style={styles.pageTitle}>My Rooms</Text>
 				<TouchableOpacity
 					onPress={() => router.push("screens/rooms/CreateRoom")} // Navigate to another page
@@ -189,6 +195,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		position: "relative", // Allows absolute positioning of the button
 		paddingBottom: 20,
+	},
+	backButton: {
+		position: "absolute",
+		left: 10,
 	},
 	addButton: {
 		position: "absolute",
