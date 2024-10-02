@@ -92,8 +92,11 @@ export class SearchController {
 		if (creator) {
 			query_params.creator = creator;
 		}
-		const result = await this.searchService.combinedSearch(query_params);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		const result = await this.searchService.combinedSearch(
+			query_params,
+			userInfo.id,
+		);
 		this.searchService.insertSearchHistory(
 			"/search",
 			query_params,
@@ -156,8 +159,12 @@ export class SearchController {
 		if (creator) {
 			query_params.creator = creator;
 		}
-		const result = await this.searchService.searchRooms(query_params);
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		const result = await this.searchService.searchRooms(
+			query_params,
+			userInfo.id,
+		);
+
 		console.log("Result room search: " + JSON.stringify(result));
 
 		if (JSON.stringify(result) === "[]") {
@@ -230,7 +237,9 @@ export class SearchController {
 	}
 
 	/* ************************************************** */
-
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	@Get("rooms/advanced")
 	@ApiOperation({
 		summary: "Advanced search for rooms",
@@ -338,6 +347,7 @@ export class SearchController {
 		type: String,
 	})
 	async advancedSearchRooms(
+		@Request() req: Request,
 		@Query("q") q: string,
 		@Query("creator_username") creator_username?: string,
 		@Query("creator_name") creator_name?: string,
@@ -410,7 +420,11 @@ export class SearchController {
 		if (tags) {
 			query_params.tags = tags;
 		}
-		return await this.searchService.advancedSearchRooms(query_params);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.searchService.advancedSearchRooms(
+			query_params,
+			userInfo.id,
+		);
 	}
 
 	/* ************************************************** */
@@ -530,10 +544,9 @@ export class SearchController {
 		@Query("q") q: string,
 		@Request() req: Request,
 	): Promise<UserDto[]> {
-		const result = await this.searchService.searchUsers(q);
-		console.log("User search result: " + JSON.stringify(result));
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-
+		const result = await this.searchService.searchUsers(q, userInfo.id);
+		console.log("User search result: " + JSON.stringify(result));
 		this.searchService.insertSearchHistory(
 			"/search/users",
 			{ q: q },
@@ -545,6 +558,9 @@ export class SearchController {
 
 	/* ************************************************** */
 
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	@Get("users/advanced")
 	@ApiOperation({
 		summary: "Advanced search for users",
@@ -605,6 +621,7 @@ export class SearchController {
 		allowEmptyValue: false,
 	})
 	async advancedSearchUsers(
+		@Request() req: Request,
 		@Query("q") q: string,
 		@Query("creator_username") creator_username?: string,
 		@Query("creator_name") creator_name?: string,
@@ -632,7 +649,11 @@ export class SearchController {
 		if (followers) {
 			query_params.followers = followers;
 		}
-		return await this.searchService.advancedSearchUsers(query_params);
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.searchService.advancedSearchUsers(
+			query_params,
+			userInfo.id,
+		);
 	}
 
 	/* ************************************************** */
