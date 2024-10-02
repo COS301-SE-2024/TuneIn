@@ -14,8 +14,10 @@ import { colors } from "../../styles/colors";
 import {
 	View,
 	Text,
+	Modal,
 	TouchableOpacity,
 	StyleSheet,
+	Pressable,
 	ToastAndroid,
 	Platform,
 	Alert,
@@ -48,6 +50,9 @@ function MyRoomTabs() {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [isMenuVisible, setMenuVisible] = useState(false);
 	// const roomData = { mine: true }; // Assuming this comes from your state or props
+
+	const [isNsfwModalVisible, setNsfwModalVisible] = useState(false);
+	const [hasSeenNsfwModal, setHasSeenNsfwModal] = useState(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -83,6 +88,23 @@ function MyRoomTabs() {
 			setJoined(true);
 		}
 	}, [currentRoom, roomID]);
+
+	useEffect(() => {
+		// Assuming roomData is set somewhere in your code
+		if (roomData.isNsfw && !hasSeenNsfwModal) {
+			// Show modal only if it hasn't been seen
+			setNsfwModalVisible(true);
+		}
+	}, [roomData, hasSeenNsfwModal]);
+
+	const handleProceed = () => {
+		setNsfwModalVisible(false);
+		setHasSeenNsfwModal(true); // Set modal as seen when proceeding
+	};
+
+	const handleExit = () => {
+		navigation.goBack();
+	};
 
 	const joinRoom = useCallback(() => {
 		const formattedRoom = formatRoomData(roomData);
@@ -299,6 +321,39 @@ function MyRoomTabs() {
 
 	return (
 		<>
+			{/* NSFW Modal */}
+			{roomData.isNsfw && (
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={isNsfwModalVisible}
+					onRequestClose={handleExit}
+				>
+					<Pressable style={styles.modalContainer} onPress={handleExit}>
+						<Pressable style={styles.modalView} onPress={() => {}}>
+							<Text style={styles.modalTitle}>NSFW Content Warning</Text>
+							<Text style={styles.modalText}>
+								This room is marked as NSFW. Are you sure you want to continue?
+							</Text>
+							<View style={styles.modalButtonContainer}>
+								<Pressable
+									style={[styles.buttonModal, styles.buttonYes]}
+									onPress={handleProceed}
+								>
+									<Text style={styles.textStyle}>Yes, Stay</Text>
+								</Pressable>
+								<Pressable
+									style={[styles.buttonModal, styles.buttonNo]}
+									onPress={handleExit}
+								>
+									<Text style={styles.textStyle}>No, Leave</Text>
+								</Pressable>
+							</View>
+						</Pressable>
+					</Pressable>
+				</Modal>
+			)}
+
 			<View style={styles.header}>
 				{/* Back Button */}
 				<TouchableOpacity
@@ -314,13 +369,6 @@ function MyRoomTabs() {
 				<Text style={styles.headerTitle}>{roomData.name}</Text>
 
 				{/* Menu Button */}
-				<TouchableOpacity
-					style={styles.menuButton}
-					onPress={navigateBasedOnOwnership}
-					testID="menu-button"
-				>
-					<Entypo name="dots-three-vertical" size={20} color="black" />
-				</TouchableOpacity>
 				<TouchableOpacity
 					style={styles.menuButton}
 					onPress={navigateBasedOnOwnership}
@@ -423,5 +471,83 @@ const styles = StyleSheet.create({
 	},
 	tabBarItemStyle: {
 		height: 45,
+	},
+	modalContent: {
+		backgroundColor: "white",
+		padding: 20,
+		borderRadius: 10,
+		alignItems: "center",
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 10,
+	},
+	modalButtons: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
+	button: {
+		backgroundColor: "#007AFF",
+		padding: 10,
+		borderRadius: 5,
+		margin: 5,
+	},
+	buttonText: {
+		color: "white",
+		fontWeight: "bold",
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "flex-end",
+		alignItems: "center",
+		backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
+	},
+	modalView: {
+		width: "100%",
+		height: "28%",
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalText: {
+		marginTop: 10,
+		fontSize: 16,
+		textAlign: "center",
+		fontWeight: "bold",
+	},
+	modalButtonContainer: {
+		marginTop: 45,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		width: "100%",
+	},
+	buttonModal: {
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: "45%",
+		alignItems: "center",
+	},
+	buttonYes: {
+		backgroundColor: colors.primary,
+		borderRadius: 25,
+	},
+	buttonNo: {
+		backgroundColor: colors.secondary,
+		borderRadius: 25,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 });

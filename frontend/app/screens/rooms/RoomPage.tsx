@@ -8,7 +8,6 @@ import React, {
 import {
 	View,
 	Text,
-	Modal,
 	Image,
 	TouchableOpacity,
 	StyleSheet,
@@ -17,7 +16,6 @@ import {
 	Alert,
 	ToastAndroid,
 	Platform,
-	Pressable,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -363,54 +361,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			"https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
 	};
 
-	// Only show the modal if roomData.isNsfw is true
-	const [modalVisible, setModalVisible] = useState((roomData.isNsfw = true));
-
-	// Function to handle the user choosing to stay
-	const handleStay = () => {
-		setModalVisible(false); // Close the modal and stay in the room
-	};
-
-	// Function to handle the user choosing to leave
-	const handleLeave = () => {
-		router.back(); // Navigate back or out of the room
-	};
-
 	return (
 		<View style={styles.container}>
-			{roomData.isNsfw && (
-				<Modal
-					animationType="slide"
-					transparent={true}
-					visible={modalVisible}
-					onRequestClose={handleLeave} // Close the modal if the back button is pressed
-				>
-					{/* Close modal when pressing outside */}
-					<Pressable style={styles.modalContainer} onPress={handleLeave}>
-						{/* Prevent the modal content from closing when pressed */}
-						<Pressable style={styles.modalView} onPress={() => {}}>
-							<Text style={styles.modalText}>
-								Warning: This room is marked as NSFW. Are you sure you want to
-								continue?
-							</Text>
-							<View style={styles.modalButtonContainer}>
-								<Pressable
-									style={[styles.button, styles.buttonYes]}
-									onPress={handleStay}
-								>
-									<Text style={styles.textStyle}>Yes, Stay</Text>
-								</Pressable>
-								<Pressable
-									style={[styles.button, styles.buttonNo]}
-									onPress={handleLeave}
-								>
-									<Text style={styles.textStyle}>No, Leave</Text>
-								</Pressable>
-							</View>
-						</Pressable>
-					</Pressable>
-				</Modal>
-			)}
 			<View style={styles.contentContainer}>
 				<View style={styles.sideBySide}>
 					{/* Left side */}
@@ -797,59 +749,6 @@ const styles = StyleSheet.create({
 	},
 	songRoomWidget: {
 		marginTop: -90,
-	},
-	modalContainer: {
-		flex: 1,
-		justifyContent: "flex-end", // Align modal to the bottom
-		alignItems: "center",
-		backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
-	},
-	modalView: {
-		width: "100%", // Full width of the screen
-		height: "28%", // Adjust height based on content
-		backgroundColor: "white",
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		padding: 20,
-		paddingBottom: 40,
-		alignItems: "center",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
-	},
-	modalText: {
-		marginTop: 10,
-		fontSize: 16,
-		textAlign: "center",
-		fontWeight: "bold",
-	},
-	modalButtonContainer: {
-		marginTop: 45,
-		flexDirection: "row",
-		justifyContent: "space-between",
-		width: "100%",
-	},
-	button: {
-		borderRadius: 5,
-		padding: 10,
-		elevation: 2,
-		width: "45%",
-		alignItems: "center",
-	},
-	buttonYes: {
-		backgroundColor: colors.primary,
-		borderRadius: 25,
-	},
-	buttonNo: {
-		backgroundColor: colors.secondary,
-		borderRadius: 25,
-	},
-	textStyle: {
-		color: "white",
-		fontWeight: "bold",
-		textAlign: "center",
 	},
 });
 

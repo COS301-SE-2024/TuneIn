@@ -101,14 +101,6 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			</View>
 
 			{/* Conditionally render explicit icon */}
-			{/* {roomCard.isExplicit && (
-				<MaterialIcons
-					name="explicit"
-					size={26}
-					color="black"
-					style={styles.explicitIcon}
-				/>
-			)} */}
 			<View style={styles.iconContainer}>
 				{roomCard.isExplicit && (
 					<MaterialIcons
