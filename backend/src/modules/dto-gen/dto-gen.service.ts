@@ -319,7 +319,17 @@ export class DtoGenService {
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
 			where: { room_id: roomID },
 		});
-
+		const scheduledRoomInfo = scheduledRoom
+			? {
+					is_scheduled: true,
+					start_date: scheduledRoom.start_date,
+					end_date: scheduledRoom.end_date,
+			  }
+			: {
+					is_scheduled: false,
+					start_date: undefined,
+					end_date: undefined,
+			  };
 		const childRooms = await this.prisma.child_room.findMany({
 			where: { parent_room_id: roomID },
 		});
@@ -332,15 +342,13 @@ export class DtoGenService {
 			description: room.description || "",
 			is_temporary: room.is_temporary || false,
 			is_private: await this.dbUtils.isRoomPrivate(roomID),
-			is_scheduled: false,
-			start_date: new Date(),
-			end_date: new Date(),
 			language: room.room_language || "",
 			has_explicit_content: room.explicit || false,
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
 			tags: room.tags || [],
 			childrenRoomIDs: childRooms.map((r) => r.room_id),
+			...scheduledRoomInfo,
 		};
 
 		if (scheduledRoom && scheduledRoom !== null) {
