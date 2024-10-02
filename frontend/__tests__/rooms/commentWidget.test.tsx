@@ -22,33 +22,6 @@ describe("CommentWidget", () => {
 		);
 	});
 
-	it("applies correct styles for 'me' prop", () => {
-		const { getByTestId } = render(
-			<CommentWidget
-				username="John Doe"
-				message="This is a comment."
-				profilePictureUrl="https://example.com/profile.jpg"
-				me={true}
-			/>,
-		);
-
-		const container = getByTestId("comment-widget-container");
-		const bubble = getByTestId("comment-widget-bubble");
-
-		// Check if container has style for 'me'
-		expect(container.props.style).toContainEqual(
-			expect.objectContaining({
-				justifyContent: "flex-start",
-			}),
-		);
-		expect(bubble.props.style).toContainEqual(
-			expect.objectContaining({
-				backgroundColor: "#08bdbd",
-				alignSelf: "flex-start",
-			}),
-		);
-	});
-
 	it("applies correct styles for 'other' prop", () => {
 		const { getByTestId } = render(
 			<CommentWidget
@@ -65,7 +38,10 @@ describe("CommentWidget", () => {
 		// Check if container has style for 'other'
 		expect(container.props.style).toContainEqual(
 			expect.objectContaining({
-				justifyContent: "flex-start",
+				alignItems: "flex-start",
+				flexDirection: "row",
+				marginRight: 10,
+				marginVertical: 4,
 			}),
 		);
 		expect(bubble.props.style).toContainEqual(

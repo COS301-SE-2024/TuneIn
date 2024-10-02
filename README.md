@@ -108,14 +108,14 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 ​      <b style="font-size: 16px;">Business Analyst (co-lead) | Data Engineer (lead) | Services Engineer (lead) | Integration Engineer<br></b><br>
     Highly motivated and dedicated final-year Computer Science student with a focus on Data Science and Mathematical Statistics. I am seeking a position as a Software Engineer or Data Engineer, committed to leveraging my skills and passion for learning new technologies to contribute value to a dynamic workplace.<br><br>Organized and dependable, successful at managing multiple priorities with a positive attitude. I am willing to take on added responsibilities to meet team goals.
 ​      <br><br>
-​      <a href="https://github.com/8xbbie" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
+​      <a href="https://github.com/thabisomatau" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
 ​        <img src="https://img.icons8.com/material-rounded/24/000000/github.png" width="30" height="30">
 ​      </a>
 ​      <a href="https://www.linkedin.com/in/thabiso-matau-60450425a" style="text-decoration: none; margin-right: 10px; display: inline-block; vertical-align: middle;">
 ​        <img src="https://img.icons8.com/fluency/24/000000/linkedin.png"  width="30" height="30">
 ​      </a>
     <br><br>
-      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=8xbbie&show_icons=true&hide_border=true"/>
+      <img alt="stats" src="https://github-readme-stats.vercel.app/api?username=thabisomatau&show_icons=true&hide_border=true"/>
       <br>
 ​    </td>
   </tr>
@@ -145,10 +145,17 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 
 
 ## :blue_book: Documentation
+[User Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/User%20Manual.pdf)
+
+[Coding Standards/Quality](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/CodingStandards.pdf)
+
+[Testing Policy Document](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/TestingPolicy.pdf)
 
 [our UI design / wireframe](https://www.figma.com/design/vM3jH8s1Xt2CLlFjRRkzQ8/LoFi?node-id=0-1&t=8Qu3n4sAnXvIIUYE-1)
 
-[link to our SRS document](https://github.com/COS301-SE-2024/TuneIn/blob/main/documentation/SRS.md)
+[SRS](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/SRCv4.pdf)
+
+[Technical Installation Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/Techincal%20Installation%20Manual.pdf)
 
 [link to our Functional Requirements document (also included in SRS above)](https://github.com/COS301-SE-2024/TuneIn/blob/main/documentation/FR.md)
 

@@ -13,7 +13,6 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import EditGenreBubble from "../../components/EditGenreBubble";
 import FavoriteSongs from "../../components/FavoriteSong";
-import PhotoSelect from "../../components/PhotoSelect";
 import Icons from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +23,7 @@ import AddFavSong from "../../components/AddFavSong";
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import GenreAdder from "../../components/GenreAdder";
+import * as ImagePicker from "expo-image-picker";
 
 type InputRef = TextInput | null;
 
@@ -201,7 +201,9 @@ const EditProfileScreen = () => {
 						}
 					} catch (error) {
 						console.log("Error checking username:", error);
-						setUsrNmErrorMessage("Error checking username");
+						setUsrNmErrorMessage(
+							"Poor connection, cannot check username ownership. PLease try again later",
+						);
 						resolve(false);
 					}
 				}, 500);
@@ -211,6 +213,19 @@ const EditProfileScreen = () => {
 		} catch (error) {
 			console.log("Error in checkUsername:", error);
 			return false;
+		}
+	};
+
+	const pickImage = async (onImageUpload: (uri: string) => Promise<void>) => {
+		let result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ImagePicker.MediaTypeOptions.All,
+			allowsEditing: true,
+			aspect: [4, 3],
+			quality: 1,
+		});
+
+		if (!result.canceled) {
+			await onImageUpload(result.assets[0].uri); // Pass only the URI (string) to onImageUpload
 		}
 	};
 
@@ -233,7 +248,7 @@ const EditProfileScreen = () => {
 		}
 	};
 
-	const updateImage = async (uri) => {
+	const updateImage = async (uri: string) => {
 		try {
 			const image = await handleImageUpload(uri); // Wait for image upload to complete
 			// console.log("image:", image);
@@ -540,21 +555,24 @@ const EditProfileScreen = () => {
 				{/* Fetch data */}
 				<View style={styles.profilePictureContainer}>
 					<Image
-						source={{ uri: profileData.profile_picture_url }}
-						style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+						source={
+							profileData.profile_picture_url
+								? { uri: profileData.profile_picture_url }
+								: require("../../../assets/profile-icon.png")
+						}
+						style={{
+							width: 125,
+							height: 125,
+							borderRadius: 125 / 2,
+						}}
 					/>
 					<TouchableOpacity
-						onPress={() => setPhotoDialogVisible(true)}
+						onPress={() => pickImage(updateImage)}
 						style={styles.changePhotoButton}
 						testID="photo-button"
 					>
 						<Text>Change Photo</Text>
 					</TouchableOpacity>
-					<PhotoSelect
-						isVisible={isPhotoDialogVisible}
-						onClose={() => setPhotoDialogVisible(false)}
-						onImageUpload={updateImage} // Pass the URI of the photo you want to display
-					/>
 				</View>
 				{/* Name */}
 				<View style={styles.listItem}>
@@ -740,6 +758,7 @@ const styles = StyleSheet.create({
 	container2: {
 		marginRight: 12,
 		marginBottom: 10,
+		marginTop: 5,
 		paddingHorizontal: 14,
 		paddingVertical: 8,
 		backgroundColor: "rgba(232, 235, 242, 1)",
@@ -757,6 +776,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
+		backgroundColor: colors.backgroundColor,
 	},
 	profileHeader: {
 		flexDirection: "row",

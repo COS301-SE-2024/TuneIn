@@ -8,8 +8,9 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	FlatList,
-	Keyboard,
 	TouchableWithoutFeedback,
+	Keyboard,
+	Platform,
 } from "react-native";
 import {
 	GestureHandlerRootView,
@@ -115,6 +116,9 @@ const Search: React.FC = () => {
 	};
 
 	useEffect(() => {
+		const canSetUserResults = () => {
+			return searchTerm.trim() === "" && filter === "user" && loading;
+		};
 		const getRecommendations = async () => {
 			try {
 				const token = await auth.getToken();
@@ -147,11 +151,21 @@ const Search: React.FC = () => {
 								name: item.room_name,
 								roomData: {
 									roomID: item.roomID,
-									backgroundImage: item.room_image,
+									id: item.roomID,
 									name: item.room_name,
 									description: item.description,
 									userID: item.creator.userID,
+									username: item.creator.username,
 									tags: item.tags,
+									backgroundImage: item.room_image,
+									isExplicit: item.has_explicit_content,
+									isNsfw: item.has_nsfw_content,
+									language: item.language,
+									roomSize: "50",
+									userProfile: item.creator.profile_picture_url,
+									mine: true,
+									songName: item.current_song ? item.current_song.title : null,
+									childrenRoomIDs: item.childrenRoomIDs,
 								},
 							}),
 						);
@@ -200,7 +214,7 @@ const Search: React.FC = () => {
 						console.log("recommended users:", recommendedUsers);
 						console.log("Recommended users length: " + recommendedUsers.length);
 
-						if (searchTerm.trim() === "" && filter === "user" && loading) {
+						if (canSetUserResults()) {
 							setResults(recommendedUsers);
 						}
 						setUserRecommendations(recommendedUsers);
@@ -309,15 +323,21 @@ const Search: React.FC = () => {
 								name: item.room_name,
 								roomData: {
 									roomID: item.roomID,
-									backgroundImage: item.room_image,
+									id: item.roomID,
 									name: item.room_name,
 									description: item.description,
 									userID: item.creator.userID,
+									username: item.creator.username,
 									tags: item.tags,
-									language: item.language,
-									roomSize: item.participant_count,
+									backgroundImage: item.room_image,
 									isExplicit: item.has_explicit_content,
 									isNsfw: item.has_nsfw_content,
+									language: item.language,
+									roomSize: "50",
+									userProfile: item.creator.profile_picture_url,
+									mine: true,
+									songName: item.current_song ? item.current_song.title : null,
+									childrenRoomIDs: item.childrenRoomIDs,
 								},
 							}),
 						);
@@ -340,15 +360,21 @@ const Search: React.FC = () => {
 								name: item.room_name,
 								roomData: {
 									roomID: item.roomID,
-									backgroundImage: item.room_image,
+									id: item.roomID,
 									name: item.room_name,
 									description: item.description,
 									userID: item.creator.userID,
+									username: item.creator.username,
 									tags: item.tags,
-									language: item.language,
-									roomSize: item.participant_count,
+									backgroundImage: item.room_image,
 									isExplicit: item.has_explicit_content,
 									isNsfw: item.has_nsfw_content,
+									language: item.language,
+									roomSize: "50",
+									userProfile: item.creator.profile_picture_url,
+									mine: true,
+									songName: item.current_song ? item.current_song.title : null,
+									childrenRoomIDs: item.childrenRoomIDs,
 								},
 							}),
 						);
@@ -612,16 +638,11 @@ const Search: React.FC = () => {
 
 	return (
 		<GestureHandlerRootView>
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<TouchableWithoutFeedback
+				onPress={() => (Platform.OS !== "web" ? Keyboard.dismiss : null)}
+			>
 				<View style={styles.container}>
 					<View style={styles.header}>
-						<TouchableOpacity
-							onPress={() => navigation.goBack()}
-							testID="back-button"
-							style={styles.backButton} // Optional to add padding or margin
-						>
-							<Ionicons name="chevron-back" size={30} color="black" />
-						</TouchableOpacity>
 						<Text style={styles.title}>Search</Text>
 					</View>
 					<View style={styles.searchBarContainer}>
@@ -650,7 +671,7 @@ const Search: React.FC = () => {
 							}}
 							testID="search-button"
 						>
-							<Ionicons name="search-sharp" size={30} color={colors.primary} />
+							<Ionicons name="search" size={24} color={colors.primary} />
 						</TouchableOpacity>
 					</View>
 					{dropdownVisible && searchSuggestions.length !== 0 && (

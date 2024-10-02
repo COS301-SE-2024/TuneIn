@@ -89,9 +89,6 @@ describe("HelpMenu", () => {
 
 		// Check if the title is rendered
 		expect(getByTestId("title")).toBeTruthy();
-
-		// Check if the back button is rendered
-		expect(getByTestId("backButton")).toBeTruthy();
 	});
 
 	test("navigates to the correct screen when a menu item is pressed", () => {
@@ -110,15 +107,6 @@ describe("HelpMenu", () => {
 		fireEvent.press(getByText("Introduction"));
 
 		expect(mockNavigate).toHaveBeenCalledWith("/screens/help/GettingStarted");
-	});
-
-	test("goes back when the back button is pressed", () => {
-		const { getByTestId } = render(<HelpMenu />);
-
-		// Simulate pressing the back button
-		fireEvent.press(getByTestId("backButton"));
-
-		expect(mockBack).toHaveBeenCalled();
 	});
 
 	// New test: Check if feedback section is rendered

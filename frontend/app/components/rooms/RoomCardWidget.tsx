@@ -12,6 +12,7 @@ import {
 import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
 import { colors } from "../../styles/colors";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface RoomCardWidgetProps {
 	roomCard: Room;
@@ -19,7 +20,7 @@ interface RoomCardWidgetProps {
 }
 
 const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
-	const cardWidth = 320;
+	const cardWidth = 290;
 	const router = useRouter();
 	const room = JSON.parse(JSON.stringify(roomCard));
 
@@ -175,7 +176,11 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 							<View style={styles.userInfoContainer}>
 								<View style={styles.userAvatarContainer}>
 									<Image
-										source={{ uri: roomCard.userProfile }}
+										source={
+											roomCard.userProfile
+												? { uri: roomCard.userProfile }
+												: require("../../assets/profile-icon.png")
+										}
 										style={styles.userAvatar}
 									/>
 									<Text style={styles.username}>
@@ -188,8 +193,14 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					</View>
 					{/* Conditionally render explicit icon */}
 					{roomCard.isExplicit && (
-						<Image
-							source={require("../../../assets/Explicit.png")}
+						// <Image
+						// 	source={require("../../../assets/Explicit.png")}
+						// 	style={styles.explicitIcon}
+						// />
+						<MaterialIcons
+							name="explicit"
+							size={28}
+							color="white"
 							style={styles.explicitIcon}
 						/>
 					)}
@@ -201,15 +212,15 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		margin: 8,
+		width: 290, // Set the width to match the card width
 		borderRadius: 15,
-		overflow: "hidden",
-		height: 210, // Adjust height as needed
+		overflow: "hidden", // Ensures the shadow respects the rounded corners
+		height: 190, // Adjust height as needed
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
+		shadowRadius: 6, // Adjust shadow radius for a softer shadow effect
+		elevation: 5, // For Android shadow
 	},
 	imageBackground: {
 		flex: 1,
@@ -318,7 +329,7 @@ const styles = StyleSheet.create({
 		height: 26,
 		position: "absolute", // Use absolute positioning
 		top: 10, // Position from the bottom
-		right: 10, // Position from the right
+		right: 10,
 	},
 });
 

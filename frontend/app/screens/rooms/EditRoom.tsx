@@ -53,8 +53,9 @@ const EditRoom: React.FC = () => {
 	// useEffect without roomDetails as dependency
 	useEffect(() => {
 		const loadRoomDetails = async () => {
+			console.log("roomData inside the edit room page", roomData);
 			setRoomDetails({
-				roomID: roomData.id,
+				roomID: roomData.id ?? roomData.roomID,
 				name: roomData.name,
 				description: roomData.description,
 				backgroundImage: roomData.backgroundImage,
@@ -128,21 +129,24 @@ const EditRoom: React.FC = () => {
 		}
 		const token = await auth.getToken();
 		try {
-			const data = await fetch(`${utils.API_BASE_URL}/rooms/${roomData.id}`, {
-				method: "PATCH",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: "Bearer " + token,
+			const data = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomData.id ?? roomData.roomID}`,
+				{
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: "Bearer " + token,
+					},
+					body: JSON.stringify({
+						room_name: newRoom.name,
+						description: newRoom.description,
+						has_explicit_content: newRoom.isExplicit,
+						has_nsfw_content: newRoom.isNsfw,
+						room_image: newRoom.backgroundImage,
+						language: newRoom.language,
+					}),
 				},
-				body: JSON.stringify({
-					room_name: newRoom.name,
-					description: newRoom.description,
-					has_explicit_content: newRoom.isExplicit,
-					has_nsfw_content: newRoom.isNsfw,
-					room_image: newRoom.backgroundImage,
-					language: newRoom.language,
-				}),
-			});
+			);
 			if (!data.ok) {
 				Alert.alert(
 					"Error",

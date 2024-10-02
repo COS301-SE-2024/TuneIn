@@ -20,7 +20,10 @@ const AppCarousel = <T,>({
 				keyExtractor={(_, index) => index.toString()}
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.contentContainer}
+				contentContainerStyle={[
+					styles.contentContainer,
+					showAddRoomCard && { marginBottom: 20 }, // Apply marginBottom when showAddRoomCard is true
+				]}
 				ItemSeparatorComponent={() => <View style={styles.separator} />}
 				ListFooterComponent={showAddRoomCard ? <AddRoomCard /> : null} // Add AddRoomCard at the end if showAddRoomCard is true
 			/>
@@ -33,12 +36,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		marginBottom: 15,
-		marginLeft: -8,
+		marginTop: 5,
 	},
 	contentContainer: {
 		paddingHorizontal: 20,
-		paddingRight: 10,
+		paddingRight: 20,
 	},
 	separator: {
 		width: 15,

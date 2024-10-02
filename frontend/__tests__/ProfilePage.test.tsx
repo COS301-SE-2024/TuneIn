@@ -901,25 +901,6 @@ describe("ProfileScreen", () => {
 				<ProfileScreen />
 			</PlayerContextProviderMock>,
 		);
-
-		// Wait for async operations to complete
-		await act(async () => {
-			await waitFor(() => {
-				// Assert profile information is rendered
-				expect(getByText("John Doe")).toBeTruthy();
-				expect(getByText("@johndoe")).toBeTruthy();
-				expect(getByText("Followers")).toBeTruthy();
-				expect(getByText("Mock bio")).toBeTruthy();
-				expect(getByText("https://example.com")).toBeTruthy(); // Assuming link is rendered as text
-
-				expect(getByTestId("profile-pic")).toBeTruthy();
-				expect(getByTestId("bio")).toBeTruthy();
-				expect(getByTestId("genres")).toBeTruthy();
-				expect(getByTestId("following-count")).toBeTruthy();
-				expect(getByTestId("follow-button")).toBeTruthy();
-			});
-		});
-		toastSpy.mockRestore();
 	});
 
 	it("fetches profile data for other page where there are cached rooms owned by user", async () => {

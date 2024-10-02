@@ -7,8 +7,6 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	ActivityIndicator,
-	Modal,
-	TouchableWithoutFeedback,
 	RefreshControl,
 	ToastAndroid,
 	Platform,
@@ -57,11 +55,6 @@ const ProfileScreen: React.FC = () => {
 	};
 
 	let ownsProfile: boolean = true;
-
-	const BackgroundIMG: string =
-		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-	const ProfileIMG: string =
-		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
 
 	// const [ownsProfile, setOwnsProfile] = useState<boolean>(true);
 	const [isLinkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -120,15 +113,25 @@ const ProfileScreen: React.FC = () => {
 		});
 	};
 
+	console.log("Params: ", params);
+	console.log("User Data: ", userData);
 	if (params && JSON.stringify(params) !== "{}") {
 		ownsProfile = false;
 	}
-
+	if (
+		userData &&
+		params.friend &&
+		userData.username === JSON.parse(params.friend as string).username
+	) {
+		ownsProfile = true;
+	}
 	const preFormatRoomData = (room: any, mine: boolean) => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
 			id: room.roomID,
-			backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+			backgroundImage: room.room_image
+				? room.room_image
+				: "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
 			name: room.room_name,
 			language: room.language,
 			songName: room.current_song ? room.current_song.title : null,
@@ -137,7 +140,9 @@ const ProfileScreen: React.FC = () => {
 				: null,
 			description: room.description,
 			userID: room.creator.userID,
-			userProfile: room.creator ? room.creator.profile_picture_url : ProfileIMG,
+			userProfile: room.creator
+				? room.creator.profile_picture_url
+				: require("../../../assets/profile-icon.png"),
 			username: room.creator ? room.creator.username : "Unknown",
 			roomSize: 50,
 			tags: room.tags ? room.tags : [],
@@ -186,12 +191,9 @@ const ProfileScreen: React.FC = () => {
 						setPendingRequests(penFData);
 						setRequests(reqFData);
 
-						if (recentRoomData === null) {
-							fetchRecentRoomInfo(data.username);
-						}
-						if (favoriteRoomData === null) {
-							fetchFavRoomInfo(data.username);
-						}
+						await fetchRecentRoomInfo(data.username);
+
+						await fetchFavRoomInfo(data.username);
 
 						if (userData !== null && data.followers.count > 0) {
 							const isFollowing = data.followers.data.some(
@@ -226,9 +228,7 @@ const ProfileScreen: React.FC = () => {
 
 						setHasRequested(req);
 
-						if (currentRoomData === null) {
-							fetchCurrentRoomInfo(data.userID);
-						}
+						await fetchCurrentRoomInfo(data.userID);
 					}
 				} catch (error) {
 					console.log("Failed to retrieve profile data:", error);
@@ -240,31 +240,33 @@ const ProfileScreen: React.FC = () => {
 						const storedToken = await auth.getToken();
 						if (storedToken) {
 							const data = await fetchProfileInfo(storedToken, "");
-							// setPrimProfileData(data);
+							console.log("Fetched data: " + JSON.stringify(data));
+							setPrimProfileData(data);
 						}
 					} catch (error) {
 						console.log("Failed to retrieve profile data:", error);
 						setProfileError(true);
 					}
 				} else {
+					console.log("User Data : " + JSON.stringify(userData));
 					setPrimProfileData(userData);
 				}
 
 				if (
-					recentRoomData === null &&
+					// recentRoomData === null &&
 					userData !== null &&
 					userData !== undefined
 				) {
 					// console.log("User Data for rec room: " + JSON.stringify(userData));
-					fetchRecentRoomInfo(userData.username);
+					await fetchRecentRoomInfo(userData.username);
 				}
 				if (
-					favoriteRoomData === null &&
+					// favoriteRoomData === null &&
 					userData !== null &&
 					userData !== undefined
 				) {
 					// console.log("fav Id: " + JSON.stringify(userData.userID));
-					fetchFavRoomInfo(userData.username);
+					await fetchFavRoomInfo(userData.username);
 				}
 
 				if (currentRoomData === null) {
@@ -272,13 +274,11 @@ const ProfileScreen: React.FC = () => {
 					setRoomCheck(true);
 				}
 			}
-
-			// console.log("Completed effect: " + JSON.stringify(userData));
-			setLoading(false);
 		};
-
+		setLoading(true);
 		initializeProfile();
-	}, [userData, setUserData]);
+		setLoading(false);
+	}, [userData, setUserData, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile && primaryProfileData) {
@@ -303,7 +303,7 @@ const ProfileScreen: React.FC = () => {
 
 			return () => clearInterval(intervalId);
 		}
-	}, [primaryProfileData, ownsProfile]);
+	}, [primaryProfileData, ownsProfile, params.friend]);
 
 	useEffect(() => {
 		if (ownsProfile) {
@@ -313,7 +313,7 @@ const ProfileScreen: React.FC = () => {
 				setCurrentRoomData(null);
 			}
 		}
-	}, [currentRoom, ownsProfile]);
+	}, [currentRoom, ownsProfile, params.friend]);
 
 	const toggleDrawer = () => {
 		setDrawerVisible(!drawerVisible);
@@ -375,11 +375,15 @@ const ProfileScreen: React.FC = () => {
 			}
 		} catch (error) {
 			// console.log("Error: " + error);
-			if (error.response && error.response.status === 404) {
-				setCurrentRoomData(null);
-				setRoomCheck(true);
+			if (axios.isAxiosError(error)) {
+				if (error.response && error.response.status === 404) {
+					setCurrentRoomData(null);
+					setRoomCheck(true);
+				} else {
+					console.log("Error fetching current room info:", error);
+				}
 			} else {
-				console.log("Error fetching current room info:", error);
+				console.log("An unknown error occurred:", error);
 			}
 		}
 	};
@@ -977,6 +981,7 @@ const ProfileScreen: React.FC = () => {
 					testID="refresh-control"
 				/>
 			}
+			style={{ backgroundColor: colors.backgroundColor }}
 		>
 			<View
 				style={{
@@ -1025,12 +1030,27 @@ const ProfileScreen: React.FC = () => {
 							testID="profile-pic"
 						>
 							<Image
-								source={{ uri: primaryProfileData.profile_picture_url }}
-								style={{ width: 125, height: 125, borderRadius: 125 / 2 }}
+								source={
+									primaryProfileData.profile_picture_url
+										? { uri: primaryProfileData.profile_picture_url }
+										: require("../../../assets/profile-icon.png")
+								}
+								style={{
+									width: 125,
+									height: 125,
+									borderRadius: 125 / 2,
+									borderWidth: 1,
+									borderColor: "black",
+								}}
 							/>
 						</View>
 						<Text
-							style={{ fontSize: 20, fontWeight: "600", textAlign: "center" }}
+							style={{
+								fontSize: 20,
+								fontWeight: "600",
+								textAlign: "center",
+								paddingTop: 10,
+							}}
 						>
 							{primaryProfileData.profile_name}
 						</Text>

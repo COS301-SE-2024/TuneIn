@@ -17,6 +17,7 @@ import {
 	NativeSyntheticEvent,
 	RefreshControl,
 	ToastAndroid,
+	Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
@@ -164,6 +165,7 @@ const Home: React.FC = () => {
 				isExplicit: room.has_explicit_content,
 				start_date: room.start_date,
 				end_date: room.end_date,
+				childrenRoomIDs: room.childrenRoomIDs,
 			};
 		});
 	};
@@ -171,11 +173,14 @@ const Home: React.FC = () => {
 	const [myRooms, setMyRooms] = useState<Room[]>([]);
 	const [myPicks, setMyPicks] = useState<Room[]>([]);
 	const [myRecents, setMyRecents] = useState<Room[]>([]);
+	const [friendRooms, setFriendRooms] = useState<Room[]>([]);
+	const [followingRooms, setFollowingRooms] = useState<Room[]>([]);
 
 	const refreshData = useCallback(async () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		if (storedToken) {
+			console.log("Loading data...");
 			const recentRooms = await fetchRooms(storedToken, "/recent");
 			const formattedRecentRooms = formatRoomData(recentRooms);
 
@@ -185,9 +190,17 @@ const Home: React.FC = () => {
 			const myRoomsData = await fetchRooms(storedToken);
 			const formattedMyRooms = formatRoomData(myRoomsData, true);
 
+			const friendRoomsData = await fetchRooms(storedToken, "/friends");
+			const formattedFriendRooms = formatRoomData(friendRoomsData);
+
+			const followingRoomsData = await fetchRooms(storedToken, "/following");
+			const formattedFollowingRooms = formatRoomData(followingRoomsData);
+
 			setMyRooms(formattedMyRooms);
 			setMyPicks(formattedPicksForYouRooms);
 			setMyRecents(formattedRecentRooms);
+			setFriendRooms(formattedFriendRooms);
+			setFollowingRooms(formattedFollowingRooms);
 
 			if (!userData) {
 				const userInfo = await fetchProfileInfo(storedToken);
@@ -197,24 +210,20 @@ const Home: React.FC = () => {
 			const fetchedFriends = await getFriends(storedToken);
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profile_picture_url: friend.profile_picture_url
-							? friend.profile_picture_url
-							: ProfileIMG,
+						profile_picture_url: friend.profile_picture_url || ProfileIMG,
 						username: friend.username,
 						friend_id: friend.friend_id,
 					}))
 				: [];
-
 			setFriends(formattedFriends);
+			console.log("Data loaded");
 		}
 		setLoading(false);
 	}, [setUserData, userData, ProfileIMG]);
 
 	useEffect(() => {
-		if (isFocused) {
-			refreshData(); // Reload data immediately when the page is focused
-		}
-	}, [isFocused, refreshData]);
+		refreshData();
+	}, []);
 
 	const [refreshing] = useState(false);
 
@@ -282,11 +291,14 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		if (!roomError || !friendError) {
 			if (roomError && !friendError) {
-				ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load rooms", ToastAndroid.SHORT);
 			} else if (!roomError && friendError) {
-				ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load friends", ToastAndroid.SHORT);
 			} else if (profileError) {
-				ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
+				if (Platform.OS === "android")
+					ToastAndroid.show("Failed to load profile data", ToastAndroid.SHORT);
 			}
 		}
 	}, [roomError, friendError, profileError]);
@@ -322,11 +334,43 @@ const Home: React.FC = () => {
 										<AppCarousel data={myRecents} renderItem={renderItem} />
 									</>
 								)}
+								{followingRooms.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(
+													followingRooms,
+													"From People You Follow",
+												)
+											}
+										>
+											<Text style={styles.sectionTitle}>
+												From People You Follow
+											</Text>
+										</TouchableOpacity>
+										<AppCarousel
+											data={followingRooms}
+											renderItem={renderItem}
+										/>
+									</>
+								)}
+								{friendRooms.length > 0 && (
+									<>
+										<TouchableOpacity
+											style={styles.navigateButton}
+											onPress={() =>
+												navigateToMoreRooms(friendRooms, "More From Friends")
+											}
+										>
+											<Text style={styles.sectionTitle}>More From Friends</Text>
+										</TouchableOpacity>
+										<AppCarousel data={friendRooms} renderItem={renderItem} />
+									</>
+								)}
 								<TouchableOpacity
 									style={styles.navigateButton}
-									onPress={() =>
-										navigateToMoreRooms(myRecents, "Picks for you")
-									}
+									onPress={() => navigateToMoreRooms(myPicks, "Picks for you")}
 								>
 									<Text style={styles.sectionTitle}>Picks for you</Text>
 								</TouchableOpacity>
@@ -341,11 +385,7 @@ const Home: React.FC = () => {
 								>
 									<Text style={styles.sectionTitle}>Friends</Text>
 								</TouchableOpacity>
-								<FriendsGrid
-									friends={friends}
-									user={userData.username}
-									maxVisible={8}
-								/>
+								<FriendsGrid friends={friends} username={userData.username} />
 							</>
 						) : null}
 						<TouchableOpacity
@@ -416,7 +456,7 @@ const styles = StyleSheet.create({
 	},
 	createRoomButtonText: {
 		color: "white",
-		fontSize: 32,
+		fontSize: 40, // Increased from 32 to 40
 		fontWeight: "bold",
 	},
 });

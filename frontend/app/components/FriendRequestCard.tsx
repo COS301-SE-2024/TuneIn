@@ -49,15 +49,20 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				style={styles.profileImage}
 				testID="friend-request-card-image"
 			/>
-			<Text style={styles.username} testID="friend-request-card-username">
+			<Text
+				style={styles.username}
+				numberOfLines={1}
+				ellipsizeMode="tail"
+				testID="friend-request-card-username"
+			>
 				{username}
 			</Text>
 			<TouchableOpacity
 				style={[
 					styles.button,
 					acceptPressed
-						? { backgroundColor: colors.primary }
-						: { backgroundColor: colors.backgroundColor },
+						? { backgroundColor: colors.backgroundColor }
+						: { backgroundColor: colors.primary },
 					{ borderColor: colors.primary },
 				]}
 				onPress={handleAcceptPress}
@@ -67,8 +72,8 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 					style={[
 						styles.acceptText,
 						acceptPressed
-							? { color: colors.backgroundColor }
-							: { color: colors.primary },
+							? { color: colors.primary }
+							: { color: colors.backgroundColor },
 					]}
 				>
 					Accept
@@ -78,9 +83,9 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 				style={[
 					styles.button,
 					rejectPressed
-						? { backgroundColor: "red" }
-						: { backgroundColor: colors.backgroundColor },
-					{ borderColor: "red" },
+						? { backgroundColor: "black" }
+						: { backgroundColor: "black" },
+					{ borderColor: "black" },
 				]}
 				onPress={handleRejectPress}
 				testID="reject-button"
@@ -90,7 +95,7 @@ const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 						styles.rejectText,
 						rejectPressed
 							? { color: colors.backgroundColor }
-							: { color: "red" },
+							: { color: "white" },
 					]}
 				>
 					Reject
@@ -117,6 +122,8 @@ const styles = StyleSheet.create({
 	username: {
 		fontSize: 16,
 		flex: 1,
+		fontWeight: "bold",
+		color: "black",
 	},
 	button: {
 		paddingVertical: 8,
@@ -130,6 +137,7 @@ const styles = StyleSheet.create({
 	},
 	rejectText: {
 		fontWeight: "bold",
+		paddingHorizontal: 3,
 	},
 });
 

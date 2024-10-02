@@ -26,12 +26,8 @@ const TopNavBar: React.FC = () => {
 						},
 					});
 					const imageUrl = response.data.profile_picture_url;
-					console.log("Image URL: " + imageUrl);
 
-					if (
-						!imageUrl ||
-						imageUrl === "https://example.com/default-profile-picture.png"
-					) {
+					if (!imageUrl) {
 						setProfileImage(defaultProfileIcon);
 					} else {
 						setProfileImage(imageUrl);

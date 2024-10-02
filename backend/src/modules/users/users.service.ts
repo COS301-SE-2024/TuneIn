@@ -513,6 +513,33 @@ export class UsersService {
 		}
 	}
 
+	async getRoomsFromFriends(userID: string): Promise<RoomDto[]> {
+		const friends = await this.dbUtils.getUserFriends(userID);
+		if (!friends) {
+			throw new Error("User has no friends");
+		}
+		const friendIDs = friends.map((friend) => friend.user_id);
+		const rooms: RoomDto[] = [];
+		for (const friendID of friendIDs) {
+			const friendRooms = await this.getUserRooms(friendID);
+			rooms.push(...friendRooms);
+		}
+		return rooms;
+	}
+
+	async getRoomsFromFollowing(userID: string): Promise<RoomDto[]> {
+		const following = await this.dbUtils.getUserFollowing(userID);
+		if (!following) {
+			throw new Error("User is not following anyone");
+		}
+		const followingIDs = following.map((follow) => follow.user_id);
+		const rooms: RoomDto[] = [];
+		for (const followID of followingIDs) {
+			const followRooms = await this.getUserRooms(followID);
+			rooms.push(...followRooms);
+		}
+		return rooms;
+	}
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
 		const user = await this.prisma.users.findUnique({
 			where: { user_id: userID },
