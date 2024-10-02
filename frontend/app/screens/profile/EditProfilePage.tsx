@@ -201,7 +201,9 @@ const EditProfileScreen = () => {
 						}
 					} catch (error) {
 						console.log("Error checking username:", error);
-						setUsrNmErrorMessage("Poor connection, cannot check username ownership. PLease try again later");
+						setUsrNmErrorMessage(
+							"Poor connection, cannot check username ownership. PLease try again later",
+						);
 						resolve(false);
 					}
 				}, 500);
