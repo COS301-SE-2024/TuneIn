@@ -42,11 +42,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 		>
 			<View style={styles.imageContainer}>
 				<Image
-					source={
-						roomCard.backgroundImage
-							? { uri: roomCard.backgroundImage }
-							: require("../../../assets/imageholder.jpg")
-					}
+					source={{ uri: roomCard.backgroundImage }}
 					style={styles.roomImage}
 				/>
 				{/* {(isBeforeStartDate || isAfterEndDate) && (
@@ -95,11 +91,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 				{/* User profile and username inline */}
 				<View style={styles.userInfo}>
 					<Image
-						source={
-							roomCard.userProfile
-								? { uri: roomCard.userProfile }
-								: require("../../../assets/profile-icon.png")
-						}
+						source={{ uri: roomCard.userProfile }}
 						style={styles.userProfile}
 					/>
 					<Text style={styles.username}>
@@ -110,6 +102,10 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 
 			{/* Conditionally render explicit icon */}
 			{roomCard.isExplicit && (
+				// <Image
+				// 	source={require("../../../assets/Explicit.png")}
+				// 	style={styles.explicitIcon}
+				// />
 				<MaterialIcons
 					name="explicit"
 					size={26}

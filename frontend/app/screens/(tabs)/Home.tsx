@@ -67,6 +67,7 @@ const Home: React.FC = () => {
 			});
 	}
 
+	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
@@ -80,6 +81,12 @@ const Home: React.FC = () => {
 	if (!instanceExists()) {
 		live.initialiseSocket();
 	}
+
+	const BackgroundIMG: string =
+		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
+	const ProfileIMG: string =
+		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
+
 	const fetchRooms = async (token: string | null, type?: string) => {
 		try {
 			const response = await axios.get(
@@ -91,6 +98,7 @@ const Home: React.FC = () => {
 			setRoomError(false);
 			return response.data;
 		} catch (error) {
+			console.log("Error fetching rooms:", error);
 			setRoomError(true);
 			return [];
 		}
@@ -104,6 +112,7 @@ const Home: React.FC = () => {
 			setFriendError(false);
 			return response.data;
 		} catch (error) {
+			console.log("Error fetching friends:", error);
 			setFriendError(true);
 			return [];
 		}
@@ -121,6 +130,7 @@ const Home: React.FC = () => {
 				return response.data;
 			}
 		} catch (error) {
+			console.log("Error fetching profile info:", error);
 			setProfileError(true);
 		}
 	};
@@ -133,9 +143,7 @@ const Home: React.FC = () => {
 		return rooms.map((room, index) => {
 			return {
 				id: room.roomID,
-				backgroundImage: room.room_image
-					? room.room_image
-					: require("../../../assets/imageholder.jpg"),
+				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
 				name: room.room_name,
 				language: room.language,
 				songName: room.current_song ? room.current_song.title : null,
@@ -146,7 +154,7 @@ const Home: React.FC = () => {
 				userID: room.creator.userID,
 				userProfile: room.creator
 					? room.creator.profile_picture_url
-					: require("../../../assets/profile-icon.png"),
+					: ProfileIMG,
 				username: room.creator ? room.creator.username : "Unknown",
 				roomSize: 50,
 				tags: room.tags ? room.tags : [],
@@ -170,6 +178,7 @@ const Home: React.FC = () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		if (storedToken) {
+			console.log("Loading data...");
 			const recentRooms = await fetchRooms(storedToken, "/recent");
 			const formattedRecentRooms = formatRoomData(recentRooms);
 
@@ -199,17 +208,16 @@ const Home: React.FC = () => {
 			const fetchedFriends = await getFriends(storedToken);
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profile_picture_url: friend.profile_picture_url
-							? friend.profile_picture_url
-							: require("../../../assets/profile-icon.png"),
+						profile_picture_url: friend.profile_picture_url || ProfileIMG,
 						username: friend.username,
 						friend_id: friend.friend_id,
 					}))
 				: [];
 			setFriends(formattedFriends);
+			console.log("Data loaded");
 		}
 		setLoading(false);
-	}, [setUserData, userData]);
+	}, [setUserData, userData, ProfileIMG]);
 
 	useEffect(() => {
 		refreshData();
