@@ -84,6 +84,7 @@ export class DtoGenService {
 
 			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
 				favRoomIDs,
+				userID,
 			);
 			if (roomDtoArray && roomDtoArray !== null) {
 				result.fav_rooms = {
@@ -425,12 +426,26 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
+	async generateMultipleRoomDto(
+		room_ids: string[],
+		userID: string | undefined,
+	): Promise<RoomDto[]> {
 		if (room_ids.length === 0) {
 			return [];
 		}
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { blockee: userID },
+			});
+		}
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
-			where: { room_id: { in: room_ids } },
+			where: {
+				AND: [
+					{ room_id: { in: room_ids } },
+					{ room_creator: { notIn: blocked.map((b) => b.blocker) } },
+				],
+			},
 		});
 
 		if (!rooms || rooms === null) {
