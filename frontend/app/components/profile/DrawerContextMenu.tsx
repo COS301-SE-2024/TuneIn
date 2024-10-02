@@ -12,8 +12,10 @@ import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { router } from "expo-router";
-import { Friend } from "../../models/friend";
 import { User } from "../../models/user";
+import { Player } from "../../PlayerContext";
+import { useContext } from "react";
+import CurrentRoom from "../../screens/rooms/functions/CurrentRoom";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
