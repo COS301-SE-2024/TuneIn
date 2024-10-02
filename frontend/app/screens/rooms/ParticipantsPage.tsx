@@ -24,7 +24,7 @@ interface ParticipantsPageProps {
 const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	participants,
 }) => {
-	const navigation = useNavigation();
+	const navigation = useRouter();
 	let _roomParticipants = useLocalSearchParams();
 	let roomParticipants = _roomParticipants.participants;
 	const participantsInRoom: Participant[] = [];
@@ -49,7 +49,15 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		});
 	}
 
-	const navigateToProfile = (userId: string) => {};
+	const navigateToProfile = (user: any) => {
+		console.log("Navigating to profile page for user:", user);
+		navigation.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+			})}&user=${user}`,
+		);
+	};
 
 	const renderItem = ({ item }: { item: Participant }) => {
 		// Truncate the username if it's longer than 20 characters
@@ -59,7 +67,10 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				: item.username;
 
 		return (
-			<TouchableOpacity style={styles.participantContainer}>
+			<TouchableOpacity
+				style={styles.participantContainer}
+				onPress={navigateToProfile.bind(null, item)}
+			>
 				<Image
 					source={
 						item.profilePictureUrl
@@ -79,7 +90,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => navigation.goBack()}
+					onPress={() => navigation.back()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
