@@ -335,6 +335,14 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		}
 	}, [readyToJoinRoom, joined, roomID]);
 
+	const handleUserPress = () => {
+		router.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: roomData.profile_picture_url,
+				username: roomData.username,
+			})}&user=${roomData.user}`,
+		);
+	};
 	const sendMessage = () => {
 		if (isSending) return;
 		setIsSending(true);
@@ -477,7 +485,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
 				<TouchableOpacity
-					// onPress={handleUserPress}
+					onPress={handleUserPress}
 					style={styles.userInfoContainer}
 				>
 					<Image
