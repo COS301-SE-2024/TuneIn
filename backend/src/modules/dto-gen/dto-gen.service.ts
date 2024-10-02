@@ -264,14 +264,23 @@ export class DtoGenService {
 		let blocked: PrismaTypes.blocked[] = [];
 		if (userID && userID !== null) {
 			blocked = await this.prisma.blocked.findMany({
-				where: { blockee: userID },
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
 			});
 		}
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
 		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
 			where: {
 				AND: [
 					{ user_id: { in: user_ids } },
-					{ user_id: { notIn: blocked.map((b) => b.blocker) } },
+					{ user_id: { notIn: blocked_id } },
 				],
 			},
 		});
@@ -433,24 +442,76 @@ export class DtoGenService {
 		if (room_ids.length === 0) {
 			return [];
 		}
+
+		//
 		let blocked: PrismaTypes.blocked[] = [];
 		if (userID && userID !== null) {
 			blocked = await this.prisma.blocked.findMany({
-				where: { blockee: userID },
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
 			});
 		}
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+
+		// get private rooms from users who aren't friends with the user then exclude them
+		let nonFriends: PrismaTypes.friends[] = [];
+		if (userID) {
+			nonFriends = await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID, is_pending: false },
+						{ friend2: userID, is_pending: false },
+					],
+				},
+			});
+		}
+		console.log("nonFriends: " + JSON.stringify(nonFriends));
+		const friendIDs: string[] = nonFriends.map((f) =>
+			f.friend1 === userID ? f.friend2 : f.friend1,
+		);
+		// get private rooms from users who aren't friends with the user then exclude them
+		const nonFriendPrivateRooms = await this.prisma.private_room.findMany({
+			where: {
+				room_id: { in: room_ids },
+			}, // include rooms with room_creator not in friendIDs
+			include: { room: true },
+		});
+		// filter out the private rooms that are not created by friends, then just return the room_id
+		const nonFriendPrivateRoomIDs = nonFriendPrivateRooms
+			.filter((r) => !friendIDs.includes(r.room.room_creator))
+			.map((r) => r.room_id);
+		// remove private rooms from the room_ids
+		const nonPrivateRoomIDs = room_ids.filter(
+			(id) => !nonFriendPrivateRoomIDs.includes(id),
+		);
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
 			where: {
 				AND: [
-					{ room_id: { in: room_ids } },
-					{ room_creator: { notIn: blocked.map((b) => b.blocker) } },
+					{ room_id: { in: nonPrivateRoomIDs } },
+					{ room_creator: { notIn: blocked_id } },
 				],
 			},
 		});
 
+		console.log("Final rooms", rooms);
+
 		if (!rooms || rooms === null) {
 			throw new Error("Unknown error. DB returned null");
 		}
+		const roomIDs: string[] = rooms.map((r) => r.room_id);
+		const scheduledRooms = await this.prisma.scheduled_room.findMany({
+			where: { room_id: { in: roomIDs } },
+		});
+		const privateRooms = await this.prisma.room.findMany({
+			where: { room_id: { in: roomIDs } },
+		});
 
 		const userIds: string[] = rooms.map((r) => r.room_creator);
 		//remove duplicate user ids
@@ -483,6 +544,19 @@ export class DtoGenService {
 				const childrenRooms = await this.prisma.child_room.findMany({
 					where: { parent_room_id: r.room_id },
 				});
+				// find the roomId in the scheduledRooms. if found, then it is a scheduled room
+				// create an object with start_date and end_date if it is a scheduled room. else, make them undefined
+				const sRoom = scheduledRooms.find((sr) => sr.room_id === r.room_id);
+				const scheduledRoom = sRoom
+					? {
+							start_date: sRoom.start_date,
+							end_date: sRoom.end_date,
+							is_scheduled: true,
+					  }
+					: { start_date: undefined, end_date: undefined, is_scheduled: false };
+				console.log("scheduledRoom: " + JSON.stringify(scheduledRoom));
+				// do the same for private rooms
+				const pRoom = privateRooms.find((pr) => pr.room_id === r.room_id);
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
@@ -490,16 +564,14 @@ export class DtoGenService {
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
-					is_private: false, //db must add column
-					is_scheduled: false, //db must add column
-					start_date: new Date(),
-					end_date: new Date(),
+					is_private: pRoom ? true : false,
 					language: r.room_language || "",
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
 					tags: r.tags || [],
 					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
+					...scheduledRoom,
 				};
 				result.push(room);
 			}
