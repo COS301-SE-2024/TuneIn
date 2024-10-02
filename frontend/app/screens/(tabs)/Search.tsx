@@ -30,6 +30,7 @@ import { SearchHistoryDto } from "../../models/SearchHistoryDto";
 import SkeletonRoomCard from "../../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../../components/SkeletonUserItem";
 import FilterBottomSheet from "../../components/FilterBottomSheet";
+import * as StorageService from "../../services/StorageService";
 
 type SearchResult = {
 	id: string;
@@ -115,6 +116,20 @@ const Search: React.FC = () => {
 		return false;
 	};
 
+	const ownsRoom = async (roomID: string): Promise<boolean> => {
+		const cachedMyRooms = await StorageService.getItem("cachedMyRooms");
+		// console.log("Cached rooms: " + cachedMyRooms);
+		if (cachedMyRooms && cachedMyRooms.length > 0) {
+			const jsonCache = JSON.parse(cachedMyRooms);
+			for (let i = 0; i < jsonCache.length; i++) {
+				if (jsonCache[i].id === roomID) {
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
 	useEffect(() => {
 		const canSetUserResults = () => {
 			return searchTerm.trim() === "" && filter === "user" && loading;
@@ -144,29 +159,35 @@ const Search: React.FC = () => {
 							console.error("Error fetching recommended rooms:", response);
 							return;
 						}
-						const recommendedRooms: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: filter,
-								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
+						const recommendedRooms: SearchResult[] = await Promise.all(
+							response.data.map(async (item: any) => {
+								const hasRoom: boolean = await ownsRoom(item.roomID);
+								// console.log("Owns room: " + hasRoom);
+								return {
 									id: item.roomID,
+									type: filter,
 									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									username: item.creator.username,
-									tags: item.tags,
-									backgroundImage: item.room_image,
-									isExplicit: item.has_explicit_content,
-									isNsfw: item.has_nsfw_content,
-									language: item.language,
-									roomSize: "50",
-									userProfile: item.creator.profile_picture_url,
-									mine: true,
-									songName: item.current_song ? item.current_song.title : null,
-									childrenRoomIDs: item.childrenRoomIDs,
-								},
+									roomData: {
+										roomID: item.roomID,
+										id: item.roomID,
+										name: item.room_name,
+										description: item.description,
+										userID: item.creator.userID,
+										username: item.creator.username,
+										tags: item.tags,
+										backgroundImage: item.room_image,
+										isExplicit: item.has_explicit_content,
+										isNsfw: item.has_nsfw_content,
+										language: item.language,
+										roomSize: "50",
+										userProfile: item.creator.profile_picture_url,
+										mine: hasRoom,
+										songName: item.current_song
+											? item.current_song.title
+											: null,
+										childrenRoomIDs: item.childrenRoomIDs,
+									},
+								};
 							}),
 						);
 						console.log("recommended rooms:", recommendedRooms);
@@ -316,29 +337,34 @@ const Search: React.FC = () => {
 						});
 
 						console.log("Advance Room Search: " + JSON.stringify(response));
-						const roomResults: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: "room",
-								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
+						const roomResults: SearchResult[] = await Promise.all(
+							response.data.map(async (item: any) => {
+								const hasRoom = await ownsRoom(item.roomID);
+								return {
 									id: item.roomID,
+									type: "room",
 									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									username: item.creator.username,
-									tags: item.tags,
-									backgroundImage: item.room_image,
-									isExplicit: item.has_explicit_content,
-									isNsfw: item.has_nsfw_content,
-									language: item.language,
-									roomSize: "50",
-									userProfile: item.creator.profile_picture_url,
-									mine: true,
-									songName: item.current_song ? item.current_song.title : null,
-									childrenRoomIDs: item.childrenRoomIDs,
-								},
+									roomData: {
+										roomID: item.roomID,
+										id: item.roomID,
+										name: item.room_name,
+										description: item.description,
+										userID: item.creator.userID,
+										username: item.creator.username,
+										tags: item.tags,
+										backgroundImage: item.room_image,
+										isExplicit: item.has_explicit_content,
+										isNsfw: item.has_nsfw_content,
+										language: item.language,
+										roomSize: "50",
+										userProfile: item.creator.profile_picture_url,
+										mine: hasRoom,
+										songName: item.current_song
+											? item.current_song.title
+											: null,
+										childrenRoomIDs: item.childrenRoomIDs,
+									},
+								};
 							}),
 						);
 
@@ -353,29 +379,34 @@ const Search: React.FC = () => {
 							},
 						);
 						// console.log("Search: " + JSON.stringify(response));
-						const formatResults: SearchResult[] = response.data.map(
-							(item: any) => ({
-								id: item.roomID,
-								type: "room",
-								name: item.room_name,
-								roomData: {
-									roomID: item.roomID,
+						const formatResults: SearchResult[] = await Promise.all(
+							response.data.map(async (item: any) => {
+								const hasRoom = await ownsRoom(item.roomID);
+								return {
 									id: item.roomID,
+									type: "room",
 									name: item.room_name,
-									description: item.description,
-									userID: item.creator.userID,
-									username: item.creator.username,
-									tags: item.tags,
-									backgroundImage: item.room_image,
-									isExplicit: item.has_explicit_content,
-									isNsfw: item.has_nsfw_content,
-									language: item.language,
-									roomSize: "50",
-									userProfile: item.creator.profile_picture_url,
-									mine: true,
-									songName: item.current_song ? item.current_song.title : null,
-									childrenRoomIDs: item.childrenRoomIDs,
-								},
+									roomData: {
+										roomID: item.roomID,
+										id: item.roomID,
+										name: item.room_name,
+										description: item.description,
+										userID: item.creator.userID,
+										username: item.creator.username,
+										tags: item.tags,
+										backgroundImage: item.room_image,
+										isExplicit: item.has_explicit_content,
+										isNsfw: item.has_nsfw_content,
+										language: item.language,
+										roomSize: "50",
+										userProfile: item.creator.profile_picture_url,
+										mine: hasRoom,
+										songName: item.current_song
+											? item.current_song.title
+											: null,
+										childrenRoomIDs: item.childrenRoomIDs,
+									},
+								};
 							}),
 						);
 
