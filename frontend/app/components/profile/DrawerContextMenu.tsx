@@ -1,5 +1,12 @@
-import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
+import {
+	View,
+	TouchableOpacity,
+	Text,
+	StyleSheet,
+	Modal,
+	Platform,
+	ToastAndroid,
+} from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
@@ -15,15 +22,42 @@ interface ContextMenuProps {
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
 	// Navigation functions
 	const navigateToAnalytics = () => {
 		router.navigate("/screens/analytics/AnalyticsPage");
 		onClose(); // Close the modal after navigation
 	};
 
-	const navigateToLogout = () => {
-		auth.logout();
-		onClose(); // Close the modal after logout
+	const navigateToLogout = async () => {
+		await auth.default
+			.getToken()
+			.then(async (token) => {
+				const current = new CurrentRoom();
+				const currentRoom = await current.getCurrentRoom(token as string);
+				if (currentRoom) {
+					const currentRoomID = currentRoom?.roomID ?? currentRoom.id;
+					await current.leaveJoinRoom(token as string, currentRoomID, true);
+				}
+				onClose(); // Close the modal after logout
+				await auth.default.logout();
+				console.log("OS: " + Platform.OS);
+				if (Platform.OS === "android") {
+					ToastAndroid.show("You have been logged out.", ToastAndroid.SHORT);
+				} else {
+					alert("You have been logged out.");
+				}
+				const { setCurrentRoom } = playerContext;
+				setCurrentRoom(null);
+			})
+			.catch((error) => {
+				console.log("Error getting token: " + error);
+			});
 	};
 
 	const navigateToHelp = () => {

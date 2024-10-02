@@ -289,9 +289,6 @@ export class SpotifyAuthService {
 			existingUser = await this.prisma.users.findFirst({
 				where: { username: spotifyUser.id },
 			});
-			if (!existingUser) {
-				throw new Error("Failed to find user");
-			}
 		}
 		if (existingUser) {
 			const e = existingUser as PrismaTypes.users;
