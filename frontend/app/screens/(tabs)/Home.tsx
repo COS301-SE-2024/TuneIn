@@ -91,7 +91,6 @@ const Home: React.FC = () => {
 			setRoomError(false);
 			return response.data;
 		} catch (error) {
-			console.log("Error fetching rooms:", error);
 			setRoomError(true);
 			return [];
 		}
@@ -105,7 +104,6 @@ const Home: React.FC = () => {
 			setFriendError(false);
 			return response.data;
 		} catch (error) {
-			console.log("Error fetching friends:", error);
 			setFriendError(true);
 			return [];
 		}
@@ -123,7 +121,6 @@ const Home: React.FC = () => {
 				return response.data;
 			}
 		} catch (error) {
-			console.log("Error fetching profile info:", error);
 			setProfileError(true);
 		}
 	};
@@ -173,7 +170,6 @@ const Home: React.FC = () => {
 		setLoading(true);
 		const storedToken = await auth.getToken();
 		if (storedToken) {
-			console.log("Loading data...");
 			const recentRooms = await fetchRooms(storedToken, "/recent");
 			const formattedRecentRooms = formatRoomData(recentRooms);
 
@@ -211,7 +207,6 @@ const Home: React.FC = () => {
 					}))
 				: [];
 			setFriends(formattedFriends);
-			console.log("Data loaded");
 		}
 		setLoading(false);
 	}, [setUserData, userData]);
