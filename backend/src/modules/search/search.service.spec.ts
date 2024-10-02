@@ -228,7 +228,7 @@ describe("SearchService", () => {
 		it("should return an empty UserDto array when query returns an empty array", async () => {
 			mockPrismaService.$queryRaw.mockResolvedValue([]);
 
-			const result = await service.searchUsers("testing");
+			const result = await service.searchUsers("testing", "userID");
 
 			expect(result).toMatchObject([new UserDto()]);
 		});
@@ -239,7 +239,7 @@ describe("SearchService", () => {
 				uDtoMock,
 			);
 
-			const result = await service.searchUsers("testing");
+			const result = await service.searchUsers("testing", "userID");
 
 			expect(result).toMatchObject(uDtoMock);
 		});
@@ -250,7 +250,7 @@ describe("SearchService", () => {
 			//mockCtx.prisma.$queryRaw.mockResolvedValue([]);
 			mockPrismaService.$queryRaw.mockResolvedValue([]);
 
-			const result = await service.searchRooms({ q: "testing" });
+			const result = await service.searchRooms({ q: "testing" }, "userID");
 
 			expect(result).toMatchObject([new RoomDto()]);
 		});
@@ -262,7 +262,7 @@ describe("SearchService", () => {
 				rDtoMock,
 			);
 
-			const result = await service.searchRooms({ q: "testing" });
+			const result = await service.searchRooms({ q: "testing" }, "userID");
 
 			expect(result).toMatchObject(rDtoMock);
 		});
@@ -276,7 +276,7 @@ describe("SearchService", () => {
 
 		it("should return an empty combined search array when query returns an empty array", async () => {
 			mockPrismaService.$queryRaw.mockResolvedValue({ rooms: [], users: [] });
-			const result = await service.searchRooms({ q: "testing" });
+			const result = await service.searchRooms({ q: "testing" }, "userID");
 
 			expect(result).toMatchObject([new RoomDto()]);
 		});
@@ -289,7 +289,7 @@ describe("SearchService", () => {
 				.spyOn(service, "searchUsers")
 				.mockResolvedValueOnce(uDtoMock as unknown as UserDto[]);
 
-			const result = await service.combinedSearch({ q: "testing" });
+			const result = await service.combinedSearch({ q: "testing" }, "userID");
 
 			expect(result).toMatchObject({ rooms: rDtoMock, users: uDtoMock });
 			searchRoomMock.mockRestore();
@@ -492,7 +492,10 @@ describe("SearchService", () => {
 				.spyOn(service, "advancedUserSearchQueryBuilder")
 				.mockReturnValueOnce(`Select * FROM users`);
 
-			const result = await service.advancedSearchUsers({ q: "testing" });
+			const result = await service.advancedSearchUsers(
+				{ q: "testing" },
+				"userID",
+			);
 
 			expect(result).toMatchObject([new UserDto()]);
 			mock.mockRestore();
@@ -508,7 +511,10 @@ describe("SearchService", () => {
 				uDtoMock,
 			);
 
-			const result = await service.advancedSearchUsers({ q: "testing" });
+			const result = await service.advancedSearchUsers(
+				{ q: "testing" },
+				"userID",
+			);
 
 			expect(result).toMatchObject(uDtoMock);
 			mock.mockRestore();
@@ -522,7 +528,10 @@ describe("SearchService", () => {
 				.spyOn(service, "advancedUserSearchQueryBuilder")
 				.mockReturnValueOnce(`Select * FROM rooms`);
 
-			const result = await service.advancedSearchRooms({ q: "testing" });
+			const result = await service.advancedSearchRooms(
+				{ q: "testing" },
+				"userID",
+			);
 
 			expect(result).toMatchObject([new RoomDto()]);
 			mock.mockRestore();
@@ -537,7 +546,10 @@ describe("SearchService", () => {
 				.spyOn(service, "advancedUserSearchQueryBuilder")
 				.mockReturnValueOnce(`Select * FROM rooms`);
 
-			const result = await service.advancedSearchRooms({ q: "testing" });
+			const result = await service.advancedSearchRooms(
+				{ q: "testing" },
+				"userID",
+			);
 
 			expect(result).toMatchObject(rDtoMock);
 			mock.mockRestore();
