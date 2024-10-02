@@ -36,7 +36,6 @@ import TopNavBar from "../../components/TopNavBar";
 import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
-import { useIsFocused } from "@react-navigation/native";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -46,7 +45,6 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const isFocused = useIsFocused();
 	const { userData, setUserData } = playerContext;
 
 	const { users, authenticated } = useAPI();
@@ -69,7 +67,6 @@ const Home: React.FC = () => {
 			});
 	}
 
-	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
 	const [friendError, setFriendError] = useState<boolean>(false);
@@ -83,12 +80,6 @@ const Home: React.FC = () => {
 	if (!instanceExists()) {
 		live.initialiseSocket();
 	}
-
-	const BackgroundIMG: string =
-		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
-	const ProfileIMG: string =
-		"https://upload.wikimedia.org/wikipedia/commons/b/b5/Windows_10_Default_Profile_Picture.svg";
-
 	const fetchRooms = async (token: string | null, type?: string) => {
 		try {
 			const response = await axios.get(
@@ -145,7 +136,9 @@ const Home: React.FC = () => {
 		return rooms.map((room, index) => {
 			return {
 				id: room.roomID,
-				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
+				backgroundImage: room.room_image
+					? room.room_image
+					: require("../../../assets/imageholder.jpg"),
 				name: room.room_name,
 				language: room.language,
 				songName: room.current_song ? room.current_song.title : null,
@@ -156,7 +149,7 @@ const Home: React.FC = () => {
 				userID: room.creator.userID,
 				userProfile: room.creator
 					? room.creator.profile_picture_url
-					: ProfileIMG,
+					: require("../../../assets/profile-icon.png"),
 				username: room.creator ? room.creator.username : "Unknown",
 				roomSize: 50,
 				tags: room.tags ? room.tags : [],
@@ -210,7 +203,9 @@ const Home: React.FC = () => {
 			const fetchedFriends = await getFriends(storedToken);
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
-						profile_picture_url: friend.profile_picture_url || ProfileIMG,
+						profile_picture_url: friend.profile_picture_url
+							? friend.profile_picture_url
+							: require("../../../assets/profile-icon.png"),
 						username: friend.username,
 						friend_id: friend.friend_id,
 					}))
@@ -219,11 +214,11 @@ const Home: React.FC = () => {
 			console.log("Data loaded");
 		}
 		setLoading(false);
-	}, [setUserData, userData, ProfileIMG]);
+	}, [setUserData, userData]);
 
 	useEffect(() => {
 		refreshData();
-	}, []);
+	}, [refreshData]);
 
 	const [refreshing] = useState(false);
 
