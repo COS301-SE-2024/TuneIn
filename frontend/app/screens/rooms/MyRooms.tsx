@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Utility function to group rooms by the month they were created
 const groupRoomsByMonth = (rooms: Room[]) => {
@@ -112,6 +112,13 @@ const MyRooms: React.FC = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.titleContainer}>
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={() => router.back()}
+					testID="back-button"
+				>
+					<Ionicons name="chevron-back" size={24} color="#000" />
+				</TouchableOpacity>
 				<Text style={styles.pageTitle}>My Rooms</Text>
 				<TouchableOpacity
 					onPress={() => router.push("screens/rooms/CreateRoom")} // Navigate to another page
@@ -180,6 +187,10 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: colors.backgroundColor,
+	},
+	backButton: {
+		position: "absolute",
+		left: 10,
 	},
 	titleContainer: {
 		flexDirection: "row",
