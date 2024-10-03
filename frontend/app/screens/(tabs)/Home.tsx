@@ -163,6 +163,8 @@ const Home: React.FC = () => {
 				mine: mine,
 				isNsfw: room.has_nsfw_content,
 				isExplicit: room.has_explicit_content,
+				isPrivate: room.is_private,
+				isScheduled: room.is_scheduled,
 				start_date: room.start_date,
 				end_date: room.end_date,
 				childrenRoomIDs: room.childrenRoomIDs,
