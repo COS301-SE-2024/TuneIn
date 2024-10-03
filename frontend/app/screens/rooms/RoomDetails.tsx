@@ -9,6 +9,8 @@ import {
 	ScrollView,
 	Image,
 	Alert,
+	Platform,
+	ToastAndroid,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -19,13 +21,23 @@ import * as utils from "../../services/Utils"; // Import Utils
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import CreateButton from "../../components/CreateButton";
+import { start } from "repl";
 
 const RoomDetails: React.FC = () => {
 	const router = useRouter();
 	const { room } = useLocalSearchParams();
 	// console.log('room', room)
-	const newRoom = Array.isArray(room) ? JSON.parse(room[0]) : JSON.parse(room);
-	// console.log('room', newRoom);
+	let newRoom = JSON.parse(room as string);
+	newRoom = {
+		...newRoom,
+		start_date: newRoom.start_date
+			? new Date(newRoom.start_date).toISOString()
+			: undefined,
+		end_date: newRoom.end_date
+			? new Date(newRoom.end_date).toISOString()
+			: undefined,
+	};
+	console.log("roomooo", newRoom.start_date, newRoom.end_date);
 
 	const [roomDetails, setRoomDetails] = useState<RoomDetailsProps>({
 		name: "",
@@ -92,15 +104,33 @@ const RoomDetails: React.FC = () => {
 		newRoom["room_image"] = imageURL;
 		const token = await auth.getToken();
 		// console.log('Token:', token);
+		console.log("New Room:", JSON.stringify(newRoom));
 		fetch(`${utils.API_BASE_URL}/users/rooms`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+				// handle cors error
+				"Access-Control-Allow-Origin": "*",
+
 				Authorization: `Bearer ${token}` || "",
 			},
 			body: JSON.stringify(newRoom),
 		})
-			.then((response) => response.json())
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				} else {
+					if (Platform.OS === "web") {
+						alert("Failed to create room. Please try again.");
+					} else {
+						ToastAndroid.show(
+							"Failed to create room. Please try again.",
+							ToastAndroid.SHORT,
+						);
+					}
+					return null;
+				}
+			})
 			.then((data) => {
 				router.navigate({
 					pathname: "/screens/(tabs)/Home",
