@@ -575,98 +575,113 @@ export class UsersService {
 		createRoomDto: CreateRoomDto,
 		userID: string,
 	): Promise<RoomDto> {
-		const newRoom: Prisma.roomCreateInput = {
-			name: createRoomDto.room_name || "Untitled Room",
+		try {
+			const newRoom: Prisma.roomCreateInput = {
+				name: createRoomDto.room_name || "Untitled Room",
 
-			//foreign key relation for 'room_creator'
-			users: {
-				connect: {
-					user_id: userID,
+				//foreign key relation for 'room_creator'
+				users: {
+					connect: {
+						user_id: userID,
+					},
 				},
-			},
-		};
-		if (createRoomDto.description)
-			newRoom.description = createRoomDto.description;
-		if (createRoomDto.is_temporary)
-			newRoom.is_temporary = createRoomDto.is_temporary;
+			};
+			if (createRoomDto.description)
+				newRoom.description = createRoomDto.description;
+			if (createRoomDto.is_temporary !== undefined)
+				newRoom.is_temporary = createRoomDto.is_temporary;
 
-		/*
+			/*
 		if (createRoomDto.language) newRoom.language = createRoomDto.language;
 		*/
-		if (createRoomDto.has_explicit_content)
-			newRoom.explicit = createRoomDto.has_explicit_content;
-		if (createRoomDto.has_nsfw_content)
-			newRoom.nsfw = createRoomDto.has_nsfw_content;
-		if (createRoomDto.room_image)
-			newRoom.playlist_photo = createRoomDto.room_image;
+			if (createRoomDto.has_explicit_content !== undefined)
+				newRoom.explicit = createRoomDto.has_explicit_content;
+			if (createRoomDto.has_nsfw_content !== undefined)
+				newRoom.nsfw = createRoomDto.has_nsfw_content;
+			if (createRoomDto.room_image !== undefined)
+				newRoom.playlist_photo = createRoomDto.room_image;
 
-		/*
+			/*
 		if (createRoomDto.current_song)
 			newRoom.current_song = createRoomDto.current_song;
 		*/
 
-		const room: PrismaTypes.room | null = await this.prisma.room.create({
-			data: newRoom,
-		});
-		if (!room) {
-			throw new Error("Something went wrong while creating the room");
-		}
-
-		//for is_private, we will need to add the roomID to the private_room tbale
-		if (createRoomDto.is_private) {
-			const privRoom: Prisma.private_roomCreateInput = {
-				room: {
-					connect: {
-						room_id: room.room_id,
-					},
-				},
-			};
-			const privRoomResult = await this.prisma.private_room.create({
-				data: privRoom,
+			const room: PrismaTypes.room | null = await this.prisma.room.create({
+				data: newRoom,
 			});
-			if (!privRoomResult || privRoomResult === null) {
+			if (!room) {
+				throw new Error("Something went wrong while creating the room");
+			}
+
+			//for is_private, we will need to add the roomID to the private_room tbale
+			if (createRoomDto.is_private) {
+				const privRoom: Prisma.private_roomCreateInput = {
+					room: {
+						connect: {
+							room_id: room.room_id,
+						},
+					},
+				};
+				const privRoomResult = await this.prisma.private_room.create({
+					data: privRoom,
+				});
+				if (!privRoomResult || privRoomResult === null) {
+					throw new Error(
+						"An unknown error occurred while creating private room. Received null.",
+					);
+				}
+			} else {
+				const pubRoom: Prisma.public_roomCreateInput = {
+					room: {
+						connect: {
+							room_id: room.room_id,
+						},
+					},
+				};
+				const pubRoomResult = await this.prisma.public_room.create({
+					data: pubRoom,
+				});
+				if (!pubRoomResult || pubRoomResult === null) {
+					throw new Error(
+						"An unknown error occurred while creating public room. Received null.",
+					);
+				}
+			}
+
+			//TODO: implement scheduled room creation
+
+			if (createRoomDto.is_scheduled) {
+				const newScheduledRoom: Prisma.scheduled_roomCreateInput = {
+					start_date: createRoomDto.start_date ?? null,
+					end_date: createRoomDto.end_date ?? null,
+					room: {
+						connect: {
+							room_id: room.room_id,
+						},
+					},
+				};
+
+				const scheduledRoom = await this.prisma.scheduled_room.create({
+					data: newScheduledRoom,
+				});
+				if (!scheduledRoom || scheduledRoom === null) {
+					throw new Error(
+						"An unknown error occurred while creating scheduled room. Received null.",
+					);
+				}
+			}
+
+			const result = await this.dtogen.generateRoomDtoFromRoom(room);
+			if (!result) {
 				throw new Error(
-					"An unknown error occurred while creating private room. Received null.",
+					"An unknown error occurred while generating RoomDto for created room. Received null.",
 				);
 			}
-		} else {
-			const pubRoom: Prisma.public_roomCreateInput = {
-				room: {
-					connect: {
-						room_id: room.room_id,
-					},
-				},
-			};
-			const pubRoomResult = await this.prisma.public_room.create({
-				data: pubRoom,
-			});
-			if (!pubRoomResult || pubRoomResult === null) {
-				throw new Error(
-					"An unknown error occurred while creating public room. Received null.",
-				);
-			}
+			return result;
+		} catch (error) {
+			console.error("Error: ", error);
+			throw new Error("Failed to create room");
 		}
-
-		//TODO: implement scheduled room creation
-		/*
-		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
-		if (createRoomDto.is_scheduled) {
-			newRoom.
-				connect: {
-					roomID: createRoomDto.roomID,
-				},
-			};
-		}
-		*/
-
-		const result = await this.dtogen.generateRoomDtoFromRoom(room);
-		if (!result) {
-			throw new Error(
-				"An unknown error occurred while generating RoomDto for created room. Received null.",
-			);
-		}
-		return result;
 	}
 
 	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
