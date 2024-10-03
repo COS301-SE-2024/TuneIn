@@ -10,8 +10,8 @@ export type RoomDto = {
 	is_temporary: boolean;
 	is_private: boolean;
 	is_scheduled: boolean;
-	start_date: Date;
-	end_date: Date;
+	start_date: Date | undefined;
+	end_date: Date | undefined;
 	language: string;
 	has_explicit_content: boolean;
 	has_nsfw_content: boolean;

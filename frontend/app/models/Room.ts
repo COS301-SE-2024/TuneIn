@@ -19,8 +19,10 @@ export interface Room {
 	roomSize?: number;
 	isExplicit?: boolean;
 	isNsfw?: boolean;
-	start_date: Date;
-	end_date: Date;
+	isPrivate?: boolean;
+	date_created: Date;
+	start_date: Date | undefined;
+	end_date: Date | undefined;
 	childrenRoomIDs?: string[];
 }
 
@@ -44,5 +46,8 @@ export const formatRoomData = (room: any): Room => {
 		start_date: room.start_date,
 		end_date: room.end_date,
 		childrenRoomIDs: room.childrenRoomIDs,
+		playlist: room.playlist,
+		isPrivate: room.is_private,
+		date_created: room.date_created,
 	};
 };
