@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -19,6 +19,8 @@ import * as utils from "../../services/Utils"; // Import Utils
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import CreateButton from "../../components/CreateButton";
+import Dropdown from "../../components/Dropdown";
+import axios from "axios";
 
 const RoomDetails: React.FC = () => {
 	const router = useRouter();
@@ -36,6 +38,34 @@ const RoomDetails: React.FC = () => {
 		isExplicit: false,
 		isNsfw: false,
 	});
+
+	const [genres, setGenres] = useState([
+		"rock",
+		"pop",
+		"jazz",
+		"classical",
+		"hip hop",
+		"country",
+		"electronica",
+		"reggae",
+		"blues",
+		"folk",
+		"metal",
+		"punk",
+		"soul",
+		"r&b",
+		"funk",
+		"dancehall",
+		"techno",
+		"ambient",
+		"gospel",
+		"latin",
+		"reggaeton",
+		"ska",
+		"opera",
+	]);
+
+	const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
 	const [image, setImage] = useState<string | null>(null);
 
@@ -113,6 +143,28 @@ const RoomDetails: React.FC = () => {
 		// router.navigate("/screens/ChatRoom");
 	};
 
+	useEffect(() => {
+		getGenres();
+	}, []);
+
+	const getGenres = async () => {
+		// console.log("Getting genres");
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				setGenres(response.data);
+			}
+		} catch (error) {
+			console.log("Error fetching genres:", error);
+		}
+	};
+
 	const pickImage = async () => {
 		let result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -169,12 +221,20 @@ const RoomDetails: React.FC = () => {
 						(value) => handleInputChange("description", value),
 						4,
 					)}
-					{_buildInputField("Genre", roomDetails.genre, (value) =>
-						handleInputChange("genre", value),
-					)}
-					{_buildInputField("Language", roomDetails.language, (value) =>
-						handleInputChange("language", value),
-					)}
+					<div
+						style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+					>
+						<Dropdown
+							options={genres}
+							selectedOption={selectedGenre}
+							setSelectedOption={setSelectedGenre}
+							placeholder="Genre"
+							onSelect={() => handleInputChange("genre", selectedGenre || "")}
+						></Dropdown>
+						{_buildInputField("Language", roomDetails.language, (value) =>
+							handleInputChange("language", value),
+						)}
+					</div>
 					{_buildInputField("Room Size", roomDetails.roomSize, (value) =>
 						handleInputChange("roomSize", value),
 					)}
