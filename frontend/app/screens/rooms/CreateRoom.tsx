@@ -21,14 +21,14 @@ const CreateRoomScreen: React.FC = () => {
 		is_permanent: boolean;
 		is_private: boolean;
 		is_scheduled: boolean;
-		start_date: Date | undefined;
-		end_date: Date | undefined;
+		start_date: Date | null;
+		end_date: Date | null;
 	}>({
 		is_permanent: true,
 		is_private: false,
 		is_scheduled: false,
-		start_date: undefined,
-		end_date: undefined,
+		start_date: null,
+		end_date: null,
 	});
 	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
 	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -52,8 +52,8 @@ const CreateRoomScreen: React.FC = () => {
 	const navigateToRoomDetails = () => {
 		console.log("Navigating to RoomDetails screen");
 		if (isSwitched) {
-			newRoom["start_date"] = startDate;
-			newRoom["end_date"] = endDate;
+			newRoom["start_date"] = startDate ?? null;
+			newRoom["end_date"] = endDate ?? null;
 			if (startDate === undefined && endDate === undefined) {
 				// alert message based on the OS
 				if (Platform.OS === "web") {
