@@ -319,11 +319,15 @@ export class DtoGenService {
 		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
 			where: { room_id: roomID },
 		});
-		const scheduledRoomInfo = scheduledRoom
+		const scheduledRoomInfo: {
+			is_scheduled: boolean;
+			start_date: Date | undefined;
+			end_date: Date | undefined;
+		} = scheduledRoom
 			? {
 					is_scheduled: true,
-					start_date: scheduledRoom.start_date,
-					end_date: scheduledRoom.end_date,
+					start_date: scheduledRoom.start_date || undefined,
+					end_date: scheduledRoom.end_date || undefined,
 			  }
 			: {
 					is_scheduled: false,
@@ -348,6 +352,7 @@ export class DtoGenService {
 			room_image: room.playlist_photo || "",
 			tags: room.tags || [],
 			childrenRoomIDs: childRooms.map((r) => r.room_id),
+			date_created: room.date_created,
 			...scheduledRoomInfo,
 		};
 
@@ -387,6 +392,18 @@ export class DtoGenService {
 			where: { parent_room_id: room.room_id },
 		});
 
+		const scheduleInfo = scheduledRoom
+			? {
+					is_scheduled: true,
+					start_date: scheduledRoom.start_date || undefined,
+					end_date: scheduledRoom.end_date || undefined,
+			  }
+			: {
+					is_scheduled: false,
+					start_date: undefined,
+					end_date: undefined,
+			  };
+
 		const result: RoomDto = {
 			creator: new UserDto(),
 			roomID: room.room_id,
@@ -395,13 +412,11 @@ export class DtoGenService {
 			description: room.description || "",
 			is_temporary: room.is_temporary || false,
 			is_private: await this.dbUtils.isRoomPrivate(room.room_id),
-			is_scheduled: false,
-			start_date: new Date(),
-			end_date: new Date(),
 			language: room.room_language || "",
 			has_explicit_content: room.explicit || false,
 			has_nsfw_content: room.nsfw || false,
 			room_image: room.playlist_photo || "",
+			date_created: room.date_created,
 			current_song: {
 				songID: "",
 				title: "",
@@ -411,6 +426,7 @@ export class DtoGenService {
 				duration: 0,
 				start_time: new Date(),
 			},
+			...scheduleInfo,
 			tags: room.tags || [],
 			childrenRoomIDs: [],
 		};
@@ -421,14 +437,6 @@ export class DtoGenService {
 			if (creator && creator !== null) {
 				result.creator = creator;
 			}
-		}
-
-		if (scheduledRoom && scheduledRoom !== null) {
-			result.is_scheduled = true;
-			/*
-			result.start_date = scheduledRoom.start_date;
-			result.end_date = scheduledRoom.end_date;
-			*/
 		}
 
 		if (childrenRooms && childrenRooms !== null) {
@@ -482,6 +490,9 @@ export class DtoGenService {
 		const friendIDs: string[] = nonFriends.map((f) =>
 			f.friend1 === userID ? f.friend2 : f.friend1,
 		);
+		if (userID) {
+			friendIDs.push(userID);
+		}
 		// get private rooms from users who aren't friends with the user then exclude them
 		const nonFriendPrivateRooms = await this.prisma.private_room.findMany({
 			where: {
@@ -557,8 +568,8 @@ export class DtoGenService {
 				const sRoom = scheduledRooms.find((sr) => sr.room_id === r.room_id);
 				const scheduledRoom = sRoom
 					? {
-							start_date: sRoom.start_date,
-							end_date: sRoom.end_date,
+							start_date: sRoom.start_date || undefined,
+							end_date: sRoom.end_date || undefined,
 							is_scheduled: true,
 					  }
 					: { start_date: undefined, end_date: undefined, is_scheduled: false };
@@ -579,6 +590,7 @@ export class DtoGenService {
 					room_image: r.playlist_photo || "",
 					tags: r.tags || [],
 					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
+					date_created: r.date_created,
 					...scheduledRoom,
 				};
 				result.push(room);
