@@ -519,8 +519,6 @@ export class DtoGenService {
 			},
 		});
 
-		console.log("Final rooms", rooms);
-
 		if (!rooms || rooms === null) {
 			throw new Error("Unknown error. DB returned null");
 		}
@@ -528,7 +526,7 @@ export class DtoGenService {
 		const scheduledRooms = await this.prisma.scheduled_room.findMany({
 			where: { room_id: { in: roomIDs } },
 		});
-		const privateRooms = await this.prisma.room.findMany({
+		const privateRooms = await this.prisma.private_room.findMany({
 			where: { room_id: { in: roomIDs } },
 		});
 
@@ -573,7 +571,6 @@ export class DtoGenService {
 							is_scheduled: true,
 					  }
 					: { start_date: undefined, end_date: undefined, is_scheduled: false };
-				console.log("scheduledRoom: " + JSON.stringify(scheduledRoom));
 				// do the same for private rooms
 				const pRoom = privateRooms.find((pr) => pr.room_id === r.room_id);
 				const room: RoomDto = {
@@ -583,7 +580,7 @@ export class DtoGenService {
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
-					is_private: pRoom ? true : false,
+					is_private: pRoom !== undefined ? true : false,
 					language: r.room_language || "",
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,
