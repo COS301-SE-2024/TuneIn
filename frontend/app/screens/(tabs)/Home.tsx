@@ -167,6 +167,7 @@ const Home: React.FC = () => {
 				isScheduled: room.is_scheduled,
 				start_date: room.start_date,
 				end_date: room.end_date,
+				date_created: room.date_created,
 				childrenRoomIDs: room.childrenRoomIDs,
 			};
 		});
