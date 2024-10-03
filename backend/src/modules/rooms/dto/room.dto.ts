@@ -51,11 +51,15 @@ export class RoomDto {
 
 	@ApiPropertyOptional()
 	@IsDate()
-	start_date?: Date;
+	start_date?: Date | undefined;
 
 	@ApiPropertyOptional()
 	@IsDate()
-	end_date?: Date;
+	end_date?: Date | undefined;
+
+	@ApiProperty()
+	@IsDate()
+	date_created: Date;
 
 	@ApiProperty()
 	@IsString()
@@ -80,7 +84,7 @@ export class RoomDto {
 	@IsObject()
 	@ValidateNested()
 	@Type(() => SongInfoDto)
-	current_song?: SongInfoDto;
+	current_song?: SongInfoDto | undefined;
 
 	@ApiProperty({
 		description: "The tags that describe the room",
@@ -94,7 +98,7 @@ export class RoomDto {
 			"The parent of this room, if this room was created by splitting another",
 		type: String,
 	})
-	parentRoomID?: string;
+	parentRoomID?: string | undefined;
 
 	@ApiProperty({
 		description: "Rooms created by splitting this room.",
