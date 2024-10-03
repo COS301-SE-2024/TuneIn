@@ -25,6 +25,7 @@ interface BottomSheetProps {
 	isPending?: boolean;
 	isRequesting?: boolean;
 	isPotential?: boolean;
+	isFollowing?: boolean;
 	handleUnfollow?: (friend: {
 		username: string;
 		friend_id: string;
@@ -62,6 +63,7 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 	isPending = false,
 	isPotential = false,
 	isRequesting = false,
+	isFollowing = false,
 	setShowMoreOptions: setShowMoreFilters = () => {},
 	handleRequest = () => {},
 	sendRequest = () => {},
@@ -74,9 +76,6 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 	const slideAnim = useRef(new Animated.Value(300)).current;
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [isModalVisible, setIsModalVisible] = useState(false);
-	const [follow, setFollow] = useState(
-		!(isFriend || isPending || isRequesting || isPotential),
-	);
 
 	useEffect(() => {}, [isFriend, isPending, isPotential]);
 
@@ -168,13 +167,12 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 															}}
 															onPress={() => {
 																handleUnfollow(friend);
-																setFollow(!follow);
 																handleClose();
 															}}
 															testID="unfollow"
 														>
 															<Text style={{ fontSize: 18, fontWeight: 500 }}>
-																{follow ? "Follow" : "Unfollow"}
+																{!isFollowing ? "Follow" : "Unfollow"}
 															</Text>
 														</TouchableOpacity>
 														{isPending ? (
@@ -281,7 +279,6 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 													hitSlop={{ top: 5, bottom: 5, left: 50, right: 50 }}
 													onPress={() => {
 														handleBlock(friend, true);
-														setFollow(true);
 														handleClose();
 													}}
 													testID="block"
