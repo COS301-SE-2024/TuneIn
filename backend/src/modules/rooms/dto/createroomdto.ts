@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsBoolean, IsOptional, IsDate } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class CreateRoomDto {
 	@ApiProperty()
@@ -28,11 +29,13 @@ export class CreateRoomDto {
 	@ApiPropertyOptional()
 	@IsDate()
 	@IsOptional()
+	@Transform(({ value }) => new Date(value))
 	start_date?: Date;
 
 	@ApiPropertyOptional()
 	@IsDate()
 	@IsOptional()
+	@Transform(({ value }) => new Date(value))
 	end_date?: Date;
 
 	@ApiPropertyOptional()
