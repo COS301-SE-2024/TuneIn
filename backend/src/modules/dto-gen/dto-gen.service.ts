@@ -84,6 +84,7 @@ export class DtoGenService {
 
 			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
 				favRoomIDs,
+				userID,
 			);
 			if (roomDtoArray && roomDtoArray !== null) {
 				result.fav_rooms = {
@@ -257,10 +258,22 @@ export class DtoGenService {
 
 	async generateMultipleUserDto(
 		user_ids: string[],
+		userID: string | undefined, // this is to filter out blocked users
 		fully_qualify = false,
 	): Promise<UserDto[]> {
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { blockee: userID },
+			});
+		}
 		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
-			where: { user_id: { in: user_ids } },
+			where: {
+				AND: [
+					{ user_id: { in: user_ids } },
+					{ user_id: { notIn: blocked.map((b) => b.blocker) } },
+				],
+			},
 		});
 
 		if (!users || users === null) {
@@ -413,12 +426,26 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDto(room_ids: string[]): Promise<RoomDto[]> {
+	async generateMultipleRoomDto(
+		room_ids: string[],
+		userID: string | undefined,
+	): Promise<RoomDto[]> {
 		if (room_ids.length === 0) {
 			return [];
 		}
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { blockee: userID },
+			});
+		}
 		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
-			where: { room_id: { in: room_ids } },
+			where: {
+				AND: [
+					{ room_id: { in: room_ids } },
+					{ room_creator: { notIn: blocked.map((b) => b.blocker) } },
+				],
+			},
 		});
 
 		if (!rooms || rooms === null) {
@@ -635,40 +662,36 @@ export class DtoGenService {
 		const user2: UserDto = await this.generateUserDto(participant2);
 		*/
 		const { user1, user2 }: { user1: UserDto; user2: UserDto } =
-			await this.generateMultipleUserDto([participant1, participant2]).then(
-				(users) => {
-					if (users.length !== 2) {
-						throw new Error(
-							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
-						);
-					}
-					if (
-						!users[0] ||
-						users[0] === null ||
-						!users[1] ||
-						users[1] === null
-					) {
-						throw new Error(
-							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
-						);
-					}
-					if (
-						users[0].userID === participant1 &&
-						users[1].userID === participant2
-					) {
-						return { user1: users[0], user2: users[1] };
-					} else if (
-						users[0].userID === participant2 &&
-						users[1].userID === participant1
-					) {
-						return { user1: users[1], user2: users[0] };
-					} else {
-						throw new Error(
-							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
-						);
-					}
-				},
-			);
+			await this.generateMultipleUserDto(
+				[participant1, participant2],
+				undefined,
+			).then((users) => {
+				if (users.length !== 2) {
+					throw new Error(
+						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
+					);
+				}
+				if (!users[0] || users[0] === null || !users[1] || users[1] === null) {
+					throw new Error(
+						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
+					);
+				}
+				if (
+					users[0].userID === participant1 &&
+					users[1].userID === participant2
+				) {
+					return { user1: users[0], user2: users[1] };
+				} else if (
+					users[0].userID === participant2 &&
+					users[1].userID === participant1
+				) {
+					return { user1: users[1], user2: users[0] };
+				} else {
+					throw new Error(
+						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
+					);
+				}
+			});
 
 		const dms: ({
 			message: PrismaTypes.message;
@@ -754,7 +777,10 @@ export class DtoGenService {
 			...uniqueUserIDs,
 			...new Set(dms.map((dm) => dm.recipient)),
 		];
-		const users: UserDto[] = await this.generateMultipleUserDto(uniqueUserIDs);
+		const users: UserDto[] = await this.generateMultipleUserDto(
+			uniqueUserIDs,
+			undefined,
+		);
 
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
