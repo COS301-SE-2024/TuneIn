@@ -25,8 +25,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const room = JSON.parse(JSON.stringify(roomCard));
 
 	const currentDate = new Date();
-	const startDate = new Date(roomCard.start_date);
-	const endDate = new Date(roomCard.end_date);
+	const startDate = roomCard.start_date
+		? new Date(roomCard.start_date)
+		: new Date(0);
+	const endDate = roomCard.end_date
+		? new Date(roomCard.end_date)
+		: new Date(Number.POSITIVE_INFINITY);
 
 	const isBeforeStartDate = currentDate < startDate;
 	const isAfterEndDate = currentDate > endDate;
@@ -127,7 +131,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	return (
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
-			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
 		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
@@ -143,12 +147,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					<View
 						style={[
 							styles.overlay,
-							// isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
+							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
 						]}
 					/>
-					{/* {(isBeforeStartDate || isAfterEndDate) && (
+					{(isBeforeStartDate || isAfterEndDate) && (
 						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
-					)} */}
+					)}
 					<View style={styles.textContainer}>
 						<Text style={styles.roomName}>
 							{truncateText(roomCard.name, 20)}

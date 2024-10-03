@@ -27,8 +27,12 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	};
 
 	const currentDate = new Date();
-	const startDate = new Date(roomCard.start_date);
-	const endDate = new Date(roomCard.end_date);
+	const startDate = roomCard.start_date
+		? new Date(roomCard.start_date)
+		: new Date(0);
+	const endDate = roomCard.end_date
+		? new Date(roomCard.end_date)
+		: new Date(Number.POSITIVE_INFINITY);
 
 	const isBeforeStartDate = currentDate < startDate;
 	const isAfterEndDate = currentDate > endDate;
@@ -38,7 +42,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			onPress={navigateToRoomPage}
 			style={styles.cardContainer}
 			testID="minicard"
-			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
 		>
 			<View style={styles.imageContainer}>
 				<Image
@@ -54,7 +58,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 				<Text style={styles.roomName}>{roomCard.name}</Text>
 
 				{/* Display opening or closing date */}
-				{/* {isBeforeStartDate ? (
+				{isBeforeStartDate ? (
 					<Text style={styles.roomStatus}>
 						This room will open on{" "}
 						{startDate.toLocaleDateString("en-GB", {
@@ -83,8 +87,8 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 						})}
 					</Text>
 				) : (
-					
-				)} */}
+					<></>
+				)}
 				<Text style={styles.roomDescription}>
 					{truncateText(roomCard.description, 50)}
 				</Text>
