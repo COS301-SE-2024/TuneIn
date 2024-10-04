@@ -58,9 +58,13 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async handleConnection(client: Socket) {
 		console.log("Client connected with ID: " + client.id);
+		this.roomService.server = this.server;
+		this.liveService.setServer(this.server);
 	}
 
 	async handleDisconnect(client: Socket) {
+		this.roomService.server = this.server;
+		this.liveService.setServer(this.server);
 		try {
 			console.log("Client (id: " + client.id + ") disconnected");
 			if (this.roomUsers.getConnectedUser(client.id) !== null) {
