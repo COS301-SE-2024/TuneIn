@@ -619,6 +619,7 @@ export class SpotifyService {
 						duration: track.duration_ms,
 						genre: genre !== undefined && genre !== null ? genre : "Unknown",
 						artwork_url: this.getLargestImage(track.album.images).url,
+						track_info: JSON.stringify(track),
 						audio_features: JSON.stringify(audioFeatures),
 						spotify_id: track.id,
 					};
@@ -660,7 +661,7 @@ export class SpotifyService {
 					);
 
 					const createList: Prisma.songCreateInput[] = [];
-					const editList: Prisma.songUpdateInput[] = [];
+					const editList: Prisma.songUpdateArgs[] = [];
 					const editListIDs: string[] = [];
 					for (const track of tracks) {
 						if (track.id !== null) {
@@ -684,6 +685,7 @@ export class SpotifyService {
 										genre !== undefined && genre !== null ? genre : "Unknown",
 									artwork_url: this.getLargestImage(track.album.images).url,
 									audio_features: JSON.stringify(trackFeatures),
+									track_info: JSON.stringify(track),
 									spotify_id: track.id,
 								};
 								createList.push(song);
@@ -696,38 +698,56 @@ export class SpotifyService {
 										genre !== undefined && genre !== null ? genre : "Unknown",
 									artwork_url: this.getLargestImage(track.album.images).url,
 									audio_features: JSON.stringify(trackFeatures),
+									track_info: JSON.stringify(track),
 									spotify_id: track.id,
 								};
-								editList.push(song);
+								editList.push({
+									where: {
+										spotify_id: track.id,
+									},
+									data: song,
+								});
 								editListIDs.push(track.id);
 							}
 						}
 					}
-					const promises: (
-						| Prisma.PrismaPromise<PrismaTypes.song[]>
-						| Prisma.PrismaPromise<Prisma.BatchPayload>
-					)[] = [];
-					if (createList.length > 0) {
-						promises.push(
-							this.prisma.song.createManyAndReturn({
-								data: createList,
-								skipDuplicates: true,
-							}),
-						);
-					}
-					if (editList.length > 0) {
-						promises.push(
-							this.prisma.song.updateMany({
-								where: {
-									spotify_id: {
-										in: editListIDs,
-									},
-								},
-								data: editList,
-							}),
-						);
-					}
-					await Promise.all(promises);
+					// const promises: (
+					// 	| Prisma.PrismaPromise<PrismaTypes.song[]>
+					// 	| Prisma.PrismaPromise<Prisma.BatchPayload>
+					// )[] = [];
+					// if (createList.length > 0) {
+					// 	promises.push(
+					// 		this.prisma.song.createManyAndReturn({
+					// 			data: createList,
+					// 			skipDuplicates: true,
+					// 		}),
+					// 	);
+					// }
+					// if (editList.length > 0) {
+					// 	promises.push(
+					// 		this.prisma.song.updateMany({
+					// 			where: {
+					// 				spotify_id: {
+					// 					in: editListIDs,
+					// 				},
+					// 			},
+					// 			data: editList,
+					// 		}),
+					// 	);
+					// }
+					// await Promise.all(promises);
+					await this.prisma.$transaction(
+						createList.map((song) => {
+							return this.prisma.song.create({
+								data: song,
+							});
+						}),
+					);
+					await this.prisma.$transaction(
+						editList.map((song) => {
+							return this.prisma.song.update(song);
+						}),
+					);
 					result = await this.prisma.song.findMany({
 						where: {
 							spotify_id: {
