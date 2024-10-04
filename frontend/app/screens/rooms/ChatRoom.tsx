@@ -40,6 +40,7 @@ const ChatRoom = () => {
 		leaveRoom,
 		roomControls,
 		roomEmojiObjects,
+		roomPlaying,
 	} = useLive();
 	const { rooms } = useAPI();
 	const [userInRoom, setUserInRoom] = useState(false);
@@ -96,7 +97,7 @@ const ChatRoom = () => {
 		} else if (currentRoom && userInRoom) {
 			await rooms.leaveRoom(roomID);
 			leaveRoom();
-			if (await roomControls.playbackHandler.userListeningToRoom()) {
+			if (await roomControls.playbackHandler.userListeningToRoom(roomPlaying)) {
 				await roomControls.playbackHandler.handlePlayback("pause");
 			}
 		}
