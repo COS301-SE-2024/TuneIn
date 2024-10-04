@@ -20,6 +20,8 @@ import ContextMenu from "../../components/ContextMenu";
 import { useLive } from "../../LiveContext";
 import { useAPI } from "../../APIContext";
 import { RoomDto, RoomSongDto } from "../../../api";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -131,6 +133,99 @@ function MyRoomTabs() {
 			});
 	};
 
+	const getRoom = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			return {
+				roomID: roomID,
+				id: roomID,
+				name: data.room_name,
+				description: data.description,
+				userID: data.creator.userID,
+				username: data.creator.username,
+				tags: data.tags,
+				genre: data.room_name.split(" - ")[1],
+				backgroundImage: data.room_image,
+				isExplicit: data.has_explicit_content,
+				isNsfw: data.has_nsfw_content,
+				language: data.language,
+				roomSize: "50",
+				userProfile: data.creator.profile_picture_url,
+				mine: data.creator.userID === currentUser?.userID,
+				songName: data.current_song ? data.current_song.title : null,
+			};
+		} catch (error) {
+			console.log("Error getting room: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room.");
+			}
+		}
+	};
+
+	const getRoomQueue = async (roomID: string) => {
+		const token = await auth.getToken();
+		try {
+			const response = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response.ok) {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show(await response.text(), ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", await response.text());
+				}
+				return null;
+			}
+			const data = await response.json();
+			const queue = data.map((song: any) => {
+				const cover = song.cover;
+				return {
+					id: song.id,
+					name: song.title,
+					artists: song.artists.map((artist: string) => ({ name: artist })), // Convert artist string to object
+					album: { images: [{ url: cover }] },
+					explicit: false,
+					preview_url: "",
+					uri: `spotify:track:${song.spotify_id}`,
+					duration_ms: song.duration * 1000,
+				};
+			});
+			console.log("Room queue data: ", queue);
+			return queue;
+		} catch (error) {
+			console.log("Error getting room queue: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to get room queue", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Failed to get room queue.");
+			}
+		}
+	};
+
 	const handleNavigateToChildRooms = async () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
@@ -143,10 +238,10 @@ function MyRoomTabs() {
 					Alert.alert("Error", "No child rooms found.");
 				}
 			} else {
-				const childRoomData: RoomDto[] = await Promise.all(
+				const childRoomData = await Promise.all(
 					childRooms.map((childRoomID: string) => getRoom(childRoomID)),
 				);
-				const childRoomQueueData: RoomSongDto[] = await Promise.all(
+				const childRoomQueueData = await Promise.all(
 					childRooms.map((childRoomID: string) => getRoomQueue(childRoomID)),
 				);
 				router.navigate({
