@@ -395,7 +395,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		setRoomQueue,
 		spotifyTokens,
 		spotifyAuth,
-		roomPlaying,
 		pollLatency,
 	});
 
@@ -719,12 +718,30 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							console.error("Failed to get Spotify tokens:", error);
 						});
 				}
+
+				if (!currentRoom) {
+					users
+						.getCurrentRoom()
+						.then((r) => {
+							if (r.status >= 200 && r.status < 300) {
+								console.log(`User was already in room`);
+								console.log(r.data);
+								setRoomID(r.data.roomID);
+							}
+						})
+						.catch(() => {
+							console.error(`Something bad happened`);
+						});
+				}
 			}
+			await new Promise((resolve) => setTimeout(resolve, 10000));
 		},
 		[
+			currentRoom,
 			currentUser,
 			refreshUser,
 			roomControls.playbackHandler,
+			setRoomID,
 			spotifyTokens,
 			tokenState.token,
 			userBookmarks.length,
@@ -759,12 +776,15 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					roomIDs.push(roomID);
 				}
 			}
-			const roomsPromise: AxiosResponse<RoomDto[]> =
-				await rooms.getRooms(roomIDs);
-			if (roomsPromise.status !== 200) {
-				return;
+			let sharedRooms: RoomDto[] = [];
+			if (roomIDs.length > 0) {
+				const roomsPromise: AxiosResponse<RoomDto[]> =
+					await rooms.getRooms(roomIDs);
+				if (roomsPromise.status !== 200) {
+					return;
+				}
+				sharedRooms = roomsPromise.data;
 			}
-			const sharedRooms: RoomDto[] = roomsPromise.data;
 			const fetchedRecentDMs: {
 				message: DirectMessageDto;
 				room?: RoomDto;
@@ -1558,18 +1578,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		} else {
 			// user is not in a room
 			// updateState({ type: actionTypes.CLEAR_ROOM_STATE });
-			users
-				.getCurrentRoom()
-				.then((r) => {
-					if (r.status >= 200 && r.status < 300) {
-						console.log(`User was already in room`);
-						console.log(r.data);
-						setRoomID(r.data.roomID);
-					}
-				})
-				.catch(() => {
-					console.error(`Something bad happened`);
-				});
 		}
 		// }, [
 		// 	authenticated,
@@ -1585,20 +1593,20 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	}, [
 		authenticated,
 		currentRoom,
-		currentSong,
+		// currentSong,
 		currentUser,
 		directMessages,
-		dmParticipants,
-		roomQueue,
-		roomMessages,
+		// dmParticipants,
+		// roomQueue,
+		// roomMessages,
 		currentRoomVotes,
 		socketRef.current?.connected,
 		socketRef.current?.disconnected,
 		tokenState.token,
 		users,
 		spotifyAuth,
-		dmControls,
-		roomControls,
+		// dmControls,
+		// roomControls,
 		// socketState,
 		socketEventsReceived,
 		socketCreationTime,
