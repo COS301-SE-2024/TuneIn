@@ -1949,7 +1949,7 @@ export class UsersService {
 			where: { user_id: userID },
 		});
 
-		if(key !== undefined || key !== null) {
+		if(key === undefined || key === null) {
 			await this.prisma.public_key.create({
 				data: {
 					user_id: userID,
