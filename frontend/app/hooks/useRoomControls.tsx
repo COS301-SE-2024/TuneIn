@@ -218,6 +218,9 @@ export function useRoomControls({
 					})
 					.catch((err) => {
 						console.error("An error occurred while transferring playback", err);
+						Alert.alert(
+							"An error occurred while transferring playback: " + err,
+						);
 						setDeviceError(
 							"An error occurred while transferring playback: " + err,
 						);
@@ -239,7 +242,19 @@ export function useRoomControls({
 				return [];
 			} else {
 				try {
-					const devices: Devices = await spotify.player.getAvailableDevices();
+					const devices: Devices = await spotify.player
+						.getAvailableDevices()
+						.catch((err) => {
+							console.error(
+								"An error occurred while fetching devices. Spotify:",
+								err,
+							);
+							setDeviceError(
+								"An error occurred while fetching devices. Spotify: " + err,
+							);
+							Alert.alert("An error occurred while fetching devices: " + err);
+							throw err;
+						});
 					setSpotifyDevices(devices);
 					setDeviceError(null);
 					for (const device of devices.devices) {
@@ -253,7 +268,22 @@ export function useRoomControls({
 							}
 						}
 					}
-					const state: PlaybackState = await spotify.player.getPlaybackState();
+					const state: PlaybackState = await spotify.player
+						.getPlaybackState()
+						.catch((err) => {
+							console.error(
+								"An error occurred while fetching playback state. Spotify:",
+								err,
+							);
+							Alert.alert(
+								"An error occurred while fetching playback state: " + err,
+							);
+							setDeviceError(
+								"An error occurred while fetching playback state. Spotify: " +
+									err,
+							);
+							throw err;
+						});
 					console.log("Playback state:", state);
 					if (state === null) {
 						return [];
@@ -461,7 +491,19 @@ export function useRoomControls({
 				return false;
 			}
 			if (roomPlaying) {
-				const state: PlaybackState = await spotify.player.getPlaybackState();
+				const state: PlaybackState = await spotify.player
+					.getPlaybackState()
+					.catch((err) => {
+						console.error(
+							"An error occurred while checking if user is listening to room",
+							err,
+						);
+						Alert.alert(
+							"An error occurred while checking if user is listening to room: " +
+								err,
+						);
+						throw err;
+					});
 				console.log("Playback state:", state);
 				if (state === null) {
 					console.log(`userListeningToRoom false because state is null`);
@@ -677,6 +719,10 @@ export function useRoomControls({
 						console.error(
 							"An error occurred while checking if user is listening to room",
 							err,
+						);
+						Alert.alert(
+							"An error occurred while checking if user is listening to room: " +
+								err,
 						);
 					}
 				};
