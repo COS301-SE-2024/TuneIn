@@ -1081,4 +1081,52 @@ export class UsersController {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		await this.usersService.reportUser(userInfo.id, username);
 	}
+
+	@Get(":username/publicKey")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({
+		summary: "Get a user's public key",
+		description: "Get the public key of the user with the provided username",
+		operationId: "getPublicKey",
+	})
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to whose public key to get.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
+	})
+	async getPublicKey(@Param("username") username: string): Promise<string> {
+		return this.usersService.getPublicKey(username);
+	}
+
+	@Post(":key/publicKey")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({
+		summary: "Upload public key",
+		description: "Upload new public key for user",
+		operationId: "uploadPublicKey",
+	})
+	@ApiParam({
+		name: "publicKey",
+		description: "The public key to upload.",
+		required: true,
+		type: String,
+		allowEmptyValue: false,
+	})
+	async uploadPublicKey(
+		@Request() req: Request,
+		@Param("key") key: string,
+	): Promise<void> {
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		this.usersService.uploadPublicKey(userInfo.id, key);
+	}
 }

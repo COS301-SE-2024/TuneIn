@@ -1934,4 +1934,33 @@ export class UsersService {
 		);
 		return Number.isNaN(genreSimilarity) ? 0 : genreSimilarity;
 	}
+
+	async getPublicKey(username: string): Promise<string> {
+		const user: UserDto = await this.getProfileByUsername(username);
+		const key = await this.prisma.public_key.findUnique({
+			where: { user_id: user.userID },
+		});
+
+		return key?.key || "";
+	}
+
+	async uploadPublicKey(userID: string, publicKey: string): Promise<void> {
+		const key = await this.prisma.public_key.findUnique({
+			where: { user_id: userID },
+		});
+
+		if(key !== undefined || key !== null) {
+			await this.prisma.public_key.create({
+				data: {
+					user_id: userID,
+                    key: publicKey,
+				}
+			})
+		} else {
+			await this.prisma.public_key.update({
+                where: { user_id: userID },
+                data: { key: publicKey },
+            });
+		}
+	}
 }
