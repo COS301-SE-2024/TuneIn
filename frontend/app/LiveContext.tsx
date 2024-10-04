@@ -294,7 +294,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 
 				if (authenticated) {
-					authAPI
+					return authAPI
 						.getSpotifyTokens()
 						.then((sp: AxiosResponse<SpotifyTokenPair>) => {
 							if (sp.status === 401) {
@@ -314,7 +314,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								throw new Error("Parameter missing from request to get user");
 							} else {
 								// some other error
-								throw new Error("Error getting user");
+								return null;
 							}
 						});
 				}

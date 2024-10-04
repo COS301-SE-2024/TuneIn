@@ -16,7 +16,7 @@ import {
 } from "../../api";
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
 import { QueueEventDto } from "../models/QueueEventDto";
-import { Alert, ToastAndroid } from "react-native";
+import { Alert } from "react-native";
 import { ChatEventDto } from "../models/ChatEventDto";
 import { PlaybackEventDto } from "../models/PlaybackEventDto";
 import {
@@ -104,11 +104,14 @@ export interface RoomControls {
 	queue: QueueControls;
 	state: PlaybackState | undefined;
 }
-
 export interface Playback {
 	spotifyDevices: Devices;
 	deviceError: string | null;
-	handlePlayback: (action: string, song?: RoomSongDto) => Promise<void>;
+	handlePlayback: (
+		action: string,
+		playlistID?: string,
+		song?: RoomSongDto,
+	) => Promise<void>;
 	getDevices: () => Promise<Device[]>;
 	getDeviceIDs: () => Promise<string[]>;
 	activeDevice: Device | undefined;
@@ -116,7 +119,7 @@ export interface Playback {
 		deviceID: string | null;
 		userSelected: boolean;
 	}>;
-	userListeningToRoom: () => Promise<boolean>;
+	userListeningToRoom: (roomPlaying: boolean) => Promise<boolean>;
 	startPlayback: () => void;
 	pausePlayback: () => void;
 	// stopPlayback: () => void;
@@ -150,10 +153,7 @@ export function useRoomControls({
 	pollLatency,
 }: RoomControlProps): RoomControls {
 	console.log("useRoomControls()");
-	console.log("currentUser:", currentUser);
-	console.log("currentRoom:", currentRoom);
 	const { socketState, updateState } = useLiveState();
-	const [lastSync, setLastSync] = useState<Date>(new Date(0));
 	const spotify: SpotifyApi | undefined = useMemo(() => {
 		if (currentUser && currentUser.hasSpotifyAccount && spotifyTokens) {
 			return SpotifyApi.withAccessToken(clientId, spotifyTokens.tokens);
@@ -231,6 +231,7 @@ export function useRoomControls({
 		undefined,
 	);
 	const [deviceError, setDeviceError] = React.useState<string | null>(null);
+	const intervalRef = useRef<NodeJS.Timeout>();
 
 	const getDevices = useCallback(
 		async function (): Promise<Device[]> {
@@ -305,11 +306,15 @@ export function useRoomControls({
 				}
 			}
 		},
-		[spotify],
+		[activeDevice, spotify],
 	);
 
 	const handlePlayback = useCallback(
-		async function (action: string, song?: RoomSongDto): Promise<void> {
+		async function (
+			action: string,
+			playlistID?: string,
+			song?: RoomSongDto,
+		): Promise<void> {
 			try {
 				if (!spotifyTokens) {
 					throw new Error("Spotify tokens not found");
@@ -319,44 +324,6 @@ export function useRoomControls({
 					throw new Error(
 						"User either does not have a Spotify account or is not logged in",
 					);
-				}
-
-				if (action === "play" && !(currentRoom || song)) {
-					throw new Error("Media to play not specified");
-				}
-
-				let trackURI: string;
-				let position = 0;
-				if (song) {
-					trackURI = `spotify:track:${song.spotifyID}`;
-					position = song.playlistIndex;
-				} else {
-					if (!currentSong) {
-						if (roomQueue.length === 0) {
-							throw new Error("No song is currently playing");
-						} else {
-							const s: RoomSongDto = roomQueue[0];
-							trackURI = `spotify:track:${s.spotifyID}`;
-							song = s;
-							position = s.playlistIndex;
-						}
-					} else {
-						trackURI = `spotify:track:${currentSong.spotifyID}`;
-						song = currentSong;
-						position = currentSong.playlistIndex;
-					}
-				}
-				console.log(`Track URI: ${trackURI}`);
-				if (!validTrackUri(trackURI)) {
-					throw new Error("Invalid track URI");
-				}
-
-				let playlistURI: string | undefined;
-				if (currentRoom) {
-					playlistURI = `spotify:playlist:${currentRoom.spotifyPlaylistID}`;
-					if (!validPlaylistUri(playlistURI)) {
-						throw new Error("Invalid playlist URI");
-					}
 				}
 
 				let device: Device | undefined = activeDevice;
@@ -394,40 +361,95 @@ export function useRoomControls({
 				}
 				console.log("active device:", device);
 
-				let st: Date | undefined;
-				if (typeof song.startTime === "string") {
-					st = new Date(song.startTime);
-				} else {
-					st = song.startTime;
-				}
-				let offsetMs = 0;
-				if (st) {
-					const currentTime = new Date();
-					console.log(
-						`Song start: ${st.getTime()}, Current time: ${currentTime.getTime()}`,
-					);
-					offsetMs = currentTime.getTime() - st.getTime();
-					console.log(`Offset: ${offsetMs}`);
+				if (action === "play") {
+					if (!playlistID || !song) {
+						throw new Error("No playlist or song provided");
+					}
+
+					const trackURI: string = `spotify:track:${song.spotifyID}`;
+					const position = song.playlistIndex;
+					// if (song) {
+					// 	trackURI
+					// 	position = ;
+					// } else {
+					// 	if (!currentSong) {
+					// 		if (roomQueue.length === 0) {
+					// 			throw new Error("No song is currently playing");
+					// 		} else {
+					// 			const s: RoomSongDto = roomQueue[0];
+					// 			trackURI = `spotify:track:${s.spotifyID}`;
+					// 			song = s;
+					// 			position = s.playlistIndex;
+					// 		}
+					// 	} else {
+					// 		trackURI = `spotify:track:${currentSong.spotifyID}`;
+					// 		song = currentSong;
+					// 		position = currentSong.playlistIndex;
+					// 	}
+					// }
+					console.log(`Track URI: ${trackURI}`);
+					if (!validTrackUri(trackURI)) {
+						throw new Error("Invalid track URI");
+					}
+
+					const playlistURI: string = `spotify:playlist:${playlistID}`;
+					if (!validPlaylistUri(playlistURI)) {
+						throw new Error("Invalid playlist URI");
+					}
+					// if (currentRoom) {
+					// 	if (roomQueue.length === 0) {
+					// 		Alert.alert("No songs in queue");
+					// 		return;
+					// 	}
+					// 	playlistURI = ;
+					// 	if (!validPlaylistUri(playlistURI)) {
+					// 		throw new Error("Invalid playlist URI");
+					// 	}
+					// }
+
+					const st = song.startTime;
+					let offsetMs = 0;
+					if (st) {
+						const currentTime = new Date();
+						console.log(
+							`Song start: ${st}, Current time: ${currentTime.getTime()}`,
+						);
+						offsetMs = currentTime.getTime() - st;
+						console.log(`Offset: ${offsetMs}`);
+					}
+
+					// await spotify.player.startResumePlayback(
+					// 	device.id,
+					// 	undefined,
+					// 	[uri],
+					// 	undefined,
+					// 	offsetMs,
+					// );
+					console.table({
+						deviceID: device.id,
+						playlistURI: playlistURI,
+						position: position,
+						offsetMs: offsetMs,
+					});
+					await spotify.player
+						.startResumePlayback(
+							device.id,
+							playlistURI,
+							undefined,
+							{ position: position },
+							offsetMs,
+						)
+						.catch((err) => {
+							console.error("An error occurred while starting playback", err);
+							Alert.alert("An error occurred while starting playback: " + err);
+							throw err;
+						});
+					console.log("Playback action (PLAY) successful");
+					return;
 				}
 
 				try {
 					switch (action) {
-						case "play":
-							// await spotify.player.startResumePlayback(
-							// 	device.id,
-							// 	undefined,
-							// 	[uri],
-							// 	undefined,
-							// 	offsetMs,
-							// );
-							await spotify.player.startResumePlayback(
-								device.id,
-								playlistURI,
-								undefined,
-								{ position: position },
-								offsetMs,
-							);
-							break;
 						case "pause":
 							await spotify.player.pausePlayback(device.id);
 							break;
@@ -452,10 +474,7 @@ export function useRoomControls({
 		[
 			spotifyTokens,
 			spotify,
-			currentRoom,
 			activeDevice,
-			currentSong,
-			roomQueue,
 			spotifyDevices.devices.length,
 			getDevices,
 		],
