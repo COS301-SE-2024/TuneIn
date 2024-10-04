@@ -112,7 +112,23 @@ function MyRoomTabs() {
 
 	const handleSavePlaylist = () => {
 		setMenuVisible(false);
-		// Implement room sharing logic here
+		rooms
+			.saveRoom(roomID)
+			.then((response) => {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("Playlist saved successfully", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Success", "Playlist saved successfully.");
+				}
+			})
+			.catch((error) => {
+				console.log("Error saving playlist: ", error);
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("Failed to save playlist", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", "Failed to save playlist.");
+				}
+			});
 	};
 
 	const handleNavigateToChildRooms = async () => {
@@ -230,8 +246,8 @@ function MyRoomTabs() {
 			>
 				<Tab.Screen
 					name="RoomPage"
-					component={() => <RoomPage />}
 					options={{ tabBarLabel: "Room" }}
+					component={RoomPage}
 				/>
 				{socketHandshakes.roomJoined && userInRoom && (
 					<>
