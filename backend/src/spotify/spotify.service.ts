@@ -910,21 +910,52 @@ export class SpotifyService {
 	}
 
 	async getManyTracks(trackIDs: string[]): Promise<Spotify.Track[]> {
+		if (trackIDs.length === 0) {
+			return [];
+		}
+		const trackInfo: Spotify.Track[] = await this.prisma.song
+			.findMany({
+				where: {
+					spotify_id: {
+						in: trackIDs,
+					},
+				},
+			})
+			.then((songs) => {
+				const result: Spotify.Track[] = [];
+				for (const song of songs) {
+					try {
+						result.push(JSON.parse(song.track_info as string) as Spotify.Track);
+					} catch (e) {
+						console.error(`Failed to parse track info for ${song.spotify_id}`);
+						console.error(song.track_info);
+						console.error(e);
+					}
+				}
+				return result;
+			});
+		const notFound: string[] = trackIDs.filter(
+			(id) => !trackInfo.map((track) => track.id).includes(id),
+		);
+		if (notFound.length === 0) {
+			return trackInfo;
+		}
+
 		let attempts = 0;
 		let error: Error | undefined;
 		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
 			try {
 				const promises: Promise<Spotify.Track[]>[] = [];
-				for (let i = 0; i < trackIDs.length; i += 50) {
-					const ids = trackIDs.slice(i, i + 50);
+				for (let i = 0; i < notFound.length; i += 50) {
+					const ids = notFound.slice(i, i + 50);
 					promises.push(this.userlessAPI.tracks.get(ids));
 				}
 				const results: Spotify.Track[][] = await Promise.all(promises);
-				const tracks: Spotify.Track[] = [];
 				for (const result of results) {
-					tracks.push(...result);
+					trackInfo.push(...result);
 				}
-				return tracks;
+				this.addTracksToDB(trackInfo);
+				return trackInfo;
 			} catch (e) {
 				error = e as Error;
 				attempts++;
