@@ -791,7 +791,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (song === null) {
 					throw new Error("No song is queued");
 				}
-				const startTime: Date | undefined = song.startTime;
+				const startTime: number | undefined = song.startTime;
 				if (startTime === undefined) {
 					throw new Error("No start time for song");
 				}
@@ -800,7 +800,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					userID: null,
 					roomID: roomID,
 					spotifyID: song.spotifyID,
-					UTC_time: startTime.getTime(),
+					UTC_time: startTime,
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 			} catch (error) {
@@ -847,7 +847,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (song === null) {
 				throw new Error("No song is queued");
 			}
-			const startTime: Date | undefined = song.startTime;
+			const startTime: number | undefined = song.startTime;
 			if (startTime === undefined) {
 				throw new Error("No start time for song");
 			}
@@ -856,7 +856,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				userID: null,
 				roomID: roomID,
 				spotifyID: song.spotifyID,
-				UTC_time: startTime.getTime(),
+				UTC_time: startTime,
 			};
 			this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
 		} catch (error) {
@@ -928,7 +928,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (song === null) {
 					throw new Error("No song is queued");
 				}
-				let startTime: Date | undefined = song.startTime;
+				let startTime: number | undefined = song.startTime;
 				if (startTime === undefined) {
 					song = await this.roomQueue.play(roomID);
 					if (song === null) {
@@ -945,7 +945,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					userID: null,
 					roomID: roomID,
 					spotifyID: song.spotifyID,
-					UTC_time: startTime.getTime(),
+					UTC_time: startTime,
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 			} catch (error) {
@@ -979,7 +979,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				if (song === null) {
 					throw new Error("No song is queued");
 				}
-				let startTime: Date | undefined = song.startTime;
+				let startTime: number | undefined = song.startTime;
 				if (startTime === undefined) {
 					song = await this.roomQueue.play(roomID);
 					if (song === null) {
@@ -996,7 +996,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					userID: null,
 					roomID: roomID,
 					spotifyID: song.spotifyID,
-					UTC_time: startTime.getTime(),
+					UTC_time: startTime,
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
 			} catch (error) {
@@ -1346,7 +1346,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			roomID,
 		);
 		if (song) {
-			const startTime: Date | undefined = await song.startTime;
+			const startTime: number | undefined = await song.startTime;
 			if (!startTime) {
 				throw new Error("No song start time found somehow?");
 			}
@@ -1356,7 +1356,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				roomID: roomID,
 				spotifyID: song.spotifyID,
 				song: song,
-				UTC_time: startTime.getTime(),
+				UTC_time: startTime,
 			};
 			this.server.to(roomID).emit(SOCKET_EVENTS.CURRENT_MEDIA, response);
 			console.log("Response emitted: " + SOCKET_EVENTS.CURRENT_MEDIA);

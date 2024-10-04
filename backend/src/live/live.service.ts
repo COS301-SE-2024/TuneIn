@@ -38,12 +38,15 @@ export class LiveService {
 	@Cron("0 * * * * *") // Run this every 1 minutes
 	async checkRoomQueues() {
 		// const jobs = this.schedulerRegistry.getCronJobs();
-		const now = new Date();
-		console.log(`${now.valueOf()} Checking room queues (${now.toISOString()})`);
+		let now = new Date().valueOf();
+		console.log(
+			`${new Date().valueOf()} Checking room queues (${new Date().toISOString()})`,
+		);
 		const rooms: Map<string, ActiveRoom> = this.roomQueue.roomQueues;
 		const roomsToRemove: string[] = [];
 		for (const room of rooms.values()) {
 			console.log(`Checking room ${room.room.roomID}`);
+			now = new Date().valueOf();
 			if (room.inactive) {
 				room.minutesInactive++;
 				console.log(
@@ -78,9 +81,7 @@ export class LiveService {
 				const head = room.songs[0];
 				const st = head.getPlaybackStartTime();
 				if (st !== null) {
-					const expectedEndTime = new Date(
-						st.getTime() + head.spotifyInfo.duration_ms,
-					);
+					const expectedEndTime = st + head.songDurationMs + 5000; // 5 seconds of buffer for this code to run
 					if (now > expectedEndTime) {
 						console.log(
 							`Room ${room.room.roomID}: Removing played songs from queue`,
@@ -90,7 +91,7 @@ export class LiveService {
 				}
 				this.cancelSongAnnouncements(room.room.roomID);
 				if (room.songs[0].getPlaybackStartTime() === null) {
-					room.songs[0].setPlaybackStartTime(new Date());
+					room.songs[0].setPlaybackStartTime(new Date().valueOf());
 					await this.roomQueue.refreshQueue(room.room.roomID);
 				}
 				const songsAsRoomSongDto: RoomSongDto[] = room
@@ -109,9 +110,9 @@ export class LiveService {
 					roomID: room.room.roomID,
 					spotifyID: currentSong.spotifyID,
 					song: currentSong,
-					UTC_time: currentSong.startTime.getTime(),
+					UTC_time: currentSong.startTime,
 				};
-				if (currentSong.startTime.getTime() < now.getTime()) {
+				if (currentSong.startTime < now) {
 					if (!currentSong.pauseTime) {
 						this.server
 							.to(room.room.roomID)
@@ -141,9 +142,13 @@ export class LiveService {
 						roomID: room.room.roomID,
 						spotifyID: song.spotifyID,
 						song: song,
-						UTC_time: song.startTime.getTime(),
+						UTC_time: song.startTime,
 					};
-					this.createSongAnnouncement(room.room.roomID, song.startTime, event);
+					this.createSongAnnouncement(
+						room.room.roomID,
+						new Date(song.startTime),
+						event,
+					);
 				}
 			}
 		}
@@ -166,9 +171,9 @@ export class LiveService {
 		const job = new CronJob(startTime, async () => {
 			try {
 				console.log(`${roomID}: New song announcement for room`);
-				if (event.song && event.song.track) {
+				if (event.song) {
 					console.log(
-						`${roomID}: Play song (index=${event.song.index}): ${event.song.spotifyID} ${event.song.track.name} by ${event.song.track.artists[0].name}`,
+						`${roomID}: Play song (index=${event.song.index}): ${event.song.spotifyID}`,
 					);
 				}
 				for (let i = 0; i < 5; i++) {

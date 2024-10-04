@@ -16,5 +16,5 @@ export class VoteDto {
 
 	@ApiProperty()
 	@IsDate()
-	createdAt: Date;
+	createdAt: number;
 }

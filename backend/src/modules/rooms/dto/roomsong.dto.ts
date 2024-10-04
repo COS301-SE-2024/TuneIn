@@ -1,6 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Track } from "@spotify/web-api-ts-sdk";
-import { IsString, IsNumber, IsDate, IsObject } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsString, IsNumber } from "class-validator";
 
 export class RoomSongDto {
 	@ApiProperty()
@@ -19,21 +18,17 @@ export class RoomSongDto {
 	@IsNumber()
 	index: number;
 
-	@ApiProperty()
-	@IsDate()
-	startTime?: Date;
+	@ApiPropertyOptional()
+	@IsNumber()
+	startTime?: number;
 
 	@ApiProperty()
-	@IsDate()
-	insertTime: Date;
+	@IsNumber()
+	insertTime: number;
 
-	@ApiProperty()
-	@IsDate()
-	pauseTime?: Date;
-
-	@ApiProperty()
-	@IsObject()
-	track: Track;
+	@ApiPropertyOptional()
+	@IsNumber()
+	pauseTime?: number;
 
 	@ApiProperty()
 	@IsNumber()

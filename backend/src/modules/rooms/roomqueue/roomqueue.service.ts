@@ -28,10 +28,9 @@ export class RoomSong {
 	public readonly userID: string;
 	public readonly spotifyID: string;
 	private votes: VoteDto[];
-	public readonly insertTime: Date;
-	private playbackStartTime: Date | null;
-	private internalQueueItemID: string;
-	public pauseTime: Date | null = null;
+	public readonly insertTime: number;
+	private playbackStartTime: number | null;
+	public pauseTime: number | null = null;
 	public readonly songDurationMs: number;
 
 	constructor(
@@ -45,8 +44,7 @@ export class RoomSong {
 		this.userID = userID;
 		this.spotifyID = spotifyID;
 		this.votes = [];
-		this.insertTime = insertTime;
-		this.playbackStartTime = playbackStartTime;
+		this.insertTime = insertTime.valueOf();
 		this.playbackStartTime =
 			playbackStartTime !== null ? playbackStartTime.valueOf() : null;
 		this.songDurationMs = durationMs;
@@ -78,7 +76,7 @@ export class RoomSong {
 			isUpvote: v.is_upvote,
 			userID: v.user_id,
 			spotifyID: v.queue_id,
-			createdAt: v.vote_time,
+			createdAt: v.vote_time.valueOf(),
 		}));
 		this.votes.push(...voteDtos);
 		this._score = this.calculateScore();
@@ -96,7 +94,7 @@ export class RoomSong {
 		return true;
 	}
 
-	swapVote(userID: string, swapTime: Date): boolean {
+	swapVote(userID: string, swapTime: number): boolean {
 		const index = this.votes.findIndex((v) => v.userID === userID);
 		if (
 			index === -1 ||
@@ -154,24 +152,23 @@ export class RoomSong {
 		return this.votes;
 	}
 
-	exportNewVotes(): Prisma.voteCreateManyInput[] {
-		const votes: Prisma.voteCreateManyInput[] = [];
+	exportVotes(): Prisma.voteCreateManyQueueInput[] {
+		const votes: Prisma.voteCreateManyQueueInput[] = [];
 		for (const vote of this.votes) {
 			votes.push({
 				is_upvote: vote.isUpvote,
-				vote_time: vote.createdAt,
-				queue_id: this.queueItemID,
+				vote_time: new Date(vote.createdAt),
 				user_id: vote.userID,
 			});
 		}
 		return votes;
 	}
 
-	getPlaybackStartTime(): Date | null {
+	getPlaybackStartTime(): number | null {
 		return this.playbackStartTime;
 	}
 
-	setPlaybackStartTime(startTime: Date): void {
+	setPlaybackStartTime(startTime: number): void {
 		this.playbackStartTime = startTime;
 	}
 
@@ -218,36 +215,22 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 				song.getPlaybackStartTime(),
 		);
 	}
-	const head: RoomSong = queue[0];
-	const tempQueue: RoomSong[] = queue;
-	let sortedWithHead = true;
-	// the current playing song must stay in the front of the queue
-	if (head.isPaused() || head.isPlaying()) {
-		// remove head from tempQueue
-		tempQueue.shift();
-		sortedWithHead = false;
-	}
-	tempQueue.sort((a, b) => {
+	queue = queue.sort((a, b) => {
 		if (a.score === b.score) {
 			return a.insertTime.valueOf() - b.insertTime.valueOf();
 		}
 		return b.score - a.score;
 	});
-	if (!sortedWithHead) {
-		tempQueue.unshift(head);
-	}
-	if (tempQueue.length > 0) {
-		const currentStartTime = head.getPlaybackStartTime();
-		if (currentStartTime !== null) {
-			//update all start times to be sequential
-			let pos = currentStartTime.getTime();
-			for (let i = 0; i < tempQueue.length; i++) {
-				const song: RoomSong = tempQueue[i];
-				const t: Date = new Date(pos);
-				song.setPlaybackStartTime(t);
-				tempQueue[i] = song;
-				pos += song.spotifyInfo.duration_ms;
-			}
+	const head: RoomSong = queue[0];
+	const currentStartTime = head.getPlaybackStartTime();
+	if (currentStartTime !== null) {
+		//update all start times to be sequential
+		let pos = currentStartTime;
+		for (let i = 0; i < queue.length; i++) {
+			const song: RoomSong = queue[i];
+			song.setPlaybackStartTime(pos);
+			queue[i] = song;
+			pos += song.songDurationMs;
 		}
 	}
 	console.log("===================================");
@@ -301,7 +284,7 @@ export class ActiveRoom {
 				try {
 					this.queue = new PriorityQueue<RoomSong>(this.compareRoomSongs);
 					const playbackStartTime: IGetCompareValue<RoomSong> = (song) => {
-						const playbackTime: Date | null = song.getPlaybackStartTime();
+						const playbackTime: number | null = song.getPlaybackStartTime();
 						if (!playbackTime || playbackTime === null) {
 							throw new Error("Song has no playback start time");
 						}
@@ -821,7 +804,7 @@ export class ActiveRoom {
 	async swapVote(
 		spotifyID: string,
 		userID: string,
-		swapTime: Date,
+		swapTime: number,
 		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
@@ -1017,11 +1000,13 @@ export class ActiveRoom {
 					const st = song.getPlaybackStartTime();
 					if (song.isPaused() && song.pauseTime !== null && st !== null) {
 						const offset = song.pauseTime.valueOf() - st.valueOf();
-						const adjustedStart = new Date(Date.now() + offset);
+						const adjustedStart = Date.now() + offset;
 						this.queue.front().setPlaybackStartTime(adjustedStart);
 						this.queue.front().pauseTime = null;
 					} else if (st === null) {
-						this.queue.front().setPlaybackStartTime(new Date());
+						this.queue.front().setPlaybackStartTime(new Date().valueOf());
+						console.log("Setting playback start time to now");
+						console.log(this.queue.front().getPlaybackStartTime());
 					}
 					result = this.queue.front();
 				} catch (e) {
@@ -1041,7 +1026,7 @@ export class ActiveRoom {
 		if (this.queue.isEmpty()) {
 			return;
 		}
-		this.queue.front().pauseTime = new Date();
+		this.queue.front().pauseTime = new Date().valueOf();
 	}
 
 	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
@@ -1061,7 +1046,7 @@ export class ActiveRoom {
 					if (this.queue.isEmpty()) {
 						return;
 					}
-					this.queue.front().setPlaybackStartTime(new Date());
+					this.queue.front().setPlaybackStartTime(new Date().valueOf());
 					result = this.queue.front();
 				} catch (e) {
 					console.error("Error in playNext");
@@ -1110,11 +1095,11 @@ export class ActiveRoom {
 			return null;
 		}
 		const lastSong = this.historicQueue.dequeue();
-		lastSong.setPlaybackStartTime(new Date());
+		lastSong.setPlaybackStartTime(new Date().valueOf());
 		const oldQueue = this.queue.toArray();
 		oldQueue.unshift(lastSong);
 		for (let i = 1, n = oldQueue.length; i < n; i++) {
-			oldQueue[i].setPlaybackStartTime(new Date(Number.MAX_SAFE_INTEGER));
+			oldQueue[i].setPlaybackStartTime(Number.MAX_SAFE_INTEGER);
 		}
 		await this.setQueue(oldQueue, spotify, murLockService);
 		await this.updateQueue(murLockService);
@@ -1260,7 +1245,7 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 		userID: string,
-		createdAt: Date,
+		createdAt: number,
 	): Promise<boolean> {
 		const vote: VoteDto = {
 			isUpvote: true,
@@ -1277,7 +1262,7 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 		userID: string,
-		createdAt: Date,
+		createdAt: number,
 	): Promise<boolean> {
 		const vote: VoteDto = {
 			isUpvote: false,
@@ -1299,7 +1284,7 @@ export class RoomQueueService {
 			isUpvote: true,
 			userID: userID,
 			spotifyID: spotifyID,
-			createdAt: new Date(),
+			createdAt: new Date().valueOf(),
 		};
 		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.removeVote(vote, this.spotify, this.murLockService);
@@ -1309,7 +1294,7 @@ export class RoomQueueService {
 		roomID: string,
 		spotifyID: string,
 		userID: string,
-		insertTime: Date,
+		insertTime: number,
 	): Promise<boolean> {
 		const activeRoom = await this.getRoom(roomID);
 		return await activeRoom.swapVote(
