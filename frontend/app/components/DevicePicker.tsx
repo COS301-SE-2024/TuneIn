@@ -19,35 +19,13 @@ const DevicePicker = () => {
 	const { roomControls } = useLive();
 	const [isVisible, setIsVisible] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-
-	useEffect(() => {
-		// Declare intervalId using useRef to ensure it maintains its value across renders
-		if (isVisible) {
-			const fetchDevices = async () => {
-				try {
-					const deviceList: Device[] =
-						roomControls.playbackHandler.spotifyDevices.devices;
-					console.log("deviceList: ", deviceList);
-				} catch (err) {
-					console.error("An error occurred while fetching devices", err);
-				}
-			};
-
-			fetchDevices();
-			intervalIdRef.current = setInterval(fetchDevices, 4000);
-
-			return () => {
-				if (intervalIdRef.current) {
-					clearInterval(intervalIdRef.current);
-				}
-			};
-		} else {
-			if (intervalIdRef.current) {
-				clearInterval(intervalIdRef.current);
-			}
-		}
-	}, [isVisible, roomControls.playbackHandler]);
+	const intervalIdRef = useRef<NodeJS.Timeout>();
+	const [localDevices, setLocalDevices] = useState<Device[]>(
+		roomControls.playbackHandler.spotifyDevices.devices,
+	);
+	const [localActiveDevice, setLocalActiveDevice] = useState<
+		Device | undefined
+	>(roomControls.playbackHandler.activeDevice);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
@@ -78,6 +56,56 @@ const DevicePicker = () => {
 		);
 	};
 
+	useEffect(() => {
+		console.log(`The first DevicePicker useEffect`);
+		const contextDevices: Device[] =
+			roomControls.playbackHandler.spotifyDevices.devices;
+		if (contextDevices.length !== localDevices.length) {
+			setLocalDevices(contextDevices);
+		} else {
+			for (let i = 0; i < contextDevices.length; i++) {
+				if (contextDevices[i].id !== localDevices[i].id) {
+					setLocalDevices(contextDevices);
+					break;
+				}
+			}
+		}
+		if (roomControls.playbackHandler.activeDevice) {
+			if (
+				!localActiveDevice ||
+				roomControls.playbackHandler.activeDevice.id !== localActiveDevice.id
+			) {
+				setLocalActiveDevice(roomControls.playbackHandler.activeDevice);
+			}
+		}
+	}, [
+		roomControls.playbackHandler.spotifyDevices.devices,
+		roomControls.playbackHandler.activeDevice,
+	]);
+
+	useEffect(() => {
+		console.log(`The other DevicePicker useEffectttttttttttt`);
+		if (!intervalIdRef.current) {
+			intervalIdRef.current = setInterval(() => {
+				console.log("Running useEffect as per 1000ms interval");
+				if (isVisible) {
+					setIsLoading(true);
+					roomControls.playbackHandler.getDevices().then(() => {
+						setIsLoading(false);
+					});
+				}
+			}, 5000);
+		}
+		if (!isVisible) {
+			clearInterval(intervalIdRef.current);
+			intervalIdRef.current = undefined;
+		}
+		return () => {
+			clearInterval(intervalIdRef.current);
+			intervalIdRef.current = undefined;
+		};
+	}, [isVisible]);
+
 	return (
 		<>
 			<TouchableOpacity
@@ -102,8 +130,7 @@ const DevicePicker = () => {
 												{roomControls.playbackHandler.deviceError}
 											</Text>
 										</>
-									) : roomControls.playbackHandler.spotifyDevices.devices
-											.length === 0 ? (
+									) : localDevices.length === 0 ? (
 										<>
 											<Text style={styles.popupTitle}>
 												No Devices Available
@@ -121,35 +148,32 @@ const DevicePicker = () => {
 													color={colors.primary}
 												/>
 											) : (
-												roomControls.playbackHandler.spotifyDevices.devices.map(
-													(device: Device, index: number) => (
-														<TouchableOpacity
-															key={index}
-															style={styles.deviceOption}
-															onPress={() =>
-																roomControls.playbackHandler.setActiveDevice({
-																	deviceID: device.id,
-																	userSelected: true,
-																})
-															}
-														>
-															{device.id !== null && (
-																<RadioButton
-																	value={device.id}
-																	testID={`radio-button-${device.id}`}
-																	status={
-																		roomControls.playbackHandler.activeDevice &&
-																		roomControls.playbackHandler.activeDevice
-																			.id === device.id
-																			? "checked"
-																			: "unchecked"
-																	}
-																/>
-															)}
-															{renderDeviceName(device)}
-														</TouchableOpacity>
-													),
-												)
+												localDevices.map((device: Device, index: number) => (
+													<TouchableOpacity
+														key={index}
+														style={styles.deviceOption}
+														onPress={() =>
+															roomControls.playbackHandler.setActiveDevice({
+																deviceID: device.id,
+																userSelected: true,
+															})
+														}
+													>
+														{device.id !== null && (
+															<RadioButton
+																value={device.id}
+																testID={`radio-button-${device.id}`}
+																status={
+																	localActiveDevice &&
+																	localActiveDevice.id === device.id
+																		? "checked"
+																		: "unchecked"
+																}
+															/>
+														)}
+														{renderDeviceName(device)}
+													</TouchableOpacity>
+												))
 											)}
 										</>
 									)}
