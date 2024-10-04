@@ -77,6 +77,7 @@ const RoomPage: React.FC = () => {
 	const [lastRoomFetch, setLastRoomFetch] = useState(new Date(0));
 	const [participantCount, setParticipantCount] = useState(0);
 	const [participants, setParticipants] = useState<any[]>([]);
+	const [devicePickerVisible, setDevicePickerVisible] = useState(false);
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		if (!thisRoom || thisRoom.roomID !== roomID) {
@@ -425,7 +426,10 @@ const RoomPage: React.FC = () => {
 								color={isBookmarked ? colors.primary : "black"}
 							/>
 						</TouchableOpacity>
-						<DevicePicker />
+						<DevicePicker
+							isVisible={devicePickerVisible}
+							setIsVisible={setDevicePickerVisible}
+						/>
 					</View>
 				</View>
 			</View>

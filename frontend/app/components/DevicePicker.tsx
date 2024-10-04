@@ -15,9 +15,15 @@ import { useLive } from "../LiveContext";
 import { Device } from "@spotify/web-api-ts-sdk";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const DevicePicker = () => {
+const DevicePicker = ({
+	isVisible,
+	setIsVisible,
+}: {
+	isVisible: boolean;
+	setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
 	const { roomControls } = useLive();
-	const [isVisible, setIsVisible] = useState(false);
+	// const [isVisible, setIsVisible] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const intervalIdRef = useRef<NodeJS.Timeout>();
 	const [localDevices, setLocalDevices] = useState<Device[]>(
