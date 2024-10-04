@@ -467,6 +467,55 @@ export class SpotifyService {
 					const tracks = items.map((item) => item.track);
 					result.push(...tracks);
 				}
+				this.addTracksToDB(result);
+				return result;
+			} catch (e) {
+				error = e as Error;
+				attempts++;
+				console.error(e);
+				await this.wait(5000 * attempts);
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error("Failed to get playlist tracks");
+	}
+
+	async getTuneInPlaylistIDs(playlistID: string): Promise<string[]> {
+		await this.createTuneInAPI();
+		let attempts = 0;
+		let error: Error | undefined;
+		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+			try {
+				const playlistInfo: Spotify.Playlist<Spotify.Track> =
+					await this.TuneInAPI.playlists.getPlaylist(playlistID);
+
+				let i = 0;
+				const promises: Promise<
+					Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+				>[] = [];
+				while (i < playlistInfo.tracks.total) {
+					promises.push(
+						this.TuneInAPI.playlists.getPlaylistItems(
+							playlistID,
+							undefined,
+							undefined,
+							50,
+							i,
+						),
+					);
+					i += 50;
+				}
+
+				const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+					await Promise.all(promises);
+				const result: string[] = [];
+				for (const s of songs) {
+					const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+					const tracks = items.map((item) => item.track);
+					result.push(...tracks.map((track) => track.id));
+				}
 				return result;
 			} catch (e) {
 				error = e as Error;
