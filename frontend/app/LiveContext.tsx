@@ -201,6 +201,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		{ message: DirectMessageDto; room?: RoomDto }[]
 	>([]);
 	const [fetchRecentDMs, setFetchRecentDMs] = useState<boolean>(true);
+	const intervalRef = useRef<NodeJS.Timeout>();
 
 	const sendIdentity = useCallback(
 		(socket: Socket) => {
@@ -1673,6 +1674,18 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		console.log(`refreshUser: ${refreshUser}`);
 		getUserDetails(spotifyAuth);
 	}, [refreshUser]);
+
+	// on mount
+	useEffect(() => {
+		const interval = setInterval(() => {
+			console.log(`Fetching Spotify tokens...`);
+			if (currentUser && authenticated) {
+				spotifyAuth.getSpotifyTokens();
+			}
+		}, 60 * 1000);
+		intervalRef.current = interval;
+		return () => clearInterval(interval);
+	}, []);
 
 	useEffect(() => {}, []);
 
