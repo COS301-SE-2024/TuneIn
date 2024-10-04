@@ -662,6 +662,7 @@ export class UsersService {
 		const recent_rooms =
 			(await this.dtogen.generateMultipleRoomDto(
 				recentRooms.map((room) => room.room_id),
+				userID,
 			)) || [];
 
 		return recent_rooms;
@@ -723,6 +724,7 @@ export class UsersService {
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
 				randomRooms.map((room: PrismaTypes.room) => room.room_id),
+				userID,
 			);
 			return r === null ? [] : r;
 		}
@@ -739,7 +741,7 @@ export class UsersService {
 		const ids: string[] = recommendedRooms.map(
 			(room: { playlist: string; score: number }) => room.playlist,
 		);
-		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -764,7 +766,7 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		let r = await this.dtogen.generateMultipleUserDto(ids);
+		let r = await this.dtogen.generateMultipleUserDto(ids, userID);
 		r = r.map((user) => {
 			user.relationship = "friend";
 			return user;
@@ -776,7 +778,7 @@ export class UsersService {
 		const f = await this.dbUtils.getUserFollowers(userID);
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
@@ -803,7 +805,7 @@ export class UsersService {
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
@@ -1098,7 +1100,7 @@ export class UsersService {
 			return [];
 		}
 		const ids: string[] = friendRequests.map((friend) => friend.friend1);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		const result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		return result;
 	}
 
@@ -1113,7 +1115,10 @@ export class UsersService {
 		const ids: string[] = potentialFriends.map(
 			(friend: PrismaTypes.users) => friend.user_id,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			ids,
+			userID,
+		);
 		return result;
 	}
 
@@ -1125,7 +1130,10 @@ export class UsersService {
 		const ids: string[] = pendingRequests.map(
 			(friend: PrismaTypes.friends) => friend.friend2,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			ids,
+			userID,
+		);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for pending requests. Received null.",
@@ -1555,9 +1563,43 @@ export class UsersService {
 		console.log(
 			"Blocking user with id: " + userID + " is blocking " + usernameToBlock,
 		);
-		if (true) {
+		const user = await this.prisma.users.findFirst({
+			where: { username: usernameToBlock },
+		});
+		if (!user) {
 			//if user does not exist
-			throw new HttpException("User is already blocked", HttpStatus.NOT_FOUND);
+			throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		// check if users is already blocked
+		const isBlocked = await this.prisma.blocked.findFirst({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		console.log("isBlocked: ", isBlocked);
+		if (isBlocked) {
+			throw new HttpException(
+				"User is already blocked",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		const result = await this.prisma.blocked.create({
+			data: {
+				blocker: userID,
+				blockee: user.user_id,
+				date_blocked: new Date(),
+			},
+		});
+		if (!result) {
+			throw new Error("Failed to block user");
+		}
+		// unfriend and unfollow user
+		try {
+			await this.unfollowUser(userID, usernameToBlock);
+			await this.unfriendUser(userID, usernameToBlock);
+		} catch (e) {
+			console.log(e);
 		}
 	}
 
@@ -1568,19 +1610,49 @@ export class UsersService {
 				" is unblocking " +
 				usernameToUnblock,
 		);
-		if (true) {
+		const user = await this.prisma.users.findFirst({
+			where: { username: usernameToUnblock },
+		});
+		if (!user) {
 			//if user does not exist
-			throw new HttpException("User was not blocked", HttpStatus.NOT_FOUND);
+			throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		// check if users is already blocked
+		const isBlocked = await this.prisma.blocked.findFirst({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		if (!isBlocked) {
+			throw new HttpException("User is not blocked", HttpStatus.BAD_REQUEST);
+		}
+		const result = await this.prisma.blocked.deleteMany({
+			where: {
+				blocker: userID,
+				blockee: user.user_id,
+			},
+		});
+		if (!result) {
+			throw new Error("Failed to unblock user");
 		}
 	}
 
 	async getBlockedUsers(userID: string): Promise<UserDto[]> {
 		console.log("Getting blocked users for user " + userID);
-		if (true) {
-			//if user does not exist
-			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		const blockedUsers: PrismaTypes.blocked[] =
+			await this.prisma.blocked.findMany({
+				where: { blocker: userID },
+			});
+		const ids: string[] = blockedUsers.map((blocked) => blocked.blockee);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			ids,
+			undefined,
+		);
+		for (const user of result) {
+			user.relationship = "blocked";
 		}
-		return [];
+		return result;
 	}
 
 	async reportUser(userID: string, usernameToReport: string): Promise<void> {
@@ -1676,6 +1748,7 @@ export class UsersService {
 
 		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
 			topUserIds,
+			userID,
 		);
 		if (!result) {
 			throw new Error(

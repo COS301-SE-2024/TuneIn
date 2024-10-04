@@ -10,11 +10,13 @@ import {
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 import { router } from "expo-router";
 import { Player } from "../../PlayerContext";
 import { useContext } from "react";
 import { useLive } from "../../LiveContext";
 import { useAPI } from "../../APIContext";
+import { User } from "../../models/user";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
@@ -61,6 +63,37 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 		onClose(); // Close the modal after navigation
 	};
 
+	const navigateToBlockedUsers = async () => {
+		const token = await auth.default.getToken();
+		const result = await fetch(`${utils.API_BASE_URL}/users/blocked`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (result.ok) {
+			const data = await result.json();
+			const blockedUsers: User = data.map((item: any) => ({
+				id: item.userID,
+				profile_picture_url: item.profile_picture_url,
+				profile_name: item.profile_name,
+				username: item.username,
+				followers: item.followers.data,
+			}));
+			console.log("Blocked Users: ", blockedUsers);
+			router.push({
+				pathname: "./MorePage",
+				params: {
+					type: "user",
+					items: JSON.stringify(blockedUsers),
+					title: "Blocked Users",
+				},
+			});
+		}
+		onClose(); // Close the modal after navigation
+	};
+
 	return (
 		<Modal transparent visible={isVisible} animationType="fade">
 			<TouchableOpacity
@@ -78,6 +111,16 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 							<Ionicons name="stats-chart" size={20} color="black" />
 							{"  "}
 							Analytics
+						</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={navigateToBlockedUsers}
+						style={styles.menuItem}
+					>
+						<Text style={styles.menuText}>
+							<Ionicons name="close" size={20} color="black" />
+							{"  "}
+							Blocked Users
 						</Text>
 					</TouchableOpacity>
 

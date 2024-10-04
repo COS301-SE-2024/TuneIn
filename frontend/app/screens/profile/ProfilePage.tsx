@@ -76,6 +76,7 @@ const ProfileScreen: React.FC = () => {
 	const [areFriends, setAreFriends] = useState<boolean>(false);
 	const [arePotentialFriends, setArePotentialFriends] =
 		useState<boolean>(false);
+	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [isPendingRequest, setIsPendingRequest] = useState<boolean>(false);
 	const [hasRequested, setHasRequested] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
@@ -185,6 +186,7 @@ const ProfileScreen: React.FC = () => {
 						const potFData = await getPotentialFriends(storedToken);
 						const penFData = await getPendingRequests(storedToken);
 						const reqFData = await getFriendRequests(storedToken);
+						const blockedData = await getBlockedUsers(storedToken);
 
 						setFriends(fData);
 						setPotentialFriends(potFData);
@@ -227,6 +229,13 @@ const ProfileScreen: React.FC = () => {
 						);
 
 						setHasRequested(req);
+
+						const blocked = blockedData.some(
+							(block) => block.username === parsedFriend.username,
+						);
+						console.log("Blocked: " + blocked);
+
+						setIsBlocked(blocked);
 
 						await fetchCurrentRoomInfo(data.userID);
 					}
@@ -440,6 +449,32 @@ const ProfileScreen: React.FC = () => {
 			return [];
 		}
 	};
+
+	const getBlockedUsers = async (token: string): Promise<Friend[]> => {
+		console.log("get blocked users");
+		try {
+			const response = await axios.get<Friend[]>(
+				`${utils.API_BASE_URL}/users/blocked`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			const mappedBlockedUsers: Friend[] = response.data.map((user: any) => ({
+				profile_picture_url: user.profile_picture_url,
+				friend_id: user.userID,
+				username: user.username,
+				relationship: "blocked",
+			}));
+			setFriendError(false);
+			console.log("Blocked users: " + JSON.stringify(mappedBlockedUsers));
+
+			return mappedBlockedUsers;
+		} catch (error) {
+			console.log("Error fetching blocked users:", error);
+			setFriendError(true);
+			return [];
+		}
+	};
 	const getPendingRequests = async (token: string): Promise<Friend[]> => {
 		console.log("get pending requests");
 		try {
@@ -561,6 +596,55 @@ const ProfileScreen: React.FC = () => {
 					"Failed to cancel friend request.",
 					ToastAndroid.SHORT,
 				);
+			}
+		}
+	};
+
+	const handleBlock = async (
+		friend: {
+			username: string;
+			friend_id: string;
+		},
+		block: boolean,
+	): Promise<void> => {
+		const token = await auth.getToken();
+		if (token) {
+			try {
+				const response = await fetch(
+					`${utils.API_BASE_URL}/users/${friend.username}/${block ? "block" : "unblock"}`,
+					{
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					},
+				);
+				if (response.status === 201) {
+					const updatedFriends = friends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setFriends(updatedFriends);
+					setAreFriends(false);
+					const updatedPotentialFriends = potentialFriends.filter(
+						(_friend) => _friend.friend_id !== friend.friend_id,
+					);
+					setPotentialFriends(updatedPotentialFriends);
+					setArePotentialFriends(false);
+					const updatedRequests = requests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					const updatedPendingRequests = pendingRequests.filter(
+						(request) => request.friend_id !== friend.friend_id,
+					);
+					setPendingRequests(updatedPendingRequests);
+					setRequests(updatedRequests);
+					setIsBlocked(block);
+					setFollowing(false);
+					console.log("User blocked successfully.");
+				}
+			} catch (error) {
+				console.log("Error blocking user:", error);
+				ToastAndroid.show("Failed to block user.", ToastAndroid.SHORT);
 			}
 		}
 	};
@@ -824,18 +908,30 @@ const ProfileScreen: React.FC = () => {
 							},
 						]}
 						onPress={() => {
-							if (following) {
-								setFriendDialogVisible(true);
+							if (isBlocked) {
+								handleBlock(
+									{
+										username: primaryProfileData.username,
+										friend_id: primaryProfileData.userID,
+									},
+									false,
+								);
 							} else {
-								followHandler();
+								setFriendDialogVisible(true);
 							}
 						}}
 						testID="follow-button"
 					>
 						<Text style={styles.buttonText}>
-							{following ? "Following  " : "Follow"}
+							{isBlocked
+								? "Unblock"
+								: areFriends
+									? "Friends  "
+									: following
+										? "Following  "
+										: "Follow  "}
 						</Text>
-						{following && (
+						{!isBlocked && (
 							<Ionicons
 								style={{ paddingTop: 2 }}
 								name="chevron-down"
@@ -858,6 +954,7 @@ const ProfileScreen: React.FC = () => {
 						handleRequest={handleFriendRequest}
 						handleUnfriend={handleFriend}
 						handleCancel={handleCancelRequest}
+						handleBlock={handleBlock}
 						sendRequest={handleSendRequest}
 						setShowMoreOptions={setFriendDialogVisible}
 					></FollowBottomSheet>

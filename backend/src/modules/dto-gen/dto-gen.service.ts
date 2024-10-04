@@ -525,7 +525,10 @@ export class DtoGenService {
 			...uniqueUserIDs,
 			...new Set(dms.map((dm) => dm.recipient)),
 		];
-		const users: UserDto[] = await this.generateMultipleUserDto(uniqueUserIDs);
+		const users: UserDto[] = await this.generateMultipleUserDto(
+			uniqueUserIDs,
+			undefined,
+		);
 
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];

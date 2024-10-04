@@ -213,5 +213,6 @@ export class UserDto {
 		| "mutual"
 		| "friend"
 		| "pending"
-		| "none";
+		| "none"
+		| "blocked";
 }

@@ -234,6 +234,28 @@ export class RoomsService {
 	async joinRoom(_room_id: string, user_id: string): Promise<void> {
 		console.log("user", user_id, "joining room", _room_id);
 		try {
+			// check if room creator blocked the user
+			const _room = await this.prisma.room.findFirst({
+				where: {
+					room_id: _room_id,
+				},
+			});
+			if (_room === null) {
+				throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+			}
+			const blocked = await this.prisma.blocked.findFirst({
+				where: {
+					blocker: _room.room_creator,
+					blockee: user_id,
+				},
+			});
+			if (blocked !== null) {
+				throw new HttpException(
+					"User is blocked from joining the room",
+					HttpStatus.FORBIDDEN,
+				);
+			}
+
 			// Check if the user is already in the room
 			const room = await this.prisma.participate.findFirst({
 				where: {
