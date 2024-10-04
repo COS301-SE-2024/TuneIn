@@ -3,6 +3,7 @@ import React, {
 	useEffect,
 	useMemo,
 	useReducer,
+	useRef,
 	useState,
 } from "react";
 import { Socket } from "socket.io-client";
@@ -133,7 +134,6 @@ interface RoomControlProps {
 	setRoomQueue: React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
 	spotifyTokens: SpotifyTokenPair | undefined;
 	spotifyAuth: SpotifyAuth;
-	roomPlaying: boolean;
 	pollLatency: () => void;
 }
 
@@ -147,7 +147,6 @@ export function useRoomControls({
 	setRoomQueue,
 	spotifyTokens,
 	spotifyAuth,
-	roomPlaying,
 	pollLatency,
 }: RoomControlProps): RoomControls {
 	console.log("useRoomControls()");
@@ -477,7 +476,7 @@ export function useRoomControls({
 	);
 
 	const userListeningToRoom = useCallback(
-		async function (): Promise<boolean> {
+		async function (roomPlaying: boolean): Promise<boolean> {
 			if (!currentSong) {
 				// throw new Error("No song is currently playing");
 				console.log(`userListeningToRoom false because !current`);
@@ -516,6 +515,9 @@ export function useRoomControls({
 						userSelected: false,
 					});
 				}
+				if (state.item === null) {
+					return false;
+				}
 				if (state.item.id === currentSong.spotifyID) {
 					return true;
 				}
@@ -524,7 +526,7 @@ export function useRoomControls({
 			}
 			return false;
 		},
-		[currentSong, spotify, roomPlaying],
+		[currentSong, spotify, activeDevice],
 	);
 
 	const startPlayback = useCallback(

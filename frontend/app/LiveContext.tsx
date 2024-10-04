@@ -952,7 +952,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								setRoomPlaying(response.song);
 							}
 						}
-						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
+						if (
+							!(await roomControls.playbackHandler.userListeningToRoom(true))
+						) {
 							if (!currentSong) {
 								return;
 							}
@@ -993,7 +995,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							}
 						}
 
-						if (!(await roomControls.playbackHandler.userListeningToRoom())) {
+						await fetchSongInfo([response.spotifyID]); //pre-fetch spotify info for later
+						if (
+							!(await roomControls.playbackHandler.userListeningToRoom(true))
+						) {
 							if (!currentSong) {
 								return;
 							}
@@ -1015,7 +1020,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					SOCKET_EVENTS.PAUSE_MEDIA,
 					async (response: PlaybackEventDto) => {
 						handleReceivedEvent(SOCKET_EVENTS.PAUSE_MEDIA);
-						if (await roomControls.playbackHandler.userListeningToRoom()) {
+						if (await roomControls.playbackHandler.userListeningToRoom(true)) {
 							await roomControls.playbackHandler.handlePlayback("pause");
 						}
 					},
@@ -1025,7 +1030,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					SOCKET_EVENTS.STOP_MEDIA,
 					async (response: PlaybackEventDto) => {
 						handleReceivedEvent(SOCKET_EVENTS.STOP_MEDIA);
-						if (await roomControls.playbackHandler.userListeningToRoom()) {
+						if (await roomControls.playbackHandler.userListeningToRoom(true)) {
 							await roomControls.playbackHandler.handlePlayback("pause");
 						}
 					},
