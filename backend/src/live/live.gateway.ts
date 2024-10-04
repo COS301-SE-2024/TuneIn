@@ -1274,6 +1274,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						console.log("Response emitted: " + SOCKET_EVENTS.SONG_ADDED);
 					}
 				}
+				this.sendQueueState(payload.roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);
@@ -1320,6 +1321,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						console.log("Response emitted: " + SOCKET_EVENTS.SONG_REMOVED);
 					}
 				}
+				this.sendQueueState(payload.roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error);

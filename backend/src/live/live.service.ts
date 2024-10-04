@@ -11,7 +11,7 @@ import {
 import { RoomSongDto } from "../modules/rooms/dto/roomsong.dto";
 
 const MAX_ANNOUNCEMENTS_PER_ROOM = 5;
-const ROOM_ACTIVITY_TIMEOUT = 10;
+const ROOM_ACTIVITY_TIMEOUT = 5;
 @Injectable()
 export class LiveService {
 	private server: Server;
@@ -94,9 +94,9 @@ export class LiveService {
 					room.songs[0].setPlaybackStartTime(new Date().valueOf());
 					await this.roomQueue.refreshQueue(room.room.roomID);
 				}
-				const songsAsRoomSongDto: RoomSongDto[] = room
+				let songsAsRoomSongDto: RoomSongDto[] = room
 					.queueAsRoomSongDto()
-					.slice(0, MAX_ANNOUNCEMENTS_PER_ROOM);
+					.slice(0, 1 + MAX_ANNOUNCEMENTS_PER_ROOM);
 				const currentSong: RoomSongDto = songsAsRoomSongDto[0];
 				if (!currentSong.startTime) {
 					console.warn(
@@ -123,6 +123,9 @@ export class LiveService {
 						);
 					}
 				}
+				songsAsRoomSongDto = room
+					.queueAsRoomSongDto()
+					.slice(1, 1 + MAX_ANNOUNCEMENTS_PER_ROOM);
 				for (const song of songsAsRoomSongDto) {
 					if (!song.startTime) {
 						console.warn(
@@ -203,12 +206,17 @@ export class LiveService {
 	}
 
 	cancelSongAnnouncements(roomID: string): void {
-		const jobs = this.roomJobs.get(roomID);
-		if (jobs) {
-			for (const job of jobs) {
-				job.stop();
-			}
+		const localJobs = this.roomJobs.get(roomID);
+		if (localJobs) {
 			this.roomJobs.delete(roomID);
 		}
+		const jobs = this.schedulerRegistry.getCronJobs();
+		jobs.forEach((job, key) => {
+			if (key.startsWith(`songAnnouncement-${roomID}`)) {
+				job.stop();
+				this.schedulerRegistry.deleteCronJob(key);
+				console.warn(`Cancelled announcement ${key}`);
+			}
+		});
 	}
 }
