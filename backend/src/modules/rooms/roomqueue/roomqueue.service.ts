@@ -30,14 +30,14 @@ export class RoomSong {
 	private votes: VoteDto[];
 	public readonly insertTime: Date;
 	private playbackStartTime: Date | null;
-	private spotifyDetails: Spotify.Track;
 	private internalQueueItemID: string;
 	public pauseTime: Date | null = null;
+	public readonly songDurationMs: number;
 
 	constructor(
 		spotifyID: string,
 		userID: string,
-		spotifyDetails: Spotify.Track,
+		durationMs: number,
 		insertTime: Date = new Date(),
 		playbackStartTime: Date | null = null,
 	) {
@@ -47,7 +47,9 @@ export class RoomSong {
 		this.votes = [];
 		this.insertTime = insertTime;
 		this.playbackStartTime = playbackStartTime;
-		this.spotifyDetails = spotifyDetails;
+		this.playbackStartTime =
+			playbackStartTime !== null ? playbackStartTime.valueOf() : null;
+		this.songDurationMs = durationMs;
 	}
 
 	private calculateScore(): number {
@@ -137,7 +139,6 @@ export class RoomSong {
 			score: this._score,
 			index: -1,
 			insertTime: this.insertTime,
-			track: this.spotifyDetails,
 			playlistIndex: -1,
 		};
 		if (this.playbackStartTime) {
@@ -174,22 +175,6 @@ export class RoomSong {
 		this.playbackStartTime = startTime;
 	}
 
-	get spotifyInfo(): Spotify.Track {
-		return this.spotifyDetails;
-	}
-
-	set spotifyInfo(info: Spotify.Track) {
-		this.spotifyDetails = info;
-	}
-
-	get queueItemID(): string {
-		return this.internalQueueItemID;
-	}
-
-	set queueItemID(id: string) {
-		this.internalQueueItemID = id;
-	}
-
 	isPlaying(): boolean {
 		if (!this.playbackStartTime || this.playbackStartTime === null) {
 			return false;
@@ -198,7 +183,7 @@ export class RoomSong {
 			return false;
 		}
 		return (
-			this.playbackStartTime.valueOf() + this.spotifyDetails.duration_ms >=
+			this.playbackStartTime.valueOf() + this.songDurationMs >=
 			new Date().valueOf()
 		);
 	}
@@ -455,10 +440,13 @@ export class ActiveRoom {
 				const songEnqueuer = songEnqueuers[i];
 				if (queueItem.song.spotify_id && songEnqueuer) {
 					try {
+						const songInfo: Spotify.Track = JSON.parse(
+							queueItem.song.track_info as string,
+						);
 						const song = new RoomSong(
 							queueItem.song.spotify_id,
 							songEnqueuer,
-							JSON.parse(queueItem.song.track_info as string),
+							songInfo.duration_ms,
 							queueItem.insert_time,
 							queueItem.start_time,
 						);
@@ -557,11 +545,9 @@ export class ActiveRoom {
 					}
 					let t = song.getPlaybackStartTime();
 					// while there are songs in the queue that have played already
-					while (t && t < new Date()) {
-						const expectedEnd = new Date(
-							t.valueOf() + song.spotifyInfo.duration_ms,
-						);
-						const now = new Date();
+					while (t && t < new Date().valueOf()) {
+						const expectedEnd = t + song.songDurationMs;
+						const now = new Date().valueOf();
 						if (now < expectedEnd) {
 							break;
 						}
@@ -873,6 +859,7 @@ export class ActiveRoom {
 
 	async addSongs(
 		songs: RoomSongDto[],
+		tracks: Spotify.Track[],
 		userID: string,
 		murLockService: MurLockService,
 	): Promise<boolean> {
@@ -887,14 +874,15 @@ export class ActiveRoom {
 					`Acquire lock: ${this.getQueueLockName()} in function 'addSong'`,
 				);
 				try {
-					for (const song of songs) {
+					for (let i = 0, n = songs.length; i < n; i++) {
+						const song = songs[i];
 						if (!roomSongs.find((s) => s.spotifyID === song.spotifyID)) {
 							this.queue.enqueue(
 								new RoomSong(
 									song.spotifyID,
 									userID,
-									song.track,
-									song.insertTime,
+									tracks[i].duration_ms,
+									new Date(song.insertTime),
 								),
 							);
 							result = true;
@@ -1242,13 +1230,12 @@ export class RoomQueueService {
 		songs: RoomSongDto[],
 	): Promise<boolean> {
 		const activeRoom = await this.getRoom(roomID);
-		const ids: string[] = songs.map((s) => s.spotifyID);
-		const tracks: Spotify.Track[] = await this.spotify.getManyTracks(ids);
-		for (let i = 0; i < songs.length; i++) {
-			songs[i].track = tracks[i];
-		}
+		const tracks: Spotify.Track[] = await this.spotify.getManyTracks(
+			songs.map((s) => s.spotifyID),
+		);
 		const result: boolean = await activeRoom.addSongs(
 			songs,
+			tracks,
 			userID,
 			this.murLockService,
 		);
