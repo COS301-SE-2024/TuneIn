@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -12,11 +12,15 @@ import SongList from "../../components/SongList"; // Import the SongList compone
 import { useLive } from "../../LiveContext";
 import CreateButton from "../../components/CreateButton";
 import { Player } from "../../PlayerContext";
+import { SongPair, convertQueue } from "../../models/SongPair";
+import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
 const Playlist = () => {
-	const { roomQueue } = useLive();
+	const { roomQueue, spotifyAuth } = useLive();
+	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
 	const router = useRouter();
 	const playerContext = useContext(Player);
+	const [localQueue, setLocalQueue] = useState<SongPair[]>([]);
 
 	if (!playerContext) {
 		throw new Error(
@@ -40,7 +44,27 @@ const Playlist = () => {
 
 	useEffect(() => {
 		console.log(`Playlist page room queue`);
-		console.log(roomQueue);
+		if (localQueue.length !== roomQueue.length) {
+			console.log(`Local queue length is wrong. Updating...`);
+			fetchSongInfo(roomQueue.map((s) => s.spotifyID)).then((tracks) => {
+				setLocalQueue(convertQueue(roomQueue, tracks));
+			});
+		}
+		if (localQueue.length === roomQueue.length) {
+			let differenceFound = false;
+			for (let i = 0; i < localQueue.length; i++) {
+				if (localQueue[i].song.spotifyID !== roomQueue[i].spotifyID) {
+					differenceFound = true;
+					break;
+				}
+			}
+			if (differenceFound) {
+				console.log(`Local queue is different. Updating...`);
+				fetchSongInfo(roomQueue.map((s) => s.spotifyID)).then((tracks) => {
+					setLocalQueue(convertQueue(roomQueue, tracks));
+				});
+			}
+		}
 	}, [roomQueue]);
 
 	return (
@@ -59,10 +83,10 @@ const Playlist = () => {
 				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
-				{roomQueue.length > 0 ? (
+				{localQueue.length > 0 ? (
 					<ScrollView>
-						{roomQueue.map((track, index) => (
-							<SongList key={track.index} track={track} showVoting={true} />
+						{localQueue.map((s, index) => (
+							<SongList key={s.song.index} song={s} showVoting={true} />
 						))}
 					</ScrollView>
 				) : (
