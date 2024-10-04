@@ -317,6 +317,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}),
 		[authAPI, authenticated, spotifyTokens],
 	);
+	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
 
 	// Method to send a ping and wait for a response or timeout
 	const sendPing = useCallback(
@@ -415,7 +416,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						} else {
 							const r: RoomDto = room.data;
 							setCurrentRoom(r);
-							roomControls.requestRoomQueue();
 						}
 					})
 					.catch((error) => {
@@ -457,7 +457,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					});
 			}
 		},
-		[roomControls, rooms],
+		[currentRoom, rooms],
 	);
 
 	const joinRoom = useCallback<(roomID: string) => void>(
@@ -494,7 +494,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		[currentUser, roomControls, setRoomID, updateState],
 	);
 
-	const resetRoom = () => {
+	const resetRoom = useCallback(() => {
 		setCurrentRoom(undefined);
 		setCurrentSong(undefined);
 		setRoomQueue([]);
@@ -504,7 +504,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		setRoomEmojiObjects([]);
 		setRoomPlaying(undefined);
 		updateState({ type: actionTypes.CLEAR_ROOM_STATE });
-	};
+	}, [updateState]);
 
 	const leaveRoom = useCallback(() => {
 		// pollLatency();
@@ -534,7 +534,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			socket.emit(SOCKET_EVENTS.LEAVE_ROOM, JSON.stringify(input));
 		}
 		resetRoom();
-	}, [currentRoom, currentUser, updateState]);
+	}, [currentRoom, currentUser, resetRoom, updateState]);
 
 	const dmControls: DirectMessageControls = useDirectMessageControls({
 		currentUser,
@@ -592,7 +592,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					console.error("Failed to get user info:", error);
 				});
 		},
-		[currentUser, dmControls, getUser, updateState],
+		[currentUser, dmControls, getUser, updateState, users],
 	);
 
 	const leaveDM = useCallback(() => {
@@ -691,7 +691,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								throw new Error("Parameter missing from request to get user");
 							} else {
 								// some other error
-								throw new Error("Error getting user");
+								console.error("Error getting user");
 							}
 						});
 				}
@@ -970,10 +970,21 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							}
 							if (
 								roomControls.state &&
+								roomControls.state !== null &&
+								roomControls.state.item !== null &&
 								!roomControls.state.is_playing &&
-								roomControls.state.item.id !== currentSong.spotifyID
+								roomControls.state.item.id !== currentSong.spotifyID &&
+								currentRoom
 							) {
-								await roomControls.playbackHandler.handlePlayback("play");
+								let songToPlay: RoomSongDto = currentSong;
+								if (s && s !== null) {
+									songToPlay = s;
+								}
+								await roomControls.playbackHandler.handlePlayback(
+									"play",
+									currentRoom.spotifyPlaylistID,
+									songToPlay,
+								);
 							}
 						}
 					},
@@ -1009,10 +1020,21 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							}
 							if (
 								roomControls.state &&
+								roomControls.state !== null &&
+								roomControls.state.item !== null &&
 								!roomControls.state.is_playing &&
-								roomControls.state.item.id !== currentSong.spotifyID
+								roomControls.state.item.id !== currentSong.spotifyID &&
+								currentRoom
 							) {
-								await roomControls.playbackHandler.handlePlayback("play");
+								let songToPlay: RoomSongDto = currentSong;
+								if (response.song && response.song !== null) {
+									songToPlay = response.song;
+								}
+								await roomControls.playbackHandler.handlePlayback(
+									"play",
+									currentRoom.spotifyPlaylistID,
+									songToPlay,
+								);
 							}
 						}
 					},
@@ -1119,7 +1141,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				socket.on(
 					SOCKET_EVENTS.QUEUE_STATE,
-					(response: {
+					async (response: {
 						room: RoomDto;
 						songs: RoomSongDto[];
 						votes: VoteDto[];
@@ -1128,31 +1150,31 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						setCurrentRoom(response.room);
 						updateRoomQueue(response.songs);
 						setCurrentRoomVotes(response.votes);
+						const spotifyIDs: string[] = response.songs.map(
+							(song) => song.spotifyID,
+						);
+						await fetchSongInfo(spotifyIDs); //pre-fetch spotify info for later
 					},
 				);
 
-				socket.on(SOCKET_EVENTS.SONG_ADDED, (newSongs: QueueEventDto) => {
+				socket.on(SOCKET_EVENTS.SONG_ADDED, async (newSongs: QueueEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.SONG_ADDED);
-					const newQueue = [...roomQueue];
-					for (let i = 0; i < newSongs.songs.length; i++) {
-						if (
-							newQueue.find(
-								(song) => song.spotifyID === newSongs.songs[i].spotifyID,
-							)
-						) {
-							continue;
-						}
-						newQueue.push(newSongs.songs[i]);
-					}
+					const newQueue = [...roomQueue, ...newSongs.songs];
 					updateRoomQueue(newQueue);
+					const spotifyIDs: string[] = newSongs.songs.map(
+						(song) => song.spotifyID,
+					);
+					await fetchSongInfo(spotifyIDs); //pre-fetch spotify info for later
 				});
 
 				socket.on(SOCKET_EVENTS.SONG_REMOVED, (removedSong: QueueEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.SONG_REMOVED);
 					let newQueue = [...roomQueue];
 					for (let i = 0; i < removedSong.songs.length; i++) {
+						const s: RoomSongDto = removedSong.songs[i];
 						newQueue = newQueue.filter(
-							(song) => song.spotifyID !== removedSong.songs[i].spotifyID,
+							(song) =>
+								song.index !== s.index || song.spotifyID !== s.spotifyID,
 						);
 					}
 					updateRoomQueue(newQueue);
@@ -1161,7 +1183,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				socket.on(SOCKET_EVENTS.VOTE_UPDATED, (updatedSong: QueueEventDto) => {
 					handleReceivedEvent(SOCKET_EVENTS.VOTE_UPDATED);
 					const i = roomQueue.findIndex(
-						(song) => song.spotifyID === updatedSong.songs[0].spotifyID,
+						(song) =>
+							song.index === updatedSong.songs[0].index ||
+							song.spotifyID === updatedSong.songs[0].spotifyID,
 					);
 					if (i === -1) {
 						return;
@@ -1177,6 +1201,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			currentSong,
 			currentUser,
 			dmControls,
+			fetchSongInfo,
 			handleReceivedEvent,
 			joinRoom,
 			keepUserSynced,
@@ -1272,6 +1297,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			handleReceivedEvent,
 			socketCreationTime,
 			socketState.socketConnected,
+			updateState,
 		],
 	);
 	const getSocket = useCallback<() => Socket | null>(() => {
