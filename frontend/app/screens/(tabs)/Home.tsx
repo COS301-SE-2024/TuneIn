@@ -36,6 +36,7 @@ import TopNavBar from "../../components/TopNavBar";
 import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
+import { useIsFocused } from "@react-navigation/native";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);

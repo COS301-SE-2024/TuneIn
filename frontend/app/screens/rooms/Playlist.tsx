@@ -65,7 +65,7 @@ const Playlist = () => {
 				});
 			}
 		}
-	}, [roomQueue]);
+	}, [fetchSongInfo, roomQueue]);
 
 	return (
 		<View style={styles.container}>

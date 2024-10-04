@@ -41,21 +41,21 @@ export const getAlbumArtUrl = (song: SongPair | undefined) => {
 };
 
 export const getTitle = (song: SongPair | undefined) => {
-	if (!song) {
+	if (!song || !song.track || !song.track.name) {
 		return "Song Title";
 	}
 	return song.track.name;
 };
 
 export const getID = (song: SongPair | undefined) => {
-	if (!song) {
+	if (!song || !song.track || !song.track.id) {
 		return "";
 	}
 	return song.track.id;
 };
 
 export const getExplicit = (song: SongPair | undefined) => {
-	if (!song) {
+	if (!song || !song.track) {
 		return false;
 	}
 	return song.track.explicit;

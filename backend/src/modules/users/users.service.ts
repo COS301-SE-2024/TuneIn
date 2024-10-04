@@ -662,7 +662,6 @@ export class UsersService {
 		const recent_rooms =
 			(await this.dtogen.generateMultipleRoomDto(
 				recentRooms.map((room) => room.room_id),
-				userID,
 			)) || [];
 
 		return recent_rooms;
@@ -724,7 +723,6 @@ export class UsersService {
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
 				randomRooms.map((room: PrismaTypes.room) => room.room_id),
-				userID,
 			);
 			return r === null ? [] : r;
 		}
@@ -741,7 +739,7 @@ export class UsersService {
 		const ids: string[] = recommendedRooms.map(
 			(room: { playlist: string; score: number }) => room.playlist,
 		);
-		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids, userID);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
 		return r;
 	}
 
@@ -766,7 +764,7 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		let r = await this.dtogen.generateMultipleUserDto(ids, userID);
+		let r = await this.dtogen.generateMultipleUserDto(ids);
 		r = r.map((user) => {
 			user.relationship = "friend";
 			return user;
@@ -778,7 +776,7 @@ export class UsersService {
 		const f = await this.dbUtils.getUserFollowers(userID);
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
@@ -805,7 +803,7 @@ export class UsersService {
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
+		let result = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
@@ -1100,7 +1098,7 @@ export class UsersService {
 			return [];
 		}
 		const ids: string[] = friendRequests.map((friend) => friend.friend1);
-		const result = await this.dtogen.generateMultipleUserDto(ids, userID);
+		const result = await this.dtogen.generateMultipleUserDto(ids);
 		return result;
 	}
 
@@ -1115,10 +1113,7 @@ export class UsersService {
 		const ids: string[] = potentialFriends.map(
 			(friend: PrismaTypes.users) => friend.user_id,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
-			ids,
-			userID,
-		);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
 		return result;
 	}
 
@@ -1130,10 +1125,7 @@ export class UsersService {
 		const ids: string[] = pendingRequests.map(
 			(friend: PrismaTypes.friends) => friend.friend2,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
-			ids,
-			userID,
-		);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for pending requests. Received null.",
@@ -1748,7 +1740,6 @@ export class UsersService {
 
 		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
 			topUserIds,
-			userID,
 		);
 		if (!result) {
 			throw new Error(

@@ -2106,6 +2106,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/rooms/history:
     get:
       operationId: searchRoomsHistory
@@ -2265,6 +2268,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/users/history:
     get:
       operationId: searchUsersHistory
