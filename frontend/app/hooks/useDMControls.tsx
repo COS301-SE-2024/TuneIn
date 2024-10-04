@@ -46,6 +46,10 @@ export function useDirectMessageControls({
 				console.error("Socket connection not initialized");
 				return;
 			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
+				return;
+			}
 
 			pollLatency();
 			if (!currentUser) {
@@ -78,6 +82,10 @@ export function useDirectMessageControls({
 		function (message: DirectMessage): void {
 			if (!socket) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -115,6 +123,10 @@ export function useDirectMessageControls({
 				console.error("Socket connection not initialized");
 				return;
 			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
+				return;
+			}
 
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -145,6 +157,10 @@ export function useDirectMessageControls({
 		function (): void {
 			if (!socket) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 

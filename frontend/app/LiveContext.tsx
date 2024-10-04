@@ -357,7 +357,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return Promise.resolve();
 			}
 			const socket = socketRef.current;
-			if (socket !== null) {
+			if (socket !== null && socket.connected) {
 				const startTime = Date.now();
 				setPingSent(true);
 				socket.volatile.emit("ping", null, (hitTime: string) => {
@@ -403,8 +403,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const getTimeOffset = useCallback(() => {
 		const socket = socketRef.current;
-		if (socket !== null) {
-			let t0 = Date.now();
+		if (socket !== null && socket.connected) {
 			socket.emit("time_sync", { t0: Date.now() });
 		}
 	}, []);
@@ -503,7 +502,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			setRoomID(roomID);
 
 			const socket = socketRef.current;
-			if (socket !== null) {
+			if (socket !== null && socket.connected) {
 				setRoomJoinSendTime(new Date());
 				// pollLatency();
 				const input: ChatEventDto = {
@@ -553,7 +552,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		const socket = socketRef.current;
 		updateState({ type: actionTypes.START_ROOM_LEAVE });
-		if (socket !== null) {
+		if (socket !== null && socket.connected) {
 			const input: ChatEventDto = {
 				userID: currentUser.userID,
 				body: {
@@ -591,7 +590,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				.then((dmUsers) => {
 					const socket = socketRef.current;
 					setDmParticipants(dmUsers);
-					if (socket !== null) {
+					if (socket !== null && socket.connected) {
 						setdmJoinSendTime(new Date());
 						const input = {
 							userID: currentUser.userID,
@@ -636,7 +635,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 			const socket = socketRef.current;
-			if (socket !== null) {
+			if (socket !== null && socket.connected) {
 				const input = {
 					userID: currentUser.userID,
 				};

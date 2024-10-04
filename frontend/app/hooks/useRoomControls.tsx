@@ -487,8 +487,12 @@ export function useRoomControls({
 
 	const startPlayback = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -514,8 +518,12 @@ export function useRoomControls({
 
 	const pausePlayback = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -541,8 +549,12 @@ export function useRoomControls({
 
 	// const stopPlayback = useCallback(
 	// 	function (): void {
-	// 		if (!socket) {
+	// 		if (socket === null) {
 	// 			console.error("Socket connection not initialized");
+	// 			return;
+	// 		}
+	// 		if (!socket.connected) {
+	// 			console.error("Socket connection is closed");
 	// 			return;
 	// 		}
 
@@ -572,8 +584,12 @@ export function useRoomControls({
 
 	const nextTrack = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -599,8 +615,12 @@ export function useRoomControls({
 
 	const prevTrack = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -717,8 +737,12 @@ export function useRoomControls({
 
 	const clearQueue = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -741,8 +765,12 @@ export function useRoomControls({
 
 	const enqueueSongs = useCallback(
 		function (songs: RoomSongDto[]): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -770,8 +798,12 @@ export function useRoomControls({
 
 	const dequeueSongs = useCallback(
 		function (songs: RoomSongDto[]): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -799,8 +831,12 @@ export function useRoomControls({
 
 	const upvoteSong = useCallback(
 		function (song: RoomSongDto): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -822,8 +858,12 @@ export function useRoomControls({
 
 	const downvoteSong = useCallback(
 		function (song: RoomSongDto): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -845,8 +885,12 @@ export function useRoomControls({
 
 	const swapSongVote = useCallback(
 		function (song: RoomSongDto): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -868,8 +912,12 @@ export function useRoomControls({
 
 	const undoSongVote = useCallback(
 		function (song: RoomSongDto): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -911,8 +959,12 @@ export function useRoomControls({
 
 	const sendLiveChatMessage = useCallback(
 		function (message: string): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -947,8 +999,12 @@ export function useRoomControls({
 
 	const sendReaction = useCallback(
 		function (emoji: string): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -973,8 +1029,12 @@ export function useRoomControls({
 
 	const requestLiveChatHistory = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
@@ -1039,8 +1099,12 @@ export function useRoomControls({
 
 	const requestRoomQueue = useCallback(
 		function (): void {
-			if (!socket) {
+			if (socket === null) {
 				console.error("Socket connection not initialized");
+				return;
+			}
+			if (!socket.connected) {
+				console.error("Socket connection is closed");
 				return;
 			}
 
