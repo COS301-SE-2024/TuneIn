@@ -235,7 +235,7 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 	}
 	console.log("===================================");
 	console.log("Sorted queue:");
-	for (const song of tempQueue) {
+	for (const song of queue) {
 		console.log(
 			song.spotifyID +
 				" - score: " +
@@ -248,7 +248,7 @@ function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
 	}
 	console.log("===================================");
 	console.log("###################################");
-	return tempQueue;
+	return queue;
 }
 
 export class ActiveRoom {
@@ -324,23 +324,32 @@ export class ActiveRoom {
 					`Acquire lock: ${this.getQueueLockName()} in function 'setQueue'`,
 				);
 				try {
-					const prev = this.spotifyIDs();
 					this.queue = PriorityQueue.fromArray(
 						sortRoomSongs(songs),
 						this.compareRoomSongs,
 					);
-					const current = this.spotifyIDs();
+					const queueIDs: string[] = this.historicQueue
+						.toArray()
+						.map((s) => s.spotifyID);
+					queueIDs.push(...this.queue.toArray().map((s) => s.spotifyID));
+					const playlistIDs: string[] = await spotify.getTuneInPlaylistIDs(
+						this.room.spotifyPlaylistID,
+					);
 
-					//if prev and current are not the same, then the queue has changed
+					//if the playlist and full queue are not the same, then the queue has changed
 					// update the spotify playlist
 					let changed = false;
-					if (prev.length !== current.length) {
+					if (queueIDs.length !== playlistIDs.length) {
 						changed = true;
 					}
 					let i = 0;
 					if (!changed) {
-						for (i = 0; i < prev.length; i++) {
-							if (prev[i] !== current[i]) {
+						for (i = 0; i < queueIDs.length; i++) {
+							if (
+								!queueIDs[i] ||
+								!playlistIDs[i] ||
+								queueIDs[i] !== playlistIDs[i]
+							) {
 								changed = true;
 								break;
 							}
@@ -348,11 +357,10 @@ export class ActiveRoom {
 					}
 					if (changed) {
 						console.log("Queue has changed, updating spotify playlist");
-						const start = this.historicQueue.size() + i;
 						await spotify.updateRoomPlaylist(
 							this.room.spotifyPlaylistID,
-							current,
-							start,
+							queueIDs,
+							i, //'i' would represent the index of the first song that is different
 						);
 					}
 				} catch (e) {
@@ -472,12 +480,6 @@ export class ActiveRoom {
 		);
 		const ids: string[] = rs.map((s) => s.spotifyID);
 		await spotify.updateRoomPlaylist(this.room.spotifyPlaylistID, ids, 0);
-	}
-
-	spotifyIDs(): string[] {
-		const songs: RoomSong[] = this.queue.toArray();
-		const result: string[] = songs.map((s) => s.spotifyID);
-		return result;
 	}
 
 	async clearQueue(murLockService: MurLockService) {
