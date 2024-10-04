@@ -346,12 +346,28 @@ export class SpotifyService {
 					await Promise.all(promises);
 				}
 
-				const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
-				await this.TuneInAPI.playlists.addItemsToPlaylist(
-					playlistID,
-					uris.slice(start),
-					start,
-				);
+				const uris: string[] = trackIDs
+					.map((id) => `spotify:track:${id}`)
+					.slice(start);
+				// await this.TuneInAPI.playlists.addItemsToPlaylist(
+				// 	playlistID,
+				// 	uris.slice(start),
+				// 	start,
+				// );
+				const promises = [];
+				for (let i = 0; i < uris.length; i += 50) {
+					console.log(`Index: ${i}`);
+					console.log(`Start: ${start}`);
+					console.log(`Position: ${start + i}`);
+					promises.push(
+						this.TuneInAPI.playlists.addItemsToPlaylist(
+							playlistID,
+							uris.slice(i, i + 50),
+							start + i,
+						),
+					);
+				}
+				await Promise.all(promises);
 				return;
 			} catch (e) {
 				error = e as Error;
