@@ -686,18 +686,17 @@ export function useRoomControls({
 		[currentRoom, currentUser, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("useEffect for syncing user with room has been called");
+	const syncUserPlayback = useCallback(async () => {
+		console.log(`Running sync`);
 		try {
-			const now = Date.now();
-			if (now.valueOf() - lastSync.valueOf() < 1000) return; // Step 2: Check if less than a second has passed
-
-			spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
-			getDevices();
+			await spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
+			await getDevices();
 			if (keepUserSynced && currentRoom && currentSong && spotify) {
 				const syncUserSpotify = async () => {
 					try {
-						let listening = await userListeningToRoom();
+						let listening = await userListeningToRoom(
+							currentSong.startTime !== undefined,
+						);
 						let attempts = 0;
 						while (!listening) {
 							attempts++;
@@ -707,13 +706,31 @@ export function useRoomControls({
 								);
 							}
 							console.log("User is not listening to room");
-							await handlePlayback("play");
-							console.log("Playback should've started");
-							const state = await spotify.player.getPlaybackState();
-							listening = state.item.id === currentSong.spotifyID;
-							if (!listening) {
-								await new Promise((resolve) => setTimeout(resolve, 1000));
-							}
+							await handlePlayback(
+								"play",
+								currentRoom.spotifyPlaylistID,
+								currentSong,
+							).then(async () => {
+								console.log("Playback should've started");
+								await new Promise((resolve) => setTimeout(resolve, 2000));
+								await spotify.player
+									.getPlaybackState()
+									.catch((err) => {
+										Alert.alert(
+											"An error occurred while checking if user is listening to room: " +
+												err,
+										);
+										throw err;
+									})
+									.then(async (state) => {
+										listening =
+											state.item !== null &&
+											state.item.id === currentSong.spotifyID;
+										if (!listening) {
+											await new Promise((resolve) => setTimeout(resolve, 1000));
+										}
+									});
+							});
 						}
 					} catch (err) {
 						console.error(
@@ -730,25 +747,49 @@ export function useRoomControls({
 				if (!activeDevice) {
 					throw new Error("Active device is not set");
 				}
-				syncUserSpotify();
+				await syncUserSpotify();
 			}
 		} catch (err) {
 			console.error("An error occurred while syncing user with room", err);
 			Alert.alert("An error occurred while syncing user with room: " + err);
 		}
-		setLastSync(new Date());
 	}, [
-		lastSync,
-		spotifyAuth,
-		keepUserSynced,
+		activeDevice,
 		currentRoom,
 		currentSong,
-		spotify,
-		userListeningToRoom,
-		handlePlayback,
-		activeDevice,
 		getDevices,
+		handlePlayback,
+		keepUserSynced,
+		spotify,
+		spotifyAuth,
+		userListeningToRoom,
 	]);
+
+	useEffect(() => {
+		console.log(`syncUserPlayback changed`);
+		if (intervalRef.current) {
+			console.log(`Clearing the existing interval`);
+			clearInterval(intervalRef.current);
+		}
+		console.log(`Creating a new interval`);
+		intervalRef.current = setInterval(syncUserPlayback, 15000);
+		return () => {
+			clearInterval(intervalRef.current);
+			intervalRef.current = undefined;
+		};
+	}, [syncUserPlayback]);
+
+	useEffect(() => {
+		console.log("useEffect for syncing user with room has been called");
+		if (!intervalRef.current) {
+			intervalRef.current = setInterval(syncUserPlayback, 15000);
+			console.log(`Interval set for syncing user with room`);
+		}
+		return () => {
+			clearInterval(intervalRef.current);
+			intervalRef.current = undefined;
+		};
+	}, []);
 
 	const playbackHandler: Playback = useMemo(() => {
 		return {
