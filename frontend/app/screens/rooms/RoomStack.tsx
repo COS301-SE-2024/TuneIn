@@ -88,7 +88,26 @@ function MyRoomTabs() {
 
 	const handleShareRoom = () => {
 		setMenuVisible(false);
-		// Implement room sharing logic here
+		throw new Error(
+			"This is not implemented and this error is to notify our devs.",
+		);
+		// const userIDs: string[];
+		// rooms.shareRoom(roomID, userIDs)
+		// 	.then((response) => {
+		// 		if (Platform.OS === "android" && ToastAndroid) {
+		// 			ToastAndroid.show("Room shared successfully", ToastAndroid.SHORT);
+		// 		} else {
+		// 			Alert.alert("Success", "Room shared successfully.");
+		// 		}
+		// 	})
+		// 	.catch((error) => {
+		// 		console.log("Error sharing room: ", error);
+		// 		if (Platform.OS === "android" && ToastAndroid) {
+		// 			ToastAndroid.show("Failed to share room", ToastAndroid.SHORT);
+		// 		} else {
+		// 			Alert.alert("Error", "Failed to share room.");
+		// 		}
+		// 	});
 	};
 
 	const handleSavePlaylist = () => {
