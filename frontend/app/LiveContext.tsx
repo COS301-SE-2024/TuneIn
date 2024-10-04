@@ -18,9 +18,9 @@ import {
 	SpotifyCallbackResponse,
 	SpotifyTokenPair,
 	UserDto,
+	RoomSongDto,
 } from "../api";
 import { EmojiReactionDto } from "./models/EmojiReactionDto";
-import { RoomSongDto } from "./models/RoomSongDto";
 import { VoteDto } from "./models/VoteDto";
 import { QueueEventDto } from "./models/QueueEventDto";
 import { ObjectConfig } from "react-native-flying-objects";

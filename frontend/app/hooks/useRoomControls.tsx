@@ -11,9 +11,9 @@ import {
 	RoomDto,
 	SpotifyTokenPair,
 	UserDto,
+	RoomSongDto,
 } from "../../api";
 import { EmojiReactionDto } from "../models/EmojiReactionDto";
-import { RoomSongDto } from "../models/RoomSongDto";
 import { QueueEventDto } from "../models/QueueEventDto";
 import { Alert, ToastAndroid } from "react-native";
 import { ChatEventDto } from "../models/ChatEventDto";

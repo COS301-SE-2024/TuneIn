@@ -1,4 +1,4 @@
-import { RoomSongDto } from "./RoomSongDto";
+import { RoomSongDto } from "../../api";
 
 export type PlaybackEventDto = {
 	date_created?: Date;

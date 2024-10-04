@@ -19,7 +19,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import ContextMenu from "../../components/ContextMenu";
 import { useLive } from "../../LiveContext";
 import { useAPI } from "../../APIContext";
-import { RoomSongDto } from "../../models/RoomSongDto";
+import { RoomDto, RoomSongDto } from "../../../api";
 
 const Tab = createMaterialTopTabNavigator();
 

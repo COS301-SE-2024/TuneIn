@@ -1,4 +1,4 @@
-import { RoomSongDto } from "./RoomSongDto";
+import { RoomSongDto } from "../../api";
 
 export type QueueEventDto = {
 	songs: RoomSongDto[];

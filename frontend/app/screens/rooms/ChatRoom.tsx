@@ -91,7 +91,6 @@ const ChatRoom = () => {
 		if (!currentRoom || !userInRoom) {
 			await rooms.joinRoom(roomID);
 			joinRoom(roomID);
-			roomControls.requestRoomQueue();
 
 			// only leave if you're in the room
 		} else if (currentRoom && userInRoom) {

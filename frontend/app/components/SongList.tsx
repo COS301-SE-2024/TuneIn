@@ -2,41 +2,43 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import SongVote from "./rooms/SongVote";
 import {
-	RoomSongDto,
 	getAlbumArtUrl,
 	constructArtistString,
 	getTitle,
-} from "../models/RoomSongDto";
+	SongPair,
+} from "../models/SongPair";
 import { useLive } from "../LiveContext";
 import { colors } from "../styles/colors";
+import { Track } from "@spotify/web-api-ts-sdk";
+import { RoomSongDto } from "../../api";
 
 interface SongListProps {
-	track: RoomSongDto;
+	song: SongPair;
 	showVoting?: boolean;
 }
 
-const SongList: React.FC<SongListProps> = ({ track, showVoting = true }) => {
+const SongList: React.FC<SongListProps> = ({ song, showVoting = true }) => {
 	const { currentSong, roomQueue } = useLive();
-	const albumCoverUrl = getAlbumArtUrl(track);
+	const albumCoverUrl: string = getAlbumArtUrl(song);
 	const [isCurrentSong, setIsCurrentSong] = useState(false);
 
 	useEffect(() => {
-		const song: RoomSongDto | undefined = roomQueue.find(
-			(s) => s.spotifyID === track.spotifyID,
+		const tmpSong: RoomSongDto | undefined = roomQueue.find(
+			(s) => s.spotifyID === song.song.spotifyID,
 		);
-		if (song) {
-			setIsCurrentSong(currentSong?.spotifyID === track.spotifyID);
+		if (tmpSong) {
+			setIsCurrentSong(currentSong?.spotifyID === song.song.spotifyID);
 		} else {
 			setIsCurrentSong(false);
 		}
-	}, [currentSong, roomQueue, track]);
+	}, [currentSong, roomQueue]);
 
 	return (
 		<View
 			style={[styles.container, isCurrentSong ? styles.currentSong : null]}
 			testID="song-container"
 		>
-			<Text style={styles.songNumber}>{track.index}</Text>
+			<Text style={styles.songNumber}>{song.song.index}</Text>
 			<Image
 				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
@@ -49,12 +51,12 @@ const SongList: React.FC<SongListProps> = ({ track, showVoting = true }) => {
 						isCurrentSong ? styles.currentSongText : null,
 					]}
 				>
-					{getTitle(track)}
+					{getTitle(song)}
 				</Text>
-				<Text style={styles.artist}>{constructArtistString(track)}</Text>
+				<Text style={styles.artist}>{constructArtistString(song)}</Text>
 			</View>
 
-			{showVoting && <SongVote song={track} />}
+			{showVoting && <SongVote song={song.song} />}
 		</View>
 	);
 };

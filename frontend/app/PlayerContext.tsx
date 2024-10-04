@@ -6,8 +6,10 @@ import {
 	constructArtistString,
 	getAlbumArtUrl,
 	getTitle,
-} from "./models/RoomSongDto";
+	SongPair,
+} from "./models/SongPair";
 import { Track } from "@spotify/web-api-ts-sdk";
+import { useSpotifyTracks } from "./hooks/useSpotifyTracks";
 
 interface PlayerContextType {
 	setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
@@ -60,59 +62,79 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 		roomQueue,
 		roomMessages,
 		userBookmarks,
+		spotifyAuth,
 	} = useLive();
+	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
 
 	useEffect(() => {
 		if (!currentRoom) {
 			setInterfaceCurrentRoom(null);
 		} else {
-			let start: Date = new Date(0);
-			if (currentRoom.start_date) {
-				start = new Date(currentRoom.start_date);
+			if (
+				interfaceCurrentRoom === null ||
+				interfaceCurrentRoom.roomID !== currentRoom.roomID
+			) {
+				let start: Date = new Date(0);
+				if (currentRoom.start_date) {
+					start = new Date(currentRoom.start_date);
+				}
+				let end: Date = new Date(0);
+				if (currentRoom.end_date) {
+					end = new Date(currentRoom.end_date);
+				}
+				const title: string =
+					currentSong && currentTrack !== null
+						? getTitle({ song: currentSong, track: currentTrack })
+						: getTitle(undefined);
+				const artist: string =
+					currentSong && currentTrack !== null
+						? constructArtistString({ song: currentSong, track: currentTrack })
+						: constructArtistString(undefined);
+				setInterfaceCurrentRoom({
+					roomID: currentRoom.roomID,
+					backgroundImage: currentRoom.room_image,
+					name: currentRoom.room_name,
+					songName: title,
+					artistName: artist,
+					description: currentRoom.room_image,
+					// userProfile?:
+					userID: currentRoom.creator.userID,
+					username: currentRoom.creator.username,
+					mine: currentRoom.creator.userID === currentUser?.userID,
+					tags: currentRoom.tags,
+					// playlist?:
+					//genre
+					language: currentRoom.language,
+					roomSize: currentRoom.participant_count,
+					isExplicit: currentRoom.has_explicit_content,
+					isNsfw: currentRoom.has_nsfw_content,
+					start_date: start,
+					end_date: end,
+				});
 			}
-			let end: Date = new Date(0);
-			if (currentRoom.end_date) {
-				end = new Date(currentRoom.end_date);
-			}
-			setInterfaceCurrentRoom({
-				roomID: currentRoom.roomID,
-				backgroundImage: currentRoom.room_image,
-				name: currentRoom.room_name,
-				songName: getTitle(currentSong),
-				artistName: constructArtistString(currentSong),
-				description: currentRoom.room_image,
-				// userProfile?:
-				userID: currentRoom.creator.userID,
-				username: currentRoom.creator.username,
-				mine: currentRoom.creator.userID === currentUser?.userID,
-				tags: currentRoom.tags,
-				// playlist?:
-				//genre
-				language: currentRoom.language,
-				roomSize: currentRoom.participant_count,
-				isExplicit: currentRoom.has_explicit_content,
-				isNsfw: currentRoom.has_nsfw_content,
-				start_date: start,
-				end_date: end,
-			});
 		}
-	}, [currentRoom, currentSong, currentUser?.userID]);
+	}, [currentRoom, currentSong]);
 
 	useEffect(() => {
-		if (!currentSong || !currentSong.track) {
+		if (!currentSong) {
 			setCurrentTrack(null);
 			setCurrentTrackIndex(null);
 			setTrackName(null);
 			setArtistName(null);
 			setAlbumArt(null);
 		} else {
-			setCurrentTrack(currentSong.track);
-			setCurrentTrackIndex(currentSong.index);
-			setTrackName(getTitle(currentSong));
-			setArtistName(constructArtistString(currentSong));
-			setAlbumArt(getAlbumArtUrl(currentSong));
+			if (currentTrack === null || currentTrack.id !== currentSong.spotifyID) {
+				fetchSongInfo([currentSong.spotifyID]).then(([track]: Track[]) => {
+					const sp: SongPair = { song: currentSong, track: track };
+					setCurrentTrack(track);
+					setCurrentTrackIndex(currentSong.index);
+					setTrackName(getTitle(sp));
+					setArtistName(constructArtistString(sp));
+					setAlbumArt(getAlbumArtUrl(sp));
+				});
+			}
 		}
-	}, [currentSong]);
+	}, [currentSong, currentTrack, fetchSongInfo]);
 
 	useEffect(() => {
 		if (!currentUser) {
