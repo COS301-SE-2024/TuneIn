@@ -85,7 +85,7 @@ export class RoomsController {
 		description: "No rooms found",
 	})
 	async getRooms(@Query("q") roomIDs: string[]): Promise<RoomDto[]> {
-		if (roomIDs.length === 0) {
+		if (!roomIDs || roomIDs.length === 0) {
 			throw new HttpException("No rooms given", HttpStatus.BAD_REQUEST);
 		}
 		return await this.roomsService.getMultipleRoomInfo(roomIDs);
@@ -1035,7 +1035,7 @@ export class RoomsController {
 		description: "Playlist saved successfully",
 	})
 	@ApiNotFoundResponse({
-		description: "Playlist not found",
+		description: "Room not found",
 	})
 	@ApiBadRequestResponse({
 		description: "Bad request",
@@ -1082,7 +1082,7 @@ export class RoomsController {
 		description: "Playlist removed successfully",
 	})
 	@ApiNotFoundResponse({
-		description: "Playlist not found",
+		description: "Room not found",
 	})
 	@ApiBadRequestResponse({
 		description: "Bad request",

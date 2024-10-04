@@ -9,7 +9,7 @@ import {
 	Request,
 	Param,
 	Head,
-	Query,
+	// Query,
 	HttpException,
 	HttpStatus,
 } from "@nestjs/common";
@@ -25,7 +25,7 @@ import {
 	ApiTags,
 	ApiUnauthorizedResponse,
 	ApiNotFoundResponse,
-	ApiQuery,
+	// ApiQuery,
 } from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
@@ -96,46 +96,46 @@ export class UsersController {
 		return this.usersService.getProfile(userInfo.username);
 	}
 
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Get()
-	@ApiOperation({
-		summary: "Get multiple users' profile info",
-		description:
-			"Returns the profile info of multiple users as an array of UserDto.",
-		operationId: "getUsers",
-	})
-	@ApiQuery({
-		name: "q",
-		description: "An array of user IDs to get info for.",
-		required: true,
-		type: "string",
-		isArray: true,
-	})
-	@ApiOkResponse({
-		description: "An array of UserDto representing the requested users.",
-		type: UserDto,
-		isArray: true,
-	})
-	@ApiBadRequestResponse({
-		description: "Bad request. No users given.",
-	})
-	@ApiNotFoundResponse({
-		description: "No users found with the given IDs.",
-	})
-	async getUsers(@Query("q") userIDs: string[]): Promise<UserDto[]> {
-		if (userIDs.length === 0) {
-			throw new HttpException("No users given", HttpStatus.BAD_REQUEST);
-		}
-		return await this.usersService.getUsers(userIDs);
-	}
+	// @ApiBearerAuth()
+	// @ApiSecurity("bearer")
+	// @UseGuards(JwtAuthGuard)
+	// /*
+	// @ApiHeader({
+	// 	name: "Authorization",
+	// 	description: "Bearer token for authentication",
+	// })
+	// */
+	// @Get()
+	// @ApiOperation({
+	// 	summary: "Get multiple users' profile info",
+	// 	description:
+	// 		"Returns the profile info of multiple users as an array of UserDto.",
+	// 	operationId: "getUsers",
+	// })
+	// @ApiQuery({
+	// 	name: "q",
+	// 	description: "An array of user IDs to get info for.",
+	// 	required: true,
+	// 	type: "string",
+	// 	isArray: true,
+	// })
+	// @ApiOkResponse({
+	// 	description: "An array of UserDto representing the requested users.",
+	// 	type: UserDto,
+	// 	isArray: true,
+	// })
+	// @ApiBadRequestResponse({
+	// 	description: "Bad request. No users given.",
+	// })
+	// @ApiNotFoundResponse({
+	// 	description: "No users found with the given IDs.",
+	// })
+	// async getUsers(@Query("q") userIDs: string[]): Promise<UserDto[]> {
+	// 	if (userIDs.length === 0) {
+	// 		throw new HttpException("No users given", HttpStatus.BAD_REQUEST);
+	// 	}
+	// 	return await this.usersService.getUsers(userIDs);
+	// }
 
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")

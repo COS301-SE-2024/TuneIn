@@ -47,31 +47,17 @@ paths:
         - bearer: []
   /users:
     get:
-      operationId: getUsers
-      summary: Get multiple users' profile info
-      description: Returns the profile info of multiple users as an array of UserDto.
-      parameters:
-        - name: q
-          required: true
-          in: query
-          description: An array of user IDs to get info for.
-          schema:
-            type: array
-            items:
-              type: string
+      operationId: getProfile
+      summary: Get current user's profile info
+      description: Get the profile info of the currently authenticated user.
+      parameters: []
       responses:
         '200':
-          description: An array of UserDto representing the requested users.
+          description: Successfully returned user profile info.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserDto'
-        '400':
-          description: Bad request. No users given.
-        '404':
-          description: No users found with the given IDs.
+                $ref: '#/components/schemas/UserDto'
       tags:
         - users
       security:
@@ -255,6 +241,48 @@ paths:
         - users
       security:
         - bearer: []
+        - bearer: []
+  /users/rooms/friends:
+    get:
+      operationId: UsersController_getRoomsFromFriends
+      summary: Get rooms from friends
+      parameters: []
+      responses:
+        '200':
+          description: Rooms from friends retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Error getting rooms from friends.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/rooms/following:
+    get:
+      operationId: UsersController_getRoomsFromFollowing
+      summary: Get rooms from people you follow
+      parameters: []
+      responses:
+        '200':
+          description: Rooms from people you follow retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Error getting rooms from people you follow.
+      tags:
+        - users
+        - users
+      security:
         - bearer: []
   /users/rooms/current:
     get:
@@ -1773,7 +1801,7 @@ paths:
         '400':
           description: Bad request
         '404':
-          description: Playlist not found
+          description: Room not found
       security:
         - bearer: []
         - bearer: []
@@ -1799,7 +1827,7 @@ paths:
         '400':
           description: Bad request
         '404':
-          description: Playlist not found
+          description: Room not found
       security:
         - bearer: []
         - bearer: []
@@ -2620,16 +2648,11 @@ components:
         index:
           type: number
         startTime:
-          format: date-time
-          type: string
+          type: number
         insertTime:
-          format: date-time
-          type: string
+          type: number
         pauseTime:
-          format: date-time
-          type: string
-        track:
-          type: object
+          type: number
         playlistIndex:
           type: number
       required:
@@ -2637,10 +2660,7 @@ components:
         - userID
         - score
         - index
-        - startTime
         - insertTime
-        - pauseTime
-        - track
         - playlistIndex
     RoomDto:
       type: object
