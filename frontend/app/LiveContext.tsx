@@ -227,42 +227,22 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		],
 	);
 
-	const updateRoomQueue = useCallback(
-		(queue: RoomSongDto[]) => {
-			if (queue.length === 0) {
-				setRoomQueue([]);
-				setCurrentSong(undefined);
-				setRoomPlaying(undefined);
-				return;
-			}
-			console.log(`Room queue updating with input:`);
-			console.log(queue);
-			const head: RoomSongDto = queue[0];
-			let st: Date = new Date(0);
-			if (head.startTime) {
-				if (typeof head.startTime === "string") {
-					st = new Date(head.startTime);
-				} else {
-					st = head.startTime;
-				}
-			}
-			if (st === new Date(0) || st.getTime() > Date.now() || head.pauseTime) {
-				queue = queue.sort((a, b) => a.index - b.index);
-			} else {
-				let partialQueue = queue.slice(1);
-				partialQueue = partialQueue.sort((a, b) => a.index - b.index);
-				queue = [head, ...partialQueue];
-			}
-			console.log(`Room queue post-sort:`);
-			console.log(queue);
-			setRoomQueue(queue);
-			if (!currentSong || queue[0].spotifyID !== currentSong.spotifyID) {
-				setCurrentSong(queue[0]);
-				setRoomPlaying(queue[0]);
-			}
-		},
-		[currentSong],
-	);
+	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
+		if (queue.length === 0) {
+			setRoomQueue([]);
+			setCurrentSong(undefined);
+			setRoomPlaying(undefined);
+			return;
+		}
+		console.log(`Room queue updating with input:`);
+		console.log(queue);
+		queue = queue.sort((a, b) => a.score - b.score);
+		console.log(`Room queue post-sort:`);
+		console.log(queue);
+		setRoomQueue(queue);
+		setCurrentSong(queue[0]);
+		setRoomPlaying(queue[0]);
+	}, []);
 
 	const spotifyAuth: SpotifyAuth = useMemo(
 		() => ({
