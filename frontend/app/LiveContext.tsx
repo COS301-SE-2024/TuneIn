@@ -48,7 +48,7 @@ import {
 	DirectMessageControls,
 	useDirectMessageControls,
 } from "./hooks/useDMControls";
-import { set } from "react-datepicker/dist/date_utils";
+import { useSpotifyTracks } from "./hooks/useSpotifyTracks";
 
 const clientId = SPOTIFY_CLIENT_ID;
 if (!clientId) {
@@ -159,28 +159,16 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [roomPlaying, setRoomPlaying] = useReducer(
 		(state: boolean, action: RoomSongDto | undefined) => {
 			if (action) {
-				console.log("action.startTime");
-				console.log(action.startTime);
-				console.log(typeof action.startTime);
-
-				//note action.startTime is TZ time as "2024-09-23T12:29:31.682Z"
-				//convert to Date object
-				let st: Date | undefined;
-				if (typeof action.startTime === "string") {
-					st = new Date(action.startTime);
-				} else {
-					st = action.startTime;
-				}
-				if (st && st.getTime() < Date.now()) {
-					if (!action.pauseTime) {
-						return true;
+				console.log(`action.startTime: ${action.startTime}`);
+				if (action.startTime) {
+					if (action.startTime < Date.now().valueOf()) {
+						if (!action.pauseTime) {
+							return true;
+						}
 					}
-					return true;
 				}
-			} else {
-				return false;
 			}
-			return state;
+			return false;
 		},
 		false,
 	);
@@ -943,22 +931,21 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							throw new Error("Server did not return song ID");
 						}
 
-						if (response.song && response.song !== null) {
-							if (
-								!currentSong ||
-								response.song.spotifyID !== currentSong.spotifyID
-							) {
-								setCurrentSong(response.song);
-								setRoomPlaying(response.song);
-							}
+						await fetchSongInfo([response.spotifyID]); //pre-fetch spotify info for later
+						const s = response.song;
+						if (s && s !== null) {
+							setCurrentSong(s);
+							setRoomPlaying(s);
 						}
 						if (
 							!(await roomControls.playbackHandler.userListeningToRoom(true))
 						) {
 							if (!currentSong) {
+								console.log("Current song not found");
 								return;
 							}
 							if (!keepUserSynced) {
+								console.log("User is not synced with room");
 								return;
 							}
 							if (
@@ -986,13 +973,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						}
 
 						if (response.song && response.song !== null) {
-							if (
-								!currentSong ||
-								response.song.spotifyID !== currentSong.spotifyID
-							) {
-								setCurrentSong(response.song);
-								setRoomPlaying(response.song);
-							}
+							setCurrentSong(response.song);
+							setRoomPlaying(response.song);
 						}
 
 						await fetchSongInfo([response.spotifyID]); //pre-fetch spotify info for later
