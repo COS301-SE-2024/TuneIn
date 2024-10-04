@@ -11,9 +11,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
 import { router } from "expo-router";
-import CurrentRoom from "../../screens/rooms/functions/CurrentRoom";
 import { Player } from "../../PlayerContext";
 import { useContext } from "react";
+import { useLive } from "../../LiveContext";
+import { useAPI } from "../../APIContext";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
@@ -22,12 +23,8 @@ interface ContextMenuProps {
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
+	const { currentRoom, socketHandshakes, leaveRoom, leaveDM } = useLive();
+	const { rooms } = useAPI();
 	// Navigation functions
 	const navigateToAnalytics = () => {
 		router.navigate("/screens/analytics/AnalyticsPage");
@@ -38,11 +35,12 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 		await auth.default
 			.getToken()
 			.then(async (token) => {
-				const current = new CurrentRoom();
-				const currentRoom = await current.getCurrentRoom(token as string);
 				if (currentRoom) {
-					const currentRoomID = currentRoom?.roomID ?? currentRoom.id;
-					await current.leaveJoinRoom(token as string, currentRoomID, true);
+					leaveRoom();
+					await rooms.leaveRoom(currentRoom.roomID);
+				}
+				if (socketHandshakes.dmJoined) {
+					leaveDM();
 				}
 				onClose(); // Close the modal after logout
 				await auth.default.logout();
@@ -52,8 +50,6 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 				} else {
 					alert("You have been logged out.");
 				}
-				const { setCurrentRoom } = playerContext;
-				setCurrentRoom(null);
 			})
 			.catch((error) => {
 				console.log("Error getting token: " + error);
