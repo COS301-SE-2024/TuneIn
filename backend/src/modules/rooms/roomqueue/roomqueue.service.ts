@@ -589,122 +589,92 @@ export class ActiveRoom {
 					const queue: RoomSong[] = historicQueue.concat(upcomingQueue);
 
 					//ensure enqueued songs are in db (songs table)
-					const tracks: Spotify.Track[] = queue.map((s) => s.spotifyInfo);
-					const songs: PrismaTypes.song[] = await spotify.addTracksToDB(tracks);
+					const tracks: Spotify.Track[] = await spotify.getManyTracks(
+						queue.map((s) => s.spotifyID),
+					);
+					const dbSongs: PrismaTypes.song[] = await spotify.addTracksToDB(
+						tracks,
+					);
 
-					//ensure enqueued songs are queueitems associated with room
-					const newQueueItems: Prisma.queueCreateManyInput[] = [];
-					for (let i = 0, n = historicQueue.length; i < n; i++) {
-						const dbSong = songs.find(
-							(s) => s.spotify_id === historicQueue[i].spotifyID,
-						);
-						if (!dbSong || dbSong === null) {
-							throw new Error("Song is not in the database somehow?");
+					//create new queue items in 1 new transaction
+					const newQueueItems: Prisma.queueCreateInput[] = [];
+					historicQueue.forEach((song) => {
+						const dbSong = dbSongs.find((s) => s.spotify_id === song.spotifyID);
+						if (!dbSong) {
+							console.log(dbSong);
+							throw new Error("Song is not in the queue somehow?");
 						}
-
-						const song = historicQueue[i];
-						newQueueItems.push({
-							room_id: this.room.roomID,
-							song_id: dbSong.song_id,
-							is_done_playing: true,
-							start_time: song.getPlaybackStartTime(),
-							insert_time: song.insertTime,
-						});
-					}
-					for (let i = 0, n = upcomingQueue.length; i < n; i++) {
-						const dbSong = songs.find(
-							(s) => s.spotify_id === upcomingQueue[i].spotifyID,
-						);
-						if (!dbSong || dbSong === null) {
-							throw new Error("Song is not in the database somehow?");
-						}
-
-						const song = upcomingQueue[i];
-						newQueueItems.push({
-							room_id: this.room.roomID,
-							song_id: dbSong.song_id,
-							is_done_playing: false,
-							start_time: song.getPlaybackStartTime(),
-							insert_time: song.insertTime,
-						});
-					}
-					await prisma.queue.createMany({
-						data: newQueueItems,
-					});
-
-					//link queue items to songs
-					const queueItems = await prisma.queue.findMany({
-						where: {
-							room_id: this.room.roomID,
-						},
-						include: {
-							vote: true,
-							song: true,
-						},
-						orderBy: {
-							start_time: "asc",
-						},
-					});
-
-					//link queue item ids & song ids to songs
-					for (let i = 0, n = queue.length; i < n; i++) {
-						if (!queue[i].queueItemID) {
-							const dbSong = queueItems.find(
-								(q) =>
-									q.song.spotify_id === queue[i].spotifyID &&
-									q.insert_time === queue[i].insertTime &&
-									q.start_time === queue[i].getPlaybackStartTime(),
-							);
-							if (!dbSong || dbSong === null) {
-								throw new Error("Song is not in the queue somehow?");
-							}
-							queue[i].queueItemID = dbSong.queue_id;
-						}
-
-						if (!queue[i].spotifyInfo && queue[i].spotifyID !== null) {
-							const song = queue[i];
-							const track = tracks.find((t) => t.id === song.spotifyID);
-							if (!track || track === null) {
-								throw new Error("Song is not in the queue somehow?");
-							}
-							song.spotifyInfo = track;
-						}
-					}
-
-					//ensure votes are in db
-					const existingVotes: PrismaTypes.vote[] = await prisma.vote.findMany({
-						where: {
-							queue_id: {
-								in: queue.map((s) => s.queueItemID),
+						const startTime = song.getPlaybackStartTime();
+						const queueItem: Prisma.queueCreateInput = {
+							room: {
+								connect: {
+									room_id: this.room.roomID,
+								},
 							},
-						},
-						include: {
-							queue: true,
-							users: true,
-						},
-					});
-					const newVotes: Prisma.voteCreateManyInput[] = [];
-					for (const song of queue) {
-						const v = song.exportNewVotes();
-						if (v.length > 0) {
-							for (const vote of v) {
-								const existingVote = existingVotes.find(
-									(ev) =>
-										ev.queue_id === song.queueItemID &&
-										ev.user_id === vote.user_id &&
-										ev.is_upvote === vote.is_upvote &&
-										ev.vote_time === vote.vote_time,
-								);
-								if (existingVote) {
-									continue;
-								}
-								newVotes.push(vote);
-							}
+							song: {
+								connect: {
+									song_id: dbSong.song_id,
+								},
+							},
+							is_done_playing: true,
+							start_time: startTime !== null ? new Date(startTime) : null,
+							insert_time: new Date(song.insertTime),
+						};
+						const songVotes: Prisma.voteCreateManyQueueInput[] =
+							song.exportVotes();
+						if (songVotes.length > 0) {
+							queueItem.vote = {
+								createMany: {
+									data: songVotes,
+								},
+							};
 						}
-					}
-					await prisma.vote.createMany({
-						data: newVotes,
+						newQueueItems.push(queueItem);
 					});
+					upcomingQueue.forEach((song) => {
+						const dbSong = dbSongs.find((s) => s.spotify_id === song.spotifyID);
+						if (!dbSong) {
+							console.log(dbSong);
+							throw new Error("Song is not in the queue somehow?");
+						}
+						const startTime = song.getPlaybackStartTime();
+						const queueItem: Prisma.queueCreateInput = {
+							room: {
+								connect: {
+									room_id: this.room.roomID,
+								},
+							},
+							song: {
+								connect: {
+									song_id: dbSong.song_id,
+								},
+							},
+							is_done_playing: false,
+							start_time: startTime !== null ? new Date(startTime) : null,
+							insert_time: new Date(song.insertTime),
+						};
+						const songVotes: Prisma.voteCreateManyQueueInput[] =
+							song.exportVotes();
+						if (songVotes.length > 0) {
+							queueItem.vote = {
+								createMany: {
+									data: songVotes,
+								},
+							};
+						}
+						newQueueItems.push(queueItem);
+					});
+
+					console.log(`Sending new queue data to db...`);
+					await prisma.$transaction([
+						prisma.queue.deleteMany({
+							where: {
+								room_id: this.room.roomID,
+							},
+						}),
+						...newQueueItems.map((q) => prisma.queue.create({ data: q })),
+					]);
+
 					console.log(`Release lock: ${this.getQueueLockName()}`);
 				} catch (e) {
 					console.error("Error in flushToDB");
