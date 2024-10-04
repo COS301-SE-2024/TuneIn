@@ -1,18 +1,11 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { SpotifyAuthService } from "./spotifyauth.service";
-import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../../prisma/prisma.module";
 import { DbUtilsModule } from "../../modules/db-utils/db-utils.module";
 import { TasksModule } from "../../tasks/tasks.module";
 @Module({
-	imports: [
-		HttpModule,
-		PrismaModule,
-		DbUtilsModule,
-		TasksModule,
-		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
-	],
+	imports: [HttpModule, PrismaModule, DbUtilsModule, TasksModule],
 	controllers: [],
 	providers: [SpotifyAuthService],
 	exports: [SpotifyAuthService],

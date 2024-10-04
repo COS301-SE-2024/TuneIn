@@ -5,7 +5,6 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { LocalStrategy } from "./local.strategy";
 import { JwtStrategy } from "./jwt.strategy";
-import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "../../prisma/prisma.module";
 import { SpotifyAuthController } from "./spotify/spotifyauth.controller";
 import { SpotifyAuthModule } from "./spotify/spotifyauth.module";
@@ -22,7 +21,6 @@ if (!JWT_SECRET_KEY || JWT_SECRET_KEY === undefined) {
 			secret: JWT_SECRET_KEY,
 			signOptions: { expiresIn: "2h" },
 		}),
-		ConfigModule.forRoot(), // Ensure ConfigModule is imported to access environment variables
 		PrismaModule,
 		SpotifyAuthModule,
 	],
