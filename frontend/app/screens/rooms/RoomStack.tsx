@@ -32,6 +32,7 @@ import CurrentRoom from "./functions/CurrentRoom";
 import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import ContextMenu from "../../components/ContextMenu";
 import * as utils from "../../services/Utils";
+import RoomModal from "../../components/RoomModal";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -53,6 +54,8 @@ function MyRoomTabs() {
 
 	const [isNsfwModalVisible, setNsfwModalVisible] = useState(false);
 	const [hasSeenNsfwModal, setHasSeenNsfwModal] = useState(false);
+	const [hasChildRooms, setHasChildRooms] = useState(false);
+	const [showModal, setShowModal] = useState(false);
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -319,6 +322,39 @@ function MyRoomTabs() {
 		}
 	};
 
+	// const handleCheckForChildRooms = async () => {
+	// 	// Logic to check if there are child rooms
+	// 	const childRoomsExist = roomData.childrenRoomIDs; // Replace with actual condition
+	// 	console.log("Child rooms exist: ", childRoomsExist);
+	// 	if (childRoomsExist) {
+	// 		setHasChildRooms(true);
+	// 		setShowModal(true);
+	// 	}
+	// };
+
+	const handleCheckForChildRooms = async () => {
+		// Logic to check if there are child rooms
+		const childRoomsExist =
+			Array.isArray(roomData.childrenRoomIDs) &&
+			roomData.childrenRoomIDs.length > 0;
+
+		console.log("Child rooms exist: ", childRoomsExist);
+
+		if (childRoomsExist) {
+			setHasChildRooms(true);
+			setShowModal(true);
+		}
+	};
+
+	useEffect(() => {
+		// Automatically check for child rooms when entering the page
+		handleCheckForChildRooms();
+	}, []); // Empty dependency array ensures this runs once when the component mounts
+
+	const closeModal = () => {
+		setShowModal(false);
+	};
+
 	return (
 		<>
 			{/* NSFW Modal */}
@@ -353,6 +389,13 @@ function MyRoomTabs() {
 					</Pressable>
 				</Modal>
 			)}
+
+			{/* RoomModal component */}
+			<RoomModal
+				visible={showModal}
+				onClose={closeModal}
+				onViewChildRooms={handleNavigateToChildRooms}
+			/>
 
 			<View style={styles.header}>
 				{/* Back Button */}
@@ -492,10 +535,6 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 5,
 		margin: 5,
-	},
-	buttonText: {
-		color: "white",
-		fontWeight: "bold",
 	},
 	modalContainer: {
 		flex: 1,
