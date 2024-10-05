@@ -416,13 +416,42 @@ export class DbUtilsService {
 		return potentialFriends;
 	}
 
+	async isBlocked(userID: string, accountBlockedId: string): Promise<boolean> {
+		const blocked: PrismaTypes.blocked[] = await this.prisma.blocked.findMany({
+			where: {
+				blocker: userID,
+				blockee: accountBlockedId,
+			},
+		});
+		if (!blocked || blocked === null) {
+			return false;
+		}
+		if (blocked.length === 0) {
+			return false;
+		}
+		if (blocked.length > 1) {
+			throw new Error("More than one blocked found.");
+		}
+		return true;
+	}
+
 	async getRelationshipStatus(
 		userID: string,
 		accountFriendId: string,
 	): Promise<
-		"following" | "follower" | "mutual" | "friend" | "pending" | "none"
+		| "following"
+		| "follower"
+		| "mutual"
+		| "friend"
+		| "pending"
+		| "none"
+		| "blocked"
 	> {
 		// check if user is following accountFriendId
+		const isBlocked = await this.isBlocked(userID, accountFriendId);
+		if (isBlocked) {
+			return "blocked";
+		}
 		const following: boolean = await this.isFollowing(userID, accountFriendId);
 
 		// check if accountFriendId is following user

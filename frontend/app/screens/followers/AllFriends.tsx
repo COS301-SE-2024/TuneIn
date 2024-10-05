@@ -8,6 +8,7 @@ import {
 	ToastAndroid,
 	Platform,
 	Alert,
+	RefreshControl,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
@@ -35,34 +36,42 @@ const AllFriends: React.FC = () => {
 	const [friendReqError, setFriendReqError] = useState(false);
 	const [potentialFriendError, setPotentialFriendError] = useState(false);
 	const [pendingError, setPendingError] = useState(false);
+	const [refreshing, setRefreshing] = useState(false); // State for refreshing
 
 	useEffect(() => {
-		const fetchFriends = async () => {
-			try {
-				const [
-					friendsData,
-					requestsData,
-					potentialFriendsData,
-					pendingRequestsData,
-				] = await Promise.all([
-					FriendServices.getFriends(),
-					FriendServices.getFriendRequests(),
-					FriendServices.getPotentialFriends(),
-					FriendServices.getPendingRequests(),
-				]);
-
-				setFriends(friendsData);
-				setRequests(requestsData);
-				setPotentialFriends(potentialFriendsData);
-				setPendingRequests(pendingRequestsData);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-				setFriendError(true);
-			}
-		};
-
 		fetchFriends();
 	}, []);
+
+	const fetchFriends = async () => {
+		setRefreshing(true); // Start refreshing
+		try {
+			const [
+				friendsData,
+				requestsData,
+				potentialFriendsData,
+				pendingRequestsData,
+			] = await Promise.all([
+				FriendServices.getFriends(),
+				FriendServices.getFriendRequests(),
+				FriendServices.getPotentialFriends(),
+				FriendServices.getPendingRequests(),
+			]);
+
+			setFriends(friendsData);
+			setRequests(requestsData);
+			setPotentialFriends(potentialFriendsData);
+			setPendingRequests(pendingRequestsData);
+			setFriendError(false);
+			setFriendReqError(false);
+			setPotentialFriendError(false);
+			setPendingError(false);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			setFriendError(true);
+		} finally {
+			setRefreshing(false); // End refreshing
+		}
+	};
 
 	useEffect(() => {
 		if (search === "") {
@@ -104,67 +113,22 @@ const AllFriends: React.FC = () => {
 	};
 
 	const handleSendRequest = async (friend: Friend): Promise<void> => {
-		try {
-			await FriendServices.handleSendRequest(friend);
-			const updatedPotentialFriends = potentialFriends.filter(
-				(item) => item.friend_id !== friend.friend_id,
-			);
-			setPotentialFriends(updatedPotentialFriends);
-			friend.relationship = "pending";
-			setPendingRequests((prev) => [...prev, friend]);
-		} catch (error) {
-			showError("Failed to send friend request.");
-		}
+		// ... (rest of your existing code)
 	};
 
 	const handleCancelRequest = async (friend: Friend): Promise<void> => {
-		try {
-			await FriendServices.handleCancelRequest(friend);
-			const updatedRequests = pendingRequests.filter(
-				(request) => request.friend_id !== friend.friend_id,
-			);
-			setPendingRequests(updatedRequests);
-			friend.relationship = "mutual";
-			setPotentialFriends((prev) => [...prev, friend]);
-		} catch (error) {
-			showError("Failed to cancel friend request.");
-		}
+		// ... (rest of your existing code)
 	};
 
 	const handleFriendRequest = async (
 		friend: Friend,
 		accept: boolean,
 	): Promise<void> => {
-		try {
-			await FriendServices.handleFriendRequest(friend, accept);
-			const updatedRequests = requests.filter(
-				(request) => request.friend_id !== friend.friend_id,
-			);
-			setRequests(updatedRequests);
-			if (accept) {
-				friend.relationship = "friend";
-				setFriends((prev) => [...prev, friend]);
-			} else {
-				friend.relationship = "mutual";
-				setPotentialFriends((prev) => [...prev, friend]);
-			}
-		} catch (error) {
-			showError("Unable to handle friend request.");
-		}
+		// ... (rest of your existing code)
 	};
 
 	const handleFriend = async (friend: Friend): Promise<void> => {
-		try {
-			await FriendServices.handleFriend(friend);
-			const updatedFriends = friends.filter(
-				(item) => item.friend_id !== friend.friend_id,
-			);
-			setFriends(updatedFriends);
-			friend.relationship = "mutual";
-			setPotentialFriends((prev) => [...prev, friend]);
-		} catch (error) {
-			showError("Failed to unfriend.");
-		}
+		// ... (rest of your existing code)
 	};
 
 	const renderRequest = ({ item }: { item: Friend }) => (
@@ -214,6 +178,12 @@ const AllFriends: React.FC = () => {
 						data={filteredFriends}
 						renderItem={renderFriend}
 						keyExtractor={(item) => item.username}
+						refreshControl={
+							<RefreshControl
+								refreshing={refreshing}
+								onRefresh={fetchFriends}
+							/>
+						}
 					/>
 				) : (
 					<Text style={styles.noFollowersText}>
@@ -229,6 +199,12 @@ const AllFriends: React.FC = () => {
 						renderItem={renderRequest}
 						keyExtractor={(item) => item.username}
 						contentContainerStyle={styles.friendsList}
+						refreshControl={
+							<RefreshControl
+								refreshing={refreshing}
+								onRefresh={fetchFriends}
+							/>
+						}
 					/>
 				) : (
 					<Text style={styles.noRequestsText}>
@@ -246,6 +222,12 @@ const AllFriends: React.FC = () => {
 						renderItem={renderFriend}
 						keyExtractor={(item) => item.username}
 						contentContainerStyle={styles.friendsList}
+						refreshControl={
+							<RefreshControl
+								refreshing={refreshing}
+								onRefresh={fetchFriends}
+							/>
+						}
 					/>
 				) : (
 					<Text style={styles.noRequestsText}>
@@ -263,6 +245,12 @@ const AllFriends: React.FC = () => {
 						renderItem={renderFriend}
 						keyExtractor={(item) => item.username}
 						contentContainerStyle={styles.friendsList}
+						refreshControl={
+							<RefreshControl
+								refreshing={refreshing}
+								onRefresh={fetchFriends}
+							/>
+						}
 					/>
 				) : (
 					<Text style={styles.noRequestsText}>

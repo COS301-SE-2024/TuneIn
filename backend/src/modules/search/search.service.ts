@@ -110,14 +110,17 @@ export class SearchService {
 		console.log("Insertion result: " + result);
 	}
 
-	async combinedSearch(params: {
-		q: string;
-		creator?: string;
-	}): Promise<CombinedSearchResults> {
+	async combinedSearch(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		userID: string,
+	): Promise<CombinedSearchResults> {
 		// console.log(params);
 
-		const rooms = await this.searchRooms(params);
-		const users = await this.searchUsers(params.q);
+		const rooms = await this.searchRooms(params, userID);
+		const users = await this.searchUsers(params.q, userID);
 
 		console.log("Rooms: " + rooms);
 		console.log("Users: " + users);
@@ -135,10 +138,13 @@ export class SearchService {
 		};
 	}
 
-	async searchRooms(params: {
-		q: string;
-		creator?: string;
-	}): Promise<RoomDto[]> {
+	async searchRooms(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		userID: string, // this is the user who is searching. To check whether the room_creator has blocked this user
+	): Promise<RoomDto[]> {
 		// console.log(params);
 		// const result = await ctx.prisma.$queryRaw<PrismaTypes.room>`
 		// SELECT room_id, name, description, username,
@@ -161,7 +167,10 @@ export class SearchService {
 
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
 			// console.log(roomDtos);
 
 			if (roomDtos) {
@@ -328,22 +337,25 @@ export class SearchService {
 		return query;
 	}
 
-	async advancedSearchRooms(params: {
-		q: string;
-		creator_username?: string;
-		creator_name?: string;
-		participant_count?: number;
-		description?: string;
-		is_temp?: boolean;
-		is_priv?: boolean;
-		is_scheduled?: boolean;
-		start_date?: string;
-		end_date?: string;
-		lang?: string;
-		explicit?: boolean;
-		nsfw?: boolean;
-		tags?: string;
-	}): Promise<RoomDto[]> {
+	async advancedSearchRooms(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		},
+		userID: string, // this is the user who is searching. To check whether the room_creator has blocked this user
+	): Promise<RoomDto[]> {
 		console.log(params);
 
 		const query = this.advancedRoomSearchQueryBuilder(params);
@@ -357,7 +369,10 @@ export class SearchService {
 
 		if (Array.isArray(result)) {
 			const roomIds = result.map((row) => row.room_id.toString());
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
 
 			if (roomDtos) {
 				const sortedRooms = roomIds
@@ -502,7 +517,7 @@ export class SearchService {
 		return [new SearchHistoryDto()];
 	}
 
-	async searchUsers(q: string): Promise<UserDto[]> {
+	async searchUsers(q: string, userID: string): Promise<UserDto[]> {
 		// console.log(q);
 
 		// const result = await ctx.prisma.$queryRaw<PrismaTypes.users>`
@@ -527,7 +542,11 @@ export class SearchService {
 			console.log("Called");
 			console.log("Result " + result);
 			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
+			const userDtos = await this.dtogen.generateMultipleUserDto(
+				userIds,
+				userID,
+				true,
+			);
 			console.log(userDtos);
 
 			if (userDtos) {
@@ -643,13 +662,16 @@ export class SearchService {
 		return query;
 	}
 
-	async advancedSearchUsers(params: {
-		q: string;
-		creator_username?: string;
-		creator_name?: string;
-		following?: number;
-		followers?: number;
-	}): Promise<UserDto[]> {
+	async advancedSearchUsers(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			following?: number;
+			followers?: number;
+		},
+		userID: string,
+	): Promise<UserDto[]> {
 		console.log(params);
 
 		const query = this.advancedUserSearchQueryBuilder(params);
@@ -663,7 +685,11 @@ export class SearchService {
 
 		if (Array.isArray(result)) {
 			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIds, true);
+			const userDtos = await this.dtogen.generateMultipleUserDto(
+				userIds,
+				userID,
+				true,
+			);
 			// console.log(userDtos);
 
 			if (userDtos) {
@@ -854,30 +880,43 @@ export class SearchService {
 
 					if (id.params.pathSegment === "rooms") {
 						if (id.params.queryParams.creator) {
-							searchResult = await this.searchRooms({
-								q: id.params.queryParams.q as string,
-								creator: id.params.queryParams.creator as string,
-							});
+							searchResult = await this.searchRooms(
+								{
+									q: id.params.queryParams.q as string,
+									creator: id.params.queryParams.creator as string,
+								},
+								userID,
+							);
 						}
-						searchResult = await this.searchRooms({
-							q: id.params.queryParams.q as string,
-						});
+						searchResult = await this.searchRooms(
+							{
+								q: id.params.queryParams.q as string,
+							},
+							userID,
+						);
 					} else if (id.params.pathSegment === "users") {
 						searchResult = await this.searchUsers(
 							id.params.queryParams.q as string,
+							userID,
 						);
 					} else {
 						if (id.params.queryParams.creator) {
-							const combo = await this.combinedSearch({
-								q: id.params.queryParams.q as string,
-								creator: id.params.queryParams.creator as string,
-							});
+							const combo = await this.combinedSearch(
+								{
+									q: id.params.queryParams.q as string,
+									creator: id.params.queryParams.creator as string,
+								},
+								userID,
+							);
 							searchResult = [combo.rooms, combo.users].flat();
 						}
-						const combo = await this.combinedSearch({
-							q: id.params.queryParams.q as string,
-							creator: id.params.queryParams.creator as string,
-						});
+						const combo = await this.combinedSearch(
+							{
+								q: id.params.queryParams.q as string,
+								creator: id.params.queryParams.creator as string,
+							},
+							userID,
+						);
 						searchResult = [combo.rooms, combo.users].flat();
 					}
 

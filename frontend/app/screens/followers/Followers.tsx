@@ -8,6 +8,7 @@ import {
 	ToastAndroid,
 	Alert, // For iOS/web
 	Platform,
+	RefreshControl, // Import RefreshControl
 } from "react-native";
 import FriendCard from "../../components/FriendCard";
 import { Friend } from "../../models/friend";
@@ -20,6 +21,7 @@ const Followers: React.FC = () => {
 	const [followers, setFollowers] = useState<Friend[]>([]);
 	const [filteredFollowers, setFilteredFollowers] = useState<Friend[]>([]);
 	const [friendError, setFriendError] = useState<boolean>(false);
+	const [isRefreshing, setIsRefreshing] = useState<boolean>(false); // State for refresh control
 	const user = useLocalSearchParams();
 
 	const getFollowers = async () => {
@@ -115,6 +117,13 @@ const Followers: React.FC = () => {
 			handle={item.relationship === "mutual" ? handleUnfollow : handleFollow} // Use handleUnfollow if mutual
 		/>
 	);
+
+	// Function to handle refresh
+	const onRefresh = async () => {
+		setIsRefreshing(true);
+		await getFollowers(); // Call the fetch function
+		setIsRefreshing(false); // Reset the refresh state
+	};
 
 	return (
 		<View style={styles.container}>

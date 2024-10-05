@@ -16,6 +16,7 @@ import {
 	ScrollView,
 } from "react-native-gesture-handler";
 import { Friend } from "../models/friend";
+import { set } from "react-datepicker/dist/date_utils";
 
 interface BottomSheetProps {
 	friend: { username: string; friend_id: string };
@@ -40,6 +41,13 @@ interface BottomSheetProps {
 		username: string;
 		friend_id: string;
 	}) => Promise<void>;
+	handleBlock?: (
+		friend: {
+			username: string;
+			friend_id: string;
+		},
+		block: boolean,
+	) => void;
 	sendRequest?: (friend: {
 		username: string;
 		friend_id: string;
@@ -55,16 +63,20 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 	isPotential = false,
 	isRequesting = false,
 	setShowMoreOptions: setShowMoreFilters = () => {},
-	handleUnfollow = () => {},
 	handleRequest = () => {},
 	sendRequest = () => {},
 	handleUnfriend = () => {},
 	handleCancel = () => {},
+	handleUnfollow = () => {},
+	handleBlock = () => {},
 	showFollowOptions: showMoreFilters = true,
 }) => {
 	const slideAnim = useRef(new Animated.Value(300)).current;
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [follow, setFollow] = useState(
+		!(isFriend || isPending || isRequesting || isPotential),
+	);
 
 	useEffect(() => {}, [isFriend, isPending, isPotential]);
 
@@ -156,12 +168,13 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 															}}
 															onPress={() => {
 																handleUnfollow(friend);
+																setFollow(!follow);
 																handleClose();
 															}}
 															testID="unfollow"
 														>
 															<Text style={{ fontSize: 18, fontWeight: 500 }}>
-																Unfollow
+																{follow ? "Follow" : "Unfollow"}
 															</Text>
 														</TouchableOpacity>
 														{isPending ? (
@@ -263,6 +276,18 @@ const FollowBottomSheet: React.FC<BottomSheetProps> = ({
 														<Text style={{ fontSize: 18 }}>Unfriend</Text>
 													</TouchableOpacity>
 												)}
+												<TouchableOpacity
+													style={{ paddingTop: 20 }}
+													hitSlop={{ top: 5, bottom: 5, left: 50, right: 50 }}
+													onPress={() => {
+														handleBlock(friend, true);
+														setFollow(true);
+														handleClose();
+													}}
+													testID="block"
+												>
+													<Text style={{ fontSize: 18 }}>Block</Text>
+												</TouchableOpacity>
 											</View>
 										</Animated.View>
 									</ScrollView>
