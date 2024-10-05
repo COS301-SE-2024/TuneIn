@@ -17,10 +17,30 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosError } from "axios";
 // import { ImageService } from "../image/image.service";
+import pRetry, { Options } from "p-retry";
 
-const NUMBER_OF_RETRIES = 3;
+const RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
 
+const spotifyRequestWithRetries = async (
+	request: Promise<any>,
+): Promise<any> => {
+	return pRetry(
+		async () => {
+			return await request;
+		},
+		{
+			onFailedAttempt: (error) => {
+				console.log(
+					`Failed attempt ${error.attemptNumber + 1}/${RETRIES}: ${
+						error.message
+					}`,
+				);
+			},
+			retries: RETRIES,
+		},
+	);
+};
 @Injectable()
 export class SpotifyService {
 	private clientId: string;
@@ -61,8 +81,8 @@ export class SpotifyService {
 		);
 
 		let error: Error | undefined;
-		this.createTuneInAPI().then(() => {
-			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+		this.refreshTuneInAPI().then(() => {
+			for (let i = 0; i < RETRIES; i++) {
 				try {
 					this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
 						this.clientId,
@@ -80,14 +100,14 @@ export class SpotifyService {
 		});
 	}
 
-	async createTuneInAPI() {
+	async refreshTuneInAPI(): Promise<void> {
 		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
 		if (!tuneinID) {
 			throw new Error("Missing TUNEIN_USER_ID");
 		}
 		let error: Error | undefined;
-		this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
-			for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+		await this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
+			for (let i = 0; i < RETRIES; i++) {
 				try {
 					this.TuneInAPI = SpotifyApi.withAccessToken(this.clientId, tp.tokens);
 					break;
@@ -121,125 +141,69 @@ export class SpotifyService {
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const api = SpotifyApi.withAccessToken(this.clientId, token);
-				const user = await api.currentUser.profile();
-				return user;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
-		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to get user profile");
+		const api = SpotifyApi.withAccessToken(this.clientId, token);
+		const user = await spotifyRequestWithRetries(api.currentUser.profile());
+		return user;
 	}
 
 	async getAudioFeatures(spotifyID: string): Promise<Spotify.AudioFeatures> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const audioFeatures = await this.userlessAPI.tracks.audioFeatures(
-					spotifyID,
-				);
-				return audioFeatures;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
-		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to get audio features");
+		const audioFeatures = await spotifyRequestWithRetries(
+			this.userlessAPI.tracks.audioFeatures(spotifyID),
+		);
+		return audioFeatures;
 	}
 
 	async getManyAudioFeatures(
 		spotifyIDs: string[],
 	): Promise<Spotify.AudioFeatures[]> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const promises: Promise<Spotify.AudioFeatures[]>[] = [];
-				for (let i = 0; i < spotifyIDs.length; i += 100) {
-					const ids = spotifyIDs.slice(i, i + 100);
-					promises.push(this.userlessAPI.tracks.audioFeatures(ids));
-					await this.wait(500); // for rate limiting
-				}
-				const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
-				const features: Spotify.AudioFeatures[] = [];
-				for (const result of results) {
-					features.push(...result);
-				}
-				return features;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		const promises: Promise<Spotify.AudioFeatures[]>[] = [];
+		for (let i = 0; i < spotifyIDs.length; i += 100) {
+			const ids = spotifyIDs.slice(i, i + 100);
+			promises.push(
+				spotifyRequestWithRetries(this.userlessAPI.tracks.audioFeatures(ids)),
+			);
+			await this.wait(500); // for rate limiting
 		}
-		if (error) {
-			throw error;
+		const results: Spotify.AudioFeatures[][] = await Promise.all(promises);
+		const features: Spotify.AudioFeatures[] = [];
+		for (const result of results) {
+			features.push(...result);
 		}
-		throw new Error("Failed to get audio features");
+		return features;
 	}
 
 	async getUserPlaylists(
 		tk: SpotifyTokenPair,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				if (new Date().getTime() > tk.epoch_expiry) {
-					throw new Error("Token has expired");
-				}
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
 
-				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-				const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
-					await api.currentUser.playlists.playlists();
-				const total = initialPlaylistsFetch.total;
-				const promises = [];
-				let i = 0;
-				while (i < total) {
-					const p = api.currentUser.playlists.playlists(50, i);
-					promises.push(p);
-					i += 50;
-					await this.wait(500); // for rate limiting
-				}
-				const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
-					await Promise.all(promises);
-				const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
-				for (const p of playlists) {
-					userPlaylists.push(...p.items);
-				}
-				return userPlaylists;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
+			await spotifyRequestWithRetries(api.currentUser.playlists.playlists());
+		const total = initialPlaylistsFetch.total;
+		const promises = [];
+		let i = 0;
+		while (i < total) {
+			await this.wait(500); // for rate limiting
+			const p = spotifyRequestWithRetries(
+				api.currentUser.playlists.playlists(50, i),
+			);
+			promises.push(p);
+			i += 50;
 		}
-		if (error) {
-			throw error;
+		const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
+			await Promise.all(promises);
+		const userPlaylists: Spotify.SimplifiedPlaylist[] = [];
+		for (const p of playlists) {
+			userPlaylists.push(...p.items);
 		}
-		throw new Error("Failed to get user playlists");
+		return userPlaylists;
 	}
 
 	async getRoomPlaylist(room: RoomDto): Promise<Spotify.Playlist> {
-		await this.createTuneInAPI();
+		await this.refreshTuneInAPI();
 		const r = await this.prisma.room.findUnique({
 			where: {
 				room_id: room.roomID,
@@ -248,55 +212,43 @@ export class SpotifyService {
 		if (r === null) {
 			throw new Error("Room not found somehow");
 		}
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				if (r.playlist_id) {
-					const playlist: Spotify.Playlist =
-						await this.TuneInAPI.playlists.getPlaylist(r.playlist_id);
-					return playlist;
-				} else {
-					const user: Spotify.UserProfile =
-						await this.TuneInAPI.currentUser.profile();
-					const playlist: Spotify.Playlist =
-						await this.TuneInAPI.playlists.createPlaylist(user.id, {
-							name: room.room_name,
-							description: room.description,
-							public: true,
-							collaborative: false,
-						});
-					// const imageBuffer = await this.downloadImage(room.room_image);
-					// const processedImageBuffer = await this.imageService.compressImage(
-					// 	imageBuffer,
-					// 	256 * 1024,
-					// );
-					// const b64 = this.imageService.imageToB64(processedImageBuffer);
-					// await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
-					// 	playlist.id,
-					// 	processedImageBuffer,
-					// );
-					await this.prisma.room.update({
-						where: {
-							room_id: room.roomID,
-						},
-						data: {
-							playlist_id: playlist.id,
-						},
-					});
-					return playlist;
-				}
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		if (r.playlist_id) {
+			const playlist: Spotify.Playlist = await spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.getPlaylist(r.playlist_id),
+			);
+			return playlist;
+		} else {
+			const user: Spotify.UserProfile = await spotifyRequestWithRetries(
+				this.TuneInAPI.currentUser.profile(),
+			);
+			const playlist: Spotify.Playlist = await spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.createPlaylist(user.id, {
+					name: room.room_name,
+					description: room.description,
+					public: true,
+					collaborative: false,
+				}),
+			);
+			// const imageBuffer = await this.downloadImage(room.room_image);
+			// const processedImageBuffer = await this.imageService.compressImage(
+			// 	imageBuffer,
+			// 	256 * 1024,
+			// );
+			// const b64 = this.imageService.imageToB64(processedImageBuffer);
+			// await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
+			// 	playlist.id,
+			// 	processedImageBuffer,
+			// );
+			await this.prisma.room.update({
+				where: {
+					room_id: room.roomID,
+				},
+				data: {
+					playlist_id: playlist.id,
+				},
+			});
+			return playlist;
 		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to create playlist");
 	}
 
 	async updateRoomPlaylist(
@@ -304,272 +256,197 @@ export class SpotifyService {
 		trackIDs: string[],
 		start = 0,
 	): Promise<void> {
-		await this.createTuneInAPI();
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				// handle current playlist songs, if not empty
-				if (start > 0) {
-					// get current playlist state
-					const currentPlaylist: Spotify.Page<
-						Spotify.PlaylistedTrack<Spotify.Track>
-					> = await this.TuneInAPI.playlists.getPlaylistItems(playlistID);
-					const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
-					while (currentTracks.length < currentPlaylist.total) {
-						const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
-							await this.TuneInAPI.playlists.getPlaylistItems(
-								playlistID,
-								undefined,
-								undefined,
-								50,
-								currentTracks.length,
-							);
-						currentTracks.push(...tracks.items);
-					}
-					const currentTrackIDs: string[] = currentTracks.map(
-						(track) => track.track.id,
-					);
-
-					//delete all songs from start
-					const deleteIDs: string[] = currentTrackIDs.slice(start);
-					const promises = [];
-					for (let i = 0; i < deleteIDs.length; i += 50) {
-						const ids = deleteIDs.slice(i, i + 50);
-						await new Promise((resolve) => setTimeout(resolve, 500));
-						promises.push(
-							this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
-								tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
-							}),
-						);
-					}
-					await Promise.all(promises);
-				}
-
-				const uris: string[] = trackIDs
-					.map((id) => `spotify:track:${id}`)
-					.slice(start);
-				// await this.TuneInAPI.playlists.addItemsToPlaylist(
-				// 	playlistID,
-				// 	uris.slice(start),
-				// 	start,
-				// );
-				const promises = [];
-				for (let i = 0; i < uris.length; i += 50) {
-					console.log(`Index: ${i}`);
-					console.log(`Start: ${start}`);
-					console.log(`Position: ${start + i}`);
-					promises.push(
-						this.TuneInAPI.playlists.addItemsToPlaylist(
-							playlistID,
-							uris.slice(i, i + 50),
-							start + i,
-						),
-					);
-				}
-				await Promise.all(promises);
-				return;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		if (start < 0) {
+			throw new Error("Start index must be greater than or equal to 0");
 		}
-		if (error) {
-			throw error;
+		await this.refreshTuneInAPI();
+		const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
+
+		// handle current playlist songs, if not empty
+		// get current playlist state
+		const currentPlaylist: Spotify.Page<
+			Spotify.PlaylistedTrack<Spotify.Track>
+		> = await spotifyRequestWithRetries(
+			this.TuneInAPI.playlists.getPlaylistItems(playlistID),
+		);
+
+		// fetch songs from Spotify with retries
+		while (currentTracks.length < currentPlaylist.total) {
+			const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
+				await spotifyRequestWithRetries(
+					this.TuneInAPI.playlists.getPlaylistItems(
+						playlistID,
+						undefined,
+						undefined,
+						50,
+						currentTracks.length,
+					),
+				);
+			currentTracks.push(...tracks.items);
 		}
-		throw new Error("Failed to update playlist");
+		const currentTrackIDs: string[] = currentTracks.map(
+			(track) => track.track.id,
+		);
+		//delete all songs from start
+		const deleteIDs: string[] = currentTrackIDs.slice(start);
+		let promises: Promise<void>[] = [];
+		for (let i = 0; i < deleteIDs.length; i += 50) {
+			// remove songs from playlist in batches of 50 with retries
+			const ids = deleteIDs.slice(i, i + 50);
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			const deleteRequest = spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
+					tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
+				}),
+			);
+			promises.push(deleteRequest);
+		}
+		await Promise.all(promises);
+
+		const uris: string[] = trackIDs
+			.map((id) => `spotify:track:${id}`)
+			.slice(start);
+		// await this.TuneInAPI.playlists.addItemsToPlaylist(
+		// 	playlistID,
+		// 	uris.slice(start),
+		// 	start,
+		// );
+		promises = [];
+		for (let i = 0; i < uris.length; i += 50) {
+			const ids = uris.slice(i, i + 50);
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			const insertRequest = spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.addItemsToPlaylist(playlistID, ids, start + i),
+			);
+			promises.push(insertRequest);
+		}
+		await Promise.all(promises);
+		return;
 	}
 
 	async saveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
-				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-				await api.currentUser.playlists.follow(roomPlaylist.id);
-				break;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
-		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to save room playlist");
+		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		await spotifyRequestWithRetries(
+			api.currentUser.playlists.follow(roomPlaylist.id),
+		);
 	}
 
 	async unsaveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
-				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-				await api.currentUser.playlists.unfollow(roomPlaylist.id);
-				break;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
-		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to save room playlist");
+		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		await spotifyRequestWithRetries(
+			api.currentUser.playlists.unfollow(roomPlaylist.id),
+		);
 	}
 
 	async getUserPlaylistTracks(
 		tk: SpotifyTokenPair,
 		playlistID: string,
 	): Promise<Spotify.Track[]> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				if (new Date().getTime() > tk.epoch_expiry) {
-					throw new Error("Token has expired");
-				}
-
-				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-				const playlistInfo: Spotify.Playlist<Spotify.Track> =
-					await api.playlists.getPlaylist(playlistID);
-
-				let i = 0;
-				const promises: Promise<
-					Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
-				>[] = [];
-				while (i < playlistInfo.tracks.total) {
-					promises.push(
-						api.playlists.getPlaylistItems(
-							playlistID,
-							undefined,
-							undefined,
-							50,
-							i,
-						),
-					);
-					i += 50;
-				}
-
-				const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
-					await Promise.all(promises);
-				const result: Spotify.Track[] = [];
-				for (const s of songs) {
-					const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
-					const tracks = items.map((item) => item.track);
-					result.push(...tracks);
-				}
-				this.addTracksToDB(result);
-				return result;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
 		}
-		if (error) {
-			throw error;
+
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		const playlistInfo: Spotify.Playlist<Spotify.Track> =
+			await spotifyRequestWithRetries(api.playlists.getPlaylist(playlistID));
+
+		let i = 0;
+		const promises: Promise<
+			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+		>[] = [];
+		while (i < playlistInfo.tracks.total) {
+			promises.push(
+				spotifyRequestWithRetries(
+					api.playlists.getPlaylistItems(
+						playlistID,
+						undefined,
+						undefined,
+						50,
+						i,
+					),
+				),
+			);
+			i += 50;
 		}
-		throw new Error("Failed to get playlist tracks");
+
+		const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+			await Promise.all(promises);
+		const result: Spotify.Track[] = [];
+		for (const s of songs) {
+			const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+			const tracks = items.map((item) => item.track);
+			result.push(...tracks);
+		}
+		await this.addTracksToDB(result);
+		return result;
 	}
 
 	async getTuneInPlaylistIDs(playlistID: string): Promise<string[]> {
-		await this.createTuneInAPI();
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				const playlistInfo: Spotify.Playlist<Spotify.Track> =
-					await this.TuneInAPI.playlists.getPlaylist(playlistID);
+		await this.refreshTuneInAPI();
+		const playlistInfo: Spotify.Playlist<Spotify.Track> =
+			await spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.getPlaylist(playlistID),
+			);
 
-				let i = 0;
-				const promises: Promise<
-					Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
-				>[] = [];
-				while (i < playlistInfo.tracks.total) {
-					promises.push(
-						this.TuneInAPI.playlists.getPlaylistItems(
-							playlistID,
-							undefined,
-							undefined,
-							50,
-							i,
-						),
-					);
-					i += 50;
-				}
+		let i = 0;
+		const promises: Promise<
+			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+		>[] = [];
+		while (i < playlistInfo.tracks.total) {
+			promises.push(
+				spotifyRequestWithRetries(
+					this.TuneInAPI.playlists.getPlaylistItems(
+						playlistID,
+						undefined,
+						undefined,
+						50,
+						i,
+					),
+				),
+			);
+			i += 50;
+		}
 
-				const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
-					await Promise.all(promises);
-				const result: string[] = [];
-				for (const s of songs) {
-					const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
-					const tracks = items.map((item) => item.track);
-					result.push(...tracks.map((track) => track.id));
-				}
-				return result;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+			await Promise.all(promises);
+		const result: string[] = [];
+		for (const s of songs) {
+			const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+			const tracks = items.map((item) => item.track);
+			result.push(...tracks.map((track) => track.id));
 		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to get playlist tracks");
+		return result;
 	}
 
 	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
-			try {
-				if (new Date().getTime() > tk.epoch_expiry) {
-					throw new Error("Token has expired");
-				}
-				const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-				const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
-					await api.currentUser.tracks.savedTracks();
-				const total = initialSongsFetch.total;
-				let i = 0;
-				const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
-				while (i < total) {
-					const p = api.currentUser.tracks.savedTracks(50, i);
-					promises.push(p);
-					i += 50;
-					await this.wait(500); // for rate limiting
-				}
+		if (new Date().getTime() > tk.epoch_expiry) {
+			throw new Error("Token has expired");
+		}
+		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
+		const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
+			await spotifyRequestWithRetries(api.currentUser.tracks.savedTracks());
+		const total = initialSongsFetch.total;
+		let i = 0;
+		const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
+		while (i < total) {
+			const p = spotifyRequestWithRetries(
+				api.currentUser.tracks.savedTracks(50, i),
+			);
+			promises.push(p);
+			i += 50;
+			await this.wait(500); // for rate limiting
+		}
 
-				const songs: Spotify.Page<Spotify.SavedTrack>[] = await Promise.all(
-					promises,
-				);
-				const likedSongs: Spotify.SavedTrack[] = [];
-				for (const s of songs) {
-					likedSongs.push(...s.items);
-				}
-				return likedSongs;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		const songs: Spotify.Page<Spotify.SavedTrack>[] = await Promise.all(
+			promises,
+		);
+		const likedSongs: Spotify.SavedTrack[] = [];
+		for (const s of songs) {
+			likedSongs.push(...s.items);
 		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to get liked songs");
+		return likedSongs;
 	}
 
 	getLargestImage(images: Spotify.Image[]): Spotify.Image {
@@ -943,12 +820,14 @@ export class SpotifyService {
 
 		let attempts = 0;
 		let error: Error | undefined;
-		for (let i = 0; i < NUMBER_OF_RETRIES; i++) {
+		for (let i = 0; i < RETRIES; i++) {
 			try {
 				const promises: Promise<Spotify.Track[]>[] = [];
 				for (let i = 0; i < notFound.length; i += 50) {
 					const ids = notFound.slice(i, i + 50);
-					promises.push(this.userlessAPI.tracks.get(ids));
+					promises.push(
+						spotifyRequestWithRetries(this.userlessAPI.tracks.get(ids)),
+					);
 				}
 				const results: Spotify.Track[][] = await Promise.all(promises);
 				for (const result of results) {
