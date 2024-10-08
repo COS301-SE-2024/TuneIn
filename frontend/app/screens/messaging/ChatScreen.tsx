@@ -28,6 +28,8 @@ const ChatScreen = () => {
 	const [connected, setConnected] = useState<boolean>(false);
 	const [isSending, setIsSending] = useState<boolean>(false);
 	const [dmError, setError] = useState<boolean>(false);
+	const [unreadCount, setUnreadCount] = useState<number>(0); // To store unread message count
+	const [showBanner, setShowBanner] = useState<boolean>(false); // Control banner visibility
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
 	const u: string = Array.isArray(username) ? username[0] : username;
@@ -79,6 +81,27 @@ const ChatScreen = () => {
 			}
 		}
 	}, [messages, u]);
+
+	// Check unread messages and show banner
+	useEffect(() => {
+		const unreadMessagesFromOther = messages.filter(
+			(msg) => !msg.message.isRead && !msg.me,
+		);
+		setUnreadCount(unreadMessagesFromOther.length);
+		setShowBanner(unreadMessagesFromOther.length > 0); // Show banner only if there are unread messages from the other person
+
+		if (unreadMessagesFromOther.length > 0) {
+			const oldestUnreadMessageIndex = messages.findIndex(
+				(msg) => !msg.message.isRead && !msg.me,
+			);
+			if (oldestUnreadMessageIndex !== -1) {
+				flatListRef.current?.scrollToIndex({
+					index: oldestUnreadMessageIndex,
+					animated: true,
+				});
+			}
+		}
+	}, [messages]);
 
 	// on component mount
 	useEffect(() => {
@@ -170,16 +193,48 @@ const ChatScreen = () => {
 					{dmError ? "Failed" : otherUser?.profile_name || "Loading..."}
 				</Text>
 			</View>
+
 			<FlatList
-				ref={flatListRef} // Reference to control scrolling
+				ref={flatListRef}
 				data={messages}
 				keyExtractor={(item) => item.message.index.toString()}
-				renderItem={({ item }) => <MessageItem message={item} />}
+				renderItem={({ item }) => (
+					<>
+						{showBanner &&
+							!item.me &&
+							item.message.index ===
+								messages.findIndex((msg) => !msg.message.isRead && !msg.me) && (
+								<View style={styles.bannerContainer}>
+									<View style={styles.greyLine} />
+									<View style={styles.unreadBanner}>
+										<Text style={styles.unreadBannerText}>
+											You have {unreadCount} unread message
+											{unreadCount > 1 ? "s" : ""}
+										</Text>
+									</View>
+									<View style={styles.greyLine} />
+								</View>
+							)}
+						<MessageItem message={item} />
+					</>
+				)}
 				contentContainerStyle={styles.messagesContainer}
-				onContentSizeChange={() =>
-					flatListRef.current?.scrollToEnd({ animated: true })
-				} // Scroll on content size change
+				getItemLayout={(data, index) => ({
+					length: 60,
+					offset: 60 * index,
+					index,
+				})}
+				onScrollToIndexFailed={(info) => {
+					const wait = new Promise((resolve) => setTimeout(resolve, 500));
+					wait.then(() => {
+						flatListRef.current?.scrollToIndex({
+							index: info.index,
+							animated: true,
+						});
+					});
+				}}
 			/>
+
 			{!dmError && (
 				<View style={styles.inputContainer}>
 					<TextInput
@@ -202,6 +257,7 @@ const ChatScreen = () => {
 		</View>
 	);
 };
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -233,59 +289,52 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		marginHorizontal: 20,
 	},
-	messageContainer: {
-		flexDirection: "row",
-		alignItems: "flex-end",
-		marginVertical: 4,
+	bannerContainer: {
+		alignItems: "center", // Center banner and lines together
+		marginVertical: 5, // Space around the banner container
+		backgroundColor: "#E0E0E0",
+		marginHorizontal: -20,
 	},
-	messageContainerMe: {
-		justifyContent: "flex-end",
+	unreadBanner: {
+		backgroundColor: colors.primary, // White background for the bubble
+		borderRadius: 25, // Rounded bubble shape
+		borderWidth: 2, // Grey border
+		borderColor: "#E0E0E0", // Light grey color for the edges
+		paddingVertical: 10, // Padding inside the bubble
+		paddingHorizontal: 20, // Padding to make the bubble wider
 	},
-	messageContainerOther: {
-		justifyContent: "flex-start",
+	unreadBannerText: {
+		color: "#333333", // Darker text color
+		fontSize: 15, // Adjust font size
+		fontWeight: "bold", // Bold text
+		textAlign: "center", // Center text inside the bubble
 	},
-	messageAvatar: {
-		width: 30,
-		height: 30,
-		borderRadius: 15,
-		marginRight: 10,
+	greyLine: {
+		width: "100%", // Make the line stretch edge to edge
+		height: 1, // Thin line
+		backgroundColor: "#E0E0E0", // Light grey color for the line
+		marginVertical: 5, // Space between the line and the banner
 	},
-	messageBubble: {
-		paddingVertical: 10,
-		paddingHorizontal: 15,
-		borderRadius: 25,
-		maxWidth: "75%",
-	},
-	messageBubbleMe: {
-		backgroundColor: colors.primary,
-		alignSelf: "flex-end",
-	},
-	messageBubbleOther: {
-		backgroundColor: "#ECECEC",
-		alignSelf: "flex-start",
-	},
-	messageText: {
-		fontSize: 16,
+	closeBanner: {
+		color: "#FFFFFF",
+		fontWeight: "bold",
 	},
 	inputContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingVertical: 5,
-		paddingHorizontal: 10,
 		borderTopWidth: 1,
 		borderTopColor: "#E0E0E0",
-		backgroundColor: "#FFFFFF",
+		paddingHorizontal: 10,
+		paddingVertical: 5,
 	},
 	input: {
 		flex: 1,
-		backgroundColor: "#F0F0F0",
-		paddingVertical: 10,
-		paddingHorizontal: 15,
-		borderRadius: 25,
-		marginRight: 20,
-		marginBottom: 10,
-		marginTop: 10,
-		marginLeft: 10,
+		height: 40,
+		borderWidth: 1,
+		borderColor: "#E0E0E0",
+		borderRadius: 5,
+		paddingHorizontal: 10,
+		marginRight: 10,
 	},
 	sendButton: {
 		padding: 10,
