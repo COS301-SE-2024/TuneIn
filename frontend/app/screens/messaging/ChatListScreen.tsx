@@ -27,10 +27,21 @@ const createChats = (
 ): ChatItemProps[] => {
 	const chats: ChatItemProps[] = [];
 	for (const message of messages) {
+		const otherUser =
+			message.sender.userID === selfID ? message.recipient : message.sender;
+
+		// Calculate unread message count for this chat
+		const unreadMessages = messages.filter(
+			(m) =>
+				m.sender.userID !== selfID &&
+				!m.isRead &&
+				m.sender.userID === otherUser.userID,
+		).length;
+
 		chats.push({
 			message: message,
-			otherUser:
-				message.sender.userID === selfID ? message.recipient : message.sender,
+			otherUser: otherUser,
+			unreadCount: unreadMessages, // Add unread count for this chat
 		});
 	}
 	return chats;
@@ -146,7 +157,11 @@ const ChatListScreen = () => {
 					data={filteredChats}
 					keyExtractor={(item) => item.message.pID}
 					renderItem={({ item }) => (
-						<ChatItem message={item.message} otherUser={item.otherUser} />
+						<ChatItem
+							message={item.message}
+							otherUser={item.otherUser}
+							unreadCount={item.unreadCount} // Pass unread count here
+						/>
 					)}
 				/>
 			)}
