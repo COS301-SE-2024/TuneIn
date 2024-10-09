@@ -51,7 +51,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly userService: UsersService,
 	) {
 		this.roomService.server = this.server;
-		this.liveService.setServer(this.server);
+		// this.liveService.setServer(this.server);
 	}
 
 	@WebSocketServer() server: Server;
@@ -59,12 +59,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleConnection(client: Socket) {
 		console.log("Client connected with ID: " + client.id);
 		this.roomService.server = this.server;
-		this.liveService.setServer(this.server);
+		// this.liveService.setServer(this.server);
 	}
 
 	async handleDisconnect(client: Socket) {
 		this.roomService.server = this.server;
-		this.liveService.setServer(this.server);
+		// this.liveService.setServer(this.server);
 		try {
 			console.log("Client (id: " + client.id + ") disconnected");
 			if (this.roomUsers.getConnectedUser(client.id) !== null) {
@@ -334,10 +334,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.emit(SOCKET_EVENTS.USER_JOINED_ROOM, joinAnnouncement);
 				console.log("Response emitted: " + SOCKET_EVENTS.USER_JOINED_ROOM);
 
-				if (!(await this.roomQueue.isPlaying(roomID))) {
-					await this.roomQueue.play(roomID);
+				// if (!(await this.roomQueue.isPlaying(roomID))) {
+				// 	await this.roomQueue.play(roomID);
+				// }
+				if (await this.roomQueue.isPlaying(roomID)) {
+					await this.sendMediaState(roomID);
 				}
-				await this.sendMediaState(roomID);
 				await this.sendQueueState(roomID);
 			} catch (error) {
 				console.error(error);
@@ -784,13 +786,21 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
 			try {
 				console.log(p);
+				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
+				if (!payload.UTC_time || payload.UTC_time === null) {
+					throw new Error("No UTC_time provided");
+				}
+
 				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
 					throw new Error("User is not in a room");
 				}
 
 				//{check user permissions}
-				const song: RoomSongDto | null = await this.roomQueue.play(roomID);
+				const song: RoomSongDto | null = await this.roomQueue.play(
+					roomID,
+					payload.UTC_time,
+				);
 				console.log("Song to play: " + song);
 				if (song === null) {
 					throw new Error("No song is queued");
@@ -916,6 +926,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.INIT_SKIP);
 			try {
 				console.log(p);
+				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
+				if (!payload.UTC_time || payload.UTC_time === null) {
+					throw new Error("No UTC_time provided");
+				}
 
 				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
@@ -924,7 +938,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//{check user permissions}
 
-				await this.roomQueue.playNext(roomID);
+				await this.roomQueue.playNext(roomID, payload.UTC_time);
 				let song: RoomSongDto | null = await this.roomQueue.getCurrentSong(
 					roomID,
 				);
@@ -934,7 +948,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 				let startTime: number | undefined = song.startTime;
 				if (startTime === undefined) {
-					song = await this.roomQueue.play(roomID);
+					song = await this.roomQueue.play(roomID, payload.UTC_time);
 					if (song === null) {
 						throw new Error("No song is queued");
 					}
@@ -968,6 +982,10 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log("Received event: " + SOCKET_EVENTS.INIT_PREV);
 			try {
 				console.log(p);
+				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
+				if (!payload.UTC_time || payload.UTC_time === null) {
+					throw new Error("No UTC_time provided");
+				}
 
 				const roomID: string | null = this.roomUsers.getRoomId(client.id);
 				if (roomID === null) {
@@ -975,7 +993,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 
 				//{check user permissions}
-				await this.roomQueue.playPrev(roomID);
+				await this.roomQueue.playPrev(roomID, payload.UTC_time);
 				let song: RoomSongDto | null = await this.roomQueue.getCurrentSong(
 					roomID,
 				);
@@ -985,7 +1003,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				}
 				let startTime: number | undefined = song.startTime;
 				if (startTime === undefined) {
-					song = await this.roomQueue.play(roomID);
+					song = await this.roomQueue.play(roomID, payload.UTC_time);
 					if (song === null) {
 						throw new Error("No song is queued");
 					}
@@ -1010,22 +1028,22 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
-	async handleSeekMedia(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
-			try {
-				//this.server.emit();
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
+	// async handleSeekMedia(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(async () => {
+	// 		console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
+	// 		try {
+	// 			//this.server.emit();
+	// 			console.log(p);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
 
 	@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)
 	async handleCurrentMedia(
@@ -1050,22 +1068,22 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
-	async handleMediaSync(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
-			try {
-				//this.server.emit();
-				console.log(p);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
+	// async handleMediaSync(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(async () => {
+	// 		console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
+	// 		try {
+	// 			//this.server.emit();
+	// 			console.log(p);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
 
 	@SubscribeMessage(SOCKET_EVENTS.UPVOTE_SONG)
 	async handleSongUpvote(
@@ -1440,6 +1458,25 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			throw new Error("No 'createdAt' provided");
 		}
 		return q;
+	}
+
+	async validatePlaybackEvent(payload: string): Promise<PlaybackEventDto> {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		let p: PlaybackEventDto;
+		try {
+			console.log(`Payload: "${payload}"`);
+			const j = JSON.parse(payload);
+			p = j as PlaybackEventDto;
+		} catch (e) {
+			console.error(e);
+			throw new Error("Invalid JSON received");
+		}
+		return p;
 	}
 
 	async handleThrownError(client: Socket, error: Error): Promise<void> {
