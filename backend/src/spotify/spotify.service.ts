@@ -17,37 +17,11 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosError } from "axios";
 import { ImageService } from "../image/image.service";
-// import pRetry, { Options } from "@common.js/p-retry";
+import { RetryService } from "../retry/retry.service";
 
-const RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
-// type pRetryFunction = <T>(
-// 	input: (attemptCount: number) => T | PromiseLike<T>,
-// 	options?: Options,
-// ) => Promise<T>;
-
-const spotifyRequestWithRetries = async (
-	request: Promise<any>,
-): Promise<any> => {
-	// return pRetry(
-	// 	async () => {
-	// 		return await request;
-	// 	},
-	// 	{
-	// 		onFailedAttempt: (error: any) => {
-	// 			console.log(
-	// 				`Failed attempt ${error.attemptNumber + 1}/${RETRIES}: ${
-	// 					error.message
-	// 				}`,
-	// 			);
-	// 		},
-	// 		retries: RETRIES,
-	// 	},
-	// );
-	return await request;
-};
-
 const MAX_BYTES_PER_IMAGE = 256 * 1000;
+const RETRIES = 3;
 
 @Injectable()
 export class SpotifyService {
@@ -57,7 +31,6 @@ export class SpotifyService {
 	private authHeader: string;
 	private userlessAPI: Spotify.SpotifyApi;
 	private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
-	private pRetry: any | undefined;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -65,6 +38,7 @@ export class SpotifyService {
 		private readonly murLockService: MurLockService,
 		private readonly httpService: HttpService,
 		private readonly imageService: ImageService,
+		private readonly retryService: RetryService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -110,19 +84,7 @@ export class SpotifyService {
 		});
 	}
 
-	// async getRetryFunction(): Promise<any> {
-	// 	if (!this.pRetry) {
-	// 		// this.pRetry = (await import("p-retry")).default;
-	// 		this.pRetry = pRetry;
-	// 	}
-	// 	return this.pRetry;
-	// }
-
 	async refreshTuneInAPI(): Promise<void> {
-		// if (!this.pRetry) {
-		// 	// this.pRetry = (await import("p-retry")).default;
-		// 	this.pRetry = pRetry;
-		// }
 		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
 		if (!tuneinID) {
 			throw new Error("Missing TUNEIN_USER_ID");
@@ -164,12 +126,14 @@ export class SpotifyService {
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
 		const api = SpotifyApi.withAccessToken(this.clientId, token);
-		const user = await spotifyRequestWithRetries(api.currentUser.profile());
+		const user = await this.retryService.spotifyRequestWithRetries(
+			api.currentUser.profile(),
+		);
 		return user;
 	}
 
 	async getAudioFeatures(spotifyID: string): Promise<Spotify.AudioFeatures> {
-		const audioFeatures = await spotifyRequestWithRetries(
+		const audioFeatures = await this.retryService.spotifyRequestWithRetries(
 			this.userlessAPI.tracks.audioFeatures(spotifyID),
 		);
 		return audioFeatures;
@@ -182,7 +146,9 @@ export class SpotifyService {
 		for (let i = 0; i < spotifyIDs.length; i += 100) {
 			const ids = spotifyIDs.slice(i, i + 100);
 			promises.push(
-				spotifyRequestWithRetries(this.userlessAPI.tracks.audioFeatures(ids)),
+				this.retryService.spotifyRequestWithRetries(
+					this.userlessAPI.tracks.audioFeatures(ids),
+				),
 			);
 			await this.wait(500); // for rate limiting
 		}
@@ -200,12 +166,14 @@ export class SpotifyService {
 		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
-			await spotifyRequestWithRetries(api.currentUser.playlists.playlists());
+			await this.retryService.spotifyRequestWithRetries(
+				api.currentUser.playlists.playlists(),
+			);
 		const total = initialPlaylistsFetch.total;
 		const promises = [];
 		for (let i = 0; i < total; i += 50) {
 			await this.wait(500); // for rate limiting
-			const p = spotifyRequestWithRetries(
+			const p = this.retryService.spotifyRequestWithRetries(
 				api.currentUser.playlists.playlists(50, i),
 			);
 			promises.push(p);
@@ -230,22 +198,25 @@ export class SpotifyService {
 			throw new Error("Room not found somehow");
 		}
 		if (r.playlist_id) {
-			const playlist: Spotify.Playlist = await spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.getPlaylist(r.playlist_id),
-			);
+			const playlist: Spotify.Playlist =
+				await this.retryService.spotifyRequestWithRetries(
+					this.TuneInAPI.playlists.getPlaylist(r.playlist_id),
+				);
 			return playlist;
 		} else {
-			const user: Spotify.UserProfile = await spotifyRequestWithRetries(
-				this.TuneInAPI.currentUser.profile(),
-			);
-			const playlist: Spotify.Playlist = await spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.createPlaylist(user.id, {
-					name: room.room_name,
-					description: room.description,
-					public: true,
-					collaborative: false,
-				}),
-			);
+			const user: Spotify.UserProfile =
+				await this.retryService.spotifyRequestWithRetries(
+					this.TuneInAPI.currentUser.profile(),
+				);
+			const playlist: Spotify.Playlist =
+				await this.retryService.spotifyRequestWithRetries(
+					this.TuneInAPI.playlists.createPlaylist(user.id, {
+						name: room.room_name,
+						description: room.description,
+						public: true,
+						collaborative: false,
+					}),
+				);
 			const imageBuffer = await this.downloadImage(room.room_image);
 			let b64: string;
 			if (imageBuffer.length < MAX_BYTES_PER_IMAGE) {
@@ -258,7 +229,7 @@ export class SpotifyService {
 				b64 = this.imageService.imageToB64(processedImageBuffer);
 			}
 			console.log(`Size of base64: ${b64.length}`);
-			// await spotifyRequestWithRetries(
+			// await this.retryService.spotifyRequestWithRetries(
 			// 	this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
 			// 		playlist.id,
 			// 		b64,
@@ -291,14 +262,14 @@ export class SpotifyService {
 		// get current playlist state
 		const currentPlaylist: Spotify.Page<
 			Spotify.PlaylistedTrack<Spotify.Track>
-		> = await spotifyRequestWithRetries(
+		> = await this.retryService.spotifyRequestWithRetries(
 			this.TuneInAPI.playlists.getPlaylistItems(playlistID),
 		);
 
 		// fetch songs from Spotify with retries
 		while (currentTracks.length < currentPlaylist.total) {
 			const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
-				await spotifyRequestWithRetries(
+				await this.retryService.spotifyRequestWithRetries(
 					this.TuneInAPI.playlists.getPlaylistItems(
 						playlistID,
 						undefined,
@@ -319,7 +290,7 @@ export class SpotifyService {
 			// remove songs from playlist in batches of 50 with retries
 			const ids = deleteIDs.slice(i, i + 50);
 			await new Promise((resolve) => setTimeout(resolve, 500));
-			const deleteRequest = spotifyRequestWithRetries(
+			const deleteRequest = this.retryService.spotifyRequestWithRetries(
 				this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
 					tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
 				}),
@@ -335,7 +306,7 @@ export class SpotifyService {
 		for (let i = 0; i < uris.length; i += 50) {
 			const ids = uris.slice(i, i + 50);
 			await new Promise((resolve) => setTimeout(resolve, 500));
-			const insertRequest = spotifyRequestWithRetries(
+			const insertRequest = this.retryService.spotifyRequestWithRetries(
 				this.TuneInAPI.playlists.addItemsToPlaylist(playlistID, ids, start + i),
 			);
 			promises.push(insertRequest);
@@ -347,7 +318,7 @@ export class SpotifyService {
 		const tk = await this.getSpotifyTokens(userID);
 		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		await spotifyRequestWithRetries(
+		await this.retryService.spotifyRequestWithRetries(
 			api.currentUser.playlists.follow(roomPlaylist.id),
 		);
 	}
@@ -356,7 +327,7 @@ export class SpotifyService {
 		const tk = await this.getSpotifyTokens(userID);
 		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
-		await spotifyRequestWithRetries(
+		await this.retryService.spotifyRequestWithRetries(
 			api.currentUser.playlists.unfollow(roomPlaylist.id),
 		);
 	}
@@ -368,7 +339,9 @@ export class SpotifyService {
 		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const playlistInfo: Spotify.Playlist<Spotify.Track> =
-			await spotifyRequestWithRetries(api.playlists.getPlaylist(playlistID));
+			await this.retryService.spotifyRequestWithRetries(
+				api.playlists.getPlaylist(playlistID),
+			);
 
 		let i = 0;
 		const promises: Promise<
@@ -377,7 +350,7 @@ export class SpotifyService {
 		while (i < playlistInfo.tracks.total) {
 			await this.wait(500); // for rate limiting
 			promises.push(
-				spotifyRequestWithRetries(
+				this.retryService.spotifyRequestWithRetries(
 					api.playlists.getPlaylistItems(
 						playlistID,
 						undefined,
@@ -405,7 +378,7 @@ export class SpotifyService {
 	async getTuneInPlaylistIDs(playlistID: string): Promise<string[]> {
 		await this.refreshTuneInAPI();
 		const playlistInfo: Spotify.Playlist<Spotify.Track> =
-			await spotifyRequestWithRetries(
+			await this.retryService.spotifyRequestWithRetries(
 				this.TuneInAPI.playlists.getPlaylist(playlistID),
 			);
 
@@ -416,7 +389,7 @@ export class SpotifyService {
 		while (i < playlistInfo.tracks.total) {
 			await this.wait(500); // for rate limiting
 			promises.push(
-				spotifyRequestWithRetries(
+				this.retryService.spotifyRequestWithRetries(
 					this.TuneInAPI.playlists.getPlaylistItems(
 						playlistID,
 						undefined,
@@ -444,13 +417,15 @@ export class SpotifyService {
 		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
-			await spotifyRequestWithRetries(api.currentUser.tracks.savedTracks());
+			await this.retryService.spotifyRequestWithRetries(
+				api.currentUser.tracks.savedTracks(),
+			);
 		const total = initialSongsFetch.total;
 		let i = 0;
 		const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
 		while (i < total) {
 			await this.wait(500); // for rate limiting
-			const p = spotifyRequestWithRetries(
+			const p = this.retryService.spotifyRequestWithRetries(
 				api.currentUser.tracks.savedTracks(50, i),
 			);
 			promises.push(p);
@@ -811,7 +786,9 @@ export class SpotifyService {
 		for (let i = 0; i < notFound.length; i += 50) {
 			const ids = notFound.slice(i, i + 50);
 			promises.push(
-				spotifyRequestWithRetries(this.userlessAPI.tracks.get(ids)),
+				this.retryService.spotifyRequestWithRetries(
+					this.userlessAPI.tracks.get(ids),
+				),
 			);
 		}
 		const results: Spotify.Track[][] = await Promise.all(promises);
@@ -827,7 +804,7 @@ export class SpotifyService {
 	): Promise<SpotifyTokenResponse> {
 		try {
 			console.log("Refreshing expired token");
-			const response = await spotifyRequestWithRetries(
+			const response = await this.retryService.spotifyRequestWithRetries(
 				firstValueFrom(
 					this.httpService.post(
 						"https://accounts.spotify.com/api/token",

@@ -5,7 +5,7 @@ import {
 	Logger,
 } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
-// import pRetry from "@common.js/p-retry";
+import { RetryService, RetryStatus } from "../src/retry/retry.service";
 
 const RETRIES = 10;
 
@@ -16,7 +16,7 @@ export class PrismaService
 {
 	private readonly logger = new Logger(PrismaService.name);
 
-	constructor() {
+	constructor(private readonly retryService: RetryService) {
 		super();
 		process.on("SIGINT", async () => {
 			this.logger.warn(
@@ -29,28 +29,33 @@ export class PrismaService
 
 	async onModuleInit() {
 		try {
-			// await pRetry(
-			// 	async () => {
-			// 		await this.$connect();
-			// 		this.logger.log("Connected to the database");
-			// 		return;
-			// 	},
-			// 	{
-			// 		onFailedAttempt: (error) => {
-			// 			// console.log(
-			// 			// 	`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`,
-			// 			// );
-			// 			this.logger.log(
-			// 				`Database connection failed: ${error.message}. Retrying... (${
-			// 					error.attemptNumber + 1
-			// 				}/${RETRIES})`,
-			// 			);
-			// 		},
-			// 		retries: RETRIES,
-			// 	},
-			// );
-			await this.$connect();
-			this.logger.log("Connected to the database");
+			const executeRequest = async (status: RetryStatus) => {
+				if (status.index > 0) {
+					console.log(`Retrying... Attempt #${status.index + 1}`);
+				}
+				return await this.$connect().then(() => {
+					this.logger.log("Connected to the database");
+				});
+			};
+
+			// Call retryAsync, passing the function and options
+			await this.retryService.retryAsync(executeRequest, {
+				retry: RETRIES,
+				delay: (status: RetryStatus) => {
+					// Optionally use exponential backoff or fixed delay
+					const delay = Math.pow(2, status.index) * 50; // Exponential backoff (50ms * 2^index)
+					console.log(
+						`Waiting for ${delay}ms before attempting database reconnection...`,
+					);
+					return delay;
+				},
+				error: (status: RetryStatus) => {
+					console.error(
+						`Error encountered on attempt #${status.index + 1}:`,
+						status.error.message,
+					);
+				},
+			});
 		} catch (error) {
 			console.error(error);
 			this.logger.error(
