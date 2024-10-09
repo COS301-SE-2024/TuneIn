@@ -3,7 +3,8 @@ import { PrismaService } from "./prisma.service";
 import { RetryModule } from "../src/retry/retry.module";
 
 @Module({
-	providers: [PrismaService, RetryModule],
+	imports: [RetryModule],
+	providers: [PrismaService],
 	exports: [PrismaService],
 })
 export class PrismaModule {}

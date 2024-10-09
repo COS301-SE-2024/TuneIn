@@ -63,6 +63,7 @@ export class RetryService {
 		const start = Date.now();
 		let index = 0,
 			e: any;
+		// eslint-disable-next-line prefer-const
 		let { retry = Number.POSITIVE_INFINITY, delay = -1, error } = options ?? {};
 		const s = () => ({ index, duration: Date.now() - start, error: e });
 		const c = (): Promise<T> =>
