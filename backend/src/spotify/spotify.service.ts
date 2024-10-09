@@ -467,65 +467,57 @@ export class SpotifyService {
 	}
 
 	async addTrackToDB(track: Spotify.Track): Promise<PrismaTypes.song> {
-		let result: PrismaTypes.song | undefined;
-		await this.murLockService.runWithLock(
-			"SONG_TABLE_EDIT_LOCK",
-			TABLE_LOCK_TIMEOUT,
-			async () => {
+		const song: PrismaTypes.song | null = await this.prisma.song.findFirst({
+			where: {
+				spotify_id: track.id,
+			},
+		});
+		if (song) {
+			return song;
+		}
+		const genre =
+			track.album && track.album.genres && track.album.genres.length > 0
+				? track.album.genres[0]
+				: undefined;
+		const audioFeatures: Spotify.AudioFeatures = await this.getAudioFeatures(
+			track.id,
+		);
+		const s: Prisma.songCreateInput = {
+			name: track.name,
+			artists: track.artists.map((artist) => artist.name),
+			duration: track.duration_ms,
+			genre: genre !== undefined && genre !== null ? genre : "Unknown",
+			artwork_url: this.getLargestImage(track.album.images).url,
+			track_info: JSON.stringify(track),
+			audio_features: JSON.stringify(audioFeatures),
+			spotify_id: track.id,
+		};
+		return await this.murLockService
+			.runWithLock("SONG_TABLE_EDIT_LOCK", TABLE_LOCK_TIMEOUT, async () => {
 				try {
 					console.log(`Acquire song table lock for 'addTrackToDB'`);
-					const song: PrismaTypes.song | null =
-						await this.prisma.song.findFirst({
-							where: {
-								spotify_id: track.id,
-							},
-						});
-					if (song) {
-						result = song;
-						return;
-					}
-					const genre =
-						track.album && track.album.genres && track.album.genres.length > 0
-							? track.album.genres[0]
-							: undefined;
-					const audioFeatures: Spotify.AudioFeatures =
-						await this.getAudioFeatures(track.id);
-					const s: Prisma.songCreateInput = {
-						name: track.name,
-						artists: track.artists.map((artist) => artist.name),
-						duration: track.duration_ms,
-						genre: genre !== undefined && genre !== null ? genre : "Unknown",
-						artwork_url: this.getLargestImage(track.album.images).url,
-						track_info: JSON.stringify(track),
-						audio_features: JSON.stringify(audioFeatures),
-						spotify_id: track.id,
-					};
-					result = await this.prisma.song.create({
+					return await this.prisma.song.create({
 						data: s,
 					});
-					console.log(`Release song table lock for 'addTrackToDB'`);
 				} catch (e) {
 					console.error("Error in addTrackToDB");
 					console.error(e);
+					throw e;
+				} finally {
+					console.log(`Release song table lock for 'addTrackToDB'`);
 				}
-			},
-		); //end mutex
-		if (result === undefined) {
-			throw new Error("Failed to add song to database");
-		}
-		return result;
+			})
+			.catch((e) => {
+				throw e;
+			}); //end mutex
 	}
 
 	async addTracksToDB(tracks: Spotify.Track[]): Promise<PrismaTypes.song[]> {
-		let result: PrismaTypes.song[] = [];
-		await this.murLockService.runWithLock(
-			"SONG_TABLE_EDIT_LOCK",
-			TABLE_LOCK_TIMEOUT,
-			async () => {
+		return await this.murLockService
+			.runWithLock("SONG_TABLE_EDIT_LOCK", TABLE_LOCK_TIMEOUT, async () => {
 				try {
 					console.log(`Acquire song table lock for 'addTracksToDB'`);
 					const allIDs: string[] = tracks.map((track) => track.id);
-					const audioFeatures = await this.getManyAudioFeatures(allIDs);
 					const songs: PrismaTypes.song[] = await this.prisma.song.findMany({
 						where: {
 							spotify_id: {
@@ -536,6 +528,7 @@ export class SpotifyService {
 					const foundIDs: (string | null)[] = songs.map(
 						(song) => song.spotify_id,
 					);
+					const audioFeatures = await this.getManyAudioFeatures(allIDs);
 
 					const createList: Prisma.songCreateInput[] = [];
 					const editList: Prisma.songUpdateArgs[] = [];
@@ -588,31 +581,6 @@ export class SpotifyService {
 							}
 						}
 					}
-					// const promises: (
-					// 	| Prisma.PrismaPromise<PrismaTypes.song[]>
-					// 	| Prisma.PrismaPromise<Prisma.BatchPayload>
-					// )[] = [];
-					// if (createList.length > 0) {
-					// 	promises.push(
-					// 		this.prisma.song.createManyAndReturn({
-					// 			data: createList,
-					// 			skipDuplicates: true,
-					// 		}),
-					// 	);
-					// }
-					// if (editList.length > 0) {
-					// 	promises.push(
-					// 		this.prisma.song.updateMany({
-					// 			where: {
-					// 				spotify_id: {
-					// 					in: editListIDs,
-					// 				},
-					// 			},
-					// 			data: editList,
-					// 		}),
-					// 	);
-					// }
-					// await Promise.all(promises);
 					await this.prisma.$transaction(
 						createList.map((song) => {
 							return this.prisma.song.create({
@@ -625,7 +593,7 @@ export class SpotifyService {
 							return this.prisma.song.update(song);
 						}),
 					);
-					result = await this.prisma.song.findMany({
+					return await this.prisma.song.findMany({
 						where: {
 							spotify_id: {
 								in: allIDs,
@@ -635,11 +603,14 @@ export class SpotifyService {
 				} catch (e) {
 					console.error("Error in addTracksToDB");
 					console.error(e);
+					throw e;
+				} finally {
+					console.log(`Release song table lock for 'addTracksToDB'`);
 				}
-				console.log(`Release song table lock for 'addTracksToDB'`);
-			},
-		); //end mutex
-		return result;
+			})
+			.catch((e) => {
+				throw e;
+			}); //end mutex
 	}
 
 	async fixSpotifyInfo(): Promise<void> {
