@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
 		alignItems: "center", // Center banner and lines together
 		marginVertical: 15, // Space around the banner container
 		backgroundColor: "#E0E0E0",
-		paddingVertical: 3,
+		paddingVertical: 1,
 		marginHorizontal: -20,
 	},
 	unreadBanner: {
