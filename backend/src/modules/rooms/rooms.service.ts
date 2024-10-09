@@ -17,7 +17,6 @@ import { IsString } from "class-validator";
 import { SpotifyService } from "../../spotify/spotify.service";
 import { RoomQueueService, ActiveRoom } from "./roomqueue/roomqueue.service";
 import { RoomSongDto } from "./dto/roomsong.dto";
-import { SpotifyTokenPair } from "../../../src/auth/spotify/spotifyauth.service";
 import { kmeans } from "ml-kmeans";
 import { KMeansResult } from "ml-kmeans/lib/KMeansResult";
 import * as Spotify from "@spotify/web-api-ts-sdk";

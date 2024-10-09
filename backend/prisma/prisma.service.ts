@@ -5,7 +5,7 @@ import {
 	Logger,
 } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
-import pRetry from "p-retry";
+// import pRetry from "@common.js/p-retry";
 
 const RETRIES = 10;
 
@@ -29,27 +29,30 @@ export class PrismaService
 
 	async onModuleInit() {
 		try {
-			await pRetry(
-				async () => {
-					await this.$connect();
-					this.logger.log("Connected to the database");
-					return;
-				},
-				{
-					onFailedAttempt: (error) => {
-						// console.log(
-						// 	`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`,
-						// );
-						this.logger.log(
-							`Database connection failed: ${error.message}. Retrying... (${
-								error.attemptNumber + 1
-							}/${RETRIES})`,
-						);
-					},
-					retries: RETRIES,
-				},
-			);
+			// await pRetry(
+			// 	async () => {
+			// 		await this.$connect();
+			// 		this.logger.log("Connected to the database");
+			// 		return;
+			// 	},
+			// 	{
+			// 		onFailedAttempt: (error) => {
+			// 			// console.log(
+			// 			// 	`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`,
+			// 			// );
+			// 			this.logger.log(
+			// 				`Database connection failed: ${error.message}. Retrying... (${
+			// 					error.attemptNumber + 1
+			// 				}/${RETRIES})`,
+			// 			);
+			// 		},
+			// 		retries: RETRIES,
+			// 	},
+			// );
+			await this.$connect();
+			this.logger.log("Connected to the database");
 		} catch (error) {
+			console.error(error);
 			this.logger.error(
 				`Failed to connect to the database after ${RETRIES} retries. Exiting...`,
 			);

@@ -17,29 +17,34 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosError } from "axios";
 import { ImageService } from "../image/image.service";
-import pRetry, { Options } from "p-retry";
+// import pRetry, { Options } from "@common.js/p-retry";
 
 const RETRIES = 3;
 const TABLE_LOCK_TIMEOUT = 30000;
+// type pRetryFunction = <T>(
+// 	input: (attemptCount: number) => T | PromiseLike<T>,
+// 	options?: Options,
+// ) => Promise<T>;
 
 const spotifyRequestWithRetries = async (
 	request: Promise<any>,
 ): Promise<any> => {
-	return pRetry(
-		async () => {
-			return await request;
-		},
-		{
-			onFailedAttempt: (error) => {
-				console.log(
-					`Failed attempt ${error.attemptNumber + 1}/${RETRIES}: ${
-						error.message
-					}`,
-				);
-			},
-			retries: RETRIES,
-		},
-	);
+	// return pRetry(
+	// 	async () => {
+	// 		return await request;
+	// 	},
+	// 	{
+	// 		onFailedAttempt: (error: any) => {
+	// 			console.log(
+	// 				`Failed attempt ${error.attemptNumber + 1}/${RETRIES}: ${
+	// 					error.message
+	// 				}`,
+	// 			);
+	// 		},
+	// 		retries: RETRIES,
+	// 	},
+	// );
+	return await request;
 };
 
 const MAX_BYTES_PER_IMAGE = 256 * 1000;
@@ -52,6 +57,7 @@ export class SpotifyService {
 	private authHeader: string;
 	private userlessAPI: Spotify.SpotifyApi;
 	private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
+	private pRetry: any | undefined;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -104,7 +110,19 @@ export class SpotifyService {
 		});
 	}
 
+	// async getRetryFunction(): Promise<any> {
+	// 	if (!this.pRetry) {
+	// 		// this.pRetry = (await import("p-retry")).default;
+	// 		this.pRetry = pRetry;
+	// 	}
+	// 	return this.pRetry;
+	// }
+
 	async refreshTuneInAPI(): Promise<void> {
+		// if (!this.pRetry) {
+		// 	// this.pRetry = (await import("p-retry")).default;
+		// 	this.pRetry = pRetry;
+		// }
 		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
 		if (!tuneinID) {
 			throw new Error("Missing TUNEIN_USER_ID");
@@ -239,12 +257,13 @@ export class SpotifyService {
 				);
 				b64 = this.imageService.imageToB64(processedImageBuffer);
 			}
-			await spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
-					playlist.id,
-					b64,
-				),
-			);
+			console.log(`Size of base64: ${b64.length}`);
+			// await spotifyRequestWithRetries(
+			// 	this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
+			// 		playlist.id,
+			// 		b64,
+			// 	),
+			// );
 			await this.prisma.room.update({
 				where: {
 					room_id: room.roomID,

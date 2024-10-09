@@ -40,6 +40,7 @@
     "@bull-board/api": "^5.21.4",
     "@bull-board/express": "^5.21.4",
     "@bull-board/ui": "^5.21.4",
+    "@common.js/p-retry": "^6.2.0",
     "@datastructures-js/priority-queue": "^6.3.1",
     "@nestjs/axios": "^3.0.3",
     "@nestjs/bull": "^10.2.0",
