@@ -74,10 +74,6 @@ export function useDirectMessageControls({
 		[currentUser, dmParticipants, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("sendDirectMessage function has been recreated");
-	}, [sendDirectMessage]);
-
 	const editDirectMessage = useCallback(
 		function (message: DirectMessage): void {
 			if (!socket) {
@@ -113,10 +109,6 @@ export function useDirectMessageControls({
 		[currentUser, dmParticipants, socket, pollLatency],
 	);
 
-	useEffect(() => {
-		console.log("editDirectMessage function has been recreated");
-	}, [editDirectMessage]);
-
 	const deleteDirectMessage = useCallback(
 		function (message: DirectMessage): void {
 			if (!socket) {
@@ -148,10 +140,6 @@ export function useDirectMessageControls({
 		},
 		[currentUser, dmParticipants, socket],
 	);
-
-	useEffect(() => {
-		console.log("deleteDirectMessage function has been recreated");
-	}, [deleteDirectMessage]);
 
 	const requestDirectMessageHistory = useCallback(
 		function (): void {
@@ -191,10 +179,6 @@ export function useDirectMessageControls({
 		},
 		[currentUser, dmParticipants, socket, socketState, updateState],
 	);
-
-	useEffect(() => {
-		console.log("requestDirectMessageHistory function has been recreated");
-	}, [requestDirectMessageHistory]);
 
 	const dmControls = useMemo(() => {
 		return {

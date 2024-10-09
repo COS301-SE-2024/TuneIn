@@ -1,11 +1,4 @@
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useReducer,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { Socket } from "socket.io-client";
 import {
 	LiveChatMessageDto,
@@ -120,11 +113,10 @@ export interface Playback {
 		userSelected: boolean;
 	}>;
 	userListeningToRoom: (roomPlaying: boolean) => Promise<boolean>;
-	startPlayback: () => void;
-	pausePlayback: () => void;
+	startPlayback: () => Promise<void>;
+	pausePlayback: () => Promise<void>;
 	// stopPlayback: () => void;
-	nextTrack: () => void;
-	prevTrack: () => void;
+	nextTrack: () => Promise<void>;
 	syncUserPlayback: () => Promise<void>;
 }
 
@@ -232,7 +224,6 @@ export function useRoomControls({
 		undefined,
 	);
 	const [deviceError, setDeviceError] = React.useState<string | null>(null);
-	const intervalRef = useRef<NodeJS.Timeout>();
 
 	const getDevices = useCallback(
 		async function (): Promise<Device[]> {
@@ -546,11 +537,26 @@ export function useRoomControls({
 			}
 			return false;
 		},
-		[currentSong, spotify, activeDevice],
+		[currentRoom, currentSong, spotify, activeDevice],
 	);
 
 	const startPlayback = useCallback(
-		function (): void {
+		async function (startTime: number = Date.now()): Promise<void> {
+			if (!currentRoom) {
+				console.error("User is not in a room");
+				return;
+			}
+
+			if (!(await userListeningToRoom(true))) {
+				if (!currentSong) {
+					return;
+				}
+				await handlePlayback(
+					"play",
+					currentRoom.spotifyPlaylistID,
+					currentSong,
+				);
+			}
 			if (socket === null) {
 				console.error("Socket connection not initialized");
 				return;
@@ -573,15 +579,27 @@ export function useRoomControls({
 				userID: currentUser.userID,
 				roomID: currentRoom.roomID,
 				spotifyID: null,
-				UTC_time: null,
+				UTC_time: startTime,
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PLAY, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, socket, pollLatency],
+		[
+			currentRoom,
+			userListeningToRoom,
+			socket,
+			pollLatency,
+			currentUser,
+			currentSong,
+			handlePlayback,
+		],
 	);
 
 	const pausePlayback = useCallback(
-		function (): void {
+		async function (): Promise<void> {
+			if (await userListeningToRoom(true)) {
+				await handlePlayback("pause");
+			}
+
 			if (socket === null) {
 				console.error("Socket connection not initialized");
 				return;
@@ -608,7 +626,14 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PAUSE, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, socket, pollLatency],
+		[
+			userListeningToRoom,
+			socket,
+			pollLatency,
+			currentUser,
+			currentRoom,
+			handlePlayback,
+		],
 	);
 
 	// const stopPlayback = useCallback(
@@ -647,7 +672,11 @@ export function useRoomControls({
 	// }, [stopPlayback]);
 
 	const nextTrack = useCallback(
-		function (): void {
+		async function (startTime: number = Date.now()): Promise<void> {
+			if (await userListeningToRoom(true)) {
+				await handlePlayback("next");
+			}
+
 			if (socket === null) {
 				console.error("Socket connection not initialized");
 				return;
@@ -670,15 +699,26 @@ export function useRoomControls({
 				userID: currentUser.userID,
 				roomID: currentRoom.roomID,
 				spotifyID: null,
-				UTC_time: null,
+				UTC_time: startTime,
 			};
 			socket.emit(SOCKET_EVENTS.INIT_SKIP, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, socket, pollLatency],
+		[
+			userListeningToRoom,
+			socket,
+			pollLatency,
+			currentUser,
+			currentRoom,
+			handlePlayback,
+		],
 	);
 
 	const prevTrack = useCallback(
-		function (): void {
+		async function (startTime: number = Date.now()): Promise<void> {
+			if (await userListeningToRoom(true)) {
+				await handlePlayback("previous");
+			}
+
 			if (socket === null) {
 				console.error("Socket connection not initialized");
 				return;
@@ -701,11 +741,18 @@ export function useRoomControls({
 				userID: currentUser.userID,
 				roomID: currentRoom.roomID,
 				spotifyID: null,
-				UTC_time: null,
+				UTC_time: startTime,
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PREV, JSON.stringify(input));
 		},
-		[currentRoom, currentUser, socket, pollLatency],
+		[
+			userListeningToRoom,
+			socket,
+			pollLatency,
+			currentUser,
+			currentRoom,
+			handlePlayback,
+		],
 	);
 
 	const syncUserPlayback = useCallback(async () => {
