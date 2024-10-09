@@ -125,6 +125,7 @@ export interface Playback {
 	// stopPlayback: () => void;
 	nextTrack: () => void;
 	prevTrack: () => void;
+	syncUserPlayback: () => Promise<void>;
 }
 
 interface RoomControlProps {
@@ -786,32 +787,6 @@ export function useRoomControls({
 		userListeningToRoom,
 	]);
 
-	useEffect(() => {
-		console.log(`syncUserPlayback changed`);
-		if (intervalRef.current) {
-			console.log(`Clearing the existing interval`);
-			clearInterval(intervalRef.current);
-		}
-		console.log(`Creating a new interval`);
-		intervalRef.current = setInterval(syncUserPlayback, 15000);
-		return () => {
-			clearInterval(intervalRef.current);
-			intervalRef.current = undefined;
-		};
-	}, [syncUserPlayback]);
-
-	useEffect(() => {
-		console.log("useEffect for syncing user with room has been called");
-		if (!intervalRef.current) {
-			intervalRef.current = setInterval(syncUserPlayback, 15000);
-			console.log(`Interval set for syncing user with room`);
-		}
-		return () => {
-			clearInterval(intervalRef.current);
-			intervalRef.current = undefined;
-		};
-	}, []);
-
 	const playbackHandler: Playback = useMemo(() => {
 		return {
 			spotifyDevices: spotifyDevices,
@@ -826,6 +801,7 @@ export function useRoomControls({
 			// stopPlayback: stopPlayback,
 			nextTrack: nextTrack,
 			prevTrack: prevTrack,
+			syncUserPlayback: syncUserPlayback,
 			deviceError: deviceError,
 		};
 	}, [
@@ -841,6 +817,7 @@ export function useRoomControls({
 		startPlayback,
 		// stopPlayback,
 		userListeningToRoom,
+		syncUserPlayback,
 	]);
 
 	const clearQueue = useCallback(

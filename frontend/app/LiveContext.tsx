@@ -128,6 +128,9 @@ export type SpotifyTokenRefreshResponse = {
 
 const LiveContext = createContext<LiveContextType | undefined>(undefined);
 
+const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5; // 5 minutes
+const SYNC_INTERVAL = 1000 * 15; // 15 seconds
+
 export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
@@ -189,7 +192,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		{ message: DirectMessageDto; room?: RoomDto }[]
 	>([]);
 	const [fetchRecentDMs, setFetchRecentDMs] = useState<boolean>(true);
-	const intervalRef = useRef<NodeJS.Timeout>();
+	const refreshIntervalRef = useRef<NodeJS.Timeout>();
+	const syncIntervalRef = useRef<NodeJS.Timeout>();
 
 	const sendIdentity = useCallback(
 		(socket: Socket) => {
@@ -1687,29 +1691,70 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		console.log(
 			`'refreshSpotifyTokens' function changed. Updating refresh interval`,
 		);
-		if (intervalRef.current) {
-			clearInterval(intervalRef.current);
+		if (refreshIntervalRef.current) {
+			console.log(`Clearing the existing 'refresh' interval`);
+			clearInterval(refreshIntervalRef.current);
 		}
-		intervalRef.current = setInterval(refreshSpotifyTokens, 60 * 1000);
-		console.log(`Spotify token refresh interval fixed`);
+		console.log(`Creating a new 'refresh' interval`);
+		refreshIntervalRef.current = setInterval(
+			refreshSpotifyTokens,
+			TOKEN_REFRESH_INTERVAL,
+		);
 		return () => {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-				intervalRef.current = undefined;
+			if (refreshIntervalRef.current) {
+				clearInterval(refreshIntervalRef.current);
+				refreshIntervalRef.current = undefined;
 			}
 		};
 	}, [refreshSpotifyTokens]);
 
-	// on mount
 	useEffect(() => {
-		if (!intervalRef.current) {
-			intervalRef.current = setInterval(refreshSpotifyTokens, 60 * 1000);
-			console.log(`Interval initialised for fetching Spotify tokens`);
+		console.log(`syncUserPlayback changed`);
+		if (keepUserSynced) {
+			if (syncIntervalRef.current) {
+				console.log(`Clearing the existing 'sync' interval`);
+				clearInterval(syncIntervalRef.current);
+			}
+			console.log(`Creating a new 'sync' interval`);
+			syncIntervalRef.current = setInterval(
+				roomControls.playbackHandler.syncUserPlayback,
+				SYNC_INTERVAL,
+			);
 		}
 		return () => {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-				intervalRef.current = undefined;
+			if (syncIntervalRef.current) {
+				clearInterval(syncIntervalRef.current);
+				syncIntervalRef.current = undefined;
+			}
+		};
+	}, [roomControls.playbackHandler.syncUserPlayback]);
+
+	// on mount
+	useEffect(() => {
+		if (!refreshIntervalRef.current) {
+			refreshIntervalRef.current = setInterval(
+				refreshSpotifyTokens,
+				TOKEN_REFRESH_INTERVAL,
+			);
+			console.log(`Interval initialised for fetching Spotify tokens`);
+		}
+		if (keepUserSynced) {
+			if (!syncIntervalRef.current) {
+				syncIntervalRef.current = setInterval(
+					roomControls.playbackHandler.syncUserPlayback,
+					SYNC_INTERVAL,
+				);
+				console.log(`Interval initialised for syncing user with room`);
+			}
+		}
+		return () => {
+			if (refreshIntervalRef.current) {
+				clearInterval(refreshIntervalRef.current);
+				refreshIntervalRef.current = undefined;
+			}
+			if (syncIntervalRef.current) {
+				clearInterval(syncIntervalRef.current);
+				syncIntervalRef.current = undefined;
 			}
 		};
 	}, []);
