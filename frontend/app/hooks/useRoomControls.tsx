@@ -117,6 +117,7 @@ export interface Playback {
 	pausePlayback: () => Promise<void>;
 	// stopPlayback: () => void;
 	nextTrack: () => Promise<void>;
+	prevTrack: () => Promise<void>;
 	syncUserPlayback: () => Promise<void>;
 }
 
@@ -488,6 +489,11 @@ export function useRoomControls({
 
 	const userListeningToRoom = useCallback(
 		async function (roomPlaying: boolean): Promise<boolean> {
+			if (!currentRoom) {
+				// throw new Error("User is not in a room");
+				console.log(`userListeningToRoom false because !currentRoom`);
+				return false;
+			}
 			if (!currentSong) {
 				// throw new Error("No song is currently playing");
 				console.log(`userListeningToRoom false because !current`);
@@ -526,12 +532,18 @@ export function useRoomControls({
 						userSelected: false,
 					});
 				}
-				if (state.item === null) {
+				if (state.context === null) {
 					return false;
 				}
-				if (state.item.id === currentSong.spotifyID) {
-					return true;
+				if (state.context.uri !== currentRoom.spotifyPlaylistID) {
+					return false;
 				}
+				// if (state.item === null) {
+				// 	return false;
+				// }
+				// if (state.item.id === currentSong.spotifyID) {
+				// 	return true;
+				// }
 			} else {
 				console.log(`userListeningToRoom false because !roomPlaying`);
 			}
