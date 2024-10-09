@@ -123,7 +123,11 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 			setArtistName(null);
 			setAlbumArt(null);
 		} else {
-			if (currentTrack === null || currentTrack.id !== currentSong.spotifyID) {
+			if (
+				!currentTrack ||
+				currentTrack === null ||
+				currentTrack.id !== currentSong.spotifyID
+			) {
 				fetchSongInfo([currentSong.spotifyID]).then(([track]: Track[]) => {
 					const sp: SongPair = { song: currentSong, track: track };
 					setCurrentTrack(track);

@@ -1381,6 +1381,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		updateState,
 	]);
 
+	const refreshSpotifyTokens = useCallback(async () => {
+		console.log(`Fetching Spotify tokens...`);
+		if (currentUser && authenticated) {
+			await spotifyAuth.getSpotifyTokens();
+		}
+	}, []);
+
 	// on mount, initialize the socket
 	// useEffect(() => {
 	// 	socketRef.current = createSocketConnection();
@@ -1676,16 +1683,35 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		getUserDetails(spotifyAuth);
 	}, [refreshUser]);
 
+	useEffect(() => {
+		console.log(
+			`'refreshSpotifyTokens' function changed. Updating refresh interval`,
+		);
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+		}
+		intervalRef.current = setInterval(refreshSpotifyTokens, 60 * 1000);
+		console.log(`Spotify token refresh interval fixed`);
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = undefined;
+			}
+		};
+	}, [refreshSpotifyTokens]);
+
 	// on mount
 	useEffect(() => {
-		const interval = setInterval(() => {
-			console.log(`Fetching Spotify tokens...`);
-			if (currentUser && authenticated) {
-				spotifyAuth.getSpotifyTokens();
+		if (!intervalRef.current) {
+			intervalRef.current = setInterval(refreshSpotifyTokens, 60 * 1000);
+			console.log(`Interval initialised for fetching Spotify tokens`);
+		}
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = undefined;
 			}
-		}, 60 * 1000);
-		intervalRef.current = interval;
-		return () => clearInterval(interval);
+		};
 	}, []);
 
 	useEffect(() => {}, []);

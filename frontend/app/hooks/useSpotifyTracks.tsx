@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Spotify from "@spotify/web-api-ts-sdk";
-import { SpotifyAuth, useLive } from "../LiveContext";
+import { SpotifyAuth } from "../LiveContext";
 import * as StorageService from "../services/StorageService";
 
 const RETRIES = 3;
@@ -15,9 +15,8 @@ export const useSpotifyTracks = (
 	const [cachedSongs, setCachedSongs] = useState<Spotify.Track[]>([]);
 
 	const initialise = useCallback(async () => {
-		const ids: string | null = await StorageService.getItem("cachedSongIDs");
 		const songs: string | null = await StorageService.getItem("cachedSongs");
-		if (ids !== null && songs !== null) {
+		if (songs !== null) {
 			setCachedSongs(JSON.parse(songs));
 		} else {
 			setCachedSongs([]);
