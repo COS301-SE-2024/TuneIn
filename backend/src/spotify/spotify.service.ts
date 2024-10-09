@@ -324,7 +324,8 @@ export class SpotifyService {
 		return;
 	}
 
-	async saveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
+	async saveRoomPlaylist(room: RoomDto, userID: string): Promise<void> {
+		const tk = await this.getSpotifyTokens(userID);
 		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		await spotifyRequestWithRetries(
@@ -332,7 +333,8 @@ export class SpotifyService {
 		);
 	}
 
-	async unsaveRoomPlaylist(room: RoomDto, tk: SpotifyTokenPair): Promise<void> {
+	async unsaveRoomPlaylist(room: RoomDto, userID: string): Promise<void> {
+		const tk = await this.getSpotifyTokens(userID);
 		const roomPlaylist: Spotify.Playlist = await this.getRoomPlaylist(room);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		await spotifyRequestWithRetries(
@@ -341,13 +343,10 @@ export class SpotifyService {
 	}
 
 	async getUserPlaylistTracks(
-		tk: SpotifyTokenPair,
+		userID: string,
 		playlistID: string,
 	): Promise<Spotify.Track[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
-
+		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const playlistInfo: Spotify.Playlist<Spotify.Track> =
 			await spotifyRequestWithRetries(api.playlists.getPlaylist(playlistID));
@@ -357,6 +356,7 @@ export class SpotifyService {
 			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
 		>[] = [];
 		while (i < playlistInfo.tracks.total) {
+			await this.wait(500); // for rate limiting
 			promises.push(
 				spotifyRequestWithRetries(
 					api.playlists.getPlaylistItems(
@@ -395,6 +395,7 @@ export class SpotifyService {
 			Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
 		>[] = [];
 		while (i < playlistInfo.tracks.total) {
+			await this.wait(500); // for rate limiting
 			promises.push(
 				spotifyRequestWithRetries(
 					this.TuneInAPI.playlists.getPlaylistItems(
@@ -420,10 +421,8 @@ export class SpotifyService {
 		return result;
 	}
 
-	async getAllLikedSongs(tk: SpotifyTokenPair): Promise<Spotify.SavedTrack[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
+	async getAllLikedSongs(userID: string): Promise<Spotify.SavedTrack[]> {
+		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const initialSongsFetch: Spotify.Page<Spotify.SavedTrack> =
 			await spotifyRequestWithRetries(api.currentUser.tracks.savedTracks());
@@ -431,12 +430,12 @@ export class SpotifyService {
 		let i = 0;
 		const promises: Promise<Spotify.Page<Spotify.SavedTrack>>[] = [];
 		while (i < total) {
+			await this.wait(500); // for rate limiting
 			const p = spotifyRequestWithRetries(
 				api.currentUser.tracks.savedTracks(50, i),
 			);
 			promises.push(p);
 			i += 50;
-			await this.wait(500); // for rate limiting
 		}
 
 		const songs: Spotify.Page<Spotify.SavedTrack>[] = await Promise.all(
@@ -789,34 +788,19 @@ export class SpotifyService {
 			return trackInfo;
 		}
 
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < RETRIES; i++) {
-			try {
-				const promises: Promise<Spotify.Track[]>[] = [];
-				for (let i = 0; i < notFound.length; i += 50) {
-					const ids = notFound.slice(i, i + 50);
-					promises.push(
-						spotifyRequestWithRetries(this.userlessAPI.tracks.get(ids)),
-					);
-				}
-				const results: Spotify.Track[][] = await Promise.all(promises);
-				for (const result of results) {
-					trackInfo.push(...result);
-				}
-				this.addTracksToDB(trackInfo);
-				return trackInfo;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await this.wait(5000 * attempts);
-			}
+		const promises: Promise<Spotify.Track[]>[] = [];
+		for (let i = 0; i < notFound.length; i += 50) {
+			const ids = notFound.slice(i, i + 50);
+			promises.push(
+				spotifyRequestWithRetries(this.userlessAPI.tracks.get(ids)),
+			);
 		}
-		if (error) {
-			throw error;
+		const results: Spotify.Track[][] = await Promise.all(promises);
+		for (const result of results) {
+			trackInfo.push(...result);
 		}
-		throw new Error("Failed to get tracks");
+		await this.addTracksToDB(trackInfo);
+		return trackInfo;
 	}
 
 	async refreshAccessToken(
