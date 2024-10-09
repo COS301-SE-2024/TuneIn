@@ -853,19 +853,21 @@ export class SpotifyService {
 	): Promise<SpotifyTokenResponse> {
 		try {
 			console.log("Refreshing expired token");
-			const response = await firstValueFrom(
-				this.httpService.post(
-					"https://accounts.spotify.com/api/token",
-					{
-						grant_type: "refresh_token",
-						refresh_token: tk.refresh_token,
-					},
-					{
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded",
-							Authorization: `Basic ${this.authHeader}`,
+			const response = await spotifyRequestWithRetries(
+				firstValueFrom(
+					this.httpService.post(
+						"https://accounts.spotify.com/api/token",
+						{
+							grant_type: "refresh_token",
+							refresh_token: tk.refresh_token,
 						},
-					},
+						{
+							headers: {
+								"Content-Type": "application/x-www-form-urlencoded",
+								Authorization: `Basic ${this.authHeader}`,
+							},
+						},
+					),
 				),
 			);
 
