@@ -16,7 +16,7 @@ import { RoomDto } from "../modules/rooms/dto/room.dto";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosError } from "axios";
-// import { ImageService } from "../image/image.service";
+import { ImageService } from "../image/image.service";
 import pRetry, { Options } from "p-retry";
 
 const RETRIES = 3;
@@ -41,6 +41,9 @@ const spotifyRequestWithRetries = async (
 		},
 	);
 };
+
+const MAX_BYTES_PER_IMAGE = 256 * 1000;
+
 @Injectable()
 export class SpotifyService {
 	private clientId: string;
@@ -54,7 +57,8 @@ export class SpotifyService {
 		private readonly configService: ConfigService,
 		private readonly prisma: PrismaService,
 		private readonly murLockService: MurLockService,
-		private readonly httpService: HttpService, // private readonly imageService: ImageService,
+		private readonly httpService: HttpService,
+		private readonly imageService: ImageService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -173,25 +177,20 @@ export class SpotifyService {
 	}
 
 	async getUserPlaylists(
-		tk: SpotifyTokenPair,
+		userID: string,
 	): Promise<Spotify.SimplifiedPlaylist[]> {
-		if (new Date().getTime() > tk.epoch_expiry) {
-			throw new Error("Token has expired");
-		}
-
+		const tk = await this.getSpotifyTokens(userID);
 		const api = SpotifyApi.withAccessToken(this.clientId, tk.tokens);
 		const initialPlaylistsFetch: Spotify.Page<Spotify.SimplifiedPlaylist> =
 			await spotifyRequestWithRetries(api.currentUser.playlists.playlists());
 		const total = initialPlaylistsFetch.total;
 		const promises = [];
-		let i = 0;
-		while (i < total) {
+		for (let i = 0; i < total; i += 50) {
 			await this.wait(500); // for rate limiting
 			const p = spotifyRequestWithRetries(
 				api.currentUser.playlists.playlists(50, i),
 			);
 			promises.push(p);
-			i += 50;
 		}
 		const playlists: Spotify.Page<Spotify.SimplifiedPlaylist>[] =
 			await Promise.all(promises);
@@ -229,16 +228,23 @@ export class SpotifyService {
 					collaborative: false,
 				}),
 			);
-			// const imageBuffer = await this.downloadImage(room.room_image);
-			// const processedImageBuffer = await this.imageService.compressImage(
-			// 	imageBuffer,
-			// 	256 * 1024,
-			// );
-			// const b64 = this.imageService.imageToB64(processedImageBuffer);
-			// await this.TuneInAPI.playlists.addCustomPlaylistCoverImage(
-			// 	playlist.id,
-			// 	processedImageBuffer,
-			// );
+			const imageBuffer = await this.downloadImage(room.room_image);
+			let b64: string;
+			if (imageBuffer.length < MAX_BYTES_PER_IMAGE) {
+				b64 = this.imageService.imageToB64(imageBuffer);
+			} else {
+				const processedImageBuffer = await this.imageService.compressImage(
+					imageBuffer,
+					MAX_BYTES_PER_IMAGE,
+				);
+				b64 = this.imageService.imageToB64(processedImageBuffer);
+			}
+			await spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
+					playlist.id,
+					b64,
+				),
+			);
 			await this.prisma.room.update({
 				where: {
 					room_id: room.roomID,
@@ -306,11 +312,6 @@ export class SpotifyService {
 		const uris: string[] = trackIDs
 			.map((id) => `spotify:track:${id}`)
 			.slice(start);
-		// await this.TuneInAPI.playlists.addItemsToPlaylist(
-		// 	playlistID,
-		// 	uris.slice(start),
-		// 	start,
-		// );
 		promises = [];
 		for (let i = 0; i < uris.length; i += 50) {
 			const ids = uris.slice(i, i + 50);
@@ -321,7 +322,6 @@ export class SpotifyService {
 			promises.push(insertRequest);
 		}
 		await Promise.all(promises);
-		return;
 	}
 
 	async saveRoomPlaylist(room: RoomDto, userID: string): Promise<void> {
