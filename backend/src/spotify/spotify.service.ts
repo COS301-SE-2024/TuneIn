@@ -848,43 +848,22 @@ export class SpotifyService {
 		}
 	}
 
-	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
+	async saveUserSpotifyTokens(
+		tk: SpotifyTokenPair,
+		userID: string,
+	): Promise<void> {
 		console.log("Saving user's Spotify tokens");
-		const user = await this.prisma.users.findFirst({
-			where: { user_id: userID },
-		});
-
-		if (!user) {
-			throw new Error("User not found");
-		}
-
 		try {
-			const existingTokens: PrismaTypes.authentication[] | null =
-				await this.prisma.authentication.findMany({
-					where: { user_id: user.user_id },
-				});
-
-			if (!existingTokens || existingTokens === null) {
-				throw new Error(
-					"A database error occurred while checking if the user's tokens exist",
-				);
-			}
-
-			if (existingTokens.length > 0) {
-				await this.prisma.authentication.update({
-					where: { user_id: user.user_id },
-					data: {
-						token: JSON.stringify(tk),
-					},
-				});
-			} else {
-				await this.prisma.authentication.create({
-					data: {
-						token: JSON.stringify(tk),
-						user_id: user.user_id,
-					},
-				});
-			}
+			await this.prisma.authentication.upsert({
+				where: { user_id: userID },
+				update: {
+					token: JSON.stringify(tk),
+				},
+				create: {
+					token: JSON.stringify(tk),
+					user_id: userID,
+				},
+			});
 		} catch (err) {
 			console.log(err);
 			throw new Error("Failed to save tokens");
@@ -911,6 +890,6 @@ export class SpotifyService {
 			await this.saveUserSpotifyTokens(newPair, userID);
 			return newPair;
 		}
-		return JSON.parse(tokens.token) as SpotifyTokenPair;
+		return tk;
 	}
 }
