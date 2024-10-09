@@ -964,7 +964,10 @@ export class ActiveRoom {
 		return votes;
 	}
 
-	async play(murLockService: MurLockService): Promise<RoomSong | null> {
+	async play(
+		murLockService: MurLockService,
+		startTime: number,
+	): Promise<RoomSong | null> {
 		if (this.queue.isEmpty()) {
 			return null;
 		}
@@ -984,10 +987,8 @@ export class ActiveRoom {
 						const adjustedStart = Date.now() + offset;
 						this.queue.front().setPlaybackStartTime(adjustedStart);
 						this.queue.front().pauseTime = null;
-					} else if (st === null) {
-						this.queue.front().setPlaybackStartTime(new Date().valueOf());
-						console.log("Setting playback start time to now");
-						console.log(this.queue.front().getPlaybackStartTime());
+					} else {
+						this.queue.front().setPlaybackStartTime(startTime);
 					}
 					result = this.queue.front();
 				} catch (e) {
@@ -1010,7 +1011,10 @@ export class ActiveRoom {
 		this.queue.front().pauseTime = new Date().valueOf();
 	}
 
-	async playNext(murLockService: MurLockService): Promise<RoomSong | null> {
+	async playNext(
+		murLockService: MurLockService,
+		startTime: number,
+	): Promise<RoomSong | null> {
 		if (this.queue.isEmpty()) {
 			return null;
 		}
@@ -1027,7 +1031,7 @@ export class ActiveRoom {
 					if (this.queue.isEmpty()) {
 						return;
 					}
-					this.queue.front().setPlaybackStartTime(new Date().valueOf());
+					this.queue.front().setPlaybackStartTime(startTime);
 					result = this.queue.front();
 				} catch (e) {
 					console.error("Error in playNext");
@@ -1045,6 +1049,7 @@ export class ActiveRoom {
 	async playPrev(
 		spotify: SpotifyService,
 		murLockService: MurLockService,
+		startTime: number,
 	): Promise<RoomSong | null> {
 		// if paused, remove pause time
 		await murLockService.runWithLock(
@@ -1076,7 +1081,7 @@ export class ActiveRoom {
 			return null;
 		}
 		const lastSong = this.historicQueue.dequeue();
-		lastSong.setPlaybackStartTime(new Date().valueOf());
+		lastSong.setPlaybackStartTime(startTime);
 		const oldQueue = this.queue.toArray();
 		oldQueue.unshift(lastSong);
 		for (let i = 1, n = oldQueue.length; i < n; i++) {
@@ -1334,9 +1339,9 @@ export class RoomQueueService {
 		return await activeRoom.isPaused();
 	}
 
-	async play(roomID: string): Promise<RoomSongDto | null> {
+	async play(roomID: string, startTime: number): Promise<RoomSongDto | null> {
 		const activeRoom = await this.getRoom(roomID);
-		const song = await activeRoom.play(this.murLockService);
+		const song = await activeRoom.play(this.murLockService, startTime);
 		if (!song || song === null) {
 			return null;
 		}
@@ -1351,13 +1356,13 @@ export class RoomQueueService {
 		await activeRoom.pauseSong();
 	}
 
-	async playNext(roomID: string): Promise<void> {
+	async playNext(roomID: string, startTime: number): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.playNext(this.murLockService);
+		await activeRoom.playNext(this.murLockService, startTime);
 	}
 
-	async playPrev(roomID: string): Promise<void> {
+	async playPrev(roomID: string, startTime: number): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.playPrev(this.spotify, this.murLockService);
+		await activeRoom.playPrev(this.spotify, this.murLockService, startTime);
 	}
 }
