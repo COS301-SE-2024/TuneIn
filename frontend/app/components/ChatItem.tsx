@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { DirectMessageDto } from "../models/DmDto";
 import { UserDto } from "../models/UserDto";
-import { colors } from "react-native-elements";
+import { colors } from "../../app/styles/colors";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;
@@ -35,7 +35,13 @@ const ChatItem: React.FC<ChatItemProps> = ({
 			/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.name}>{otherUser.profile_name}</Text>
-				<Text style={styles.lastMessage}>{message.messageBody}</Text>
+				<Text
+					style={styles.lastMessage}
+					numberOfLines={1} // Limits the message to one line
+					ellipsizeMode="tail" // Adds ellipsis at the end if the text is too long
+				>
+					{message.messageBody}
+				</Text>
 			</View>
 
 			{/* Display unread message count if there are any */}

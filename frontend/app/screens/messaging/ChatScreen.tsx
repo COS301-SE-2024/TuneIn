@@ -205,14 +205,12 @@ const ChatScreen = () => {
 							item.message.index ===
 								messages.findIndex((msg) => !msg.message.isRead && !msg.me) && (
 								<View style={styles.bannerContainer}>
-									<View style={styles.greyLine} />
 									<View style={styles.unreadBanner}>
 										<Text style={styles.unreadBannerText}>
 											You have {unreadCount} unread message
 											{unreadCount > 1 ? "s" : ""}
 										</Text>
 									</View>
-									<View style={styles.greyLine} />
 								</View>
 							)}
 						<MessageItem message={item} />
@@ -291,8 +289,9 @@ const styles = StyleSheet.create({
 	},
 	bannerContainer: {
 		alignItems: "center", // Center banner and lines together
-		marginVertical: 5, // Space around the banner container
+		marginVertical: 15, // Space around the banner container
 		backgroundColor: "#E0E0E0",
+		paddingVertical: 3,
 		marginHorizontal: -20,
 	},
 	unreadBanner: {
@@ -308,16 +307,6 @@ const styles = StyleSheet.create({
 		fontSize: 15, // Adjust font size
 		fontWeight: "bold", // Bold text
 		textAlign: "center", // Center text inside the bubble
-	},
-	greyLine: {
-		width: "100%", // Make the line stretch edge to edge
-		height: 1, // Thin line
-		backgroundColor: "#E0E0E0", // Light grey color for the line
-		marginVertical: 5, // Space between the line and the banner
-	},
-	closeBanner: {
-		color: "#FFFFFF",
-		fontWeight: "bold",
 	},
 	inputContainer: {
 		flexDirection: "row",
