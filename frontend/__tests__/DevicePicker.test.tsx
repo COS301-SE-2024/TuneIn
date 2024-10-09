@@ -1,13 +1,8 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import DevicePicker from "../app/components/DevicePicker"; // Adjust the path to your component
-import { useSpotifyDevices } from "../app/hooks/useSpotifyDevices";
-import * as spotifyAuth from "../app/services/SpotifyAuth";
 
 // Mocking hooks and services
-jest.mock("../app/hooks/useSpotifyDevices");
-jest.mock("../app/services/SpotifyAuth");
-
 describe("DevicePicker Component", () => {
 	const mockGetDeviceIDs = jest.fn();
 	const mockGetTokens = jest.fn();

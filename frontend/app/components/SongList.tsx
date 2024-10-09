@@ -1,37 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import Voting from "../components/rooms/Voting";
-import { Track } from "../models/Track";
+import SongVote from "./rooms/SongVote";
+import {
+	getAlbumArtUrl,
+	constructArtistString,
+	getTitle,
+	SongPair,
+} from "../models/SongPair";
+import { useLive } from "../LiveContext";
+import { colors } from "../styles/colors";
+import { Track } from "@spotify/web-api-ts-sdk";
+import { RoomSongDto } from "../../api";
 
 interface SongListProps {
-	track: Track;
-	voteCount?: number;
+	song: SongPair;
 	showVoting?: boolean;
-	songNumber: number;
-	index: number; // Index of the song in the list
-	isCurrent: boolean; // Indicates if this song is the currently playing song
-	swapSongs?: (index: number, direction: "up" | "down") => void; // Function to swap songs
-	setVoteCount?: (newVoteCount: number) => void; // Function to update vote count
 }
 
-const SongList: React.FC<SongListProps> = ({
-	track,
-	voteCount,
-	showVoting = true,
-	songNumber,
-	index,
-	isCurrent,
-	swapSongs,
-	setVoteCount,
-}) => {
-	const albumCoverUrl = track.album.images[0]?.url ?? "";
+const SongList: React.FC<SongListProps> = ({ song, showVoting = true }) => {
+	const { currentSong, roomQueue } = useLive();
+	const albumCoverUrl: string = getAlbumArtUrl(song);
+	const [isCurrentSong, setIsCurrentSong] = useState(false);
+
+	useEffect(() => {
+		const tmpSong: RoomSongDto | undefined = roomQueue.find(
+			(s) => s.spotifyID === song.song.spotifyID,
+		);
+		if (tmpSong) {
+			setIsCurrentSong(currentSong?.spotifyID === song.song.spotifyID);
+		} else {
+			setIsCurrentSong(false);
+		}
+	}, [currentSong, roomQueue]);
 
 	return (
 		<View
-			style={[styles.container, isCurrent ? styles.currentSong : null]}
+			style={[styles.container, isCurrentSong ? styles.currentSong : null]}
 			testID="song-container"
 		>
-			<Text style={styles.songNumber}>{songNumber}</Text>
+			<Text style={styles.songNumber}>{song.song.index}</Text>
 			<Image
 				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
@@ -39,28 +46,17 @@ const SongList: React.FC<SongListProps> = ({
 			/>
 			<View style={styles.infoContainer}>
 				<Text
-					style={[styles.songName, isCurrent ? styles.currentSongText : null]}
+					style={[
+						styles.songName,
+						isCurrentSong ? styles.currentSongText : null,
+					]}
 				>
-					{track.name}
+					{getTitle(song)}
 				</Text>
-				<Text style={styles.artist}>
-					{track.artists.map((artist) => artist.name).join(", ")}
-				</Text>
+				<Text style={styles.artist}>{constructArtistString(song)}</Text>
 			</View>
 
-			{/* Conditionally render the Voting component */}
-			{showVoting &&
-				voteCount !== undefined &&
-				setVoteCount !== undefined &&
-				index !== undefined &&
-				swapSongs !== undefined && (
-					<Voting
-						voteCount={voteCount}
-						setVoteCount={setVoteCount}
-						index={index}
-						swapSongs={swapSongs}
-					/>
-				)}
+			{showVoting && <SongVote song={song.song} />}
 		</View>
 	);
 };
@@ -97,7 +93,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	currentSongText: {
-		color: "blue", // Text color for current song
+		color: colors.primary, // Text color for current song
 	},
 	artist: {
 		fontSize: 14,

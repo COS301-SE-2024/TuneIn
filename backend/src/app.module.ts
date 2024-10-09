@@ -21,8 +21,10 @@ import { SearchModule } from "./modules/search/search.module";
 import { GenresModule } from "./modules/genres/genres.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SongsModule } from "./modules/songs/songs.module";
+import { MurLockModule } from "murlock";
 import { MyLogger } from "./logger/logger.service";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
+import { ImageModule } from "./image/image.module";
 
 @Module({
 	imports: [
@@ -48,7 +50,15 @@ import { RecommendationsModule } from "./recommendations/recommendations.module"
 		GenresModule,
 		ScheduleModule.forRoot(),
 		SongsModule,
+		MurLockModule.forRoot({
+			redisOptions: { url: "redis://localhost:6379" },
+			wait: 1000,
+			maxAttempts: 10,
+			logLevel: "log",
+			ignoreUnlockFail: false,
+		}),
 		RecommendationsModule,
+		ImageModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, MyLogger],

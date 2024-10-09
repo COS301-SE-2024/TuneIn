@@ -20,7 +20,7 @@ import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import AddFavSong from "../../components/AddFavSong";
-import { Player } from "../../PlayerContext";
+import { useLive } from "../../LiveContext";
 import { colors } from "../../styles/colors";
 import GenreAdder from "../../components/GenreAdder";
 import * as ImagePicker from "expo-image-picker";
@@ -36,16 +36,8 @@ const EditProfileScreen = () => {
 		: params.profile;
 	const profileInfo = JSON.parse(profile as string);
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
+	const { currentUser, refreshUser, setRefreshUser } = useLive();
 	const inputRefs = useRef<InputRef[]>([]);
-	const { userData, setUserData } = playerContext;
-
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([
 		"rock",
@@ -102,7 +94,9 @@ const EditProfileScreen = () => {
 		const response = await updateProfile();
 		console.log("The response: " + JSON.stringify(response));
 		if (JSON.stringify(response) !== "[]") {
-			setUserData(null);
+			if (!refreshUser) {
+				setRefreshUser(true);
+			}
 		} else {
 			setLoading(false);
 		}
@@ -184,16 +178,18 @@ const EditProfileScreen = () => {
 			const response = await new Promise<boolean>((resolve) => {
 				timeoutRef.current = setTimeout(async () => {
 					try {
-						const response = await axios.get(
-							`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+						const response = await axios.head(
+							`${utils.API_BASE_URL}/users/${profileData.username}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
 								},
 							},
 						);
-
-						if (response.data) {
+						if (response.status === 500) {
+							setUsrNmErrorMessage("Error checking username");
+							resolve(false);
+						} else if (response.status !== 200) {
 							setUsrNmErrorMessage("Username already taken");
 							resolve(false);
 						} else {
@@ -230,10 +226,10 @@ const EditProfileScreen = () => {
 	};
 
 	useEffect(() => {
-		if (userData === null) {
+		if (!currentUser) {
 			router.navigate("screens/profile/ProfilePage");
 		}
-	}, [userData]);
+	}, [currentUser]);
 
 	const handleImageUpload = async (uri: string) => {
 		try {

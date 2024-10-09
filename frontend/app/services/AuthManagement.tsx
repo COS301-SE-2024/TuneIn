@@ -13,7 +13,7 @@ if (!jwtSecretKey) {
 	);
 }
 
-class AuthManagement {
+export class AuthManagement {
 	private static instance: AuthManagement;
 	private token: string | null = null;
 	public tokenSet: boolean = false;
@@ -59,11 +59,7 @@ class AuthManagement {
 		router.navigate("/screens/WelcomeScreen");
 	}
 
-	public exchangeCognitoToken(
-		token: string,
-		postLogin: Function,
-		callPostLogin: boolean,
-	): void {
+	public exchangeCognitoToken(token: string): void {
 		// POST request to backend
 		fetch(`${utils.API_BASE_URL}/auth/login`, {
 			method: "POST",
@@ -78,9 +74,6 @@ class AuthManagement {
 			.then((data) => {
 				const token = data.token; // Extract the token from the response
 				this.setToken(token); // Set the token in the AuthManagement service
-				if (callPostLogin) {
-					postLogin();
-				}
 			})
 			.catch((error) => {
 				console.error("Failed to exchange Cognito token:", error);
@@ -99,9 +92,6 @@ class AuthManagement {
 			if (await this.checkTokenExpiry()) {
 				await this.refreshAccessToken();
 			}
-
-			console.log("Token:", this.token);
-			console.log("Token expiry:", await this.checkTokenExpiry());
 			return this.token;
 		} catch (error) {
 			console.error("Failed to get token:", error);

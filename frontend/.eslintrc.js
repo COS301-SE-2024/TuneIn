@@ -4,7 +4,7 @@ const { rules } = require("eslint-config-prettier");
 module.exports = {
   extends: ["expo", "prettier"],
   plugins: ["prettier"],
-  ignorePatterns: [".eslintrc.js", "node_modules/", "api-client/", "babel.config.js"],
+  ignorePatterns: [".eslintrc.js", "node_modules/", "api/", "babel.config.js"],
   rules: {
     // Possible problems
     "no-constructor-return": "error",

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import Voting from "../app/components/Voting";
+import SongVote from "../app/components/rooms/SongVote";
 
 jest.mock("expo-font", () => ({
 	...jest.requireActual("expo-font"),
@@ -17,13 +17,13 @@ jest.mock("expo-asset", () => ({
 	})),
 }));
 
-describe("Voting Component", () => {
+describe("SongVote Component", () => {
 	const mockSetVoteCount = jest.fn();
 	const mockSwapSongs = jest.fn();
 
 	const renderComponent = (voteCount = 0) => {
 		return render(
-			<Voting
+			<SongVote
 				voteCount={voteCount}
 				setVoteCount={mockSetVoteCount}
 				index={0}

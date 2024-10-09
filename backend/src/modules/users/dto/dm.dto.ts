@@ -52,4 +52,8 @@ export class DirectMessageDto {
 	@ApiProperty()
 	@IsString()
 	pID: string;
+
+	@ApiProperty()
+	@IsBoolean()
+	bodyIsRoomID: boolean;
 }

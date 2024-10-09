@@ -3,7 +3,7 @@ import { render, fireEvent } from "@testing-library/react-native";
 import ProfileCard, {
 	ProfileCardProps,
 } from "../../app/screens/messaging/profileCard"; // Adjust the path accordingly
-import { UserDto } from "../../app/models/UserDto"; // Adjust the path accordingly
+import { UserDto } from "../../api";
 import { colors } from "../../app/styles/colors";
 
 const mockUser: UserDto = {

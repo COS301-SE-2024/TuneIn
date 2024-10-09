@@ -51,31 +51,3 @@ jest.mock("socket.io-client", () => {
 		})),
 	};
 });
-
-jest.mock("./app/services/Live", () => {
-	const originalModule = jest.requireActual("./app/services/Live");
-
-	return {
-		__esModule: true,
-		...originalModule,
-		LiveSocketService: jest.fn().mockImplementation(() => ({
-			initialiseSocket: jest.fn().mockResolvedValue(undefined),
-			sendPing: jest.fn().mockResolvedValue(undefined),
-			getTimeOffset: jest.fn().mockResolvedValue(undefined),
-			pollLatency: jest.fn().mockResolvedValue(undefined),
-			getFetchedDMs: jest.fn().mockResolvedValue([]),
-			dmsAreConnected: jest.fn().mockResolvedValue(true),
-			getSelf: jest.fn().mockResolvedValue(null),
-			getInstance: jest.fn().mockReturnValue({
-				initialiseSocket: jest.fn().mockResolvedValue(undefined),
-				sendPing: jest.fn().mockResolvedValue(undefined),
-				getTimeOffset: jest.fn().mockResolvedValue(undefined),
-				pollLatency: jest.fn().mockResolvedValue(undefined),
-				getFetchedDMs: jest.fn().mockResolvedValue([]),
-				dmsAreConnected: jest.fn().mockResolvedValue(true),
-				getSelf: jest.fn().mockResolvedValue(null),
-			}),
-			instanceExists: jest.fn().mockReturnValue(true),
-		})),
-	};
-});

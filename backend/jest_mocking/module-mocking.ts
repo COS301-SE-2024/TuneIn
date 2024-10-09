@@ -58,6 +58,7 @@ import { EventQueueService } from "../src/live/eventqueue/eventqueue.service";
 import { LiveService } from "../src/live/live.service";
 import { SongsService } from "../src/modules/songs/songs.service";
 import { SongsController } from "../src/modules/songs/songs.controller";
+import { RoomQueueService } from "../src/modules/rooms/roomqueue/roomqueue.service";
 import { DmUsersService } from "../src/live/dmusers/dmusers.service";
 import { DmUsersModule } from "../src/live/dmusers/dmusers.module";
 import { MyLogger } from "../src/logger/logger.service";
@@ -351,6 +352,24 @@ export async function createSongsTestingModule(): Promise<TestingModule> {
 		providers: [SongsService],
 		controllers: [SongsController],
 		exports: [SongsService],
+	}).compile();
+}
+
+//RoomQueueModule
+export async function createRoomQueueTestingModule(): Promise<TestingModule> {
+	return await Test.createTestingModule({
+		imports: [
+			PrismaModule,
+			DtoGenModule,
+			DbUtilsModule,
+			SpotifyModule,
+			SpotifyAuthModule,
+		],
+		providers: [
+			RoomQueueService,
+			{ provide: PrismaService, useValue: mockPrismaService },
+		],
+		exports: [RoomQueueService],
 	}).compile();
 }
 
