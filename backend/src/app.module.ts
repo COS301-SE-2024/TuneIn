@@ -25,6 +25,7 @@ import { MurLockModule } from "murlock";
 import { MyLogger } from "./logger/logger.service";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
 import { ImageModule } from "./image/image.module";
+import { RetryModule } from "./retry/retry.module";
 
 @Module({
 	imports: [
@@ -59,6 +60,7 @@ import { ImageModule } from "./image/image.module";
 		}),
 		RecommendationsModule,
 		ImageModule,
+		RetryModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, MyLogger],
