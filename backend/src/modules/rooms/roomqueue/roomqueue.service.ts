@@ -328,10 +328,19 @@ export class ActiveRoom {
 						sortRoomSongs(songs),
 						this.compareRoomSongs,
 					);
-					const queueIDs: string[] = this.historicQueue
-						.toArray()
-						.map((s) => s.spotifyID);
-					queueIDs.push(...this.queue.toArray().map((s) => s.spotifyID));
+					const queueIDs: string[] =
+						this.historicQueue.size() > 0
+							? this.historicQueue.toArray().map((s) => s.spotifyID)
+							: [];
+
+					if (this.queue.size() > 0) {
+						queueIDs.push(...this.queue.toArray().map((s) => s.spotifyID));
+					}
+
+					if (queueIDs.length === 0) {
+						return;
+					}
+
 					const playlistIDs: string[] = await spotify.getTuneInPlaylistIDs(
 						this.room.spotifyPlaylistID,
 					);

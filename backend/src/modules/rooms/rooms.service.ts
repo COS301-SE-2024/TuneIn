@@ -1166,10 +1166,7 @@ export class RoomsService {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		const room: RoomDto = await this.getRoomInfo(roomID);
-		const tokens: SpotifyTokenPair = await this.spotifyService.getSpotifyTokens(
-			userID,
-		);
-		await this.spotifyService.saveRoomPlaylist(room, tokens);
+		await this.spotifyService.saveRoomPlaylist(room, userID);
 	}
 
 	async unsaveRoomPlaylist(roomID: string, userID: string): Promise<void> {
@@ -1180,10 +1177,7 @@ export class RoomsService {
 			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
 		}
 		const room: RoomDto = await this.getRoomInfo(roomID);
-		const tokens: SpotifyTokenPair = await this.spotifyService.getSpotifyTokens(
-			userID,
-		);
-		await this.spotifyService.saveRoomPlaylist(room, tokens);
+		await this.spotifyService.unsaveRoomPlaylist(room, userID);
 	}
 
 	// async shareRoom(@Request() req: Request, @Param("roomID") roomID: string, @Body() users: string[]) {
