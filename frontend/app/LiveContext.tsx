@@ -111,12 +111,13 @@ interface LiveContextType {
 
 	dmControls: DirectMessageControls;
 	directMessages: DirectMessage[];
-	enterDM: (usernames: string[]) => void;
+	enterDM: (usernames: string[]) => Promise<void>;
 	leaveDM: () => void;
 	dmParticipants: UserDto[];
 	currentRoomVotes: VoteDto[];
 
 	spotifyAuth: SpotifyAuth;
+	setKeepUserSynced: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export type SpotifyTokenRefreshResponse = {
@@ -145,7 +146,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [currentUser, setCurrentUser] = useState<UserDto>();
 	const [userBookmarks, setUserBookmarks] = useState<RoomDto[]>([]);
 	const [currentRoom, setCurrentRoom] = useState<RoomDto>();
-	const [currentSong, setCurrentSong] = useState<RoomSongDto>();
+	// const [currentSong, setCurrentSong] = useState<RoomSongDto>();
+	const currentSongRef = useRef<RoomSongDto | undefined>();
 	const [roomQueue, setRoomQueue] = useState<RoomSongDto[]>([]);
 	const [roomParticipants, setRoomParticipants] = useState<UserDto[]>([]);
 	const [currentRoomVotes, setCurrentRoomVotes] = useState<VoteDto[]>([]);
@@ -157,7 +159,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [backendLatency, setBackendLatency] = useState<number>(0);
 	const [pingSent, setPingSent] = useState<boolean>(false);
 	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>();
-	const [keepUserSynced, setKeepUserSynced] = useState<boolean>(true);
+	const [keepUserSynced, setKeepUserSynced] = useState<boolean>(false);
 	const [refreshUser, setRefreshUser] = useState<boolean>(false);
 	const [roomPlaying, setRoomPlaying] = useReducer(
 		(state: boolean, action: RoomSongDto | undefined) => {
@@ -222,7 +224,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const updateRoomQueue = useCallback((queue: RoomSongDto[]) => {
 		if (queue.length === 0) {
 			setRoomQueue([]);
-			setCurrentSong(undefined);
+			currentSongRef.current = undefined;
 			setRoomPlaying(undefined);
 			return;
 		}
@@ -233,7 +235,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		console.log(`Room queue post-sort:`);
 		console.log(queue);
 		setRoomQueue(queue);
-		setCurrentSong(queue[0]);
+		currentSongRef.current = queue[0];
 		setRoomPlaying(queue[0]);
 	}, []);
 
@@ -393,10 +395,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const roomControls: RoomControls = useRoomControls({
 		currentUser,
-		keepUserSynced,
 		currentRoom,
 		socket: socketRef.current,
-		currentSong,
+		currentSong: currentSongRef.current,
 		roomQueue,
 		setRoomQueue,
 		spotifyTokens,
@@ -465,7 +466,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		[currentRoom, rooms],
 	);
 
-	const joinRoom = useCallback<(roomID: string) => void>(
+	const joinRoom = useCallback(
 		(roomID: string) => {
 			if (!currentUser) {
 				console.error("User cannot join room without being logged in");
@@ -501,7 +502,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const resetRoom = useCallback(() => {
 		setCurrentRoom(undefined);
-		setCurrentSong(undefined);
+		currentSongRef.current = undefined;
 		setRoomQueue([]);
 		setRoomParticipants([]);
 		setCurrentRoomVotes([]);
@@ -549,7 +550,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	});
 
 	const enterDM = useCallback(
-		(usernames: string[]) => {
+		async (usernames: string[]) => {
 			// pollLatency();
 			if (!currentUser) {
 				console.error("User is not logged in");
@@ -957,13 +958,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						await fetchSongInfo([response.spotifyID]); //pre-fetch spotify info for later
 						const s = response.song;
 						if (s && s !== null) {
-							setCurrentSong(s);
+							currentSongRef.current = s;
 							setRoomPlaying(s);
 						}
 						if (
 							!(await roomControls.playbackHandler.userListeningToRoom(true))
 						) {
-							if (!currentSong) {
+							if (!currentSongRef.current) {
 								console.log("Current song not found");
 								return;
 							}
@@ -976,10 +977,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								roomControls.state !== null &&
 								roomControls.state.item !== null &&
 								!roomControls.state.is_playing &&
-								roomControls.state.item.id !== currentSong.spotifyID &&
+								roomControls.state.item.id !==
+									currentSongRef.current.spotifyID &&
 								currentRoom
 							) {
-								let songToPlay: RoomSongDto = currentSong;
+								let songToPlay: RoomSongDto = currentSongRef.current;
 								if (s && s !== null) {
 									songToPlay = s;
 								}
@@ -1007,7 +1009,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						}
 
 						if (response.song && response.song !== null) {
-							setCurrentSong(response.song);
+							currentSongRef.current = response.song;
+
 							setRoomPlaying(response.song);
 						}
 
@@ -1015,7 +1018,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						if (
 							!(await roomControls.playbackHandler.userListeningToRoom(true))
 						) {
-							if (!currentSong) {
+							if (!currentSongRef.current) {
 								return;
 							}
 							if (!keepUserSynced) {
@@ -1026,10 +1029,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								roomControls.state !== null &&
 								roomControls.state.item !== null &&
 								!roomControls.state.is_playing &&
-								roomControls.state.item.id !== currentSong.spotifyID &&
+								roomControls.state.item.id !==
+									currentSongRef.current.spotifyID &&
 								currentRoom
 							) {
-								let songToPlay: RoomSongDto = currentSong;
+								let songToPlay: RoomSongDto = currentSongRef.current;
 								if (response.song && response.song !== null) {
 									songToPlay = response.song;
 								}
@@ -1201,7 +1205,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 		[
 			currentRoom,
-			currentSong,
 			currentUser,
 			dmControls,
 			fetchSongInfo,
@@ -1389,7 +1392,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (currentUser && authenticated) {
 			await spotifyAuth.getSpotifyTokens();
 		}
-	}, []);
+	}, [authenticated, currentUser, spotifyAuth]);
 
 	// on mount, initialize the socket
 	// useEffect(() => {
@@ -1429,7 +1432,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				// user is not authenticated & socket doesn't exist anyway
 				// ignore
 				console.error("User is not authenticated & socket doesn't exist");
-				getUserDetails(spotifyAuth);
+				// getUserDetails(spotifyAuth);
 			}
 			updateState({ type: actionTypes.RESET });
 			return;
@@ -1669,13 +1672,16 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	useEffect(() => {
 		if (roomQueue.length > 0) {
-			if (!currentSong || roomQueue[0].spotifyID !== currentSong.spotifyID) {
-				setCurrentSong(roomQueue[0]);
-				setRoomPlaying(currentSong);
+			if (
+				!currentSongRef.current ||
+				roomQueue[0].spotifyID !== currentSongRef.current.spotifyID
+			) {
+				currentSongRef.current = roomQueue[0];
+				setRoomPlaying(currentSongRef.current);
 			}
 		} else {
-			if (currentSong) {
-				setCurrentSong(undefined);
+			if (currentSongRef.current) {
+				currentSongRef.current = undefined;
 				setRoomPlaying(undefined);
 			}
 		}
@@ -1712,8 +1718,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	useEffect(() => {
 		console.log(`refreshUser: ${refreshUser}`);
-		getUserDetails(spotifyAuth);
-	}, [refreshUser]);
+		if (refreshUser) {
+			getUserDetails(spotifyAuth);
+		}
+	}, [getUserDetails, refreshUser, spotifyAuth]);
 
 	useEffect(() => {
 		console.log(
@@ -1748,6 +1756,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				roomControls.playbackHandler.syncUserPlayback,
 				SYNC_INTERVAL,
 			);
+		} else {
+			if (syncIntervalRef.current) {
+				console.log(`Clearing the existing 'sync' interval`);
+				clearInterval(syncIntervalRef.current);
+			}
 		}
 		return () => {
 			if (syncIntervalRef.current) {
@@ -1755,7 +1768,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				syncIntervalRef.current = undefined;
 			}
 		};
-	}, [roomControls.playbackHandler.syncUserPlayback]);
+	}, [keepUserSynced, roomControls.playbackHandler.syncUserPlayback]);
 
 	// on mount
 	useEffect(() => {
@@ -1773,6 +1786,11 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 					SYNC_INTERVAL,
 				);
 				console.log(`Interval initialised for syncing user with room`);
+			}
+		} else {
+			if (syncIntervalRef.current) {
+				clearInterval(syncIntervalRef.current);
+				syncIntervalRef.current = undefined;
 			}
 		}
 		return () => {
@@ -1807,7 +1825,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				pollLatency,
 
 				currentRoom,
-				currentSong,
+				currentSong: currentSongRef.current,
 				joinRoom,
 				leaveRoom,
 				roomMessages,
@@ -1825,6 +1843,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				currentRoomVotes,
 
 				spotifyAuth,
+				setKeepUserSynced,
 			}}
 		>
 			{children}
