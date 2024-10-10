@@ -1,6 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as async from "async";
 
+const GLOBAL_CONCURRENCY = 10; //10 concurrent tasks at a time
+// const FIFO_CONCURRENCY = 1; // Concurrency set to 1 would ensure FIFO processing for all tasks in queue
+
 //custom type for task function (because it's more type-safe than the default 'Function')
 export type TaskFunction = () => Promise<void>;
 
@@ -16,7 +19,7 @@ export class EventQueueService {
 			} catch (error) {
 				this.logger.error(`Task failed: ${error}`);
 			}
-		}, 1); // Concurrency set to 1 to ensure FIFO processing
+		}, GLOBAL_CONCURRENCY);
 
 		this.queue.error((error, task) => {
 			this.logger.error(`Task encountered an error: ${error}`, task.toString());
@@ -27,7 +30,7 @@ export class EventQueueService {
 		});
 	}
 
-	addToQueue(task: TaskFunction): void {
+	addToQueue(event: string, task: TaskFunction): void {
 		this.queue.push(task, (err) => {
 			if (err) {
 				this.logger.error(`Error executing task: ${err}`);
@@ -35,6 +38,6 @@ export class EventQueueService {
 				this.logger.log("Task completed successfully.");
 			}
 		});
-		this.logger.log("Task added to the queue.");
+		this.logger.log(`Task '${event}' added to the queue.`);
 	}
 }

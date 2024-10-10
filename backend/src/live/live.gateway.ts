@@ -81,7 +81,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage("message")
 	async handleMessage(@MessageBody() p: string): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
+		this.eventQueueService.addToQueue("message", async () => {
 			console.log(p);
 			//Hello World
 			this.server.emit("message", { response: "Hello World" });
@@ -93,8 +93,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.CONNECT_USER);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.CONNECT_USER, async () => {
 			try {
 				//auth
 				const payload: ChatEventDto = await this.validateChatEvent(p);
@@ -182,8 +181,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.LIVE_MESSAGE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.LIVE_MESSAGE, async () => {
 			try {
 				/*
 				validate auth
@@ -240,11 +238,12 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY);
-			try {
-				//this.server.emit();
-				/*
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY,
+			async () => {
+				try {
+					//this.server.emit();
+					/*
 				validate auth
 
 				get room id
@@ -255,33 +254,34 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				emit to socket: LIVE_MESSAGE, { message: chatHistory }
 				*/
 
-				//auth
+					//auth
 
-				const payload: ChatEventDto = await this.validateChatEvent(p);
-				if (!payload.userID) {
-					throw new Error("No userID provided");
-				}
+					const payload: ChatEventDto = await this.validateChatEvent(p);
+					if (!payload.userID) {
+						throw new Error("No userID provided");
+					}
 
-				if (!payload.body) {
-					throw new Error("No body provided");
-				}
-				const roomID: string = payload.body.roomID;
-				if (!roomID) {
-					throw new Error("No roomID provided");
-				}
-				if (!this.dbUtils.roomExists(roomID)) {
-					throw new Error("Room does not exist");
-				}
+					if (!payload.body) {
+						throw new Error("No body provided");
+					}
+					const roomID: string = payload.body.roomID;
+					if (!roomID) {
+						throw new Error("No roomID provided");
+					}
+					if (!this.dbUtils.roomExists(roomID)) {
+						throw new Error("Room does not exist");
+					}
 
-				const messages: LiveChatMessageDto[] =
-					await this.roomService.getLiveChatHistoryDto(roomID);
-				this.server.emit(SOCKET_EVENTS.LIVE_CHAT_HISTORY, messages);
-				console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
+					const messages: LiveChatMessageDto[] =
+						await this.roomService.getLiveChatHistoryDto(roomID);
+					this.server.emit(SOCKET_EVENTS.LIVE_CHAT_HISTORY, messages);
+					console.log("Response emitted: " + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
@@ -289,8 +289,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.JOIN_ROOM);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.JOIN_ROOM, async () => {
 			try {
 				//this.server.emit();
 				/*
@@ -353,8 +352,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.LEAVE_ROOM);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.LEAVE_ROOM, async () => {
 			try {
 				//auth
 
@@ -395,29 +393,31 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.EMOJI_REACTION);
-			try {
-				console.log(p);
-				let r: EmojiReactionDto;
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.EMOJI_REACTION,
+			async () => {
 				try {
-					const j = JSON.parse(p);
-					r = j as EmojiReactionDto;
-				} catch (e) {
-					console.error(e);
-					throw new Error("Invalid JSON received");
+					console.log(p);
+					let r: EmojiReactionDto;
+					try {
+						const j = JSON.parse(p);
+						r = j as EmojiReactionDto;
+					} catch (e) {
+						console.error(e);
+						throw new Error("Invalid JSON received");
+					}
+					const roomID = this.roomUsers.getRoomId(client.id);
+					if (!roomID) {
+						throw new Error("User is not in a room");
+					}
+					await this.roomService.saveReaction(roomID, r);
+					this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
 				}
-				const roomID = this.roomUsers.getRoomId(client.id);
-				if (!roomID) {
-					throw new Error("User is not in a room");
-				}
-				await this.roomService.saveReaction(roomID, r);
-				this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
+			},
+		);
 	}
 	/* **************************************************************************************** */
 
@@ -426,39 +426,43 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.DIRECT_MESSAGE);
-			try {
-				console.log(p);
-				let payload: DirectMessageDto;
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.DIRECT_MESSAGE,
+			async () => {
 				try {
-					const j = JSON.parse(p);
-					payload = j as DirectMessageDto;
-				} catch (e) {
-					console.error(e);
-					throw new Error("Invalid JSON received");
-				}
+					console.log(p);
+					let payload: DirectMessageDto;
+					try {
+						const j = JSON.parse(p);
+						payload = j as DirectMessageDto;
+					} catch (e) {
+						console.error(e);
+						throw new Error("Invalid JSON received");
+					}
 
-				const chatID: string | null = await this.dmUsers.getChatID(client.id);
-				if (!chatID) {
-					throw new Error("User is not in a DM chat");
-				}
+					const chatID: string | null = await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						throw new Error("User is not in a DM chat");
+					}
 
-				const user: UserDto | null = await this.dmUsers.getUser(client.id);
-				if (!user) {
-					throw new Error("User not found in DM chat");
-				}
+					const user: UserDto | null = await this.dmUsers.getUser(client.id);
+					if (!user) {
+						throw new Error("User not found in DM chat");
+					}
 
-				console.log("user: " + user);
-				console.log("chatID: " + chatID);
-				const finalMessage: DirectMessageDto =
-					await this.userService.sendMessage(payload);
-				this.server.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
+					console.log("user: " + user);
+					console.log("chatID: " + chatID);
+					const finalMessage: DirectMessageDto =
+						await this.userService.sendMessage(payload);
+					this.server
+						.to(chatID)
+						.emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
@@ -466,40 +470,41 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log(
-				"Received event: " + SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
-			);
-			try {
-				console.log(p);
-				let payload: { userID: string; participantID: string };
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+			async () => {
 				try {
-					const j = JSON.parse(p);
-					payload = j as { userID: string; participantID: string };
-				} catch (e) {
-					console.error(e);
-					throw new Error("Invalid JSON received");
-				}
-				const messages: DirectMessageDto[] = await this.userService.getMessages(
-					payload.userID,
-					payload.participantID,
-				);
-				let chatID: string | null = await this.dmUsers.getChatID(client.id);
-				if (!chatID) {
-					await this.dmUsers.setChatInfo(client.id, payload.participantID);
-					chatID = await this.dmUsers.getChatID(client.id);
-					if (!chatID) {
-						throw new Error("Chat ID was not set for some reason");
+					console.log(p);
+					let payload: { userID: string; participantID: string };
+					try {
+						const j = JSON.parse(p);
+						payload = j as { userID: string; participantID: string };
+					} catch (e) {
+						console.error(e);
+						throw new Error("Invalid JSON received");
 					}
-					client.join(chatID);
+					const messages: DirectMessageDto[] =
+						await this.userService.getMessages(
+							payload.userID,
+							payload.participantID,
+						);
+					let chatID: string | null = await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						await this.dmUsers.setChatInfo(client.id, payload.participantID);
+						chatID = await this.dmUsers.getChatID(client.id);
+						if (!chatID) {
+							throw new Error("Chat ID was not set for some reason");
+						}
+						client.join(chatID);
+					}
+					this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
+					console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
 				}
-				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
-				console.log("Response emitted: " + SOCKET_EVENTS.DM_HISTORY);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
+			},
+		);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.TYPING)
@@ -507,8 +512,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.TYPING);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.TYPING, async () => {
 			try {
 				console.log(p);
 				/*
@@ -548,8 +552,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.STOP_TYPING);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.STOP_TYPING, async () => {
 			try {
 				console.log(p);
 				/*
@@ -591,8 +594,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.ENTER_DM);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.ENTER_DM, async () => {
 			try {
 				console.log(p);
 				let enterPayload: { userID: string; participantID: string };
@@ -635,8 +637,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.EXIT_DM);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.EXIT_DM, async () => {
 			try {
 				console.log(p);
 				const chatID: string | null = await this.dmUsers.getChatID(client.id);
@@ -670,8 +671,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.MODIFY_DM);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.MODIFY_DM, async () => {
 			try {
 				console.log(p);
 				let payload: {
@@ -782,8 +782,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.INIT_PLAY);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PLAY, async () => {
 			try {
 				console.log(p);
 				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
@@ -884,7 +883,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	@ConnectedSocket() client: Socket,
 	// 	@MessageBody() p: string,
 	// ): Promise<void> {
-	// 	this.eventQueueService.addToQueue(async () => {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_STOP, async () => {
 	// 			// 		console.log("Received event: " + SOCKET_EVENTS.INIT_STOP);
 	// 		try {
 	// 			//this.server.emit();
@@ -922,8 +921,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.INIT_SKIP);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_SKIP, async () => {
 			try {
 				console.log(p);
 				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
@@ -978,8 +976,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.INIT_PREV);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PREV, async () => {
 			try {
 				console.log(p);
 				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
@@ -1034,7 +1031,6 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	@MessageBody() p: string,
 	// ): Promise<void> {
 	// 	this.eventQueueService.addToQueue(async () => {
-	// 		console.log("Received event: " + SOCKET_EVENTS.SEEK_MEDIA);
 	// 		try {
 	// 			//this.server.emit();
 	// 			console.log(p);
@@ -1050,8 +1046,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.CURRENT_MEDIA);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.CURRENT_MEDIA, async () => {
 			try {
 				console.log(p);
 				const roomID: string | null = this.roomUsers.getRoomId(client.id);
@@ -1073,8 +1068,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	@ConnectedSocket() client: Socket,
 	// 	@MessageBody() p: string,
 	// ): Promise<void> {
-	// 	this.eventQueueService.addToQueue(async () => {
-	// 		console.log("Received event: " + SOCKET_EVENTS.MEDIA_SYNC);
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.MEDIA_SYNC, async () => {
 	// 		try {
 	// 			//this.server.emit();
 	// 			console.log(p);
@@ -1090,8 +1084,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.UPVOTE_SONG, async () => {
 			try {
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
@@ -1133,8 +1126,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.DOWNVOTE_SONG, async () => {
 			try {
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
@@ -1176,38 +1168,40 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
-			try {
-				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p);
-				const somethingChanged: boolean = await this.roomQueue.undoSongVote(
-					payload.roomID,
-					payload.songs[0].spotifyID,
-					payload.songs[0].userID,
-				);
-				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.UNDO_SONG_VOTE,
+			async () => {
+				try {
+					console.log(p);
+					const payload: QueueEventDto = await this.validateQueueEvent(p);
+					const somethingChanged: boolean = await this.roomQueue.undoSongVote(
 						payload.roomID,
 						payload.songs[0].spotifyID,
+						payload.songs[0].userID,
 					);
-					if (song) {
-						const response: QueueEventDto = {
-							roomID: payload.roomID,
-							songs: [song],
-						};
-						this.server
-							.to(payload.roomID)
-							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-						this.sendQueueState(payload.roomID);
+					if (somethingChanged) {
+						const song = await this.roomQueue.getSongAsRoomSongDto(
+							payload.roomID,
+							payload.songs[0].spotifyID,
+						);
+						if (song) {
+							const response: QueueEventDto = {
+								roomID: payload.roomID,
+								songs: [song],
+							};
+							this.server
+								.to(payload.roomID)
+								.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+							console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+							this.sendQueueState(payload.roomID);
+						}
 					}
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error);
 				}
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
+			},
+		);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.SWAP_SONG_VOTE)
@@ -1215,42 +1209,44 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
-			try {
-				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
-				if (!payload.createdAt) {
-					throw new Error("No createdAt provided");
-				}
-				const somethingChanged: boolean = await this.roomQueue.swapSongVote(
-					payload.roomID,
-					payload.songs[0].spotifyID,
-					payload.songs[0].userID,
-					payload.createdAt,
-				);
-				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.SWAP_SONG_VOTE,
+			async () => {
+				try {
+					console.log(p);
+					const payload: QueueEventDto = await this.validateQueueEvent(p, true);
+					if (!payload.createdAt) {
+						throw new Error("No createdAt provided");
+					}
+					const somethingChanged: boolean = await this.roomQueue.swapSongVote(
 						payload.roomID,
 						payload.songs[0].spotifyID,
+						payload.songs[0].userID,
+						payload.createdAt,
 					);
-					if (song) {
-						const response: QueueEventDto = {
-							roomID: payload.roomID,
-							songs: [song],
-						};
-						this.server
-							.to(payload.roomID)
-							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-						this.sendQueueState(payload.roomID);
+					if (somethingChanged) {
+						const song = await this.roomQueue.getSongAsRoomSongDto(
+							payload.roomID,
+							payload.songs[0].spotifyID,
+						);
+						if (song) {
+							const response: QueueEventDto = {
+								roomID: payload.roomID,
+								songs: [song],
+							};
+							this.server
+								.to(payload.roomID)
+								.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+							console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+							this.sendQueueState(payload.roomID);
+						}
 					}
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error);
 				}
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
+			},
+		);
 	}
 
 	@SubscribeMessage(SOCKET_EVENTS.ENQUEUE_SONG)
@@ -1258,8 +1254,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.ENQUEUE_SONG, async () => {
 			try {
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
@@ -1305,8 +1300,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.QUEUE_STATE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.DEQUEUE_SONG, async () => {
 			try {
 				console.log(p);
 				const payload: QueueEventDto = await this.validateQueueEvent(p);
@@ -1352,8 +1346,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() p: string,
 	): Promise<void> {
-		this.eventQueueService.addToQueue(async () => {
-			console.log("Received event: " + SOCKET_EVENTS.REQUEST_QUEUE);
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.REQUEST_QUEUE, async () => {
 			try {
 				console.log(p);
 				const obj: { roomID: string } = JSON.parse(p) as { roomID: string };
