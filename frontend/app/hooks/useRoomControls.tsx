@@ -125,7 +125,7 @@ interface RoomControlProps {
 	currentUser: UserDto | undefined;
 	currentRoom: RoomDto | undefined;
 	socket: Socket | null;
-	currentSong: RoomSongDto | undefined;
+	currentSongRef: React.MutableRefObject<RoomSongDto | undefined>;
 	roomQueue: RoomSongDto[];
 	setRoomQueue: React.Dispatch<React.SetStateAction<RoomSongDto[]>>;
 	spotifyTokens: SpotifyTokenPair | undefined;
@@ -137,7 +137,7 @@ export function useRoomControls({
 	currentUser,
 	currentRoom,
 	socket,
-	currentSong,
+	currentSongRef,
 	roomQueue,
 	setRoomQueue,
 	spotifyTokens,
@@ -359,7 +359,7 @@ export function useRoomControls({
 					// 	trackURI
 					// 	position = ;
 					// } else {
-					// 	if (!currentSong) {
+					// 	if (!currentSongRef.current) {
 					// 		if (roomQueue.length === 0) {
 					// 			throw new Error("No song is currently playing");
 					// 		} else {
@@ -369,9 +369,9 @@ export function useRoomControls({
 					// 			position = s.playlistIndex;
 					// 		}
 					// 	} else {
-					// 		trackURI = `spotify:track:${currentSong.spotifyID}`;
-					// 		song = currentSong;
-					// 		position = currentSong.playlistIndex;
+					// 		trackURI = `spotify:track:${currentSongRef.current.spotifyID}`;
+					// 		song = currentSongRef.current;
+					// 		position = currentSongRef.current.playlistIndex;
 					// 	}
 					// }
 					console.log(`Track URI: ${trackURI}`);
@@ -488,7 +488,7 @@ export function useRoomControls({
 				console.log(`userListeningToRoom false because !currentRoom`);
 				return false;
 			}
-			if (!currentSong) {
+			if (!currentSongRef.current) {
 				// throw new Error("No song is currently playing");
 				console.log(`userListeningToRoom false because !current`);
 				return false;
@@ -535,7 +535,7 @@ export function useRoomControls({
 				// if (state.item === null) {
 				// 	return false;
 				// }
-				// if (state.item.id === currentSong.spotifyID) {
+				// if (state.item.id === currentSongRef.current.spotifyID) {
 				// 	return true;
 				// }
 			} else {
@@ -543,7 +543,7 @@ export function useRoomControls({
 			}
 			return false;
 		},
-		[currentRoom, currentSong, spotify, activeDevice],
+		[currentRoom, currentSongRef, spotify, activeDevice],
 	);
 
 	const startPlayback = useCallback(
@@ -554,13 +554,25 @@ export function useRoomControls({
 			}
 
 			if (!(await userListeningToRoom(true))) {
-				if (!currentSong) {
+				if (!currentSongRef.current) {
 					return;
+				}
+				if (currentSongRef.current.pauseTime) {
+					if (!currentSongRef.current.startTime) {
+						currentSongRef.current.startTime = startTime;
+					} else {
+						const offset =
+							currentSongRef.current.startTime -
+							currentSongRef.current.pauseTime;
+						currentSongRef.current.startTime = startTime - offset;
+					}
+				} else {
+					currentSongRef.current.startTime = startTime;
 				}
 				await handlePlayback(
 					"play",
 					currentRoom.spotifyPlaylistID,
-					currentSong,
+					currentSongRef.current,
 				);
 			}
 			if (socket === null) {
@@ -595,13 +607,14 @@ export function useRoomControls({
 			socket,
 			pollLatency,
 			currentUser,
-			currentSong,
+			currentSongRef,
 			handlePlayback,
 		],
 	);
 
 	const pausePlayback = useCallback(
 		async function (): Promise<void> {
+			const now = Date.now();
 			if (await userListeningToRoom(true)) {
 				await handlePlayback("pause");
 			}
@@ -628,9 +641,12 @@ export function useRoomControls({
 				userID: currentUser.userID,
 				roomID: currentRoom.roomID,
 				spotifyID: null,
-				UTC_time: null,
+				UTC_time: now,
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PAUSE, JSON.stringify(input));
+			if (currentSongRef.current) {
+				currentSongRef.current.pauseTime = now;
+			}
 		},
 		[
 			userListeningToRoom,
@@ -638,6 +654,7 @@ export function useRoomControls({
 			pollLatency,
 			currentUser,
 			currentRoom,
+			currentSongRef,
 			handlePlayback,
 		],
 	);
@@ -766,6 +783,7 @@ export function useRoomControls({
 		try {
 			await spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
 			await getDevices();
+			const currentSong: RoomSongDto | undefined = currentSongRef.current;
 			if (currentRoom && currentSong && spotify) {
 				const syncUserSpotify = async () => {
 					try {
@@ -831,7 +849,7 @@ export function useRoomControls({
 	}, [
 		activeDevice,
 		currentRoom,
-		currentSong,
+		currentSongRef,
 		getDevices,
 		handlePlayback,
 		spotify,

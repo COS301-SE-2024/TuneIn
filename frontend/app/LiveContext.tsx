@@ -397,7 +397,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		currentUser,
 		currentRoom,
 		socket: socketRef.current,
-		currentSong: currentSongRef.current,
+		currentSongRef: currentSongRef,
 		roomQueue,
 		setRoomQueue,
 		spotifyTokens,
