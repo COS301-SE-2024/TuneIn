@@ -123,7 +123,6 @@ export interface Playback {
 
 interface RoomControlProps {
 	currentUser: UserDto | undefined;
-	keepUserSynced: boolean;
 	currentRoom: RoomDto | undefined;
 	socket: Socket | null;
 	currentSong: RoomSongDto | undefined;
@@ -136,7 +135,6 @@ interface RoomControlProps {
 
 export function useRoomControls({
 	currentUser,
-	keepUserSynced,
 	currentRoom,
 	socket,
 	currentSong,
@@ -211,9 +209,7 @@ export function useRoomControls({
 					})
 					.catch((err) => {
 						console.error("An error occurred while transferring playback", err);
-						Alert.alert(
-							"An error occurred while transferring playback: " + err,
-						);
+						alert("An error occurred while transferring playback: " + err);
 						setDeviceError(
 							"An error occurred while transferring playback: " + err,
 						);
@@ -245,7 +241,7 @@ export function useRoomControls({
 							setDeviceError(
 								"An error occurred while fetching devices. Spotify: " + err,
 							);
-							Alert.alert("An error occurred while fetching devices: " + err);
+							alert("An error occurred while fetching devices: " + err);
 							throw err;
 						});
 					setSpotifyDevices(devices);
@@ -268,9 +264,7 @@ export function useRoomControls({
 								"An error occurred while fetching playback state. Spotify:",
 								err,
 							);
-							Alert.alert(
-								"An error occurred while fetching playback state: " + err,
-							);
+							alert("An error occurred while fetching playback state: " + err);
 							setDeviceError(
 								"An error occurred while fetching playback state. Spotify: " +
 									err,
@@ -324,7 +318,7 @@ export function useRoomControls({
 					if (spotifyDevices.devices.length === 0) {
 						const devices = await getDevices();
 						if (devices.length === 0) {
-							Alert.alert("Please connect a device to Spotify");
+							alert("Please connect a device to Spotify");
 							return;
 						} else {
 							for (const d of devices) {
@@ -343,7 +337,7 @@ export function useRoomControls({
 					}
 				}
 				if (!device) {
-					Alert.alert("Please connect a device to Spotify");
+					alert("Please connect a device to Spotify");
 					return;
 				}
 
@@ -391,7 +385,7 @@ export function useRoomControls({
 					}
 					// if (currentRoom) {
 					// 	if (roomQueue.length === 0) {
-					// 		Alert.alert("No songs in queue");
+					// 		alert("No songs in queue");
 					// 		return;
 					// 	}
 					// 	playlistURI = ;
@@ -434,7 +428,7 @@ export function useRoomControls({
 						)
 						.catch((err) => {
 							console.error("An error occurred while starting playback", err);
-							Alert.alert("An error occurred while starting playback: " + err);
+							alert("An error occurred while starting playback: " + err);
 							throw err;
 						});
 					console.log("Playback action (PLAY) successful");
@@ -514,7 +508,7 @@ export function useRoomControls({
 							"An error occurred while checking if user is listening to room",
 							err,
 						);
-						Alert.alert(
+						alert(
 							"An error occurred while checking if user is listening to room: " +
 								err,
 						);
@@ -772,7 +766,7 @@ export function useRoomControls({
 		try {
 			await spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
 			await getDevices();
-			if (keepUserSynced && currentRoom && currentSong && spotify) {
+			if (currentRoom && currentSong && spotify) {
 				const syncUserSpotify = async () => {
 					try {
 						let listening = await userListeningToRoom(
@@ -797,7 +791,7 @@ export function useRoomControls({
 								await spotify.player
 									.getPlaybackState()
 									.catch((err) => {
-										Alert.alert(
+										alert(
 											"An error occurred while checking if user is listening to room: " +
 												err,
 										);
@@ -818,7 +812,7 @@ export function useRoomControls({
 							"An error occurred while checking if user is listening to room",
 							err,
 						);
-						Alert.alert(
+						alert(
 							"An error occurred while checking if user is listening to room: " +
 								err,
 						);
@@ -832,7 +826,7 @@ export function useRoomControls({
 			}
 		} catch (err) {
 			console.error("An error occurred while syncing user with room", err);
-			Alert.alert("An error occurred while syncing user with room: " + err);
+			alert("An error occurred while syncing user with room: " + err);
 		}
 	}, [
 		activeDevice,
@@ -840,7 +834,6 @@ export function useRoomControls({
 		currentSong,
 		getDevices,
 		handlePlayback,
-		keepUserSynced,
 		spotify,
 		spotifyAuth,
 		userListeningToRoom,
@@ -901,8 +894,8 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.CLEAR_QUEUE, JSON.stringify(input));
 			console.log(`emitted: ${SOCKET_EVENTS.CLEAR_QUEUE}`);
-			socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			console.log(`emitted: ${SOCKET_EVENTS.REQUEST_QUEUE}`);
+			// socket.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			// console.log(`emitted: ${SOCKET_EVENTS.REQUEST_QUEUE}`);
 		},
 		[currentRoom, currentUser, socket],
 	);
@@ -934,8 +927,10 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: enqueueSongs");
-			socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			console.log("emitted: requestQueue");
+			// socket.volatile
+			// 	.timeout(1000)
+			// 	.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, socket],
 	);
@@ -967,8 +962,8 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: dequeueSongs");
-			socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			console.log("emitted: requestQueue");
+			// socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
+			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
 	);
@@ -1163,10 +1158,9 @@ export function useRoomControls({
 			};
 			//make it volatile so that it doesn't get queued up
 			//nothing will be lost if it doesn't get sent
-			socket.volatile.emit(
-				SOCKET_EVENTS.EMOJI_REACTION,
-				JSON.stringify(newReaction),
-			);
+			socket.volatile
+				.timeout(500)
+				.emit(SOCKET_EVENTS.EMOJI_REACTION, JSON.stringify(newReaction));
 		},
 		[currentUser, socket],
 	);
