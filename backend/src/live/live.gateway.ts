@@ -46,7 +46,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly dtogen: DtoGenService,
 		private readonly roomService: RoomsService,
 		private readonly eventQueueService: EventQueueService,
-		private readonly liveService: LiveService,
+		// private readonly liveService: LiveService,
 		private readonly roomQueue: RoomQueueService,
 		private readonly userService: UsersService,
 	) {
