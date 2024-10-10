@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLive } from "../../LiveContext";
@@ -11,10 +11,17 @@ interface SongVoteProps {
 
 const SongVote: React.FC<SongVoteProps> = ({ song }) => {
 	const { roomControls, currentRoomVotes, currentUser } = useLive();
-	const [userUpvote, setUserUpvote] = useState<boolean>(false);
-	const [userDownvote, setUserDownvote] = useState<boolean>(false);
+	const [vote, setVote] = useState<VoteDto | undefined>(
+		currentRoomVotes.find(
+			(v) => v.spotifyID === song.spotifyID && v.userID === currentUser?.userID,
+		),
+	);
 
 	useEffect(() => {
+		updateVoteFromCurrentRoomVotes();
+	}, [currentRoomVotes]);
+
+	const updateVoteFromCurrentRoomVotes = useCallback(() => {
 		if (!currentUser) {
 			console.error("User not found");
 			return;
@@ -22,40 +29,56 @@ const SongVote: React.FC<SongVoteProps> = ({ song }) => {
 		const userVote: VoteDto | undefined = currentRoomVotes.find(
 			(v) => v.spotifyID === song.spotifyID && v.userID === currentUser.userID,
 		);
-		if (userVote) {
-			setUserUpvote(userVote.isUpvote);
-			setUserDownvote(!userVote.isUpvote);
-		} else {
-			setUserUpvote(false);
-			setUserDownvote(false);
+		if (
+			vote !== userVote ||
+			JSON.stringify(vote) !== JSON.stringify(userVote)
+		) {
+			setVote(userVote);
 		}
-	}, [currentRoomVotes]);
+	}, [currentRoomVotes, currentUser, song.spotifyID, vote]);
 
-	const handleUpvote = () => {
-		if (userUpvote) {
-			// Remove upvote
-			roomControls.queue.undoSongVote(song);
-		} else if (userDownvote) {
-			// Change downvote to upvote
-			roomControls.queue.swapSongVote(song);
+	const handleVoteChange = (isUpvote: boolean) => {
+		const newVote: VoteDto = {
+			isUpvote: isUpvote,
+			userID: currentUser?.userID || "",
+			spotifyID: song.spotifyID,
+			createdAt: new Date(),
+		};
+		setVote(newVote);
+
+		// Reset vote after 10 seconds
+		setTimeout(() => {
+			updateVoteFromCurrentRoomVotes();
+		}, 10000);
+
+		// Call appropriate roomControls method
+		if (isUpvote) {
+			if (vote && vote.isUpvote) {
+				// Remove upvote
+				roomControls.queue.undoSongVote(song);
+			} else if (vote && !vote.isUpvote) {
+				// Change downvote to upvote
+				roomControls.queue.swapSongVote(song);
+			} else {
+				// Cast upvote
+				roomControls.queue.upvoteSong(song);
+			}
 		} else {
-			// Cast upvote
-			roomControls.queue.upvoteSong(song);
+			if (vote && !vote.isUpvote) {
+				// Remove downvote
+				roomControls.queue.undoSongVote(song);
+			} else if (vote && vote.isUpvote) {
+				// Change upvote to downvote
+				roomControls.queue.swapSongVote(song);
+			} else {
+				// Cast downvote
+				roomControls.queue.downvoteSong(song);
+			}
 		}
 	};
 
-	const handleDownvote = () => {
-		if (userDownvote) {
-			// Remove downvote
-			roomControls.queue.undoSongVote(song);
-		} else if (userUpvote) {
-			// Change upvote to downvote
-			roomControls.queue.swapSongVote(song);
-		} else {
-			// Cast downvote
-			roomControls.queue.downvoteSong(song);
-		}
-	};
+	const handleUpvote = () => handleVoteChange(true);
+	const handleDownvote = () => handleVoteChange(false);
 
 	return (
 		<View style={styles.votingContainer}>
@@ -63,7 +86,7 @@ const SongVote: React.FC<SongVoteProps> = ({ song }) => {
 				<Ionicons
 					name="arrow-up-outline"
 					size={24}
-					color={userUpvote ? "green" : "gray"}
+					color={vote && vote.isUpvote ? "green" : "gray"}
 				/>
 			</TouchableOpacity>
 			<Text style={styles.voteCount}>{song.score}</Text>
@@ -71,7 +94,7 @@ const SongVote: React.FC<SongVoteProps> = ({ song }) => {
 				<Ionicons
 					name="arrow-down-outline"
 					size={24}
-					color={userDownvote ? "red" : "gray"}
+					color={vote && !vote.isUpvote ? "red" : "gray"}
 				/>
 			</TouchableOpacity>
 		</View>
