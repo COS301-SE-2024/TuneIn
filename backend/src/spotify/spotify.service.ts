@@ -795,7 +795,7 @@ export class SpotifyService {
 		for (const result of results) {
 			trackInfo.push(...result);
 		}
-		await this.addTracksToDB(trackInfo);
+		await this.addTracksToDB(results.flat());
 		return trackInfo;
 	}
 

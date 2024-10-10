@@ -675,6 +675,7 @@ export class ActiveRoom {
 					});
 
 					console.log(`Sending new queue data to db...`);
+					const start = Date.now();
 					await prisma.$transaction([
 						prisma.queue.deleteMany({
 							where: {
@@ -683,7 +684,7 @@ export class ActiveRoom {
 						}),
 						...newQueueItems.map((q) => prisma.queue.create({ data: q })),
 					]);
-
+					console.log(`Queue flush transaction took ${Date.now() - start}ms`);
 					console.log(`Release lock: ${this.getQueueLockName()}`);
 				} catch (e) {
 					console.error("Error in flushToDB");
