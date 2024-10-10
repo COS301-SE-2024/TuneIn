@@ -686,7 +686,42 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 								throw new Error("Internal Server Error");
 							} else {
 								setCurrentUser(u.data);
-								setRefreshUser(false);
+							}
+
+							if (!currentRoom) {
+								users
+									.getCurrentRoom()
+									.then((r) => {
+										if (r.status >= 200 && r.status < 300) {
+											console.log(`User was already in room`);
+											console.log(r.data);
+											setRoomID(r.data.roomID);
+										}
+									})
+									.catch(() => {
+										console.error(`Something bad happened`);
+									});
+							}
+
+							console.log(`getUserDetails: getting bookmarks`);
+							bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
+								setUserBookmarks(fetchedBookmarks);
+							});
+
+							// get spotify tokens
+							if (!spotifyTokens) {
+								console.log(`getUserDetails: getting spotify tokens`);
+								spotifyAuth
+									.getSpotifyTokens()
+									.then((t) => {
+										if (t !== null) {
+											setSpotifyTokens(t);
+											roomControls.playbackHandler.getDevices();
+										}
+									})
+									.catch((error) => {
+										console.error("Failed to get Spotify tokens:", error);
+									});
 							}
 						})
 						.catch((error: Error): void => {
@@ -699,46 +734,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							}
 						});
 				}
-
-				if (userBookmarks.length === 0) {
-					console.log(`getUserDetails: getting bookmarks`);
-					bookmarks.getBookmarks(users).then((fetchedBookmarks) => {
-						setUserBookmarks(fetchedBookmarks);
-					});
-				}
-
-				// get spotify tokens
-				if (!spotifyTokens) {
-					console.log(`getUserDetails: getting spotify tokens`);
-					spotifyAuth
-						.getSpotifyTokens()
-						.then((t) => {
-							if (t !== null) {
-								setSpotifyTokens(t);
-								roomControls.playbackHandler.getDevices();
-							}
-						})
-						.catch((error) => {
-							console.error("Failed to get Spotify tokens:", error);
-						});
-				}
-
-				if (!currentRoom) {
-					users
-						.getCurrentRoom()
-						.then((r) => {
-							if (r.status >= 200 && r.status < 300) {
-								console.log(`User was already in room`);
-								console.log(r.data);
-								setRoomID(r.data.roomID);
-							}
-						})
-						.catch(() => {
-							console.error(`Something bad happened`);
-						});
-				}
 			}
-			await new Promise((resolve) => setTimeout(resolve, 10000));
+			setRefreshUser(false);
+			// await new Promise((resolve) => setTimeout(resolve, 10000));
 		},
 		[
 			currentRoom,
