@@ -228,7 +228,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 		console.log(`Room queue updating with input:`);
 		console.log(queue);
-		queue = queue.sort((a, b) => a.score - b.score);
+		queue = queue.sort((a, b) => a.index - b.index);
+		queue = queue.sort((a, b) => b.score - a.score);
 		console.log(`Room queue post-sort:`);
 		console.log(queue);
 		setRoomQueue(queue);
@@ -1679,6 +1680,35 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		}
 	}, [roomQueue]);
+
+	useEffect(() => {
+		if (currentRoomVotes.length > 0) {
+			let newQueue = [...roomQueue];
+			newQueue.forEach((song) => {
+				song.score = 0;
+			});
+			for (let i = 0; i < currentRoomVotes.length; i++) {
+				const vote = currentRoomVotes[i];
+				const index = newQueue.findIndex(
+					(song) => song.spotifyID === vote.spotifyID,
+				);
+				if (index !== -1) {
+					if (vote.isUpvote) {
+						newQueue[index].score++;
+					} else {
+						newQueue[index].score--;
+					}
+				}
+			}
+			newQueue = newQueue.sort((a, b) => {
+				if (a.score === b.score) {
+					return a.insertTime - b.insertTime;
+				}
+				return b.score - a.score;
+			});
+			updateRoomQueue(newQueue);
+		}
+	}, [currentRoomVotes]);
 
 	useEffect(() => {
 		console.log(`refreshUser: ${refreshUser}`);
