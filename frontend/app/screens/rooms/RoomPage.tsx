@@ -16,6 +16,7 @@ import {
 	Alert,
 	ToastAndroid,
 	Platform,
+	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -86,6 +87,8 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 	const [participantCount, setParticipantCount] = useState(0);
 	const [participants, setParticipants] = useState<any[]>([]);
 	const playback = useRef(new SimpleSpotifyPlayback()).current;
+
+	const [loading, setLoading] = useState(false);
 
 	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
@@ -287,6 +290,12 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		};
 	}, [isPlaying]);
 
+	// const handlePlay = async () => {
+	// 	setLoading(true); // Start loading
+	// 	await playPreviousTrack; // Assuming playPreviousTrack is an async function
+	// 	setLoading(false); // Stop loading
+	// };
+
 	const playPauseTrack = useCallback(
 		async (index: number, offset: number) => {
 			if (live.canControlRoom()) {
@@ -430,12 +439,17 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPreviousTrack}
+							// onPress={handlePlay}
 						>
+							{/* {loading ? (
+								<ActivityIndicator size={30} color="black" /> // Show loading indicator
+							) : ( */}
 							<FontAwesome5
 								name={isPlaying ? "pause" : "play"}
 								size={30}
 								color="black"
 							/>
+							{/* )} */}
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
