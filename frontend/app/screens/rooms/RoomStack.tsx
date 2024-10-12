@@ -21,6 +21,7 @@ import {
 	ToastAndroid,
 	Platform,
 	Alert,
+	Button,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
@@ -33,6 +34,7 @@ import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import ContextMenu from "../../components/ContextMenu";
 import * as utils from "../../services/Utils";
 import RoomModal from "../../components/RoomModal";
+import BannedModal from "../../components/BannedModal";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -56,6 +58,30 @@ function MyRoomTabs() {
 	const [hasSeenNsfwModal, setHasSeenNsfwModal] = useState(false);
 	const [hasChildRooms, setHasChildRooms] = useState(false);
 	const [showModal, setShowModal] = useState(false);
+	const [isBannedModalVisible, setBannedModalVisible] = useState(false);
+	const [isUserBanned, setIsUserBanned] = useState(false); // State to check if user is banned
+
+	const handleShowBannedModal = () => {
+		setBannedModalVisible(true);
+	};
+
+	const handleCloseBannedModal = () => {
+		setBannedModalVisible(false);
+	};
+
+	// Simulate checking ban condition (replace with actual condition)
+	useEffect(() => {
+		// Replace this with your actual condition
+		const checkIfUserIsBanned = () => {
+			const banned = false; // Replace this with your actual check
+			setIsUserBanned(banned);
+			if (banned) {
+				handleShowBannedModal();
+			}
+		};
+
+		checkIfUserIsBanned();
+	}, []); // Only run on mount
 
 	const playerContext = useContext(Player);
 	if (!playerContext) {
@@ -395,6 +421,18 @@ function MyRoomTabs() {
 				onViewChildRooms={handleNavigateToChildRooms}
 			/>
 
+			{/* BannedModal component */}
+			<BannedModal
+				visible={isBannedModalVisible}
+				onClose={handleCloseBannedModal}
+			/>
+			{/* <View>
+				<Button title="Simulate Ban" onPress={handleShowBannedModal} />
+				<BannedModal
+					visible={isBannedModalVisible}
+					onClose={handleCloseBannedModal}
+				/>
+			</View> */}
 			<View style={styles.header}>
 				{/* Back Button */}
 				<TouchableOpacity
