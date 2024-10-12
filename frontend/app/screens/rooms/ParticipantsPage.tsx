@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { colors } from "../../styles/colors"; // Assuming colors file is available
 
 interface Participant {
@@ -55,8 +55,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		});
 	}
 
-	const navigateToProfile = (userId: string) => {};
-
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
 		setContextMenuVisible(true);
@@ -68,9 +66,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	};
 
 	const handleBanUser = () => {
-		// Perform the ban action here
 		console.log(`Banning user: ${selectedParticipant?.username}`);
-		// After banning, close the menu
 		handleCloseContextMenu();
 	};
 
@@ -79,7 +75,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	};
 
 	const renderItem = ({ item }: { item: Participant }) => {
-		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
@@ -99,7 +94,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
 
-				{/* Add Menu Icon Button */}
 				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
 				</TouchableOpacity>
@@ -133,30 +127,29 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				/>
 			)}
 
-			{/* Context Menu for Ban User */}
 			<Modal
-				visible={contextMenuVisible}
+				animationType="slide"
 				transparent={true}
-				animationType="fade"
+				visible={contextMenuVisible}
 				onRequestClose={handleCloseContextMenu}
 			>
-				<View style={styles.modalOverlay}>
-					<View style={styles.modalContainer}>
-						<Text style={styles.modalTitle}>
+				<View style={styles.overlay}>
+					<View style={styles.modalView}>
+						<Text style={styles.modalTextHeader}>
 							Ban {truncateUsername(selectedParticipant?.username || "")}?
 						</Text>
-						<View style={styles.modalButtonsContainer}>
+						<View style={styles.buttonContainer}>
 							<TouchableOpacity
-								style={styles.modalButton}
+								style={[styles.buttonModal, styles.banButton]}
 								onPress={handleBanUser}
 							>
-								<Text style={styles.modalButtonText}>Ban User</Text>
+								<Text style={styles.buttonText}>Ban User</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
-								style={styles.modalCancelButton}
+								style={[styles.buttonModal, styles.cancelButton]}
 								onPress={handleCloseContextMenu}
 							>
-								<Text style={styles.modalCancelButtonText}>Cancel</Text>
+								<Text style={styles.buttonText}>Cancel</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -201,7 +194,7 @@ const styles = StyleSheet.create({
 	participantContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "space-between", // This ensures spacing between username and menu button
+		justifyContent: "space-between",
 		marginVertical: 8,
 		padding: 10,
 	},
@@ -209,7 +202,6 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 	},
-
 	profilePicture: {
 		width: 50,
 		height: 50,
@@ -221,55 +213,58 @@ const styles = StyleSheet.create({
 		color: "black",
 	},
 	// Modal styles
-	modalOverlay: {
+	overlay: {
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
+		justifyContent: "flex-end",
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
-	modalContainer: {
-		width: 300,
-		padding: 20,
-		backgroundColor: "white",
-		borderRadius: 10,
-		alignItems: "center",
-	},
-	modalTitle: {
-		fontSize: 18,
-		fontWeight: "bold",
-		textAlign: "center",
-	},
-	modalButtonsContainer: {
-		width: 300,
-		padding: 20,
-		backgroundColor: "white",
-		borderRadius: 10,
-		alignItems: "center",
-	},
-	modalButton: {
+	modalView: {
 		width: "100%",
-		padding: 10,
+		height: "18%",
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
-		marginBottom: 10,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalTextHeader: {
+		fontSize: 19,
+		marginBottom: 0,
+		textAlign: "center",
+		fontWeight: "bold",
+	},
+	buttonContainer: {
+		marginTop: 30,
+		flexDirection: "row",
+		justifyContent: "space-between", // Align buttons side by side
+		width: "100%", // Make sure it occupies the full width
+	},
+	buttonModal: {
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: "48%", // Make buttons take up about half the width
+		alignItems: "center",
+	},
+	banButton: {
 		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
-	modalButtonText: {
-		color: "white",
-		fontSize: 16,
-		fontWeight: "bold",
-	},
-	modalCancelButton: {
-		width: "100%",
-		padding: 10,
-		alignItems: "center",
+	cancelButton: {
 		backgroundColor: colors.secondary,
 		borderRadius: 25,
 	},
-	modalCancelButtonText: {
+	buttonText: {
 		color: "white",
-		fontSize: 16,
 		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 16,
 	},
 });
 

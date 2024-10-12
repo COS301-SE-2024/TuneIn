@@ -117,26 +117,28 @@ const BannedUsers: React.FC = () => {
 			<Modal
 				visible={contextMenuVisible}
 				transparent={true}
-				animationType="fade"
+				animationType="slide"
 				onRequestClose={handleCloseContextMenu}
 			>
-				<View style={styles.modalOverlay}>
-					<View style={styles.modalContainer}>
-						<Text style={styles.modalTitle}>
+				<View style={styles.overlay}>
+					<View style={styles.modalView}>
+						<Text style={styles.modalTextHeader}>
 							Unban {selectedParticipant?.username}?
 						</Text>
-						<TouchableOpacity
-							style={styles.modalButton}
-							onPress={handleUnbanUser}
-						>
-							<Text style={styles.modalButtonText}>Unban User</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.modalCancelButton}
-							onPress={handleCloseContextMenu}
-						>
-							<Text style={styles.modalCancelButtonText}>Cancel</Text>
-						</TouchableOpacity>
+						<View style={styles.buttonContainer}>
+							<TouchableOpacity
+								style={[styles.buttonModal, styles.unbanButton]}
+								onPress={handleUnbanUser}
+							>
+								<Text style={styles.buttonText}>Unban User</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={[styles.buttonModal, styles.cancelButton]}
+								onPress={handleCloseContextMenu}
+							>
+								<Text style={styles.buttonText}>Cancel</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
 				</View>
 			</Modal>
@@ -199,48 +201,57 @@ const styles = StyleSheet.create({
 		color: "black",
 	},
 	// Modal styles
-	modalOverlay: {
+	overlay: {
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
+		justifyContent: "flex-end",
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
-	modalContainer: {
-		width: 300,
-		padding: 20,
+	modalView: {
+		width: "100%",
+		height: "18%",
 		backgroundColor: "white",
-		borderRadius: 10,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
 	},
-	modalTitle: {
-		fontSize: 18,
+	modalTextHeader: {
+		fontSize: 19,
+		textAlign: "center",
 		fontWeight: "bold",
-		marginBottom: 20,
 	},
-	modalButton: {
-		width: "85%",
+	buttonContainer: {
+		marginTop: 30,
+		flexDirection: "row",
+		justifyContent: "space-between", // Align buttons side by side
+		width: "100%", // Full width
+	},
+	buttonModal: {
+		borderRadius: 5,
 		padding: 10,
+		elevation: 2,
+		width: "48%", // Make buttons take up about half the width
 		alignItems: "center",
-		marginBottom: 10,
+	},
+	unbanButton: {
 		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
-	modalButtonText: {
-		color: "white",
-		fontSize: 16,
-		fontWeight: "bold",
-	},
-	modalCancelButton: {
-		width: "85%",
-		padding: 10,
-		alignItems: "center",
+	cancelButton: {
 		backgroundColor: colors.secondary,
 		borderRadius: 25,
 	},
-	modalCancelButtonText: {
+	buttonText: {
 		color: "white",
-		fontSize: 16,
 		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 16,
 	},
 });
 
