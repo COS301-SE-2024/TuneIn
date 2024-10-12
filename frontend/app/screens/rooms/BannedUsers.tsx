@@ -10,8 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { colors } from "../../styles/colors"; // Assuming colors file is available
+import { colors } from "../../styles/colors";
 
 interface Participant {
 	id: string;
@@ -19,43 +18,30 @@ interface Participant {
 	profilePictureUrl: string;
 }
 
-interface ParticipantsPageProps {
-	participants: Participant[];
-}
-
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
-}) => {
+const BannedUsers: React.FC = () => {
 	const navigation = useNavigation();
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
-
-	const navigateToProfile = (userId: string) => {};
+	// Mock Data for Banned Participants
+	const mockParticipants: Participant[] = [
+		{
+			id: "1",
+			username: "john_doe_123",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+		},
+		{
+			id: "2",
+			username: "jane_smith_456",
+			profilePictureUrl: "https://randomuser.me/api/portraits/women/2.jpg",
+		},
+		{
+			id: "3",
+			username: "sam_wilson_789",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/3.jpg",
+		},
+	];
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -67,19 +53,14 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		setSelectedParticipant(null);
 	};
 
-	const handleBanUser = () => {
-		// Perform the ban action here
-		console.log(`Banning user: ${selectedParticipant?.username}`);
-		// After banning, close the menu
+	const handleUnbanUser = () => {
+		// Perform the unban action here
+		console.log(`Unbanning user: ${selectedParticipant?.username}`);
+		// After unbanning, close the menu
 		handleCloseContextMenu();
 	};
 
-	const truncateUsername = (username: string) => {
-		return username.length > 20 ? `${username.slice(0, 17)}...` : username;
-	};
-
 	const renderItem = ({ item }: { item: Participant }) => {
-		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
@@ -98,8 +79,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-
-				{/* Add Menu Icon Button */}
 				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
 				</TouchableOpacity>
@@ -117,23 +96,24 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.header}>Participants</Text>
+				<Text style={styles.header}>Banned Users</Text>
 			</View>
-			{participantsInRoom.length === 0 ? (
+
+			{mockParticipants.length === 0 ? (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
-						This room has no participants.
+						This room has no banned users.
 					</Text>
 				</View>
 			) : (
 				<FlatList
-					data={participantsInRoom}
+					data={mockParticipants}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.id}
 				/>
 			)}
 
-			{/* Context Menu for Ban User */}
+			{/* Context Menu for Unban User */}
 			<Modal
 				visible={contextMenuVisible}
 				transparent={true}
@@ -143,22 +123,20 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				<View style={styles.modalOverlay}>
 					<View style={styles.modalContainer}>
 						<Text style={styles.modalTitle}>
-							Ban {truncateUsername(selectedParticipant?.username || "")}?
+							Unban {selectedParticipant?.username}?
 						</Text>
-						<View style={styles.modalButtonsContainer}>
-							<TouchableOpacity
-								style={styles.modalButton}
-								onPress={handleBanUser}
-							>
-								<Text style={styles.modalButtonText}>Ban User</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.modalCancelButton}
-								onPress={handleCloseContextMenu}
-							>
-								<Text style={styles.modalCancelButtonText}>Cancel</Text>
-							</TouchableOpacity>
-						</View>
+						<TouchableOpacity
+							style={styles.modalButton}
+							onPress={handleUnbanUser}
+						>
+							<Text style={styles.modalButtonText}>Unban User</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.modalCancelButton}
+							onPress={handleCloseContextMenu}
+						>
+							<Text style={styles.modalCancelButtonText}>Cancel</Text>
+						</TouchableOpacity>
 					</View>
 				</View>
 			</Modal>
@@ -201,7 +179,7 @@ const styles = StyleSheet.create({
 	participantContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "space-between", // This ensures spacing between username and menu button
+		justifyContent: "space-between",
 		marginVertical: 8,
 		padding: 10,
 	},
@@ -209,7 +187,6 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 	},
-
 	profilePicture: {
 		width: 50,
 		height: 50,
@@ -217,6 +194,7 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 	},
 	username: {
+		flex: 1,
 		fontSize: 16,
 		color: "black",
 	},
@@ -237,17 +215,10 @@ const styles = StyleSheet.create({
 	modalTitle: {
 		fontSize: 18,
 		fontWeight: "bold",
-		textAlign: "center",
-	},
-	modalButtonsContainer: {
-		width: 300,
-		padding: 20,
-		backgroundColor: "white",
-		borderRadius: 10,
-		alignItems: "center",
+		marginBottom: 20,
 	},
 	modalButton: {
-		width: "100%",
+		width: "85%",
 		padding: 10,
 		alignItems: "center",
 		marginBottom: 10,
@@ -260,7 +231,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalCancelButton: {
-		width: "100%",
+		width: "85%",
 		padding: 10,
 		alignItems: "center",
 		backgroundColor: colors.secondary,
@@ -273,4 +244,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default ParticipantsPage;
+export default BannedUsers;

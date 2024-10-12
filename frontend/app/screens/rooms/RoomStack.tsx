@@ -276,6 +276,14 @@ function MyRoomTabs() {
 		});
 	};
 
+	const handleBanUserList = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/BannedUsers",
+			params: { room: room },
+		});
+	};
+
 	const handleShareRoom = () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
@@ -321,16 +329,6 @@ function MyRoomTabs() {
 			}
 		}
 	};
-
-	// const handleCheckForChildRooms = async () => {
-	// 	// Logic to check if there are child rooms
-	// 	const childRoomsExist = roomData.childrenRoomIDs; // Replace with actual condition
-	// 	console.log("Child rooms exist: ", childRoomsExist);
-	// 	if (childRoomsExist) {
-	// 		setHasChildRooms(true);
-	// 		setShowModal(true);
-	// 	}
-	// };
 
 	const handleCheckForChildRooms = async () => {
 		// Logic to check if there are child rooms
@@ -425,6 +423,7 @@ function MyRoomTabs() {
 					isVisible={isMenuVisible}
 					onClose={() => setMenuVisible(false)}
 					onAdvancedSettings={handleAdvancedSettings}
+					onBanUserList={handleBanUserList}
 					onRoomInfo={handleRoomInfo}
 					onShareRoom={handleShareRoom}
 					onSavePlaylist={handleSavePlaylist}
