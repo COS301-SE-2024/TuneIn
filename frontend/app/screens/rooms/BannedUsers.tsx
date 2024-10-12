@@ -18,14 +18,12 @@ interface Participant {
 	profilePictureUrl: string;
 }
 
-const BannedUsers: React.FC = () => {
-	const navigation = useNavigation();
-	const [selectedParticipant, setSelectedParticipant] =
-		useState<Participant | null>(null);
-	const [contextMenuVisible, setContextMenuVisible] = useState(false);
+interface BannedUsersProps {
+	bannedUsers?: Participant[]; // Make bannedUsers optional
+}
 
-	// Mock Data for Banned Participants
-	const mockParticipants: Participant[] = [
+const BannedUsers: React.FC<BannedUsersProps> = ({
+	bannedUsers = [
 		{
 			id: "1",
 			username: "john_doe_123",
@@ -41,7 +39,12 @@ const BannedUsers: React.FC = () => {
 			username: "sam_wilson_789",
 			profilePictureUrl: "https://randomuser.me/api/portraits/men/3.jpg",
 		},
-	];
+	],
+}) => {
+	const navigation = useNavigation();
+	const [selectedParticipant, setSelectedParticipant] =
+		useState<Participant | null>(null);
+	const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -79,8 +82,16 @@ const BannedUsers: React.FC = () => {
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+				{/* <TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
+				</TouchableOpacity> */}
+				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+					<Ionicons
+						name="ellipsis-vertical"
+						size={24}
+						color="black"
+						testID={`ellipsis-${item.id}`}
+					/>
 				</TouchableOpacity>
 			</View>
 		);
@@ -99,7 +110,7 @@ const BannedUsers: React.FC = () => {
 				<Text style={styles.header}>Banned Users</Text>
 			</View>
 
-			{mockParticipants.length === 0 ? (
+			{bannedUsers.length === 0 ? (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no banned users.
@@ -107,7 +118,7 @@ const BannedUsers: React.FC = () => {
 				</View>
 			) : (
 				<FlatList
-					data={mockParticipants}
+					data={bannedUsers}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.id}
 				/>
@@ -145,6 +156,8 @@ const BannedUsers: React.FC = () => {
 		</View>
 	);
 };
+
+// Styles remain unchanged...
 
 const styles = StyleSheet.create({
 	container: {
