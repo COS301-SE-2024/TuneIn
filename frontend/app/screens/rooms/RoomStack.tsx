@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
 	},
 	modalView: {
 		width: "100%",
-		height: "28%",
+		height: "26%",
 		backgroundColor: "white",
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalButtonContainer: {
-		marginTop: 45,
+		marginTop: 30,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		width: "100%",

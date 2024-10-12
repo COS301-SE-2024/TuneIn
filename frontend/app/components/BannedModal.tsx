@@ -19,7 +19,7 @@ const BannedModal: React.FC<BannedModalProps> = ({ visible, onClose }) => {
 			visible={visible}
 			onRequestClose={onClose}
 		>
-			<View style={styles.centeredView}>
+			<View style={styles.overlay}>
 				<View style={styles.modalView}>
 					<Text style={styles.modalTextHeader}>You Have Been Banned</Text>
 					<Text style={styles.modalText}>
@@ -28,7 +28,7 @@ const BannedModal: React.FC<BannedModalProps> = ({ visible, onClose }) => {
 					</Text>
 					<View style={styles.buttonContainer}>
 						<TouchableOpacity
-							style={styles.backButton}
+							style={[styles.buttonModal, styles.backButton]}
 							onPress={() => {
 								navigation.goBack(); // Use navigation to go back
 								onClose(); // Call onClose to handle modal state
@@ -45,23 +45,22 @@ const BannedModal: React.FC<BannedModalProps> = ({ visible, onClose }) => {
 };
 
 const styles = StyleSheet.create({
-	centeredView: {
+	overlay: {
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-		marginTop: 22,
+		justifyContent: "flex-end", // Align to bottom
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Add a background overlay
 	},
 	modalView: {
-		margin: 20,
+		width: "100%",
+		height: "28%",
 		backgroundColor: "white",
-		borderRadius: 20,
-		padding: 35,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
 		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
+		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.25,
 		shadowRadius: 4,
 		elevation: 5,
@@ -73,26 +72,33 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalText: {
-		marginBottom: 16,
+		marginTop: 10,
+		fontSize: 16,
 		textAlign: "center",
+		fontWeight: "bold",
 	},
 	buttonContainer: {
-		marginTop: 20,
+		marginTop: 30,
 		flexDirection: "row",
-		justifyContent: "center", // Center button in the container
-		width: "100%", // Ensure it takes full width
+		justifyContent: "center", // Center the button container
+		width: "100%",
+	},
+	buttonModal: {
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: "100%",
+		alignItems: "center",
 	},
 	backButton: {
-		paddingVertical: 10,
-		paddingHorizontal: 30,
 		backgroundColor: colors.primary,
-		borderRadius: 20,
-		// No margins here to prevent it from being offset
+		borderRadius: 25,
 	},
 	buttonText: {
 		color: "white",
-		fontSize: 16,
 		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 16,
 	},
 });
 

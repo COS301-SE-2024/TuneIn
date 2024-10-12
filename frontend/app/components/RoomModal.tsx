@@ -20,7 +20,7 @@ const RoomModal: React.FC<RoomModalProps> = ({
 			visible={visible}
 			onRequestClose={onClose}
 		>
-			<View style={styles.centeredView}>
+			<View style={styles.overlay}>
 				<View style={styles.modalView}>
 					<Text style={styles.modalTextHeader}>This Room Has Been Split</Text>
 					<Text style={styles.modalText}>
@@ -28,12 +28,15 @@ const RoomModal: React.FC<RoomModalProps> = ({
 					</Text>
 					<View style={styles.buttonContainer}>
 						<TouchableOpacity
-							style={styles.primaryButton}
+							style={[styles.buttonModal, styles.primaryButton]}
 							onPress={onViewChildRooms}
 						>
 							<Text style={styles.buttonText}>View Sub Rooms</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.secondaryButton} onPress={onClose}>
+						<TouchableOpacity
+							style={[styles.buttonModal, styles.secondaryButton]}
+							onPress={onClose}
+						>
 							<Text style={styles.buttonText}>Stay in Room</Text>
 						</TouchableOpacity>
 					</View>
@@ -44,23 +47,22 @@ const RoomModal: React.FC<RoomModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-	centeredView: {
+	overlay: {
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-		marginTop: 22,
+		justifyContent: "flex-end", // Align to bottom
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Add a background overlay
 	},
 	modalView: {
-		margin: 20,
+		width: "100%",
+		height: "26%",
 		backgroundColor: "white",
-		borderRadius: 20,
-		padding: 35,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
 		alignItems: "center",
 		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
+		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.25,
 		shadowRadius: 4,
 		elevation: 5,
@@ -72,27 +74,31 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	modalText: {
-		marginBottom: 16,
+		marginTop: 10,
+		fontSize: 16,
 		textAlign: "center",
+		fontWeight: "bold",
 	},
 	buttonContainer: {
-		marginTop: 10,
+		marginTop: 30,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		width: "100%",
 	},
-	primaryButton: {
+	buttonModal: {
+		borderRadius: 5,
 		padding: 10,
-		paddingHorizontal: 15,
-		marginRight: 10, // Add space between buttons
+		elevation: 2,
+		width: "45%",
+		alignItems: "center",
+	},
+	primaryButton: {
 		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
 	secondaryButton: {
 		backgroundColor: colors.secondary,
 		borderRadius: 25,
-		padding: 10,
-		paddingHorizontal: 20,
 	},
 	buttonText: {
 		color: "white",
