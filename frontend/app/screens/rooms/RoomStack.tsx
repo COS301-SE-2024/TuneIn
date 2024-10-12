@@ -35,6 +35,7 @@ import ContextMenu from "../../components/ContextMenu";
 import * as utils from "../../services/Utils";
 import RoomModal from "../../components/RoomModal";
 import BannedModal from "../../components/BannedModal";
+import NsfwModal from "../../components/NsfwModal";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -383,35 +384,15 @@ function MyRoomTabs() {
 		<>
 			{/* NSFW Modal */}
 			{roomData.isNsfw && (
-				<Modal
-					animationType="slide"
-					transparent={true}
-					visible={isNsfwModalVisible}
-					onRequestClose={handleExit}
-				>
-					<Pressable style={styles.modalContainer} onPress={handleExit}>
-						<Pressable style={styles.modalView} onPress={() => {}}>
-							<Text style={styles.modalTitle}>NSFW Content Warning</Text>
-							<Text style={styles.modalText}>
-								This room is marked as NSFW. Are you sure you want to continue?
-							</Text>
-							<View style={styles.modalButtonContainer}>
-								<Pressable
-									style={[styles.buttonModal, styles.buttonYes]}
-									onPress={handleProceed}
-								>
-									<Text style={styles.textStyle}>Yes, Stay</Text>
-								</Pressable>
-								<Pressable
-									style={[styles.buttonModal, styles.buttonNo]}
-									onPress={handleExit}
-								>
-									<Text style={styles.textStyle}>No, Leave</Text>
-								</Pressable>
-							</View>
-						</Pressable>
-					</Pressable>
-				</Modal>
+				<>
+					<NsfwModal
+						visible={isNsfwModalVisible}
+						onProceed={handleProceed}
+						onExit={handleExit}
+					/>
+
+					{/* The rest of your component */}
+				</>
 			)}
 
 			{/* RoomModal component */}
@@ -426,13 +407,6 @@ function MyRoomTabs() {
 				visible={isBannedModalVisible}
 				onClose={handleCloseBannedModal}
 			/>
-			{/* <View>
-				<Button title="Simulate Ban" onPress={handleShowBannedModal} />
-				<BannedModal
-					visible={isBannedModalVisible}
-					onClose={handleCloseBannedModal}
-				/>
-			</View> */}
 			<View style={styles.header}>
 				{/* Back Button */}
 				<TouchableOpacity
