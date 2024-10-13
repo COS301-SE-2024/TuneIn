@@ -17,7 +17,7 @@ import { LiveChatMessageDto } from "./dto/livechatmessage.dto";
 import { PlaybackEventDto } from "./dto/playbackevent.dto";
 import { RoomsService } from "../modules/rooms/rooms.service";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
-import { LiveService } from "./live.service";
+// import { LiveService } from "./live.service";
 import { RoomQueueService } from "../modules/rooms/roomqueue/roomqueue.service";
 import { EmojiReactionDto } from "./dto/emojireaction.dto";
 import { QueueEventDto } from "./dto/queueevent.dto";
@@ -816,6 +816,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					UTC_time: startTime,
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				await this.sendQueueState(roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error as Error);
@@ -872,6 +873,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				UTC_time: startTime,
 			};
 			this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
+			await this.sendQueueState(roomID);
 		} catch (error) {
 			console.error(error);
 			this.handleThrownError(client, error as Error);
@@ -964,6 +966,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					UTC_time: startTime,
 				};
 				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				await this.sendQueueState(roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error as Error);
@@ -971,59 +974,60 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	@SubscribeMessage(SOCKET_EVENTS.INIT_PREV)
-	async handleInitPrevMedia(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PREV, async () => {
-			try {
-				console.log(p);
-				const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
-				if (!payload.UTC_time || payload.UTC_time === null) {
-					throw new Error("No UTC_time provided");
-				}
+	// @SubscribeMessage(SOCKET_EVENTS.INIT_PREV)
+	// async handleInitPrevMedia(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PREV, async () => {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: PlaybackEventDto = await this.validatePlaybackEvent(p);
+	// 			if (!payload.UTC_time || payload.UTC_time === null) {
+	// 				throw new Error("No UTC_time provided");
+	// 			}
 
-				const roomID: string | null = this.roomUsers.getRoomId(client.id);
-				if (roomID === null) {
-					throw new Error("User is not in a room");
-				}
+	// 			const roomID: string | null = this.roomUsers.getRoomId(client.id);
+	// 			if (roomID === null) {
+	// 				throw new Error("User is not in a room");
+	// 			}
 
-				//{check user permissions}
-				await this.roomQueue.playPrev(roomID, payload.UTC_time);
-				let song: RoomSongDto | null = await this.roomQueue.getCurrentSong(
-					roomID,
-				);
-				console.log("Song to play: " + song);
-				if (song === null) {
-					throw new Error("No song is queued");
-				}
-				let startTime: number | undefined = song.startTime;
-				if (startTime === undefined) {
-					song = await this.roomQueue.play(roomID, payload.UTC_time);
-					if (song === null) {
-						throw new Error("No song is queued");
-					}
-				}
-				startTime = song.startTime;
-				if (startTime === undefined) {
-					throw new Error("No start time for song. Very weird error");
-				}
+	// 			//{check user permissions}
+	// 			await this.roomQueue.playPrev(roomID, payload.UTC_time);
+	// 			let song: RoomSongDto | null = await this.roomQueue.getCurrentSong(
+	// 				roomID,
+	// 			);
+	// 			console.log("Song to play: " + song);
+	// 			if (song === null) {
+	// 				throw new Error("No song is queued");
+	// 			}
+	// 			let startTime: number | undefined = song.startTime;
+	// 			if (startTime === undefined) {
+	// 				song = await this.roomQueue.play(roomID, payload.UTC_time);
+	// 				if (song === null) {
+	// 					throw new Error("No song is queued");
+	// 				}
+	// 			}
+	// 			startTime = song.startTime;
+	// 			if (startTime === undefined) {
+	// 				throw new Error("No start time for song. Very weird error");
+	// 			}
 
-				const response: PlaybackEventDto = {
-					date_created: new Date(),
-					userID: null,
-					roomID: roomID,
-					spotifyID: song.spotifyID,
-					UTC_time: startTime,
-				};
-				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error as Error);
-			}
-		});
-	}
+	// 			const response: PlaybackEventDto = {
+	// 				date_created: new Date(),
+	// 				userID: null,
+	// 				roomID: roomID,
+	// 				spotifyID: song.spotifyID,
+	// 				UTC_time: startTime,
+	// 			};
+	// 			this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+	// 			await this.sendQueueState(roomID);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
 
 	// @SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
 	// async handleSeekMedia(
@@ -1056,6 +1060,7 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 				//{check user permissions}
 				await this.sendMediaState(roomID);
+				await this.sendQueueState(roomID);
 			} catch (error) {
 				console.error(error);
 				this.handleThrownError(client, error as Error);

@@ -1047,51 +1047,51 @@ export class ActiveRoom {
 		return result;
 	}
 
-	async playPrev(
-		spotify: SpotifyService,
-		murLockService: MurLockService,
-		startTime: number,
-	): Promise<RoomSong | null> {
-		// if paused, remove pause time
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			QUEUE_LOCK_TIMEOUT,
-			async () => {
-				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'playPrev'`,
-				);
-				try {
-					if (!this.queue.isEmpty()) {
-						const song = this.queue.front();
-						if (song.isPaused()) {
-							this.queue.front().pauseTime = null;
-						}
-					}
-				} catch (e) {
-					console.error("Error in playPrev");
-					console.error(e);
-				}
-				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'playPrev'`,
-				);
-			},
-		);
+	// async playPrev(
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// 	startTime: number,
+	// ): Promise<RoomSong | null> {
+	// 	// if paused, remove pause time
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () => {
+	// 			console.log(
+	// 				`Acquire lock: ${this.getQueueLockName()} in function 'playPrev'`,
+	// 			);
+	// 			try {
+	// 				if (!this.queue.isEmpty()) {
+	// 					const song = this.queue.front();
+	// 					if (song.isPaused()) {
+	// 						this.queue.front().pauseTime = null;
+	// 					}
+	// 				}
+	// 			} catch (e) {
+	// 				console.error("Error in playPrev");
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				`Release lock: ${this.getQueueLockName()} in function 'playPrev'`,
+	// 			);
+	// 		},
+	// 	);
 
-		//find newest song in historic queue
-		if (this.historicQueue.isEmpty()) {
-			return null;
-		}
-		const lastSong = this.historicQueue.dequeue();
-		lastSong.setPlaybackStartTime(startTime);
-		const oldQueue = this.queue.toArray();
-		oldQueue.unshift(lastSong);
-		for (let i = 1, n = oldQueue.length; i < n; i++) {
-			oldQueue[i].setPlaybackStartTime(Number.MAX_SAFE_INTEGER);
-		}
-		await this.setQueue(oldQueue, spotify, murLockService);
-		await this.updateQueue(murLockService);
-		return this.queue.front();
-	}
+	// 	//find newest song in historic queue
+	// 	if (this.historicQueue.isEmpty()) {
+	// 		return null;
+	// 	}
+	// 	const lastSong = this.historicQueue.dequeue();
+	// 	lastSong.setPlaybackStartTime(startTime);
+	// 	const oldQueue = this.queue.toArray();
+	// 	oldQueue.unshift(lastSong);
+	// 	for (let i = 1, n = oldQueue.length; i < n; i++) {
+	// 		oldQueue[i].setPlaybackStartTime(Number.MAX_SAFE_INTEGER);
+	// 	}
+	// 	await this.setQueue(oldQueue, spotify, murLockService);
+	// 	// await this.updateQueue(murLockService);
+	// 	return this.queue.front();
+	// }
 
 	async isPlaying(): Promise<boolean> {
 		if (this.queue.isEmpty()) {
@@ -1362,8 +1362,8 @@ export class RoomQueueService {
 		await activeRoom.playNext(this.murLockService, startTime);
 	}
 
-	async playPrev(roomID: string, startTime: number): Promise<void> {
-		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.playPrev(this.spotify, this.murLockService, startTime);
-	}
+	// async playPrev(roomID: string, startTime: number): Promise<void> {
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	await activeRoom.playPrev(this.spotify, this.murLockService, startTime);
+	// }
 }

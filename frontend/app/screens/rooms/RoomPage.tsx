@@ -182,13 +182,13 @@ const RoomPage: React.FC = () => {
 		}
 	};
 
-	const playPreviousTrack = () => {
-		if (userInRoom) {
-			if (roomControls.canControlRoom()) {
-				roomControls.playbackHandler.prevTrack();
-			}
-		}
-	};
+	// const playPreviousTrack = () => {
+	// 	if (userInRoom) {
+	// 		if (roomControls.canControlRoom()) {
+	// 			roomControls.playbackHandler.prevTrack();
+	// 		}
+	// 	}
+	// };
 
 	const handleViewParticipants = () => {
 		router.navigate({
@@ -415,12 +415,12 @@ const RoomPage: React.FC = () => {
 
 				{roomData.mine ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
 						>
 							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
