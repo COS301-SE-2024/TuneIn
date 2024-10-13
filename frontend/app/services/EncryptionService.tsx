@@ -11,16 +11,12 @@ type KeyPair = {
 };
 
 // Generate and store the public/private key pair
-export async function generateKeyPair(): Promise<KeyPair> {
+export async function generateKeyPair() {
 	const keyPair = nacl.box.keyPair();
-
-	// Convert keys to hexadecimal strings for storage
 	const publicKey = Buffer.from(keyPair.publicKey).toString("hex");
 	const privateKey = Buffer.from(keyPair.secretKey).toString("hex");
 
-	// Store private key securely
 	await SecureStore.setItemAsync("privateKey", privateKey);
-	await SecureStore.setItemAsync("publicKey", publicKey);
 
 	try {
 		await axios.post(`${utils.API_BASE_URL}/users/${publicKey}/publicKey`);
@@ -28,19 +24,26 @@ export async function generateKeyPair(): Promise<KeyPair> {
 		console.log("Error uploading public key", err);
 	}
 
-	// Return the keys for usage (public key to be sent to the server)
 	return { publicKey, privateKey };
 }
+
+export async function generateSymKey(username: string) {
+	const symmetricKey = nacl.randomBytes(32);
+	const symKey = Buffer.from(symmetricKey).toString('hex');
+
+	await SecureStore.setItemAsync(`${username}-symKey`, symKey);
+}
+
 
 // Encrypt a message using the recipient's public key
 export async function encryptMessage(
 	message: string,
-	recipientPublicKey: string,
+	senderPrivateKey: string, // Sender's private key passed in
+	recipientPublicKey: string, // Recipient's public key passed in
 ): Promise<string> {
+	const privateKeyUint8Array = Buffer.from(senderPrivateKey, "hex");
 	const publicKeyUint8Array = Buffer.from(recipientPublicKey, "hex");
-	const privateKey: string =
-		(await SecureStore.getItemAsync("privateKey")) || "";
-	const privateKeyUint8Array = Buffer.from(privateKey, "hex");
+
 	const messageUint8Array = Buffer.from(message, "utf-8");
 	const nonce = nacl.randomBytes(24); // Generate a nonce for encryption
 
@@ -55,21 +58,15 @@ export async function encryptMessage(
 	return Buffer.concat([nonce, encryptedMessage]).toString("hex"); // Concatenate nonce + message
 }
 
+
 // Decrypt the encrypted message using the private key
 export async function decryptMessage(
 	encryptedMessage: string,
+	recipientPrivateKey: string, // Recipient's private key
+	senderPublicKey: string, // Sender's public key
 ): Promise<string> {
-	const privateKey: string =
-		(await SecureStore.getItemAsync("privateKey")) || "";
-	const publicKey: string = (await SecureStore.getItemAsync("publicKey")) || "";
-
-	if (privateKey === "" || publicKey === "") {
-		console.error("Missing private or public key");
-		return "";
-	}
-
-	const privateKeyUint8Array = Buffer.from(privateKey, "hex");
-	const publicKeyUint8Array = Buffer.from(publicKey, "hex"); // Changed to "hex"
+	const privateKeyUint8Array = Buffer.from(recipientPrivateKey, "hex");
+	const publicKeyUint8Array = Buffer.from(senderPublicKey, "hex");
 	const encryptedBytes: Buffer = Buffer.from(encryptedMessage, "hex");
 
 	// Extract the nonce and the message
@@ -80,8 +77,8 @@ export async function decryptMessage(
 	const decryptedMessage = nacl.box.open(
 		ciphertext,
 		nonce,
-		publicKeyUint8Array, // Use the public key from the SecureStore
-		privateKeyUint8Array,
+		publicKeyUint8Array, // Sender's public key
+		privateKeyUint8Array, // Recipient's private key
 	);
 
 	// Handle the null case when decryption fails
@@ -94,6 +91,7 @@ export async function decryptMessage(
 
 	return Buffer.from(decryptedMessage).toString("utf-8"); // Return the decrypted message as a string
 }
+
 
 export async function handleUserLogin(): Promise<void> {
 	try {

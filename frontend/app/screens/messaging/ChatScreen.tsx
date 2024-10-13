@@ -14,11 +14,13 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
 import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
+import * as crypto from "../../services/EncryptionService"
 import * as utils from "../../services/Utils";
 import { live, DirectMessage, instanceExists } from "../../services/Live";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
+import * as SecureStore from "expo-secure-store";
 
 const ChatScreen = () => {
 	const [self, setSelf] = useState<UserDto>();
@@ -27,6 +29,7 @@ const ChatScreen = () => {
 	const [messages, setMessages] = useState<DirectMessage[]>([]);
 	const [connected, setConnected] = useState<boolean>(false);
 	const [isSending, setIsSending] = useState<boolean>(false);
+	const [publicKey, setPublicKey] = useState<string>("");
 	const [dmError, setError] = useState<boolean>(false);
 	const router = useRouter();
 	let { username } = useLocalSearchParams();
@@ -39,6 +42,29 @@ const ChatScreen = () => {
 			flatListRef.current?.scrollToEnd({ animated: true });
 		}
 	}, [messages]);
+
+	const getPublicKey = async () => {
+		try {
+			const token = await auth.getToken();
+			const result = await axios.get(
+				`${utils.API_BASE_URL}/users/${u}/publicKey`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+
+			setPublicKey(result.data);
+		} catch (error) {
+			console.log("Error fetching public key", error);
+		}
+	};
+
+	const checkKey = async () => {
+		const symKey = await SecureStore.getItemAsync(`${u}-symKey`);
+		if(symKey === null) {
+			
+		}
+	}
 
 	const getUsers = async () => {
 		try {
@@ -70,14 +96,31 @@ const ChatScreen = () => {
 	};
 
 	useEffect(() => {
-		if (instanceExists()) {
-			if (!messages || messages.length === 0) {
-				if (live.receivedDMHistory()) {
-					setMessages(live.getFetchedDMs());
+		const getMessages = async () => {
+			if (instanceExists()) {
+				if (!messages || messages.length === 0) {
+					if (live.receivedDMHistory()) {
+						const privateKey =
+							(await SecureStore.getItemAsync("privateKey")) || "";
+						const decryptedMessages: DirectMessage[] = live.getFetchedDMs().map(async (dm) => {
+							const decryptedMessage = await crypto.decryptMessage(
+								dm.message.messageBody,
+								privateKey,
+								publicKey,
+							);
+							return {
+								...dm,
+								messageBody: decryptedMessage,
+							};
+						});
+						setMessages(decryptedMessages);
+					}
+					live.requestDMHistory(u);
 				}
-				live.requestDMHistory(u);
 			}
 		}
+		
+		getMessages();
 	}, [messages, u]);
 
 	// on component mount
@@ -116,12 +159,14 @@ const ChatScreen = () => {
 		};
 	}, []);
 
-	const handleSend = () => {
+	const handleSend = async () => {
+		const privateKey = await SecureStore.getItemAsync("privateKey") || "";
+		const encryptedMessage = await crypto.encryptMessage(message, privateKey, publicKey)
 		if (!self || !otherUser || isSending) return;
 		const newMessage: DirectMessage = {
 			message: {
 				index: messages.length,
-				messageBody: message,
+				messageBody: encryptedMessage,
 				sender: self,
 				recipient: otherUser,
 				dateSent: new Date(),
