@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as async from "async";
 
-const GLOBAL_CONCURRENCY = 10; //10 concurrent tasks at a time
+const GLOBAL_CONCURRENCY = 1; //1 concurrent tasks at a time
 // const FIFO_CONCURRENCY = 1; // Concurrency set to 1 would ensure FIFO processing for all tasks in queue
 
 //custom type for task function (because it's more type-safe than the default 'Function')

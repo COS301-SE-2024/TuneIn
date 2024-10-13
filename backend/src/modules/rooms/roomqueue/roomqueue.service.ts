@@ -22,6 +22,7 @@ import { MurLockService } from "murlock";
 // import { TasksService } from "../../../tasks/tasks.service";
 
 const QUEUE_LOCK_TIMEOUT = 20000;
+const MIN_PLAYLIST_UPDATE_INTERVAL = 60000;
 
 export class RoomSong {
 	private _score: number;
@@ -263,6 +264,7 @@ export class ActiveRoom {
 	};
 	public inactive = false;
 	public minutesInactive = 0;
+	private lastPlaylistUpdate = 0;
 
 	constructor(room: RoomDto, murLockService: MurLockService) {
 		this.room = room;
@@ -328,50 +330,30 @@ export class ActiveRoom {
 						sortRoomSongs(songs),
 						this.compareRoomSongs,
 					);
-					const queueIDs: string[] =
-						this.historicQueue.size() > 0
-							? this.historicQueue.toArray().map((s) => s.spotifyID)
-							: [];
+					// const queueIDs: string[] =
+					// 	this.historicQueue.size() > 0
+					// 		? this.historicQueue.toArray().map((s) => s.spotifyID)
+					// 		: [];
 
-					if (this.queue.size() > 0) {
-						queueIDs.push(...this.queue.toArray().map((s) => s.spotifyID));
-					}
+					// if (this.queue.size() > 0) {
+					// 	queueIDs.push(...this.queue.toArray().map((s) => s.spotifyID));
+					// }
 
-					if (queueIDs.length === 0) {
-						return;
-					}
+					// if (queueIDs.length === 0) {
+					// 	return;
+					// }
 
-					const playlistIDs: string[] = await spotify.getTuneInPlaylistIDs(
-						this.room.spotifyPlaylistID,
-					);
-
-					//if the playlist and full queue are not the same, then the queue has changed
-					// update the spotify playlist
-					let changed = false;
-					if (queueIDs.length !== playlistIDs.length) {
-						changed = true;
-					}
-					let i = 0;
-					if (!changed) {
-						for (i = 0; i < queueIDs.length; i++) {
-							if (
-								!queueIDs[i] ||
-								!playlistIDs[i] ||
-								queueIDs[i] !== playlistIDs[i]
-							) {
-								changed = true;
-								break;
-							}
-						}
-					}
-					if (changed) {
-						console.log("Queue has changed, updating spotify playlist");
-						await spotify.updateRoomPlaylist(
-							this.room.spotifyPlaylistID,
-							queueIDs,
-							i, //'i' would represent the index of the first song that is different
-						);
-					}
+					// if (
+					// 	this.lastPlaylistUpdate + MIN_PLAYLIST_UPDATE_INTERVAL <
+					// 	Date.now()
+					// ) {
+					// 	console.log("Queue has changed, updating spotify playlist");
+					// 	await spotify
+					// 		.updateRoomPlaylist(this.room.spotifyPlaylistID, queueIDs)
+					// 		.then(() => {
+					// 			this.lastPlaylistUpdate = Date.now();
+					// 		});
+					// }
 				} catch (e) {
 					console.error("Error in setQueue");
 					console.error(e);
@@ -398,7 +380,7 @@ export class ActiveRoom {
 	 */
 	async reloadQueue(
 		prisma: PrismaService,
-		spotify: SpotifyService,
+		// spotify: SpotifyService,
 		murLockService: MurLockService,
 	) {
 		//load historic queue from db
@@ -487,8 +469,12 @@ export class ActiveRoom {
 				}
 			},
 		);
-		const ids: string[] = rs.map((s) => s.spotifyID);
-		await spotify.updateRoomPlaylist(this.room.spotifyPlaylistID, ids, 0);
+		// const ids: string[] = rs.map((s) => s.spotifyID);
+		// await spotify
+		// 	.updateRoomPlaylist(this.room.spotifyPlaylistID, ids)
+		// 	.then(() => {
+		// 		this.lastPlaylistUpdate = Date.now();
+		// 	});
 	}
 
 	async clearQueue(murLockService: MurLockService) {
@@ -826,8 +812,12 @@ export class ActiveRoom {
 		songs: RoomSongDto[],
 		tracks: Spotify.Track[],
 		userID: string,
+		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<boolean> {
+		if (songs.length === 0) {
+			return false;
+		}
 		console.log(`Attempting to add ${songs.length} songs to the queue`);
 		let result = false;
 		const roomSongs: RoomSong[] = this.queue.toArray();
@@ -863,6 +853,10 @@ export class ActiveRoom {
 			},
 		);
 		await this.updateQueue(murLockService);
+		await spotify.addSongsToRoomPlaylist(
+			this.room.spotifyPlaylistID,
+			songs.map((s) => s.spotifyID),
+		);
 		return result;
 	}
 
@@ -876,6 +870,7 @@ export class ActiveRoom {
 		let result = false;
 		await this.refreshQueue(spotify, murLockService);
 		const roomSongs: RoomSong[] = this.queue.toArray();
+		const oldQueue = roomSongs.map((s) => s.spotifyID);
 		await murLockService.runWithLock(
 			this.getQueueLockName(),
 			QUEUE_LOCK_TIMEOUT,
@@ -925,8 +920,19 @@ export class ActiveRoom {
 				);
 			},
 		);
-		if (result) await this.setQueue(roomSongs, spotify, murLockService);
+		// if (result) await this.setQueue(roomSongs, spotify, murLockService);
 		await this.updateQueue(murLockService);
+		let i = 0;
+		for (i = 0; i < roomSongs.length; i++) {
+			if (roomSongs[i].spotifyID !== oldQueue[i]) {
+				break;
+			}
+		}
+		await spotify.replaceSongsFromRoomPlaylist(
+			this.room.spotifyPlaylistID,
+			i,
+			roomSongs.slice(i).map((s) => s.spotifyID),
+		);
 		return result;
 	}
 
@@ -1028,7 +1034,19 @@ export class ActiveRoom {
 					`Acquire lock: ${this.getQueueLockName()} in function 'ActiveRoom.playNext'`,
 				);
 				try {
-					this.queue.dequeue();
+					const prev = this.queue.dequeue();
+					// add song to the historic queue, if not there yet
+					const s = this.historicQueue
+						.toArray()
+						.find(
+							(s) =>
+								s.spotifyID === prev.spotifyID &&
+								s.getPlaybackStartTime() === prev.getPlaybackStartTime(),
+						);
+					if (!s) {
+						this.historicQueue.enqueue(prev);
+					}
+
 					if (this.queue.isEmpty()) {
 						return;
 					}
@@ -1043,7 +1061,7 @@ export class ActiveRoom {
 				);
 			},
 		);
-		await this.updateQueue(murLockService);
+		// await this.updateQueue(murLockService);
 		return result;
 	}
 
@@ -1159,7 +1177,7 @@ export class RoomQueueService {
 		const activeRoom = new ActiveRoom(room, this.murLockService);
 		await activeRoom.reloadQueue(
 			this.prisma,
-			this.spotify,
+			// this.spotify,
 			this.murLockService,
 		);
 		this.roomQueues.set(roomID, activeRoom);
@@ -1209,6 +1227,7 @@ export class RoomQueueService {
 			songs,
 			tracks,
 			userID,
+			this.spotify,
 			this.murLockService,
 		);
 		return result;

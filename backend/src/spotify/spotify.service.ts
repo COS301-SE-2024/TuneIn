@@ -93,7 +93,36 @@ export class SpotifyService {
 		await this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
 			for (let i = 0; i < RETRIES; i++) {
 				try {
-					this.TuneInAPI = SpotifyApi.withAccessToken(this.clientId, tp.tokens);
+					this.TuneInAPI = SpotifyApi.withAccessToken(
+						this.clientId,
+						tp.tokens,
+						{
+							beforeRequest: (url: string, options) => {
+								console.log(`TuneInAPI request: ${url}`);
+								console.log(options);
+							},
+							afterRequest: (url: string, options, response: Response) => {
+								console.log(`TuneInAPI response: ${url}`);
+								console.log(options);
+								console.log(response);
+								if (response.status === 429) {
+									const retryAfter = response.headers.get("retry-after");
+									if (retryAfter) {
+										const delay = parseInt(retryAfter, 10) * 1000;
+										console.log(`Rate limited, waiting ${delay}ms`);
+										return this.wait(delay).then(() => {
+											return;
+										});
+									}
+								} else if (response.status === 401) {
+									console.log(`Token expired, refreshing...`);
+									return this.getSpotifyTokens(tuneinID).then((newTokens) => {
+										return;
+									});
+								}
+							},
+						},
+					);
 					break;
 				} catch (e) {
 					error = e as Error;
@@ -217,24 +246,27 @@ export class SpotifyService {
 						collaborative: false,
 					}),
 				);
-			const imageBuffer = await this.downloadImage(room.room_image);
-			let b64: string;
-			if (imageBuffer.length < MAX_BYTES_PER_IMAGE) {
-				b64 = this.imageService.imageToB64(imageBuffer);
-			} else {
-				const processedImageBuffer = await this.imageService.compressImage(
-					imageBuffer,
-					MAX_BYTES_PER_IMAGE,
-				);
-				b64 = this.imageService.imageToB64(processedImageBuffer);
+			// use regex to check if room.room_image is a valid URL
+			if (room.room_image.match(/^(http|https):\/\//)) {
+				const imageBuffer = await this.downloadImage(room.room_image);
+				let b64: string;
+				if (imageBuffer.length < MAX_BYTES_PER_IMAGE) {
+					b64 = this.imageService.imageToB64(imageBuffer);
+				} else {
+					const processedImageBuffer = await this.imageService.compressImage(
+						imageBuffer,
+						MAX_BYTES_PER_IMAGE,
+					);
+					b64 = this.imageService.imageToB64(processedImageBuffer);
+				}
+				console.log(`Size of base64: ${b64.length}`);
+				// await this.retryService.spotifyRequestWithRetries(
+				// 	this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
+				// 		playlist.id,
+				// 		b64,
+				// 	),
+				// );
 			}
-			console.log(`Size of base64: ${b64.length}`);
-			// await this.retryService.spotifyRequestWithRetries(
-			// 	this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
-			// 		playlist.id,
-			// 		b64,
-			// 	),
-			// );
 			await this.prisma.room.update({
 				where: {
 					room_id: room.roomID,
@@ -249,12 +281,8 @@ export class SpotifyService {
 
 	async updateRoomPlaylist(
 		playlistID: string,
-		trackIDs: string[],
-		start = 0,
+		roomQueueTrackIDs: string[],
 	): Promise<void> {
-		if (start < 0) {
-			throw new Error("Start index must be greater than or equal to 0");
-		}
 		await this.refreshTuneInAPI();
 		const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
 
@@ -265,9 +293,12 @@ export class SpotifyService {
 		> = await this.retryService.spotifyRequestWithRetries(
 			this.TuneInAPI.playlists.getPlaylistItems(playlistID),
 		);
+		console.log(`First request done`);
 
 		// fetch songs from Spotify with retries
 		while (currentTracks.length < currentPlaylist.total) {
+			await this.wait(500); // for rate limiting
+			console.log(`Loop request`);
 			const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
 				await this.retryService.spotifyRequestWithRetries(
 					this.TuneInAPI.playlists.getPlaylistItems(
@@ -280,29 +311,54 @@ export class SpotifyService {
 				);
 			currentTracks.push(...tracks.items);
 		}
-		const currentTrackIDs: string[] = currentTracks.map(
+		const currentPlaylistTrackIDs: string[] = currentTracks.map(
 			(track) => track.track.id,
 		);
-		//delete all songs from start
-		const deleteIDs: string[] = currentTrackIDs.slice(start);
-		let promises: Promise<void>[] = [];
-		for (let i = 0; i < deleteIDs.length; i += 50) {
-			// remove songs from playlist in batches of 50 with retries
-			const ids = deleteIDs.slice(i, i + 50);
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			const deleteRequest = this.retryService.spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
-					tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
-				}),
-			);
-			promises.push(deleteRequest);
-		}
-		await Promise.all(promises);
 
-		const uris: string[] = trackIDs
+		//if the playlist and full queue are not the same, then the queue has changed
+		// update the spotify playlist
+		let changed = false;
+		if (roomQueueTrackIDs.length !== currentPlaylistTrackIDs.length) {
+			changed = true;
+		}
+		let start = 0;
+		if (!changed) {
+			for (start = 0; start < roomQueueTrackIDs.length; start++) {
+				if (
+					!roomQueueTrackIDs[start] ||
+					!currentPlaylistTrackIDs[start] ||
+					roomQueueTrackIDs[start] !== currentPlaylistTrackIDs[start]
+				) {
+					changed = true;
+					break;
+				}
+			}
+		}
+
+		if (!changed) return;
+
+		//delete all songs from start
+		if (start <= currentPlaylistTrackIDs.length) {
+			const deleteIDs: string[] = currentPlaylistTrackIDs.slice(start);
+			const promises: Promise<void>[] = [];
+			for (let i = 0; i < deleteIDs.length; i += 50) {
+				// remove songs from playlist in batches of 50 with retries
+				const ids = deleteIDs.slice(i, i + 50);
+				await new Promise((resolve) => setTimeout(resolve, 500));
+				const deleteRequest = this.retryService.spotifyRequestWithRetries(
+					this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
+						tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
+					}),
+				);
+				promises.push(deleteRequest);
+			}
+			await Promise.all(promises);
+		}
+
+		const uris: string[] = roomQueueTrackIDs
 			.map((id) => `spotify:track:${id}`)
 			.slice(start);
-		promises = [];
+		const promises: Promise<void>[] = [];
 		for (let i = 0; i < uris.length; i += 50) {
 			const ids = uris.slice(i, i + 50);
 			await new Promise((resolve) => setTimeout(resolve, 500));
@@ -312,6 +368,43 @@ export class SpotifyService {
 			promises.push(insertRequest);
 		}
 		await Promise.all(promises);
+	}
+
+	async addSongsToRoomPlaylist(
+		playlistID: string,
+		trackIDs: string[],
+	): Promise<void> {
+		const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
+		const promises: Promise<void>[] = [];
+		for (let i = 0; i < uris.length; i += 50) {
+			const ids = uris.slice(i, i + 50);
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			const insertRequest = this.retryService.spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.addItemsToPlaylist(playlistID, ids),
+			);
+			promises.push(insertRequest);
+		}
+		await Promise.all(promises);
+	}
+
+	async replaceSongsFromRoomPlaylist(
+		playlistID: string,
+		startIndex: number,
+		trackIDs: string[],
+	): Promise<void> {
+		const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
+		const promises: Promise<void>[] = [];
+		for (let i = 0; i < uris.length; i += 50) {
+			const ids = uris.slice(i, i + 50);
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			const updateRequest = this.retryService.spotifyRequestWithRetries(
+				this.TuneInAPI.playlists.updatePlaylistItems(playlistID, {
+					uris: ids,
+					range_start: startIndex + i,
+				}),
+			);
+			promises.push(updateRequest);
+		}
 	}
 
 	async saveRoomPlaylist(room: RoomDto, userID: string): Promise<void> {
