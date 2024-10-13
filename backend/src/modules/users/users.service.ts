@@ -1949,18 +1949,69 @@ export class UsersService {
 			where: { user_id: userID },
 		});
 
-		if(key === undefined || key === null) {
+		if (key === undefined || key === null) {
 			await this.prisma.public_key.create({
 				data: {
 					user_id: userID,
-                    key: publicKey,
-				}
-			})
+					key: publicKey,
+				},
+			});
 		} else {
 			await this.prisma.public_key.update({
-                where: { user_id: userID },
-                data: { key: publicKey },
-            });
+				where: { user_id: userID },
+				data: { key: publicKey },
+			});
+		}
+	}
+
+	async getSymmetricKey(sender: string, receiver: string): Promise<string> {
+		const senderDto: UserDto = await this.getProfileByUsername(sender);
+		// const receiverDto: UserDto = await this.getProfileByUsername(receiver);
+
+		const key = await this.prisma.symmetric_key.findUnique({
+			where: { sender: senderDto.userID, receiver: receiver },
+		});
+
+		return key?.key || "";
+	}
+
+	async getAllSymmetricKey(receiver: string): Promise<string[]> {
+		// const receiverDto: UserDto = await this.getProfileByUsername(receiver);
+
+		const key = await this.prisma.symmetric_key.findMany({
+			where: { receiver: receiver },
+		});
+
+		const keys = key?.map((item) => 
+			item?.key
+		)
+
+		return keys;
+	}
+
+	async uploadSymmetricKey(
+		sender: string,
+		receiver: string,
+		publicKey: string,
+	): Promise<void> {
+		const receiverDto: UserDto = await this.getProfileByUsername(receiver);
+
+		const key = await this.prisma.symmetric_key.findUnique({
+			where: { sender: senderDto, receiver: receiverDto.userID },
+		});
+
+		if (key === undefined || key === null) {
+			await this.prisma.symmetric_key.create({
+				data: {
+					sender: senderDto, receiver: receiverDto.userID 
+					key: publicKey,
+				},
+			});
+		} else {
+			await this.prisma.symmetric_key.update({
+				where: { sender: senderDto, receiver: receiverDto.userID },
+				data: { key: publicKey },
+			});
 		}
 	}
 }
