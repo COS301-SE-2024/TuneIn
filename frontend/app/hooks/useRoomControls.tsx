@@ -303,6 +303,7 @@ export function useRoomControls({
 			song?: RoomSongDto,
 		): Promise<void> {
 			try {
+				console.log(`call handlePlayback`);
 				if (!spotifyTokens) {
 					throw new Error("Spotify tokens not found");
 				}
@@ -527,11 +528,23 @@ export function useRoomControls({
 					});
 				}
 				if (state.context === null) {
+					console.log(`userListeningToRoom false because context is null`);
 					return false;
 				}
-				if (state.context.uri !== currentRoom.spotifyPlaylistID) {
+				if (!state.is_playing) {
+					console.error(
+						`userListeningToRoom false because Spotify is not playing`,
+					);
 					return false;
 				}
+				const playlistURI = `spotify:playlist:${currentRoom.spotifyPlaylistID}`;
+				if (state.context.uri !== playlistURI) {
+					console.log(
+						`userListeningToRoom false because context URI is not room playlist`,
+					);
+					return false;
+				}
+				return true;
 				// if (state.item === null) {
 				// 	return false;
 				// }
@@ -541,6 +554,7 @@ export function useRoomControls({
 			} else {
 				console.log(`userListeningToRoom false because !roomPlaying`);
 			}
+			console.log(`userListeningToRoom false because of unknown reason`);
 			return false;
 		},
 		[currentRoom, currentSongRef, spotify, activeDevice],
@@ -553,27 +567,45 @@ export function useRoomControls({
 				return;
 			}
 
+			let cs: RoomSongDto | undefined = currentSongRef.current;
+			let success: boolean = false;
 			if (!(await userListeningToRoom(true))) {
-				if (!currentSongRef.current) {
+				if (!cs) {
 					return;
 				}
-				if (currentSongRef.current.pauseTime) {
-					if (!currentSongRef.current.startTime) {
-						currentSongRef.current.startTime = startTime;
+				if (cs.pauseTime) {
+					if (!cs.startTime) {
+						cs.startTime = startTime;
 					} else {
-						const offset =
-							currentSongRef.current.startTime -
-							currentSongRef.current.pauseTime;
-						currentSongRef.current.startTime = startTime - offset;
+						const offset = cs.startTime - cs.pauseTime;
+						cs.startTime = startTime - offset;
 					}
 				} else {
-					currentSongRef.current.startTime = startTime;
+					cs.startTime = startTime;
 				}
-				await handlePlayback(
-					"play",
-					currentRoom.spotifyPlaylistID,
-					currentSongRef.current,
+				if (cs.playlistIndex === -1) {
+					cs.playlistIndex = await spotifyAuth.getTrackIndex(
+						currentRoom.spotifyPlaylistID,
+						cs.spotifyID,
+					);
+				}
+				await handlePlayback("play", currentRoom.spotifyPlaylistID, cs).then(
+					async () => {
+						await new Promise((resolve) => setTimeout(resolve, 2000)).then(
+							async () => {
+								success = await userListeningToRoom(true);
+							},
+						);
+					},
 				);
+			} else {
+				return;
+			}
+			if (!success) {
+				console.error(`Playback could not be started`);
+			} else {
+				console.log(`Playback started & confirmed`);
+				currentSongRef.current = cs;
 			}
 			if (socket === null) {
 				console.error("Socket connection not initialized");
@@ -600,23 +632,84 @@ export function useRoomControls({
 				UTC_time: startTime,
 			};
 			socket.emit(SOCKET_EVENTS.INIT_PLAY, JSON.stringify(input));
+			if (currentSongRef.current) {
+				currentSongRef.current.startTime = startTime;
+			}
 		},
 		[
 			currentRoom,
+			currentSongRef,
 			userListeningToRoom,
 			socket,
 			pollLatency,
 			currentUser,
-			currentSongRef,
 			handlePlayback,
+			spotifyAuth,
 		],
 	);
 
 	const pausePlayback = useCallback(
 		async function (): Promise<void> {
 			const now = Date.now();
+			const cs: RoomSongDto | undefined = currentSongRef.current;
+			let successfullyPaused: boolean = false;
+			if (!cs) {
+				return;
+			}
+			if (!cs.startTime) {
+				return;
+			} else {
+				cs.pauseTime = now;
+			}
 			if (await userListeningToRoom(true)) {
-				await handlePlayback("pause");
+				await handlePlayback("pause").then(async () => {
+					await new Promise((resolve) => setTimeout(resolve, 2000)).then(
+						async () => {
+							successfullyPaused = !(await userListeningToRoom(true));
+							if (!successfullyPaused) {
+								currentSongRef.current = cs;
+								console.error(`Playback could not be paused`);
+								return;
+							}
+							if (!spotify) {
+								console.log(
+									`User either does not have a Spotify account or is not logged in`,
+								);
+								return false;
+							}
+
+							await spotify.player
+								.getPlaybackState()
+								.catch((err) => {
+									alert(
+										"An error occurred while checking if user is listening to room: " +
+											err,
+									);
+									throw err;
+								})
+								.then(async (state) => {
+									console.log("Playback state:", state);
+									if (state === null) {
+										console.log(`Playback state is null`);
+										return;
+									}
+									setPlaybackState(state);
+									if (state.is_playing) {
+										console.error(
+											`Playback could not be paused. Spotify is still playing`,
+										);
+										return;
+									}
+								});
+						},
+					);
+				});
+			} else {
+				return;
+			}
+
+			if (!successfullyPaused) {
+				return;
 			}
 
 			if (socket === null) {
@@ -649,13 +742,14 @@ export function useRoomControls({
 			}
 		},
 		[
+			currentSongRef,
 			userListeningToRoom,
 			socket,
 			pollLatency,
 			currentUser,
 			currentRoom,
-			currentSongRef,
 			handlePlayback,
+			spotify,
 		],
 	);
 
