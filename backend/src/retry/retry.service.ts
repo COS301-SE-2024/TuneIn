@@ -87,10 +87,34 @@ export class RetryService {
 		retries: number = RETRIES,
 	): Promise<any> {
 		const executeRequest = async (status: RetryStatus) => {
-			if (status.index > 0) {
-				console.log(`Retrying... Attempt #${status.index + 1}`);
+			try {
+				if (status.index > 0) {
+					console.log(`Retrying... Attempt #${status.index + 1}`);
+				}
+				console.log(`SPOTIFY REQUEST MADE`);
+				return await request;
+			} catch (e: any) {
+				// Handle rate-limit errors (429)
+				console.error(`Error performing Spotify request: ${e.message}`);
+				console.error(JSON.stringify(e));
+				if (
+					e.statusCode &&
+					e.statusCode === 429 &&
+					e.headers["retry-after"] &&
+					e.headers["retry-after"]
+				) {
+					const retryAfter = parseInt(e.headers["retry-after"], 10);
+					console.error(
+						`Rate-limited. Retrying after ${retryAfter} seconds...`,
+					);
+					await new Promise((resolve) =>
+						setTimeout(resolve, (retryAfter + 1) * 1000),
+					); // Wait for retry-after + 1 second
+					throw e; // Rethrow the error to trigger retry
+				}
+
+				throw e; // For other errors, rethrow to be handled by retryAsync
 			}
-			return await request;
 		};
 
 		// Call retryAsync, passing the function and options
@@ -98,7 +122,7 @@ export class RetryService {
 			retry: retries,
 			delay: (status: RetryStatus) => {
 				// Optionally use exponential backoff or fixed delay
-				const delay = Math.pow(2, status.index) * 100; // Exponential backoff (100ms * 2^index)
+				const delay = Math.pow(2, status.index) * 500; // Exponential backoff (500ms * 2^index)
 				console.log(`Waiting for ${delay}ms before next attempt...`);
 				return delay;
 			},
