@@ -1,43 +1,61 @@
-import { useState } from "react";
-import * as spotifyAuth from "../services/SpotifyAuth";
-import { ToastAndroid } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import * as Spotify from "@spotify/web-api-ts-sdk";
+import { useLive } from "../LiveContext";
+import { SPOTIFY_CLIENT_ID } from "react-native-dotenv";
 
-export const useSpotifySearch = () => {
-	const [searchResults, setSearchResults] = useState<any[]>([]);
+const clientId = SPOTIFY_CLIENT_ID;
+if (!clientId) {
+	throw new Error(
+		"No Spotify client ID (SPOTIFY_CLIENT_ID) provided in environment variables",
+	);
+}
+
+export const useSpotifySearch = (): {
+	searchResults: Spotify.Track[];
+	handleSearch: (query: string) => Promise<void>;
+	error: string | null;
+} => {
+	const { spotifyAuth, currentUser } = useLive();
+	const [searchResults, setSearchResults] = useState<Spotify.Track[]>([]);
 	const [error, setError] = useState<string | null>(null);
-	const handleSearch = async (query: string) => {
-		try {
-			console.log("handleSearch: ", query);
-			const allTokens = await spotifyAuth.getTokens();
-			const accessToken = allTokens.access_token;
+	const spotify = useRef<Spotify.SpotifyApi | null>(null);
 
-			if (!accessToken) {
-				throw new Error("Access token not found");
+	useEffect(() => {
+		if (currentUser && currentUser.hasSpotifyAccount) {
+			if (spotify != null) {
+				spotifyAuth.getSpotifyTokens().then((tokens) => {
+					if (tokens !== null) {
+						spotify.current = Spotify.SpotifyApi.withAccessToken(
+							clientId,
+							tokens.tokens,
+						);
+					}
+				});
 			}
-
-			const response = await fetch(
-				`https://api.spotify.com/v1/search?q=${query}&type=track`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
-					},
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
-
-			const data = await response.json();
-			setSearchResults(data.tracks.items);
-		} catch (err) {
-			setError("An error occurred while searching");
-			console.log("An error occurred while searching", err);
-			ToastAndroid.show("Failed to load search results", ToastAndroid.SHORT);
 		}
-	};
+	}, [currentUser, spotifyAuth]);
+
+	const handleSearch = useCallback(
+		async (query: string): Promise<void> => {
+			try {
+				let client: Spotify.SpotifyApi;
+				if (spotify.current !== null) {
+					client = spotify.current;
+				} else {
+					client = spotifyAuth.userlessAPI;
+				}
+				await client.search(query, ["track"]).then((response) => {
+					console.log("search results");
+					console.log(response);
+					setSearchResults(response.tracks.items);
+				});
+			} catch (err) {
+				setError("An error occurred while searching");
+				console.error("Error performing Spotify search: ", err);
+			}
+		},
+		[spotifyAuth.userlessAPI],
+	);
 
 	return {
 		searchResults,

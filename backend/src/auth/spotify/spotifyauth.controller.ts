@@ -101,13 +101,13 @@ export class SpotifyAuthController {
 	@ApiResponse({
 		status: 201,
 		description: "The record has been successfully created.",
-		type: String,
+		type: SpotifyCallbackResponse,
 	})
 	@ApiResponse({ status: 403, description: "Forbidden." })
 	async handleSpotifyAuthCallback(
 		@Query("code") code: string,
 		@Query("state") state: string,
-	) {
+	): Promise<SpotifyCallbackResponse> {
 		//expecting "/auth/callback?code={code}&state={state}"
 		//`http://localhost:3000/auth/spotify/callback?code=${code}&state=${state}`,
 		const tokens: SpotifyTokenResponse =
@@ -123,7 +123,7 @@ export class SpotifyAuthController {
 
 		const response: SpotifyCallbackResponse = {
 			token: jwt,
-			spotifyTokens: tokens,
+			spotifyTokens: tp,
 		};
 		return response;
 	}
@@ -147,17 +147,17 @@ export class SpotifyAuthController {
 	@ApiResponse({
 		status: 200,
 		description: "The user's Spotify Auth Tokens",
-		type: SpotifyTokenResponse,
+		type: SpotifyTokenPair,
 	})
 	@ApiResponse({ status: 404, description: "User not found" })
 	async handleSpotifyTokens(
 		@Request() req: Request,
-	): Promise<SpotifyTokenResponse> {
+	): Promise<SpotifyTokenPair> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
 		const tokens: SpotifyTokenPair = await this.spotifyAuth.getSpotifyTokens(
 			userInfo.id,
 		);
-		return tokens.tokens;
+		return tokens;
 	}
 
 	@ApiBearerAuth()
