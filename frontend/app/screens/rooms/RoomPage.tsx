@@ -37,6 +37,7 @@ import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 // const MemoizedCommentWidget = memo(CommentWidget);
 const { width, height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
+const OPTIMISTIC_PLAYBACK_STATE_TIMEOUT = 5000;
 
 const RoomPage: React.FC = () => {
 	const { rooms } = useAPI();
@@ -83,8 +84,11 @@ const RoomPage: React.FC = () => {
 	const { fetchSongInfo, addSongsToCache } = useSpotifyTracks(spotifyAuth);
 	const [localCurrentSong, setLocalCurrentSong] = useState<rs.SongPair>();
 	const [localQueue, setLocalQueue] = useState<rs.SongPair[]>([]);
-	const [localRoomPlaying, setLocalRoomPlaying] = useState(false);
+	const [localRoomPlaying, setLocalRoomPlaying] = useState(roomPlaying);
 	const [devicePickerVisible, setDevicePickerVisible] = useState(false);
+	const [optimisticPlaybackState, setOptimisticPlaybackState] = useState(false);
+	const optimisticPlaybackStatIntervaleRef = useRef<NodeJS.Timeout>();
+	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		console.log(`!thisRoom: ${!thisRoom}`);
@@ -96,12 +100,22 @@ const RoomPage: React.FC = () => {
 				setThisRoom(r);
 				if (currentRoom) {
 					setUserInRoom(currentRoom.roomID === roomID);
-					if (localRoomPlaying !== roomPlaying) {
-						setLocalRoomPlaying(roomPlaying);
+					if (
+						(!localRoomPlaying || !ownerPlaying) &&
+						!optimisticPlaybackState &&
+						(ownerPlaying || localRoomPlaying)
+					) {
+						setOwnerPlaying(roomPlaying); // Set ownerPlaying to the socket state
 					}
 				} else {
-					setUserInRoom(false);
-					setLocalRoomPlaying(false);
+					if (!userInRoom) {
+						setUserInRoom(false);
+					}
+					if (!optimisticPlaybackState) {
+						if (!ownerPlaying) {
+							setLocalRoomPlaying(false);
+						}
+					}
 				}
 				if (r.current_song) {
 					const s = r.current_song;
@@ -117,7 +131,17 @@ const RoomPage: React.FC = () => {
 				}
 			});
 		}
-	}, [thisRoom, roomID, rooms, currentRoom]);
+	}, [
+		thisRoom,
+		roomID,
+		rooms,
+		currentRoom,
+		localRoomPlaying,
+		optimisticPlaybackState,
+		ownerPlaying,
+		roomPlaying,
+		fetchSongInfo,
+	]);
 
 	const checkBookmarked = useCallback(async () => {
 		for (let i = 0; i < userBookmarks.length; i++) {
@@ -160,27 +184,45 @@ const RoomPage: React.FC = () => {
 			if (userInRoom) {
 				console.log("playPauseTrack playPauseTrack playPauseTrack");
 				if (roomControls.canControlRoom()) {
-					if (!roomPlaying) {
+					if (!ownerPlaying) {
 						console.log("starting playback");
+						setOwnerPlaying(true); //set owner's request to play
+						setLocalRoomPlaying(true);
 						roomControls.playbackHandler.startPlayback();
 					} else {
 						console.log("stopping playback");
+						setOwnerPlaying(false); //set owner's request to pause
+						setLocalRoomPlaying(false);
 						roomControls.playbackHandler.pausePlayback();
 					}
+					setOptimisticPlaybackState(true);
+					optimisticPlaybackStatIntervaleRef.current = setTimeout(() => {
+						setOptimisticPlaybackState(false);
+						setLocalRoomPlaying(ownerPlaying);
+						optimisticPlaybackStatIntervaleRef.current = undefined;
+					}, OPTIMISTIC_PLAYBACK_STATE_TIMEOUT);
+				} else {
+					alert(
+						`You're not the owner of this room. Playback controls should not be visible for you`,
+					);
 				}
+			} else {
+				alert(
+					`You're gonna have to join this room first before trying to play music`,
+				);
 			}
 		},
-		[roomControls, roomPlaying, userInRoom],
+		[ownerPlaying, roomControls, userInRoom],
 	);
 
-	const playNextTrack = () => {
+	const playNextTrack = useCallback(() => {
 		if (userInRoom) {
 			console.log("playNextTrack playNextTrack playNextTrack");
 			if (roomControls.canControlRoom()) {
 				roomControls.playbackHandler.nextTrack();
 			}
 		}
-	};
+	}, [roomControls, userInRoom]);
 
 	// const playPreviousTrack = () => {
 	// 	if (userInRoom) {
@@ -207,7 +249,9 @@ const RoomPage: React.FC = () => {
 		} else if (currentRoom && userInRoom) {
 			await rooms.leaveRoom(roomID);
 			leaveRoom();
-			if (await roomControls.playbackHandler.userListeningToRoom(roomPlaying)) {
+			if (
+				await roomControls.playbackHandler.userListeningToRoom(ownerPlaying)
+			) {
 				await roomControls.playbackHandler.handlePlayback("pause");
 			}
 			setUserInRoom(false);
@@ -267,7 +311,7 @@ const RoomPage: React.FC = () => {
 	}, [roomPlaying]);
 
 	useEffect(() => {
-		if (roomPlaying) {
+		if (ownerPlaying) {
 			trackPositionIntervalRef.current = window.setInterval(() => {
 				const s = currentSong;
 				if (s) {
@@ -289,7 +333,7 @@ const RoomPage: React.FC = () => {
 				clearInterval(trackPositionIntervalRef.current);
 			}
 		};
-	}, [currentSong, roomPlaying]);
+	}, [currentSong, ownerPlaying]);
 
 	// update local state only if different from socket state
 	useEffect(() => {
@@ -331,8 +375,8 @@ const RoomPage: React.FC = () => {
 						},
 					);
 				}
-				if (localRoomPlaying !== roomPlaying) {
-					setLocalRoomPlaying(roomPlaying);
+				if (ownerPlaying && !localRoomPlaying && !optimisticPlaybackState) {
+					setLocalRoomPlaying(true);
 				}
 				let differenceFound = false;
 				if (roomQueue.length !== localQueue.length) {
@@ -413,7 +457,7 @@ const RoomPage: React.FC = () => {
 					<Text>{rs.constructArtistString(currentSong)}</Text>
 				</View> */}
 
-				{roomData.mine ? (
+				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						{/* <TouchableOpacity
 							style={styles.controlButton}
@@ -426,7 +470,7 @@ const RoomPage: React.FC = () => {
 							onPress={() => playPauseTrack()}
 						>
 							<FontAwesome5
-								name={userInRoom && localRoomPlaying ? "pause" : "play"}
+								name={userInRoom && ownerPlaying ? "pause" : "play"}
 								size={30}
 								color="black"
 							/>
@@ -442,7 +486,7 @@ const RoomPage: React.FC = () => {
 					<View></View>
 				)}
 			</View>
-			<Animated.ScrollView
+			{/* <Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
 				contentContainerStyle={{ flexGrow: 1 }}
 			>
@@ -470,7 +514,7 @@ const RoomPage: React.FC = () => {
 							</View>
 						</TouchableOpacity>
 					))}
-			</Animated.ScrollView>
+			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
