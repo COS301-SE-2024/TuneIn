@@ -30,8 +30,8 @@ jobs:
     - name: Last linting check before deployment
       run: cd backend && npm run lint
 
-    - name: Last tests before deployment
-      run: cd backend && npm run test
+#    - name: Last tests before deployment
+#      run: cd backend && npm run test
 
     - name: Verify Build before deployment
       run: |

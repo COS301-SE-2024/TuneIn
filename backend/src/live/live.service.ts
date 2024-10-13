@@ -5,10 +5,9 @@ import { Injectable } from "@nestjs/common";
 // import { Server } from "socket.io";
 // import { PlaybackEventDto } from "./dto/playbackevent.dto";
 // import { SOCKET_EVENTS } from "../common/constants";
-import {
-	// RoomQueueService,
-	// ActiveRoom,
-} from "../modules/rooms/roomqueue/roomqueue.service";
+import // RoomQueueService,
+// ActiveRoom,
+"../modules/rooms/roomqueue/roomqueue.service";
 // import { RoomSongDto } from "../modules/rooms/dto/roomsong.dto";
 
 // const MAX_ANNOUNCEMENTS_PER_ROOM = 5;
@@ -17,10 +16,8 @@ import {
 export class LiveService {
 	// private server: Server;
 	// private roomJobs: Map<string, CronJob[]>;
-	constructor(
-		// private readonly schedulerRegistry: SchedulerRegistry,
-		// private readonly roomQueue: RoomQueueService,
-	) {
+	constructor() {
+		// private readonly roomQueue: RoomQueueService, // private readonly schedulerRegistry: SchedulerRegistry,
 		// this.roomJobs = new Map<string, CronJob[]>();
 	}
 
