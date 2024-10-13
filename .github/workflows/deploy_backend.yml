@@ -25,7 +25,7 @@ jobs:
 
     - name: Install dependencies
       run:  |
-        cd backend && rm package-lock.json && npm ci
+        cd backend && rm package-lock.json && npm i
 
     - name: Last linting check before deployment
       run: cd backend && npm run lint
