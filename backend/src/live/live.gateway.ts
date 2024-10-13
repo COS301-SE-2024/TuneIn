@@ -1084,175 +1084,175 @@ export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	});
 	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.UPVOTE_SONG)
-	async handleSongUpvote(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(SOCKET_EVENTS.UPVOTE_SONG, async () => {
-			try {
-				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
-				if (!payload.createdAt) {
-					throw new Error("No createdAt provided");
-				}
-				const somethingChanged: boolean = await this.roomQueue.upvoteSong(
-					payload.roomID,
-					payload.songs[0].spotifyID,
-					payload.songs[0].userID,
-					payload.createdAt,
-				);
-				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
-						payload.roomID,
-						payload.songs[0].spotifyID,
-					);
-					if (song) {
-						const response: QueueEventDto = {
-							roomID: payload.roomID,
-							songs: [song],
-						};
-						this.server
-							.to(payload.roomID)
-							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-						this.sendQueueState(payload.roomID);
-					}
-				}
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.UPVOTE_SONG)
+	// async handleSongUpvote(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.UPVOTE_SONG, async () => {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: QueueEventDto = await this.validateQueueEvent(p, true);
+	// 			if (!payload.createdAt) {
+	// 				throw new Error("No createdAt provided");
+	// 			}
+	// 			const somethingChanged: boolean = await this.roomQueue.upvoteSong(
+	// 				payload.roomID,
+	// 				payload.songs[0].spotifyID,
+	// 				payload.songs[0].userID,
+	// 				payload.createdAt,
+	// 			);
+	// 			if (somethingChanged) {
+	// 				const song = await this.roomQueue.getSongAsRoomSongDto(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 				);
+	// 				if (song) {
+	// 					const response: QueueEventDto = {
+	// 						roomID: payload.roomID,
+	// 						songs: [song],
+	// 					};
+	// 					this.server
+	// 						.to(payload.roomID)
+	// 						.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 					console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+	// 					this.sendQueueState(payload.roomID);
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error);
+	// 		}
+	// 	});
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.DOWNVOTE_SONG)
-	async handleSongDownvote(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(SOCKET_EVENTS.DOWNVOTE_SONG, async () => {
-			try {
-				console.log(p);
-				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
-				if (!payload.createdAt) {
-					throw new Error("No createdAt provided");
-				}
-				const somethingChanged: boolean = await this.roomQueue.downvoteSong(
-					payload.roomID,
-					payload.songs[0].spotifyID,
-					payload.songs[0].userID,
-					payload.createdAt,
-				);
-				if (somethingChanged) {
-					const song = await this.roomQueue.getSongAsRoomSongDto(
-						payload.roomID,
-						payload.songs[0].spotifyID,
-					);
-					if (song) {
-						const response: QueueEventDto = {
-							roomID: payload.roomID,
-							songs: [song],
-						};
-						this.server
-							.to(payload.roomID)
-							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-						this.sendQueueState(payload.roomID);
-					}
-				}
-			} catch (error) {
-				console.error(error);
-				this.handleThrownError(client, error);
-			}
-		});
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.DOWNVOTE_SONG)
+	// async handleSongDownvote(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.DOWNVOTE_SONG, async () => {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: QueueEventDto = await this.validateQueueEvent(p, true);
+	// 			if (!payload.createdAt) {
+	// 				throw new Error("No createdAt provided");
+	// 			}
+	// 			const somethingChanged: boolean = await this.roomQueue.downvoteSong(
+	// 				payload.roomID,
+	// 				payload.songs[0].spotifyID,
+	// 				payload.songs[0].userID,
+	// 				payload.createdAt,
+	// 			);
+	// 			if (somethingChanged) {
+	// 				const song = await this.roomQueue.getSongAsRoomSongDto(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 				);
+	// 				if (song) {
+	// 					const response: QueueEventDto = {
+	// 						roomID: payload.roomID,
+	// 						songs: [song],
+	// 					};
+	// 					this.server
+	// 						.to(payload.roomID)
+	// 						.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 					console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+	// 					this.sendQueueState(payload.roomID);
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error);
+	// 		}
+	// 	});
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.UNDO_SONG_VOTE)
-	async handleVoteUndo(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(
-			SOCKET_EVENTS.UNDO_SONG_VOTE,
-			async () => {
-				try {
-					console.log(p);
-					const payload: QueueEventDto = await this.validateQueueEvent(p);
-					const somethingChanged: boolean = await this.roomQueue.undoSongVote(
-						payload.roomID,
-						payload.songs[0].spotifyID,
-						payload.songs[0].userID,
-					);
-					if (somethingChanged) {
-						const song = await this.roomQueue.getSongAsRoomSongDto(
-							payload.roomID,
-							payload.songs[0].spotifyID,
-						);
-						if (song) {
-							const response: QueueEventDto = {
-								roomID: payload.roomID,
-								songs: [song],
-							};
-							this.server
-								.to(payload.roomID)
-								.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-							console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-							this.sendQueueState(payload.roomID);
-						}
-					}
-				} catch (error) {
-					console.error(error);
-					this.handleThrownError(client, error);
-				}
-			},
-		);
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.UNDO_SONG_VOTE)
+	// async handleVoteUndo(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(
+	// 		SOCKET_EVENTS.UNDO_SONG_VOTE,
+	// 		async () => {
+	// 			try {
+	// 				console.log(p);
+	// 				const payload: QueueEventDto = await this.validateQueueEvent(p);
+	// 				const somethingChanged: boolean = await this.roomQueue.undoSongVote(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 					payload.songs[0].userID,
+	// 				);
+	// 				if (somethingChanged) {
+	// 					const song = await this.roomQueue.getSongAsRoomSongDto(
+	// 						payload.roomID,
+	// 						payload.songs[0].spotifyID,
+	// 					);
+	// 					if (song) {
+	// 						const response: QueueEventDto = {
+	// 							roomID: payload.roomID,
+	// 							songs: [song],
+	// 						};
+	// 						this.server
+	// 							.to(payload.roomID)
+	// 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+	// 						this.sendQueueState(payload.roomID);
+	// 					}
+	// 				}
+	// 			} catch (error) {
+	// 				console.error(error);
+	// 				this.handleThrownError(client, error);
+	// 			}
+	// 		},
+	// 	);
+	// }
 
-	@SubscribeMessage(SOCKET_EVENTS.SWAP_SONG_VOTE)
-	async handleVoteSwap(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() p: string,
-	): Promise<void> {
-		this.eventQueueService.addToQueue(
-			SOCKET_EVENTS.SWAP_SONG_VOTE,
-			async () => {
-				try {
-					console.log(p);
-					const payload: QueueEventDto = await this.validateQueueEvent(p, true);
-					if (!payload.createdAt) {
-						throw new Error("No createdAt provided");
-					}
-					const somethingChanged: boolean = await this.roomQueue.swapSongVote(
-						payload.roomID,
-						payload.songs[0].spotifyID,
-						payload.songs[0].userID,
-						payload.createdAt,
-					);
-					if (somethingChanged) {
-						const song = await this.roomQueue.getSongAsRoomSongDto(
-							payload.roomID,
-							payload.songs[0].spotifyID,
-						);
-						if (song) {
-							const response: QueueEventDto = {
-								roomID: payload.roomID,
-								songs: [song],
-							};
-							this.server
-								.to(payload.roomID)
-								.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
-							console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
-							this.sendQueueState(payload.roomID);
-						}
-					}
-				} catch (error) {
-					console.error(error);
-					this.handleThrownError(client, error);
-				}
-			},
-		);
-	}
+	// @SubscribeMessage(SOCKET_EVENTS.SWAP_SONG_VOTE)
+	// async handleVoteSwap(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise<void> {
+	// 	this.eventQueueService.addToQueue(
+	// 		SOCKET_EVENTS.SWAP_SONG_VOTE,
+	// 		async () => {
+	// 			try {
+	// 				console.log(p);
+	// 				const payload: QueueEventDto = await this.validateQueueEvent(p, true);
+	// 				if (!payload.createdAt) {
+	// 					throw new Error("No createdAt provided");
+	// 				}
+	// 				const somethingChanged: boolean = await this.roomQueue.swapSongVote(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 					payload.songs[0].userID,
+	// 					payload.createdAt,
+	// 				);
+	// 				if (somethingChanged) {
+	// 					const song = await this.roomQueue.getSongAsRoomSongDto(
+	// 						payload.roomID,
+	// 						payload.songs[0].spotifyID,
+	// 					);
+	// 					if (song) {
+	// 						const response: QueueEventDto = {
+	// 							roomID: payload.roomID,
+	// 							songs: [song],
+	// 						};
+	// 						this.server
+	// 							.to(payload.roomID)
+	// 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 						console.log("Response emitted: " + SOCKET_EVENTS.VOTE_UPDATED);
+	// 						this.sendQueueState(payload.roomID);
+	// 					}
+	// 				}
+	// 			} catch (error) {
+	// 				console.error(error);
+	// 				this.handleThrownError(client, error);
+	// 			}
+	// 		},
+	// 	);
+	// }
 
 	@SubscribeMessage(SOCKET_EVENTS.ENQUEUE_SONG)
 	async handleSongEnqueue(

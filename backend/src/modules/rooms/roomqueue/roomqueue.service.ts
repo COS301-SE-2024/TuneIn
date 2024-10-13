@@ -22,7 +22,7 @@ import { MurLockService } from "murlock";
 // import { TasksService } from "../../../tasks/tasks.service";
 
 const QUEUE_LOCK_TIMEOUT = 20000;
-const MIN_PLAYLIST_UPDATE_INTERVAL = 60000;
+// const MIN_PLAYLIST_UPDATE_INTERVAL = 60000;
 
 export class RoomSong {
 	private _score: number;
@@ -264,7 +264,7 @@ export class ActiveRoom {
 	};
 	public inactive = false;
 	public minutesInactive = 0;
-	private lastPlaylistUpdate = 0;
+	// private lastPlaylistUpdate = 0;
 
 	constructor(room: RoomDto, murLockService: MurLockService) {
 		this.room = room;
@@ -313,7 +313,7 @@ export class ActiveRoom {
 	 */
 	async setQueue(
 		songs: RoomSong[],
-		spotify: SpotifyService,
+		// spotify: SpotifyService,
 		murLockService: MurLockService,
 	) {
 		this.inactive = false;
@@ -369,8 +369,8 @@ export class ActiveRoom {
 	 * Refreshes the song order in the queue
 	 * @param murLockService
 	 */
-	async refreshQueue(spotify: SpotifyService, murLockService: MurLockService) {
-		await this.setQueue(this.queue.toArray(), spotify, murLockService);
+	async refreshQueue(murLockService: MurLockService) {
+		await this.setQueue(this.queue.toArray(), murLockService);
 	}
 
 	/**
@@ -681,10 +681,9 @@ export class ActiveRoom {
 	}
 
 	async getCurrentSong(
-		spotify: SpotifyService,
 		murLockService: MurLockService,
 	): Promise<RoomSong | null> {
-		await this.refreshQueue(spotify, murLockService);
+		await this.refreshQueue(murLockService);
 		console.log("historicQueue");
 		console.log(this.historicQueue.toArray());
 		console.log("currentQueue");
@@ -697,116 +696,116 @@ export class ActiveRoom {
 		}
 	}
 
-	async addVote(
-		vote: VoteDto,
-		spotify: SpotifyService,
-		murLockService: MurLockService,
-	): Promise<boolean> {
-		let result = false;
-		this.printQueueBrief();
-		const songs: RoomSong[] = this.queue.toArray();
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			QUEUE_LOCK_TIMEOUT,
-			async () => {
-				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'addVote'`,
-				);
-				try {
-					const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-					if (index === -1 || !songs[index]) {
-						result = false;
-						return;
-					}
-					result = songs[index].addVote(vote);
-				} catch (e) {
-					console.error("Error in addVote");
-					console.error(e);
-				}
-				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'addVote'`,
-				);
-			},
-		);
-		if (result) await this.setQueue(songs, spotify, murLockService);
-		this.printQueueBrief();
-		return result;
-	}
+	// async addVote(
+	// 	vote: VoteDto,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise<boolean> {
+	// 	let result = false;
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] = this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () => {
+	// 			console.log(
+	// 				`Acquire lock: ${this.getQueueLockName()} in function 'addVote'`,
+	// 			);
+	// 			try {
+	// 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+	// 				if (index === -1 || !songs[index]) {
+	// 					result = false;
+	// 					return;
+	// 				}
+	// 				result = songs[index].addVote(vote);
+	// 			} catch (e) {
+	// 				console.error("Error in addVote");
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				`Release lock: ${this.getQueueLockName()} in function 'addVote'`,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
 
-	async removeVote(
-		vote: VoteDto,
-		spotify: SpotifyService,
-		murLockService: MurLockService,
-	): Promise<boolean> {
-		let result = false;
-		this.printQueueBrief();
-		const songs: RoomSong[] = this.queue.toArray();
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			QUEUE_LOCK_TIMEOUT,
-			async () => {
-				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'removeVote'`,
-				);
-				try {
-					const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
-					if (index === -1 || songs[index] === null || !songs[index]) {
-						result = false;
-						return;
-					}
-					result = songs[index].removeVote(vote);
-				} catch (e) {
-					console.error("Error in removeVote");
-					console.error(e);
-				}
-				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'removeVote'`,
-				);
-			},
-		);
-		if (result) await this.setQueue(songs, spotify, murLockService);
-		this.printQueueBrief();
-		return result;
-	}
+	// async removeVote(
+	// 	vote: VoteDto,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise<boolean> {
+	// 	let result = false;
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] = this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () => {
+	// 			console.log(
+	// 				`Acquire lock: ${this.getQueueLockName()} in function 'removeVote'`,
+	// 			);
+	// 			try {
+	// 				const index = songs.findIndex((s) => s.spotifyID === vote.spotifyID);
+	// 				if (index === -1 || songs[index] === null || !songs[index]) {
+	// 					result = false;
+	// 					return;
+	// 				}
+	// 				result = songs[index].removeVote(vote);
+	// 			} catch (e) {
+	// 				console.error("Error in removeVote");
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				`Release lock: ${this.getQueueLockName()} in function 'removeVote'`,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
 
-	async swapVote(
-		spotifyID: string,
-		userID: string,
-		swapTime: number,
-		spotify: SpotifyService,
-		murLockService: MurLockService,
-	): Promise<boolean> {
-		let result = false;
-		await this.refreshQueue(spotify, murLockService);
-		this.printQueueBrief();
-		const songs: RoomSong[] = this.queue.toArray();
-		await murLockService.runWithLock(
-			this.getQueueLockName(),
-			QUEUE_LOCK_TIMEOUT,
-			async () => {
-				console.log(
-					`Acquire lock: ${this.getQueueLockName()} in function 'swapVote'`,
-				);
-				try {
-					const index = songs.findIndex((s) => s.spotifyID === spotifyID);
-					if (index === -1 || songs[index] === null || !songs[index]) {
-						result = false;
-						return;
-					}
-					result = songs[index].swapVote(userID, swapTime);
-				} catch (e) {
-					console.error("Error in swapVote");
-					console.error(e);
-				}
-				console.log(
-					`Release lock: ${this.getQueueLockName()} in function 'swapVote'`,
-				);
-			},
-		);
-		if (result) await this.setQueue(songs, spotify, murLockService);
-		this.printQueueBrief();
-		return result;
-	}
+	// async swapVote(
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	swapTime: number,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise<boolean> {
+	// 	let result = false;
+	// 	await this.refreshQueue(murLockService);
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] = this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () => {
+	// 			console.log(
+	// 				`Acquire lock: ${this.getQueueLockName()} in function 'swapVote'`,
+	// 			);
+	// 			try {
+	// 				const index = songs.findIndex((s) => s.spotifyID === spotifyID);
+	// 				if (index === -1 || songs[index] === null || !songs[index]) {
+	// 					result = false;
+	// 					return;
+	// 				}
+	// 				result = songs[index].swapVote(userID, swapTime);
+	// 			} catch (e) {
+	// 				console.error("Error in swapVote");
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				`Release lock: ${this.getQueueLockName()} in function 'swapVote'`,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
 
 	async addSongs(
 		songs: RoomSongDto[],
@@ -868,7 +867,7 @@ export class ActiveRoom {
 	): Promise<boolean> {
 		console.log(`Attempting to remove ${songs.length} songs`);
 		let result = false;
-		await this.refreshQueue(spotify, murLockService);
+		await this.refreshQueue(murLockService);
 		const roomSongs: RoomSong[] = this.queue.toArray();
 		const oldQueue = roomSongs.map((s) => s.spotifyID);
 		await murLockService.runWithLock(
@@ -1188,7 +1187,7 @@ export class RoomQueueService {
 
 	async refreshQueue(roomID: string): Promise<void> {
 		const activeRoom = await this.getRoom(roomID);
-		await activeRoom.refreshQueue(this.spotify, this.murLockService);
+		await activeRoom.refreshQueue(this.murLockService);
 	}
 
 	async flushToDB(roomID: string): Promise<void> {
@@ -1247,70 +1246,70 @@ export class RoomQueueService {
 		);
 	}
 
-	async upvoteSong(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-		createdAt: number,
-	): Promise<boolean> {
-		const vote: VoteDto = {
-			isUpvote: true,
-			userID: userID,
-			spotifyID: spotifyID,
-			createdAt: createdAt,
-		};
-		console.log("upvoteSong for spotifyID: ", spotifyID);
-		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.addVote(vote, this.spotify, this.murLockService);
-	}
+	// async upvoteSong(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	createdAt: number,
+	// ): Promise<boolean> {
+	// 	const vote: VoteDto = {
+	// 		isUpvote: true,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: createdAt,
+	// 	};
+	// 	console.log("upvoteSong for spotifyID: ", spotifyID);
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	return await activeRoom.addVote(vote, this.spotify, this.murLockService);
+	// }
 
-	async downvoteSong(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-		createdAt: number,
-	): Promise<boolean> {
-		const vote: VoteDto = {
-			isUpvote: false,
-			userID: userID,
-			spotifyID: spotifyID,
-			createdAt: createdAt,
-		};
-		console.log("upvoteSong for spotifyID: ", spotifyID);
-		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.addVote(vote, this.spotify, this.murLockService);
-	}
+	// async downvoteSong(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	createdAt: number,
+	// ): Promise<boolean> {
+	// 	const vote: VoteDto = {
+	// 		isUpvote: false,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: createdAt,
+	// 	};
+	// 	console.log("upvoteSong for spotifyID: ", spotifyID);
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	return await activeRoom.addVote(vote, this.spotify, this.murLockService);
+	// }
 
-	async undoSongVote(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-	): Promise<boolean> {
-		const vote: VoteDto = {
-			isUpvote: true,
-			userID: userID,
-			spotifyID: spotifyID,
-			createdAt: new Date().valueOf(),
-		};
-		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.removeVote(vote, this.spotify, this.murLockService);
-	}
+	// async undoSongVote(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// ): Promise<boolean> {
+	// 	const vote: VoteDto = {
+	// 		isUpvote: true,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: new Date().valueOf(),
+	// 	};
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	return await activeRoom.removeVote(vote, this.spotify, this.murLockService);
+	// }
 
-	async swapSongVote(
-		roomID: string,
-		spotifyID: string,
-		userID: string,
-		insertTime: number,
-	): Promise<boolean> {
-		const activeRoom = await this.getRoom(roomID);
-		return await activeRoom.swapVote(
-			spotifyID,
-			userID,
-			insertTime,
-			this.spotify,
-			this.murLockService,
-		);
-	}
+	// async swapSongVote(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	insertTime: number,
+	// ): Promise<boolean> {
+	// 	const activeRoom = await this.getRoom(roomID);
+	// 	return await activeRoom.swapVote(
+	// 		spotifyID,
+	// 		userID,
+	// 		insertTime,
+	// 		this.spotify,
+	// 		this.murLockService,
+	// 	);
+	// }
 
 	async getQueueState(roomID: string): Promise<{
 		room: RoomDto;
@@ -1336,10 +1335,7 @@ export class RoomQueueService {
 
 	async getCurrentSong(roomID: string): Promise<RoomSongDto | null> {
 		const activeRoom = await this.getRoom(roomID);
-		const song = await activeRoom.getCurrentSong(
-			this.spotify,
-			this.murLockService,
-		);
+		const song = await activeRoom.getCurrentSong(this.murLockService);
 		if (!song || song === null) {
 			return null;
 		}

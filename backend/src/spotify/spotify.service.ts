@@ -105,21 +105,20 @@ export class SpotifyService {
 								console.log(`TuneInAPI response: ${url}`);
 								console.log(options);
 								console.log(response);
-								if (response.status === 429) {
-									const retryAfter = response.headers.get("retry-after");
-									if (retryAfter) {
-										const delay = parseInt(retryAfter, 10) * 1000;
-										console.log(`Rate limited, waiting ${delay}ms`);
-										return this.wait(delay).then(() => {
-											return;
-										});
-									}
-								} else if (response.status === 401) {
-									console.log(`Token expired, refreshing...`);
-									return this.getSpotifyTokens(tuneinID).then((newTokens) => {
-										return;
-									});
-								}
+								// if (response.status === 429) {
+								// 	const retryAfter = response.headers.get("retry-after");
+								// 	if (retryAfter) {
+								// 		const delay = parseInt(retryAfter, 10) * 1000;
+								// 		console.log(`Rate limited, waiting ${delay}ms`);
+								// 		return this.wait(delay).then(() => {
+								// 			return;
+								// 		});
+								// 	}
+								// } else if (response.status === 401) {
+								// 	console.log(`Token expired, refreshing...`);
+								// 	this.getSpotifyTokens(tuneinID);
+								// }
+								// return;
 							},
 						},
 					);
