@@ -105,6 +105,11 @@ const DevicePicker = ({
 		if (!isVisible) {
 			clearInterval(intervalIdRef.current);
 			intervalIdRef.current = undefined;
+		} else {
+			//once DevicePicker is visible, fetch devices
+			roomControls.playbackHandler.getDevices().then(() => {
+				setIsLoading(false);
+			});
 		}
 		return () => {
 			clearInterval(intervalIdRef.current);

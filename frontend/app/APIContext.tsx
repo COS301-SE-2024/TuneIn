@@ -6,6 +6,7 @@ import React, {
 	useEffect,
 	useState,
 	useRef,
+	useCallback,
 } from "react";
 import {
 	AuthApi,
@@ -94,31 +95,40 @@ export const APIProvider: React.FC<{ children: ReactNode }> = ({
 	const [authenticated, setAuthenticated] = useState<boolean>(false);
 	const apiGroupRef = useRef<APIGroup | null>(null);
 
-	console.log("APIContext token: ", token);
 	useEffect(() => {
 		const fetchToken = async () => {
 			if (auth.authenticated()) {
 				const t = await auth.getToken();
-				setToken(t);
+				if (t !== null && t !== token) {
+					setToken(t);
+					console.log(`Initialised token to: ${t}`);
+				}
 			}
 		};
 		fetchToken();
 	}, []);
 
 	useEffect(() => {
-		if (
-			token !== null &&
-			(apiGroupRef.current === null ||
-				apiGroupRef.current.tokenState.token !== token)
-		) {
-			setAuthenticated(true);
-			apiGroupRef.current = createAPIGroup(token, setToken, true);
+		if (token === null) {
+			if (authenticated) {
+				setAuthenticated(false);
+				return;
+			}
 		} else {
-			setAuthenticated(false);
+			if (!authenticated) {
+				setAuthenticated(true);
+			}
+
+			if (
+				apiGroupRef.current === null ||
+				apiGroupRef.current.tokenState.token !== token
+			) {
+				apiGroupRef.current = createAPIGroup(token, setToken, true);
+			}
 		}
 	}, [token]);
 
-	if (!apiGroupRef.current) {
+	if (apiGroupRef.current === null) {
 		// Ensure that APIGroup is only created after the token is fetched
 		apiGroupRef.current = createAPIGroup(token, setToken, authenticated);
 	}
@@ -131,29 +141,31 @@ export const APIProvider: React.FC<{ children: ReactNode }> = ({
 };
 
 export const useAPI = () => {
-	let context = useContext(APIContext);
-	if (!context) {
+	const contextRef = useRef<APIGroup | undefined>(useContext(APIContext));
+	if (!contextRef.current) {
 		throw new Error("useAPI must be used within an APIProvider");
 	}
 
-	const fetchTokenAndUpdateContext = async () => {
+	const fetchTokenAndUpdateContext = useCallback(async () => {
 		if (auth.authenticated()) {
 			const t = await auth.getToken();
 
 			// TypeScript won't shut up without this check
-			if (!context) {
+			if (!contextRef.current) {
 				throw new Error("useAPI must be used within an APIProvider");
 			}
 
-			if (context.tokenState.token !== t && t !== null) {
+			if (contextRef.current.tokenState.token !== t && t !== null) {
 				console.log("Updating APIContext token to: ", t);
-				context.tokenState.setToken(t);
-				context = createAPIGroup(t, context.tokenState.setToken, true);
+				contextRef.current.tokenState.setToken(t);
+				contextRef.current = createAPIGroup(
+					t,
+					contextRef.current.tokenState.setToken,
+					true,
+				);
 			}
 		}
-	};
-	fetchTokenAndUpdateContext().then(() => {
-		console.log("Token refreshed");
-	});
-	return context;
+	}, []);
+	fetchTokenAndUpdateContext();
+	return contextRef.current;
 };
