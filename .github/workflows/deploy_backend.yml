@@ -25,7 +25,7 @@ jobs:
 
     - name: Install dependencies
       run:  |
-        cd backend && npm install
+        cd backend && npm ci
 
     - name: Last linting check before deployment
       run: cd backend && npm run lint
@@ -35,7 +35,7 @@ jobs:
 
     - name: Verify Build before deployment
       run: |
-        cd backend && npm run build:swc
+        cd backend && npm run build
         if [ ! -f "dist/src/main.js" ]; then
           echo "Build failed: main.js not found!"
           exit 1
