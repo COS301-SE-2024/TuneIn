@@ -94,7 +94,10 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
 
-				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+				<TouchableOpacity
+					onPress={() => handleOpenContextMenu(item)}
+					testID={`ellipsis-button-${item.id}`}
+				>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
 				</TouchableOpacity>
 			</View>

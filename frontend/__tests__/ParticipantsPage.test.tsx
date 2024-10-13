@@ -28,13 +28,13 @@ describe("ParticipantsPage", () => {
 			participants: JSON.stringify([
 				{
 					userID: "1",
-					username: "JohnDoe",
-					profile_picture_url: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+					username: "user_1",
+					profile_picture_url: "https://example.com/user1.jpg",
 				},
 				{
 					userID: "2",
-					username: "JaneSmith",
-					profile_picture_url: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+					username: "user_2_with_a_very_long_name",
+					profile_picture_url: "https://example.com/user2.jpg",
 				},
 			]),
 		});
@@ -43,13 +43,13 @@ describe("ParticipantsPage", () => {
 	const mockParticipants = [
 		{
 			id: "1",
-			username: "JohnDoe",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+			username: "user_1",
+			profilePictureUrl: "https://example.com/user1.jpg",
 		},
 		{
 			id: "2",
-			username: "JaneSmith",
-			profilePictureUrl: "https://f4.bcbits.com/img/a3392505354_10.jpg",
+			username: "user_2_with_a_very_long_name",
+			profilePictureUrl: "https://example.com/user2.jpg",
 		},
 	];
 
@@ -59,8 +59,8 @@ describe("ParticipantsPage", () => {
 		);
 
 		// Check if both participants are rendered
-		expect(getByText("JohnDoe")).toBeTruthy();
-		expect(getByText("JaneSmith")).toBeTruthy();
+		expect(getByText("user_1")).toBeTruthy();
+		expect(getByText("user_2_with_a_ver...")).toBeTruthy();
 	});
 
 	it("should navigate back when the back button is pressed", () => {
@@ -73,5 +73,48 @@ describe("ParticipantsPage", () => {
 
 		// Check if goBack was called
 		expect(mockGoBack).toHaveBeenCalled();
+	});
+
+	it("opens the context menu when the ellipsis button is pressed", () => {
+		const { getByTestId, getByText, queryByText } = render(
+			<ParticipantsPage participants={mockParticipants} />,
+		);
+
+		const optionsButton = getByTestId("ellipsis-button-1"); // Assuming you add testID for ellipsis buttons
+		fireEvent.press(optionsButton);
+
+		// Check if the context menu modal is displayed
+		expect(getByText("Ban user_1?")).toBeTruthy();
+	});
+
+	it("sets the selected participant and shows the context menu", () => {
+		const { getByTestId, getByText } = render(
+			<ParticipantsPage participants={mockParticipants} />,
+		);
+
+		const optionsButton = getByTestId("ellipsis-button-2");
+		fireEvent.press(optionsButton);
+
+		// Expect the modal to show the correct truncated username
+		expect(getByText("Ban user_2_with_a_ver...?")).toBeTruthy();
+	});
+
+	it("bans the selected user and closes the context menu", () => {
+		console.log = jest.fn(); // Mock console.log to check if it's called
+		const { getByTestId, getByText, queryByText } = render(
+			<ParticipantsPage participants={mockParticipants} />,
+		);
+
+		const optionsButton = getByTestId("ellipsis-button-1");
+		fireEvent.press(optionsButton);
+
+		const banButton = getByText("Ban User");
+		fireEvent.press(banButton);
+
+		// Check if the user was banned
+		expect(console.log).toHaveBeenCalledWith("Banning user: user_1");
+
+		// Check if the modal is closed
+		expect(queryByText("Ban user_1?")).toBeNull();
 	});
 });
