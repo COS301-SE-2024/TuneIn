@@ -69,7 +69,7 @@ export const convertQueue = (
 	for (let i = 0, n = queue.length; i < n; i++) {
 		result.push({ song: queue[i], track: tracks[i] });
 	}
-	result.sort((a, b) => a.song.index - b.song.index);
-	result.sort((a, b) => b.song.score - a.song.score);
+	// result.sort((a, b) => a.song.index - b.song.index);
+	// result.sort((a, b) => b.song.score - a.song.score);
 	return result;
 };

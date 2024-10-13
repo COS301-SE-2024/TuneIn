@@ -70,9 +70,9 @@ const ChatScreen = () => {
 						dmControls.requestDirectMessageHistory();
 					}
 				}
-				if (!socketHandshakes.dmsReceived) {
-					dmControls.requestDirectMessageHistory();
-				}
+				// if (!socketHandshakes.dmsReceived) {
+				// 	dmControls.requestDirectMessageHistory();
+				// }
 			} catch (error) {
 				console.error("Failed to setup DM", error);
 			}

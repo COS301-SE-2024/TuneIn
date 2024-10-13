@@ -28,6 +28,8 @@ import { Text } from "react-native";
 import { ChatEventDto } from "./models/ChatEventDto";
 import { PlaybackEventDto } from "./models/PlaybackEventDto";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import * as Spotify from "@spotify/web-api-ts-sdk";
+import AccessTokenHelpers from "@spotify/web-api-ts-sdk/dist/mjs/auth/AccessTokenHelpers";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "react-native-dotenv";
 import { useAPI } from "./APIContext";
 import { AxiosResponse } from "axios";
@@ -65,7 +67,9 @@ export interface SpotifyAuth {
 		redirectURI: string,
 	) => Promise<SpotifyCallbackResponse>;
 	getSpotifyTokens: () => Promise<SpotifyTokenPair | null>;
-	userlessAPI: SpotifyApi;
+	getUserlessAPI: () => Promise<SpotifyApi>;
+	userlessAPIExpiry: number;
+	getTrackIndex: (playlistID: string, trackID: string) => Promise<number>;
 }
 
 interface LiveContextType {
@@ -163,16 +167,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [refreshUser, setRefreshUser] = useState<boolean>(false);
 	const [roomPlaying, setRoomPlaying] = useReducer(
 		(state: boolean, action: RoomSongDto | undefined) => {
+			console.log(`action: ${action}`);
 			if (action) {
 				console.log(`action.startTime: ${action.startTime}`);
 				if (action.startTime) {
 					if (action.startTime < Date.now().valueOf()) {
 						if (!action.pauseTime) {
+							console.log(`'roomPlaying' set to true`);
 							return true;
 						}
 					}
 				}
 			}
+			console.log(`'roomPlaying' set to false`);
 			return false;
 		},
 		false,
@@ -196,6 +203,8 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [fetchRecentDMs, setFetchRecentDMs] = useState<boolean>(true);
 	const refreshIntervalRef = useRef<NodeJS.Timeout>();
 	const syncIntervalRef = useRef<NodeJS.Timeout>();
+	const userlessAPIRef = useRef<SpotifyApi>();
+	const userlessAPIExpiryRef = useRef<number>(0);
 
 	const sendIdentity = useCallback(
 		(socket: Socket) => {
@@ -231,7 +240,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		console.log(`Room queue updating with input:`);
 		console.log(queue);
 		queue = queue.sort((a, b) => a.index - b.index);
-		queue = queue.sort((a, b) => b.score - a.score);
+		// queue = queue.sort((a, b) => b.score - a.score);
 		console.log(`Room queue post-sort:`);
 		console.log(queue);
 		setRoomQueue(queue);
@@ -316,11 +325,115 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				console.error("Cannot get Spotify tokens without being authenticated");
 				return null;
 			},
-			userlessAPI: SpotifyApi.withClientCredentials(
-				SPOTIFY_CLIENT_ID,
-				SPOTIFY_CLIENT_SECRET,
-				[],
-			),
+			// userlessAPI: SpotifyApi.withClientCredentials(
+			// 	SPOTIFY_CLIENT_ID,
+			// 	SPOTIFY_CLIENT_SECRET,
+			// 	[],
+			// 	{
+			// 		cachingStrategy: new Spotify.LocalStorageCachingStrategy(),
+			// 	} as Spotify.SdkOptions,
+			// ),
+
+			// we are going to refactor how we create userlessAPI such that
+			//  we perform auth ourselves and simply pass our access tokens to the client
+			// instead of letting the API client do it itself (as it relies on localStorage)
+			// which is not available in React Native
+			getUserlessAPI: async () => {
+				if (userlessAPIRef.current) {
+					const apiToken: Spotify.AccessToken | null =
+						await userlessAPIRef.current.getAccessToken();
+					if (apiToken !== null) {
+						if (userlessAPIExpiryRef.current < Date.now()) {
+							//refresh the token
+							const params = new URLSearchParams();
+							params.append("client_id", SPOTIFY_CLIENT_ID);
+							params.append("grant_type", "refresh_token");
+							params.append("refresh_token", apiToken.refresh_token);
+							const refreshedTokens: Spotify.AccessToken = await fetch(
+								"https://accounts.spotify.com/api/token",
+								{
+									method: "POST",
+									headers: {
+										"Content-Type": "application/x-www-form-urlencoded",
+									},
+									body: params,
+								},
+							)
+								.then((res) => res.json())
+								.catch((error) => {
+									console.error(
+										"Failed to refresh userless API tokens:",
+										error,
+									);
+									throw error;
+								});
+							console.log("Refreshed userless API tokens:", refreshedTokens);
+							userlessAPIRef.current = SpotifyApi.withAccessToken(
+								SPOTIFY_CLIENT_ID,
+								refreshedTokens,
+							);
+							userlessAPIExpiryRef.current =
+								Date.now() + refreshedTokens.expires_in;
+						}
+						return userlessAPIRef.current;
+					}
+				}
+				return fetch("https://accounts.spotify.com/api/token", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+						Authorization:
+							"Basic " + btoa(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`),
+					},
+					body: "grant_type=client_credentials",
+				})
+					.then((res) => res.json())
+					.then((tokens) => {
+						console.log(`Got userless API tokens:`, tokens);
+						userlessAPIRef.current = SpotifyApi.withAccessToken(
+							SPOTIFY_CLIENT_ID,
+							tokens,
+						);
+						userlessAPIExpiryRef.current = Date.now() + tokens.expires_in;
+						return userlessAPIRef.current;
+					})
+					.catch((error) => {
+						console.error("Failed to get userless API:", error);
+						throw error;
+					});
+			},
+			userlessAPIExpiry: userlessAPIExpiryRef.current,
+			getTrackIndex: async (playlistID: string, trackID: string) => {
+				const api = await spotifyAuth.getUserlessAPI();
+				let i = 0;
+				let playlistTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
+				let currentPage = await api.playlists.getPlaylistItems(
+					playlistID,
+					undefined,
+					undefined,
+					50,
+					0,
+				);
+				playlistTracks.push(...currentPage.items);
+				while (currentPage.next !== null) {
+					i++;
+					currentPage = await api.playlists.getPlaylistItems(
+						playlistID,
+						undefined,
+						undefined,
+						50,
+						i,
+					);
+					playlistTracks.push(...currentPage.items);
+				}
+
+				for (i = playlistTracks.length - 1; i >= 0; i--) {
+					if (playlistTracks[i].track.id === trackID) {
+						return i;
+					}
+				}
+				return -1;
+			},
 		}),
 		[authAPI, authenticated, spotifyTokens],
 	);
@@ -748,7 +861,6 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 			setRoomID,
 			spotifyTokens,
 			tokenState.token,
-			userBookmarks.length,
 			users,
 		],
 	);
@@ -964,14 +1076,15 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 						if (
 							!(await roomControls.playbackHandler.userListeningToRoom(true))
 						) {
+							console.log(`USER NOT LISTENING TO ROOOMMOOSMNSJFNJKSNKJNFSJK`);
 							if (!currentSongRef.current) {
 								console.log("Current song not found");
 								return;
 							}
-							if (!keepUserSynced) {
-								console.log("User is not synced with room");
-								return;
-							}
+							// if (!keepUserSynced) {
+							// 	console.log("User is not synced with room");
+							// 	return;
+							// }
 							if (
 								roomControls.state &&
 								roomControls.state !== null &&
@@ -1021,9 +1134,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							if (!currentSongRef.current) {
 								return;
 							}
-							if (!keepUserSynced) {
-								return;
-							}
+							// if (!keepUserSynced) {
+							// 	return;
+							// }
 							if (
 								roomControls.state &&
 								roomControls.state !== null &&
@@ -1412,11 +1525,13 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	//if auth info changes, get user info & spotify tokens
 	useEffect(() => {
 		console.log("Running main effect");
+		console.log(`authenticated: ${authenticated}`);
+		console.log(`currentUser: ${currentUser}`);
 		// console.table(socketState);
 		// console.table(socketEventsReceived);
 
 		// if user is not authenticated, disconnect from socket
-		if (!currentUser || !authenticated) {
+		if (!authenticated) {
 			if (socketRef.current !== null) {
 				if (socketRef.current.connected || !socketRef.current.disconnected) {
 					socketRef.current.disconnect();
@@ -1432,13 +1547,19 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 				// user is not authenticated & socket doesn't exist anyway
 				// ignore
 				console.error("User is not authenticated & socket doesn't exist");
-				// getUserDetails(spotifyAuth);
 			}
 			updateState({ type: actionTypes.RESET });
 			return;
 		}
 
 		//// from here on, we know that the user is authenticated
+		if (!currentUser) {
+			console.log("User is authenticated but we don't have their info");
+			getUserDetails(spotifyAuth);
+			return;
+		}
+
+		//// from here on, we know that we have the user's info
 		if (socketRef.current === null) {
 			if (authenticated) {
 				if (currentUser) {
@@ -1514,43 +1635,36 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		// disconnect if otherwise
 		// join dms if socket is connected but user is not in dms
 		if (dmParticipants.length > 0) {
-			if (!socketState.sentDMJoin) {
-				console.log("User is connected to dms but not joined. Joining...");
-				enterDM(dmParticipants.map((u) => u.username));
-				updateState({ type: actionTypes.REQUEST_DM_JOIN });
-				return;
+			if (!socketState.dmJoined) {
+				if (!socketState.sentDMJoin) {
+					console.log("User is connected to dms but not joined. Joining...");
+					enterDM(dmParticipants.map((u) => u.username));
+					updateState({ type: actionTypes.REQUEST_DM_JOIN });
+					return;
+				} else if (
+					dmJoinSendTime !== new Date(0) &&
+					dmJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+				) {
+					console.log("User tried to join dms but failed. Retrying...");
+					enterDM(dmParticipants.map((u) => u.username));
+					updateState({ type: actionTypes.REQUEST_DM_JOIN });
+					return;
+				}
 			}
 
-			if (
-				!socketState.dmJoined &&
-				dmJoinSendTime !== new Date(0) &&
-				dmJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
-			) {
-				console.log("User tried to join dms but failed. Retrying...");
-				enterDM(dmParticipants.map((u) => u.username));
-				updateState({ type: actionTypes.REQUEST_DM_JOIN });
-				return;
-			}
-
-			if (!socketState.dmsRequested) {
-				console.log(
-					"User is connected to dms but no messages have been requested",
-				);
-				dmControls.requestDirectMessageHistory();
-				updateState({ type: actionTypes.DMS_REQUESTED });
-				return;
-			}
-
+			//// from here on, we know that the user is supposed to be connected to dms & actually is
 			if (!socketState.dmsReceived) {
-				console.log(
-					"User is connected to dms but no messages have been received",
-				);
-				dmControls.requestDirectMessageHistory();
-				updateState({ type: actionTypes.DMS_REQUESTED });
-				return;
+				if (!socketState.dmsRequested) {
+					console.log(
+						"User is connected to dms but no messages have been requested",
+					);
+					dmControls.requestDirectMessageHistory();
+					updateState({ type: actionTypes.DMS_REQUESTED });
+					return;
+				}
 			}
 		}
-		// disconnect from dms if no participants & user is in dms somehow
+		// disconnect from dms if user is connected to dms but shouldn't be
 		else if (dmParticipants.length === 0) {
 			if (
 				socketState.sentDMJoin ||
@@ -1565,22 +1679,25 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 
 		if (currentRoom) {
-			if (!socketState.sentRoomJoin) {
-				console.log("User is in a room but not joined in backend. Joining...");
-				joinRoom(currentRoom.roomID);
-				updateState({ type: actionTypes.SENT_ROOM_JOIN });
-				return;
-			}
+			if (!socketState.roomJoined) {
+				if (!socketState.sentRoomJoin) {
+					console.log(
+						"User is in a room but not joined in backend. Joining...",
+					);
+					joinRoom(currentRoom.roomID);
+					updateState({ type: actionTypes.SENT_ROOM_JOIN });
+					return;
+				}
 
-			if (
-				!socketState.roomJoined &&
-				roomJoinSendTime !== new Date(0) &&
-				roomJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
-			) {
-				console.log("User tried to join room but failed. Retrying...");
-				joinRoom(currentRoom.roomID);
-				updateState({ type: actionTypes.SENT_ROOM_JOIN });
-				return;
+				if (
+					roomJoinSendTime !== new Date(0) &&
+					roomJoinSendTime.getSeconds() - new Date().getSeconds() > TIMEOUT
+				) {
+					console.log("User tried to join room but failed. Retrying...");
+					joinRoom(currentRoom.roomID);
+					updateState({ type: actionTypes.SENT_ROOM_JOIN });
+					return;
+				}
 			}
 
 			if (!socketState.roomChatReceived) {
@@ -1635,7 +1752,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		// currentSong,
 		currentUser,
 		directMessages,
-		// dmParticipants,
+		dmParticipants,
 		// roomQueue,
 		// roomMessages,
 		currentRoomVotes,
@@ -1665,12 +1782,14 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	]);
 
 	useEffect(() => {
+		console.log(`running 'attachListeners' effect`);
 		if (socketRef.current !== null) {
 			attachListeners(socketRef.current);
 		}
 	}, [attachListeners]);
 
 	useEffect(() => {
+		console.log(`running 'roomQueue' effect`);
 		if (roomQueue.length > 0) {
 			if (
 				!currentSongRef.current ||
@@ -1687,36 +1806,37 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	}, [roomQueue]);
 
-	useEffect(() => {
-		if (currentRoomVotes.length > 0) {
-			let newQueue = [...roomQueue];
-			newQueue.forEach((song) => {
-				song.score = 0;
-			});
-			for (let i = 0; i < currentRoomVotes.length; i++) {
-				const vote = currentRoomVotes[i];
-				const index = newQueue.findIndex(
-					(song) => song.spotifyID === vote.spotifyID,
-				);
-				if (index !== -1) {
-					if (vote.isUpvote) {
-						newQueue[index].score++;
-					} else {
-						newQueue[index].score--;
-					}
-				}
-			}
-			newQueue = newQueue.sort((a, b) => {
-				if (a.score === b.score) {
-					return a.insertTime - b.insertTime;
-				}
-				return b.score - a.score;
-			});
-			updateRoomQueue(newQueue);
-		}
-	}, [currentRoomVotes]);
+	// useEffect(() => {
+	// 	if (currentRoomVotes.length > 0) {
+	// 		let newQueue = [...roomQueue];
+	// 		newQueue.forEach((song) => {
+	// 			song.score = 0;
+	// 		});
+	// 		for (let i = 0; i < currentRoomVotes.length; i++) {
+	// 			const vote = currentRoomVotes[i];
+	// 			const index = newQueue.findIndex(
+	// 				(song) => song.spotifyID === vote.spotifyID,
+	// 			);
+	// 			if (index !== -1) {
+	// 				if (vote.isUpvote) {
+	// 					newQueue[index].score++;
+	// 				} else {
+	// 					newQueue[index].score--;
+	// 				}
+	// 			}
+	// 		}
+	// 		newQueue = newQueue.sort((a, b) => {
+	// 			if (a.score === b.score) {
+	// 				return a.insertTime - b.insertTime;
+	// 			}
+	// 			return b.score - a.score;
+	// 		});
+	// 		updateRoomQueue(newQueue);
+	// 	}
+	// }, [currentRoomVotes]);
 
 	useEffect(() => {
+		console.log(`running '[getUserDetails, refreshUser, spotifyAuth]' effect`);
 		console.log(`refreshUser: ${refreshUser}`);
 		if (refreshUser) {
 			getUserDetails(spotifyAuth);
@@ -1745,7 +1865,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	}, [refreshSpotifyTokens]);
 
 	useEffect(() => {
-		console.log(`syncUserPlayback changed`);
+		console.log(
+			`running '[keepUserSynced, roomControls.playbackHandler.syncUserPlayback]' effect`,
+		);
 		if (keepUserSynced) {
 			if (syncIntervalRef.current) {
 				console.log(`Clearing the existing 'sync' interval`);
@@ -1772,6 +1894,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	// on mount
 	useEffect(() => {
+		console.log(`running 'on LiveContext mount' effect`);
 		if (!refreshIntervalRef.current) {
 			refreshIntervalRef.current = setInterval(
 				refreshSpotifyTokens,
