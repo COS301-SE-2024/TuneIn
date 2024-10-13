@@ -18,7 +18,7 @@ import { AuthenticationDetails, CognitoUser } from "amazon-cognito-identity-js";
 import auth from "../../services/AuthManagement";
 import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
-import {} from "../../LiveContext";
+import { initialiseSocket, instanceExists } from "../../services/Live";
 
 const LoginScreen: React.FC = () => {
 	const [obscureText, setObscureText] = useState(true);
@@ -54,7 +54,11 @@ const LoginScreen: React.FC = () => {
 						result.getAccessToken().getJwtToken(),
 					);
 				}
-				auth.exchangeCognitoToken(result.getAccessToken().getJwtToken());
+				auth.exchangeCognitoToken(
+					result.getAccessToken().getJwtToken(),
+					initialiseSocket,
+					instanceExists(),
+				);
 				router.replace("/screens/(tabs)/Home");
 				setIsLoading(false);
 			},

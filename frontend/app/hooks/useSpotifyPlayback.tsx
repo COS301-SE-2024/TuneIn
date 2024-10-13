@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import { useSpotifyDevices } from "./useSpotifyDevices";
-import { useLive } from "../LiveContext";
+import * as spotifyAuth from "../services/SpotifyAuth";
 
 export const useSpotifyPlayback = () => {
-	const { spotifyAuth } = useLive();
 	const [accessToken, setAccessToken] = useState<string>("");
 	const [selectedTrackUri, setSelectedTrackUri] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
@@ -13,7 +12,7 @@ export const useSpotifyPlayback = () => {
 	useEffect(() => {
 		const fetchToken = async () => {
 			try {
-				const allTokens = await spotifyAuth.getSpotifyTokens();
+				const allTokens = await spotifyAuth.getTokens();
 				const token = allTokens.access_token;
 				console.log("Access Token:", token);
 				setAccessToken(token);

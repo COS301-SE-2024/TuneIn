@@ -6,7 +6,6 @@ import { RoomUsersModule } from "./roomusers/roomuser.module";
 import { LiveGateway } from "./live.gateway";
 import { EventQueueService } from "./eventqueue/eventqueue.service";
 import { LiveService } from "./live.service";
-import { RoomQueueModule } from "../modules/rooms/roomqueue/roomqueue.module";
 import { DmUsersModule } from "./dmusers/dmusers.module";
 import { UsersModule } from "../modules/users/users.module";
 import { AutoModerationModule } from "./automod/automod.module";
@@ -18,7 +17,6 @@ import { AutoModerationModule } from "./automod/automod.module";
 		DbUtilsModule,
 		DtoGenModule,
 		RoomsModule,
-		RoomQueueModule,
 		UsersModule,
 		AutoModerationModule,
 	],

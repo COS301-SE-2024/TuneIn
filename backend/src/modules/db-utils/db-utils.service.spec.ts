@@ -546,6 +546,15 @@ describe("DbUtilsService", () => {
 		});
 	});
 	describe("getFriendRequests", () => {
+		it("should throw Error if no friend requests are found", async () => {
+			jest
+				.spyOn(mockPrismaService.friends, "findMany")
+				.mockResolvedValueOnce(null);
+			await expect(service.getFriendRequests("userID")).rejects.toThrowError(
+				"An unexpected error occurred in the database.",
+			);
+		});
+
 		it("should return an array of friend requests if found", async () => {
 			const mockFriendRequests = [
 				{ friend1: "friendID1", friend2: "userID", is_pending: true },
@@ -700,14 +709,16 @@ describe("DbUtilsService", () => {
 			});
 		});
 
-		it("should return an empty array if no friends are found", async () => {
+		it("should throw an error if no friends are found", async () => {
 			const mockUserID = "user-1";
 
 			jest
 				.spyOn(mockPrismaService.friends, "findMany")
-				.mockResolvedValueOnce([]);
+				.mockResolvedValueOnce(null);
 
-			await expect(service.getUserFriends(mockUserID)).resolves.toEqual([]);
+			await expect(service.getUserFriends(mockUserID)).rejects.toThrow(
+				"No friends found.",
+			);
 		});
 
 		it("should throw an error if no users are found", async () => {

@@ -10,9 +10,9 @@ import { JWTPayload } from "../auth.service";
 import * as jwt from "jsonwebtoken";
 import { IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { SpotifyService } from "../../spotify/spotify.service";
 import { AxiosError } from "axios";
 import { Type } from "class-transformer";
-import { TasksService } from "../../tasks/tasks.service";
 
 export class SpotifyTokenResponse {
 	@ApiProperty()
@@ -54,17 +54,10 @@ export class SpotifyTokenRefreshResponse {
 	expires_in: number;
 }
 
-export class SpotifyTokenPair {
-	@ApiProperty()
-	@IsObject()
-	@ValidateNested()
-	@Type(() => SpotifyTokenResponse)
+export type SpotifyTokenPair = {
 	tokens: SpotifyTokenResponse;
-
-	@ApiProperty()
-	@IsNumber()
 	epoch_expiry: number;
-}
+};
 
 export class SpotifyCallbackResponse {
 	@ApiProperty()
@@ -73,25 +66,24 @@ export class SpotifyCallbackResponse {
 
 	@ApiProperty()
 	@IsObject()
-	@Type(() => SpotifyTokenPair)
+	@Type(() => SpotifyTokenResponse)
 	@ValidateNested()
-	spotifyTokens: SpotifyTokenPair;
+	spotifyTokens: SpotifyTokenResponse;
 }
 
 @Injectable()
 export class SpotifyAuthService {
-	private clientId: string;
-	private clientSecret: string;
-	// private redirectUri: string;
-	private authHeader: string;
-	private selfAuthorisedAPI: Spotify.SpotifyApi;
+	private clientId;
+	private clientSecret;
+	// private redirectUri;
+	private authHeader;
 
 	constructor(
 		private readonly configService: ConfigService,
 		private readonly httpService: HttpService,
 		private readonly prisma: PrismaService,
 		// private readonly dbUtils: DbUtilsService,
-		private readonly tasksService: TasksService,
+		private readonly spotify: SpotifyService, // private readonly tasksService: TasksService,
 	) {
 		const clientId = this.configService.get<string>("SPOTIFY_CLIENT_ID");
 		if (!clientId) {
@@ -116,11 +108,6 @@ export class SpotifyAuthService {
 		this.authHeader = Buffer.from(
 			`${this.clientId}:${this.clientSecret}`,
 		).toString("base64");
-
-		this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
-			this.clientId,
-			this.clientSecret,
-		);
 	}
 
 	//how state is constructed in frontend
@@ -283,34 +270,15 @@ export class SpotifyAuthService {
 		return token;
 	}
 
-	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
-		let attempts = 0;
-		let error: Error | undefined;
-		for (let i = 0; i < 3; i++) {
-			try {
-				const api = Spotify.SpotifyApi.withAccessToken(this.clientId, token);
-				const user = await api.currentUser.profile();
-				return user;
-			} catch (e) {
-				error = e as Error;
-				attempts++;
-				console.error(e);
-				await new Promise((resolve) => setTimeout(resolve, 5000 * attempts));
-			}
-		}
-		if (error) {
-			throw error;
-		}
-		throw new Error("Failed to get user profile");
-	}
-
 	async createUser(tk: SpotifyTokenPair): Promise<PrismaTypes.users> {
 		//get user
 		if (tk.epoch_expiry < Date.now()) {
 			throw new Error("Token has expired");
 		}
 
-		const spotifyUser: Spotify.UserProfile = await this.getSelf(tk.tokens);
+		const spotifyUser: Spotify.UserProfile = await this.spotify.getSelf(
+			tk.tokens,
+		);
 
 		let existingUser: PrismaTypes.users | null =
 			await this.prisma.users.findFirst({
@@ -321,9 +289,6 @@ export class SpotifyAuthService {
 			existingUser = await this.prisma.users.findFirst({
 				where: { username: spotifyUser.id },
 			});
-			if (!existingUser) {
-				throw new Error("Failed to find user");
-			}
 		}
 		if (existingUser) {
 			const e = existingUser as PrismaTypes.users;
@@ -373,7 +338,7 @@ export class SpotifyAuthService {
 		try {
 			const response = await this.prisma.users.create({ data: user });
 			console.log(response);
-			await this.tasksService.addImportLibraryTask(tk, response.user_id);
+			//await this.tasksService.addImportLibraryTask(tk, response.user_id);
 			return response;
 		} catch (err) {
 			console.log(err);
@@ -444,9 +409,5 @@ export class SpotifyAuthService {
 			return newPair;
 		}
 		return JSON.parse(tokens.token) as SpotifyTokenPair;
-	}
-
-	getUserlessAPI(): Spotify.SpotifyApi {
-		return this.selfAuthorisedAPI;
 	}
 }

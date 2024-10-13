@@ -1,8 +1,8 @@
 // `common/constants.ts`
 export const SOCKET_EVENTS = {
 	//shared
-	CONNECT_USER: "connectUser",
-	DISCONNECT_USER: "disconnectUser",
+	CONNECT: "connectUser",
+	DISCONNECT: "disconnectUser",
 	JOIN_ROOM: "joinRoom",
 	LEAVE_ROOM: "leaveRoom",
 	ERROR: "error",
@@ -28,31 +28,14 @@ export const SOCKET_EVENTS = {
 	INIT_PLAY: "initPlay",
 	INIT_PAUSE: "initPause",
 	INIT_STOP: "initStop",
-	INIT_SKIP: "initSkip",
-	INIT_PREV: "initPrev",
 	SEEK_MEDIA: "seekMedia",
 	CURRENT_MEDIA: "currentMedia",
-	MEDIA_SYNC: "mediaSync",
-	REQUEST_QUEUE: "requestQueue",
-	CLEAR_QUEUE: "clearQueue",
-
-	//for queue & voting
-	UPVOTE_SONG: "upvoteSong",
-	DOWNVOTE_SONG: "downvoteSong",
-	UNDO_SONG_VOTE: "undoSongVote",
-	SWAP_SONG_VOTE: "swapSongVote",
-	ENQUEUE_SONG: "enqueueSong",
-	DEQUEUE_SONG: "dequeueSong",
-
-	SONG_ADDED: "songAdded",
-	SONG_REMOVED: "songRemoved",
-	VOTE_UPDATED: "voteUpdated",
 	QUEUE_STATE: "queueState",
-	ROOM_SETTINGS_CHANGED: "roomSettingsChanged",
+	MEDIA_SYNC: "mediaSync",
 
 	//for server responses
 	CONNECTED: "connected",
-	DISCONNECTED: "disconnected",
+	DISONNECTED: "disconnected",
 	ROOM_JOINED: "roomJoined",
 	ROOM_LEFT: "roomLeft",
 	MESSAGE_SENT: "messageSent",

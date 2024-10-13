@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsDate } from "class-validator";
+import { IsString, IsObject, ValidateNested, IsDate } from "class-validator";
 
 //for Emoji and Category, see: https://github.com/woodybury/rn-emoji-picker
 export interface Emoji {
@@ -27,8 +27,9 @@ export class EmojiReactionDto {
 	@ApiProperty({
 		description: "The message body",
 	})
-	@IsString()
-	body: string;
+	@IsObject()
+	@ValidateNested()
+	body: Emoji;
 
 	@ApiProperty({
 		description: "The user that used the emoji",

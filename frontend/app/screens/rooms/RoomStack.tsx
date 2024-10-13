@@ -1,8 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+	useState,
+	useEffect,
+	useContext,
+	useCallback,
+	useRef,
+} from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
-import RoomChat from "./ChatRoom";
+import Chat from "./ChatRoom";
+import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import {
 	View,
@@ -15,12 +22,13 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
+import { formatRoomData } from "../../models/Room";
+import { live, LiveMessage } from "../../services/Live";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import ContextMenu from "../../components/ContextMenu";
-import { useLive } from "../../LiveContext";
-import { useAPI } from "../../APIContext";
-import { RoomDto, RoomSongDto } from "../../../api";
 import auth from "../../services/AuthManagement";
+import CurrentRoom from "./functions/CurrentRoom";
+import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
+import ContextMenu from "../../components/ContextMenu";
 import * as utils from "../../services/Utils";
 
 const Tab = createMaterialTopTabNavigator();
@@ -28,13 +36,30 @@ const Tab = createMaterialTopTabNavigator();
 function MyRoomTabs() {
 	const navigation = useNavigation();
 	const router = useRouter();
-	const { currentUser, currentRoom, socketHandshakes } = useLive();
-	const { rooms } = useAPI();
-	const [userInRoom, setUserInRoom] = useState(false);
+	const [joined, setJoined] = useState(false); // Track if the user has joined the room
+	const [messages, setMessages] = useState<LiveMessage[]>([]);
+	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
+	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
+		null,
+	);
 	const [secondsPlayed, setSecondsPlayed] = useState(0);
+	const playback = useRef(new SimpleSpotifyPlayback()).current;
+	const [isPlaying, setIsPlaying] = useState(false);
 	const [isMenuVisible, setMenuVisible] = useState(false);
+	// const roomData = { mine: true }; // Assuming this comes from your state or props
+
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+
+	const { currentRoom, setCurrentRoom, userData } = playerContext;
 
 	const { room } = useLocalSearchParams();
+	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -42,7 +67,7 @@ function MyRoomTabs() {
 		roomData = JSON.parse(room);
 	}
 
-	roomData.mine = currentUser ? roomData.userID === currentUser.userID : false;
+	roomData.mine = roomData.userID === userData?.userID;
 
 	let roomID: string;
 	if (roomData.id !== undefined) {
@@ -53,84 +78,64 @@ function MyRoomTabs() {
 		roomID = currentRoom?.roomID ?? "";
 	}
 
-	// const navigateBasedOnOwnership = () => {
-	// 	console.log("Room is mine? ", roomData.mine);
-	// 	if (roomData.mine) {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/AdvancedSettings",
-	// 			params: { room: room },
-	// 		});
-	// 	} else {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/RoomInfo",
-	// 			params: { room: room },
-	// 		});
-	// 	}
-	// };
+	useEffect(() => {
+		if (currentRoom && currentRoom?.roomID === roomID) {
+			setJoined(true);
+		}
+	}, [currentRoom, roomID]);
 
-	const navigateBasedOnOwnership = () => {
-		setMenuVisible(true);
+	const joinRoom = useCallback(() => {
+		const formattedRoom = formatRoomData(roomData);
+		setJoined(true);
+		setCurrentRoom(formattedRoom);
+	}, [roomData, setCurrentRoom]);
+
+	const leaveRoom = () => {
+		setCurrentRoom(null);
+		setJoined(false);
 	};
 
-	const handleAdvancedSettings = () => {
-		setMenuVisible(false);
-		router.navigate({
-			pathname: "/screens/rooms/AdvancedSettings",
-			params: { room: room },
-		});
-	};
+	const handleJoinLeave = async () => {
+		const token = await auth.getToken();
+		if (!token) {
+			throw new Error("No token found");
+		}
+		if (!joined) {
+			await roomCurrent.leaveJoinRoom(token, roomID, false);
 
-	const handleRoomInfo = () => {
-		setMenuVisible(false);
-		router.navigate({
-			pathname: "/screens/rooms/RoomInfo",
-			params: { room: room },
-		});
-	};
-
-	const handleShareRoom = () => {
-		setMenuVisible(false);
-		throw new Error(
-			"This is not implemented and this error is to notify our devs.",
-		);
-		// const userIDs: string[];
-		// rooms.shareRoom(roomID, userIDs)
-		// 	.then((response) => {
-		// 		if (Platform.OS === "android" && ToastAndroid) {
-		// 			ToastAndroid.show("Room shared successfully", ToastAndroid.SHORT);
-		// 		} else {
-		// 			Alert.alert("Success", "Room shared successfully.");
-		// 		}
-		// 	})
-		// 	.catch((error) => {
-		// 		console.log("Error sharing room: ", error);
-		// 		if (Platform.OS === "android" && ToastAndroid) {
-		// 			ToastAndroid.show("Failed to share room", ToastAndroid.SHORT);
-		// 		} else {
-		// 			Alert.alert("Error", "Failed to share room.");
-		// 		}
-		// 	});
-	};
-
-	const handleSavePlaylist = () => {
-		setMenuVisible(false);
-		rooms
-			.saveRoom(roomID)
-			.then((response) => {
-				if (Platform.OS === "android" && ToastAndroid) {
-					ToastAndroid.show("Playlist saved successfully", ToastAndroid.SHORT);
-				} else {
-					Alert.alert("Success", "Playlist saved successfully.");
-				}
-			})
-			.catch((error) => {
-				console.log("Error saving playlist: ", error);
-				if (Platform.OS === "android" && ToastAndroid) {
-					ToastAndroid.show("Failed to save playlist", ToastAndroid.SHORT);
-				} else {
-					Alert.alert("Error", "Failed to save playlist.");
-				}
-			});
+			joinRoom();
+			live.joinRoom(roomID, setJoined, setMessages);
+			setJoined(true);
+			setJoinedSongIndex(currentTrackIndex);
+			setJoinedSecondsPlayed(secondsPlayed);
+			console.log(
+				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
+			);
+		} else {
+			const leftRoom: boolean = await roomCurrent.leaveJoinRoom(
+				token as string,
+				roomID,
+				true,
+			);
+			if (!leftRoom) {
+				ToastAndroid.show(
+					"Error leaving room. Please try again.",
+					ToastAndroid.SHORT,
+				);
+				return;
+			}
+			leaveRoom();
+			setJoined(false);
+			live.leaveRoom();
+			setJoinedSongIndex(null);
+			setJoinedSecondsPlayed(null);
+			// 	//playbackManager.pause();
+			const deviceID = await playback.getFirstDevice();
+			if (deviceID && deviceID !== null) {
+				playback.handlePlayback("pause", deviceID);
+			}
+			setIsPlaying(false);
+		}
 	};
 
 	const getRoom = async (roomID: string) => {
@@ -167,7 +172,7 @@ function MyRoomTabs() {
 				language: data.language,
 				roomSize: "50",
 				userProfile: data.creator.profile_picture_url,
-				mine: data.creator.userID === currentUser?.userID,
+				mine: data.creator.userID === userData?.userID,
 				songName: data.current_song ? data.current_song.title : null,
 			};
 		} catch (error) {
@@ -226,6 +231,36 @@ function MyRoomTabs() {
 		}
 	};
 
+	const navigateBasedOnOwnership = () => {
+		setMenuVisible(true);
+	};
+
+	const handleAdvancedSettings = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/AdvancedSettings",
+			params: { room: room },
+		});
+	};
+
+	const handleRoomInfo = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/RoomInfo",
+			params: { room: room },
+		});
+	};
+
+	const handleShareRoom = () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
+	};
+
+	const handleSavePlaylist = () => {
+		setMenuVisible(false);
+		// Implement room sharing logic here
+	};
+
 	const handleNavigateToChildRooms = async () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
@@ -261,23 +296,6 @@ function MyRoomTabs() {
 			}
 		}
 	};
-
-	const updateRoomStatus = useCallback(async () => {
-		if (currentRoom && currentRoom.roomID === roomID) {
-			setUserInRoom(true);
-		} else {
-			setUserInRoom(false);
-		}
-	}, [roomID, currentRoom]);
-
-	useEffect(() => {
-		updateRoomStatus();
-	}, [roomID, currentRoom]);
-
-	// on component mount
-	useEffect(() => {
-		updateRoomStatus();
-	}, []);
 
 	return (
 		<>
@@ -341,14 +359,16 @@ function MyRoomTabs() {
 			>
 				<Tab.Screen
 					name="RoomPage"
+					component={() => (
+						<RoomPage joined={joined} handleJoinLeave={handleJoinLeave} />
+					)}
 					options={{ tabBarLabel: "Room" }}
-					component={RoomPage}
 				/>
-				{socketHandshakes.roomJoined && userInRoom && (
+				{joined && (
 					<>
 						<Tab.Screen
 							name="Chat"
-							component={RoomChat}
+							component={Chat}
 							options={{ tabBarLabel: "Chat" }}
 						/>
 						<Tab.Screen

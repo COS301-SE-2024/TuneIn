@@ -12,11 +12,10 @@ import Ionicons from "@expo/vector-icons/Ionicons"; // Import for icons
 import * as auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
 import { router } from "expo-router";
+import { User } from "../../models/user";
 import { Player } from "../../PlayerContext";
 import { useContext } from "react";
-import { useLive } from "../../LiveContext";
-import { useAPI } from "../../APIContext";
-import { User } from "../../models/user";
+import CurrentRoom from "../../screens/rooms/functions/CurrentRoom";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
@@ -25,8 +24,12 @@ interface ContextMenuProps {
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
-	const { currentRoom, socketHandshakes, leaveRoom, leaveDM } = useLive();
-	const { rooms } = useAPI();
+	const playerContext = useContext(Player);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
 	// Navigation functions
 	const navigateToAnalytics = () => {
 		router.navigate("/screens/analytics/AnalyticsPage");
@@ -37,12 +40,11 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 		await auth.default
 			.getToken()
 			.then(async (token) => {
+				const current = new CurrentRoom();
+				const currentRoom = await current.getCurrentRoom(token as string);
 				if (currentRoom) {
-					leaveRoom();
-					await rooms.leaveRoom(currentRoom.roomID);
-				}
-				if (socketHandshakes.dmJoined) {
-					leaveDM();
+					const currentRoomID = currentRoom?.roomID ?? currentRoom.id;
+					await current.leaveJoinRoom(token as string, currentRoomID, true);
 				}
 				onClose(); // Close the modal after logout
 				await auth.default.logout();
@@ -52,6 +54,8 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ isVisible, onClose }) => {
 				} else {
 					alert("You have been logged out.");
 				}
+				const { setCurrentRoom } = playerContext;
+				setCurrentRoom(null);
 			})
 			.catch((error) => {
 				console.log("Error getting token: " + error);

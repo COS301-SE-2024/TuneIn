@@ -1,25 +1,20 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
-import {
-	SongPair,
-	constructArtistString,
-	getAlbumArtUrl,
-	getTitle,
-} from "../models/SongPair";
-import { Track } from "@spotify/web-api-ts-sdk";
+import { Track } from "../models/Track";
 
 const { width, height } = Dimensions.get("window");
 
 const isSmallScreen = width < 380 || height < 700;
 
 interface SongRoomWidgetProps {
-	song: SongPair | undefined;
+	track: Track;
 }
 
-const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({ song }) => {
-	const artistName = constructArtistString(song);
-	const albumCoverUrl = getAlbumArtUrl(song);
-	const songName = getTitle(song);
+const SongRoomWidget: React.FC<SongRoomWidgetProps> = ({ track }) => {
+	const { name: songName, artists, album } = track;
+	const artistName = artists.map((artist) => artist.name).join(", ");
+	const albumCoverUrl = album.images[0]?.url;
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.imageContainer}>

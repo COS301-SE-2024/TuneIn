@@ -6,29 +6,41 @@ import axios from "axios";
 import auth from "../services/AuthManagement";
 import * as utils from "./../services/Utils";
 import { colors } from "../styles/colors";
-import { useLive } from "../LiveContext";
 
 // Default profile icon for fallback
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 
 const TopNavBar: React.FC = () => {
 	const router = useRouter();
-	const { currentUser } = useLive();
-	const [profileImage, setProfileImage] = useState<string>(defaultProfileIcon);
+	const [profileImage, setProfileImage] = useState<string>("");
 	const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (!currentUser) {
-			setProfileImage(defaultProfileIcon);
-		} else if (
-			currentUser.profile_picture_url ===
-			"https://example.com/default-profile-picture.png"
-		) {
-			setProfileImage(defaultProfileIcon);
-		} else {
-			setProfileImage(currentUser.profile_picture_url);
-		}
-	}, [currentUser]);
+		const fetchProfilePicture = async () => {
+			try {
+				const token = await auth.getToken();
+				if (token) {
+					const response = await axios.get(`${utils.API_BASE_URL}/users`, {
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					});
+					const imageUrl = response.data.profile_picture_url;
+
+					if (!imageUrl) {
+						setProfileImage(defaultProfileIcon);
+					} else {
+						setProfileImage(imageUrl);
+					}
+				}
+			} catch (error) {
+				console.log("Error fetching profile info:", error);
+				setProfileImage(defaultProfileIcon); // Fallback in case of error
+			}
+		};
+
+		fetchProfilePicture();
+	}, []);
 
 	const navigateToProfile = () => {
 		router.push({

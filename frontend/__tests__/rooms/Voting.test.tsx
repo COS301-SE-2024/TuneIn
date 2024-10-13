@@ -1,8 +1,8 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import SongVote from "../../app/components/rooms/SongVote"; // Adjust the import path as needed
+import Voting from "../../app/components/rooms/Voting"; // Adjust the import path as needed
 
-describe("SongVote Component", () => {
+describe("Voting Component", () => {
 	const setVoteCount = jest.fn();
 	const swapSongs = jest.fn();
 
@@ -12,7 +12,7 @@ describe("SongVote Component", () => {
 
 	it("should render correctly", () => {
 		const { getByTestId, getByText } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -27,7 +27,7 @@ describe("SongVote Component", () => {
 
 	it("should handle upvote correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -44,7 +44,7 @@ describe("SongVote Component", () => {
 
 	it("should handle downvote correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -61,7 +61,7 @@ describe("SongVote Component", () => {
 
 	it("should handle upvote removal correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -79,7 +79,7 @@ describe("SongVote Component", () => {
 
 	it("should handle downvote removal correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -97,7 +97,7 @@ describe("SongVote Component", () => {
 
 	it("should handle changing from downvote to upvote correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}
@@ -115,7 +115,7 @@ describe("SongVote Component", () => {
 
 	it("should handle changing from upvote to downvote correctly", () => {
 		const { getByTestId } = render(
-			<SongVote
+			<Voting
 				voteCount={10}
 				setVoteCount={setVoteCount}
 				index={0}

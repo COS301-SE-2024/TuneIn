@@ -2,34 +2,26 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 // import { Chat } from "../models/chat";
-import { DirectMessageDto, UserDto, RoomDto } from "../../api";
-import { useLive } from "../LiveContext";
+import { DirectMessageDto } from "../models/DmDto";
+import { UserDto } from "../models/UserDto";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;
 	otherUser: UserDto;
-	room?: RoomDto;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser, room }) => {
-	const { enterDM, leaveDM, socketHandshakes } = useLive();
+const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser }) => {
 	const router = useRouter();
 
 	return (
 		<TouchableOpacity
 			testID="chat-item-touchable"
 			style={styles.container}
-			onPress={() => {
-				console.log("pre enterDM");
-				if (socketHandshakes.dmJoined) {
-					leaveDM();
-				}
-				enterDM([otherUser.username]);
-				console.log("post enterDM");
+			onPress={() =>
 				router.push(
 					`/screens/messaging/ChatScreen?username=${otherUser.username}`,
-				);
-			}}
+				)
+			}
 		>
 			<Image
 				source={{ uri: otherUser.profile_picture_url }}
@@ -38,11 +30,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser, room }) => {
 			/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.name}>{otherUser.profile_name}</Text>
-				<Text style={styles.lastMessage}>
-					{message.bodyIsRoomID && room
-						? `Shared Room: ${room.room_name}`
-						: message.messageBody}
-				</Text>
+				<Text style={styles.lastMessage}>{message.messageBody}</Text>
 			</View>
 		</TouchableOpacity>
 	);

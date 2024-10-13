@@ -26,6 +26,7 @@
     "noUnusedParameters": true,
     "strictFunctionTypes": true,
     "useUnknownInCatchVariables": false,
+    "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "esModuleInterop": true,

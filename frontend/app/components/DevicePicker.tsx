@@ -6,32 +6,73 @@ import {
 	Modal,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
+	Alert,
 	ActivityIndicator,
 } from "react-native";
+import { useSpotifyDevices } from "../hooks/useSpotifyDevices";
 import { RadioButton } from "react-native-paper";
-import Icon from "react-native-vector-icons/FontAwesome"; // Example: using FontAwesome icons
+import Icon from "react-native-vector-icons/FontAwesome";
+import { Devices } from "../models/Devices";
+import * as spotifyAuth from "../services/SpotifyAuth";
 import { colors } from "../styles/colors";
-import { useLive } from "../LiveContext";
-import { Device } from "@spotify/web-api-ts-sdk";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-const DevicePicker = ({
-	isVisible,
-	setIsVisible,
-}: {
-	isVisible: boolean;
-	setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-	const { roomControls } = useLive();
-	// const [isVisible, setIsVisible] = useState(false);
+const DevicePicker = () => {
+	const { getDeviceIDs, devices: initialDevices, error } = useSpotifyDevices();
+	const [isVisible, setIsVisible] = useState(false);
+	const [devices, setDevices] = useState<Devices[]>(initialDevices);
+	const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const intervalIdRef = useRef<NodeJS.Timeout>();
-	const [localDevices, setLocalDevices] = useState<Device[]>(
-		roomControls.playbackHandler.spotifyDevices.devices,
-	);
-	const [localActiveDevice, setLocalActiveDevice] = useState<
-		Device | undefined
-	>(roomControls.playbackHandler.activeDevice);
+	const [accessToken, setAccessToken] = useState<string>("");
+	const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+
+	useEffect(() => {
+		const fetchToken = async () => {
+			try {
+				const allTokens = await spotifyAuth.getTokens();
+				const token = allTokens.access_token;
+				setAccessToken(token);
+			} catch (err) {
+				console.error("An error occurred while fetching the token", err);
+			}
+		};
+
+		fetchToken();
+	}, []);
+
+	useEffect(() => {
+		if (isVisible) {
+			const fetchDevices = async () => {
+				try {
+					const deviceList = await getDeviceIDs();
+					if (deviceList) {
+						setDevices(deviceList);
+						const activeDevice = deviceList.find((device) => device.is_active);
+						if (activeDevice) {
+							setSelectedDevice(activeDevice.id);
+						}
+					} else {
+						console.warn("Received null or undefined deviceList");
+					}
+				} catch (err) {
+					console.error("An error occurred while fetching devices", err);
+				}
+			};
+
+			fetchDevices();
+			intervalIdRef.current = setInterval(fetchDevices, 4000);
+
+			return () => {
+				if (intervalIdRef.current) {
+					clearInterval(intervalIdRef.current);
+				}
+			};
+		} else {
+			if (intervalIdRef.current) {
+				clearInterval(intervalIdRef.current);
+			}
+		}
+	}, [isVisible, getDeviceIDs]);
 
 	const handleOpenPopup = () => {
 		setIsVisible(true);
@@ -41,7 +82,32 @@ const DevicePicker = ({
 		setIsVisible(false);
 	};
 
-	const renderDeviceName = (device: Device) => {
+	const handleDeviceSelect = async (deviceId: string) => {
+		setIsLoading(true);
+		setSelectedDevice(deviceId);
+		try {
+			const response = await fetch("https://api.spotify.com/v1/me/player", {
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					device_ids: [deviceId],
+				}),
+			});
+			if (!response.ok) {
+				throw new Error("Failed to transfer playback to the selected device.");
+			}
+		} catch (error) {
+			const errorMessage = (error as Error).message;
+			Alert.alert("Error", errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const renderDeviceName = (device: Devices) => {
 		let icon = null;
 		switch (device.type) {
 			case "Smartphone":
@@ -62,61 +128,6 @@ const DevicePicker = ({
 		);
 	};
 
-	useEffect(() => {
-		console.log(`The first DevicePicker useEffect`);
-		const contextDevices: Device[] =
-			roomControls.playbackHandler.spotifyDevices.devices;
-		if (contextDevices.length !== localDevices.length) {
-			setLocalDevices(contextDevices);
-		} else {
-			for (let i = 0; i < contextDevices.length; i++) {
-				if (contextDevices[i].id !== localDevices[i].id) {
-					setLocalDevices(contextDevices);
-					break;
-				}
-			}
-		}
-		if (roomControls.playbackHandler.activeDevice) {
-			if (
-				!localActiveDevice ||
-				roomControls.playbackHandler.activeDevice.id !== localActiveDevice.id
-			) {
-				setLocalActiveDevice(roomControls.playbackHandler.activeDevice);
-			}
-		}
-	}, [
-		roomControls.playbackHandler.spotifyDevices.devices,
-		roomControls.playbackHandler.activeDevice,
-	]);
-
-	useEffect(() => {
-		console.log(`The other DevicePicker useEffectttttttttttt`);
-		if (!intervalIdRef.current) {
-			intervalIdRef.current = setInterval(() => {
-				console.log("Running useEffect as per 1000ms interval");
-				if (isVisible) {
-					setIsLoading(true);
-					roomControls.playbackHandler.getDevices().then(() => {
-						setIsLoading(false);
-					});
-				}
-			}, 5000);
-		}
-		if (!isVisible) {
-			clearInterval(intervalIdRef.current);
-			intervalIdRef.current = undefined;
-		} else {
-			//once DevicePicker is visible, fetch devices
-			roomControls.playbackHandler.getDevices().then(() => {
-				setIsLoading(false);
-			});
-		}
-		return () => {
-			clearInterval(intervalIdRef.current);
-			intervalIdRef.current = undefined;
-		};
-	}, [isVisible]);
-
 	return (
 		<>
 			<TouchableOpacity
@@ -132,16 +143,14 @@ const DevicePicker = ({
 						<View style={styles.modalBackground}>
 							<TouchableWithoutFeedback>
 								<View style={styles.popupContainer}>
-									{roomControls.playbackHandler.deviceError ? (
+									{error ? (
 										<>
 											<Text style={styles.popupTitle}>
 												Error Fetching Devices
 											</Text>
-											<Text style={styles.popupMessage}>
-												{roomControls.playbackHandler.deviceError}
-											</Text>
+											<Text style={styles.popupMessage}>{error}</Text>
 										</>
-									) : localDevices.length === 0 ? (
+									) : !devices || devices.length === 0 ? (
 										<>
 											<Text style={styles.popupTitle}>
 												No Devices Available
@@ -159,29 +168,21 @@ const DevicePicker = ({
 													color={colors.primary}
 												/>
 											) : (
-												localDevices.map((device: Device, index: number) => (
+												devices.map((device: Devices, index: number) => (
 													<TouchableOpacity
 														key={index}
 														style={styles.deviceOption}
-														onPress={() =>
-															roomControls.playbackHandler.setActiveDevice({
-																deviceID: device.id,
-																userSelected: true,
-															})
-														}
+														onPress={() => handleDeviceSelect(device.id)}
 													>
-														{device.id !== null && (
-															<RadioButton
-																value={device.id}
-																testID={`radio-button-${device.id}`}
-																status={
-																	localActiveDevice &&
-																	localActiveDevice.id === device.id
-																		? "checked"
-																		: "unchecked"
-																}
-															/>
-														)}
+														<RadioButton
+															value={device.id}
+															testID={`radio-button-${device.id}`}
+															status={
+																selectedDevice === device.id
+																	? "checked"
+																	: "unchecked"
+															}
+														/>
 														{renderDeviceName(device)}
 													</TouchableOpacity>
 												))

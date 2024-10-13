@@ -4,10 +4,10 @@
   "main": "expo-router/entry",
   "scheme": "tunein-app",
   "scripts": {
-    "prestart": "node prestart.js && node node_modules/react-native-localhost/scripts/postinstall.js",
+    "prestart": "node check-versions.js && node node_modules/react-native-localhost/scripts/postinstall.js",
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
     "web": "expo start --web",
     "lint-fix": "eslint --fix .",
     "lint": "eslint .",

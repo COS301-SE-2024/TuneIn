@@ -5,10 +5,7 @@ import { Prisma } from "@prisma/client";
 import { UserDto } from "./dto/user.dto";
 import { CreateRoomDto } from "../rooms/dto/createroomdto";
 import { RoomDto } from "../rooms/dto/room.dto";
-import {
-	DbUtilsService,
-	FullyQualifiedRoom,
-} from "../db-utils/db-utils.service";
+import { DbUtilsService } from "../db-utils/db-utils.service";
 import { DtoGenService } from "../dto-gen/dto-gen.service";
 import { UpdateUserDto } from "./dto/updateuser.dto";
 import { DirectMessageDto } from "./dto/dm.dto";
@@ -93,19 +90,19 @@ export class UsersService {
 		});
 	}
 
-	async getUsers(userIDs: string[]): Promise<UserDto[]> {
-		const users: UserDto[] = await this.dtogen.generateMultipleUserDto(userIDs);
-		return users;
+	async getProfile(uid: string): Promise<UserDto> {
+		const user = await this.dtogen.generateUserDto(uid);
+		return user;
 	}
 
 	async usernameTaken(username: string): Promise<boolean> {
 		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
-		if (user === null) {
-			throw new HttpException("Username not found", HttpStatus.NOT_FOUND);
+		if (!user || user === null) {
+			return false;
 		}
-		throw new HttpException("Username found", HttpStatus.OK);
+		return true;
 	}
 
 	async updateProfile(
@@ -162,7 +159,10 @@ export class UsersService {
 			data: updatedUser,
 		});
 
-		const [u]: UserDto[] = await this.dtogen.generateMultipleUserDto([userId]);
+		const u = await this.dtogen.generateUserDto(userId);
+		if (!u) {
+			throw new Error("Failed to generate user profile");
+		}
 		return u;
 	}
 
@@ -202,13 +202,6 @@ export class UsersService {
 			const genresToAdd = newGenreNames.filter(
 				(name) => !currentGenreNames.includes(name) && genreMap.has(name),
 			);
-			const genresToAddIDs: string[] = [];
-			for (const name of genresToAdd) {
-				const id = genreMap.get(name);
-				if (id) {
-					genresToAddIDs.push(id);
-				}
-			}
 
 			const genresToRemove = currentGenreNames
 				.filter((name): name is string => name !== null)
@@ -228,9 +221,9 @@ export class UsersService {
 
 			// Step 5: Insert new genres
 			await prisma.favorite_genres.createMany({
-				data: genresToAddIDs.map((id) => ({
+				data: genresToAdd.map((name) => ({
 					user_id: userId,
-					genre_id: id,
+					genre_id: genreMap.get(name)!,
 				})),
 			});
 		});
@@ -304,13 +297,6 @@ export class UsersService {
 			const songsToAdd = newSongIds.filter(
 				(id) => !currentSongSpotifyId.includes(id) && songMap.has(id),
 			);
-			const songsToAddIDs: string[] = [];
-			for (const id of songsToAdd) {
-				const songId = songMap.get(id);
-				if (songId) {
-					songsToAddIDs.push(songId);
-				}
-			}
 			console.log("Songs to add: " + songsToAdd);
 
 			const songsToRemove = currentSongSpotifyId
@@ -331,30 +317,33 @@ export class UsersService {
 
 			// Step 5: Insert new songs
 			await prisma.favorite_songs.createMany({
-				data: songsToAddIDs.map((id) => ({
+				data: songsToAdd.map((id) => ({
 					user_id: userId,
-					song_id: id,
+					song_id: songMap.get(id)!,
 				})),
 			});
 		});
 	}
 
-	async getProfile(username: string): Promise<UserDto> {
+	async getProfileByUsername(username: string): Promise<UserDto> {
 		const userData = await this.prisma.users.findFirst({
 			where: { username: username },
 		});
 
 		if (!userData) {
-			throw new HttpException(
-				"User with username: (" + username + ") does not exist",
-				HttpStatus.NOT_FOUND,
-			);
+			throw new Error("User not found");
 		} else {
-			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+			const user = await this.dtogen.generateUserDto(userData.user_id);
+			const relationship = await this.dbUtils.getRelationshipStatus(
 				userData.user_id,
-			]);
-			return user;
+				user.userID,
+			);
+			if (user && relationship !== "blocked") {
+				return user;
+			}
 		}
+
+		return new UserDto();
 	}
 
 	/*
@@ -531,7 +520,12 @@ export class UsersService {
 		}
 
 		const ids: string[] = rooms.map((room) => room.room_id);
-		const r = await this.dtogen.generateMultipleRoomDto(ids);
+		const r = await this.dtogen.generateMultipleRoomDto(ids, userID);
+		if (!r || r === null) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for user rooms (getUserRooms). Received null.",
+			);
+		}
 		return r;
 	}
 
@@ -577,14 +571,6 @@ export class UsersService {
 		}
 
 		//for is_private, we will need to add the roomID to the private_room tbale
-		const r: FullyQualifiedRoom = {
-			...room,
-			child_room_child_room_parent_room_idToroom: [],
-			participate: [],
-			private_room: null,
-			public_room: null,
-			scheduled_room: null,
-		};
 		if (createRoomDto.is_private) {
 			const privRoom: Prisma.private_roomCreateInput = {
 				room: {
@@ -596,7 +582,11 @@ export class UsersService {
 			const privRoomResult = await this.prisma.private_room.create({
 				data: privRoom,
 			});
-			r.private_room = privRoomResult;
+			if (!privRoomResult || privRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating private room. Received null.",
+				);
+			}
 		} else {
 			const pubRoom: Prisma.public_roomCreateInput = {
 				room: {
@@ -608,7 +598,11 @@ export class UsersService {
 			const pubRoomResult = await this.prisma.public_room.create({
 				data: pubRoom,
 			});
-			r.public_room = pubRoomResult;
+			if (!pubRoomResult || pubRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating public room. Received null.",
+				);
+			}
 		}
 
 		//TODO: implement scheduled room creation
@@ -623,32 +617,33 @@ export class UsersService {
 			};
 		}
 		*/
-		const rooms = await this.dtogen.generateMultipleRoomDtoFromRoom([r]);
-		if (rooms.length === 0) {
+
+		const result = await this.dtogen.generateRoomDtoFromRoom(room);
+		if (!result) {
 			throw new Error(
-				"An unknown error occurred while generating RoomDto for created room. Received empty array.",
+				"An unknown error occurred while generating RoomDto for created room. Received null.",
 			);
 		}
-		return rooms[0];
+		return result;
 	}
 
-	async getRecentRooms(username: string): Promise<RoomDto[]> {
+	async getRecentRoomsById(userID: string): Promise<RoomDto[]> {
 		/*
 		activity field in users table is modelled as:
 		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
 		*/
 		// get the recent rooms from the user's activity field
-		const u: PrismaTypes.users | null = await this.prisma.users.findFirst({
-			where: { username: username },
+		const u = await this.prisma.users.findUnique({
+			where: { user_id: userID },
 		});
 
-		if (u === null) {
-			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		if (!u || u === null) {
+			throw new Error("User does not exist");
 		}
 
 		const recentRooms = await this.prisma.user_activity.findMany({
 			where: {
-				user_id: u.user_id, // Filter by specific user ID
+				user_id: userID, // Filter by specific user ID
 			},
 			distinct: ["room_id"], // Ensure unique room IDs
 			orderBy: {
@@ -662,6 +657,51 @@ export class UsersService {
 		const recent_rooms =
 			(await this.dtogen.generateMultipleRoomDto(
 				recentRooms.map((room) => room.room_id),
+				userID,
+			)) || [];
+
+		return recent_rooms;
+		// } catch (e) {
+		// 	throw new Error(
+		// 		"An unknown error occurred while parsing the 'recent_rooms' field in 'activity'. Expected string[], received " +
+		// 			typeof activity["recent_rooms"],
+		// 	);
+		// }
+	}
+
+	async getRecentRoomByUsername(username: string): Promise<RoomDto[]> {
+		/*
+		activity field in users table is modelled as:
+		"{"recent_rooms": ["0352e8b8-e987-4dc9-a379-dc68b541e24f", "497d8138-13d2-49c9-808d-287b447448e8", "376578dd-9ef6-41cb-a9f6-2ded47e22c84", "62560ae5-9236-490c-8c75-c234678dc346"]}"
+		*/
+		// get the recent rooms from the user's activity field
+		const userID = (await this.getProfileByUsername(username)).userID;
+
+		const u = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!u || u === null) {
+			throw new Error("User does not exist");
+		}
+
+		const recentRooms = await this.prisma.user_activity.findMany({
+			where: {
+				user_id: userID, // Filter by specific user ID
+			},
+			distinct: ["room_id"], // Ensure unique room IDs
+			orderBy: {
+				room_join_time: "desc", // Sort by most recent join time
+			},
+			select: {
+				room_id: true, // Only select the room ID
+			},
+		});
+
+		const recent_rooms =
+			(await this.dtogen.generateMultipleRoomDto(
+				recentRooms.map((room) => room.room_id),
+				userID,
 			)) || [];
 
 		return recent_rooms;
@@ -723,6 +763,7 @@ export class UsersService {
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
 				randomRooms.map((room: PrismaTypes.room) => room.room_id),
+				userID,
 			);
 			return r === null ? [] : r;
 		}
@@ -739,7 +780,7 @@ export class UsersService {
 		const ids: string[] = recommendedRooms.map(
 			(room: { playlist: string; score: number }) => room.playlist,
 		);
-		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -764,7 +805,7 @@ export class UsersService {
 				ids.push(friend.friend1);
 			}
 		}
-		let r = await this.dtogen.generateMultipleUserDto(ids);
+		let r = await this.dtogen.generateMultipleUserDto(ids, userID);
 		r = r.map((user) => {
 			user.relationship = "friend";
 			return user;
@@ -776,7 +817,7 @@ export class UsersService {
 		const f = await this.dbUtils.getUserFollowers(userID);
 		const followers: PrismaTypes.users[] = f;
 		const ids: string[] = followers.map((follower) => follower.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for followers. Received null.",
@@ -803,7 +844,7 @@ export class UsersService {
 		}
 		const followees: PrismaTypes.users[] = following;
 		const ids: string[] = followees.map((followee) => followee.user_id);
-		let result = await this.dtogen.generateMultipleUserDto(ids);
+		let result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for following. Received null.",
@@ -822,23 +863,43 @@ export class UsersService {
 		return result;
 	}
 
-	async getBookmarks(username: string): Promise<RoomDto[]> {
-		const u: PrismaTypes.users | null = await this.prisma.users.findFirst({
-			where: { username: username },
-		});
-		if (u === null) {
-			throw new HttpException(
-				"User with username: (" + username + ") does not exist",
-				HttpStatus.NOT_FOUND,
-			);
+	async getBookmarksById(userID: string): Promise<RoomDto[]> {
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 		const bookmarks: PrismaTypes.bookmark[] =
 			await this.prisma.bookmark.findMany({
-				where: { user_id: u.user_id },
+				where: { user_id: userID },
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs, userID);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
+		return rooms;
+	}
+
+	async getBookmarksByUsername(username: string): Promise<RoomDto[]> {
+		const userID = (await this.getProfileByUsername(username)).userID;
+
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+		}
+		const bookmarks: PrismaTypes.bookmark[] =
+			await this.prisma.bookmark.findMany({
+				where: { user_id: userID },
+			});
+
+		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
+		const rooms = await this.dtogen.generateMultipleRoomDto(roomIDs, userID);
+		if (!rooms) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for bookmarks. Received null.",
+			);
+		}
 		return rooms;
 	}
 
@@ -913,12 +974,20 @@ export class UsersService {
 				HttpStatus.BAD_REQUEST,
 			);
 		}
-		await this.prisma.friends.create({
+		const result = await this.prisma.friends.create({
 			data: {
 				friend1: userID,
 				friend2: potentialFriend.user_id,
 			},
 		});
+
+		if (!result || result === null) {
+			throw new Error(
+				"Failed to befriend user (@" +
+					newPotentialFriendUsername +
+					"). Database error.",
+			);
+		}
 		return true;
 	}
 
@@ -967,7 +1036,7 @@ export class UsersService {
 		}
 
 		//delete the friendship
-		await this.prisma.friends.deleteMany({
+		const result = await this.prisma.friends.deleteMany({
 			where: {
 				OR: [
 					{ friend1: userID, friend2: friend.user_id },
@@ -975,6 +1044,13 @@ export class UsersService {
 				],
 			},
 		});
+
+		if (!result || result === null) {
+			throw new Error(
+				"Failed to unfriend user (" + friendUsername + "). Database error.",
+			);
+		}
+
 		return true;
 	}
 
@@ -1092,13 +1168,22 @@ export class UsersService {
 
 	async getFriendRequests(userID: string): Promise<UserDto[]> {
 		//get all friend requests for the user
+		console.log("Getting friend requests for user " + userID);
+
+		/*
+			DONT IGNORE THIS
+
+			YOU HAVE TO USE generateUserDto() with the show_friendship flag set to true
+			this adds the friendship status to the user object (which will contain info for accepting & rejecting friend requests)
+		*/
+
 		const friendRequests: PrismaTypes.friends[] =
 			await this.dbUtils.getFriendRequests(userID);
 		if (friendRequests.length === 0) {
 			return [];
 		}
 		const ids: string[] = friendRequests.map((friend) => friend.friend1);
-		const result = await this.dtogen.generateMultipleUserDto(ids);
+		const result = await this.dtogen.generateMultipleUserDto(ids, userID);
 		return result;
 	}
 
@@ -1113,19 +1198,25 @@ export class UsersService {
 		const ids: string[] = potentialFriends.map(
 			(friend: PrismaTypes.users) => friend.user_id,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			ids,
+			userID,
+		);
 		return result;
 	}
 
 	async getPendingRequests(userID: string): Promise<UserDto[]> {
 		//get all pending friend requests for the user
 		console.log("Getting pending friend requests for user " + userID);
-		const pendingRequests: PrismaTypes.friends[] =
+		const pendingRequests: PrismaTypes.friends[] | null =
 			await this.dbUtils.getPendingRequests(userID);
 		const ids: string[] = pendingRequests.map(
 			(friend: PrismaTypes.friends) => friend.friend2,
 		);
-		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(ids);
+		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			ids,
+			userID,
+		);
 		if (!result) {
 			throw new Error(
 				"An unknown error occurred while generating UserDto for pending requests. Received null.",
@@ -1185,39 +1276,46 @@ export class UsersService {
 		return true;
 	}
 
-	async getCurrentRoom(username: string): Promise<RoomDto | undefined> {
-		const user: PrismaTypes.users | null = await this.prisma.users.findFirst({
-			where: { username: username },
-		});
-		if (user === null) {
-			throw new HttpException(
-				`User with username ${username} does not exist`,
-				HttpStatus.NOT_FOUND,
-			);
+	async getCurrentRoomDto(username: string): Promise<RoomDto> {
+		let userID = "";
+		// regex to check if username is infact, userID
+		// const isUserID = /^[0-9a-fA-F]{36}$/;
+		// user id is 36 characters long, is alphanumeric and has no spaces. also contains hyphens
+		// example: 711c5238-3081-7008-9055-510a6bebc7e9
+		const isUserID =
+			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+		console.log("username: ", username, username.length);
+		if (isUserID.test(username)) {
+			userID = username;
+		} else {
+			userID = (await this.getProfileByUsername(username)).userID;
 		}
+		// const userID: string = username;
 
-		const room: FullyQualifiedRoom | null = await this.prisma.room.findFirst({
-			where: {
-				participate: {
-					some: {
-						user_id: user.user_id,
-					},
+		if (!(await this.dbUtils.userExists(userID))) {
+			throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
+		}
+		const room: ({ room: PrismaTypes.room } & PrismaTypes.participate) | null =
+			await this.prisma.participate.findFirst({
+				where: {
+					user_id: userID,
 				},
-			},
-			include: {
-				child_room_child_room_parent_room_idToroom: true,
-				participate: true,
-				private_room: true,
-				public_room: true,
-				scheduled_room: true,
-			},
-		});
+				include: {
+					room: true,
+				},
+			});
 
 		if (room === null) {
 			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
 		}
-		const [result]: RoomDto[] =
-			await this.dtogen.generateMultipleRoomDtoFromRoom([room]);
+		const result: RoomDto | null = await this.dtogen.generateRoomDto(
+			room.room.room_id,
+		);
+		if (!result) {
+			throw new Error(
+				"An unknown error occurred while generating RoomDto for current room. Received null.",
+			);
+		}
 		return result;
 	}
 
@@ -1259,36 +1357,7 @@ export class UsersService {
 		recipientID: string,
 	): Promise<DirectMessageDto[]> {
 		//get messages between two users
-		return await this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
-	}
-
-	async getMessagesByUsername(
-		userID: string,
-		recipientUsername: string,
-	): Promise<DirectMessageDto[]> {
-		//get messages between two users
-		const users: PrismaTypes.users[] = await this.prisma.users.findMany({
-			where: {
-				OR: [{ user_id: userID }, { username: recipientUsername }],
-			},
-		});
-		if (users.find((user) => user.user_id === userID) === undefined) {
-			throw new HttpException(
-				`User with ID: (${userID}) does not exist`,
-				HttpStatus.NOT_FOUND,
-			);
-		}
-		const recipient = users.find((user) => user.username === recipientUsername);
-		if (!recipient) {
-			throw new HttpException(
-				`User with username ${recipientUsername} does not exist`,
-				HttpStatus.NOT_FOUND,
-			);
-		}
-		return await this.dtogen.getChatAsDirectMessageDto(
-			userID,
-			recipient.user_id,
-		);
+		return this.dtogen.getChatAsDirectMessageDto(userID, recipientID);
 	}
 
 	async getUnreadMessages(
@@ -1318,6 +1387,12 @@ export class UsersService {
 				},
 			});
 
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
 		//count number of unique senders
 		const senders: string[] = [];
 		for (let i = 0; i < dms.length; i++) {
@@ -1335,9 +1410,7 @@ export class UsersService {
 		userID: string,
 		min: Date,
 	): Promise<DirectMessageDto[]> {
-		const [self]: UserDto[] = await this.dtogen.generateMultipleUserDto([
-			userID,
-		]);
+		const self: UserDto = await this.dtogen.generateUserDto(userID);
 		const dms: ({
 			message: PrismaTypes.message;
 		} & PrismaTypes.private_message)[] =
@@ -1355,6 +1428,12 @@ export class UsersService {
 				},
 			});
 
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
+
 		//sort messages by date
 		dms.sort((a, b) => {
 			return a.message.date_sent.getTime() - b.message.date_sent.getTime();
@@ -1364,9 +1443,9 @@ export class UsersService {
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
 			if (dm && dm !== null) {
-				const [sender]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+				const sender: UserDto = await this.dtogen.generateUserDto(
 					dm.message.sender,
-				]);
+				);
 				const index: number = await this.dbUtils.getDMIndex(
 					userID,
 					dm.message.sender,
@@ -1381,7 +1460,6 @@ export class UsersService {
 					dateRead: new Date(0),
 					isRead: false,
 					pID: dm.p_message_id,
-					bodyIsRoomID: this.dtogen.messageBodyIsRoomID(dm.message.contents),
 				};
 				result.push(message);
 			}
@@ -1444,24 +1522,27 @@ export class UsersService {
 		//edit a message
 		try {
 			const updatedMessage:
-				| {
+				| ({
 						message: PrismaTypes.message;
-				  } & PrismaTypes.private_message =
-				await this.prisma.private_message.update({
-					where: {
-						p_message_id: message.pID,
-					},
-					data: {
-						message: {
-							update: {
-								contents: message.messageBody,
-							},
+				  } & PrismaTypes.private_message)
+				| null = await this.prisma.private_message.update({
+				where: {
+					p_message_id: message.pID,
+				},
+				data: {
+					message: {
+						update: {
+							contents: message.messageBody,
 						},
 					},
-					include: {
-						message: true,
-					},
-				});
+				},
+				include: {
+					message: true,
+				},
+			});
+			if (!updatedMessage || updatedMessage === null) {
+				throw new Error("Failed to update message");
+			}
 			return await this.dtogen.generateDirectMessageDto(
 				updatedMessage.p_message_id,
 			);
@@ -1505,6 +1586,12 @@ export class UsersService {
 					message: true,
 				},
 			});
+
+		if (!dms || dms === null) {
+			throw new Error(
+				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
+			);
+		}
 
 		const uniqueUserIDs: Map<string, boolean> = new Map<string, boolean>();
 		for (let i = 0; i < dms.length; i++) {
@@ -1685,14 +1772,16 @@ export class UsersService {
 			throw new Error("User does not exist");
 		}
 
-		const userFriends: PrismaTypes.users[] =
+		const userFriends: PrismaTypes.users[] | null =
 			await this.dbUtils.getUserFollowing(userID);
-		const friendIDs: string[] = userFriends.map(
-			(user: PrismaTypes.users) => user.user_id,
-		);
-		users = users.filter(
-			(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
-		);
+		if (userFriends !== null) {
+			const friendIDs: string[] = userFriends.map(
+				(user: PrismaTypes.users) => user.user_id,
+			);
+			users = users.filter(
+				(user: PrismaTypes.users) => !friendIDs.includes(user.user_id),
+			);
+		}
 
 		const userScores: { [key: string]: number } = {};
 
@@ -1711,7 +1800,7 @@ export class UsersService {
 			end = new Date().getTime();
 			console.log("Time taken to calculate popularity: " + (end - start));
 			start = new Date().getTime();
-			const activity = await this.calculateActivity(user);
+			const activity = await this.calculateActivity(user.user_id);
 			end = new Date().getTime();
 			console.log("Time taken to calculate activity: " + (end - start));
 			start = new Date().getTime();
@@ -1740,6 +1829,7 @@ export class UsersService {
 
 		const result: UserDto[] = await this.dtogen.generateMultipleUserDto(
 			topUserIds,
+			userID,
 		);
 		if (!result) {
 			throw new Error(
@@ -1753,8 +1843,11 @@ export class UsersService {
 		userID1: string,
 		userID2: string,
 	): Promise<number> {
-		const mutualFriends: PrismaTypes.users[] =
+		const mutualFriends: PrismaTypes.users[] | null =
 			await this.dbUtils.getMutualFriends(userID1, userID2);
+		if (!mutualFriends) {
+			throw new Error("Failed to calculate mutual friends");
+		}
 		console.log(
 			"Mutual friends between " + userID1 + " and " + userID2 + ": ",
 			mutualFriends.length,
@@ -1780,22 +1873,21 @@ export class UsersService {
 		return popularity;
 	}
 
-	async calculateActivity(user: PrismaTypes.users): Promise<number> {
-		const rooms: RoomDto[] = await this.getUserRooms(user.user_id);
+	async calculateActivity(userID: string): Promise<number> {
+		const rooms: RoomDto[] = await this.getUserRooms(userID);
 
-		const friends: PrismaTypes.users[] = await this.dbUtils.getUserFriends(
-			user.user_id,
-		);
+		const friends: PrismaTypes.users[] | null =
+			await this.dbUtils.getUserFriends(userID);
 
 		if (!friends) {
 			throw new Error("Failed to calculate activity (no friends)");
 		}
 
-		const bookmarks: RoomDto[] = await this.getBookmarks(user.username);
+		const bookmarks: RoomDto[] = await this.getBookmarksById(userID);
 		const date30DaysAgo: Date = new Date();
 		date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
 		const messages: PrismaTypes.message[] = await this.prisma.message.findMany({
-			where: { sender: user.user_id, date_sent: { gte: date30DaysAgo } },
+			where: { sender: userID, date_sent: { gte: date30DaysAgo } },
 		});
 		const roomMessages: PrismaTypes.room_message[] =
 			await this.prisma.room_message.findMany({

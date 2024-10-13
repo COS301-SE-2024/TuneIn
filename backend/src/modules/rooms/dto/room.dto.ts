@@ -8,11 +8,12 @@ import {
 	ValidateNested,
 } from "class-validator";
 import { UserDto } from "../../users/dto/user.dto";
+import { SongInfoDto } from "./songinfo.dto";
 import { Type } from "class-transformer";
-import { RoomSongDto } from "./roomsong.dto";
 
 export class RoomDto {
 	@ApiProperty({
+		description: "The date the room was created",
 		type: UserDto,
 	})
 	@IsObject()
@@ -23,10 +24,6 @@ export class RoomDto {
 	@ApiProperty()
 	@IsString()
 	roomID: string;
-
-	@ApiProperty()
-	@IsString()
-	spotifyPlaylistID: string;
 
 	@ApiProperty()
 	@IsNumber()
@@ -78,12 +75,12 @@ export class RoomDto {
 
 	@ApiPropertyOptional({
 		description: "The current song playing in the room",
-		type: RoomSongDto,
+		type: SongInfoDto,
 	})
 	@IsObject()
 	@ValidateNested()
-	@Type(() => RoomSongDto)
-	current_song?: RoomSongDto;
+	@Type(() => SongInfoDto)
+	current_song?: SongInfoDto;
 
 	@ApiProperty({
 		description: "The tags that describe the room",

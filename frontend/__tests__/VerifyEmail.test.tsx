@@ -73,24 +73,24 @@ describe("VerifyEmailScreen", () => {
 		expect(getByPlaceholderText("Enter the verification code")).toBeTruthy();
 	});
 
-	// it("handles successful verification", async () => {
-	// 	const { getByText, getByPlaceholderText } = render(<VerifyEmailScreen />);
-	// 	const codeInput = getByPlaceholderText("Enter the verification code");
-	// 	const verifyButton = getByText("VERIFY");
+	it("handles successful verification", async () => {
+		const { getByText, getByPlaceholderText } = render(<VerifyEmailScreen />);
+		const codeInput = getByPlaceholderText("Enter the verification code");
+		const verifyButton = getByText("VERIFY");
 
-	// 	fireEvent.changeText(codeInput, "correctCode");
-	// 	fireEvent.press(verifyButton);
+		fireEvent.changeText(codeInput, "correctCode");
+		fireEvent.press(verifyButton);
 
-	// 	await waitFor(() => {
-	// 		expect(Alert.alert).toHaveBeenCalledWith(
-	// 			"Success!",
-	// 			"Verification successful",
-	// 			[{ text: "OK" }],
-	// 			{ cancelable: false },
-	// 		);
-	// 		expect(mockRouterNavigate).toHaveBeenCalledWith("/screens/SpotifyAuth");
-	// 	});
-	// });
+		await waitFor(() => {
+			expect(Alert.alert).toHaveBeenCalledWith(
+				"Success!",
+				"Verification successful",
+				[{ text: "OK" }],
+				{ cancelable: false },
+			);
+			expect(mockRouterNavigate).toHaveBeenCalledWith("/screens/SpotifyAuth");
+		});
+	});
 
 	it("handles failed verification", async () => {
 		const { getByText, getByPlaceholderText } = render(<VerifyEmailScreen />);

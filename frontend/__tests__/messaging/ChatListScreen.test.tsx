@@ -4,7 +4,8 @@ import { NavigationContainer } from "@react-navigation/native"; // Import Naviga
 import ChatListScreen from "../../app/screens/messaging/ChatListScreen";
 import auth from "../../app/services/AuthManagement";
 import axios from "axios";
-import { DirectMessageDto, UserDto } from "../../api";
+import { DirectMessageDto } from "../../app/models/DmDto";
+import { UserDto } from "../../app/models/UserDto";
 
 // Mocking dependencies
 jest.mock("axios");

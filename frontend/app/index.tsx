@@ -3,14 +3,13 @@ import { useRouter } from "expo-router";
 import HomeScreen from "./screens/(tabs)/Home"; // Make sure to import the HomeScreen component
 import * as StorageService from "./services/StorageService";
 import auth from "./services/AuthManagement";
-import { API_BASE_URL } from "./services/Utils";
+import { live } from "./services/Live";
 import * as Font from "expo-font";
 import { Platform, ActivityIndicator, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { PlayerContextProvider } from "./PlayerContext";
 import "../polyfills";
 import { APIProvider } from "./APIContext";
-import { LiveProvider } from "./LiveContext";
 
 const fetchFonts = () => {
 	return Font.loadAsync({
@@ -52,13 +51,14 @@ const App: React.FC = () => {
 
 				const cognitoToken = await StorageService.getItem("cognitoToken");
 				if (cognitoToken) {
-					auth.exchangeCognitoToken(cognitoToken);
+					auth.exchangeCognitoToken(cognitoToken, live.initialiseSocket, true);
 				}
 
 				if (!auth.tokenSet) {
 					const authToken = await StorageService.getItem("token");
 					if (authToken && authToken !== "undefined" && authToken !== "null") {
 						auth.setToken(authToken);
+						live.initialiseSocket();
 					}
 				}
 
@@ -91,12 +91,9 @@ const App: React.FC = () => {
 
 	return (
 		<APIProvider>
-			<LiveProvider>
-				<PlayerContextProvider>
-					<HomeScreen />{" "}
-					{/* Display HomeScreen after checking authentication */}
-				</PlayerContextProvider>
-			</LiveProvider>
+			<PlayerContextProvider>
+				<HomeScreen /> {/* Display HomeScreen after checking authentication */}
+			</PlayerContextProvider>
 		</APIProvider>
 	);
 };

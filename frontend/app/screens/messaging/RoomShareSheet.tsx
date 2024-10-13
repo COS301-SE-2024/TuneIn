@@ -17,8 +17,8 @@ import ProfileCard, { ProfileCardProps } from "./profileCard"; // ProfileCard co
 import auth from "../../services/AuthManagement"; // For fetching auth token
 import axios from "axios";
 import * as utils from "../../services/Utils"; // For API_BASE_URL
+import { UserDto } from "../../models/UserDto";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { UserDto } from "../../../api";
 interface RoomShareSheetProps {
 	room: Room;
 	isVisible: boolean;

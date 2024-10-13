@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
-import * as Spotify from "@spotify/web-api-ts-sdk";
 
 interface Track {
 	id: string;
@@ -14,10 +13,9 @@ interface Track {
 }
 
 interface SongCardProps {
-	track: Spotify.Track;
+	track: Track;
 	onAdd: () => void;
 	onRemove: () => void;
-	onPlay: () => void;
 	isAdded: boolean;
 }
 
@@ -47,7 +45,7 @@ const SongCard: React.FC<SongCardProps> = ({
 			}
 
 			const { sound: newSound } = await Audio.Sound.createAsync(
-				{ uri: track.preview_url || "" },
+				{ uri: track.preview_url },
 				{ shouldPlay: true },
 			);
 			setSound(newSound);

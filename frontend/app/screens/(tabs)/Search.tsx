@@ -26,7 +26,7 @@ import { User } from "../../models/user";
 import axios from "axios";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { SearchHistoryDto } from "../../../api";
+import { SearchHistoryDto } from "../../models/SearchHistoryDto";
 import SkeletonRoomCard from "../../components/rooms/SkeletonRoomCard";
 import SkeletonUserItem from "../../components/SkeletonUserItem";
 import FilterBottomSheet from "../../components/FilterBottomSheet";
@@ -182,11 +182,14 @@ const Search: React.FC = () => {
 
 						setUserLoading(true);
 
-						response = await axios.get(`${utils.API_BASE_URL}/users/foryou`, {
-							headers: {
-								Authorization: `Bearer ${token}`,
+						response = await axios.get(
+							`${utils.API_BASE_URL}/users/recommended/users`,
+							{
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
 							},
-						});
+						);
 						if (response.status !== 200) {
 							console.error("Error fetching recommended users:", response);
 							return;

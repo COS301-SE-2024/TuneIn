@@ -1,4 +1,4 @@
-import { LiveChatMessageDto } from "../../api";
+import { LiveChatMessageDto } from "./LiveChatMessageDto";
 
 export type ChatEventDto = {
 	date_created?: Date;

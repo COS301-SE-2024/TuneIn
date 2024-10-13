@@ -3,15 +3,11 @@ import { DbUtilsService } from "../../modules/db-utils/db-utils.service";
 import { DtoGenService } from "../../modules/dto-gen/dto-gen.service";
 import { UserDto } from "../../modules/users/dto/user.dto";
 import { UsersService } from "../../modules/users/users.service";
-import { Server } from "socket.io";
-import { SOCKET_EVENTS } from "../../common/constants";
-import { DirectMessageDto } from "../../modules/users/dto/dm.dto";
 
 interface dmUser {
 	user: UserDto;
 	participant: UserDto | null;
 	chatID: string | null;
-	socketIDs: string[];
 }
 
 @Injectable()
@@ -25,159 +21,101 @@ export class DmUsersService {
 	private connectedUsers = new Map<string, dmUser>();
 
 	async addConnectedUser(
-		socketID: string,
+		socketId: string,
 		userId: string,
 		participantId?: string,
 	): Promise<void> {
+		if (this.connectedUsers.has(socketId)) {
+			return;
+		}
 		if (!(await this.dbUtils.userExists(userId))) {
 			throw new Error("User with ID " + userId + " does not exist");
 		}
+		const user: UserDto = await this.dtogen.generateUserDto(userId);
 
-		if (this.connectedUsers.has(userId)) {
-			// add socket id to user
-			const u = this.connectedUsers.get(userId);
-			if (!u) {
-				throw new Error("Connected user does not exist");
-			}
-			u.socketIDs.push(socketID);
-			if (participantId) {
-				await this.setChatInfo(socketID, participantId);
-			}
-			return;
-		}
-
-		const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
-			userId,
-		]);
-
-		this.connectedUsers.set(userId, {
+		this.connectedUsers.set(socketId, {
 			user: user,
 			participant: null,
 			chatID: null,
-			socketIDs: [socketID],
 		});
 		if (participantId) {
-			await this.setChatInfo(socketID, participantId);
+			await this.setChatInfo(socketId, participantId);
 		}
 
 		console.log("Added connected user: " + user);
 		console.log("Connected users: " + this.connectedUsers);
 	}
 
-	removeConnectedUser(socketID: string) {
-		// this.connectedUsers.delete(socketID);
-		for (const [key, value] of this.connectedUsers) {
-			while (value.socketIDs.includes(socketID)) {
-				value.socketIDs.splice(value.socketIDs.indexOf(socketID), 1);
-				if (value.socketIDs.length === 0) {
-					this.connectedUsers.delete(key);
-				}
-			}
-		}
+	removeConnectedUser(socketId: string) {
+		this.connectedUsers.delete(socketId);
 	}
 
-	getConnectedUser(socketID: string): dmUser | null {
-		// const u = this.connectedUsers.get(socketID);
-		// if (!u || u === undefined) {
-		// 	throw new Error("Connected user does not exist");
-		// }
-		// return u;
-		for (const [_, value] of this.connectedUsers) {
-			if (value.socketIDs.includes(socketID)) {
-				return value;
-			}
-		}
-		return null;
-	}
-
-	getUserId(socketID: string): string | null {
-		// const u = this.connectedUsers.get(socketID);
-		// if (!u || u === undefined) {
-		// 	throw new Error("Connected user does not exist");
-		// }
-		// const user = u.user;
-		// if (!user || user === undefined) {
-		// 	throw new Error("Connected user does not have a user object");
-		// }
-		// if (!user.userID || user.userID === undefined) {
-		// 	throw new Error("Connected user does not have a userID");
-		// }
-		// return user.userID;
-		const u = this.getUser(socketID);
-		if (u === null) {
+	getConnectedUser(socketId: string): dmUser | null {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
-		return u.userID;
+		return u;
 	}
 
-	getUser(socketID: string): UserDto | null {
-		// const u = this.connectedUsers.get(socketID);
-		// if (!u || u === undefined) {
-		// 	throw new Error("Connected user does not exist");
-		// }
-		// const user = u.user;
-		// if (!user || user === undefined) {
-		// 	throw new Error("Connected user does not have a user object");
-		// }
-		// return user;
-		const u = this.getConnectedUser(socketID);
-		if (u === null) {
+	getUserId(socketId: string): string | null {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
-		return u.user;
+		const user = u.user;
+		if (!user || user === undefined) {
+			throw new Error("Connected user does not have a user object");
+		}
+		if (!user.userID || user.userID === undefined) {
+			throw new Error("Connected user does not have a userID");
+		}
+		return user.userID;
+	}
+
+	getUser(socketId: string): UserDto | null {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
+			throw new Error("Connected user does not exist");
+		}
+		const user = u.user;
+		if (!user || user === undefined) {
+			throw new Error("Connected user does not have a user object");
+		}
+		return user;
 	}
 
 	getSocketId(userId: string): string | null {
-		// for (const [socketID, u] of this.connectedUsers) {
-		// 	if (u.user.userID === userId) {
-		// 		return socketID;
-		// 	}
-		// }
-		// return null;
-		for (const [key, value] of this.connectedUsers) {
-			if (value.socketIDs.includes(userId)) {
-				return key;
+		for (const [socketId, u] of this.connectedUsers) {
+			if (u.user.userID === userId) {
+				return socketId;
 			}
 		}
 		return null;
 	}
 
-	getParticipant(socketID: string): UserDto | null {
-		// const u = this.connectedUsers.get(socketID);
-		// if (!u || u === undefined) {
-		// 	throw new Error("Connected user does not exist");
-		// }
-		// const participant = u.participant;
-		// if (!participant || participant === undefined) {
-		// 	throw new Error("Connected user does not have a participant object");
-		// }
-		// return participant;
-		const u = this.getConnectedUser(socketID);
-		if (u === null) {
+	getParticipant(socketId: string): UserDto | null {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
 		const participant = u.participant;
-		if (participant === null) {
+		if (!participant || participant === undefined) {
 			throw new Error("Connected user does not have a participant object");
 		}
 		return participant;
 	}
 
-	getChatID(socketID: string): string | null {
-		// const u = this.connectedUsers.get(socketID);
-		// if (!u || u === undefined) {
-		// 	throw new Error("Connected user does not exist");
-		// }
-		// return u.chatID;
-		const u = this.getConnectedUser(socketID);
-		if (u === null) {
+	getChatID(socketId: string): string | null {
+		const u = this.connectedUsers.get(socketId);
+		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
 		return u.chatID;
 	}
 
-	async setChatInfo(socketID: string, participantId: string) {
-		const u = this.getConnectedUser(socketID);
+	async setChatInfo(socketId: string, participantId: string) {
+		const u = this.connectedUsers.get(socketId);
 		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
@@ -191,12 +129,12 @@ export class DmUsersService {
 			*/
 		if (!(u.participant === null) || !(u.chatID === null)) {
 			//disconnect & reconnect
-			this.disconnectChat(socketID);
+			this.disconnectChat(socketId);
 		}
 
-		const [participant]: UserDto[] = await this.dtogen.generateMultipleUserDto([
+		const participant: UserDto = await this.dtogen.generateUserDto(
 			participantId,
-		]);
+		);
 
 		const chatIDs: string[] = await this.usersService.generateChatHash(
 			u.user.userID,
@@ -224,70 +162,23 @@ export class DmUsersService {
 			chatID = chatIDs[1];
 		}
 
-		this.connectedUsers.set(u.user.userID, {
+		this.connectedUsers.set(socketId, {
 			user: u.user,
 			participant: participant,
 			chatID: chatID,
-			socketIDs: u.socketIDs,
 		});
 	}
 
-	disconnectChat(socketID: string) {
-		const u = this.getConnectedUser(socketID);
+	disconnectChat(socketId: string) {
+		const u = this.connectedUsers.get(socketId);
 		if (!u || u === undefined) {
 			throw new Error("Connected user does not exist");
 		}
-		this.connectedUsers.set(u.user.userID, {
+		this.connectedUsers.set(socketId, {
 			user: u.user,
 			participant: null,
 			chatID: null,
-			socketIDs: u.socketIDs,
 		});
-		console.log(socketID);
-	}
-
-	async shareRoom(
-		socketServer: Server,
-		messages: DirectMessageDto[],
-	): Promise<void> {
-		const chatIDs: string[][] = await Promise.all(
-			messages.map(async (m) => {
-				return await this.usersService.generateChatHash(
-					m.sender.userID,
-					m.recipient.userID,
-				);
-			}),
-		);
-		for (let i = 0; i < messages.length; i++) {
-			if (chatIDs[i].length !== 2) {
-				throw new Error("Invalid chatIDs generated");
-			}
-			if (
-				!this.connectedUsers.has(messages[i].sender.userID) &&
-				!this.connectedUsers.has(messages[i].recipient.userID)
-			) {
-				// neither user is connected
-				continue;
-			}
-			const values: dmUser[] = Array.from(this.connectedUsers.values());
-			let chatID: string | undefined;
-			if (values.some((u) => u.chatID === chatIDs[i][0])) {
-				const id = values.find((u) => u.chatID === chatIDs[i][0]);
-				if (!id) {
-					chatID = undefined;
-				}
-				chatID = chatIDs[i][0];
-			}
-			if (!chatID && values.some((u) => u.chatID === chatIDs[i][1])) {
-				const id = values.find((u) => u.chatID === chatIDs[i][1]);
-				if (!id) {
-					chatID = undefined;
-				}
-				chatID = chatIDs[i][1];
-			}
-
-			if (chatID)
-				socketServer.to(chatID).emit(SOCKET_EVENTS.DIRECT_MESSAGE, messages[i]);
-		}
+		console.log(socketId);
 	}
 }

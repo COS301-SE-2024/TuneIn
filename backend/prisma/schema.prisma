@@ -187,10 +187,9 @@ model room_message {
 }
 
 model scheduled_room {
-  room_id    String    @id @db.Uuid
-  start_date DateTime? @db.Timestamptz(6)
-  end_date   DateTime? @db.Timestamptz(6)
-  room       room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
+  room_id        String   @id @db.Uuid
+  scheduled_date DateTime @db.Timestamptz(6)
+  room           room     @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
 
   @@index([room_id], map: "fki_scheduled_room ")
 }
@@ -272,7 +271,6 @@ model users {
   participate                     participate[]
   playlist                        playlist[]
   private_message                 private_message[]
-  public_key                      public_key?
   room                            room[]
   search_history                  search_history[]
   user_activity                   user_activity[]
@@ -317,10 +315,4 @@ model child_room {
   parent_room_id                       String @db.Uuid
   room_child_room_parent_room_idToroom room   @relation("child_room_parent_room_idToroom", fields: [parent_room_id], references: [room_id], onDelete: Cascade)
   room_child_room_room_idToroom        room   @relation("child_room_room_idToroom", fields: [room_id], references: [room_id], onDelete: Cascade)
-}
-
-model public_key {
-  user_id String @id @db.Uuid
-  key     String
-  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }

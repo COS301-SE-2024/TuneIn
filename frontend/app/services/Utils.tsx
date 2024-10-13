@@ -2,11 +2,11 @@ import localhost from "react-native-localhost";
 import { Buffer } from "buffer";
 import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
 
-const shouldUseProductionServer =
-	USE_PRODUCTION_SERVER &&
-	JSON.parse(USE_PRODUCTION_SERVER.toLowerCase()) === true;
-console.log(`USE_PRODUCTION_SERVER: `, USE_PRODUCTION_SERVER);
-console.log(`shouldUseProductionServer: `, shouldUseProductionServer);
+console.log("USE_PRODUCTION_SERVER: ", USE_PRODUCTION_SERVER);
+let shouldUseProductionServer: boolean = true;
+if (USE_PRODUCTION_SERVER !== undefined && USE_PRODUCTION_SERVER === "false") {
+	shouldUseProductionServer = false;
+}
 
 function getAPIBase(): string {
 	if (shouldUseProductionServer) {

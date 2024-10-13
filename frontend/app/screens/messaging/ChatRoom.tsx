@@ -24,8 +24,10 @@ import io from "socket.io-client";
 import axios from "axios";
 import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
+import { UserDto } from "../../models/UserDto";
 import { ChatEventDto } from "../../models/ChatEventDto";
-import { LiveChatMessageDto, UserDto, RoomDto } from "../../../api";
+import { RoomDto } from "../../models/RoomDto";
+import { LiveChatMessageDto } from "../../models/LiveChatMessageDto";
 
 type Message = {
 	message: LiveChatMessageDto;

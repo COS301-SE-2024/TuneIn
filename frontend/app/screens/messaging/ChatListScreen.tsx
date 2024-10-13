@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -14,12 +14,11 @@ import { colors } from "../../styles/colors";
 import CreateChatScreen from "./CreateChatScreen";
 import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
+import { DirectMessageDto } from "../../models/DmDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import axios, { AxiosResponse } from "axios";
-import { DirectMessageDto, UserDto, RoomDto } from "../../../api";
-import { useLive } from "../../LiveContext";
-import { useAPI } from "../../APIContext";
+import axios from "axios";
+import { UserDto } from "../../models/UserDto";
 import { useIsFocused } from "@react-navigation/native";
 
 const createChats = (
@@ -38,89 +37,84 @@ const createChats = (
 };
 
 const ChatListScreen = () => {
-	const {
-		currentUser,
-		refreshUser,
-		setRefreshUser,
-		recentDMs,
-		setFetchRecentDMs,
-	} = useLive();
+	const selfRef = React.useRef<UserDto>();
 	const [searchQuery, setSearchQuery] = useState("");
-	const [localRecentDMs, setLocalRecentDMs] =
-		useState<{ message: DirectMessageDto; room?: RoomDto }[]>(recentDMs);
+	const [userMessages, setUserMessages] = useState<DirectMessageDto[]>([]);
 	const [filteredChats, setFilteredChats] = useState<ChatItemProps[]>([]);
+	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [noResults, setNoResults] = useState(false); // State to track no results
 	const router = useRouter();
 	const isFocused = useIsFocused();
 
-	const localStateOutdated = useCallback(() => {
-		if (currentUser !== undefined) {
-			if (recentDMs.length !== localRecentDMs.length) {
-				return true;
-			}
-			for (let i = 0; i < recentDMs.length; i++) {
-				if (recentDMs[i].message.pID !== localRecentDMs[i].message.pID) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}, [currentUser, recentDMs, localRecentDMs]);
+	const fetchChats = async () => {
+		try {
+			const token = await auth.getToken();
 
-	const getMessages = useCallback(
-		(recents: { message: DirectMessageDto }[]) => {
-			const messages: DirectMessageDto[] = [];
-			for (const recent of recents) {
-				messages.push(recent.message);
-			}
-			return messages;
-		},
-		[],
-	);
+			const promises = [];
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/dms`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+			promises.push(
+				axios.get(`${utils.API_BASE_URL}/users/friends`, {
+					headers: { Authorization: `Bearer ${token}` },
+				}),
+			);
+
+			const responses = await Promise.all(promises);
+			const chats = responses[0].data as DirectMessageDto[];
+			selfRef.current = responses[1].data as UserDto;
+			setFriends(responses[2].data as UserDto[]);
+
+			setFilteredChats(createChats(chats, selfRef.current.userID));
+			setUserMessages(chats);
+		} catch (error) {
+			console.log(error);
+			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
+			throw error;
+		}
+	};
 
 	useEffect(() => {
 		if (isFocused) {
-			if (localStateOutdated()) {
-				setFetchRecentDMs(true);
-			}
+			fetchChats();
 		}
-	}, [recentDMs, isFocused, localStateOutdated, setFetchRecentDMs]);
-
-	useEffect(() => {
-		if (isFocused) {
-			if (localStateOutdated()) {
-				setFetchRecentDMs(true);
-			}
-		}
-	}, []);
+	}, [isFocused]);
 
 	useEffect(() => {
 		if (searchQuery === "") {
-			if (currentUser !== undefined) {
-				const messages: DirectMessageDto[] = getMessages(localRecentDMs);
-				setFilteredChats(createChats(messages, currentUser.userID));
+			if (selfRef.current !== undefined) {
+				setFilteredChats(createChats(userMessages, selfRef.current.userID));
+				setNoResults(false); // Reset no results state
 			}
 		} else {
-			if (currentUser !== undefined) {
-				const messages: DirectMessageDto[] = getMessages(localRecentDMs);
-				const filtered = messages.filter((chat) => {
+			if (selfRef.current !== undefined) {
+				const currentUsername = selfRef.current.username.toLowerCase();
+
+				const filtered = userMessages.filter((chat) => {
 					const senderName = chat.sender.profile_name.toLowerCase();
 					const recipientName = chat.recipient.profile_name.toLowerCase();
 
 					return (
 						(senderName.includes(searchQuery.toLowerCase()) ||
 							recipientName.includes(searchQuery.toLowerCase())) &&
-						!senderName.includes(currentUser.username) &&
-						!recipientName.includes(currentUser.username)
+						!senderName.includes(currentUsername) &&
+						!recipientName.includes(currentUsername)
 					);
 				});
 
-				setFilteredChats(createChats(filtered, currentUser.userID));
+				setFilteredChats(createChats(filtered, selfRef.current.userID));
 				setNoResults(filtered.length === 0); // Set no results state
 			}
 		}
-	}, [currentUser, searchQuery, localRecentDMs]);
+	}, [searchQuery, userMessages]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);
