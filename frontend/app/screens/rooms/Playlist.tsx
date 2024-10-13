@@ -15,6 +15,8 @@ import { Player } from "../../PlayerContext";
 import { SongPair, convertQueue } from "../../models/SongPair";
 import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
+const VOTING_ENABLED = false;
+
 const Playlist = () => {
 	const { roomQueue, spotifyAuth } = useLive();
 	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
@@ -86,7 +88,11 @@ const Playlist = () => {
 				{localQueue.length > 0 ? (
 					<ScrollView>
 						{localQueue.map((s, index) => (
-							<SongList key={s.song.index} song={s} showVoting={true} />
+							<SongList
+								key={s.song.index}
+								song={s}
+								showVoting={VOTING_ENABLED}
+							/>
 						))}
 					</ScrollView>
 				) : (
