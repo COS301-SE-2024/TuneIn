@@ -8,10 +8,11 @@ import {
 	TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import { Room } from "../../models/Room";
 import { colors } from "../../styles/colors";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Utility function to group rooms by the month they were created
@@ -216,6 +217,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		position: "relative", // Allows absolute positioning of the button
 		paddingBottom: 20,
+	},
+	backButton: {
+		position: "absolute",
+		left: 10,
 	},
 	addButton: {
 		position: "absolute",
