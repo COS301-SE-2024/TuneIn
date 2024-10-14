@@ -399,7 +399,19 @@ const RoomPage: React.FC = () => {
 				}
 			}
 		}
-	}, [currentSong, roomQueue, currentRoom, roomPlaying]);
+	}, [
+		currentSong,
+		roomQueue,
+		currentRoom,
+		roomPlaying,
+		thisRoom,
+		roomID,
+		ownerPlaying,
+		localRoomPlaying,
+		optimisticPlaybackState,
+		localQueue,
+		fetchSongInfo,
+	]);
 
 	// on component mount
 	useEffect(() => {
@@ -450,21 +462,9 @@ const RoomPage: React.FC = () => {
 				<View style={styles.songRoomWidget}>
 					<SongRoomWidget song={userInRoom ? localCurrentSong : undefined} />
 				</View>
-				{/* <View style={styles.trackInfo}>
-					<Text style={styles.nowPlayingTrackName}>
-						{rs.getTitle(currentSong)}
-					</Text>
-					<Text>{rs.constructArtistString(currentSong)}</Text>
-				</View> */}
 
 				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						{/* <TouchableOpacity
-							style={styles.controlButton}
-							onPress={playPreviousTrack}
-						>
-							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity> */}
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
@@ -475,9 +475,14 @@ const RoomPage: React.FC = () => {
 								color="black"
 							/>
 						</TouchableOpacity>
+
 						<TouchableOpacity
-							style={styles.controlButton}
-							onPress={playNextTrack}
+							style={[
+								styles.controlButton,
+								roomQueue.length <= 1 ? { opacity: 0.5 } : {},
+							]}
+							onPress={roomQueue.length > 1 ? playNextTrack : () => {}} // Provide an empty function instead of null
+							disabled={roomQueue.length <= 1} // Disable touch interaction
 						>
 							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
@@ -486,35 +491,6 @@ const RoomPage: React.FC = () => {
 					<View></View>
 				)}
 			</View>
-			{/* <Animated.ScrollView
-				style={[styles.queueContainer, { maxHeight: queueHeight }]}
-				contentContainerStyle={{ flexGrow: 1 }}
-			>
-				{userInRoom &&
-					localQueue.map((song, index) => (
-						<TouchableOpacity
-							key={rs.getID(song)}
-							style={[
-								styles.track,
-								index === localCurrentSong?.song.index
-									? styles.currentTrack
-									: styles.queueTrack,
-							]}
-							onPress={() => playPauseTrack(0)}
-						>
-							<Image
-								source={{ uri: rs.getAlbumArtUrl(song) }}
-								style={styles.queueAlbumArt}
-							/>
-							<View style={styles.trackInfo}>
-								<Text style={styles.queueTrackName}>{rs.getTitle(song)}</Text>
-								<Text style={styles.queueTrackArtist}>
-									{rs.constructArtistString(song)}
-								</Text>
-							</View>
-						</TouchableOpacity>
-					))}
-			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}

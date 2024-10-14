@@ -142,7 +142,7 @@ const SongList: React.FC<SongListProps> = ({ song, showVoting = true }) => {
 			style={[styles.container, isCurrentSong ? styles.currentSong : null]}
 			testID="song-container"
 		>
-			<Text style={styles.songNumber}>{song.song.index}</Text>
+			<Text style={styles.songNumber}>{song.song.index + 1}</Text>
 			<Image
 				source={{ uri: albumCoverUrl }}
 				style={styles.albumCover}
