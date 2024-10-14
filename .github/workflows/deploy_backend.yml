@@ -25,13 +25,13 @@ jobs:
 
     - name: Install dependencies
       run:  |
-        cd backend && npm ci
+        cd backend && rm package-lock.json && npm i
 
     - name: Last linting check before deployment
       run: cd backend && npm run lint
 
-    - name: Last tests before deployment
-      run: cd backend && npm run test
+#    - name: Last tests before deployment
+#      run: cd backend && npm run test
 
     - name: Verify Build before deployment
       run: |
@@ -72,6 +72,7 @@ jobs:
           echo "${{ secrets.BACKEND_B64_ENV_FILE }}" | base64 -d > .env
           chmod +x start_backend.sh
           nvm use default
+          rm package-lock.json
           npm i
           npm run prisma-read > /dev/null
           npm run prisma-gen

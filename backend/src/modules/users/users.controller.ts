@@ -8,6 +8,10 @@ import {
 	UseGuards,
 	Request,
 	Param,
+	Head,
+	// Query,
+	HttpException,
+	HttpStatus,
 } from "@nestjs/common";
 import { UserListeningStatsDto, UsersService } from "./users.service";
 import {
@@ -20,6 +24,8 @@ import {
 	ApiSecurity,
 	ApiTags,
 	ApiUnauthorizedResponse,
+	ApiNotFoundResponse,
+	// ApiQuery,
 } from "@nestjs/swagger";
 import { UserDto } from "./dto/user.dto";
 import { RoomDto } from "../rooms/dto/room.dto";
@@ -110,8 +116,49 @@ export class UsersController {
 	})
 	getProfile(@Request() req: Request): Promise<UserDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return this.usersService.getProfile(userInfo.id);
+		return this.usersService.getProfile(userInfo.username);
 	}
+
+	// @ApiBearerAuth()
+	// @ApiSecurity("bearer")
+	// @UseGuards(JwtAuthGuard)
+	// /*
+	// @ApiHeader({
+	// 	name: "Authorization",
+	// 	description: "Bearer token for authentication",
+	// })
+	// */
+	// @Get()
+	// @ApiOperation({
+	// 	summary: "Get multiple users' profile info",
+	// 	description:
+	// 		"Returns the profile info of multiple users as an array of UserDto.",
+	// 	operationId: "getUsers",
+	// })
+	// @ApiQuery({
+	// 	name: "q",
+	// 	description: "An array of user IDs to get info for.",
+	// 	required: true,
+	// 	type: "string",
+	// 	isArray: true,
+	// })
+	// @ApiOkResponse({
+	// 	description: "An array of UserDto representing the requested users.",
+	// 	type: UserDto,
+	// 	isArray: true,
+	// })
+	// @ApiBadRequestResponse({
+	// 	description: "Bad request. No users given.",
+	// })
+	// @ApiNotFoundResponse({
+	// 	description: "No users found with the given IDs.",
+	// })
+	// async getUsers(@Query("q") userIDs: string[]): Promise<UserDto[]> {
+	// 	if (userIDs.length === 0) {
+	// 		throw new HttpException("No users given", HttpStatus.BAD_REQUEST);
+	// 	}
+	// 	return await this.usersService.getUsers(userIDs);
+	// }
 
 	@ApiBearerAuth()
 	@ApiSecurity("bearer")
@@ -319,36 +366,7 @@ export class UsersController {
 	})
 	async getRecentRooms(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecentRoomsById(userInfo.id);
-	}
-
-	@ApiBearerAuth()
-	@ApiSecurity("bearer")
-	@UseGuards(JwtAuthGuard)
-	/*
-	@ApiHeader({
-		name: "Authorization",
-		description: "Bearer token for authentication",
-	})
-	*/
-	@Get(":username/rooms/recent")
-	@ApiOperation({
-		summary: "Get a user's recent rooms",
-		description: "Get the user's most recently visited rooms.",
-		operationId: "getRecentRoomsByUsername",
-	})
-	@ApiOkResponse({
-		description: "The user's recent rooms as an array of RoomDto.",
-		type: RoomDto,
-		isArray: true,
-	})
-	@ApiBadRequestResponse({
-		description: "Username does not exist or is invalid.",
-	})
-	async getRecentRoomsByUsername(
-		@Param("username") username: string,
-	): Promise<RoomDto[]> {
-		return await this.usersService.getRecentRoomByUsername(username);
+		return await this.usersService.getRecentRooms(userInfo.username);
 	}
 
 	@ApiBearerAuth()
@@ -435,7 +453,33 @@ export class UsersController {
 	})
 	async getCurrentRoom(@Request() req: Request): Promise<RoomDto> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getCurrentRoomDto(userInfo.id);
+		const result: RoomDto | undefined = await this.usersService.getCurrentRoom(
+			userInfo.username,
+		);
+		if (result === undefined) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return result;
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard)
+	@ApiSecurity("bearer")
+	@Get("foryou")
+	@ApiOperation({ summary: "Get recommended users" })
+	@ApiOkResponse({
+		description: "Recommended users retrieved successfully",
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiUnauthorizedResponse({
+		description: "Unauthorized",
+	})
+	@ApiTags("users")
+	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
+		console.log("called /users/foryou");
+		const userInfo: JWTPayload = this.auth.getUserInfo(req);
+		return await this.usersService.getRecommendedUsers(userInfo.id);
 	}
 
 	@ApiBearerAuth()
@@ -625,40 +669,35 @@ export class UsersController {
 	})
 	async getBookmarks(@Request() req: Request): Promise<RoomDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getBookmarksById(userInfo.id);
+		return await this.usersService.getBookmarks(userInfo.username);
 	}
 
-	@Get(":username/bookmarks")
-	@ApiOperation({
-		summary: "Get the authorized user's bookmarks",
-		description: "Get all of the rooms that the user has bookmarked.",
-		operationId: "getBookmarksByUsername",
-	})
-	@ApiOkResponse({
-		description: "The user's bookmarks as an array of RoomDto.",
-		type: RoomDto,
-		isArray: true,
-	})
-	@ApiBadRequestResponse({
-		description: "Username does not exist or is invalid.",
-	})
-	async getBookmarksByUsername(
-		@Param("username") username: string,
-	): Promise<RoomDto[]> {
-		return await this.usersService.getBookmarksByUsername(username);
-	}
-
-	@Get(":username/taken")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	@Head(":username")
 	@ApiOperation({
 		summary: "Check if a username is taken",
-		description: "Get all of the rooms that the user has bookmarked.",
+		description: "Check if the given username is already taken.",
 		operationId: "isUsernameTaken",
 	})
-	@ApiOkResponse({
-		description: "True if taken, false if not.",
+	@ApiParam({
+		name: "username",
+		description: "The username of the user to check.",
+		required: true,
+		type: String,
+		example: "johndoe",
+		allowEmptyValue: false,
 	})
-	async isUsernameTaken(@Param("username") username: string): Promise<boolean> {
-		return await this.usersService.usernameTaken(username);
+	@ApiOkResponse({
+		description:
+			"The username is taken and a GET request can be made to get the user's profile.",
+	})
+	@ApiNotFoundResponse({
+		description: "The username is not taken and can be used.",
+	})
+	async isUsernameTaken(@Param("username") username: string): Promise<void> {
+		await this.usersService.usernameTaken(username);
 	}
 
 	@ApiBearerAuth()
@@ -691,8 +730,7 @@ export class UsersController {
 	async getProfileByUsername(
 		@Param("username") username: string,
 	): Promise<UserDto> {
-		console.log("called /users/:username");
-		return this.usersService.getProfileByUsername(username);
+		return this.usersService.getProfile(username);
 	}
 
 	@ApiBearerAuth()
@@ -948,30 +986,89 @@ export class UsersController {
 		return await this.usersService.cancelFriendRequest(userInfo.id, username);
 	}
 
-	// create endpoint to get a user's recommended users
-	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard)
-	@ApiSecurity("bearer")
-	@Get("recommended/users")
-	@ApiOperation({ summary: "Get recommended users" })
+	@Get(":username/bookmarks")
+	@ApiOperation({
+		summary: "Get the authorized user's bookmarks",
+		description: "Get all of the rooms that the user has bookmarked.",
+		operationId: "getBookmarksByUsername",
+	})
 	@ApiOkResponse({
-		description: "Recommended users retrieved successfully",
-		type: UserDto,
+		description: "The user's bookmarks as an array of RoomDto.",
+		type: RoomDto,
 		isArray: true,
 	})
-	@ApiUnauthorizedResponse({
-		description: "Unauthorized",
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
 	})
-	@ApiTags("users")
-	async getRecommendedUsers(@Request() req: Request): Promise<UserDto[]> {
-		console.log("called /users/recommended/users");
+	async getBookmarksByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getBookmarks(username);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/rooms/recent")
+	@ApiOperation({
+		summary: "Get a user's recent rooms",
+		description: "Get the user's most recently visited rooms.",
+		operationId: "getRecentRoomsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's recent rooms as an array of RoomDto.",
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getRecentRoomsByUsername(
+		@Param("username") username: string,
+	): Promise<RoomDto[]> {
+		return await this.usersService.getRecentRooms(username);
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: "Authorization",
+		description: "Bearer token for authentication",
+	})
+	*/
+	@Get(":username/dms")
+	@ApiOperation({
+		summary: "Get the authorized user's direct messages with the given user",
+		description: "Get all of the direct messages between the two users.",
+		operationId: "getDMsByUsername",
+	})
+	@ApiOkResponse({
+		description: "The user's direct messages as an array of DirectMessageDto.",
+		type: DirectMessageDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({
+		description: "Username does not exist or is invalid.",
+	})
+	async getDMsByUsername(
+		@Request() req: Request,
+		@Param("username") username: string,
+	): Promise<DirectMessageDto[]> {
 		const userInfo: JWTPayload = this.auth.getUserInfo(req);
-		return await this.usersService.getRecommendedUsers(userInfo.id);
+		return await this.usersService.getMessagesByUsername(userInfo.id, username);
 	}
 
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	@Get(":username/room/current")
+	@Get(":username/rooms/current")
 	@ApiOperation({ summary: "Get a user's current room based on username" })
 	@ApiParam({
 		name: "username",
@@ -991,7 +1088,13 @@ export class UsersController {
 	async getCurrentRoomByUserId(
 		@Param("username") username: string,
 	): Promise<RoomDto> {
-		return await this.usersService.getCurrentRoomDto(username);
+		const result: RoomDto | undefined = await this.usersService.getCurrentRoom(
+			username,
+		);
+		if (result === undefined) {
+			throw new HttpException("User is not in a room", HttpStatus.NOT_FOUND);
+		}
+		return result;
 	}
 
 	@Post(":username/block")

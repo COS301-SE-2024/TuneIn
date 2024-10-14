@@ -192,6 +192,10 @@ model scheduled_room {
   start_date DateTime? @db.Timestamptz(6)
   end_date   DateTime? @db.Timestamptz(6)
   room       room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
+  room_id    String    @id @db.Uuid
+  start_date DateTime? @db.Timestamptz(6)
+  end_date   DateTime? @db.Timestamptz(6)
+  room       room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
 
   @@index([room_id], map: "fki_scheduled_room ")
 }

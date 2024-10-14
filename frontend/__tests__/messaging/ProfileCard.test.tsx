@@ -3,7 +3,7 @@ import { render, fireEvent } from "@testing-library/react-native";
 import ProfileCard, {
 	ProfileCardProps,
 } from "../../app/components/messaging/profileCard"; // Adjust the import path as necessary
-import { UserDto } from "../../app/models/UserDto"; // Adjust the import path as necessary
+import { UserDto } from "../../api";
 
 describe("ProfileCard", () => {
 	const mockUser: UserDto = {
