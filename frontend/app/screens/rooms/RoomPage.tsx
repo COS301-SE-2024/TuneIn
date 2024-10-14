@@ -1,11 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useCallback,
-	useContext,
-	useReducer,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -15,8 +8,6 @@ import {
 	Animated,
 	Dimensions,
 	Alert,
-	ToastAndroid,
-	Platform,
 	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -304,7 +295,7 @@ const RoomPage: React.FC = () => {
 			}
 		};
 		fetchParticipants();
-	}, [userInRoom]);
+	}, [roomID, userInRoom]);
 
 	useEffect(() => {
 		return () => {
