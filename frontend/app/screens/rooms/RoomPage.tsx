@@ -27,7 +27,7 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
 // const MemoizedCommentWidget = memo(CommentWidget);
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
 const OPTIMISTIC_PLAYBACK_STATE_TIMEOUT = 5000;
 
