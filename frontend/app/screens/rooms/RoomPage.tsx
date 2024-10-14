@@ -17,6 +17,7 @@ import {
 	Alert,
 	ToastAndroid,
 	Platform,
+	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -68,6 +69,8 @@ const RoomPage: React.FC = () => {
 	}
 
 	const router = useRouter();
+	const [isLoadingPause, setIsLoadingPause] = useState(false);
+	const [isLoadingNext, setIsLoadingNext] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const truncateUsername = (username: string) => {
@@ -137,9 +140,10 @@ const RoomPage: React.FC = () => {
 		rooms,
 		currentRoom,
 		localRoomPlaying,
-		optimisticPlaybackState,
 		ownerPlaying,
+		optimisticPlaybackState,
 		roomPlaying,
+		userInRoom,
 		fetchSongInfo,
 	]);
 
@@ -184,6 +188,10 @@ const RoomPage: React.FC = () => {
 			if (userInRoom) {
 				console.log("playPauseTrack playPauseTrack playPauseTrack");
 				if (roomControls.canControlRoom()) {
+					setIsLoadingPause(true);
+					setTimeout(() => {
+						setIsLoadingPause(false);
+					}, 1000); // 1 second loader
 					if (!ownerPlaying) {
 						console.log("starting playback");
 						setOwnerPlaying(true); //set owner's request to play
@@ -217,20 +225,16 @@ const RoomPage: React.FC = () => {
 
 	const playNextTrack = useCallback(() => {
 		if (userInRoom) {
-			console.log("playNextTrack playNextTrack playNextTrack");
+			setIsLoadingNext(true);
+			setTimeout(() => {
+				setIsLoadingNext(false);
+			}, 1000); // 1 second loader
+			console.log("playNextTrack");
 			if (roomControls.canControlRoom()) {
 				roomControls.playbackHandler.nextTrack();
 			}
 		}
 	}, [roomControls, userInRoom]);
-
-	// const playPreviousTrack = () => {
-	// 	if (userInRoom) {
-	// 		if (roomControls.canControlRoom()) {
-	// 			roomControls.playbackHandler.prevTrack();
-	// 		}
-	// 	}
-	// };
 
 	const handleViewParticipants = () => {
 		router.navigate({
@@ -419,7 +423,7 @@ const RoomPage: React.FC = () => {
 			getAndSetRoomInfo();
 			checkBookmarked();
 		}
-	}, []);
+	}, [checkBookmarked, getAndSetRoomInfo, thisRoom]);
 
 	return (
 		<View style={styles.container}>
@@ -468,12 +472,17 @@ const RoomPage: React.FC = () => {
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
+							disabled={isLoadingPause}
 						>
-							<FontAwesome5
-								name={userInRoom && ownerPlaying ? "pause" : "play"}
-								size={30}
-								color="black"
-							/>
+							{isLoadingPause ? (
+								<ActivityIndicator size="small" color="black" /> // Show loader
+							) : (
+								<FontAwesome5
+									name={userInRoom && ownerPlaying ? "pause" : "play"}
+									size={30}
+									color="black"
+								/>
+							)}
 						</TouchableOpacity>
 
 						<TouchableOpacity
@@ -484,7 +493,11 @@ const RoomPage: React.FC = () => {
 							onPress={roomQueue.length > 1 ? playNextTrack : () => {}} // Provide an empty function instead of null
 							disabled={roomQueue.length <= 1} // Disable touch interaction
 						>
-							<FontAwesome5 name="step-forward" size={30} color="black" />
+							{isLoadingNext ? (
+								<ActivityIndicator size="small" color="black" /> // Show loader
+							) : (
+								<FontAwesome5 name="step-forward" size={30} color="black" />
+							)}
 						</TouchableOpacity>
 					</View>
 				) : (
