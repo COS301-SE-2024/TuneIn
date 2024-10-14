@@ -82,7 +82,7 @@ export class RoomsService {
 					room_id: roomID,
 				},
 			});
-			if (!room) {
+			if (!room || room === null) {
 				return new RoomDto();
 			}
 			// filter out null values
@@ -156,7 +156,7 @@ export class RoomsService {
 				data: updatedRoom,
 			});
 
-			if (!room) {
+			if (!room || room === null) {
 				throw new Error("Failed to update room");
 			}
 
@@ -200,9 +200,16 @@ export class RoomsService {
 				where: {
 					room_id: _room_id,
 				},
+				include: {
+					participate: true,
+				},
 			});
-			if (_room === null) {
+			if (!_room || _room === null) {
 				throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+			}
+			// check if room is at capacity
+			if (_room.participate.length >= Number(_room.room_size)) {
+				throw new HttpException("Room is at capacity", HttpStatus.FORBIDDEN);
 			}
 			const blocked = await this.prisma.blocked.findFirst({
 				where: {
@@ -210,7 +217,7 @@ export class RoomsService {
 					blockee: user_id,
 				},
 			});
-			if (blocked !== null) {
+			if (!blocked || blocked === null) {
 				throw new HttpException(
 					"User is blocked from joining the room",
 					HttpStatus.FORBIDDEN,
@@ -224,7 +231,7 @@ export class RoomsService {
 				},
 			});
 
-			if (room !== null) {
+			if (room) {
 				await this.leaveRoom(room.room_id, user_id);
 			}
 			// Add the user to the room
@@ -261,7 +268,7 @@ export class RoomsService {
 			});
 
 			// If the user is already in the room, return false
-			if (room === null) {
+			if (!room || room === null) {
 				throw new HttpException(
 					"User is not in the room",
 					HttpStatus.NOT_FOUND,
@@ -281,7 +288,7 @@ export class RoomsService {
 					room_leave_time: null,
 				},
 			});
-			if (user === null) {
+			if (!user || user === null) {
 				throw new HttpException(
 					"User is not in the room",
 					HttpStatus.NOT_FOUND,
