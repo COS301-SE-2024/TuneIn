@@ -166,11 +166,37 @@ export class SearchService {
 		// console.log(result);
 
 		if (Array.isArray(result)) {
-			const roomIds = result.map((row) => row.room_id.toString());
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(
-				roomIds,
-				userID,
+			let roomIds = result.map((row) => row.room_id.toString());
+
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] =
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			const blocked_rooms: PrismaTypes.room[] = await this.prisma.room.findMany(
+				{
+					where: {
+						room_id: {
+							in: roomIds,
+						},
+						room_creator: {
+							in: usersWhoBlockedGivenUser.map((user) => user.user_id),
+						},
+					},
+				},
 			);
+			roomIds = roomIds.filter(
+				(id) =>
+					!blocked_rooms.map((room) => room.room_id.toString()).includes(id),
+			);
+
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
 			// console.log(roomDtos);
 
 			if (roomDtos) {
@@ -368,11 +394,35 @@ export class SearchService {
 		);
 
 		if (Array.isArray(result)) {
-			const roomIds = result.map((row) => row.room_id.toString());
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(
-				roomIds,
-				userID,
+			let roomIds = result.map((row) => row.room_id.toString());
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] =
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			const blocked_rooms: PrismaTypes.room[] = await this.prisma.room.findMany(
+				{
+					where: {
+						room_id: {
+							in: roomIds,
+						},
+						room_creator: {
+							in: usersWhoBlockedGivenUser.map((user) => user.user_id),
+						},
+					},
+				},
 			);
+			roomIds = roomIds.filter(
+				(id) =>
+					!blocked_rooms.map((room) => room.room_id.toString()).includes(id),
+			);
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
 
 			if (roomDtos) {
 				const sortedRooms = roomIds
@@ -541,16 +591,28 @@ export class SearchService {
 		if (Array.isArray(result)) {
 			console.log("Called");
 			console.log("Result " + result);
-			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(
-				userIds,
-				userID,
-				true,
+			let userIDs = result.map((row) => row.user_id.toString());
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] =
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			userIDs = userIDs.filter(
+				(id) =>
+					!usersWhoBlockedGivenUser
+						.map((user) => user.user_id.toString())
+						.includes(id),
 			);
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
 			console.log(userDtos);
 
 			if (userDtos) {
-				const sortedUsers = userIds
+				const sortedUsers = userIDs
 					.map((id) => userDtos.find((user) => user.userID === id))
 					.filter((user): user is UserDto => user !== undefined);
 
@@ -684,16 +746,29 @@ export class SearchService {
 		);
 
 		if (Array.isArray(result)) {
-			const userIds = result.map((row) => row.user_id.toString());
-			const userDtos = await this.dtogen.generateMultipleUserDto(
-				userIds,
-				userID,
-				true,
+			let userIDs = result.map((row) => row.user_id.toString());
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] =
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			userIDs = userIDs.filter(
+				(id) =>
+					!usersWhoBlockedGivenUser
+						.map((user) => user.user_id.toString())
+						.includes(id),
 			);
+			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
 			// console.log(userDtos);
 
 			if (userDtos) {
-				const sortedUsers = userIds
+				const sortedUsers = userIDs
 					.map((id) => userDtos.find((user) => user.userID === id))
 					.filter((user): user is UserDto => user !== undefined);
 

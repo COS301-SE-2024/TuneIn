@@ -1,8 +1,11 @@
+import { RoomSongDto } from "../../api";
+
 export type PlaybackEventDto = {
 	date_created?: Date;
 	userID: string | null;
 	roomID: string;
-	songID: string | null;
+	spotifyID: string | null;
+	song?: RoomSongDto | null;
 	UTC_time: number | null;
 	errorMessage?: string;
 };

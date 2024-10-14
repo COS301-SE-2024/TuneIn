@@ -27,15 +27,16 @@ import AppCarousel from "../../components/AppCarousel";
 import FriendsGrid from "../../components/FriendsGrid";
 import Miniplayer from "../../components/home/miniplayer";
 import axios, { AxiosResponse } from "axios";
-import auth from "../../services/AuthManagement";
-import { live, instanceExists } from "../../services/Live";
-import * as utils from "../../services/Utils";
+import auth from "./../../services/AuthManagement"; // Import AuthManagement
+import * as StorageService from "./../../services/StorageService"; // Import StorageService
+import * as utils from "./../../services/Utils"; // Import Utils
 import { Player } from "../../PlayerContext";
 import { colors } from "../../styles/colors";
 import TopNavBar from "../../components/TopNavBar";
 import { useAPI } from "../../APIContext";
 import { UserDto } from "../../../api";
 import { RequiredError } from "../../../api/base";
+import { useIsFocused } from "@react-navigation/native";
 
 const Home: React.FC = () => {
 	const playerContext = useContext(Player);
@@ -45,28 +46,8 @@ const Home: React.FC = () => {
 		);
 	}
 
-	const { userData, setUserData } = playerContext;
-
-	const { users, authenticated } = useAPI();
-	const [currentUser, setCurrentUser] = useState<UserDto>();
-	if (authenticated && !currentUser) {
-		users
-			.getProfile()
-			.then((user: AxiosResponse<UserDto>) => {
-				if (user.status === 401 || user.status === 500) {
-					// Handle errors
-				}
-				setCurrentUser(user.data);
-			})
-			.catch((error) => {
-				if (error instanceof RequiredError) {
-					// Handle required field error
-				} else {
-					// Handle other errors
-				}
-			});
-	}
-
+	const isFocused = useIsFocused();
+	const { currentRoom, userData } = playerContext;
 	const [errorMessage, setErrorMessage] = useState<string>("");
 	const [roomError, setRoomError] = useState<boolean>(false);
 	const [profileError, setProfileError] = useState<boolean>(false);
@@ -77,11 +58,6 @@ const Home: React.FC = () => {
 	const scrollViewRef = useRef<ScrollView>(null);
 	const previousScrollY = useRef(0);
 	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-
-	if (!instanceExists()) {
-		live.initialiseSocket();
-	}
-
 	const BackgroundIMG: string =
 		"https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600";
 	const ProfileIMG: string =
@@ -115,23 +91,6 @@ const Home: React.FC = () => {
 			console.log("Error fetching friends:", error);
 			setFriendError(true);
 			return [];
-		}
-	};
-
-	const fetchProfileInfo = async (token: string) => {
-		try {
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				setProfileError(false);
-				return response.data;
-			}
-		} catch (error) {
-			console.log("Error fetching profile info:", error);
-			setProfileError(true);
 		}
 	};
 
@@ -200,11 +159,20 @@ const Home: React.FC = () => {
 			setFriendRooms(formattedFriendRooms);
 			setFollowingRooms(formattedFollowingRooms);
 
-			if (!userData) {
-				const userInfo = await fetchProfileInfo(storedToken);
-				setUserData(userInfo);
-			}
+			await StorageService.setItem(
+				"cachedRecents",
+				JSON.stringify(formattedRecentRooms),
+			);
+			await StorageService.setItem(
+				"cachedPicks",
+				JSON.stringify(formattedPicksForYouRooms),
+			);
+			await StorageService.setItem(
+				"cachedMyRooms",
+				JSON.stringify(formattedMyRooms),
+			);
 
+			// Fetch friends
 			const fetchedFriends = await getFriends(storedToken);
 			const formattedFriends: Friend[] = Array.isArray(fetchedFriends)
 				? fetchedFriends.map((friend: Friend) => ({
@@ -217,7 +185,7 @@ const Home: React.FC = () => {
 			console.log("Data loaded");
 		}
 		setLoading(false);
-	}, [setUserData, userData, ProfileIMG]);
+	}, [ProfileIMG]);
 
 	useEffect(() => {
 		refreshData();

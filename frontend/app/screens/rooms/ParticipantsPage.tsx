@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -7,51 +7,22 @@ import {
 	TouchableOpacity,
 	FlatList,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLive } from "../../LiveContext";
+import { UserDto } from "../../../api";
+import { useAPI } from "../../APIContext";
 
-interface Participant {
-	id: string;
-	username: string;
-	profilePictureUrl: string;
-}
-
-interface ParticipantsPageProps {
-	participants: Participant[];
-}
-
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
-}) => {
-	const navigation = useNavigation();
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
+const ParticipantsPage: React.FC = () => {
+	const router = useRouter();
+	const { roomID } = useLocalSearchParams<{ roomID: string }>();
+	const { rooms } = useAPI();
+	const { currentRoom, roomParticipants } = useLive();
+	const [participants, setParticipants] = React.useState<UserDto[]>([]);
 
 	const navigateToProfile = (userId: string) => {};
 
-	const renderItem = ({ item }: { item: Participant }) => {
+	const renderItem = ({ item }: { item: UserDto }) => {
 		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
@@ -62,8 +33,8 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			<TouchableOpacity style={styles.participantContainer}>
 				<Image
 					source={
-						item.profilePictureUrl
-							? { uri: item.profilePictureUrl }
+						item.profile_picture_url
+							? { uri: item.profile_picture_url }
 							: require("../../assets/profile-icon.png")
 					}
 					style={styles.profilePicture}
@@ -74,19 +45,46 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		);
 	};
 
+	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
+		const usersResponse = await rooms.getRoomUsers(roomID);
+		return usersResponse.data;
+	}, [roomID, rooms]);
+
+	// on roomID or currentRoom change
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, [currentRoom, roomParticipants]);
+
+	// on mount
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => navigation.goBack()}
+					onPress={() => router.back()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{(participantsInRoom.length === 0 && (
+			{(participants.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.
@@ -94,9 +92,9 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</View>
 			)) || (
 				<FlatList
-					data={participantsInRoom}
+					data={participants}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.userID}
 				/>
 			)}
 		</View>

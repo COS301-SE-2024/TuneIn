@@ -1,69 +1,73 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	ScrollView,
+} from "react-native";
+import { useRouter } from "expo-router";
 // import { Ionicons } from "@expo/vector-icons";
 import SongList from "../../components/SongList"; // Import the SongList component
-import { Track } from "../../models/Track";
+import { useLive } from "../../LiveContext";
 import CreateButton from "../../components/CreateButton";
+import { Player } from "../../PlayerContext";
+import { SongPair, convertQueue } from "../../models/SongPair";
+import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
+
+const VOTING_ENABLED = false;
 
 const Playlist = () => {
+	const { roomQueue, spotifyAuth } = useLive();
+	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
 	const router = useRouter();
-	const { queue, currentTrackIndex, Room_id, mine } = useLocalSearchParams();
-	const isMine = mine === "true";
-	const [playlist, setPlaylist] = useState<Track[]>([]);
-	const [votes, setVotes] = useState<number[]>([]); // Track votes for each song
+	const playerContext = useContext(Player);
+	const [localQueue, setLocalQueue] = useState<SongPair[]>([]);
 
-	useEffect(() => {
-		try {
-			if (typeof queue === "string") {
-				const parsedQueue = JSON.parse(queue) as Track[];
-				setPlaylist(parsedQueue);
-				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
-			} else if (Array.isArray(queue)) {
-				const parsedQueue = queue.map((item) => JSON.parse(item) as Track);
-				setPlaylist(parsedQueue);
-				setVotes(new Array(parsedQueue.length).fill(0)); // Initialize votes array
-			}
-		} catch (error) {
-			console.error("Failed to parse queue:", error);
-		}
-	}, [queue]);
+	if (!playerContext) {
+		throw new Error(
+			"PlayerContext must be used within a PlayerContextProvider",
+		);
+	}
+	const { currentRoom } = playerContext;
+	const isMine = currentRoom?.mine ? "true" : "false";
 
-	// Function to handle voting
-	const handleVoteChange = (index: number, newVoteCount: number) => {
-		const updatedVotes = [...votes];
-		updatedVotes[index] = newVoteCount;
-
-		const sortedPlaylist = [...playlist]
-			.map((track, i) => ({ track, vote: updatedVotes[i], index: i }))
-			.sort((a, b) => {
-				if (a.vote === b.vote) return a.index - b.index; // Keep original order for same votes
-				return b.vote - a.vote; // Sort descending by votes
-			})
-			.map((item) => item.track);
-
-		// Ensure songs don't move above the current track index
-		const finalPlaylist = [
-			...sortedPlaylist.slice(0, Number(currentTrackIndex) + 1),
-			...sortedPlaylist.slice(Number(currentTrackIndex) + 1),
-		];
-
-		setVotes(updatedVotes);
-		setPlaylist(finalPlaylist);
-	};
-
+	console.log("curr room_id:", isMine);
 	const navigateToAddSong = () => {
-		console.log("curr room_id:", Room_id);
+		console.log("curr room_id:", isMine);
 		router.navigate({
 			pathname: "/screens/rooms/EditPlaylist",
 			params: {
-				queue: queue,
-				currentTrackIndex: currentTrackIndex,
-				Room_id: Room_id,
-				isMine: mine,
+				Room_id: currentRoom?.roomID,
+				isMine: isMine,
 			},
 		});
 	};
+
+	useEffect(() => {
+		console.log(`Playlist page room queue`);
+		if (localQueue.length !== roomQueue.length) {
+			console.log(`Local queue length is wrong. Updating...`);
+			fetchSongInfo(roomQueue.map((s) => s.spotifyID)).then((tracks) => {
+				setLocalQueue(convertQueue(roomQueue, tracks));
+			});
+		}
+		if (localQueue.length === roomQueue.length) {
+			let differenceFound = false;
+			for (let i = 0; i < localQueue.length; i++) {
+				if (localQueue[i].song.spotifyID !== roomQueue[i].spotifyID) {
+					differenceFound = true;
+					break;
+				}
+			}
+			if (differenceFound) {
+				console.log(`Local queue is different. Updating...`);
+				fetchSongInfo(roomQueue.map((s) => s.spotifyID)).then((tracks) => {
+					setLocalQueue(convertQueue(roomQueue, tracks));
+				});
+			}
+		}
+	}, [fetchSongInfo, roomQueue]);
 
 	return (
 		<View style={styles.container}>
@@ -81,22 +85,16 @@ const Playlist = () => {
 				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
-				{playlist.length > 0 ? (
-					playlist.map((track, index) => (
-						<SongList
-							key={index}
-							songNumber={index + 1}
-							track={track}
-							voteCount={votes[index]}
-							showVoting={true}
-							index={index}
-							isCurrent={index === Number(currentTrackIndex)}
-							swapSongs={() => {}} // Not needed here
-							setVoteCount={(newVoteCount) =>
-								handleVoteChange(index, newVoteCount)
-							}
-						/>
-					))
+				{localQueue.length > 0 ? (
+					<ScrollView>
+						{localQueue.map((s, index) => (
+							<SongList
+								key={s.song.index}
+								song={s}
+								showVoting={VOTING_ENABLED}
+							/>
+						))}
+					</ScrollView>
 				) : (
 					<View style={styles.emptyQueueContainer}>
 						<Text style={styles.emptyQueueText}>
@@ -108,13 +106,6 @@ const Playlist = () => {
 					</View>
 				)}
 			</View>
-			{/* <TouchableOpacity style={styles.addButton} onPress={navigateToAddSong}>
-				{isMine ? (
-					<Text style={styles.addButtonText}>Manage queue</Text>
-				) : (
-					<Text style={styles.addButtonText}>Add Song</Text>
-				)}
-			</TouchableOpacity> */}
 			<CreateButton
 				title={isMine ? "Manage queue" : "Add Song"}
 				onPress={navigateToAddSong}
@@ -128,6 +119,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingHorizontal: 16,
 		backgroundColor: "white",
+	},
+	containerButton: {
+		flex: 1,
+		justifyContent: "flex-end", // Aligns the button at the bottom
+		paddingBottom: 20,
 	},
 	header: {
 		flexDirection: "row",

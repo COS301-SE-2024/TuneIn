@@ -12,73 +12,52 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
-import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
-import { live, DirectMessage, instanceExists } from "../../services/Live";
+import { useLive } from "../../LiveContext";
+import { DirectMessage } from "../../hooks/useDMControls";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
+import { UserDto } from "../../../api";
 
 const ChatScreen = () => {
-	const [self, setSelf] = useState<UserDto>();
-	const [otherUser, setOtherUser] = useState<UserDto>();
+	const {
+		currentUser,
+		enterDM,
+		leaveDM,
+		dmControls,
+		dmParticipants,
+		directMessages,
+		socketHandshakes,
+	} = useLive();
 	const [message, setMessage] = useState<string>("");
-	const [messages, setMessages] = useState<DirectMessage[]>([]);
-	const [connected, setConnected] = useState<boolean>(false);
-	const [isSending, setIsSending] = useState<boolean>(false);
 	const [dmError, setError] = useState<boolean>(false);
 	const [unreadCount, setUnreadCount] = useState<number>(0); // To store unread message count
 	const [showBanner, setShowBanner] = useState<boolean>(false); // Control banner visibility
 	const router = useRouter();
-	let { username } = useLocalSearchParams();
-	const u: string = Array.isArray(username) ? username[0] : username;
+	let { username } = useLocalSearchParams<{ username: string }>();
 	const flatListRef = useRef<FlatList>(null); // FlatList reference
-
-	// Scroll to the bottom whenever messages change
-	useEffect(() => {
-		if (messages.length > 0) {
-			flatListRef.current?.scrollToEnd({ animated: true });
-		}
-	}, [messages]);
-
-	const getUsers = async () => {
-		try {
-			const token = await auth.getToken();
-			const userPromises = [
-				axios.get(`${utils.API_BASE_URL}/users`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-				axios.get(`${utils.API_BASE_URL}/users/${u}`, {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			];
-			const [selfResponse, otherUserResponse] = await Promise.all(userPromises);
-			return [selfResponse.data as UserDto, otherUserResponse.data as UserDto];
-		} catch (error) {
-			console.log("Error fetching users' information", error);
-			setError(true);
-			ToastAndroid.show("Failed to load DMs", ToastAndroid.SHORT);
-			throw error;
-		}
-	};
 
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
-		if (connected) {
+		if (socketHandshakes.dmJoined) {
 			console.log("Leaving DM");
-			await live.leaveDM();
+			leaveDM();
 		}
 	};
 
 	useEffect(() => {
-		if (instanceExists()) {
-			if (!messages || messages.length === 0) {
-				if (live.receivedDMHistory()) {
-					setMessages(live.getFetchedDMs());
+		if (socketHandshakes.dmJoined) {
+			if (!directMessages || directMessages.length === 0) {
+				if (!socketHandshakes.dmsReceived) {
+					dmControls.requestDirectMessageHistory();
 				}
-				live.requestDMHistory(u);
 			}
+		}
+		// Scroll to the bottom whenever messages change
+		if (directMessages.length > 0) {
+			flatListRef.current?.scrollToEnd({ animated: true });
 		}
 	}, [messages, u]);
 
@@ -107,22 +86,16 @@ const ChatScreen = () => {
 	useEffect(() => {
 		const initialize = async () => {
 			try {
-				if (instanceExists()) {
-					await live.initialiseSocket();
+				if (!socketHandshakes.dmJoined) {
+					const user = dmParticipants.find((u) => u.username === username);
+					if (!user) {
+						await enterDM([username]);
+						dmControls.requestDirectMessageHistory();
+					}
 				}
-				const [fetchedSelf, fetchedOtherUser] = await getUsers();
-				setSelf(fetchedSelf);
-				setOtherUser(fetchedOtherUser);
-				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
-				await live.enterDM(
-					fetchedSelf.userID,
-					fetchedOtherUser.userID,
-					setMessages,
-					setConnected,
-				);
-				if (!live.receivedDMHistory()) {
-					live.requestDMHistory(fetchedOtherUser.userID);
-				}
+				// if (!socketHandshakes.dmsReceived) {
+				// 	dmControls.requestDirectMessageHistory();
+				// }
 			} catch (error) {
 				console.error("Failed to setup DM", error);
 			}
@@ -140,26 +113,25 @@ const ChatScreen = () => {
 	}, []);
 
 	const handleSend = () => {
-		if (!self || !otherUser || isSending) return;
+		if (!currentUser || dmParticipants.length <= 0) return;
 		const newMessage: DirectMessage = {
 			message: {
-				index: messages.length,
+				index: directMessages.length,
 				messageBody: message,
-				sender: self,
-				recipient: otherUser,
-				dateSent: new Date(),
-				dateRead: new Date(0),
+				sender: currentUser,
+				recipient: dmParticipants[0],
+				dateSent: new Date().toISOString(),
+				dateRead: new Date(0).toISOString(),
 				isRead: false,
 				pID: "",
+				bodyIsRoomID: false,
 			},
 			me: true,
 			messageSent: false,
+			isOptimistic: true,
 		};
-		setIsSending(true);
+		dmControls.sendDirectMessage(newMessage);
 		setMessage("");
-		live.sendDM(newMessage, otherUser).finally(() => {
-			setIsSending(false);
-		});
 	};
 
 	return (
@@ -181,16 +153,16 @@ const ChatScreen = () => {
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				{otherUser && otherUser.profile_picture_url && (
+				{dmParticipants[0] && dmParticipants[0].profile_picture_url && (
 					<Image
 						source={{
-							uri: otherUser.profile_picture_url,
+							uri: dmParticipants[0].profile_picture_url,
 						}}
 						style={styles.avatar}
 					/>
 				)}
 				<Text style={styles.headerTitle}>
-					{dmError ? "Failed" : otherUser?.profile_name || "Loading..."}
+					{dmError ? "Failed" : dmParticipants[0]?.profile_name || "Loading..."}
 				</Text>
 			</View>
 

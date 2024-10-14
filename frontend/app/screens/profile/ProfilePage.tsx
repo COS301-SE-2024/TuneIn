@@ -28,7 +28,7 @@ import { Room, formatRoomData } from "../../models/Room";
 import * as StorageService from "../../services/StorageService"; // Import StorageService
 import RoomCardWidget from "../../components/rooms/RoomCardWidget";
 import AppCarousel from "../../components/AppCarousel";
-import { RoomDto } from "../../models/RoomDto";
+import { RoomDto } from "../../../api";
 import { Friend } from "../../models/friend";
 import FollowBottomSheet from "../../components/FollowBottomSheet";
 import { User } from "../../models/user";
@@ -370,7 +370,7 @@ const ProfileScreen: React.FC = () => {
 			const storedToken = await auth.getToken();
 			if (storedToken) {
 				const response = await axios.get(
-					`${utils.API_BASE_URL}/users/${userID}/room/current`,
+					`${utils.API_BASE_URL}/users/${userID}/rooms/current`,
 					{
 						headers: {
 							Authorization: `Bearer ${storedToken}`,

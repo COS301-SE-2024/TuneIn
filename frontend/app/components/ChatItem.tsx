@@ -1,32 +1,41 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { DirectMessageDto } from "../models/DmDto";
-import { UserDto } from "../models/UserDto";
+import { DirectMessageDto, UserDto, RoomDto } from "../../api";
+import { useLive } from "../LiveContext";
 import { colors } from "../../app/styles/colors";
 
 export interface ChatItemProps {
 	message: DirectMessageDto;
 	otherUser: UserDto;
+	room?: RoomDto;
 	unreadCount: number; // New prop to track unread messages
 }
 
 const ChatItem: React.FC<ChatItemProps> = ({
 	message,
 	otherUser,
+	room,
 	unreadCount,
 }) => {
+	const { enterDM, leaveDM, socketHandshakes } = useLive();
 	const router = useRouter();
 
 	return (
 		<TouchableOpacity
 			testID="chat-item-touchable"
 			style={styles.container}
-			onPress={() =>
+			onPress={() => {
+				console.log("pre enterDM");
+				if (socketHandshakes.dmJoined) {
+					leaveDM();
+				}
+				enterDM([otherUser.username]);
+				console.log("post enterDM");
 				router.push(
 					`/screens/messaging/ChatScreen?username=${otherUser.username}`,
-				)
-			}
+				);
+			}}
 		>
 			<Image
 				source={{ uri: otherUser.profile_picture_url }}
@@ -40,7 +49,9 @@ const ChatItem: React.FC<ChatItemProps> = ({
 					numberOfLines={1} // Limits the message to one line
 					ellipsizeMode="tail" // Adds ellipsis at the end if the text is too long
 				>
-					{message.messageBody}
+					{message.bodyIsRoomID && room
+						? `Shared Room: ${room.room_name}`
+						: message.messageBody}
 				</Text>
 			</View>
 
