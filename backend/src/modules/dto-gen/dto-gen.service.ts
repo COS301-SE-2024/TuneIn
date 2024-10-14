@@ -80,7 +80,7 @@ export class DtoGenService {
 		];
 		// exclude userID from the blocked_ids
 		const blocked_id = blocked_ids.filter((id) => id !== userID);
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
+		const users = await this.prisma.users.findMany({
 			where: {
 				AND: [{ user_id: { in: userIDs } }, { user_id: { notIn: blocked_id } }],
 			},
