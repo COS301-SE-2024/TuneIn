@@ -119,7 +119,7 @@ describe("RoomsService", () => {
 					language: updateRoomDto.language,
 					participant_count: 0,
 					is_private: false,
-
+					date_created: new Date("2024-10-13T00:14:22.584Z"),
 					is_scheduled: false,
 					is_temporary: false,
 					tags: [],
@@ -171,6 +171,7 @@ describe("RoomsService", () => {
 				has_explicit_content: updateRoomDto.has_explicit_content,
 				has_nsfw_content: updateRoomDto.has_nsfw_content,
 				language: updateRoomDto.language,
+				date_created: new Date("2024-10-13T00:14:22.584Z"),
 				creator: {
 					bio: "",
 					fav_genres: {
