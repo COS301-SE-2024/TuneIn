@@ -163,6 +163,7 @@ model room {
   explicit                                   Boolean?         @default(false)
   tags                                       String[]
   playlist_id                                String?
+  room_size                                  Int              @default(50)
   banned                                     banned[]
   bookmark                                   bookmark[]
   chat_reactions                             chat_reactions[]
@@ -247,35 +248,37 @@ model user_activity {
 }
 
 model users {
-  user_id                         String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username                        String
-  bio                             String?
-  profile_picture                 String?
-  activity                        Json?             @db.Json
-  preferences                     Json?             @db.Json
-  full_name                       String?
-  external_links                  Json?             @db.Json
-  email                           String?
-  authentication                  authentication?
-  banned                          banned[]
-  blocked_blocked_blockeeTousers  blocked[]         @relation("blocked_blockeeTousers")
-  blocked_blocked_blockerTousers  blocked[]         @relation("blocked_blockerTousers")
-  bookmark                        bookmark[]
-  chat_reactions                  chat_reactions[]
-  favorite_genres                 favorite_genres[]
-  favorite_songs                  favorite_songs[]
-  follows_follows_followeeTousers follows[]         @relation("follows_followeeTousers")
-  follows_follows_followerTousers follows[]         @relation("follows_followerTousers")
-  friends_friends_friend1Tousers  friends[]         @relation("friends_friend1Tousers")
-  friends_friends_friend2Tousers  friends[]         @relation("friends_friend2Tousers")
-  message                         message[]
-  participate                     participate[]
-  playlist                        playlist[]
-  private_message                 private_message[]
-  room                            room[]
-  search_history                  search_history[]
-  user_activity                   user_activity[]
-  vote                            vote[]
+  user_id                               String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                              String
+  bio                                   String?
+  profile_picture                       String?
+  activity                              Json?             @db.Json
+  preferences                           Json?             @db.Json
+  full_name                             String?
+  external_links                        Json?             @db.Json
+  email                                 String?
+  authentication                        authentication?
+  banned                                banned[]
+  blocked_blocked_blockeeTousers        blocked[]         @relation("blocked_blockeeTousers")
+  blocked_blocked_blockerTousers        blocked[]         @relation("blocked_blockerTousers")
+  bookmark                              bookmark[]
+  chat_reactions                        chat_reactions[]
+  favorite_genres                       favorite_genres[]
+  favorite_songs                        favorite_songs[]
+  follows_follows_followeeTousers       follows[]         @relation("follows_followeeTousers")
+  follows_follows_followerTousers       follows[]         @relation("follows_followerTousers")
+  friends_friends_friend1Tousers        friends[]         @relation("friends_friend1Tousers")
+  friends_friends_friend2Tousers        friends[]         @relation("friends_friend2Tousers")
+  message                               message[]
+  participate                           participate[]
+  playlist                              playlist[]
+  private_message                       private_message[]
+  public_key_public_key_recieverTousers public_key[]      @relation("public_key_recieverTousers")
+  public_key_public_key_senderTousers   public_key?       @relation("public_key_senderTousers")
+  room                                  room[]
+  search_history                        search_history[]
+  user_activity                         user_activity[]
+  vote                                  vote[]
 }
 
 model vote {
@@ -316,4 +319,12 @@ model child_room {
   parent_room_id                       String @db.Uuid
   room_child_room_parent_room_idToroom room   @relation("child_room_parent_room_idToroom", fields: [parent_room_id], references: [room_id], onDelete: Cascade)
   room_child_room_room_idToroom        room   @relation("child_room_room_idToroom", fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model public_key {
+  sender                           String @id @db.Uuid
+  key                              String
+  reciever                         String @db.Uuid
+  users_public_key_recieverTousers users  @relation("public_key_recieverTousers", fields: [reciever], references: [user_id], onDelete: Cascade)
+  users_public_key_senderTousers   users  @relation("public_key_senderTousers", fields: [sender], references: [user_id], onDelete: Cascade, map: "public_key_user_id_fkey")
 }
