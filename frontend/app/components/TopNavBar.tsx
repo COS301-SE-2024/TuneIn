@@ -32,7 +32,7 @@ const TopNavBar: React.FC = () => {
 
 	const navigateToProfile = () => {
 		router.push({
-			pathname: "/screens/profile/",
+			pathname: "/screens/profile/ProfilePage",
 		});
 	};
 

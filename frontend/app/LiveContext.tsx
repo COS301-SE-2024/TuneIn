@@ -277,7 +277,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							} else {
 								// some other error
 								console.error(error);
-								throw new Error("Error getting user");
+								throw new Error("Error getting user: " + error);
 							}
 						});
 				} catch (error) {
