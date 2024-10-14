@@ -268,32 +268,9 @@ export class DtoGenService {
 			},
 		});
 
-		if (!rooms || rooms === null) {
-			throw new Error("Unknown error. DB returned null");
-		}
-		const roomIDsFinal: string[] = rooms.map((r) => r.room_id);
-		const scheduledRooms = await this.prisma.scheduled_room.findMany({
-			where: { room_id: { in: roomIDsFinal } },
-		});
-		const privateRooms = await this.prisma.private_room.findMany({
-			where: { room_id: { in: roomIDsFinal } },
-		});
-
-		const userIds: string[] = rooms.map((r) => r.room_creator);
-		//remove duplicate user ids
-		const uniqueUserIds: string[] = [...new Set(userIds)];
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
-			where: { user_id: { in: uniqueUserIds } },
-		});
-
-		const userDtos: UserDto[] = [];
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				const user = this.generateBriefUserDto(u);
-				userDtos.push(user);
-			}
-		}
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
 
 		const result: RoomDto[] = [];
 		for (let i = 0; i < rooms.length; i++) {
@@ -307,12 +284,10 @@ export class DtoGenService {
 							") not found in Users table",
 					);
 				}
-				const childrenRooms = await this.prisma.child_room.findMany({
-					where: { parent_room_id: r.room_id },
-				});
-				// find the roomId in the scheduledRooms. if found, then it is a scheduled room
-				// create an object with start_date and end_date if it is a scheduled room. else, make them undefined
-				const sRoom = scheduledRooms.find((sr) => sr.room_id === r.room_id);
+				const childrenRooms = r.child_room_child_room_parent_room_idToroom.map(
+					(r) => r.room_id,
+				);
+				const sRoom = r.scheduled_room;
 				const scheduledRoom = sRoom
 					? {
 							start_date: sRoom.start_date || undefined,
@@ -320,12 +295,11 @@ export class DtoGenService {
 							is_scheduled: true,
 					  }
 					: { start_date: undefined, end_date: undefined, is_scheduled: false };
-				// do the same for private rooms
-				const pRoom = privateRooms.find((pr) => pr.room_id === r.room_id);
+				const pRoom = r.private_room;
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
-					participant_count: 0, //to fix soon
+					participant_count: r.participate.length,
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
@@ -335,7 +309,8 @@ export class DtoGenService {
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
 					tags: r.tags || [],
-					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
+					spotifyPlaylistID: r.playlist_id || "",
+					childrenRoomIDs: childrenRooms,
 					date_created: r.date_created,
 					...scheduledRoom,
 				};
