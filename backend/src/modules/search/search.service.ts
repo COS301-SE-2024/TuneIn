@@ -608,7 +608,11 @@ export class SearchService {
 						.map((user) => user.user_id.toString())
 						.includes(id),
 			);
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
+			const userDtos = await this.dtogen.generateMultipleUserDto(
+				userIDs,
+				userID,
+				true,
+			);
 			console.log(userDtos);
 
 			if (userDtos) {
@@ -764,7 +768,11 @@ export class SearchService {
 						.map((user) => user.user_id.toString())
 						.includes(id),
 			);
-			const userDtos = await this.dtogen.generateMultipleUserDto(userIDs, true);
+			const userDtos = await this.dtogen.generateMultipleUserDto(
+				userIDs,
+				userID,
+				true,
+			);
 			// console.log(userDtos);
 
 			if (userDtos) {
