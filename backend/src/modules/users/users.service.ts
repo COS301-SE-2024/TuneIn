@@ -392,9 +392,12 @@ export class UsersService {
 				HttpStatus.NOT_FOUND,
 			);
 		} else {
-			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
-				userData.user_id,
-			]);
+			console.log("User data: ", userData);
+			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto(
+				[userData.user_id],
+				undefined,
+				true,
+			);
 			return user;
 		}
 	}
