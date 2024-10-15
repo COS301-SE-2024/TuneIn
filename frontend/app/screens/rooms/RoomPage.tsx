@@ -4,6 +4,7 @@ import React, {
 	useRef,
 	useCallback,
 	useContext,
+	useReducer,
 } from "react";
 import {
 	View,
@@ -21,29 +22,37 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import auth from "../../services/AuthManagement";
-import * as utils from "../../services/Utils";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Bookmarker from "./functions/Bookmarker";
-import { Track } from "../../models/Track";
 import DevicePicker from "../../components/DevicePicker";
-import { live } from "../../services/Live";
-import { Player } from "../../PlayerContext";
-import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
-import { formatRoomData } from "../../models/Room";
+import { useLive } from "../../LiveContext";
+import * as rs from "../../models/SongPair";
 import { colors } from "../../styles/colors";
+import bookmarks from "../../services/BookmarkService";
+import { useAPI } from "../../APIContext";
 import SongRoomWidget from "../../components/SongRoomWidget";
+import { RoomDto } from "../../../api";
+import * as utils from "../../services/Utils";
+import * as Spotify from "@spotify/web-api-ts-sdk";
+import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
+// const MemoizedCommentWidget = memo(CommentWidget);
 const { width, height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
+const OPTIMISTIC_PLAYBACK_STATE_TIMEOUT = 5000;
 
-interface RoomPageProps {
-	joined: boolean;
-	handleJoinLeave: () => Promise<void>;
-}
-
-// const RoomPage = () => {
-const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
-	live.initialiseSocket();
+const RoomPage: React.FC = () => {
+	const { rooms } = useAPI();
+	const {
+		roomControls,
+		roomPlaying,
+		joinRoom,
+		leaveRoom,
+		currentSong,
+		currentRoom,
+		roomQueue,
+		userBookmarks,
+		spotifyAuth,
+	} = useLive();
 	const { room } = useLocalSearchParams();
 	let roomData: any;
 	if (Array.isArray(room)) {
@@ -59,173 +68,201 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 		roomID = roomData.roomID;
 	}
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
-	const { currentRoom, setCurrentRoom } = playerContext;
-	const [joineds, setJoined] = useState(false);
-
-	useEffect(() => {
-		if (currentRoom && currentRoom?.roomID === roomID) {
-			setJoined(true);
-		}
-	}, [currentRoom, roomID]);
-
 	const router = useRouter();
-	const [readyToJoinRoom, setReadyToJoinRoom] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
-	const [queue, setQueue] = useState<Track[]>([]);
-	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-	const [isPlaying, setIsPlaying] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
-	const [message, setMessage] = useState("");
-	const [isSending, setIsSending] = useState(false);
-	const [participantCount, setParticipantCount] = useState(0);
-	const [participants, setParticipants] = useState<any[]>([]);
-	const playback = useRef(new SimpleSpotifyPlayback()).current;
-
-	const [loading, setLoading] = useState(false);
-
-	const bookmarker = useRef(new Bookmarker()).current;
 	const truncateUsername = (username: string) => {
 		if (username) {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
 	};
+	const [thisRoom, setThisRoom] = useState<RoomDto>();
+	const [userInRoom, setUserInRoom] = useState(false);
+	const trackPositionIntervalRef = useRef<number | null>(null);
+	const queueHeight = useRef(new Animated.Value(0)).current;
+	const [participantCount, setParticipantCount] = useState(0);
+	const [participants, setParticipants] = useState<any[]>([]);
+	const { fetchSongInfo, addSongsToCache } = useSpotifyTracks(spotifyAuth);
+	const [localCurrentSong, setLocalCurrentSong] = useState<rs.SongPair>();
+	const [localQueue, setLocalQueue] = useState<rs.SongPair[]>([]);
+	const [localRoomPlaying, setLocalRoomPlaying] = useState(roomPlaying);
+	const [devicePickerVisible, setDevicePickerVisible] = useState(false);
+	const [optimisticPlaybackState, setOptimisticPlaybackState] = useState(false);
+	const optimisticPlaybackStatIntervaleRef = useRef<NodeJS.Timeout>();
+	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
 
-	const checkBookmark = useCallback(async () => {
-		try {
-			const token = await auth.getToken();
-			const isBookmarked = await bookmarker.checkBookmark(
-				token as string,
-				String(roomID),
-			);
-			setIsBookmarked(isBookmarked ?? false); // Use false as the default value if isBookmarked is undefined
-		} catch (error) {
-			console.log("Error checking bookmark:", error);
+	const syncWithRoom = () => {
+		// Placeholder function for syncing with the room
+		// console.log("Syncing with room... (functionality to be implemented)");
+	};
+
+	const getAndSetRoomInfo = useCallback(async () => {
+		console.log(`!thisRoom: ${!thisRoom}`);
+		console.log(`thisRoom.roomID !== roomID: ${thisRoom?.roomID !== roomID}`);
+		if (!thisRoom || thisRoom.roomID !== roomID) {
+			await rooms.getRoomInfo(roomID).then(async (roomResponse) => {
+				const r = roomResponse.data;
+				console.log(`1: Setting thisRoom to: ${r}`);
+				setThisRoom(r);
+				if (currentRoom) {
+					setUserInRoom(currentRoom.roomID === roomID);
+					if (
+						(!localRoomPlaying || !ownerPlaying) &&
+						!optimisticPlaybackState &&
+						(ownerPlaying || localRoomPlaying)
+					) {
+						setOwnerPlaying(roomPlaying); // Set ownerPlaying to the socket state
+					}
+				} else {
+					if (!userInRoom) {
+						setUserInRoom(false);
+					}
+					if (!optimisticPlaybackState) {
+						if (!ownerPlaying) {
+							setLocalRoomPlaying(false);
+						}
+					}
+				}
+				if (r.current_song) {
+					const s = r.current_song;
+					await fetchSongInfo([s.spotifyID]).then(
+						([track]: Spotify.Track[]) => {
+							const result: rs.SongPair = {
+								song: s,
+								track: track,
+							};
+							setLocalCurrentSong(result);
+						},
+					);
+				}
+			});
 		}
-	}, [roomID, bookmarker]);
+	}, [
+		thisRoom,
+		roomID,
+		rooms,
+		currentRoom,
+		localRoomPlaying,
+		optimisticPlaybackState,
+		ownerPlaying,
+		roomPlaying,
+		fetchSongInfo,
+	]);
 
-	checkBookmark();
+	const checkBookmarked = useCallback(async () => {
+		for (let i = 0; i < userBookmarks.length; i++) {
+			if (userBookmarks[i].roomID === roomID) {
+				setIsBookmarked(true);
+				break;
+			}
+		}
+	}, [roomID, userBookmarks]);
 
 	const handleBookmark = async () => {
-		live.startPlayback(roomID);
-
-		// make a request to the backend to check if the room is bookmarked
-		// if it is bookmarked, set isBookmarked to true
-		setIsBookmarked(!isBookmarked);
-		const token = await auth.getToken();
-
-		try {
-			const handleBookmark = await bookmarker.handleBookmark(
-				token as string,
-				String(roomID),
-				isBookmarked,
-			);
-			if (handleBookmark) {
-				Alert.alert(
-					"Success",
-					`Room has been ${isBookmarked ? "unbookmarked" : "bookmarked"}`,
-					[
-						{
-							text: "OK",
-							onPress: () => console.log("OK Pressed"),
-						},
-					],
-				);
-			}
-		} catch (error) {
-			console.error("Error:", error);
+		const previouslyBookmarked = isBookmarked;
+		if (previouslyBookmarked) {
+			// Unbookmark the room
+			bookmarks.unbookmarkRoom(rooms, roomID).then(() => {
+				Alert.alert("Success", `Room bookmark has been removed`, [
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]);
+			});
+			setIsBookmarked(false);
+		} else {
+			// Bookmark the room
+			bookmarks.bookmarkRoom(rooms, roomID).then(() => {
+				Alert.alert("Success", `Room has been bookmarked`, [
+					{
+						text: "OK",
+						onPress: () => console.log("OK Pressed"),
+					},
+				]);
+			});
+			setIsBookmarked(true);
 		}
 	};
 
-	const joinRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setCurrentRoom(formattedRoom);
-	}, [roomData, setCurrentRoom]);
-
-	const trackPositionIntervalRef = useRef<number | null>(null);
-	const queueHeight = useRef(new Animated.Value(0)).current;
-	const collapsedHeight = 60;
-	const screenHeight = Dimensions.get("window").height;
-	const expandedHeight = screenHeight - 350;
-	const animatedHeight = useRef(new Animated.Value(collapsedHeight)).current;
-
-	useEffect(() => {
-		const fetchQueue = async () => {
-			const storedToken = await auth.getToken();
-
-			if (!storedToken) {
-				console.error("No stored token found");
-				return;
-			}
-
-			try {
-				const response = await fetch(
-					`${utils.API_BASE_URL}/rooms/${roomID}/songs`,
-					{
-						method: "GET",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${storedToken}`,
-						},
-					},
-				);
-
-				if (!response.ok) {
-					const errorText = await response.text();
-					console.error(
-						`Failed to fetch queue: ${response.status} ${response.statusText}`,
-						errorText,
+	const playPauseTrack = useCallback(
+		async (offset: number = 0) => {
+			if (userInRoom) {
+				console.log("playPauseTrack playPauseTrack playPauseTrack");
+				if (roomControls.canControlRoom()) {
+					if (!ownerPlaying) {
+						console.log("starting playback");
+						setOwnerPlaying(true); //set owner's request to play
+						setLocalRoomPlaying(true);
+						roomControls.playbackHandler.startPlayback();
+					} else {
+						console.log("stopping playback");
+						setOwnerPlaying(false); //set owner's request to pause
+						setLocalRoomPlaying(false);
+						roomControls.playbackHandler.pausePlayback();
+					}
+					setOptimisticPlaybackState(true);
+					optimisticPlaybackStatIntervaleRef.current = setTimeout(() => {
+						setOptimisticPlaybackState(false);
+						setLocalRoomPlaying(ownerPlaying);
+						optimisticPlaybackStatIntervaleRef.current = undefined;
+					}, OPTIMISTIC_PLAYBACK_STATE_TIMEOUT);
+				} else {
+					alert(
+						`You're not the owner of this room. Playback controls should not be visible for you`,
 					);
-					return;
 				}
-
-				const data = await response.json();
-				if (Array.isArray(data)) {
-					const tracks: Track[] = data.map((item: any) => ({
-						id: item.id,
-						name: item.name,
-						artists: [{ name: item.artistNames }],
-						album: { images: [{ url: item.albumArtUrl }] },
-						explicit: item.explicit,
-						preview_url: item.preview_url,
-						uri: item.uri,
-						duration_ms: item.duration_ms,
-					}));
-					setQueue(tracks);
-				} else {
-					console.error("Unexpected response data format:", data);
-				}
-			} catch (error) {
-				console.log("Failed to fetch queue:", error);
-
-				// Show a toast on Android, and an alert on other platforms
-				if (Platform.OS === "android") {
-					// ToastAndroid.show("Failed to fetch queue", ToastAndroid.SHORT);
-					console.log("Failed to fetch queue");
-				} else {
-					console.log("Failed to fetch queue");
-					// Alert.alert("Error", "Failed to fetch queue");
-				}
+			} else {
+				alert(
+					`You're gonna have to join this room first before trying to play music`,
+				);
 			}
-		};
+		},
+		[ownerPlaying, roomControls, userInRoom],
+	);
 
-		fetchQueue();
-	}, [roomData.roomID, roomID]);
-
-	useEffect(() => {
-		return () => {
-			if (trackPositionIntervalRef.current) {
-				clearInterval(trackPositionIntervalRef.current);
+	const playNextTrack = useCallback(() => {
+		if (userInRoom) {
+			console.log("playNextTrack playNextTrack playNextTrack");
+			if (roomControls.canControlRoom()) {
+				roomControls.playbackHandler.nextTrack();
 			}
-		};
-	}, [isPlaying]);
+		}
+	}, [roomControls, userInRoom]);
+
+	// const playPreviousTrack = () => {
+	// 	if (userInRoom) {
+	// 		if (roomControls.canControlRoom()) {
+	// 			roomControls.playbackHandler.prevTrack();
+	// 		}
+	// 	}
+	// };
+
+	const handleViewParticipants = () => {
+		router.navigate({
+			pathname: "/screens/rooms/ParticipantsPage",
+			params: { roomID: roomID },
+		});
+	};
+
+	const handleJoinLeave = async () => {
+		// only join if not in room or if in another room
+		if (!currentRoom || !userInRoom) {
+			await rooms.joinRoom(roomID);
+			joinRoom(roomID);
+			setUserInRoom(true);
+			// only leave if you're in the room
+		} else if (currentRoom && userInRoom) {
+			await rooms.leaveRoom(roomID);
+			leaveRoom();
+			if (
+				await roomControls.playbackHandler.userListeningToRoom(ownerPlaying)
+			) {
+				await roomControls.playbackHandler.handlePlayback("pause");
+			}
+			setUserInRoom(false);
+		}
+	};
 
 	useEffect(() => {
 		const fetchParticipants = async () => {
@@ -269,12 +306,26 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 			}
 		};
 		fetchParticipants();
-	}, [joined]);
+	}, [userInRoom]);
 
 	useEffect(() => {
-		if (isPlaying) {
+		return () => {
+			if (trackPositionIntervalRef.current) {
+				clearInterval(trackPositionIntervalRef.current);
+			}
+		};
+	}, [roomPlaying]);
+
+	useEffect(() => {
+		if (ownerPlaying) {
 			trackPositionIntervalRef.current = window.setInterval(() => {
-				setSecondsPlayed((prevSeconds) => prevSeconds + 1);
+				const s = currentSong;
+				if (s) {
+					const st = s.startTime;
+					if (st) {
+						setSecondsPlayed(new Date().valueOf() - st.valueOf());
+					}
+				}
 			}, 1000);
 		} else {
 			if (trackPositionIntervalRef.current !== null) {
@@ -288,92 +339,81 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				clearInterval(trackPositionIntervalRef.current);
 			}
 		};
-	}, [isPlaying]);
+	}, [currentSong, ownerPlaying]);
 
-	// const handlePlay = async () => {
-	// 	setLoading(true); // Start loading
-	// 	await playPreviousTrack; // Assuming playPreviousTrack is an async function
-	// 	setLoading(false); // Stop loading
-	// };
-
-	const playPauseTrack = useCallback(
-		async (index: number, offset: number) => {
-			if (live.canControlRoom()) {
-				if (playback.isPlaying()) {
-					live.startPlayback(roomID);
-				} else {
-					live.stopPlayback(roomID);
-				}
-				setCurrentTrackIndex(index);
-				setIsPlaying(playback.isPlaying());
-				//setSecondsPlayed(playbackManager.getSecondsPlayed());
-			}
-		},
-		[playback, roomID],
-	);
-
-	const playNextTrack = () => {
-		if (live.canControlRoom()) {
-		}
-	};
-
-	const playPreviousTrack = () => {
-		if (live.canControlRoom()) {
-		}
-	};
-
-	const handleViewParticipants = () => {
-		router.navigate({
-			pathname: "/screens/rooms/ParticipantsPage",
-			params: {
-				participants: JSON.stringify(participants),
-			},
-		}); // Change this to the correct page for participants
-	};
-
-	if (!readyToJoinRoom) {
-		setReadyToJoinRoom(true);
-		console.log("Ready to join room...");
-	}
-
+	// update local state only if different from socket state
 	useEffect(() => {
-		if (readyToJoinRoom && !joined) {
-			console.log("Joining room...");
-			console.log(readyToJoinRoom, joined);
-			//live.joinRoom(roomID, setJoined, setMessages, setMessage);
+		console.log(`!!!`);
+		console.log(`thisRoom: ${thisRoom}`);
+		console.log(`currentRoom: ${currentRoom}`);
+		console.log(`!!!`);
+		if (thisRoom === undefined && currentRoom !== undefined) {
+			if (currentRoom.roomID === roomID) {
+				console.log(`2: Setting thisRoom to: ${currentRoom}`);
+				setThisRoom(currentRoom);
+			}
+		} else if (thisRoom !== undefined && currentRoom === undefined) {
+			// ignore, because room page can show information about a room that the user is not in
+		} else if (thisRoom !== undefined && currentRoom !== undefined) {
+			// only update local state if socket state is for this room
+			if (roomID === currentRoom.roomID) {
+				if (thisRoom.roomID !== currentRoom.roomID) {
+					console.log(`3: Setting thisRoom to: ${currentRoom}`);
+					setThisRoom(currentRoom);
+				}
+				// if (currentRoom.current_song) {
+				// 	const s = currentRoom.current_song;
+				// 	fetchSongInfo([s.spotifyID]).then(([track]: Spotify.Track[]) => {
+				// 		const result: rs.SongPair = {
+				// 			song: s,
+				// 			track: track,
+				// 		};
+				// 		setLocalCurrentSong(result);
+				// 	});
+				// }
+				if (currentSong) {
+					fetchSongInfo([currentSong.spotifyID]).then(
+						([track]: Spotify.Track[]) => {
+							setLocalCurrentSong({
+								song: currentSong,
+								track: track,
+							} as rs.SongPair);
+						},
+					);
+				}
+				if (ownerPlaying && !localRoomPlaying && !optimisticPlaybackState) {
+					setLocalRoomPlaying(true);
+				}
+				let differenceFound = false;
+				if (roomQueue.length !== localQueue.length) {
+					differenceFound = true;
+				}
+				if (!differenceFound) {
+					for (let i = 0, n = roomQueue.length; i < n; i++) {
+						const s1 = roomQueue[i];
+						const s2 = localQueue[i];
+						if (s1.spotifyID !== s2.song.spotifyID) {
+							differenceFound = true;
+							break;
+						}
+					}
+				}
+				if (differenceFound) {
+					fetchSongInfo(roomQueue.map((s) => s.spotifyID)).then((tracks) => {
+						setLocalQueue(rs.convertQueue(roomQueue, tracks));
+					});
+				}
+			}
 		}
-	}, [readyToJoinRoom, joined, roomID]);
+	}, [currentSong, roomQueue, currentRoom, roomPlaying]);
 
-	const sendMessage = () => {
-		if (isSending) return;
-		setIsSending(true);
-		live.sendLiveChatMessage(message, setIsSending);
-		setMessage("");
-	};
-
-	const syncWithRoom = () => {
-		// Placeholder function for syncing with the room
-		// console.log("Syncing with room... (functionality to be implemented)");
-	};
-
-	const exampleTrack: Track = {
-		id: "1",
-		name: "Song Title",
-		artists: [{ name: "Artist Name" }],
-		album: {
-			images: [
-				{
-					url: "https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
-				},
-			],
-		},
-		explicit: false,
-		preview_url: "https://example.com/preview.mp3",
-		uri: "spotify:track:example",
-		duration_ms: 180000,
-		albumArtUrl:
-			"https://www.wagbet.com/wp-content/uploads/2019/11/music_placeholder.png",
-	};
+	// on component mount
+	useEffect(() => {
+		if (thisRoom === undefined) {
+			getAndSetRoomInfo();
+			checkBookmarked();
+		}
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -396,7 +436,7 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 							onPress={handleJoinLeave}
 						>
 							<Text style={styles.joinLeaveButtonText}>
-								{joined ? "Leave" : "Join"}
+								{userInRoom ? "Leave" : "Join"}
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -404,48 +444,42 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 				</View>
 				<View style={styles.trackDetails}>
 					<Image
-						source={
-							queue[currentTrackIndex]?.albumArtUrl
-								? { uri: queue[currentTrackIndex].albumArtUrl }
-								: require("../../../assets/profile-icon.png")
-						}
+						source={{
+							uri:
+								userInRoom && localCurrentSong
+									? rs.getAlbumArtUrl(localCurrentSong)
+									: rs.getAlbumArtUrl(undefined),
+						}}
 						style={styles.nowPlayingAlbumArt}
 					/>
 				</View>
 				<View style={styles.songRoomWidget}>
-					<SongRoomWidget track={exampleTrack} />
+					<SongRoomWidget song={userInRoom ? localCurrentSong : undefined} />
 				</View>
-				<View style={styles.trackInfo}>
+				{/* <View style={styles.trackInfo}>
 					<Text style={styles.nowPlayingTrackName}>
-						{queue[currentTrackIndex]?.name}
+						{rs.getTitle(currentSong)}
 					</Text>
-					<Text>
-						{queue[currentTrackIndex]?.artists.map((artist, index) => (
-							<Text key={index}>
-								{artist.name}
-								{index < queue[currentTrackIndex].artists.length - 1 && ", "}
-							</Text>
-						))}
-					</Text>
-				</View>
-				{roomData.mine ? (
+					<Text>{rs.constructArtistString(currentSong)}</Text>
+				</View> */}
+
+				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							style={styles.controlButton}
 							onPress={playPreviousTrack}
 						>
 							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={() => playPreviousTrack}
-							// onPress={handlePlay}
+							onPress={() => playPauseTrack()}
 						>
 							{/* {loading ? (
 								<ActivityIndicator size={30} color="black" /> // Show loading indicator
 							) : ( */}
 							<FontAwesome5
-								name={isPlaying ? "pause" : "play"}
+								name={userInRoom && ownerPlaying ? "pause" : "play"}
 								size={30}
 								color="black"
 							/>
@@ -472,40 +506,35 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 					</View>
 				)}
 			</View>
-			<Animated.ScrollView
+			{/* <Animated.ScrollView
 				style={[styles.queueContainer, { maxHeight: queueHeight }]}
 				contentContainerStyle={{ flexGrow: 1 }}
 			>
-				{queue.map((track, index) => (
-					<TouchableOpacity
-						key={track.id}
-						style={[
-							styles.track,
-							index === currentTrackIndex
-								? styles.currentTrack
-								: styles.queueTrack,
-						]}
-						onPress={() => playPauseTrack(index, 0)}
-					>
-						<Image
-							source={{ uri: track.albumArtUrl }}
-							style={styles.queueAlbumArt}
-						/>
-						<View style={styles.trackInfo}>
-							<Text style={styles.queueTrackName}>{track.name}</Text>
-							<Text style={styles.queueTrackArtist}>
-								{queue[currentTrackIndex]?.artists.map((artist, index) => (
-									<Text key={index}>
-										{artist.name}
-										{index < queue[currentTrackIndex].artists.length - 1 &&
-											", "}
-									</Text>
-								))}
-							</Text>
-						</View>
-					</TouchableOpacity>
-				))}
-			</Animated.ScrollView>
+				{userInRoom &&
+					localQueue.map((song, index) => (
+						<TouchableOpacity
+							key={rs.getID(song)}
+							style={[
+								styles.track,
+								index === localCurrentSong?.song.index
+									? styles.currentTrack
+									: styles.queueTrack,
+							]}
+							onPress={() => playPauseTrack(0)}
+						>
+							<Image
+								source={{ uri: rs.getAlbumArtUrl(song) }}
+								style={styles.queueAlbumArt}
+							/>
+							<View style={styles.trackInfo}>
+								<Text style={styles.queueTrackName}>{rs.getTitle(song)}</Text>
+								<Text style={styles.queueTrackArtist}>
+									{rs.constructArtistString(song)}
+								</Text>
+							</View>
+						</TouchableOpacity>
+					))}
+			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
@@ -539,7 +568,10 @@ const RoomPage: React.FC<RoomPageProps> = ({ joined, handleJoinLeave }) => {
 								color={isBookmarked ? colors.primary : "black"}
 							/>
 						</TouchableOpacity>
-						<DevicePicker />
+						<DevicePicker
+							isVisible={devicePickerVisible}
+							setIsVisible={setDevicePickerVisible}
+						/>
 					</View>
 				</View>
 			</View>

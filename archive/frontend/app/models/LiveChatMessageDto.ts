@@ -1,4 +1,4 @@
-import { UserDto } from "./UserDto";
+import { UserDto } from "../../api";
 
 //LiveChatMessageDto
 export type LiveChatMessageDto = {

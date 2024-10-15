@@ -222,33 +222,6 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/rooms/recent:
-    get:
-      operationId: getRecentRoomsByUsername
-      summary: Get a user's recent rooms
-      description: Get the user's most recently visited rooms.
-      parameters:
-        - name: username
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The user's recent rooms as an array of RoomDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoomDto'
-        '400':
-          description: Username does not exist or is invalid.
-      tags:
-        - users
-      security:
-        - bearer: []
-        - bearer: []
   /users/rooms/foryou:
     get:
       operationId: getRecommendedRooms
@@ -269,6 +242,48 @@ paths:
       security:
         - bearer: []
         - bearer: []
+  /users/rooms/friends:
+    get:
+      operationId: UsersController_getRoomsFromFriends
+      summary: Get rooms from friends
+      parameters: []
+      responses:
+        '200':
+          description: Rooms from friends retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Error getting rooms from friends.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
+  /users/rooms/following:
+    get:
+      operationId: UsersController_getRoomsFromFollowing
+      summary: Get rooms from people you follow
+      parameters: []
+      responses:
+        '200':
+          description: Rooms from people you follow retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Error getting rooms from people you follow.
+      tags:
+        - users
+        - users
+      security:
+        - bearer: []
   /users/rooms/current:
     get:
       operationId: getCurrentRoom
@@ -283,6 +298,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoomDto'
       tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/foryou:
+    get:
+      operationId: UsersController_getRecommendedUsers
+      summary: Get recommended users
+      parameters: []
+      responses:
+        '200':
+          description: Recommended users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - users
         - users
       security:
         - bearer: []
@@ -447,47 +484,32 @@ paths:
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/bookmarks:
-    get:
-      operationId: getBookmarksByUsername
-      summary: Get the authorized user's bookmarks
-      description: Get all of the rooms that the user has bookmarked.
-      parameters:
-        - name: username
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The user's bookmarks as an array of RoomDto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoomDto'
-        '400':
-          description: Username does not exist or is invalid.
-      tags:
-        - users
-  /users/{username}/taken:
-    get:
+  /users/{username}:
+    head:
       operationId: isUsernameTaken
       summary: Check if a username is taken
-      description: Get all of the rooms that the user has bookmarked.
+      description: Check if the given username is already taken.
       parameters:
         - name: username
           required: true
           in: path
+          description: The username of the user to check.
+          example: johndoe
+          allowEmptyValue: false
           schema:
             type: string
       responses:
         '200':
-          description: True if taken, false if not.
+          description: >-
+            The username is taken and a GET request can be made to get the
+            user's profile.
+        '404':
+          description: The username is not taken and can be used.
       tags:
         - users
-  /users/{username}:
+      security:
+        - bearer: []
+        - bearer: []
     get:
       operationId: getProfileByUsername
       summary: Get user profile info by username
@@ -680,29 +702,85 @@ paths:
         - users
       security:
         - bearer: []
-  /users/recommended/users:
+  /users/{username}/bookmarks:
     get:
-      operationId: UsersController_getRecommendedUsers
-      summary: Get recommended users
-      parameters: []
+      operationId: getBookmarksByUsername
+      summary: Get the authorized user's bookmarks
+      description: Get all of the rooms that the user has bookmarked.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
       responses:
         '200':
-          description: Recommended users retrieved successfully
+          description: The user's bookmarks as an array of RoomDto.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserDto'
-        '401':
-          description: Unauthorized
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
       tags:
         - users
+  /users/{username}/rooms/recent:
+    get:
+      operationId: getRecentRoomsByUsername
+      summary: Get a user's recent rooms
+      description: Get the user's most recently visited rooms.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's recent rooms as an array of RoomDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
         - users
       security:
         - bearer: []
         - bearer: []
-  /users/{username}/room/current:
+  /users/{username}/dms:
+    get:
+      operationId: getDMsByUsername
+      summary: Get the authorized user's direct messages with the given user
+      description: Get all of the direct messages between the two users.
+      parameters:
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user's direct messages as an array of DirectMessageDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectMessageDto'
+        '400':
+          description: Username does not exist or is invalid.
+      tags:
+        - users
+      security:
+        - bearer: []
+        - bearer: []
+  /users/{username}/rooms/current:
     get:
       operationId: UsersController_getCurrentRoomByUserId
       summary: Get a user's current room based on username
@@ -930,7 +1008,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/SpotifyCallbackResponse'
         '403':
           description: Forbidden.
       tags:
@@ -947,7 +1025,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SpotifyTokenResponse'
+                $ref: '#/components/schemas/SpotifyTokenPair'
         '404':
           description: User not found
       security:
@@ -977,6 +1055,38 @@ paths:
         - bearer: []
       tags:
         - auth
+  /rooms:
+    get:
+      operationId: getRooms
+      summary: Get multiple rooms
+      description: Returns the rooms as an array of RoomDto.
+      parameters:
+        - name: q
+          required: true
+          in: query
+          description: An array of room IDs to get info for.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: An array of RoomDto representing the rooms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDto'
+        '400':
+          description: No rooms given
+        '404':
+          description: No rooms found
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
   /rooms/new:
     get:
       operationId: getNewRooms
@@ -1208,7 +1318,7 @@ paths:
     get:
       operationId: getRoomQueue
       summary: Get the queue of a room
-      description: Returns the queue of the room as an array of SongInfoDto.
+      description: Returns the queue of the room as an array of RoomSongDto.
       parameters:
         - name: roomID
           required: true
@@ -1221,42 +1331,17 @@ paths:
             type: string
       responses:
         '200':
-          description: The queue of the room as an array of SongInfoDto.
+          description: The queue of the room as an array of RoomSongDto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomSongDto'
         '401':
           description: Unauthorized
         '404':
           description: Room not found
-      tags:
-        - rooms
-    post:
-      operationId: addSongToQueue
-      summary: Add a song to the queue of a room
-      parameters:
-        - name: roomID
-          required: true
-          in: path
-          description: The ID of the room to add the song to.
-          example: 123e4567-e89b-12d3-a456-426614174000
-          allowEmptyValue: false
-          schema:
-            format: uuid
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-      responses:
-        '200':
-          description: The queue of the room as an array of SongInfoDto.
-        '401':
-          description: Unauthorized
-        '404':
-          description: Room not found
-      security:
-        - bearer: []
-        - bearer: []
       tags:
         - rooms
   /rooms/{roomID}/songs/current:
@@ -1276,7 +1361,52 @@ paths:
             type: string
       responses:
         '200':
-          description: ''
+          description: The current song of the room as a RoomSongDto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomSongDto'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not found
+      tags:
+        - rooms
+  /rooms/{roomID}/share:
+    post:
+      operationId: shareRoom
+      summary: Share a room
+      description: Shares the room with the given users.
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to share.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        description: The user IDs of the user to share the room with.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+                example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: Room shared successfully
+        '400':
+          description: No users to share with
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not found
       tags:
         - rooms
   /rooms/{roomID}/chat/history:
@@ -1639,12 +1769,14 @@ paths:
         '200':
           description: The scheduled room as a .ics file.
           content:
-            text/calendar:
-              schema:
-                $ref: '#/components/schemas/File'
             application/octet-stream:
               schema:
-                $ref: '#/components/schemas/File'
+                type: string
+                format: binary
+            text/calendar:
+              schema:
+                type: string
+                format: binary
         '404':
           description: Room not found
       tags:
@@ -1665,13 +1797,37 @@ paths:
             type: string
       responses:
         '200':
-          description: The playlist ID as a string.
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Playlist saved successfully
         '400':
           description: Bad request
+        '404':
+          description: Room not found
+      security:
+        - bearer: []
+        - bearer: []
+      tags:
+        - rooms
+  /rooms/{roomID}/unsave:
+    post:
+      operationId: unsaveRoom
+      summary: Unsave room as a playlist
+      parameters:
+        - name: roomID
+          required: true
+          in: path
+          description: The ID of the room to remove from the user's playlists.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          allowEmptyValue: false
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: Playlist removed successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Room not found
       security:
         - bearer: []
         - bearer: []
@@ -1950,6 +2106,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/rooms/history:
     get:
       operationId: searchRoomsHistory
@@ -2109,6 +2268,9 @@ paths:
           description: Invalid query parameters
       tags:
         - search
+      security:
+        - bearer: []
+        - bearer: []
   /search/users/history:
     get:
       operationId: searchUsersHistory
@@ -2295,19 +2457,6 @@ components:
       required:
         - count
         - data
-    UserFriendship:
-      type: object
-      properties:
-        status:
-          type: boolean
-        accept_url:
-          type: string
-        reject_url:
-          type: string
-      required:
-        - status
-        - accept_url
-        - reject_url
     UserDto:
       type: object
       properties:
@@ -2358,12 +2507,8 @@ components:
           description: The user's recent rooms
           allOf:
             - $ref: '#/components/schemas/RoomsData'
-        friendship:
-          description: >-
-            The user's friendship status with the current user, or null if the
-            user is not friends with the current user
-          allOf:
-            - $ref: '#/components/schemas/UserFriendship'
+        hasSpotifyAccount:
+          type: boolean
         relationship:
           type: string
           description: >-
@@ -2381,6 +2526,7 @@ components:
         - fav_songs
         - fav_rooms
         - recent_rooms
+        - hasSpotifyAccount
     FollowersAndFollowing:
       type: object
       properties:
@@ -2443,12 +2589,8 @@ components:
           description: The user's recent rooms
           allOf:
             - $ref: '#/components/schemas/RoomsData'
-        friendship:
-          description: >-
-            The user's friendship status with the current user, or null if the
-            user is not friends with the current user
-          allOf:
-            - $ref: '#/components/schemas/UserFriendship'
+        hasSpotifyAccount:
+          type: boolean
         relationship:
           type: string
           description: >-
@@ -2479,6 +2621,8 @@ components:
           type: boolean
         pID:
           type: string
+        bodyIsRoomID:
+          type: boolean
       required:
         - index
         - messageBody
@@ -2488,6 +2632,7 @@ components:
         - dateRead
         - isRead
         - pID
+        - bodyIsRoomID
     UserListeningStatsDto:
       type: object
       properties:
@@ -2497,14 +2642,40 @@ components:
           example: 100
       required:
         - totalListenedSongs
+    RoomSongDto:
+      type: object
+      properties:
+        spotifyID:
+          type: string
+        userID:
+          type: string
+        score:
+          type: number
+        index:
+          type: number
+        startTime:
+          type: number
+        insertTime:
+          type: number
+        pauseTime:
+          type: number
+        playlistIndex:
+          type: number
+      required:
+        - spotifyID
+        - userID
+        - score
+        - index
+        - insertTime
+        - playlistIndex
     RoomDto:
       type: object
       properties:
         creator:
-          description: The date the room was created
-          allOf:
-            - $ref: '#/components/schemas/UserDto'
+          $ref: '#/components/schemas/UserDto'
         roomID:
+          type: string
+        spotifyPlaylistID:
           type: string
         participant_count:
           type: number
@@ -2535,7 +2706,7 @@ components:
         current_song:
           description: The current song playing in the room
           allOf:
-            - $ref: '#/components/schemas/SongInfoDto'
+            - $ref: '#/components/schemas/RoomSongDto'
         tags:
           description: The tags that describe the room
           type: array
@@ -2554,6 +2725,7 @@ components:
       required:
         - creator
         - roomID
+        - spotifyPlaylistID
         - participant_count
         - room_name
         - description
@@ -2653,6 +2825,26 @@ components:
         - scope
         - expires_in
         - refresh_token
+    SpotifyTokenPair:
+      type: object
+      properties:
+        tokens:
+          $ref: '#/components/schemas/SpotifyTokenResponse'
+        epoch_expiry:
+          type: number
+      required:
+        - tokens
+        - epoch_expiry
+    SpotifyCallbackResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        spotifyTokens:
+          $ref: '#/components/schemas/SpotifyTokenPair'
+      required:
+        - token
+        - spotifyTokens
     UpdateRoomDto:
       type: object
       properties:
@@ -2688,6 +2880,8 @@ components:
     LiveChatMessageDto:
       type: object
       properties:
+        messageID:
+          type: string
         messageBody:
           type: string
         sender:
@@ -2698,6 +2892,7 @@ components:
           format: date-time
           type: string
       required:
+        - messageID
         - messageBody
         - sender
         - roomID
@@ -2842,9 +3037,6 @@ components:
           format: uuid
       required:
         - userID
-    File:
-      type: object
-      properties: {}
     CombinedSearchResults:
       type: object
       properties:

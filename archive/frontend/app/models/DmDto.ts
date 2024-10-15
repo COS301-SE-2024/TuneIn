@@ -1,5 +1,4 @@
-import { UserDto } from "./UserDto";
-import { Room } from "./Room";
+import { UserDto } from "../../api";
 
 export type DirectMessageDto = {
 	index: number;
@@ -10,5 +9,5 @@ export type DirectMessageDto = {
 	dateRead: Date;
 	isRead: boolean;
 	pID: string;
-	room?: Room;
+	bodyIsRoomID: boolean;
 };

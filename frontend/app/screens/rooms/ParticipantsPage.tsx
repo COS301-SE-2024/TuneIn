@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -8,9 +8,11 @@ import {
 	FlatList,
 	Modal,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLive } from "../../LiveContext";
+import { UserDto } from "../../../api";
+import { useAPI } from "../../APIContext";
 import { colors } from "../../styles/colors"; // Assuming colors file is available
 
 interface Participant {
@@ -23,37 +25,16 @@ interface ParticipantsPageProps {
 	participants: Participant[];
 }
 
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
-}) => {
-	const navigation = useNavigation();
+const ParticipantsPage: React.FC = () => {
+	const router = useRouter();
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
+	const { roomID } = useLocalSearchParams<{ roomID: string }>();
+	const { rooms } = useAPI();
+	const { currentRoom, roomParticipants } = useLive();
+	const [participants, setParticipants] = React.useState<UserDto[]>([]);
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -74,19 +55,26 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		return username.length > 20 ? `${username.slice(0, 17)}...` : username;
 	};
 
-	const renderItem = ({ item }: { item: Participant }) => {
+	const renderItem = ({ item }: { item: UserDto }) => {
+		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
 				: item.username;
+
+		const participant: Participant = {
+			id: item.userID, // Assuming userID maps to id
+			username: item.username,
+			profilePictureUrl: item.profile_picture_url || "", // Fallback if profile_picture_url is missing
+		};
 
 		return (
 			<View style={styles.participantContainer}>
 				<TouchableOpacity style={styles.profileInfoContainer}>
 					<Image
 						source={
-							item.profilePictureUrl
-								? { uri: item.profilePictureUrl }
+							participant.profilePictureUrl
+								? { uri: participant.profilePictureUrl }
 								: require("../../assets/profile-icon.png")
 						}
 						style={styles.profilePicture}
@@ -95,8 +83,8 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</TouchableOpacity>
 
 				<TouchableOpacity
-					onPress={() => handleOpenContextMenu(item)}
-					testID={`ellipsis-button-${item.id}`}
+					onPress={() => handleOpenContextMenu(participant)}
+					testID={`ellipsis-button-${participant.id}`}
 				>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
 				</TouchableOpacity>
@@ -104,29 +92,56 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		);
 	};
 
+	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
+		const usersResponse = await rooms.getRoomUsers(roomID);
+		return usersResponse.data;
+	}, [roomID, rooms]);
+
+	// on roomID or currentRoom change
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, [currentRoom, roomParticipants]);
+
+	// on mount
+	useEffect(() => {
+		if (currentRoom) {
+			setParticipants(roomParticipants);
+		} else {
+			fetchRoomParticipants().then((users) => {
+				setParticipants(users);
+			});
+		}
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => navigation.goBack()}
+					onPress={() => router.back()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{participantsInRoom.length === 0 ? (
+			{(participants.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.
 					</Text>
 				</View>
-			) : (
+			)) || (
 				<FlatList
-					data={participantsInRoom}
+					data={participants}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.userID}
 				/>
 			)}
 

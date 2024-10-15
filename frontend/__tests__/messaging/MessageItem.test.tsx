@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
-import MessageItem from "../../app/components/messaging/MessageItem";
-import { DirectMessage } from "../../app/services/Live";
+import MessageItem from "../../app/components/MessageItem";
+import { DirectMessage } from "../../app/hooks/useDMControls";
 
 // Mock the RoomLink component
 jest.mock("../../app/components/messaging/RoomLink", () => "RoomLink");
@@ -25,15 +25,9 @@ describe("MessageItem", () => {
 				},
 				links: {
 					count: 0,
-					data: [],
+					data: {},
 				},
 				bio: "",
-				current_song: {
-					title: "",
-					artists: [],
-					cover: "",
-					start_time: new Date(), // Initialize with a valid Date object
-				},
 				fav_genres: {
 					count: 0,
 					data: [],
@@ -50,6 +44,7 @@ describe("MessageItem", () => {
 					count: 0,
 					data: [],
 				},
+				hasSpotifyAccount: false,
 			},
 			room: undefined,
 			index: 0,
@@ -68,15 +63,9 @@ describe("MessageItem", () => {
 				},
 				links: {
 					count: 0,
-					data: [],
+					data: {},
 				},
 				bio: "",
-				current_song: {
-					title: "",
-					artists: [],
-					cover: "",
-					start_time: new Date(),
-				},
 				fav_genres: {
 					count: 0,
 					data: [],
@@ -94,9 +83,10 @@ describe("MessageItem", () => {
 					data: [],
 				},
 				friendship: undefined,
+				hasSpotifyAccount: false,
 			},
-			dateSent: new Date(),
-			dateRead: new Date(),
+			dateSent: new Date().toISOString(),
+			dateRead: new Date().toISOString(),
 			isRead: false,
 			pID: "",
 		},
