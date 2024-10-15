@@ -255,7 +255,7 @@ export class RoomsService {
 					blockee: user_id,
 				},
 			});
-			if (!blocked || blocked === null) {
+			if (blocked) {
 				throw new HttpException(
 					"User is blocked from joining the room",
 					HttpStatus.FORBIDDEN,
