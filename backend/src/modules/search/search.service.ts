@@ -169,14 +169,17 @@ export class SearchService {
 			let roomIds = result.map((row) => row.room_id.toString());
 
 			//check if rooms are owned by users who have blocked the user
-			const usersWhoBlockedGivenUser: PrismaTypes.users[] =
-				await this.prisma.users.findMany({
+			const usersWhoBlockedGivenUser: PrismaTypes.blocked[] =
+				await this.prisma.blocked.findMany({
 					where: {
-						blocked_blocked_blockerTousers: {
-							some: {
+						OR: [
+							{
+								blocker: userID,
+							},
+							{
 								blockee: userID,
 							},
-						},
+						],
 					},
 				});
 			const blocked_rooms: PrismaTypes.room[] = await this.prisma.room.findMany(
@@ -186,7 +189,13 @@ export class SearchService {
 							in: roomIds,
 						},
 						room_creator: {
-							in: usersWhoBlockedGivenUser.map((user) => user.user_id),
+							in: usersWhoBlockedGivenUser.map((user) => {
+								if (user.blocker === userID) {
+									return user.blockee;
+								} else {
+									return user.blocker;
+								}
+							}),
 						},
 					},
 				},
