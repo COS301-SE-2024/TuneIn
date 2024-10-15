@@ -49,8 +49,8 @@ export class DbUtilsService {
 	async getUserFollowing(userID: string): Promise<UserWithAuth[]> {
 		return await this.prisma.users.findMany({
 			where: {
-				follows_follows_followerTousers: {
-					every: {
+				follows_follows_followeeTousers: {
+					some: {
 						follower: userID,
 					},
 				},
