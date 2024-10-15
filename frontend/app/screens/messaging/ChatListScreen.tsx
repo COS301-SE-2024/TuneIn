@@ -131,7 +131,7 @@ const ChatListScreen = () => {
 				setNoResults(filtered.length === 0); // Set no results state
 			}
 		}
-	}, [currentUser, searchQuery, localRecentDMs]);
+	}, [currentUser, searchQuery, localRecentDMs, getMessages]);
 
 	const toggleModal = () => {
 		setModalVisible(!isModalVisible);
