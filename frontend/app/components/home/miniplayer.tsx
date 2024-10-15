@@ -56,6 +56,7 @@ const Miniplayer: React.FC = () => {
 	if (!currentRoom) return null;
 
 	const navigateToRoomPage = () => {
+		console.log("Navigating to room page", currentRoom);
 		router.push({
 			pathname: "/screens/rooms/RoomStack",
 			params: { room: JSON.stringify(currentRoom) },

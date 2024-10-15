@@ -215,6 +215,22 @@ export class DtoGenService {
 				);
 			}
 			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const scheduledRoom: {
+				start_date: Date | undefined;
+				end_date: Date | undefined;
+				is_scheduled: boolean;
+			} =
+				r.scheduled_room === null
+					? {
+							start_date: undefined,
+							end_date: undefined,
+							is_scheduled: false,
+					  }
+					: {
+							start_date: r.scheduled_room.start_date || undefined,
+							end_date: r.scheduled_room.end_date || undefined,
+							is_scheduled: true,
+					  };
 			const room: RoomDto = {
 				creator: u || new UserDto(),
 				roomID: r.room_id,
@@ -224,9 +240,7 @@ export class DtoGenService {
 				description: r.description || "",
 				is_temporary: r.is_temporary || false,
 				is_private: r.private_room !== null,
-				is_scheduled: r.scheduled_room !== null,
-				start_date: new Date(),
-				end_date: new Date(),
+				...scheduledRoom,
 				language: r.room_language || "",
 				has_explicit_content: r.explicit || false,
 				has_nsfw_content: r.nsfw || false,

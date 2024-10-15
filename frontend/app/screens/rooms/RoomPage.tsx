@@ -409,6 +409,7 @@ const RoomPage: React.FC = () => {
 			getAndSetRoomInfo();
 			checkBookmarked();
 		}
+		checkBookmarked();
 	}, []);
 	const handleUserPress = () => {
 		router.navigate(

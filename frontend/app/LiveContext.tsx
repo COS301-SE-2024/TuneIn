@@ -534,6 +534,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 							throw new Error("Internal Server Error");
 						} else {
 							const r: RoomDto = room.data;
+							console.log("Roooooom current: ", r);
 							setCurrentRoom(r);
 						}
 					})
