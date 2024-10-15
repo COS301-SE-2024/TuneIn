@@ -235,7 +235,9 @@ const RoomPage: React.FC = () => {
 	const handleViewParticipants = () => {
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
-			params: { roomID: roomID },
+			params: {
+				participants: JSON.stringify(participants),
+			},
 		});
 	};
 
@@ -408,6 +410,14 @@ const RoomPage: React.FC = () => {
 			checkBookmarked();
 		}
 	}, []);
+	const handleUserPress = () => {
+		router.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: roomData.profile_picture_url,
+				username: roomData.username,
+			})}&user=${roomData.user}`,
+		);
+	};
 
 	return (
 		<View style={styles.container}>
