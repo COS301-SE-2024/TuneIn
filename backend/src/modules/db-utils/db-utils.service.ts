@@ -85,8 +85,8 @@ export class DbUtilsService {
 			this.prisma.users.findMany({
 				where: {
 					follows_follows_followeeTousers: {
-						every: {
-							followee: userID,
+						some: {
+							follower: userID,
 						},
 					},
 				},
@@ -95,14 +95,15 @@ export class DbUtilsService {
 			this.prisma.users.findMany({
 				where: {
 					follows_follows_followerTousers: {
-						every: {
-							follower: userID,
+						some: {
+							followee: userID,
 						},
 					},
 				},
 				include: { authentication: true },
 			}), // people userID is following
 		]);
+		console.log("result for following and followers: ", result);
 		return {
 			following: result[0],
 			followers: result[1],
@@ -114,25 +115,23 @@ export class DbUtilsService {
 		followers: number;
 	}> {
 		const result: number[] = await this.prisma.$transaction([
-			this.prisma.users.count({
+			this.prisma.follows.count({
 				where: {
-					follows_follows_followeeTousers: {
-						every: {
-							followee: userID,
-						},
-					},
+					follower: userID,
 				},
 			}), // number of people following userID
-			this.prisma.users.count({
+			this.prisma.follows.count({
 				where: {
-					follows_follows_followerTousers: {
-						every: {
-							follower: userID,
-						},
-					},
+					followee: userID,
 				},
 			}), // number of people userID is following
 		]);
+		console.log(
+			"result for following and followers: ",
+			result,
+			" for user: ",
+			userID,
+		);
 		return {
 			following: result[0],
 			followers: result[1],
