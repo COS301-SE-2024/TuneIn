@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import {
 	View,
 	Text,
@@ -7,11 +7,19 @@ import {
 	TouchableOpacity,
 	FlatList,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useLive } from "../../LiveContext";
-import { UserDto } from "../../../api";
-import { useAPI } from "../../APIContext";
+
+interface Participant {
+	id: string;
+	username: string;
+	profilePictureUrl: string;
+}
+
+interface ParticipantsPageProps {
+	participants: Participant[];
+}
 
 const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	participants,
@@ -51,7 +59,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		);
 	};
 
-	const renderItem = ({ item }: { item: UserDto }) => {
+	const renderItem = ({ item }: { item: Participant }) => {
 		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
@@ -65,8 +73,8 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			>
 				<Image
 					source={
-						item.profile_picture_url
-							? { uri: item.profile_picture_url }
+						item.profilePictureUrl
+							? { uri: item.profilePictureUrl }
 							: require("../../assets/profile-icon.png")
 					}
 					style={styles.profilePicture}
@@ -76,33 +84,6 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			</TouchableOpacity>
 		);
 	};
-
-	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
-		const usersResponse = await rooms.getRoomUsers(roomID);
-		return usersResponse.data;
-	}, [roomID, rooms]);
-
-	// on roomID or currentRoom change
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, [currentRoom, roomParticipants]);
-
-	// on mount
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -116,7 +97,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{(participants.length === 0 && (
+			{(participantsInRoom.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.
@@ -124,9 +105,9 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				</View>
 			)) || (
 				<FlatList
-					data={participants}
+					data={participantsInRoom}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.userID}
+					keyExtractor={(item) => item.id}
 				/>
 			)}
 		</View>
