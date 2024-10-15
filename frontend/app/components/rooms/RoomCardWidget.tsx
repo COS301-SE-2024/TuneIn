@@ -131,7 +131,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	return (
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
-			disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine && (isBeforeStartDate || isAfterEndDate)}
 		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground

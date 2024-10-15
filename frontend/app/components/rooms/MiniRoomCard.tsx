@@ -42,7 +42,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			onPress={navigateToRoomPage}
 			style={styles.cardContainer}
 			testID="minicard"
-			disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine && (isBeforeStartDate || isAfterEndDate)}
 		>
 			<View style={styles.imageContainer}>
 				<Image
