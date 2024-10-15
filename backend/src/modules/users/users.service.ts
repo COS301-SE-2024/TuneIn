@@ -550,7 +550,9 @@ export class UsersService {
 		if (!following) {
 			throw new Error("User is not following anyone");
 		}
-		const followingIDs = following.map((follow) => follow.user_id);
+		const followingIDs = following
+			.map((follow) => follow.user_id)
+			.filter((id) => id !== userID);
 		const rooms: RoomDto[] = [];
 		for (const followID of followingIDs) {
 			const followRooms = await this.getUserRooms(followID);
