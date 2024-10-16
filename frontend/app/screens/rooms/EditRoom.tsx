@@ -26,7 +26,6 @@ import axios from "axios";
 import { get } from "http";
 import GenreAdder from "../../components/GenreAdder";
 import EditGenreBubble from "../../components/EditGenreBubble";
-import { IsNumber } from "class-validator";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -55,10 +54,35 @@ const EditRoom: React.FC = () => {
 		start_date: new Date(),
 		end_date: new Date(),
 		date_created: new Date(),
+		childrenRoomIDs: [],
+		userProfile: "",
+		username: "",
+		mine: false,
+		isPrivate: false,
 	});
 	const [image, setImage] = useState<string | null>(null);
 
 	// useEffect without roomDetails as dependency
+	useEffect(() => {
+		const getGenres = async () => {
+			try {
+				const token = await auth.getToken();
+
+				if (token) {
+					const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					});
+					console.log("Genre data", response.data);
+					setGenres(response.data);
+				}
+			} catch (error) {
+				console.log("Error fetching genres:", error);
+			}
+		};
+		getGenres();
+	}, []); // Empty dependency array
 	useEffect(() => {
 		const loadRoomDetails = async () => {
 			console.log("roomData inside the edit room page", roomData);
@@ -70,10 +94,18 @@ const EditRoom: React.FC = () => {
 				language: roomData.language,
 				tags: roomData.tags,
 				userID: roomData.userID,
-				roomSize: 50,
+				roomSize: roomData.roomSize,
 				isExplicit: roomData.isExplicit,
 				isNsfw: roomData.isNsfw,
-			} as Room);
+				start_date: roomData.start_date,
+				end_date: roomData.end_date,
+				date_created: roomData.date_created,
+				childrenRoomIDs: roomData.childrenRoomIDs,
+				userProfile: roomData.userProfile,
+				username: roomData.username,
+				mine: roomData.mine,
+				isPrivate: roomData.isPrivate,
+			});
 			setSelectedGenres(
 				roomData.tags.filter((g: string) => genres.includes(g)),
 			);
@@ -81,26 +113,7 @@ const EditRoom: React.FC = () => {
 		};
 
 		loadRoomDetails();
-		getGenres();
-	}, [roomData]); // Only roomData is a dependency now
-
-	const getGenres = async () => {
-		try {
-			const token = await auth.getToken();
-
-			if (token) {
-				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-				console.log("Genre data", response.data);
-				setGenres(response.data);
-			}
-		} catch (error) {
-			console.log("Error fetching genres:", error);
-		}
-	};
+	}, [roomData, genres]); // Only roomData is a dependency now
 
 	const addGenres = (genresToAdd: string[]) => {
 		roomData.tags = [...roomData.tags, ...genresToAdd];
