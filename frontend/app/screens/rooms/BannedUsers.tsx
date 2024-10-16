@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -8,12 +8,9 @@ import {
 	FlatList,
 	Modal,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useLive } from "../../LiveContext";
-import { UserDto } from "../../../api";
-import { useAPI } from "../../APIContext";
-import { colors } from "../../styles/colors"; // Assuming colors file is available
+import { colors } from "../../styles/colors";
 
 interface Participant {
 	id: string;
@@ -21,20 +18,33 @@ interface Participant {
 	profilePictureUrl: string;
 }
 
-interface ParticipantsPageProps {
-	participants: Participant[];
+interface BannedUsersProps {
+	bannedUsers?: Participant[]; // Make bannedUsers optional
 }
 
-const ParticipantsPage: React.FC = () => {
-	const router = useRouter();
+const BannedUsers: React.FC<BannedUsersProps> = ({
+	bannedUsers = [
+		{
+			id: "1",
+			username: "john_doe_123",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+		},
+		{
+			id: "2",
+			username: "jane_smith_456",
+			profilePictureUrl: "https://randomuser.me/api/portraits/women/2.jpg",
+		},
+		{
+			id: "3",
+			username: "sam_wilson_789",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/3.jpg",
+		},
+	],
+}) => {
+	const navigation = useNavigation();
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
-
-	const { roomID } = useLocalSearchParams<{ roomID: string }>();
-	const { rooms } = useAPI();
-	const { currentRoom, roomParticipants } = useLive();
-	const [participants, setParticipants] = React.useState<UserDto[]>([]);
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -46,122 +56,92 @@ const ParticipantsPage: React.FC = () => {
 		setSelectedParticipant(null);
 	};
 
-	const handleBanUser = () => {
-		console.log(`Banning user: ${selectedParticipant?.username}`);
+	const handleUnbanUser = () => {
+		// Perform the unban action here
+		console.log(`Unbanning user: ${selectedParticipant?.username}`);
+		// After unbanning, close the menu
 		handleCloseContextMenu();
 	};
 
-	const truncateUsername = (username: string) => {
-		return username.length > 20 ? `${username.slice(0, 17)}...` : username;
-	};
-
-	const renderItem = ({ item }: { item: UserDto }) => {
-		// Truncate the username if it's longer than 20 characters
+	const renderItem = ({ item }: { item: Participant }) => {
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
 				: item.username;
-
-		const participant: Participant = {
-			id: item.userID, // Assuming userID maps to id
-			username: item.username,
-			profilePictureUrl: item.profile_picture_url || "", // Fallback if profile_picture_url is missing
-		};
 
 		return (
 			<View style={styles.participantContainer}>
 				<TouchableOpacity style={styles.profileInfoContainer}>
 					<Image
 						source={
-							participant.profilePictureUrl
-								? { uri: participant.profilePictureUrl }
+							item.profilePictureUrl
+								? { uri: item.profilePictureUrl }
 								: require("../../assets/profile-icon.png")
 						}
 						style={styles.profilePicture}
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-
-				<TouchableOpacity
-					onPress={() => handleOpenContextMenu(participant)}
-					testID={`ellipsis-button-${participant.id}`}
-				>
+				{/* <TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
+				</TouchableOpacity> */}
+				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+					<Ionicons
+						name="ellipsis-vertical"
+						size={24}
+						color="black"
+						testID={`ellipsis-${item.id}`}
+					/>
 				</TouchableOpacity>
 			</View>
 		);
 	};
-
-	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
-		const usersResponse = await rooms.getRoomUsers(roomID);
-		return usersResponse.data;
-	}, [roomID, rooms]);
-
-	// on roomID or currentRoom change
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, [currentRoom, roomParticipants]);
-
-	// on mount
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, []);
 
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => router.back()}
+					onPress={() => navigation.goBack()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.header}>Participants</Text>
+				<Text style={styles.header}>Banned Users</Text>
 			</View>
-			{(participants.length === 0 && (
+
+			{bannedUsers.length === 0 ? (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
-						This room has no participants.
+						This room has no banned users.
 					</Text>
 				</View>
-			)) || (
+			) : (
 				<FlatList
-					data={participants}
+					data={bannedUsers}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.userID}
+					keyExtractor={(item) => item.id}
 				/>
 			)}
 
+			{/* Context Menu for Unban User */}
 			<Modal
-				animationType="slide"
-				transparent={true}
 				visible={contextMenuVisible}
+				transparent={true}
+				animationType="slide"
 				onRequestClose={handleCloseContextMenu}
 			>
 				<View style={styles.overlay}>
 					<View style={styles.modalView}>
 						<Text style={styles.modalTextHeader}>
-							Ban {truncateUsername(selectedParticipant?.username || "")}?
+							Unban {selectedParticipant?.username}?
 						</Text>
 						<View style={styles.buttonContainer}>
 							<TouchableOpacity
-								style={[styles.buttonModal, styles.banButton]}
-								onPress={handleBanUser}
+								style={[styles.buttonModal, styles.unbanButton]}
+								onPress={handleUnbanUser}
 							>
-								<Text style={styles.buttonText}>Ban User</Text>
+								<Text style={styles.buttonText}>Unban User</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								style={[styles.buttonModal, styles.cancelButton]}
@@ -176,6 +156,8 @@ const ParticipantsPage: React.FC = () => {
 		</View>
 	);
 };
+
+// Styles remain unchanged...
 
 const styles = StyleSheet.create({
 	container: {
@@ -227,6 +209,7 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 	},
 	username: {
+		flex: 1,
 		fontSize: 16,
 		color: "black",
 	},
@@ -253,7 +236,6 @@ const styles = StyleSheet.create({
 	},
 	modalTextHeader: {
 		fontSize: 19,
-		marginBottom: 0,
 		textAlign: "center",
 		fontWeight: "bold",
 	},
@@ -261,7 +243,7 @@ const styles = StyleSheet.create({
 		marginTop: 30,
 		flexDirection: "row",
 		justifyContent: "space-between", // Align buttons side by side
-		width: "100%", // Make sure it occupies the full width
+		width: "100%", // Full width
 	},
 	buttonModal: {
 		borderRadius: 5,
@@ -270,7 +252,7 @@ const styles = StyleSheet.create({
 		width: "48%", // Make buttons take up about half the width
 		alignItems: "center",
 	},
-	banButton: {
+	unbanButton: {
 		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
@@ -286,4 +268,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default ParticipantsPage;
+export default BannedUsers;

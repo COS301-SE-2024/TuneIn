@@ -101,18 +101,24 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			</View>
 
 			{/* Conditionally render explicit icon */}
-			{roomCard.isExplicit && (
-				// <Image
-				// 	source={require("../../../assets/Explicit.png")}
-				// 	style={styles.explicitIcon}
-				// />
-				<MaterialIcons
-					name="explicit"
-					size={26}
-					color="black"
-					style={styles.explicitIcon}
-				/>
-			)}
+			<View style={styles.iconContainer}>
+				{roomCard.isExplicit && (
+					<MaterialIcons
+						name="explicit"
+						size={28}
+						color="black"
+						style={styles.explicitIcon}
+					/>
+				)}
+				{roomCard.isNsfw && (
+					<MaterialIcons
+						name="18-up-rating"
+						size={28}
+						color="black"
+						style={styles.explicitIcon}
+					/>
+				)}
+			</View>
 		</TouchableOpacity>
 	);
 };
@@ -189,8 +195,12 @@ const styles = StyleSheet.create({
 	explicitIcon: {
 		width: 24,
 		height: 24,
-		marginLeft: 8,
-		position: "absolute",
+		marginLeft: 4,
+	},
+	iconContainer: {
+		flexDirection: "row", // Places the icons next to each other
+		alignItems: "center", // Aligns the icons vertically
+		position: "absolute", // Absolute positioning to place it at the desired location
 		bottom: 10,
 		right: 10,
 	},
