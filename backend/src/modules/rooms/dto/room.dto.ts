@@ -25,6 +25,10 @@ export class RoomDto {
 	roomID: string;
 
 	@ApiProperty()
+	@IsNumber()
+	room_size: number;
+
+	@ApiProperty()
 	@IsString()
 	spotifyPlaylistID: string;
 
