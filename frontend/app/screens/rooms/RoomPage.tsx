@@ -8,10 +8,12 @@ import {
 	Animated,
 	Dimensions,
 	Alert,
+	ToastAndroid,
+	Platform,
 	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import auth from "../../services/AuthManagement";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DevicePicker from "../../components/DevicePicker";
@@ -83,6 +85,11 @@ const RoomPage: React.FC = () => {
 	const [optimisticPlaybackState, setOptimisticPlaybackState] = useState(false);
 	const optimisticPlaybackStatIntervaleRef = useRef<NodeJS.Timeout>();
 	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
+
+	const syncWithRoom = () => {
+		// Placeholder function for syncing with the room
+		// console.log("Syncing with room... (functionality to be implemented)");
+	};
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		console.log(`!thisRoom: ${!thisRoom}`);
@@ -495,6 +502,35 @@ const RoomPage: React.FC = () => {
 					<View></View>
 				)}
 			</View>
+			{/* <Animated.ScrollView
+				style={[styles.queueContainer, { maxHeight: queueHeight }]}
+				contentContainerStyle={{ flexGrow: 1 }}
+			>
+				{userInRoom &&
+					localQueue.map((song, index) => (
+						<TouchableOpacity
+							key={rs.getID(song)}
+							style={[
+								styles.track,
+								index === localCurrentSong?.song.index
+									? styles.currentTrack
+									: styles.queueTrack,
+							]}
+							onPress={() => playPauseTrack(0)}
+						>
+							<Image
+								source={{ uri: rs.getAlbumArtUrl(song) }}
+								style={styles.queueAlbumArt}
+							/>
+							<View style={styles.trackInfo}>
+								<Text style={styles.queueTrackName}>{rs.getTitle(song)}</Text>
+								<Text style={styles.queueTrackArtist}>
+									{rs.constructArtistString(song)}
+								</Text>
+							</View>
+						</TouchableOpacity>
+					))}
+			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
@@ -770,6 +806,12 @@ const styles = StyleSheet.create({
 	},
 	songRoomWidget: {
 		marginTop: -90,
+	},
+	buttonText: {
+		marginLeft: 5, // Space between icon and text
+		fontSize: 18, // Font size
+		color: "white", // Text color
+		fontWeight: "bold", // Make it bold
 	},
 });
 
