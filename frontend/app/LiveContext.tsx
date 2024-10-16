@@ -92,6 +92,8 @@ interface LiveContextType {
 
 	currentUser: UserDto | undefined;
 	refreshUser: boolean;
+	setUsername: React.Dispatch<React.SetStateAction<string>>;
+	username: string;
 	setRefreshUser: React.Dispatch<React.SetStateAction<boolean>>;
 	userBookmarks: RoomDto[];
 	recentDMs: { message: DirectMessageDto; room?: RoomDto }[];
@@ -165,6 +167,7 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [spotifyTokens, setSpotifyTokens] = useState<SpotifyTokenPair>();
 	const [keepUserSynced, setKeepUserSynced] = useState<boolean>(false);
 	const [refreshUser, setRefreshUser] = useState<boolean>(false);
+	const [username, setUsername] = useState<string>("");
 	const [roomPlaying, setRoomPlaying] = useReducer(
 		(state: boolean, action: RoomSongDto | undefined) => {
 			console.log(`action: ${action}`);
@@ -782,6 +785,10 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 	// 			console.error("Error getting token:", error);
 	// 		});
 	// }
+	useEffect(() => {
+		if (username !== "")
+			setCurrentUser({ ...currentUser, username: username } as UserDto);
+	}, [username]);
 
 	const getUserDetails = useCallback(
 		async (spotifyAuth: SpotifyAuth) => {
@@ -1938,7 +1945,9 @@ export const LiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
 				currentUser,
 				refreshUser,
+				username,
 				setRefreshUser,
+				setUsername,
 				userBookmarks,
 				recentDMs,
 				setFetchRecentDMs,
