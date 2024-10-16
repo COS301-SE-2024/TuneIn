@@ -88,7 +88,7 @@ const RoomPage: React.FC = () => {
 
 	const syncWithRoom = () => {
 		// Placeholder function for syncing with the room
-		roomControls.playbackHandler.startPlayback();
+		roomControls.playbackHandler.syncUserPlayback();
 		console.log("Syncing with room...");
 	};
 

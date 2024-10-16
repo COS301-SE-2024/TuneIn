@@ -838,6 +838,8 @@ export function useRoomControls({
 						let listening = await userListeningToRoom(
 							currentSong.startTime !== undefined,
 						);
+						console.log("current song start time: " + currentSong.startTime);
+						console.log("current song index: " + currentSong.index);
 						let attempts = 0;
 						while (!listening) {
 							attempts++;
@@ -1279,11 +1281,6 @@ export function useRoomControls({
 
 	const canControlRoom = useCallback(
 		function (): boolean {
-			console.log("canControlRoom currentUser:", currentUser);
-			console.log("canControlRoom room:", currentRoom);
-			console.log(
-				`(!currentRoom): ${!currentRoom}, (!currentUser): ${!currentUser}, (!currentRoom.creator): ${!currentRoom?.creator}, (currentRoom.creator.userID === currentUser.userID): ${currentRoom?.creator?.userID === currentUser?.userID}`,
-			);
 			if (!currentRoom) {
 				return false;
 			}

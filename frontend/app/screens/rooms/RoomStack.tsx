@@ -78,7 +78,6 @@ function MyRoomTabs() {
 	}
 
 	roomData.mine = currentUser ? roomData.userID === currentUser.userID : false;
-	console.log("this is the room name length:", roomData.name.length);
 	let roomID: string;
 	if (roomData.id !== undefined) {
 		roomID = roomData.id;
