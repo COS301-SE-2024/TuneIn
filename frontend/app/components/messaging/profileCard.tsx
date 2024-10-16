@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { UserDto } from "../../models/UserDto";
+import { UserDto } from "../../../api";
 import { colors } from "../../styles/colors";
 
 export interface ProfileCardProps {

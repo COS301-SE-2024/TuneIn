@@ -1,82 +1,140 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import DevicePicker from "../app/components/DevicePicker"; // Adjust the path to your component
-import { useSpotifyDevices } from "../app/hooks/useSpotifyDevices";
-import * as spotifyAuth from "../app/services/SpotifyAuth";
+import { useLive } from "../app/LiveContext";
+import DevicePicker from "../app/components/DevicePicker"; // Adjust the path as needed
+import { Device } from "@spotify/web-api-ts-sdk";
 
-// Mocking hooks and services
-jest.mock("../app/hooks/useSpotifyDevices");
-jest.mock("../app/services/SpotifyAuth");
+// Mocking external dependencies
+jest.mock("../app/LiveContext", () => ({
+	useLive: jest.fn(),
+}));
 
-describe("DevicePicker Component", () => {
-	const mockGetDeviceIDs = jest.fn();
-	const mockGetTokens = jest.fn();
-	const mockDevices = [
-		{ id: "1", name: "Phone", type: "Smartphone", is_active: true },
-		{ id: "2", name: "Laptop", type: "Computer", is_active: false },
-	];
+describe("DevicePicker", () => {
+	let mockSetIsVisible;
+	let roomControlsMock;
 
 	beforeEach(() => {
-		(useSpotifyDevices as jest.Mock).mockReturnValue({
-			getDeviceIDs: mockGetDeviceIDs,
-			devices: mockDevices,
-			error: null,
+		mockSetIsVisible = jest.fn();
+
+		roomControlsMock = {
+			playbackHandler: {
+				spotifyDevices: {
+					devices: [
+						{ id: "1", name: "Device 1", type: "Smartphone" },
+						{ id: "2", name: "Device 2", type: "Computer" },
+					],
+				},
+				activeDevice: { id: "1", name: "Device 1", type: "Smartphone" },
+				getDevices: jest.fn().mockResolvedValue(undefined),
+				setActiveDevice: jest.fn(),
+				deviceError: null,
+			},
+		};
+
+		(useLive as jest.Mock).mockReturnValue({
+			roomControls: roomControlsMock,
 		});
-		mockGetTokens.mockResolvedValue({ access_token: "mockAccessToken" });
-		(spotifyAuth.getTokens as jest.Mock).mockImplementation(mockGetTokens);
 	});
 
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	test("renders the device picker button", () => {
-		const { getByTestId } = render(<DevicePicker />);
-		const speakerButton = getByTestId("Speaker-button");
-		expect(speakerButton).toBeTruthy();
+	it("renders correctly", () => {
+		const { getByTestId, getByText } = render(
+			<DevicePicker isVisible={false} setIsVisible={mockSetIsVisible} />,
+		);
+
+		// Check that the speaker button is rendered
+		expect(getByTestId("Speaker-button")).toBeTruthy();
 	});
 
-	test("opens and closes the modal", async () => {
-		const { getByTestId, getByText, queryByText } = render(<DevicePicker />);
+	it("opens modal when speaker button is pressed", async () => {
+		const { getByTestId } = render(
+			<DevicePicker isVisible={false} setIsVisible={mockSetIsVisible} />,
+		);
 
-		// Open modal
+		// Press the speaker button to open the modal
 		fireEvent.press(getByTestId("Speaker-button"));
-		expect(getByText("Select a Device")).toBeTruthy();
 
-		// Close modal
-		fireEvent.press(getByText("Close"));
+		// Expect the modal to be visible
+		expect(mockSetIsVisible).toHaveBeenCalledWith(true);
+	});
+
+	it("closes modal when overlay is pressed", async () => {
+		const { getByTestId } = render(
+			<DevicePicker isVisible={true} setIsVisible={mockSetIsVisible} />,
+		);
+
+		// Press the overlay to close the modal
+		fireEvent.press(getByTestId("modalBackground"));
+
+		// Expect the setIsVisible to be called with false
+		expect(mockSetIsVisible).toHaveBeenCalledWith(false);
+	});
+
+	it("displays loading indicator when fetching devices", async () => {
+		roomControlsMock.playbackHandler.getDevices = jest
+			.fn()
+			.mockImplementation(() => {
+				return new Promise((resolve) => {
+					setTimeout(() => {
+						resolve();
+					}, 500);
+				});
+			});
+
+		const { getByTestId } = render(
+			<DevicePicker isVisible={true} setIsVisible={mockSetIsVisible} />,
+		);
+
+		// Simulate opening the modal
+		fireEvent.press(getByTestId("Speaker-button"));
+
 		await waitFor(() => {
-			expect(queryByText("Select a Device")).toBeNull();
+			expect(roomControlsMock.playbackHandler.getDevices).toHaveBeenCalled();
 		});
 	});
 
-	test("displays available devices", async () => {
-		const { getByTestId, getByText } = render(<DevicePicker />);
+	it("displays devices and allows selection", async () => {
+		const { getByText } = render(
+			<DevicePicker isVisible={true} setIsVisible={mockSetIsVisible} />,
+		);
 
-		fireEvent.press(getByTestId("Speaker-button"));
+		// Expect the devices to be displayed
+		expect(getByText("Device 1")).toBeTruthy();
+		expect(getByText("Device 2")).toBeTruthy();
 
-		await waitFor(() => {
-			expect(getByText("Phone")).toBeTruthy();
-			expect(getByText("Laptop")).toBeTruthy();
+		// Select a device
+		fireEvent.press(getByText("Device 1"));
+
+		// Expect setActiveDevice to be called with the correct device
+		expect(
+			roomControlsMock.playbackHandler.setActiveDevice,
+		).toHaveBeenCalledWith({
+			deviceID: "1",
+			userSelected: true,
 		});
 	});
 
-	test("handles device fetch error", async () => {
-		(useSpotifyDevices as jest.Mock).mockReturnValue({
-			getDeviceIDs: jest
-				.fn()
-				.mockRejectedValue(new Error("Failed to fetch devices")),
-			devices: [],
-			error: "Failed to fetch devices",
-		});
+	it("displays error message when there are no devices", () => {
+		roomControlsMock.playbackHandler.spotifyDevices.devices = [];
+		const { getByText } = render(
+			<DevicePicker isVisible={true} setIsVisible={mockSetIsVisible} />,
+		);
 
-		const { getByTestId, getByText } = render(<DevicePicker />);
+		// Expect error message when there are no devices
+		expect(getByText("No Devices Available")).toBeTruthy();
+	});
 
-		fireEvent.press(getByTestId("Speaker-button"));
+	it("displays error message when there is a device error", () => {
+		roomControlsMock.playbackHandler.deviceError = "Some error occurred";
+		const { getByText } = render(
+			<DevicePicker isVisible={true} setIsVisible={mockSetIsVisible} />,
+		);
 
-		await waitFor(() => {
-			expect(getByText("Error Fetching Devices")).toBeTruthy();
-			expect(getByText("Failed to fetch devices")).toBeTruthy();
-		});
+		// Expect error message when there's a device error
+		expect(getByText("Error Fetching Devices")).toBeTruthy();
+		expect(getByText("Some error occurred")).toBeTruthy();
 	});
 });

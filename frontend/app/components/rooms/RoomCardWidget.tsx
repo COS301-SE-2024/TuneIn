@@ -25,8 +25,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	const room = JSON.parse(JSON.stringify(roomCard));
 
 	const currentDate = new Date();
-	const startDate = new Date(roomCard.start_date);
-	const endDate = new Date(roomCard.end_date);
+	const startDate = roomCard.start_date
+		? new Date(roomCard.start_date)
+		: new Date(0);
+	const endDate = roomCard.end_date
+		? new Date(roomCard.end_date)
+		: new Date(Number.POSITIVE_INFINITY);
 
 	const isBeforeStartDate = currentDate < startDate;
 	const isAfterEndDate = currentDate > endDate;
@@ -127,7 +131,7 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 	return (
 		<TouchableOpacity
 			onPress={navigateToRoomPage}
-			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine && (isBeforeStartDate || isAfterEndDate)}
 		>
 			<Animated.View style={[styles.container, { width: cardWidth }]}>
 				<ImageBackground
@@ -143,12 +147,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					<View
 						style={[
 							styles.overlay,
-							// isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
+							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
 						]}
 					/>
-					{/* {(isBeforeStartDate || isAfterEndDate) && (
+					{(isBeforeStartDate || isAfterEndDate) && (
 						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
-					)} */}
+					)}
 					<View style={styles.textContainer}>
 						<Text style={styles.roomName}>
 							{truncateText(roomCard.name, 20)}
@@ -175,14 +179,26 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						) : (
 							<View style={styles.userInfoContainer}>
 								<View style={styles.userAvatarContainer}>
-									<Image
-										source={
-											roomCard.userProfile
-												? { uri: roomCard.userProfile }
-												: require("../../assets/profile-icon.png")
-										}
-										style={styles.userAvatar}
-									/>
+									<TouchableOpacity
+										onPress={() => {
+											router.push(
+												`/screens/profile/ProfilePage?friend=${JSON.stringify({
+													username: roomCard.username,
+													profile_picture_url: roomCard.userProfile,
+													userID: roomCard.userID,
+												})}&user=${roomCard.username}`,
+											);
+										}}
+									>
+										<Image
+											source={
+												roomCard.userProfile
+													? { uri: roomCard.userProfile }
+													: require("../../assets/profile-icon.png")
+											}
+											style={styles.userAvatar}
+										/>
+									</TouchableOpacity>
 									<Text style={styles.username}>
 										{truncateText(roomCard.username, 13)}
 									</Text>
@@ -192,18 +208,24 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						)}
 					</View>
 					{/* Conditionally render explicit icon */}
-					{roomCard.isExplicit && (
-						// <Image
-						// 	source={require("../../../assets/Explicit.png")}
-						// 	style={styles.explicitIcon}
-						// />
-						<MaterialIcons
-							name="explicit"
-							size={28}
-							color="white"
-							style={styles.explicitIcon}
-						/>
-					)}
+					<View style={styles.iconContainer}>
+						{roomCard.isExplicit && (
+							<MaterialIcons
+								name="explicit"
+								size={28}
+								color="white"
+								style={styles.explicitIcon}
+							/>
+						)}
+						{roomCard.isNsfw && (
+							<MaterialIcons
+								name="18-up-rating"
+								size={28}
+								color="white"
+								style={styles.explicitIcon}
+							/>
+						)}
+					</View>
 				</ImageBackground>
 			</Animated.View>
 		</TouchableOpacity>
@@ -327,8 +349,13 @@ const styles = StyleSheet.create({
 	explicitIcon: {
 		width: 26,
 		height: 26,
-		position: "absolute", // Use absolute positioning
-		top: 10, // Position from the bottom
+		marginRight: 4, // Adds space between the two icons
+	},
+	iconContainer: {
+		flexDirection: "row", // Places the icons next to each other
+		alignItems: "center", // Aligns the icons vertically
+		position: "absolute", // Absolute positioning to place it at the desired location
+		top: 10,
 		right: 10,
 	},
 });

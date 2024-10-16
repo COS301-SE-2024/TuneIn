@@ -20,32 +20,26 @@ import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
 import AddFavSong from "../../components/AddFavSong";
-import { Player } from "../../PlayerContext";
+import { useLive } from "../../LiveContext";
 import { colors } from "../../styles/colors";
 import GenreAdder from "../../components/GenreAdder";
 import * as ImagePicker from "expo-image-picker";
+import { Player } from "../../PlayerContext";
 
 type InputRef = TextInput | null;
 
 const EditProfileScreen = () => {
 	const router = useRouter();
 	const params = useLocalSearchParams();
+
 	// console.log("Profile :", params);
 	const profile = Array.isArray(params.profile)
 		? params.profile[0]
 		: params.profile;
 	const profileInfo = JSON.parse(profile as string);
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
-
+	const { currentUser, refreshUser, setUsername, setRefreshUser } = useLive();
 	const inputRefs = useRef<InputRef[]>([]);
-	const { userData, setUserData } = playerContext;
-
 	const [profileData, setProfileData] = useState(profileInfo);
 	const [genres, setGenres] = useState<string[]>([
 		"rock",
@@ -102,10 +96,14 @@ const EditProfileScreen = () => {
 		const response = await updateProfile();
 		console.log("The response: " + JSON.stringify(response));
 		if (JSON.stringify(response) !== "[]") {
-			setUserData(null);
+			if (!refreshUser) {
+				setRefreshUser(true);
+			}
 		} else {
 			setLoading(false);
 		}
+		router.navigate("screens/profile/ProfilePage");
+		setLoading(false);
 	};
 
 	useEffect(() => {
@@ -140,6 +138,7 @@ const EditProfileScreen = () => {
 	const updateProfile = async () => {
 		try {
 			// console.log("Profile data: " + JSON.stringify(profileData));
+			setUsername(profileData.username);
 			const response = await axios.patch(
 				`${utils.API_BASE_URL}/users`,
 				profileData,
@@ -184,26 +183,27 @@ const EditProfileScreen = () => {
 			const response = await new Promise<boolean>((resolve) => {
 				timeoutRef.current = setTimeout(async () => {
 					try {
-						const response = await axios.get(
-							`${utils.API_BASE_URL}/users/${profileData.username}/taken`,
+						console.log("Checking username:", profileData.username);
+						const response = await axios.head(
+							`${utils.API_BASE_URL}/users/${profileData.username}`,
 							{
 								headers: {
 									Authorization: `Bearer ${token}`,
 								},
 							},
 						);
-
-						if (response.data) {
+						console.log("Response for checking username valid:", response);
+						if (response.status !== 200) {
 							setUsrNmErrorMessage("Username already taken");
 							resolve(false);
+							return false;
 						} else {
 							resolve(true);
+							return true;
 						}
 					} catch (error) {
 						console.log("Error checking username:", error);
-						setUsrNmErrorMessage(
-							"Poor connection, cannot check username ownership. PLease try again later",
-						);
+						setUsrNmErrorMessage("Username already taken");
 						resolve(false);
 					}
 				}, 500);
@@ -230,10 +230,10 @@ const EditProfileScreen = () => {
 	};
 
 	useEffect(() => {
-		if (userData === null) {
+		if (!currentUser) {
 			router.navigate("screens/profile/ProfilePage");
 		}
-	}, [userData]);
+	}, [currentUser]);
 
 	const handleImageUpload = async (uri: string) => {
 		try {
@@ -283,20 +283,20 @@ const EditProfileScreen = () => {
 
 	const [changed, setChanged] = useState(false);
 
-	const handleSave = (text, value) => {
+	const handleSave = (text: string, value: string) => {
 		// Update the appropriate property in profileData
 		if (value === "name") {
-			setProfileData((prevProfileData) => ({
+			setProfileData((prevProfileData: any) => ({
 				...prevProfileData,
 				profile_name: text,
 			}));
 		} else if (value === "username") {
-			setProfileData((prevProfileData) => ({
+			setProfileData((prevProfileData: any) => ({
 				...prevProfileData,
 				username: text,
 			}));
 		} else if (value === "bio") {
-			setProfileData((prevProfileData) => ({
+			setProfileData((prevProfileData: any) => ({
 				...prevProfileData,
 				bio: text,
 			}));

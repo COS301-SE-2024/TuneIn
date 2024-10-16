@@ -8,12 +8,11 @@ import {
 	ValidateNested,
 } from "class-validator";
 import { UserDto } from "../../users/dto/user.dto";
-import { SongInfoDto } from "./songinfo.dto";
 import { Type } from "class-transformer";
+import { RoomSongDto } from "./roomsong.dto";
 
 export class RoomDto {
 	@ApiProperty({
-		description: "The date the room was created",
 		type: UserDto,
 	})
 	@IsObject()
@@ -24,6 +23,14 @@ export class RoomDto {
 	@ApiProperty()
 	@IsString()
 	roomID: string;
+
+	@ApiProperty()
+	@IsNumber()
+	room_size: number;
+
+	@ApiProperty()
+	@IsString()
+	spotifyPlaylistID: string;
 
 	@ApiProperty()
 	@IsNumber()
@@ -51,11 +58,15 @@ export class RoomDto {
 
 	@ApiPropertyOptional()
 	@IsDate()
-	start_date?: Date;
+	start_date?: Date | undefined;
 
 	@ApiPropertyOptional()
 	@IsDate()
-	end_date?: Date;
+	end_date?: Date | undefined;
+
+	@ApiProperty()
+	@IsDate()
+	date_created: Date;
 
 	@ApiProperty()
 	@IsString()
@@ -75,12 +86,12 @@ export class RoomDto {
 
 	@ApiPropertyOptional({
 		description: "The current song playing in the room",
-		type: SongInfoDto,
+		type: RoomSongDto,
 	})
 	@IsObject()
 	@ValidateNested()
-	@Type(() => SongInfoDto)
-	current_song?: SongInfoDto;
+	@Type(() => RoomSongDto)
+	current_song?: RoomSongDto;
 
 	@ApiProperty({
 		description: "The tags that describe the room",
@@ -94,7 +105,7 @@ export class RoomDto {
 			"The parent of this room, if this room was created by splitting another",
 		type: String,
 	})
-	parentRoomID?: string;
+	parentRoomID?: string | undefined;
 
 	@ApiProperty({
 		description: "Rooms created by splitting this room.",

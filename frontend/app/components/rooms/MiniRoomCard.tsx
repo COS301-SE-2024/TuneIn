@@ -27,8 +27,12 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 	};
 
 	const currentDate = new Date();
-	const startDate = new Date(roomCard.start_date);
-	const endDate = new Date(roomCard.end_date);
+	const startDate = roomCard.start_date
+		? new Date(roomCard.start_date)
+		: new Date(0);
+	const endDate = roomCard.end_date
+		? new Date(roomCard.end_date)
+		: new Date(Number.POSITIVE_INFINITY);
 
 	const isBeforeStartDate = currentDate < startDate;
 	const isAfterEndDate = currentDate > endDate;
@@ -38,7 +42,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			onPress={navigateToRoomPage}
 			style={styles.cardContainer}
 			testID="minicard"
-			// disabled={!roomCard.mine || isBeforeStartDate || isAfterEndDate}
+			disabled={!roomCard.mine && (isBeforeStartDate || isAfterEndDate)}
 		>
 			<View style={styles.imageContainer}>
 				<Image
@@ -54,7 +58,7 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 				<Text style={styles.roomName}>{roomCard.name}</Text>
 
 				{/* Display opening or closing date */}
-				{/* {isBeforeStartDate ? (
+				{isBeforeStartDate ? (
 					<Text style={styles.roomStatus}>
 						This room will open on{" "}
 						{startDate.toLocaleDateString("en-GB", {
@@ -83,8 +87,8 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 						})}
 					</Text>
 				) : (
-					
-				)} */}
+					<></>
+				)}
 				<Text style={styles.roomDescription}>
 					{truncateText(roomCard.description, 50)}
 				</Text>
@@ -101,18 +105,24 @@ const MiniRoomCard: React.FC<MiniRoomCardProps> = ({ roomCard }) => {
 			</View>
 
 			{/* Conditionally render explicit icon */}
-			{roomCard.isExplicit && (
-				// <Image
-				// 	source={require("../../../assets/Explicit.png")}
-				// 	style={styles.explicitIcon}
-				// />
-				<MaterialIcons
-					name="explicit"
-					size={26}
-					color="black"
-					style={styles.explicitIcon}
-				/>
-			)}
+			<View style={styles.iconContainer}>
+				{roomCard.isExplicit && (
+					<MaterialIcons
+						name="explicit"
+						size={28}
+						color="black"
+						style={styles.explicitIcon}
+					/>
+				)}
+				{roomCard.isNsfw && (
+					<MaterialIcons
+						name="18-up-rating"
+						size={28}
+						color="black"
+						style={styles.explicitIcon}
+					/>
+				)}
+			</View>
 		</TouchableOpacity>
 	);
 };
@@ -189,8 +199,12 @@ const styles = StyleSheet.create({
 	explicitIcon: {
 		width: 24,
 		height: 24,
-		marginLeft: 8,
-		position: "absolute",
+		marginLeft: 4,
+	},
+	iconContainer: {
+		flexDirection: "row", // Places the icons next to each other
+		alignItems: "center", // Aligns the icons vertically
+		position: "absolute", // Absolute positioning to place it at the desired location
 		bottom: 10,
 		right: 10,
 	},

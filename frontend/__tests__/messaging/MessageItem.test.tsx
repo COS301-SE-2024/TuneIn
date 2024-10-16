@@ -1,128 +1,73 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
-import MessageItem from "../../app/components/messaging/MessageItem";
-import { DirectMessage } from "../../app/services/Live";
+import MessageItem from "../../app/components/MessageItem"; // Adjust the import path as necessary
+import { DirectMessage } from "../../app/hooks/useDMControls"; // Adjust import path if needed
 
-// Mock the RoomLink component
-jest.mock("../../app/components/messaging/RoomLink", () => "RoomLink");
-
-describe("MessageItem", () => {
-	const mockMessage: DirectMessage = {
-		message: {
-			messageBody: "Hello, world!",
-			sender: {
-				profile_picture_url: "http://example.com/profile.jpg",
-				profile_name: "",
-				userID: "",
-				username: "",
-				followers: {
-					count: 0,
-					data: [],
-				},
-				following: {
-					count: 0,
-					data: [],
-				},
-				links: {
-					count: 0,
-					data: [],
-				},
-				bio: "",
-				current_song: {
-					title: "",
-					artists: [],
-					cover: "",
-					start_time: new Date(), // Initialize with a valid Date object
-				},
-				fav_genres: {
-					count: 0,
-					data: [],
-				},
-				fav_songs: {
-					count: 0,
-					data: [],
-				},
-				fav_rooms: {
-					count: 0,
-					data: [],
-				},
-				recent_rooms: {
-					count: 0,
-					data: [],
-				},
-			},
-			room: undefined,
-			index: 0,
-			recipient: {
-				profile_name: "",
-				userID: "",
-				username: "",
-				profile_picture_url: "",
-				followers: {
-					count: 0,
-					data: [],
-				},
-				following: {
-					count: 0,
-					data: [],
-				},
-				links: {
-					count: 0,
-					data: [],
-				},
-				bio: "",
-				current_song: {
-					title: "",
-					artists: [],
-					cover: "",
-					start_time: new Date(),
-				},
-				fav_genres: {
-					count: 0,
-					data: [],
-				},
-				fav_songs: {
-					count: 0,
-					data: [],
-				},
-				fav_rooms: {
-					count: 0,
-					data: [],
-				},
-				recent_rooms: {
-					count: 0,
-					data: [],
-				},
-				friendship: undefined,
-			},
-			dateSent: new Date(),
-			dateRead: new Date(),
-			isRead: false,
-			pID: "",
+// Sample data for the tests
+const mockMessageFromMe: DirectMessage = {
+	message: {
+		index: 1,
+		messageBody: "Hello from me!",
+		sender: {
+			userID: "user1",
+			username: "User 1",
+			profile_picture_url: "https://example.com/my-avatar.jpg",
 		},
-		messageSent: false,
-	};
+		recipient: {
+			userID: "user2",
+			username: "User 2",
+		},
+		dateSent: new Date().toISOString(),
+		dateRead: new Date(0).toISOString(),
+		isRead: false,
+		pID: "",
+		bodyIsRoomID: false,
+	},
+	me: true,
+	messageSent: true,
+	isOptimistic: false,
+};
+// Create a mock message for testing
+const mockMessageFromOther: DirectMessage = {
+	me: false,
+	message: {
+		index: 0,
+		messageBody: "Hello from you!",
+		sender: {
+			username: "User 2",
+			profile_picture_url: "https://example.com/other-avatar.jpg",
+		},
+		recipient: {
+			username: "User 1",
+			profile_picture_url: "https://example.com/my-avatar.jpg",
+		},
+		dateSent: new Date().toISOString(),
+		dateRead: new Date(0).toISOString(),
+		isRead: false,
+		pID: "",
+		bodyIsRoomID: false,
+	},
+};
 
-	it("renders message body correctly", () => {
-		const { getByText } = render(<MessageItem message={mockMessage} />);
-		expect(getByText("Hello, world!")).toBeTruthy();
-	});
+it("renders my message correctly", () => {
+	const { getByText } = render(<MessageItem message={mockMessageFromMe} />);
 
-	it("renders profile picture when message is from another user", () => {
-		const { getByTestId } = render(<MessageItem message={mockMessage} />);
-		expect(getByTestId("profile-pic")).toBeTruthy();
-	});
+	// Check if my message is rendered
+	expect(getByText("Hello from me!")).toBeTruthy();
+});
 
-	it("does not render profile picture when message is from the current user", () => {
-		const messageFromMe = {
-			...mockMessage,
-			message: {
-				...mockMessage.message,
-				messageSent: true,
-				sender: { ...mockMessage.message.sender, profile_picture_url: "" }, // Ensure this does not render
-			},
-		};
-		const { queryByTestId } = render(<MessageItem message={messageFromMe} />);
-		expect(queryByTestId("profile-pic")).toBeNull();
-	});
+it("renders another user's message correctly", () => {
+	const { getByText, getByLabelText } = render(
+		<MessageItem message={mockMessageFromOther} />,
+	);
+
+	// Check if the other user's message is rendered
+	expect(getByText("Hello from you!")).toBeTruthy();
+
+	// Check if the avatar is displayed by accessibility label
+	const avatar = getByLabelText("User 2's avatar");
+	expect(avatar).toBeTruthy(); // Check that the image is rendered
+
+	// Optionally, check the image source directly
+	expect(avatar.props.source.uri).toBe("https://example.com/other-avatar.jpg");
 });

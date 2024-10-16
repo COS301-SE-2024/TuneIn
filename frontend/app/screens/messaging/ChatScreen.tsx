@@ -12,28 +12,32 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import MessageItem from "../../components/MessageItem";
-import { UserDto } from "../../models/UserDto";
 import auth from "../../services/AuthManagement";
-import * as crypto from "../../services/EncryptionService"
+import * as crypto from "../../services/EncryptionService";
 import * as utils from "../../services/Utils";
-import { live, DirectMessage, instanceExists } from "../../services/Live";
+import { useLive } from "../../LiveContext";
+import { DirectMessage } from "../../hooks/useDMControls";
 import axios from "axios";
 import { colors } from "../../styles/colors";
 import Feather from "@expo/vector-icons/Feather";
 import * as SecureStore from "expo-secure-store";
+import { UserDto } from "../../../api";
 
 const ChatScreen = () => {
-	const [self, setSelf] = useState<UserDto>();
-	const [otherUser, setOtherUser] = useState<UserDto>();
+	const {
+		currentUser,
+		enterDM,
+		leaveDM,
+		dmControls,
+		dmParticipants,
+		directMessages,
+		socketHandshakes,
+	} = useLive();
 	const [message, setMessage] = useState<string>("");
-	const [messages, setMessages] = useState<DirectMessage[]>([]);
-	const [connected, setConnected] = useState<boolean>(false);
-	const [isSending, setIsSending] = useState<boolean>(false);
 	const [publicKey, setPublicKey] = useState<string>("");
 	const [dmError, setError] = useState<boolean>(false);
 	const router = useRouter();
-	let { username } = useLocalSearchParams();
-	const u: string = Array.isArray(username) ? username[0] : username;
+	let { username } = useLocalSearchParams<{ username: string }>();
 	const flatListRef = useRef<FlatList>(null); // FlatList reference
 
 	// Scroll to the bottom whenever messages change
@@ -61,10 +65,9 @@ const ChatScreen = () => {
 
 	const checkKey = async () => {
 		const symKey = await SecureStore.getItemAsync(`${u}-symKey`);
-		if(symKey === null) {
-			
+		if (symKey === null) {
 		}
-	}
+	};
 
 	const getUsers = async () => {
 		try {
@@ -89,9 +92,9 @@ const ChatScreen = () => {
 
 	const cleanup = async () => {
 		console.log("Cleaning up DM");
-		if (connected) {
+		if (socketHandshakes.dmJoined) {
 			console.log("Leaving DM");
-			await live.leaveDM();
+			leaveDM();
 		}
 	};
 
@@ -102,24 +105,26 @@ const ChatScreen = () => {
 					if (live.receivedDMHistory()) {
 						const privateKey =
 							(await SecureStore.getItemAsync("privateKey")) || "";
-						const decryptedMessages: DirectMessage[] = live.getFetchedDMs().map(async (dm) => {
-							const decryptedMessage = await crypto.decryptMessage(
-								dm.message.messageBody,
-								privateKey,
-								publicKey,
-							);
-							return {
-								...dm,
-								messageBody: decryptedMessage,
-							};
-						});
+						const decryptedMessages: DirectMessage[] = live
+							.getFetchedDMs()
+							.map(async (dm) => {
+								const decryptedMessage = await crypto.decryptMessage(
+									dm.message.messageBody,
+									privateKey,
+									publicKey,
+								);
+								return {
+									...dm,
+									messageBody: decryptedMessage,
+								};
+							});
 						setMessages(decryptedMessages);
 					}
 					live.requestDMHistory(u);
 				}
 			}
-		}
-		
+		};
+
 		getMessages();
 	}, [messages, u]);
 
@@ -127,22 +132,16 @@ const ChatScreen = () => {
 	useEffect(() => {
 		const initialize = async () => {
 			try {
-				if (instanceExists()) {
-					await live.initialiseSocket();
+				if (!socketHandshakes.dmJoined) {
+					const user = dmParticipants.find((u) => u.username === username);
+					if (!user) {
+						await enterDM([username]);
+						dmControls.requestDirectMessageHistory();
+					}
 				}
-				const [fetchedSelf, fetchedOtherUser] = await getUsers();
-				setSelf(fetchedSelf);
-				setOtherUser(fetchedOtherUser);
-				console.log("Fetched users:", fetchedSelf, fetchedOtherUser);
-				await live.enterDM(
-					fetchedSelf.userID,
-					fetchedOtherUser.userID,
-					setMessages,
-					setConnected,
-				);
-				if (!live.receivedDMHistory()) {
-					live.requestDMHistory(fetchedOtherUser.userID);
-				}
+				// if (!socketHandshakes.dmsReceived) {
+				// 	dmControls.requestDirectMessageHistory();
+				// }
 			} catch (error) {
 				console.error("Failed to setup DM", error);
 			}
@@ -160,9 +159,13 @@ const ChatScreen = () => {
 	}, []);
 
 	const handleSend = async () => {
-		const privateKey = await SecureStore.getItemAsync("privateKey") || "";
-		const encryptedMessage = await crypto.encryptMessage(message, privateKey, publicKey)
-		if (!self || !otherUser || isSending) return;
+		const privateKey = (await SecureStore.getItemAsync("privateKey")) || "";
+		const encryptedMessage = await crypto.encryptMessage(
+			message,
+			privateKey,
+			publicKey,
+		);
+		if (!currentUser || dmParticipants.length <= 0) return;
 		const newMessage: DirectMessage = {
 			message: {
 				index: messages.length,
@@ -173,15 +176,14 @@ const ChatScreen = () => {
 				dateRead: new Date(0),
 				isRead: false,
 				pID: "",
+				bodyIsRoomID: false,
 			},
 			me: true,
 			messageSent: false,
+			isOptimistic: true,
 		};
-		setIsSending(true);
+		dmControls.sendDirectMessage(newMessage);
 		setMessage("");
-		live.sendDM(newMessage, otherUser).finally(() => {
-			setIsSending(false);
-		});
 	};
 
 	return (
@@ -203,21 +205,33 @@ const ChatScreen = () => {
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				{otherUser && otherUser.profile_picture_url && (
-					<Image
-						source={{
-							uri: otherUser.profile_picture_url,
+				{dmParticipants[0] && dmParticipants[0].profile_picture_url && (
+					<TouchableOpacity
+						onPress={() => {
+							router.push(
+								`/screens/profile/ProfilePage?friend=${JSON.stringify({
+									username: dmParticipants[0].username,
+									profile_picture_url: dmParticipants[0].profile_picture_url,
+									userID: dmParticipants[0].userID,
+								})}&user=${dmParticipants[0].username}`,
+							);
 						}}
-						style={styles.avatar}
-					/>
+					>
+						<Image
+							source={{
+								uri: dmParticipants[0].profile_picture_url,
+							}}
+							style={styles.avatar}
+						/>
+					</TouchableOpacity>
 				)}
 				<Text style={styles.headerTitle}>
-					{dmError ? "Failed" : otherUser?.profile_name || "Loading..."}
+					{dmError ? "Failed" : dmParticipants[0]?.profile_name || "Loading..."}
 				</Text>
 			</View>
 			<FlatList
 				ref={flatListRef} // Reference to control scrolling
-				data={messages}
+				data={directMessages}
 				keyExtractor={(item) => item.message.index.toString()}
 				renderItem={({ item }) => <MessageItem message={item} />}
 				contentContainerStyle={styles.messagesContainer}

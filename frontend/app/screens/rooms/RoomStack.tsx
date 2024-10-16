@@ -1,65 +1,76 @@
-import React, {
-	useState,
-	useEffect,
-	useContext,
-	useCallback,
-	useRef,
-} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Queue from "./Playlist";
 import RoomPage from "./RoomPage";
-import Chat from "./ChatRoom";
-import { Player } from "../../PlayerContext";
+import RoomChat from "./ChatRoom";
 import { colors } from "../../styles/colors";
 import {
 	View,
 	Text,
+	Modal,
 	TouchableOpacity,
 	StyleSheet,
+	Pressable,
 	ToastAndroid,
 	Platform,
 	Alert,
+	Button,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
-import { formatRoomData } from "../../models/Room";
-import { live, LiveMessage } from "../../services/Live";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import auth from "../../services/AuthManagement";
-import CurrentRoom from "./functions/CurrentRoom";
-import { SimpleSpotifyPlayback } from "../../services/SimpleSpotifyPlayback";
 import ContextMenu from "../../components/ContextMenu";
+import { useLive } from "../../LiveContext";
+import { useAPI } from "../../APIContext";
+import { RoomDto, RoomSongDto } from "../../../api";
+import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import RoomModal from "../../components/RoomModal";
+import BannedModal from "../../components/BannedModal";
+import NsfwModal from "../../components/NsfwModal";
+import { Room } from "../../models/Room";
 
 const Tab = createMaterialTopTabNavigator();
 
 function MyRoomTabs() {
 	const navigation = useNavigation();
 	const router = useRouter();
-	const [joined, setJoined] = useState(false); // Track if the user has joined the room
-	const [messages, setMessages] = useState<LiveMessage[]>([]);
-	const [joinedsongIndex, setJoinedSongIndex] = useState<number | null>(null);
-	const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-	const [ioinedSecondsPlayed, setJoinedSecondsPlayed] = useState<number | null>(
-		null,
-	);
+	const { currentUser, currentRoom, socketHandshakes } = useLive();
+	const { rooms } = useAPI();
+	const [userInRoom, setUserInRoom] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0);
-	const playback = useRef(new SimpleSpotifyPlayback()).current;
-	const [isPlaying, setIsPlaying] = useState(false);
 	const [isMenuVisible, setMenuVisible] = useState(false);
-	// const roomData = { mine: true }; // Assuming this comes from your state or props
 
-	const playerContext = useContext(Player);
-	if (!playerContext) {
-		throw new Error(
-			"PlayerContext must be used within a PlayerContextProvider",
-		);
-	}
+	const [isNsfwModalVisible, setNsfwModalVisible] = useState(false);
+	const [hasSeenNsfwModal, setHasSeenNsfwModal] = useState(false);
+	const [hasChildRooms, setHasChildRooms] = useState(false);
+	const [showModal, setShowModal] = useState(false);
+	const [isBannedModalVisible, setBannedModalVisible] = useState(false);
+	const [isUserBanned, setIsUserBanned] = useState(false); // State to check if user is banned
 
-	const { currentRoom, setCurrentRoom, userData } = playerContext;
+	const handleShowBannedModal = () => {
+		setBannedModalVisible(true);
+	};
+
+	const handleCloseBannedModal = () => {
+		setBannedModalVisible(false);
+	};
+
+	// Simulate checking ban condition (replace with actual condition)
+	useEffect(() => {
+		// Replace this with your actual condition
+		const checkIfUserIsBanned = () => {
+			const banned = false; // Replace this with your actual check
+			setIsUserBanned(banned);
+			if (banned) {
+				handleShowBannedModal();
+			}
+		};
+
+		checkIfUserIsBanned();
+	}, []); // Only run on mount
 
 	const { room } = useLocalSearchParams();
-	const roomCurrent = new CurrentRoom();
 	let roomData: any;
 	if (Array.isArray(room)) {
 		roomData = JSON.parse(room[0]);
@@ -67,7 +78,7 @@ function MyRoomTabs() {
 		roomData = JSON.parse(room);
 	}
 
-	roomData.mine = roomData.userID === userData?.userID;
+	roomData.mine = currentUser ? roomData.userID === currentUser.userID : false;
 
 	let roomID: string;
 	if (roomData.id !== undefined) {
@@ -78,67 +89,95 @@ function MyRoomTabs() {
 		roomID = currentRoom?.roomID ?? "";
 	}
 
-	useEffect(() => {
-		if (currentRoom && currentRoom?.roomID === roomID) {
-			setJoined(true);
-		}
-	}, [currentRoom, roomID]);
+	// const navigateBasedOnOwnership = () => {
+	// 	console.log("Room is mine? ", roomData.mine);
+	// 	if (roomData.mine) {
+	// 		router.navigate({
+	// 			pathname: "/screens/rooms/AdvancedSettings",
+	// 			params: { room: room },
+	// 		});
+	// 	} else {
+	// 		router.navigate({
+	// 			pathname: "/screens/rooms/RoomInfo",
+	// 			params: { room: room },
+	// 		});
+	// 	}
+	// };
 
-	const joinRoom = useCallback(() => {
-		const formattedRoom = formatRoomData(roomData);
-		setJoined(true);
-		setCurrentRoom(formattedRoom);
-	}, [roomData, setCurrentRoom]);
-
-	const leaveRoom = () => {
-		setCurrentRoom(null);
-		setJoined(false);
+	const navigateBasedOnOwnership = () => {
+		setMenuVisible(true);
 	};
 
-	const handleJoinLeave = async () => {
-		const token = await auth.getToken();
-		if (!token) {
-			throw new Error("No token found");
-		}
-		if (!joined) {
-			await roomCurrent.leaveJoinRoom(token, roomID, false);
-
-			joinRoom();
-			live.joinRoom(roomID, setJoined, setMessages);
-			setJoined(true);
-			setJoinedSongIndex(currentTrackIndex);
-			setJoinedSecondsPlayed(secondsPlayed);
-			console.log(
-				`Joined: Song Index - ${currentTrackIndex}, Seconds Played - ${secondsPlayed}`,
-			);
-		} else {
-			const leftRoom: boolean = await roomCurrent.leaveJoinRoom(
-				token as string,
-				roomID,
-				true,
-			);
-			if (!leftRoom) {
-				ToastAndroid.show(
-					"Error leaving room. Please try again.",
-					ToastAndroid.SHORT,
-				);
-				return;
-			}
-			leaveRoom();
-			setJoined(false);
-			live.leaveRoom();
-			setJoinedSongIndex(null);
-			setJoinedSecondsPlayed(null);
-			// 	//playbackManager.pause();
-			const deviceID = await playback.getFirstDevice();
-			if (deviceID && deviceID !== null) {
-				playback.handlePlayback("pause", deviceID);
-			}
-			setIsPlaying(false);
-		}
+	const handleAdvancedSettings = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/AdvancedSettings",
+			params: { room: room },
+		});
 	};
 
-	const getRoom = async (roomID: string) => {
+	const handleRoomInfo = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/RoomInfo",
+			params: { room: room },
+		});
+	};
+
+	const handleBanUserList = () => {
+		setMenuVisible(false);
+		router.navigate({
+			pathname: "/screens/rooms/BannedUsers",
+			params: { room: room },
+		});
+	};
+
+	const handleShareRoom = () => {
+		setMenuVisible(false);
+		throw new Error(
+			"This is not implemented and this error is to notify our devs.",
+		);
+		// const userIDs: string[];
+		// rooms.shareRoom(roomID, userIDs)
+		// 	.then((response) => {
+		// 		if (Platform.OS === "android" && ToastAndroid) {
+		// 			ToastAndroid.show("Room shared successfully", ToastAndroid.SHORT);
+		// 		} else {
+		// 			Alert.alert("Success", "Room shared successfully.");
+		// 		}
+		// 	})
+		// 	.catch((error) => {
+		// 		console.log("Error sharing room: ", error);
+		// 		if (Platform.OS === "android" && ToastAndroid) {
+		// 			ToastAndroid.show("Failed to share room", ToastAndroid.SHORT);
+		// 		} else {
+		// 			Alert.alert("Error", "Failed to share room.");
+		// 		}
+		// 	});
+	};
+
+	const handleSavePlaylist = () => {
+		setMenuVisible(false);
+		rooms
+			.saveRoom(roomID)
+			.then((response) => {
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("Playlist saved successfully", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Success", "Playlist saved successfully.");
+				}
+			})
+			.catch((error) => {
+				console.log("Error saving playlist: ", error);
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("Failed to save playlist", ToastAndroid.SHORT);
+				} else {
+					Alert.alert("Error", "Failed to save playlist.");
+				}
+			});
+	};
+
+	const getRoom = async (roomID: string): Promise<Room | null | undefined> => {
 		const token = await auth.getToken();
 		try {
 			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
@@ -170,10 +209,16 @@ function MyRoomTabs() {
 				isExplicit: data.has_explicit_content,
 				isNsfw: data.has_nsfw_content,
 				language: data.language,
-				roomSize: "50",
+				roomSize: data.room_size,
 				userProfile: data.creator.profile_picture_url,
-				mine: data.creator.userID === userData?.userID,
+				mine: data.creator.userID === currentUser?.userID,
 				songName: data.current_song ? data.current_song.title : null,
+				artistName: data.current_song ? data.current_song.artists[0] : null,
+				isPrivate: data.is_private,
+				date_created: new Date(data.date_created),
+				start_date: data.start_date ? new Date(data.start_date) : undefined,
+				end_date: data.end_date ? new Date(data.end_date) : undefined,
+				childrenRoomIDs: data.childrenRoomIDs,
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
@@ -231,36 +276,6 @@ function MyRoomTabs() {
 		}
 	};
 
-	const navigateBasedOnOwnership = () => {
-		setMenuVisible(true);
-	};
-
-	const handleAdvancedSettings = () => {
-		setMenuVisible(false);
-		router.navigate({
-			pathname: "/screens/rooms/AdvancedSettings",
-			params: { room: room },
-		});
-	};
-
-	const handleRoomInfo = () => {
-		setMenuVisible(false);
-		router.navigate({
-			pathname: "/screens/rooms/RoomInfo",
-			params: { room: room },
-		});
-	};
-
-	const handleShareRoom = () => {
-		setMenuVisible(false);
-		// Implement room sharing logic here
-	};
-
-	const handleSavePlaylist = () => {
-		setMenuVisible(false);
-		// Implement room sharing logic here
-	};
-
 	const handleNavigateToChildRooms = async () => {
 		setMenuVisible(false);
 		// Implement room sharing logic here
@@ -297,8 +312,88 @@ function MyRoomTabs() {
 		}
 	};
 
+	const handleCheckForChildRooms = async () => {
+		// Logic to check if there are child rooms
+		const childRoomsExist =
+			Array.isArray(roomData.childrenRoomIDs) &&
+			roomData.childrenRoomIDs.length > 0;
+
+		console.log("Child rooms exist: ", childRoomsExist);
+
+		if (childRoomsExist) {
+			setHasChildRooms(true);
+			setShowModal(true);
+		}
+	};
+
+	useEffect(() => {
+		// Automatically check for child rooms when entering the page
+		handleCheckForChildRooms();
+	}, []); // Empty dependency array ensures this runs once when the component mounts
+
+	const updateRoomStatus = useCallback(async () => {
+		if (currentRoom && currentRoom.roomID === roomID) {
+			setUserInRoom(true);
+		} else {
+			setUserInRoom(false);
+		}
+	}, [roomID, currentRoom]);
+
+	useEffect(() => {
+		updateRoomStatus();
+	}, [roomID, currentRoom]);
+
+	// on component mount
+	useEffect(() => {
+		updateRoomStatus();
+	}, []);
+
+	const closeModal = () => {
+		setShowModal(false);
+	};
+
+	useEffect(() => {
+		// Assuming roomData is set somewhere in your code
+		if (roomData.isNsfw && !hasSeenNsfwModal) {
+			// Show modal only if it hasn't been seen
+			setNsfwModalVisible(true);
+		}
+	}, [roomData, hasSeenNsfwModal]);
+
+	const handleProceed = () => {
+		setNsfwModalVisible(false);
+		setHasSeenNsfwModal(true); // Set modal as seen when proceeding
+	};
+
+	const handleExit = () => {
+		navigation.goBack();
+	};
+
 	return (
 		<>
+			{/* NSFW Modal */}
+			{roomData.isNsfw && (
+				<>
+					<NsfwModal
+						visible={isNsfwModalVisible}
+						onProceed={handleProceed}
+						onExit={handleExit}
+					/>
+				</>
+			)}
+
+			{/* RoomModal component */}
+			<RoomModal
+				visible={showModal}
+				onClose={closeModal}
+				onViewChildRooms={handleNavigateToChildRooms}
+			/>
+
+			{/* BannedModal component */}
+			<BannedModal
+				visible={isBannedModalVisible}
+				onClose={handleCloseBannedModal}
+			/>
 			<View style={styles.header}>
 				{/* Back Button */}
 				<TouchableOpacity
@@ -321,19 +416,13 @@ function MyRoomTabs() {
 				>
 					<Entypo name="dots-three-vertical" size={20} color="black" />
 				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.menuButton}
-					onPress={navigateBasedOnOwnership}
-					testID="menu-button"
-				>
-					<Entypo name="dots-three-vertical" size={20} color="black" />
-				</TouchableOpacity>
 
 				{/* ContextMenu */}
 				<ContextMenu
 					isVisible={isMenuVisible}
 					onClose={() => setMenuVisible(false)}
 					onAdvancedSettings={handleAdvancedSettings}
+					onBanUserList={handleBanUserList}
 					onRoomInfo={handleRoomInfo}
 					onShareRoom={handleShareRoom}
 					onSavePlaylist={handleSavePlaylist}
@@ -359,16 +448,14 @@ function MyRoomTabs() {
 			>
 				<Tab.Screen
 					name="RoomPage"
-					component={() => (
-						<RoomPage joined={joined} handleJoinLeave={handleJoinLeave} />
-					)}
 					options={{ tabBarLabel: "Room" }}
+					component={RoomPage}
 				/>
-				{joined && (
+				{socketHandshakes.roomJoined && userInRoom && (
 					<>
 						<Tab.Screen
 							name="Chat"
-							component={Chat}
+							component={RoomChat}
 							options={{ tabBarLabel: "Chat" }}
 						/>
 						<Tab.Screen
@@ -423,5 +510,79 @@ const styles = StyleSheet.create({
 	},
 	tabBarItemStyle: {
 		height: 45,
+	},
+	modalContent: {
+		backgroundColor: "white",
+		padding: 20,
+		borderRadius: 10,
+		alignItems: "center",
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 10,
+	},
+	modalButtons: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
+	button: {
+		backgroundColor: "#007AFF",
+		padding: 10,
+		borderRadius: 5,
+		margin: 5,
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "flex-end",
+		alignItems: "center",
+		backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
+	},
+	modalView: {
+		width: "100%",
+		height: "26%",
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		paddingBottom: 40,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalText: {
+		marginTop: 10,
+		fontSize: 16,
+		textAlign: "center",
+		fontWeight: "bold",
+	},
+	modalButtonContainer: {
+		marginTop: 30,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		width: "100%",
+	},
+	buttonModal: {
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: "45%",
+		alignItems: "center",
+	},
+	buttonYes: {
+		backgroundColor: colors.primary,
+		borderRadius: 25,
+	},
+	buttonNo: {
+		backgroundColor: colors.secondary,
+		borderRadius: 25,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 });

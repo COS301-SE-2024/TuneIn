@@ -1,9 +1,15 @@
 import React, { createContext, useEffect, useState } from "react";
 import { Room } from "../app/models/Room";
-import { Track } from "../app/models/Track";
 import { UserDto } from "../api";
-import CurrentRoom from "./screens/rooms/functions/CurrentRoom";
-import { getItem } from "./services/StorageService";
+import { useLive } from "./LiveContext";
+import {
+	constructArtistString,
+	getAlbumArtUrl,
+	getTitle,
+	SongPair,
+} from "./models/SongPair";
+import { Track } from "@spotify/web-api-ts-sdk";
+import { useSpotifyTracks } from "./hooks/useSpotifyTracks";
 
 interface PlayerContextType {
 	setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
@@ -11,8 +17,6 @@ interface PlayerContextType {
 	currentTrackIndex: number | null;
 	setCurrentTrackIndex: React.Dispatch<React.SetStateAction<number | null>>;
 	currentRoom: Room | null;
-	NumberOfPeople: number | null;
-	setNumberOfPeople: React.Dispatch<React.SetStateAction<number | null>>;
 	setCurrentRoom: React.Dispatch<React.SetStateAction<Room | null>>;
 	trackName: string | null;
 	setTrackName: React.Dispatch<React.SetStateAction<string | null>>;
@@ -38,55 +42,125 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 	const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(
 		null,
 	);
-	const [NumberOfPeople, setNumberOfPeople] = useState<number | null>(null);
-	const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
+	const [interfaceCurrentRoom, setInterfaceCurrentRoom] = useState<Room | null>(
+		null,
+	);
 	const [trackName, setTrackName] = useState<string | null>(null);
 	const [artistName, setArtistName] = useState<string | null>(null);
 	const [albumArt, setAlbumArt] = useState<string | null>(null);
 	const [userData, setUserData] = useState<UserDto | null>(null);
+
+	const {
+		roomControls,
+		roomPlaying,
+		joinRoom,
+		leaveRoom,
+		roomEmojiObjects,
+		currentSong,
+		currentRoom,
+		currentUser,
+		roomQueue,
+		roomMessages,
+		userBookmarks,
+		spotifyAuth,
+	} = useLive();
+	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
+
 	useEffect(() => {
-		async function fetchData() {
-			try {
-				const currentRoomHandler: CurrentRoom = new CurrentRoom();
-				const token: string | null = await getItem("token");
-				if (!token) {
-					console.log("no token");
-					return;
+		if (!currentRoom) {
+			setInterfaceCurrentRoom(null);
+		} else {
+			if (
+				interfaceCurrentRoom === null ||
+				interfaceCurrentRoom.roomID !== currentRoom.roomID
+			) {
+				let start: Date = new Date(0);
+				if (currentRoom.start_date) {
+					start = new Date(currentRoom.start_date);
 				}
-				const result = await currentRoomHandler.getCurrentRoom(token);
-				if (!result) {
-					console.log("no result");
-					return;
+				let end: Date = new Date(Number.POSITIVE_INFINITY);
+				if (currentRoom.end_date) {
+					end = new Date(currentRoom.end_date);
 				}
-				const room: Room = {
-					userID: result.creator.userID,
-					roomID: result.roomID,
-					name: result.room_name,
-					description: result.description,
-					backgroundImage: result.room_image,
-					start_date: result.start_date,
-					end_date: result.end_date,
-					tags: result.tags,
-					childrenRoomIDs: result.childrenRoomIDs,
-				};
-				setCurrentRoom(room);
-			} catch (error) {
-				console.error("Error fetching data: ", error);
+				console.log("currentSong", currentSong);
+				console.log("currentTrack", currentTrack);
+				const title: string =
+					currentSong && currentTrack !== null
+						? getTitle({ song: currentSong, track: currentTrack })
+						: getTitle(undefined);
+				const artist: string =
+					currentSong && currentTrack !== null
+						? constructArtistString({ song: currentSong, track: currentTrack })
+						: constructArtistString(undefined);
+				setInterfaceCurrentRoom({
+					roomID: currentRoom.roomID,
+					backgroundImage: currentRoom.room_image,
+					name: currentRoom.room_name,
+					songName: title,
+					artistName: artist,
+					description: currentRoom.room_image,
+					userProfile: currentRoom.creator.profile_picture_url,
+					// userProfile?:
+					userID: currentRoom.creator.userID,
+					username: currentRoom.creator.username,
+					mine: currentRoom.creator.userID === currentUser?.userID,
+					tags: currentRoom.tags,
+					// playlist?:
+					//genre
+					language: currentRoom.language,
+					roomSize: currentRoom.participant_count,
+					isExplicit: currentRoom.has_explicit_content,
+					isNsfw: currentRoom.has_nsfw_content,
+					start_date: start,
+					end_date: end,
+					date_created: new Date(),
+				});
 			}
 		}
-		fetchData();
-	}, []);
+	}, [currentRoom, currentSong]);
+
+	useEffect(() => {
+		if (!currentSong) {
+			setCurrentTrack(null);
+			setCurrentTrackIndex(null);
+			setTrackName(null);
+			setArtistName(null);
+			setAlbumArt(null);
+		} else {
+			if (
+				!currentTrack ||
+				currentTrack === null ||
+				currentTrack.id !== currentSong.spotifyID
+			) {
+				fetchSongInfo([currentSong.spotifyID]).then(([track]: Track[]) => {
+					const sp: SongPair = { song: currentSong, track: track };
+					setCurrentTrack(track);
+					setCurrentTrackIndex(currentSong.index);
+					setTrackName(getTitle(sp));
+					setArtistName(constructArtistString(sp));
+					setAlbumArt(getAlbumArtUrl(sp));
+				});
+			}
+		}
+	}, [currentSong, currentTrack, fetchSongInfo]);
+
+	useEffect(() => {
+		if (!currentUser) {
+			setUserData(null);
+		} else {
+			setUserData(currentUser);
+		}
+	}, [currentUser]);
+
 	return (
 		<Player.Provider
 			value={{
-				setNumberOfPeople,
-				NumberOfPeople,
 				currentTrack,
 				setCurrentTrack,
 				currentTrackIndex,
 				setCurrentTrackIndex,
-				currentRoom,
-				setCurrentRoom,
+				currentRoom: interfaceCurrentRoom,
+				setCurrentRoom: setInterfaceCurrentRoom,
 				trackName,
 				setTrackName,
 				artistName,

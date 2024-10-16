@@ -4,9 +4,14 @@ import { UserDto } from "../users/dto/user.dto";
 import { PrismaService } from "../../../prisma/prisma.service";
 //import { Prisma } from "@prisma/client";
 import * as PrismaTypes from "@prisma/client";
-import { DbUtilsService } from "../db-utils/db-utils.service";
+import {
+	DbUtilsService,
+	FullyQualifiedRoom,
+	UserWithAuth,
+} from "../db-utils/db-utils.service";
 import { LiveChatMessageDto } from "../../live/dto/livechatmessage.dto";
 import { DirectMessageDto } from "../users/dto/dm.dto";
+import validator from "validator";
 
 // A service that will generate DTOs
 @Injectable()
@@ -16,190 +21,8 @@ export class DtoGenService {
 		private readonly dbUtils: DbUtilsService,
 	) {}
 
-	async generateUserDto(
-		userID: string,
-		fully_qualify = true,
-	): Promise<UserDto> {
-		if (!(await this.dbUtils.userExists(userID))) {
-			throw new Error("User with id " + userID + " does not exist");
-		}
-
-		//check if userID exists
-		const user: PrismaTypes.users | null = await this.prisma.users.findUnique({
-			where: { user_id: userID },
-		});
-
-		if (!user || user === null) {
-			throw new Error(
-				"An unexpected error occurred in the database while fetching user. DTOGenService.generateUserDto():ERROR01",
-			);
-		}
-
-		//get user info
-		const result: UserDto = this.generateBriefUserDto(user);
-		result.links = await this.dbUtils.getLinks(user);
-		// const preferences = await this.dbUtils.getPreferences(user);
-		const fav_genres = await this.prisma.favorite_genres.findMany({
-			where: { user_id: userID },
-			include: { genre: true },
-		});
-
-		const fav_songs = await this.prisma.favorite_songs.findMany({
-			where: { user_id: userID },
-			include: { song: true },
-		});
-
-		result.fav_genres = {
-			count: fav_genres.length,
-			data: fav_genres
-				.map((genre) => genre.genre?.genre)
-				.filter((name): name is string => name !== null),
-		};
-
-		result.fav_songs = {
-			count: fav_songs.length,
-			data: fav_songs.map((song) => ({
-				songID: song.song.song_id,
-				title: song.song.name,
-				artists: song.song.artists,
-				cover: song.song.artwork_url as string,
-				spotify_id: song.song.spotify_id,
-				duration: song.song.duration as number,
-			})),
-		};
-
-		// result.fav_songs = preferences.fav_songs;
-
-		if (fully_qualify) {
-			const recent_rooms = await this.dbUtils.getActivity(user);
-			result.recent_rooms = {
-				count: recent_rooms.count,
-				data: recent_rooms.data || [], // I'm assuming that recent_rooms.data is an array of room IDs
-			};
-
-			const favRooms = await this.prisma.bookmark.findMany({
-				where: { user_id: userID },
-			});
-			const favRoomIDs: string[] = favRooms.map((r) => r.room_id);
-
-			const roomDtoArray: RoomDto[] | null = await this.generateMultipleRoomDto(
-				favRoomIDs,
-				userID,
-			);
-			if (roomDtoArray && roomDtoArray !== null) {
-				result.fav_rooms = {
-					count: roomDtoArray.length,
-					data: roomDtoArray.map((r) => r.roomID),
-				};
-			}
-		}
-
-		const following: PrismaTypes.users[] | null =
-			await this.dbUtils.getUserFollowing(userID);
-		result.following.count = following.length;
-		if (fully_qualify) {
-			for (let i = 0; i < following.length; i++) {
-				const f = following[i];
-				if (f && f !== null) {
-					const u: UserDto = this.generateBriefUserDto(f);
-					result.following.data.push(u);
-				}
-			}
-		}
-
-		const followers: PrismaTypes.users[] | null =
-			await this.dbUtils.getUserFollowers(userID);
-		result.followers.count = followers.length;
-		if (fully_qualify) {
-			for (let i = 0; i < followers.length; i++) {
-				const f = followers[i];
-				if (f && f !== null) {
-					const u: UserDto = this.generateBriefUserDto(f);
-					result.followers.data.push(u);
-				}
-			}
-		}
-
-		//exclude links temporarily
-		//exclude current songs
-		//exclude fav genres
-		//exclude fav songs
-
-		// if (fully_qualify) {
-		// 	const favRooms: PrismaTypes.room[] | null =
-		// 		await this.dbUtils.getRandomRooms(5);
-		// 	if (favRooms && favRooms !== null) {
-		// 		result.fav_rooms.count = favRooms.length;
-		// 		const ids: string[] = favRooms.map((r) => r.room_id);
-		// 		const rooms = await this.generateMultipleRoomDto(ids);
-		// 		if (rooms && rooms !== null) {
-		// 			result.fav_rooms.data = rooms;
-		// 		}
-		// 	}
-		// }
-
-		// if (fully_qualify) {
-		// 	const recentRooms: PrismaTypes.room[] | null =
-		// 		await this.dbUtils.getRandomRooms(5);
-		// 	if (recentRooms && recentRooms !== null) {
-		// 		result.recent_rooms.count = recentRooms.length;
-		// 		const ids: string[] = recentRooms.map((r) => r.room_id);
-		// 		const rooms = await this.generateMultipleRoomDto(ids);
-		// 		if (rooms && rooms !== null) {
-		// 			result.recent_rooms.data = rooms;
-		// 		}
-		// 	}
-		// }
-
-		try {
-			const currentRoomID = await this.dbUtils.getCurrentRoomID(userID);
-			result.current_room_id = currentRoomID;
-		} catch {
-			//error will be thrown if not applicable
-		}
-		return result;
-	}
-
-	async generateFriendUserDto(selfID: string, friendUsername: string) {
-		const friend = await this.prisma.users.findFirst({
-			where: { username: friendUsername },
-		});
-
-		if (!friend || friend === null) {
-			throw new Error(
-				"User with username " + friendUsername + " does not exist",
-			);
-		}
-		const friendID = friend.user_id;
-		const friendship = await this.prisma.friends.findFirst({
-			where: {
-				OR: [
-					{ friend1: selfID, friend2: friendID },
-					{ friend1: friendID, friend2: selfID },
-				],
-			},
-		});
-
-		if (!friendship || friendship === null) {
-			throw new Error(
-				"Friendship between " + selfID + " and " + friendID + " does not exist",
-			);
-		}
-		const result: UserDto = this.generateBriefUserDto(friend);
-		const base = `/users/${result.username}`;
-		result.friendship = {
-			status: !friendship.is_pending,
-			accept_url: friendship.is_pending ? "" : base + "/accept",
-			reject_url: friendship.is_pending ? "" : base + "/reject",
-		};
-		return result;
-	}
-
-	generateBriefUserDto(
-		user: PrismaTypes.users,
-		add_friendship = false,
-	): UserDto {
-		let result: UserDto = {
+	generateBriefUserDto(user: UserWithAuth): UserDto {
+		return {
 			profile_name: user.full_name || "",
 			userID: user.user_id,
 			username: user.username,
@@ -217,15 +40,6 @@ export class DtoGenService {
 				data: {},
 			},
 			bio: user.bio || "",
-			current_song: {
-				songID: "",
-				title: "",
-				artists: [],
-				cover: "",
-				spotify_id: "",
-				duration: 0,
-				start_time: new Date(),
-			},
 			fav_genres: {
 				count: 0,
 				data: [],
@@ -242,231 +56,221 @@ export class DtoGenService {
 				count: 0,
 				data: [],
 			},
+			hasSpotifyAccount: user.authentication !== null,
 		};
-		if (add_friendship) {
-			result = {
-				...result,
-				friendship: {
-					status: false,
-					accept_url: "",
-					reject_url: "",
-				},
-			};
-		}
-		return result;
 	}
 
 	async generateMultipleUserDto(
-		user_ids: string[],
-		userID: string | undefined, // this is to filter out blocked users
+		userIDs: string[],
+		userID: string | undefined = undefined,
 		fully_qualify = false,
 	): Promise<UserDto[]> {
 		let blocked: PrismaTypes.blocked[] = [];
 		if (userID && userID !== null) {
 			blocked = await this.prisma.blocked.findMany({
-				where: { blockee: userID },
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
 			});
 		}
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
+		const users = await this.prisma.users.findMany({
 			where: {
-				AND: [
-					{ user_id: { in: user_ids } },
-					{ user_id: { notIn: blocked.map((b) => b.blocker) } },
-				],
+				AND: [{ user_id: { in: userIDs } }, { user_id: { notIn: blocked_id } }],
+			},
+			include: {
+				authentication: true,
+				favorite_genres: {
+					include: { genre: true },
+				},
+				favorite_songs: {
+					include: { song: true },
+				},
 			},
 		});
 
-		if (!users || users === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch users. DTOGenService.generateMultipleUserDto():ERROR01",
-			);
+		if (users.length === 0) {
+			return [];
 		}
 
-		//const result: UserDto[] = [];
-		const promises: Promise<UserDto>[] = [];
-		for (let i = 0; i < users.length; i++) {
+		const result: UserDto[] = [];
+		for (let i = 0, n = users.length; i < n; i++) {
 			const u = users[i];
-			if (u && u !== null) {
-				/*
-				const user: UserDto = await this.generateUserDto(u.user_id, false);
-				result.push(user);
-				*/
-				promises.push(this.generateUserDto(u.user_id, fully_qualify));
+			const user: UserDto = this.generateBriefUserDto(u);
+			user.links = this.dbUtils.getLinks(u);
+			user.fav_genres = {
+				count: u.favorite_genres.length,
+				data: u.favorite_genres
+					.map((genre) => genre.genre?.genre)
+					.filter((name): name is string => name !== null),
+			};
+
+			user.fav_songs = {
+				count: u.favorite_songs.length,
+				data: u.favorite_songs.map((song) => ({
+					songID: song.song.song_id,
+					title: song.song.name,
+					artists: song.song.artists,
+					cover: song.song.artwork_url as string,
+					spotify_id: song.song.spotify_id,
+					duration: song.song.duration as number,
+				})),
+			};
+			user.hasSpotifyAccount = u.authentication !== null;
+
+			if (fully_qualify) {
+				const recent_rooms = this.dbUtils.getActivity(u);
+				user.recent_rooms = {
+					count: recent_rooms.count,
+					data: recent_rooms.data,
+				};
+
+				const [currentRoom, bookmarkedRooms]: PrismaTypes.room[][] =
+					await this.prisma.$transaction([
+						this.prisma.room.findMany({
+							where: {
+								participate: {
+									some: {
+										user_id: u.user_id,
+									},
+								},
+							},
+						}),
+						this.prisma.room.findMany({
+							where: {
+								bookmark: {
+									some: {
+										user_id: u.user_id,
+									},
+								},
+							},
+						}),
+					]);
+
+				if (currentRoom.length > 0) {
+					user.current_room_id = currentRoom[0].room_id;
+				}
+				user.fav_rooms = {
+					count: bookmarkedRooms.length,
+					data: bookmarkedRooms.map((r) => r.room_id),
+				};
+
+				const followData: {
+					following: UserWithAuth[];
+					followers: UserWithAuth[];
+				} = await this.dbUtils.getUserFollowersAndFollowing(user.userID);
+
+				for (let i = 0; i < followData.following.length; i++) {
+					const f = followData.following[i];
+					const u: UserDto = this.generateBriefUserDto(f);
+					user.following.data.push(u);
+				}
+				user.following.count = followData.following.length;
+
+				for (let i = 0; i < followData.followers.length; i++) {
+					const f = followData.followers[i];
+					const u: UserDto = this.generateBriefUserDto(f);
+					user.followers.data.push(u);
+				}
+				user.followers.count = followData.followers.length;
+			} else {
+				const followData: {
+					following: number;
+					followers: number;
+				} = await this.dbUtils.getUserFollowersAndFollowingCount(user.userID);
+
+				user.following.count = followData.following;
+				user.followers.count = followData.followers;
 			}
+			result.push(user);
 		}
-		const result: UserDto[] = await Promise.all(promises);
-		return result;
-	}
-
-	async generateRoomDto(roomID: string): Promise<RoomDto | null> {
-		const room: PrismaTypes.room | null = await this.prisma.room.findUnique({
-			where: { room_id: roomID },
-		});
-
-		if (!room || room === null) {
-			return null;
-		}
-
-		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
-			where: { room_id: roomID },
-		});
-
-		const childRooms = await this.prisma.child_room.findMany({
-			where: { parent_room_id: roomID },
-		});
-
-		const result: RoomDto = {
-			creator: new UserDto(),
-			roomID: room.room_id,
-			participant_count: 0,
-			room_name: room.name,
-			description: room.description || "",
-			is_temporary: room.is_temporary || false,
-			is_private: await this.dbUtils.isRoomPrivate(roomID),
-			is_scheduled: false,
-			start_date: new Date(),
-			end_date: new Date(),
-			language: room.room_language || "",
-			has_explicit_content: room.explicit || false,
-			has_nsfw_content: room.nsfw || false,
-			room_image: room.playlist_photo || "",
-			tags: room.tags || [],
-			childrenRoomIDs: childRooms.map((r) => r.room_id),
-		};
-
-		if (scheduledRoom && scheduledRoom !== null) {
-			result.is_scheduled = true;
-			/*
-			result.start_date = scheduledRoom.start_date;
-			result.end_date = scheduledRoom.end_date;
-			*/
-		}
-
-		const creator = await this.generateUserDto(room.room_creator, false);
-		if (creator && creator !== null) {
-			result.creator = creator;
-		}
-
-		//participant count will be added later
-		//current song will be added later
-		//dates will be added later
-		//current songs will be added later
-
-		return result;
-	}
-
-	async generateRoomDtoFromRoom(
-		room: PrismaTypes.room,
-	): Promise<RoomDto | null> {
-		if (!room || room === null) {
-			return null;
-		}
-
-		const scheduledRoom = await this.prisma.scheduled_room.findUnique({
-			where: { room_id: room.room_id },
-		});
-
-		const childrenRooms = await this.prisma.child_room.findMany({
-			where: { parent_room_id: room.room_id },
-		});
-
-		const result: RoomDto = {
-			creator: new UserDto(),
-			roomID: room.room_id,
-			participant_count: 0,
-			room_name: room.name,
-			description: room.description || "",
-			is_temporary: room.is_temporary || false,
-			is_private: await this.dbUtils.isRoomPrivate(room.room_id),
-			is_scheduled: false,
-			start_date: new Date(),
-			end_date: new Date(),
-			language: room.room_language || "",
-			has_explicit_content: room.explicit || false,
-			has_nsfw_content: room.nsfw || false,
-			room_image: room.playlist_photo || "",
-			current_song: {
-				songID: "",
-				title: "",
-				artists: [],
-				cover: "",
-				spotify_id: "",
-				duration: 0,
-				start_time: new Date(),
-			},
-			tags: room.tags || [],
-			childrenRoomIDs: [],
-		};
-
-		const creator = await this.generateUserDto(room.room_creator, false);
-		if (creator && creator !== null) {
-			const creator = await this.generateUserDto(room.room_creator, false);
-			if (creator && creator !== null) {
-				result.creator = creator;
-			}
-		}
-
-		if (scheduledRoom && scheduledRoom !== null) {
-			result.is_scheduled = true;
-			/*
-			result.start_date = scheduledRoom.start_date;
-			result.end_date = scheduledRoom.end_date;
-			*/
-		}
-
-		if (childrenRooms && childrenRooms !== null) {
-			result.childrenRoomIDs = childrenRooms.map((r) => r.room_id);
-		}
-
-		//participant count will be added later
-		//current song will be added later
-		//dates will be added later
-		//current songs will be added later
-
 		return result;
 	}
 
 	async generateMultipleRoomDto(
-		room_ids: string[],
-		userID: string | undefined,
+		roomIDs: string[],
+		userID: string | undefined = undefined,
 	): Promise<RoomDto[]> {
-		if (room_ids.length === 0) {
+		if (roomIDs.length === 0) {
 			return [];
 		}
+
+		//
 		let blocked: PrismaTypes.blocked[] = [];
 		if (userID && userID !== null) {
 			blocked = await this.prisma.blocked.findMany({
-				where: { blockee: userID },
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
 			});
 		}
-		const rooms: PrismaTypes.room[] | null = await this.prisma.room.findMany({
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+
+		// get private rooms from users who aren't friends with the user then exclude them
+		let nonFriends: PrismaTypes.friends[] = [];
+		if (userID) {
+			nonFriends = await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID, is_pending: false },
+						{ friend2: userID, is_pending: false },
+					],
+				},
+			});
+		}
+		console.log("nonFriends: " + JSON.stringify(nonFriends));
+		const friendIDs: string[] = nonFriends.map((f) =>
+			f.friend1 === userID ? f.friend2 : f.friend1,
+		);
+		if (userID) {
+			friendIDs.push(userID);
+		}
+		// get private rooms from users who aren't friends with the user then exclude them
+		const nonFriendPrivateRooms = await this.prisma.private_room.findMany({
+			where: {
+				room_id: { in: roomIDs },
+			}, // include rooms with room_creator not in friendIDs
+			include: { room: true },
+		});
+		// filter out the private rooms that are not created by friends, then just return the room_id
+		const nonFriendPrivateRoomIDs = nonFriendPrivateRooms
+			.filter((r) => !friendIDs.includes(r.room.room_creator))
+			.map((r) => r.room_id);
+		// remove private rooms from the room_ids
+		const nonPrivateRoomIDs = roomIDs.filter(
+			(id) => !nonFriendPrivateRoomIDs.includes(id),
+		);
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
+		const rooms: FullyQualifiedRoom[] = await this.prisma.room.findMany({
 			where: {
 				AND: [
-					{ room_id: { in: room_ids } },
-					{ room_creator: { notIn: blocked.map((b) => b.blocker) } },
+					{ room_id: { in: nonPrivateRoomIDs } },
+					{ room_creator: { notIn: blocked_id } },
 				],
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
 			},
 		});
 
-		if (!rooms || rooms === null) {
-			throw new Error("Unknown error. DB returned null");
-		}
-
-		const userIds: string[] = rooms.map((r) => r.room_creator);
-		//remove duplicate user ids
-		const uniqueUserIds: string[] = [...new Set(userIds)];
-		const users: PrismaTypes.users[] | null = await this.prisma.users.findMany({
-			where: { user_id: { in: uniqueUserIds } },
-		});
-
-		const userDtos: UserDto[] = [];
-		for (let i = 0; i < users.length; i++) {
-			const u = users[i];
-			if (u && u !== null) {
-				const user = this.generateBriefUserDto(u);
-				userDtos.push(user);
-			}
-		}
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
 
 		const result: RoomDto[] = [];
 		for (let i = 0; i < rooms.length; i++) {
@@ -480,26 +284,36 @@ export class DtoGenService {
 							") not found in Users table",
 					);
 				}
-				const childrenRooms = await this.prisma.child_room.findMany({
-					where: { parent_room_id: r.room_id },
-				});
+				const childrenRooms = r.child_room_child_room_parent_room_idToroom.map(
+					(r) => r.room_id,
+				);
+				const sRoom = r.scheduled_room;
+				const scheduledRoom = sRoom
+					? {
+							start_date: sRoom.start_date || undefined,
+							end_date: sRoom.end_date || undefined,
+							is_scheduled: true,
+					  }
+					: { start_date: undefined, end_date: undefined, is_scheduled: false };
+				const pRoom = r.private_room;
 				const room: RoomDto = {
 					creator: u || new UserDto(),
 					roomID: r.room_id,
-					participant_count: 0, //to fix soon
+					participant_count: r.participate.length,
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
-					is_private: false, //db must add column
-					is_scheduled: false, //db must add column
-					start_date: new Date(),
-					end_date: new Date(),
+					is_private: pRoom !== undefined ? true : false,
 					language: r.room_language || "",
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,
 					room_image: r.playlist_photo || "",
 					tags: r.tags || [],
-					childrenRoomIDs: childrenRooms.map((r) => r.room_id),
+					spotifyPlaylistID: r.playlist_id || "",
+					childrenRoomIDs: childrenRooms,
+					date_created: r.date_created,
+					...scheduledRoom,
+					room_size: Number(r.room_size) || 50,
 				};
 				result.push(room);
 			}
@@ -507,15 +321,81 @@ export class DtoGenService {
 		return result;
 	}
 
+	async generateMultipleRoomDtoFromRoom(
+		rooms: FullyQualifiedRoom[],
+	): Promise<RoomDto[]> {
+		if (rooms.length === 0) {
+			return [];
+		}
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
+
+		const result: RoomDto[] = [];
+		for (let i = 0; i < rooms.length; i++) {
+			const r = rooms[i];
+			const u = userDtos.find((u) => u.userID === r.room_creator);
+			if (!u) {
+				throw new Error(
+					"Weird error. Got users from Rooms table but user (" +
+						r.room_creator +
+						") not found in Users table",
+				);
+			}
+			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const scheduledRoom: {
+				start_date: Date | undefined;
+				end_date: Date | undefined;
+				is_scheduled: boolean;
+			} =
+				r.scheduled_room === null
+					? {
+							start_date: undefined,
+							end_date: undefined,
+							is_scheduled: false,
+					  }
+					: {
+							start_date: r.scheduled_room.start_date || undefined,
+							end_date: r.scheduled_room.end_date || undefined,
+							is_scheduled: true,
+					  };
+			const room: RoomDto = {
+				creator: u || new UserDto(),
+				roomID: r.room_id,
+				spotifyPlaylistID: r.playlist_id || "",
+				participant_count: r.participate.length,
+				room_name: r.name,
+				description: r.description || "",
+				is_temporary: r.is_temporary || false,
+				is_private: r.private_room !== null,
+				...scheduledRoom,
+				language: r.room_language || "",
+				has_explicit_content: r.explicit || false,
+				has_nsfw_content: r.nsfw || false,
+				room_image: r.playlist_photo || "",
+				tags: r.tags || [],
+				date_created: r.date_created,
+				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
+				room_size: Number(r.room_size) || 50,
+			};
+			result.push(room);
+		}
+		return result;
+	}
+
 	async generateLiveChatMessageDto(
 		messageID: string,
 	): Promise<LiveChatMessageDto> {
-		const roomMessage: PrismaTypes.room_message | null =
-			await this.prisma.room_message.findUnique({
-				where: { message_id: messageID },
-			});
+		const message:
+			| ({
+					room_message: PrismaTypes.room_message | null;
+			  } & PrismaTypes.message)
+			| null = await this.prisma.message.findUnique({
+			where: { message_id: messageID },
+			include: { room_message: true },
+		});
 
-		if (!roomMessage || roomMessage === null) {
+		if (message === null || message.room_message === null) {
 			throw new Error(
 				"Message with id " +
 					messageID +
@@ -523,25 +403,15 @@ export class DtoGenService {
 			);
 		}
 
-		const message: PrismaTypes.message | null =
-			await this.prisma.message.findUnique({
-				where: { message_id: messageID },
-			});
-
-		if (!message || message === null) {
-			throw new Error(
-				"Message with id " +
-					messageID +
-					" does not exist. DTOGenService.generateLiveChatMessageDto():ERROR02",
-			);
-		}
-
-		const sender: UserDto = await this.generateUserDto(message.sender);
+		const [sender]: UserDto[] = await this.generateMultipleUserDto([
+			message.sender,
+		]);
 
 		const result: LiveChatMessageDto = {
+			messageID: messageID,
 			messageBody: message.contents,
 			sender: sender,
-			roomID: roomMessage.room_id,
+			roomID: message.room_message.room_id,
 			dateCreated: message.date_sent,
 		};
 
@@ -554,12 +424,11 @@ export class DtoGenService {
 		const senderIDs: string[] = messages.map((m) => m.sender);
 		const uniqueSenderIDs: string[] = [...new Set(senderIDs)];
 		const senders: Map<string, UserDto> = new Map<string, UserDto>();
+		const sendUsers: UserDto[] = await this.generateMultipleUserDto(
+			uniqueSenderIDs,
+		);
 		for (let i = 0; i < uniqueSenderIDs.length; i++) {
-			const id = uniqueSenderIDs[i];
-			if (id) {
-				const sender: UserDto = await this.generateUserDto(id);
-				senders.set(id, sender);
-			}
+			senders.set(uniqueSenderIDs[i], sendUsers[i]);
 		}
 
 		const roomIDs = await this.prisma.room_message.findMany({
@@ -570,18 +439,12 @@ export class DtoGenService {
 			},
 		});
 
-		if (!roomIDs || roomIDs === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch room IDs. DTOGenService.generateMultipleLiveChatMessageDto():ERROR01",
-			);
-		}
-
 		const result: LiveChatMessageDto[] = [];
 		for (let i = 0; i < messages.length; i++) {
 			const m = messages[i];
 			if (m && m !== null) {
 				const s: UserDto | undefined = senders.get(m.sender);
-				if (!s || s === null) {
+				if (!s) {
 					throw new Error(
 						"Weird error. Got messages from Messages table but user (" +
 							m.sender +
@@ -590,7 +453,7 @@ export class DtoGenService {
 				}
 
 				const roomMessage = roomIDs.find((r) => r.message_id === m.message_id);
-				if (!roomMessage || roomMessage === null) {
+				if (!roomMessage) {
 					throw new Error(
 						"Weird error. Got messages from Messages table but message (" +
 							m.message_id +
@@ -599,6 +462,7 @@ export class DtoGenService {
 				}
 
 				const message: LiveChatMessageDto = {
+					messageID: m.message_id,
 					messageBody: m.contents,
 					sender: s,
 					roomID: roomMessage.room_id,
@@ -623,7 +487,7 @@ export class DtoGenService {
 		});
 		console.log("dm: " + JSON.stringify(dm));
 
-		if (!dm || dm === null) {
+		if (dm === null) {
 			throw new Error(
 				"Message with id " +
 					pmID +
@@ -631,13 +495,16 @@ export class DtoGenService {
 			);
 		}
 
-		const sender: UserDto = await this.generateUserDto(dm.message.sender);
-		const recipient: UserDto = await this.generateUserDto(dm.recipient);
+		const [sender, recipient]: UserDto[] = await this.generateMultipleUserDto([
+			dm.message.sender,
+			dm.recipient,
+		]);
 		const index: number = await this.dbUtils.getDMIndex(
 			sender.userID,
 			recipient.userID,
 			pmID,
 		);
+
 		const result: DirectMessageDto = {
 			index: index,
 			messageBody: dm.message.contents,
@@ -647,6 +514,7 @@ export class DtoGenService {
 			dateRead: new Date(0),
 			isRead: false,
 			pID: dm.p_message_id,
+			bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
 		};
 		console.log("result: " + JSON.stringify(result));
 		return result;
@@ -662,36 +530,30 @@ export class DtoGenService {
 		const user2: UserDto = await this.generateUserDto(participant2);
 		*/
 		const { user1, user2 }: { user1: UserDto; user2: UserDto } =
-			await this.generateMultipleUserDto(
-				[participant1, participant2],
-				undefined,
-			).then((users) => {
-				if (users.length !== 2) {
-					throw new Error(
-						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
-					);
-				}
-				if (!users[0] || users[0] === null || !users[1] || users[1] === null) {
-					throw new Error(
-						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR02",
-					);
-				}
-				if (
-					users[0].userID === participant1 &&
-					users[1].userID === participant2
-				) {
-					return { user1: users[0], user2: users[1] };
-				} else if (
-					users[0].userID === participant2 &&
-					users[1].userID === participant1
-				) {
-					return { user1: users[1], user2: users[0] };
-				} else {
-					throw new Error(
-						"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
-					);
-				}
-			});
+			await this.generateMultipleUserDto([participant1, participant2]).then(
+				(users) => {
+					if (users.length !== 2) {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR01",
+						);
+					}
+					if (
+						users[0].userID === participant1 &&
+						users[1].userID === participant2
+					) {
+						return { user1: users[0], user2: users[1] };
+					} else if (
+						users[0].userID === participant2 &&
+						users[1].userID === participant1
+					) {
+						return { user1: users[1], user2: users[0] };
+					} else {
+						throw new Error(
+							"An unexpected error occurred in the database. Could not fetch users. DTOGenService.getChatAsDirectMessageDto():ERROR03",
+						);
+					}
+				},
+			);
 
 		const dms: ({
 			message: PrismaTypes.message;
@@ -722,10 +584,8 @@ export class DtoGenService {
 		);
 		console.log(dms);
 
-		if (!dms || dms === null) {
-			throw new Error(
-				"An unexpected error occurred in the database. Could not fetch direct messages. DTOGenService.generateMultipleDirectMessageDto():ERROR01",
-			);
+		if (dms.length === 0) {
+			return [];
 		}
 
 		//filter unread messages
@@ -747,6 +607,8 @@ export class DtoGenService {
 				const recipient: UserDto =
 					dm.recipient === user1.userID ? user1 : user2;
 
+				//body is room id, if it is: ##uuidv4##
+				// uuid v4 regex: /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 				const message: DirectMessageDto = {
 					index: i,
 					messageBody: dm.message.contents,
@@ -756,6 +618,7 @@ export class DtoGenService {
 					dateRead: new Date(0),
 					isRead: false,
 					pID: dm.p_message_id,
+					bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
 				};
 				result.push(message);
 			}
@@ -784,32 +647,43 @@ export class DtoGenService {
 
 		for (let i = 0; i < dms.length; i++) {
 			const dm = dms[i];
-			if (dm && dm !== null) {
-				const sender: UserDto | undefined = users.find(
-					(u) => u.userID === dm.message.sender,
+			const sender: UserDto | undefined = users.find(
+				(u) => u.userID === dm.message.sender,
+			);
+			const recipient: UserDto | undefined = users.find(
+				(u) => u.userID === dm.recipient,
+			);
+			if (!sender || !recipient) {
+				throw new Error(
+					"Weird error. Got messages from DMs table but user not found in Users table",
 				);
-				const recipient: UserDto | undefined = users.find(
-					(u) => u.userID === dm.recipient,
-				);
-				if (!sender || sender === null || !recipient || recipient === null) {
-					throw new Error(
-						"Weird error. Got messages from DMs table but user not found in Users table",
-					);
-				}
-
-				const message: DirectMessageDto = {
-					index: i,
-					messageBody: dm.message.contents,
-					sender: sender,
-					recipient: recipient,
-					dateSent: dm.message.date_sent,
-					dateRead: new Date(0),
-					isRead: false,
-					pID: dm.p_message_id,
-				};
-				result.push(message);
 			}
+
+			const message: DirectMessageDto = {
+				index: i,
+				messageBody: dm.message.contents,
+				sender: sender,
+				recipient: recipient,
+				dateSent: dm.message.date_sent,
+				dateRead: new Date(0),
+				isRead: false,
+				pID: dm.p_message_id,
+				bodyIsRoomID: this.messageBodyIsRoomID(dm.message.contents),
+			};
+			result.push(message);
 		}
 		return result;
+	}
+
+	messageBodyIsRoomID(messageBody: string): boolean {
+		// format: ##uuidv4##
+		const regexPattern = /^##(.+?)##$/;
+		const match = messageBody.match(regexPattern);
+
+		// if there's a match and the captured group (the content between ##) is a valid UUID, return true
+		if (match && validator.isUUID(match[1])) {
+			return true;
+		}
+		return false;
 	}
 }

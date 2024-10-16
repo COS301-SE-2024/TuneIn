@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { DirectMessage } from "../services/Live";
+import { DirectMessage } from "../hooks/useDMControls";
 import { colors } from "../styles/colors";
 
 interface MessageItemProps {
@@ -19,6 +19,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 				<Image
 					source={{ uri: message.message.sender.profile_picture_url }}
 					style={styles.avatar}
+					accessibilityLabel={`${message.message.sender.username}'s avatar`}
 				/>
 			)}
 			<View

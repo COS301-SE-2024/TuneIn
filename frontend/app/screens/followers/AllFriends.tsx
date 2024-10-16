@@ -10,7 +10,7 @@ import {
 	Alert,
 	RefreshControl,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import FriendCard from "../../components/FriendCard";
 import FriendServices from "../../services/FriendServices";
 import { Friend } from "../../models/friend";
@@ -114,10 +114,16 @@ const AllFriends: React.FC = () => {
 
 	const handleSendRequest = async (friend: Friend): Promise<void> => {
 		// ... (rest of your existing code)
+		console.log("Sending friend request to", friend.username);
+		await FriendServices.handleSendRequest(friend);
+		await fetchFriends();
 	};
 
 	const handleCancelRequest = async (friend: Friend): Promise<void> => {
 		// ... (rest of your existing code)
+		console.log("Cancelling friend request to", friend.username);
+		await FriendServices.handleCancelRequest(friend);
+		await fetchFriends();
 	};
 
 	const handleFriendRequest = async (
@@ -125,11 +131,26 @@ const AllFriends: React.FC = () => {
 		accept: boolean,
 	): Promise<void> => {
 		// ... (rest of your existing code)
+		console.log(
+			`${accept ? "Accepting" : "Rejecting"} friend request from`,
+			friend.username,
+		);
+		await FriendServices.handleFriendRequest(friend, accept);
+		await fetchFriends();
 	};
 
 	const handleFriend = async (friend: Friend): Promise<void> => {
 		// ... (rest of your existing code)
+		console.log("Unfriending", friend.username);
+		await FriendServices.handleFriend(friend);
+		await fetchFriends();
 	};
+
+	useFocusEffect(
+		React.useCallback(() => {
+			fetchFriends();
+		}, []),
+	);
 
 	const renderRequest = ({ item }: { item: Friend }) => (
 		<FriendRequestCard
