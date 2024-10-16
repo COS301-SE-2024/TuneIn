@@ -87,7 +87,7 @@ const CreateChatScreen: React.FC<CreateChatScreenProps> = ({ closeModal }) => {
 							style={styles.avatar}
 						/>
 						<View>
-							<Text style={styles.name}>{item.username}</Text>
+							<Text style={styles.name}>{item.profile_name}</Text>
 							{/* Assuming username is available */}
 							<Text style={styles.username}>{item.username}</Text>
 						</View>

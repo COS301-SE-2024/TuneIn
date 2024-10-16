@@ -15,6 +15,7 @@ class FriendServices {
 				profile_picture_url: friend.profile_picture_url,
 				friend_id: friend.userID,
 				username: friend.username,
+				profile_name: friend.profile_name,
 				relationship: friend.relationship,
 			}));
 		} catch (error) {
