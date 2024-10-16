@@ -176,8 +176,7 @@ export class RoomsService {
 		}
 
 		if (updateRoomDto.room_size !== undefined) {
-			updatedRoom.room_size =
-				updateRoomDto.room_size as unknown as Prisma.Decimal;
+			updatedRoom.room_size = updateRoomDto.room_size as unknown as number;
 		}
 
 		if (updateRoomDto.tags !== undefined) {
