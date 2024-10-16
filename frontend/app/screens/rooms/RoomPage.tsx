@@ -469,6 +469,13 @@ const RoomPage: React.FC = () => {
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.controlButton}
+							onPress={syncWithRoom} // Function to sync with the room
+						>
+							<MaterialIcons name="sync" size={28} color="black" />
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
 							disabled={isLoadingPause}
 						>
@@ -496,6 +503,18 @@ const RoomPage: React.FC = () => {
 							) : (
 								<FontAwesome5 name="step-forward" size={30} color="black" />
 							)}
+						</TouchableOpacity>
+					</View>
+				) : userInRoom ? (
+					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
+						<TouchableOpacity
+							style={styles.joinLeaveButton}
+							onPress={syncWithRoom} // Function to sync with the room
+						>
+							<Text style={styles.buttonText}>
+								Sync
+								<MaterialIcons name="sync" size={18} color="white" />
+							</Text>
 						</TouchableOpacity>
 					</View>
 				) : (
