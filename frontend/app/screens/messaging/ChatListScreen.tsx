@@ -171,7 +171,11 @@ const ChatListScreen = () => {
 					)}
 				/>
 			)}
-			<TouchableOpacity style={styles.newChatButton} onPress={toggleModal}>
+			<TouchableOpacity
+				testID="new-chat-button"
+				style={styles.newChatButton}
+				onPress={toggleModal}
+			>
 				<Entypo name="message" size={24} color="white" />
 			</TouchableOpacity>
 			<Modal

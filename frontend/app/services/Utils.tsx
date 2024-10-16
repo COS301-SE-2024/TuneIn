@@ -1,4 +1,13 @@
 import { Buffer } from "buffer";
+// import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
+
+const USE_PRODUCTION_SERVER = "true";
+
+const shouldUseProductionServer =
+	USE_PRODUCTION_SERVER &&
+	JSON.parse(USE_PRODUCTION_SERVER.toLowerCase()) === true;
+console.log(`USE_PRODUCTION_SERVER: `, USE_PRODUCTION_SERVER);
+console.log(`shouldUseProductionServer: `, shouldUseProductionServer);
 
 function getAPIBase(): string {
 	return "https://tunein.co.za:3000";

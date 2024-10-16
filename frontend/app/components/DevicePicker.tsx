@@ -129,7 +129,7 @@ const DevicePicker = ({
 			<View style={styles.container}>
 				<Modal visible={isVisible} transparent={true} animationType="slide">
 					<TouchableWithoutFeedback onPress={handleClosePopup}>
-						<View style={styles.modalBackground}>
+						<View style={styles.modalBackground} testID="modalBackground">
 							<TouchableWithoutFeedback>
 								<View style={styles.popupContainer}>
 									{roomControls.playbackHandler.deviceError ? (
@@ -155,6 +155,7 @@ const DevicePicker = ({
 											<Text style={styles.popupTitle}>Select a Device</Text>
 											{isLoading ? (
 												<ActivityIndicator
+													testID="ActivityIndicator"
 													size="large"
 													color={colors.primary}
 												/>
