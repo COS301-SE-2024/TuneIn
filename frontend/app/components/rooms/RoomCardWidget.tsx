@@ -179,14 +179,26 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						) : (
 							<View style={styles.userInfoContainer}>
 								<View style={styles.userAvatarContainer}>
-									<Image
-										source={
-											roomCard.userProfile
-												? { uri: roomCard.userProfile }
-												: require("../../assets/profile-icon.png")
-										}
-										style={styles.userAvatar}
-									/>
+									<TouchableOpacity
+										onPress={() => {
+											router.push(
+												`/screens/profile/ProfilePage?friend=${JSON.stringify({
+													username: roomCard.username,
+													profile_picture_url: roomCard.userProfile,
+													userID: roomCard.userID,
+												})}&user=${roomCard.username}`,
+											);
+										}}
+									>
+										<Image
+											source={
+												roomCard.userProfile
+													? { uri: roomCard.userProfile }
+													: require("../../assets/profile-icon.png")
+											}
+											style={styles.userAvatar}
+										/>
+									</TouchableOpacity>
 									<Text style={styles.username}>
 										{truncateText(roomCard.username, 13)}
 									</Text>
