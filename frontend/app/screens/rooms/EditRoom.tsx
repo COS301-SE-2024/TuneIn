@@ -26,6 +26,7 @@ import axios from "axios";
 import { get } from "http";
 import GenreAdder from "../../components/GenreAdder";
 import EditGenreBubble from "../../components/EditGenreBubble";
+import { IsNumber } from "class-validator";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -141,7 +142,10 @@ const EditRoom: React.FC = () => {
 
 	const handleInputChange = (field: keyof Room, value: string | boolean) => {
 		if (field === "roomSize") {
-			setRoomDetails({ ...roomDetails, [field]: Number(value) });
+			setRoomDetails({
+				...roomDetails,
+				[field]: !Number.isNaN(Number(value)) ? Number(value) : 0,
+			});
 		} else {
 			setRoomDetails({ ...roomDetails, [field]: value });
 		}
@@ -193,6 +197,8 @@ const EditRoom: React.FC = () => {
 						has_nsfw_content: newRoom.isNsfw,
 						room_image: newRoom.backgroundImage,
 						language: newRoom.language,
+						tags: roomData.tags,
+						room_size: roomDetails.roomSize,
 					}),
 				},
 			);
@@ -241,6 +247,9 @@ const EditRoom: React.FC = () => {
 						(value) => handleInputChange("description", value),
 						2,
 					)}
+					<Text style={{ fontSize: 16, fontWeight: "bold", paddingBottom: 10 }}>
+						Genres
+					</Text>
 					<View style={styles.chipsContainer}>
 						{selectedGenres?.map((genre, index) => (
 							<EditGenreBubble
@@ -276,8 +285,10 @@ const EditRoom: React.FC = () => {
 					{buildInputField("Language", roomDetails.language ?? "", (value) =>
 						handleInputChange("language", value),
 					)}
-					{buildInputField("Room Size", "50".toString(), (value) =>
-						handleInputChange("roomSize", value),
+					{buildInputField(
+						"Room Size",
+						roomDetails.roomSize?.toString() ?? "55",
+						(value) => handleInputChange("roomSize", value),
 					)}
 					{buildToggle("Explicit", roomDetails.isExplicit ?? false, () =>
 						handleToggleChange("isExplicit", !roomDetails.isExplicit),
@@ -323,14 +334,31 @@ const buildInputField = (
 	return (
 		<View style={styles.inputFieldContainer}>
 			<Text style={styles.inputFieldLabel}>{labelText}</Text>
-			<TextInput
-				style={styles.inputField}
-				placeholder={`Add ${labelText.toLowerCase()}`}
-				value={value}
-				onChangeText={onChange}
-				multiline={maxLines > 1}
-				numberOfLines={maxLines}
-			/>
+			{labelText === "Room Size" ? (
+				<View>
+					<TextInput
+						style={styles.inputField}
+						placeholder={`Add ${labelText.toLowerCase()}`}
+						value={Number.isNaN(Number(value)) ? "" : value}
+						onChangeText={onChange}
+						keyboardType="numeric"
+					/>
+					{Number.isNaN(Number(value)) !== false && (
+						<Text style={[styles.errorMessage]}>
+							{"Please enter a numerical value"}
+						</Text>
+					)}
+				</View>
+			) : (
+				<TextInput
+					style={styles.inputField}
+					placeholder={`Add ${labelText.toLowerCase()}`}
+					value={value}
+					onChangeText={onChange}
+					multiline={maxLines > 1}
+					numberOfLines={maxLines}
+				/>
+			)}
 		</View>
 	);
 };
@@ -340,7 +368,6 @@ const buildToggle = (
 	value: boolean,
 	onChange: (value: boolean) => void,
 ) => {
-	console.log(labelText, value);
 	return (
 		<View style={styles.toggleContainer}>
 			<Text style={styles.toggleLabel}>{labelText}</Text>
@@ -353,6 +380,11 @@ const styles = StyleSheet.create({
 	scrollView: {
 		flexGrow: 1,
 		backgroundColor: "white",
+	},
+	errorMessage: {
+		marginTop: 10,
+		// marginLeft: 85,
+		color: "red",
 	},
 	container: {
 		flex: 1,
