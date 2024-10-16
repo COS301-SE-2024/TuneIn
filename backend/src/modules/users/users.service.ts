@@ -727,6 +727,7 @@ export class UsersService {
 		const recent_rooms =
 			(await this.dtogen.generateMultipleRoomDto(
 				recentRooms.map((room) => room.room_id),
+				u.user_id,
 			)) || [];
 
 		return recent_rooms;
