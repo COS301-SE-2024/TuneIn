@@ -248,6 +248,7 @@ export class DtoGenService {
 				tags: r.tags || [],
 				date_created: r.date_created,
 				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
+				room_size: Number(r.room_size) || 50,
 			};
 			result.push(room);
 		}
@@ -374,6 +375,7 @@ export class DtoGenService {
 					childrenRoomIDs: childrenRooms,
 					date_created: r.date_created,
 					...scheduledRoom,
+					room_size: Number(r.room_size) || 50,
 				};
 				result.push(room);
 			}
